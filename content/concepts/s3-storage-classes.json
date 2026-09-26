@@ -1,0 +1,393 @@
+{
+  "conceptId": "s3-storage-classes",
+  "card": {
+    "en": {
+      "tldr": "Choose an S3 storage class by how often objects are accessed, how quickly they must be retrieved, how long they will be kept, and whether they must survive the loss of an Availability Zone. The cheapest-looking infrequent-access option is not suitable if it misses a retrieval, retention, or resilience requirement.",
+      "whenToUse": [
+        "Choose S3 Standard-IA for infrequently accessed, long-lived objects that need millisecond access and resilience to the loss of an Availability Zone.",
+        "Choose S3 One Zone-IA when infrequently accessed objects can be re-created after an Availability Zone loss.",
+        "Choose S3 Intelligent-Tiering when access patterns are unknown or change and automatic tiering is needed.",
+        "Choose a S3 Glacier class for rarely accessed data, according to whether retrieval must take milliseconds, minutes to hours, or hours."
+      ],
+      "keyFacts": [
+        "S3 Standard is the default class for frequently accessed objects.",
+        "S3 Standard-IA and S3 One Zone-IA have a 30-day minimum storage duration and retrieval fees; only S3 Standard-IA is resilient to an Availability Zone loss.",
+        "S3 Intelligent-Tiering has a monitoring and automation fee but no retrieval fees. Objects smaller than 128 KB remain in its Frequent Access tier.",
+        "S3 Glacier Instant Retrieval provides millisecond access with a 90-day minimum storage duration.",
+        "S3 Glacier Flexible Retrieval requires restoration, supports retrieval in minutes to hours, and has a 90-day minimum; S3 Glacier Deep Archive requires restoration, supports retrieval in hours, and has a 180-day minimum."
+      ],
+      "gotchas": [
+        "S3 One Zone-IA's durability does not mean it survives the physical loss of its Availability Zone.",
+        "S3 Glacier Flexible Retrieval and S3 Glacier Deep Archive cannot serve real-time reads without restoration.",
+        "S3 Intelligent-Tiering's optional Archive Access and Deep Archive Access tiers also require restoration.",
+        "Deleting or transitioning Standard-IA or One Zone-IA objects before 30 days incurs a charge for the remaining minimum duration."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "only copy; monthly reads; millisecond access",
+        "re-creatable; single-AZ loss acceptable",
+        "unpredictable access; automatic cost optimization",
+        "quarterly archive reads; immediate access",
+        "rare archive retrieval; restoration is acceptable"
+      ]
+    },
+    "es": {
+      "tldr": "Elige una clase de almacenamiento de S3 según la frecuencia de acceso, el tiempo de recuperación, cuánto tiempo conservarás los objetos y si deben resistir la pérdida de una Availability Zone. Una opción de menor costo para accesos poco frecuentes no sirve si incumple un requisito de recuperación, retención o resiliencia.",
+      "whenToUse": [
+        "Elige S3 Standard-IA para objetos de larga duración y acceso poco frecuente que necesitan acceso en milisegundos y resiliencia ante la pérdida de una Availability Zone.",
+        "Elige S3 One Zone-IA cuando puedes volver a crear los objetos después de la pérdida de una Availability Zone.",
+        "Elige S3 Intelligent-Tiering cuando los patrones de acceso son desconocidos o cambiantes y necesitas cambios automáticos de nivel.",
+        "Elige una clase S3 Glacier para datos de acceso muy poco frecuente, según si la recuperación debe tomar milisegundos, minutos a horas u horas."
+      ],
+      "keyFacts": [
+        "S3 Standard es la clase predeterminada para objetos de acceso frecuente.",
+        "S3 Standard-IA y S3 One Zone-IA tienen una duración mínima de almacenamiento de 30 días y cargos por recuperación; solo S3 Standard-IA resiste la pérdida de una Availability Zone.",
+        "S3 Intelligent-Tiering cobra por monitoreo y automatización, pero no por recuperación. Los objetos menores de 128 KB permanecen en su nivel Frequent Access.",
+        "S3 Glacier Instant Retrieval ofrece acceso en milisegundos y tiene una duración mínima de almacenamiento de 90 días.",
+        "S3 Glacier Flexible Retrieval requiere restauración, permite recuperar en minutos a horas y tiene un mínimo de 90 días; S3 Glacier Deep Archive requiere restauración, permite recuperar en horas y tiene un mínimo de 180 días."
+      ],
+      "gotchas": [
+        "La durabilidad de S3 One Zone-IA no significa que resista la pérdida física de su Availability Zone.",
+        "S3 Glacier Flexible Retrieval y S3 Glacier Deep Archive no permiten lecturas en tiempo real sin restauración.",
+        "Los niveles opcionales Archive Access y Deep Archive Access de S3 Intelligent-Tiering también requieren restauración.",
+        "Si eliminas o cambias de clase objetos de Standard-IA u One Zone-IA antes de 30 días, se cobra el tiempo restante de la duración mínima."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "only copy; monthly reads; millisecond access",
+        "re-creatable; single-AZ loss acceptable",
+        "unpredictable access; automatic cost optimization",
+        "quarterly archive reads; immediate access",
+        "rare archive retrieval; restoration is acceptable"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-storage-classes--49a442ef",
+      "conceptId": "s3-storage-classes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A medical imaging company retains the only copy of completed scans in Amazon S3 for several years. Clinicians open a scan about once a month and require millisecond access; the scans must remain available if an Availability Zone is lost. Which storage class meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Standard",
+          "correct": false,
+          "why": "It provides millisecond access and multi-AZ resilience, but is intended for frequently accessed data rather than these monthly reads."
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard-IA",
+          "correct": true,
+          "why": "It is intended for long-lived, infrequently accessed objects and provides millisecond access with resilience to an Availability Zone loss."
+        },
+        {
+          "id": "C",
+          "text": "S3 One Zone-IA",
+          "correct": false,
+          "why": "It cannot meet the requirement to keep the only copy available after its Availability Zone is lost."
+        },
+        {
+          "id": "D",
+          "text": "S3 Glacier Flexible Retrieval",
+          "correct": false,
+          "why": "Archived objects must be restored before access, so it cannot provide the required millisecond reads."
+        }
+      ],
+      "explanation": "Monthly reads and millisecond access point to an infrequent-access class, while the only-copy and AZ-loss requirements rule out S3 One Zone-IA. S3 Standard-IA is designed for long-lived, infrequently accessed data and stores objects across multiple Availability Zones. S3 Glacier Flexible Retrieval requires restoration instead of providing real-time access.",
+      "keywordCues": [
+        "only copy",
+        "once a month",
+        "millisecond access",
+        "if an Availability Zone is lost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+      ],
+      "es": {
+        "stem": "Una empresa de imágenes médicas conserva en Amazon S3 la única copia de estudios terminados durante varios años. Los médicos abren cada estudio aproximadamente una vez al mes y necesitan acceso en milisegundos; los estudios deben seguir disponibles si se pierde una Availability Zone. ¿Qué clase de almacenamiento cumple estos requisitos de la manera MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Standard",
+            "why": "Ofrece acceso en milisegundos y resiliencia entre varias Availability Zones, pero está pensada para datos de acceso frecuente y no para estas lecturas mensuales."
+          },
+          {
+            "id": "B",
+            "text": "S3 Standard-IA",
+            "why": "Está pensada para objetos de larga duración y acceso poco frecuente, y ofrece acceso en milisegundos con resiliencia ante la pérdida de una Availability Zone."
+          },
+          {
+            "id": "C",
+            "text": "S3 One Zone-IA",
+            "why": "No cumple el requisito de mantener disponible la única copia tras la pérdida de su Availability Zone."
+          },
+          {
+            "id": "D",
+            "text": "S3 Glacier Flexible Retrieval",
+            "why": "Debes restaurar los objetos archivados antes de acceder a ellos, por lo que no ofrece las lecturas requeridas en milisegundos."
+          }
+        ],
+        "explanation": "Las lecturas mensuales y el acceso en milisegundos apuntan a una clase para acceso poco frecuente, mientras que los requisitos de copia única y pérdida de una Availability Zone descartan S3 One Zone-IA. S3 Standard-IA está diseñada para datos de larga duración y acceso poco frecuente, y almacena objetos en varias Availability Zones. S3 Glacier Flexible Retrieval requiere restauración en lugar de acceso en tiempo real."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-storage-classes--291a78d9",
+      "conceptId": "s3-storage-classes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A game studio stores rendered preview assets in S3 for at least six months. Artists view an asset roughly once a month and need millisecond access. The studio can regenerate every asset from source files if the storage Availability Zone is lost. Which storage class meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Glacier Instant Retrieval",
+          "correct": false,
+          "why": "It offers millisecond access, but is intended for rarely accessed archive data rather than assets viewed monthly."
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard",
+          "correct": false,
+          "why": "It supports the reads, but is intended for frequently accessed objects rather than monthly access."
+        },
+        {
+          "id": "C",
+          "text": "S3 Standard-IA",
+          "correct": false,
+          "why": "It supports monthly millisecond reads but adds multi-AZ resilience that these regenerable assets do not require."
+        },
+        {
+          "id": "D",
+          "text": "S3 One Zone-IA",
+          "correct": true,
+          "why": "It supports infrequent millisecond reads at lower cost than Standard-IA when losing one Availability Zone is acceptable."
+        }
+      ],
+      "explanation": "The assets are long-lived, accessed infrequently, and need millisecond reads, which fits an IA class. Because the studio can regenerate them after an AZ loss, S3 One Zone-IA's single-AZ placement is acceptable. S3 Standard-IA provides additional AZ resilience, but that does not satisfy an unmet requirement here.",
+      "keywordCues": [
+        "at least six months",
+        "once a month",
+        "millisecond access",
+        "can regenerate every asset"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos almacena en S3 vistas previas renderizadas durante al menos seis meses. Los artistas consultan cada recurso aproximadamente una vez al mes y necesitan acceso en milisegundos. El estudio puede volver a generar todos los recursos desde los archivos fuente si se pierde la Availability Zone donde se almacenan. ¿Qué clase de almacenamiento cumple estos requisitos de la manera MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Glacier Instant Retrieval",
+            "why": "Ofrece acceso en milisegundos, pero está pensada para archivos consultados muy rara vez y no para recursos vistos mensualmente."
+          },
+          {
+            "id": "B",
+            "text": "S3 Standard",
+            "why": "Permite las lecturas, pero está pensada para objetos de acceso frecuente y no mensual."
+          },
+          {
+            "id": "C",
+            "text": "S3 Standard-IA",
+            "why": "Permite lecturas mensuales en milisegundos, pero agrega resiliencia entre varias Availability Zones que estos recursos regenerables no necesitan."
+          },
+          {
+            "id": "D",
+            "text": "S3 One Zone-IA",
+            "why": "Permite lecturas poco frecuentes en milisegundos a menor costo que Standard-IA cuando es aceptable perder una Availability Zone."
+          }
+        ],
+        "explanation": "Los recursos se conservan durante mucho tiempo, se consultan poco y requieren lecturas en milisegundos, lo que corresponde a una clase IA. Como el estudio puede volver a generarlos tras la pérdida de una Availability Zone, es aceptable que S3 One Zone-IA los almacene en una sola zona. S3 Standard-IA ofrece resiliencia adicional entre zonas, pero aquí no responde a un requisito pendiente."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-storage-classes--d74cf578",
+      "conceptId": "s3-storage-classes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A news publisher stores S3 articles whose popularity changes unpredictably after publication. Most objects are larger than 128 KB, readers may request any article without a restoration step, and the team does not want to revise lifecycle rules as trends change. Which storage class meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Intelligent-Tiering with its automatic low-latency access tiers",
+          "correct": true,
+          "why": "It automatically adjusts access tiers as object access patterns change while retaining low-latency access without restoration."
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard-IA for every article",
+          "correct": false,
+          "why": "It does not automatically adapt to articles that become frequently accessed and charges for retrievals."
+        },
+        {
+          "id": "C",
+          "text": "S3 Glacier Flexible Retrieval for every article",
+          "correct": false,
+          "why": "Articles in this class require restoration and are unavailable for immediate reader requests."
+        },
+        {
+          "id": "D",
+          "text": "S3 Intelligent-Tiering with Deep Archive Access activated for every eligible article",
+          "correct": false,
+          "why": "Articles moved to this optional archive tier must be restored before readers can access them."
+        }
+      ],
+      "explanation": "Unpredictable demand and a desire to avoid adjusting lifecycle rules favor S3 Intelligent-Tiering. Its automatic low-latency tiers accommodate changing access patterns without a performance impact. Activating an optional asynchronous archive tier would introduce a restoration step for archived articles, violating the reader-access requirement.",
+      "keywordCues": [
+        "changes unpredictably",
+        "larger than 128 KB",
+        "without a restoration step",
+        "does not want to revise lifecycle rules"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+      ],
+      "es": {
+        "stem": "Una editorial almacena en S3 artículos cuya popularidad cambia de forma impredecible después de publicarlos. La mayoría de los objetos superan los 128 KB, los lectores pueden solicitar cualquier artículo sin un paso de restauración y el equipo no quiere modificar reglas de ciclo de vida cuando cambian las tendencias. ¿Qué clase de almacenamiento cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Intelligent-Tiering con sus niveles automáticos de acceso de baja latencia",
+            "why": "Ajusta automáticamente los niveles según cambian los patrones de acceso de los objetos y conserva el acceso de baja latencia sin restauración."
+          },
+          {
+            "id": "B",
+            "text": "S3 Standard-IA para todos los artículos",
+            "why": "No se adapta automáticamente a los artículos que pasan a consultarse con frecuencia y cobra por las recuperaciones."
+          },
+          {
+            "id": "C",
+            "text": "S3 Glacier Flexible Retrieval para todos los artículos",
+            "why": "Los artículos de esta clase requieren restauración y no están disponibles para solicitudes inmediatas de los lectores."
+          },
+          {
+            "id": "D",
+            "text": "S3 Intelligent-Tiering con Deep Archive Access activado para todos los artículos elegibles",
+            "why": "Debes restaurar los artículos trasladados a este nivel de archivo opcional antes de que los lectores puedan acceder a ellos."
+          }
+        ],
+        "explanation": "La demanda impredecible y el deseo de no ajustar reglas de ciclo de vida favorecen S3 Intelligent-Tiering. Sus niveles automáticos de baja latencia se adaptan a los cambios en los patrones de acceso sin afectar el rendimiento. Activar un nivel opcional de archivo asíncrono introduciría un paso de restauración para los artículos archivados, lo que incumple el requisito de acceso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-storage-classes--b383ecfc",
+      "conceptId": "s3-storage-classes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "An architecture firm keeps completed project packages in S3 for several years. Auditors open a package about once per quarter, but when they do, the download must begin with millisecond access and no restoration request. Which storage class best fits this archive workload MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Glacier Deep Archive",
+          "correct": false,
+          "why": "It requires restoration and supports retrieval in hours, not immediate access."
+        },
+        {
+          "id": "B",
+          "text": "S3 Glacier Flexible Retrieval",
+          "correct": false,
+          "why": "It requires restoration and is not available for real-time access."
+        },
+        {
+          "id": "C",
+          "text": "S3 Glacier Instant Retrieval",
+          "correct": true,
+          "why": "It is intended for long-lived archive data accessed roughly once a quarter that requires millisecond access."
+        },
+        {
+          "id": "D",
+          "text": "S3 Standard-IA",
+          "correct": false,
+          "why": "It provides millisecond access but is intended for more frequent, approximately monthly access rather than this quarterly archive workload."
+        }
+      ],
+      "explanation": "Quarterly archive reads paired with a strict millisecond-access requirement match S3 Glacier Instant Retrieval. Unlike S3 Glacier Flexible Retrieval or Deep Archive, it provides real-time access without first restoring an object. S3 Standard-IA also provides millisecond reads, but is designed for more frequent access.",
+      "keywordCues": [
+        "several years",
+        "once per quarter",
+        "millisecond access",
+        "no restoration request"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+      ],
+      "es": {
+        "stem": "Una firma de arquitectura conserva en S3 paquetes de proyectos terminados durante varios años. Los auditores abren un paquete aproximadamente una vez por trimestre, pero, cuando lo hacen, la descarga debe comenzar con acceso en milisegundos y sin solicitar una restauración. ¿Qué clase de almacenamiento se ajusta mejor a este archivo de la manera MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Glacier Deep Archive",
+            "why": "Requiere restauración y permite recuperar en horas, no el acceso inmediato solicitado."
+          },
+          {
+            "id": "B",
+            "text": "S3 Glacier Flexible Retrieval",
+            "why": "Requiere restauración y no está disponible para acceso en tiempo real."
+          },
+          {
+            "id": "C",
+            "text": "S3 Glacier Instant Retrieval",
+            "why": "Está pensada para datos archivados de larga duración que se consultan aproximadamente una vez por trimestre y requieren acceso en milisegundos."
+          },
+          {
+            "id": "D",
+            "text": "S3 Standard-IA",
+            "why": "Ofrece acceso en milisegundos, pero está pensada para accesos más frecuentes, aproximadamente mensuales, y no para este archivo trimestral."
+          }
+        ],
+        "explanation": "Las lecturas trimestrales de un archivo, junto con el requisito estricto de acceso en milisegundos, corresponden a S3 Glacier Instant Retrieval. A diferencia de S3 Glacier Flexible Retrieval y Deep Archive, ofrece acceso en tiempo real sin restaurar primero el objeto. S3 Standard-IA también ofrece lecturas en milisegundos, pero está diseñada para accesos más frecuentes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-storage-classes--r0",
+      "conceptId": "s3-storage-classes",
+      "kind": "recall",
+      "prompt": "Your only copy of long-lived S3 objects is read monthly and must open in milliseconds after an AZ loss. Which class and why?",
+      "promptEs": "Tu única copia de objetos de larga duración en S3 se consulta cada mes y debe abrirse en milisegundos tras perder una Availability Zone. ¿Qué clase eliges y por qué?",
+      "idealAnswer": "Choose S3 Standard-IA. It supports infrequent millisecond reads and stores objects across multiple Availability Zones, unlike S3 One Zone-IA.",
+      "rubric": [
+        "Names S3 Standard-IA.",
+        "Connects monthly, long-lived access to an infrequent-access class with millisecond reads.",
+        "Explains that multi-AZ resilience protects the only copy from an Availability Zone loss."
+      ]
+    }
+  ]
+}

@@ -16,6 +16,7 @@ Hard rules:
 - Single-response: exactly 4 options (A–D), exactly 1 correct. Multi-response: exactly 5 options (A–E), exactly 2 correct, stem says "(Choose two.)".
 - Distractors must be plausible AWS solutions a real candidate might choose — prefer look-alike services from the confusable group — and each must fail a specific stated requirement. No "all/none of the above", no joke options, no options that are obviously wrong by length or wording.
 - Vary industries, scale and constraints across questions; vary which letter is correct.
+- Avoid giveaways: the correct option must not be systematically the longest or most detailed; distractors are as specific and well-written as the key. Real SAA-C03 distractors are often valid AWS designs that miss exactly one requirement (cost, overhead, HA, latency, security).
 - The questions test decisions in scenarios, not definitions or trivia.
 - Spanish (es) fields: neutral Latin-American Spanish using "tú". Keep AWS service names, feature names and the requirement phrases (e.g. "least operational overhead", "cost-effective") in English inside the Spanish text.
 - Card: concise micro-lesson (1–2 phone screens) optimized for the exam decisions, not a documentation summary.
@@ -55,7 +56,7 @@ ${siblings}
 
 PRODUCE:
 - card (en + es)
-- ${t.generate} questions: ${t.generate - t.multi} single-response and ${t.multi} multi-response, difficulty mix (mostly 2, some 1 and 3)
+- ${t.generate} questions: ${t.generate - t.multi} single-response and ${t.multi} multi-response, difficulty mix (mostly 2 and 3, at most one 1)
 - ${group ? 2 : 1} recall prompts
 
 AWS DOCUMENTATION EXCERPTS:

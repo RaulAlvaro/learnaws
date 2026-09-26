@@ -1,0 +1,438 @@
+{
+  "conceptId": "sqs-standard-vs-fifo",
+  "card": {
+    "en": {
+      "tldr": "Amazon SQS buffers messages so producers and consumers can scale independently. Choose a standard queue when at-least-once delivery and high scale are acceptable; choose a FIFO queue when message order and avoidance of queue-introduced duplicates are required.",
+      "whenToUse": [
+        "Use a standard queue to absorb traffic spikes when consumers can tolerate and handle repeated deliveries.",
+        "Use a FIFO queue when operations must be received in the order sent.",
+        "Use FIFO message groups when separate streams each need ordering within one queue."
+      ],
+      "keyFacts": [
+        "Standard queues support at-least-once delivery.",
+        "FIFO queues preserve the order in which messages are sent and received and do not introduce duplicates into the queue.",
+        "FIFO queues support exactly-once processing, but have a limited transactions-per-second rate; high-throughput mode can increase the transaction limit.",
+        "A consumer must delete a processed message; during its visibility timeout, the message remains in the queue but is not returned to subsequent receive requests."
+      ],
+      "gotchas": [
+        "Do not select a standard queue when the scenario requires strict message ordering or cannot tolerate queue-introduced duplicates.",
+        "Do not assume FIFO has the same throughput characteristics as a standard queue; consider FIFO high-throughput mode when both ordering and greater throughput matter.",
+        "SQS provides a queue for consumers, not topic-based distribution to multiple independent subscriber groups."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS distributes a publication to multiple subscribers; SQS buffers messages for queue consumers."
+        },
+        {
+          "concept": "Amazon MQ",
+          "difference": "Amazon MQ fits migration of applications dependent on existing broker protocols; SQS offers a queue with a simple API."
+        },
+        {
+          "concept": "AWS Step Functions",
+          "difference": "Step Functions orchestrates workflow steps; SQS buffers work for independent consumers."
+        }
+      ],
+      "examCues": [
+        "absorb bursts without ordering requirements",
+        "process commands in the order submitted",
+        "duplicates cannot be tolerated",
+        "independently ordered customer streams",
+        "ordering required at higher throughput"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon SQS almacena mensajes en una cola para que productores y consumidores escalen de forma independiente. Elige una cola standard si aceptas entregas at-least-once y necesitas alta escala; elige una cola FIFO si necesitas orden y evitar duplicados introducidos por la cola.",
+      "whenToUse": [
+        "Usa una cola standard para absorber picos de tráfico cuando los consumidores pueden manejar entregas repetidas.",
+        "Usa una cola FIFO cuando las operaciones deban recibirse en el orden en que se enviaron.",
+        "Usa message groups de FIFO cuando distintos flujos necesiten mantener su propio orden dentro de una cola."
+      ],
+      "keyFacts": [
+        "Las colas standard admiten entrega at-least-once.",
+        "Las colas FIFO conservan el orden de envío y recepción y no introducen duplicados en la cola.",
+        "Las colas FIFO admiten exactly-once processing, pero tienen una tasa limitada de transacciones por segundo; high-throughput mode puede aumentar ese límite.",
+        "El consumidor debe eliminar el mensaje procesado; durante el visibility timeout, el mensaje permanece en la cola, pero no se devuelve en solicitudes de recepción posteriores."
+      ],
+      "gotchas": [
+        "No elijas una cola standard si necesitas un orden estricto o no puedes tolerar duplicados introducidos por la cola.",
+        "No supongas que FIFO tiene las mismas características de rendimiento que una cola standard; considera FIFO high-throughput mode si necesitas orden y más capacidad.",
+        "SQS ofrece una cola para consumidores, no distribución basada en temas a varios grupos independientes de suscriptores."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS distribuye una publicación a varios suscriptores; SQS almacena mensajes para consumidores de una cola."
+        },
+        {
+          "concept": "Amazon MQ",
+          "difference": "Amazon MQ sirve para migrar aplicaciones que dependen de protocolos de brokers existentes; SQS ofrece una cola con una API sencilla."
+        },
+        {
+          "concept": "AWS Step Functions",
+          "difference": "Step Functions orquesta pasos de un flujo de trabajo; SQS almacena trabajo para consumidores independientes."
+        }
+      ],
+      "examCues": [
+        "absorb bursts without ordering requirements",
+        "process commands in the order submitted",
+        "duplicates cannot be tolerated",
+        "independently ordered customer streams",
+        "ordering required at higher throughput"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html",
+      "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "sqs-standard-vs-fifo--4c417d0a",
+      "conceptId": "sqs-standard-vs-fifo",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "step-functions"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 1,
+      "stem": "A photo-printing company receives bursts of image-processing requests after promotional emails. Worker instances can process requests independently, and their application already handles repeated deliveries; the order of requests does not matter. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place requests in an Amazon SQS standard queue for the workers to consume.",
+          "correct": true,
+          "why": "A standard queue buffers bursts and supports at-least-once delivery, which the workers can handle."
+        },
+        {
+          "id": "B",
+          "text": "Place requests in an Amazon SQS FIFO queue and assign all requests to one message group.",
+          "correct": false,
+          "why": "FIFO ordering is not required, so this adds an unnecessary throughput consideration."
+        },
+        {
+          "id": "C",
+          "text": "Publish each request to an Amazon SNS topic subscribed to by all workers.",
+          "correct": false,
+          "why": "SNS distributes a publication to multiple subscribers rather than providing the requested queue of work."
+        },
+        {
+          "id": "D",
+          "text": "Send each request through an AWS Step Functions workflow with one image-processing step.",
+          "correct": false,
+          "why": "Workflow orchestration is unnecessary when the requirement is to buffer independent requests for workers."
+        }
+      ],
+      "explanation": "The deciding constraints are bursty arrivals, independent work, no ordering requirement, and consumers that handle repeated deliveries. An SQS standard queue decouples producers from workers and supports at-least-once delivery. FIFO addresses ordering and duplicate requirements that this scenario does not have. SNS would distribute publications to subscribers rather than serve as the workers' queue of requests.",
+      "keywordCues": [
+        "bursts of image-processing requests",
+        "already handles repeated deliveries",
+        "order of requests does not matter"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html"
+      ],
+      "es": {
+        "stem": "Una empresa de impresión fotográfica recibe picos de solicitudes de procesamiento de imágenes después de enviar correos promocionales. Las instancias de trabajo pueden procesar las solicitudes de forma independiente y su aplicación ya maneja entregas repetidas; el orden de las solicitudes no importa. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar las solicitudes en una cola Amazon SQS standard para que las consuman las instancias de trabajo.",
+            "why": "Una cola standard almacena las solicitudes durante los picos y admite entrega at-least-once, que las instancias pueden manejar."
+          },
+          {
+            "id": "B",
+            "text": "Colocar las solicitudes en una cola Amazon SQS FIFO y asignarlas todas a un solo message group.",
+            "why": "No se necesita orden FIFO, por lo que esta opción añade una consideración de capacidad innecesaria."
+          },
+          {
+            "id": "C",
+            "text": "Publicar cada solicitud en un tema de Amazon SNS al que estén suscritas todas las instancias de trabajo.",
+            "why": "SNS distribuye una publicación a varios suscriptores en vez de proporcionar la cola de trabajo solicitada."
+          },
+          {
+            "id": "D",
+            "text": "Enviar cada solicitud a través de un flujo de trabajo de AWS Step Functions con un solo paso de procesamiento de imágenes.",
+            "why": "No hace falta orquestar un flujo de trabajo cuando se necesita almacenar solicitudes independientes para las instancias de trabajo."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son los picos de solicitudes, el trabajo independiente, la ausencia de un requisito de orden y consumidores que manejan entregas repetidas. Una cola SQS standard desacopla a los productores de las instancias de trabajo y admite entrega at-least-once. FIFO resuelve requisitos de orden y duplicados que aquí no existen. SNS distribuiría publicaciones a suscriptores en lugar de funcionar como la cola de solicitudes de las instancias."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-standard-vs-fifo--d789727a",
+      "conceptId": "sqs-standard-vs-fifo",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "amazon-mq"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A laboratory sends instrument commands to a processing service through a message queue. For each instrument, commands must be received in the order submitted, and the queue must not introduce duplicate commands. Commands from different instruments may be processed independently. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an Amazon SQS standard queue and attach the instrument ID to each message.",
+          "correct": false,
+          "why": "Adding an ID does not give a standard queue strict ordering or prevent queue-introduced duplicates."
+        },
+        {
+          "id": "B",
+          "text": "Use an Amazon SQS FIFO queue with a separate message group for each instrument.",
+          "correct": true,
+          "why": "FIFO preserves order and avoids queue-introduced duplicates while message groups separate ordered streams."
+        },
+        {
+          "id": "C",
+          "text": "Publish commands to an Amazon SNS topic with a separate subscriber for each instrument.",
+          "correct": false,
+          "why": "SNS distributes messages to subscribers rather than providing the required FIFO queue behavior."
+        },
+        {
+          "id": "D",
+          "text": "Use an Amazon MQ broker for every instrument without changing the application's messaging API.",
+          "correct": false,
+          "why": "The scenario does not require compatibility with an existing broker protocol, which is the reason to favor Amazon MQ."
+        }
+      ],
+      "explanation": "Each instrument needs its own ordered command stream, and the queue must not introduce duplicates. An SQS FIFO queue provides those properties, and message groups allow multiple ordered streams in one queue. A standard queue supports at-least-once delivery and does not satisfy the stated ordering requirement. Amazon MQ addresses broker compatibility, which the laboratory has not requested.",
+      "keywordCues": [
+        "in the order submitted",
+        "must not introduce duplicate commands",
+        "different instruments may be processed independently"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio envía comandos de instrumentos a un servicio de procesamiento mediante una cola de mensajes. Para cada instrumento, los comandos deben recibirse en el orden en que se enviaron y la cola no debe introducir comandos duplicados. Los comandos de distintos instrumentos pueden procesarse de forma independiente. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar una cola Amazon SQS standard y agregar el ID del instrumento a cada mensaje.",
+            "why": "Agregar un ID no proporciona orden estricto a una cola standard ni evita duplicados introducidos por la cola."
+          },
+          {
+            "id": "B",
+            "text": "Usar una cola Amazon SQS FIFO con un message group diferente para cada instrumento.",
+            "why": "FIFO conserva el orden y evita duplicados introducidos por la cola, mientras que los message groups separan los flujos ordenados."
+          },
+          {
+            "id": "C",
+            "text": "Publicar los comandos en un tema de Amazon SNS con un suscriptor distinto por instrumento.",
+            "why": "SNS distribuye mensajes a suscriptores en vez de proporcionar el comportamiento requerido de una cola FIFO."
+          },
+          {
+            "id": "D",
+            "text": "Usar un broker Amazon MQ para cada instrumento sin cambiar la API de mensajería de la aplicación.",
+            "why": "El escenario no exige compatibilidad con un protocolo de broker existente, que sería el motivo para elegir Amazon MQ."
+          }
+        ],
+        "explanation": "Cada instrumento necesita su propio flujo ordenado de comandos y la cola no debe introducir duplicados. Una cola SQS FIFO ofrece esas propiedades y sus message groups permiten varios flujos ordenados en una sola cola. Una cola standard admite entrega at-least-once y no cumple el requisito de orden. Amazon MQ resuelve necesidades de compatibilidad con brokers que el laboratorio no ha planteado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-standard-vs-fifo--06b85455",
+      "conceptId": "sqs-standard-vs-fifo",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "amazon-mq"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing platform uses an Amazon SQS standard queue to pass purchase requests from its website to workers. It is launching an event where requests must be received in the order submitted, and the queue must not introduce duplicates. The team also expects increased transaction volume and wants to retain a managed queue. Which change best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the SQS standard queue and increase the number of workers.",
+          "correct": false,
+          "why": "More workers do not add FIFO ordering or prevent queue-introduced duplicates."
+        },
+        {
+          "id": "B",
+          "text": "Replace the queue with an Amazon SNS topic to distribute requests to workers.",
+          "correct": false,
+          "why": "SNS provides subscriber distribution rather than the required ordered work queue."
+        },
+        {
+          "id": "C",
+          "text": "Use an Amazon SQS FIFO queue and consider its high-throughput mode for the increased volume.",
+          "correct": true,
+          "why": "FIFO addresses order and queue-introduced duplicates, and high-throughput mode can increase its transaction limit."
+        },
+        {
+          "id": "D",
+          "text": "Replace the queue with an Amazon MQ broker to retain purchase-request order.",
+          "correct": false,
+          "why": "No existing broker protocol compatibility requirement justifies replacing SQS with Amazon MQ."
+        }
+      ],
+      "explanation": "The new requirements are ordered receipt and no duplicates introduced by the queue, so a standard queue is no longer the right type. SQS FIFO provides these properties while retaining a managed queue. FIFO has a limited transactions-per-second rate, and its high-throughput mode can increase the transaction limit. Adding workers to the standard queue cannot change its delivery guarantees.",
+      "keywordCues": [
+        "requests must be received in the order submitted",
+        "queue must not introduce duplicates",
+        "increased transaction volume"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de venta de boletos usa una cola Amazon SQS standard para pasar solicitudes de compra del sitio web a las instancias de trabajo. Lanzará un evento en el que las solicitudes deben recibirse en el orden en que se enviaron y la cola no debe introducir duplicados. El equipo también prevé un mayor volumen de transacciones y quiere conservar una cola administrada. ¿Qué cambio cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener la cola SQS standard y aumentar la cantidad de instancias de trabajo.",
+            "why": "Más instancias de trabajo no proporcionan orden FIFO ni evitan duplicados introducidos por la cola."
+          },
+          {
+            "id": "B",
+            "text": "Reemplazar la cola por un tema de Amazon SNS para distribuir solicitudes a las instancias de trabajo.",
+            "why": "SNS distribuye mensajes a suscriptores en vez de ofrecer la cola de trabajo ordenada que se necesita."
+          },
+          {
+            "id": "C",
+            "text": "Usar una cola Amazon SQS FIFO y considerar su high-throughput mode para el mayor volumen.",
+            "why": "FIFO resuelve los requisitos de orden y duplicados introducidos por la cola, y high-throughput mode puede aumentar su límite de transacciones."
+          },
+          {
+            "id": "D",
+            "text": "Reemplazar la cola por un broker Amazon MQ para mantener el orden de las solicitudes de compra.",
+            "why": "No existe un requisito de compatibilidad con protocolos de brokers que justifique reemplazar SQS por Amazon MQ."
+          }
+        ],
+        "explanation": "Los nuevos requisitos son recibir los mensajes en orden y evitar duplicados introducidos por la cola, por lo que una cola standard ya no es adecuada. SQS FIFO ofrece esas propiedades y mantiene una cola administrada. FIFO tiene una tasa limitada de transacciones por segundo, y high-throughput mode puede aumentar el límite. Agregar instancias de trabajo a la cola standard no cambia sus garantías de entrega."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-standard-vs-fifo--a49d72b0",
+      "conceptId": "sqs-standard-vs-fifo",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher wants each completed manuscript to trigger two independent jobs: format an ebook and prepare a print layout. Each team needs its own durable queue so its workers can consume jobs at a different pace; neither job requires ordering. Which architecture meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Put manuscripts in one Amazon SQS standard queue and have both teams poll that queue.",
+          "correct": false,
+          "why": "A shared queue does not give each team its own copy and independent queue of every manuscript."
+        },
+        {
+          "id": "B",
+          "text": "Put manuscripts in one Amazon SQS FIFO queue and use one message group per team.",
+          "correct": false,
+          "why": "Message groups do not distribute a copy of each manuscript to two independent consumer queues."
+        },
+        {
+          "id": "C",
+          "text": "Publish manuscripts to one Amazon SNS topic with both teams subscribed directly.",
+          "correct": false,
+          "why": "Direct subscriptions do not provide the separate durable SQS queues explicitly required for each team."
+        },
+        {
+          "id": "D",
+          "text": "Publish manuscripts to an Amazon SNS topic subscribed to by a separate Amazon SQS standard queue for each team.",
+          "correct": true,
+          "why": "SNS fans each publication out to both teams' durable queues, and standard queues fit the lack of ordering requirements."
+        }
+      ],
+      "explanation": "The deciding requirement is not simply buffering work: both teams must receive every manuscript in their own queue. An SNS topic can fan out publications to separate SQS queues, allowing each team to consume at its own pace. Because neither job needs ordering, standard queues fit. A single shared SQS queue does not give both teams an independent queue containing each manuscript.",
+      "keywordCues": [
+        "two independent jobs",
+        "Each team needs its own durable queue",
+        "neither job requires ordering"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html"
+      ],
+      "es": {
+        "stem": "Una editorial quiere que cada manuscrito terminado inicie dos trabajos independientes: dar formato a un ebook y preparar el diseño para impresión. Cada equipo necesita su propia cola duradera para que sus instancias de trabajo consuman tareas a distinto ritmo; ninguno de los trabajos requiere orden. ¿Qué arquitectura cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar los manuscritos en una sola cola Amazon SQS standard y hacer que ambos equipos consulten esa cola.",
+            "why": "Una cola compartida no le da a cada equipo su propia copia ni una cola independiente con todos los manuscritos."
+          },
+          {
+            "id": "B",
+            "text": "Colocar los manuscritos en una sola cola Amazon SQS FIFO y usar un message group por equipo.",
+            "why": "Los message groups no distribuyen una copia de cada manuscrito a dos colas de consumidores independientes."
+          },
+          {
+            "id": "C",
+            "text": "Publicar los manuscritos en un tema de Amazon SNS con ambos equipos suscritos directamente.",
+            "why": "Las suscripciones directas no proporcionan las colas SQS duraderas y separadas que necesita cada equipo."
+          },
+          {
+            "id": "D",
+            "text": "Publicar los manuscritos en un tema de Amazon SNS suscrito a una cola Amazon SQS standard independiente para cada equipo.",
+            "why": "SNS distribuye cada publicación a las colas duraderas de ambos equipos, y las colas standard son adecuadas porque no se requiere orden."
+          }
+        ],
+        "explanation": "El requisito decisivo no es solo almacenar trabajo: ambos equipos deben recibir cada manuscrito en su propia cola. Un tema de SNS puede distribuir las publicaciones a colas SQS separadas para que cada equipo consuma a su propio ritmo. Como ningún trabajo necesita orden, las colas standard son adecuadas. Una sola cola SQS compartida no proporciona a ambos equipos una cola independiente con cada manuscrito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "sqs-standard-vs-fifo--r0",
+      "conceptId": "sqs-standard-vs-fifo",
+      "kind": "recall",
+      "prompt": "Which SQS queue type fits bursty, unordered jobs that workers can safely retry, and why?",
+      "promptEs": "¿Qué tipo de cola SQS sirve para trabajos con picos, sin orden y que las instancias pueden reintentar de forma segura? ¿Por qué?",
+      "idealAnswer": "Use an SQS standard queue. It buffers work so producers and consumers can scale independently, and its at-least-once delivery is acceptable when workers handle repeated deliveries.",
+      "rubric": [
+        "Names SQS standard.",
+        "Explains buffering or decoupling.",
+        "Connects at-least-once delivery to safe handling of repeats."
+      ]
+    },
+    {
+      "id": "sqs-standard-vs-fifo--r1",
+      "conceptId": "sqs-standard-vs-fifo",
+      "kind": "why-not",
+      "prompt": "Why is a single SQS FIFO queue not enough when two teams each need every message in their own durable queue?",
+      "promptEs": "¿Por qué una sola cola SQS FIFO no basta si dos equipos necesitan cada mensaje en su propia cola duradera?",
+      "idealAnswer": "FIFO changes ordering and duplicate behavior; it does not fan out each message into two independent queues. Publish to an SNS topic subscribed to by a separate SQS queue for each team.",
+      "rubric": [
+        "Explains that FIFO does not provide fan-out to independent queues.",
+        "Identifies SNS-to-SQS fan-out.",
+        "Specifies a separate SQS queue for each team."
+      ]
+    }
+  ]
+}

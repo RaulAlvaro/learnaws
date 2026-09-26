@@ -4,20 +4,26 @@ import { gte, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 
 export const MODELS = {
-  smart: process.env.OPENAI_MODEL_SMART ?? "gpt-5",
-  fast: process.env.OPENAI_MODEL_FAST ?? "gpt-5-mini",
+  smart: process.env.OPENAI_MODEL_SMART ?? "gpt-6-sol",
+  fast: process.env.OPENAI_MODEL_FAST ?? "gpt-6-luna",
   tts: process.env.OPENAI_MODEL_TTS ?? "gpt-4o-mini-tts",
-  stt: process.env.OPENAI_MODEL_STT ?? "gpt-4o-transcribe",
+  stt: process.env.OPENAI_MODEL_STT ?? "gpt-transcribe",
 };
 
 /** USD per 1M tokens (input, output). Estimates — only used for the spend meter. */
 const PRICES: Record<string, [number, number]> = {
-  "gpt-5": [1.25, 10],
+  "gpt-6-astra": [10, 50],
+  "gpt-6-sol": [2, 10],
+  "gpt-6-luna": [0.1, 0.5],
+  "gpt-5.5": [5, 30],
+  "gpt-5.4-mini": [0.75, 4.5],
+  "gpt-5.4-nano": [0.2, 1.25],
+  "gpt-5.4": [2.5, 15],
   "gpt-5-mini": [0.25, 2],
-  "gpt-5-nano": [0.05, 0.4],
+  "gpt-5": [1.25, 10],
 };
 const TTS_USD_PER_MIN = 0.015;
-const STT_USD_PER_MIN = 0.006;
+const STT_USD_PER_MIN = 0.0045;
 
 export const MONTHLY_CAP_USD = Number(process.env.AI_MONTHLY_CAP_USD ?? 20);
 

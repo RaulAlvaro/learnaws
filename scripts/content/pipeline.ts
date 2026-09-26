@@ -34,7 +34,7 @@ const OUT = path.join(CONTENT, "concepts");
 const STATE = path.join(WORK, "state.json");
 for (const d of [WORK, DOCS, STAGE, VERIFY, OUT]) fs.mkdirSync(d, { recursive: true });
 
-const MODEL = process.env.OPENAI_MODEL_CONTENT ?? process.env.OPENAI_MODEL_SMART ?? "gpt-5";
+const MODEL = process.env.OPENAI_MODEL_CONTENT ?? process.env.OPENAI_MODEL_SMART ?? "gpt-6-sol";
 const VERIFY_MODEL = process.env.OPENAI_MODEL_VERIFY ?? MODEL;
 const syllabus: Syllabus = JSON.parse(fs.readFileSync(path.join(CONTENT, "syllabus.json"), "utf8"));
 

@@ -239,14 +239,14 @@ if [[ -n "$(_existing NEXT_PUBLIC_VAPID_PUBLIC_KEY || true)" && -n "$(_existing 
   VAPID_PRIVATE_KEY=$(_existing VAPID_PRIVATE_KEY)
 else
   say "Generando un par de claves para el recordatorio diario (no tienes que copiar nada)…"
-  keys=$(npx -y web-push generate-vapid-keys --json)
-  NEXT_PUBLIC_VAPID_PUBLIC_KEY=$(printf '%s' "$keys" | node -pe 'JSON.parse(require("fs").readFileSync(0)).publicKey')
-  VAPID_PRIVATE_KEY=$(printf '%s' "$keys" | node -pe 'JSON.parse(require("fs").readFileSync(0)).privateKey')
+  # stdin pipes into node are flaky in Git Bash on Windows: generate in-process instead.
+  keys=$(node -e 'const k=require("web-push").generateVAPIDKeys();console.log(k.publicKey+" "+k.privateKey)')
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY=${keys% *}
+  VAPID_PRIVATE_KEY=${keys#* }
 fi
 write_env NEXT_PUBLIC_VAPID_PUBLIC_KEY "$NEXT_PUBLIC_VAPID_PUBLIC_KEY"
 write_env VAPID_PRIVATE_KEY "$VAPID_PRIVATE_KEY"
-ask VAPID_EMAIL "Tu email (contacto técnico para el servicio de push):"
-write_env VAPID_SUBJECT "mailto:$VAPID_EMAIL"
+write_env VAPID_SUBJECT "https://learnaws.crafter.run"
 
 # ── 5. Dokploy ────────────────────────────────────────────────────────────
 stage "Dokploy — subir las claves y desplegar"
