@@ -20,6 +20,9 @@ export function Nav() {
   const active = (href: string) =>
     href === "/" ? path === "/" : href === "/more" ? MORE.some((p) => path.startsWith(p)) : path.startsWith(href);
 
+  // Title screen for sign-in / sign-up: no game chrome around it.
+  if (path.startsWith("/sign-in") || path.startsWith("/sign-up")) return null;
+
   return (
     <>
       <header className="relative z-20 pt-[env(safe-area-inset-top)]">

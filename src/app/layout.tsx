@@ -3,6 +3,8 @@ import { Lilita_One, Nunito } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
 import { Onboarding } from "@/components/onboarding";
+import { esMX } from "@clerk/localizations";
+import { arcadeAppearance } from "@/lib/clerk-appearance";
 import "./globals.css";
 
 const lilita = Lilita_One({ variable: "--font-lilita", weight: "400", subsets: ["latin"] });
@@ -21,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={arcadeAppearance} localization={esMX}>
       <html lang="es" className={`${lilita.variable} ${nunito.variable} h-full antialiased`}>
         <body className="min-h-full font-sans">
           <Nav />

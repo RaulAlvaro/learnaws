@@ -6,6 +6,7 @@ import { highlight } from "@/lib/game/cues";
 import { play } from "@/lib/game/sfx";
 import type { Chip } from "@/lib/game/cues";
 import type { PublicQuestion, Reveal } from "../question-view";
+import { ExpertPanel } from "./expert-panel";
 import { GameIcon, type GameIconName } from "./icons";
 
 export type GameQuestionData = PublicQuestion & { cues: string[]; chips: Chip[] };
@@ -78,6 +79,7 @@ export function GameQuestion({
   const [error, setError] = useState<string | null>(null);
   const [showWhy, setShowWhy] = useState(false);
   const [shake, setShake] = useState(0);
+  const [expertOpen, setExpertOpen] = useState(false);
   const started = useRef(0);
   const audio = useRef<HTMLAudioElement | null>(null);
   const need = question.answerCount;
@@ -353,6 +355,9 @@ export function GameQuestion({
                 Ver respuesta
               </button>
             </div>
+            <button onClick={() => setExpertOpen(true)} className="press chunk-sm flex w-full items-center justify-center gap-2 !bg-blue py-3 font-extrabold text-white">
+              <GameIcon name="gift-of-knowledge" size={20} /> Pregúntale al experto (texto o voz)
+            </button>
           </motion.div>
         )}
 
@@ -382,12 +387,17 @@ export function GameQuestion({
                 <GameIcon name="open-book" size={20} /> ¿Por qué?
               </button>
             )}
+            <button onClick={() => setExpertOpen(true)} className="press chunk-sm flex w-full items-center justify-center gap-2 !bg-blue py-3 font-extrabold text-white">
+              <GameIcon name="gift-of-knowledge" size={20} /> Pregúntale al experto
+            </button>
             <button onClick={onNext} className="press chunk display w-full !bg-yellow py-4 text-[1.5em]">
               Siguiente
             </button>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {expertOpen && result && <ExpertPanel attemptId={result.attemptId} onClose={() => setExpertOpen(false)} />}
 
       {error && (
         <p className="chunk-sm break-words !bg-bad-bg p-3 text-[0.92em] font-bold">

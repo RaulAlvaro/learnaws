@@ -1,9 +1,11 @@
 import { SignIn } from "@clerk/nextjs";
+import { AuthShell } from "@/components/auth-shell";
+import { arcadeAppearance } from "@/lib/clerk-appearance";
 
 export default function SignInPage() {
   return (
-    <div className="flex justify-center pt-8">
-      <SignIn />
-    </div>
+    <AuthShell>
+      <SignIn appearance={arcadeAppearance} />
+    </AuthShell>
   );
 }

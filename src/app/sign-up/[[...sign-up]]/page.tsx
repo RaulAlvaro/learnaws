@@ -1,9 +1,11 @@
 import { SignUp } from "@clerk/nextjs";
+import { AuthShell } from "@/components/auth-shell";
+import { arcadeAppearance } from "@/lib/clerk-appearance";
 
 export default function SignUpPage() {
   return (
-    <div className="flex justify-center pt-8">
-      <SignUp />
-    </div>
+    <AuthShell>
+      <SignUp appearance={arcadeAppearance} />
+    </AuthShell>
   );
 }
