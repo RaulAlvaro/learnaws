@@ -1,0 +1,1199 @@
+{
+  "labs": [
+    {
+      "id": "lab-00-budget-and-identity",
+      "order": 0,
+      "title": "Account safety first: Budgets, root lockdown and IAM Identity Center",
+      "titleEs": "Seguridad de la cuenta primero: Budgets, proteger root e IAM Identity Center",
+      "concepts": [
+        "aws-budgets",
+        "root-user-mfa-best-practices",
+        "iam-identity-center-sso",
+        "iam-users-groups-roles",
+        "exam-cue-security-least-privilege"
+      ],
+      "domain": "d1",
+      "minutes": 45,
+      "estimatedCostUsd": "$0",
+      "costWarning": null,
+      "objectiveEs": "Dejar tu cuenta lista para practicar sin sustos: alertas de gasto por email, MFA en el usuario root, y un usuario administrador diario vía IAM Identity Center (así no vuelves a usar root). Este lab es obligatorio antes que cualquier otro.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "Inicia sesión como root y activa MFA en el usuario root.",
+          "detailEs": "Menú de tu cuenta (arriba a la derecha) → Security credentials → Multi-factor authentication (MFA) → Assign MFA device. Usa una app autenticadora o una passkey/llave física. Es la primera recomendación de AWS para root."
+        },
+        {
+          "id": "s2",
+          "textEs": "Elige una Region de trabajo para todos los labs (recomendado: us-east-1, N. Virginia) y selecciónala en el selector de Region.",
+          "detailEs": "Usar siempre la misma Region evita el error clásico de 'no encuentro el recurso que creé' y facilita el cleanup."
+        },
+        {
+          "id": "s3",
+          "textEs": "Abre Billing and Cost Management → Budgets → Create budget. Usa la plantilla (template) 'Zero spend budget' e ingresa tu email.",
+          "detailEs": "Te avisa en cuanto el gasto supere $0.01. Es tu alarma temprana de que olvidaste borrar algo."
+        },
+        {
+          "id": "s4",
+          "textEs": "Crea un segundo budget con la plantilla 'Monthly cost budget' con un monto bajo (por ejemplo $5) y tu email.",
+          "detailEs": "Por defecto alerta cuando el gasto real llega al 85% y 100%, y cuando el pronóstico (forecast) supera el 100%. Revisa estos umbrales en la pantalla antes de crear."
+        },
+        {
+          "id": "s5",
+          "textEs": "En Billing preferences, activa las alertas de Free Tier por email (Free Tier usage alerts / 'Receive AWS Free Tier alerts') si la opción está disponible en tu cuenta.",
+          "detailEs": "Si tu cuenta se creó después del 15-jul-2025, estás en el modelo nuevo de Free Tier basado en créditos; revisa cuántos créditos te quedan en la página de Billing (sección Free Tier/Credits)."
+        },
+        {
+          "id": "s6",
+          "textEs": "Abre IAM Identity Center y pulsa Enable (habilítalo en tu Region de trabajo, instancia de organización).",
+          "detailEs": "Identity Center es la forma recomendada por AWS para dar acceso humano. Al habilitarlo se crea una AWS Organization si no tienes una; es gratis."
+        },
+        {
+          "id": "s7",
+          "textEs": "En Identity Center: Users → Add user. Crea tu usuario (tu email real) y completa el alta desde el email de invitación, configurando MFA.",
+          "detailEs": null
+        },
+        {
+          "id": "s8",
+          "textEs": "Permission sets → Create permission set → Predefined permission set → AdministratorAccess. Duración de sesión: la que quieras (p. ej. 4 h).",
+          "detailEs": "Un permission set es una plantilla de permisos; al asignarlo a una cuenta, Identity Center crea un IAM role en esa cuenta (con prefijo AWSReservedSSO_)."
+        },
+        {
+          "id": "s9",
+          "textEs": "AWS accounts → selecciona tu cuenta → Assign users or groups → tu usuario → permission set AdministratorAccess.",
+          "detailEs": null
+        },
+        {
+          "id": "s10",
+          "textEs": "Copia la AWS access portal URL (en el dashboard/Settings de Identity Center), guárdala en favoritos, cierra sesión de root e inicia sesión por el portal con tu nuevo usuario.",
+          "detailEs": "Desde ahora trabajas con credenciales temporales de un role, no con root ni con access keys de larga duración."
+        },
+        {
+          "id": "s11",
+          "textEs": "Ya dentro con tu usuario, abre CloudShell (icono de terminal en la barra superior) y ejecuta: aws sts get-caller-identity",
+          "detailEs": "Observa el ARN: verás un assumed-role/AWSReservedSSO_AdministratorAccess_.../tu-usuario. Esto demuestra que Identity Center te da un role temporal."
+        },
+        {
+          "id": "s12",
+          "textEs": "Abre IAM → Roles y busca el role AWSReservedSSO_AdministratorAccess_*. Mira su trust policy.",
+          "detailEs": "Confía en el proveedor SAML de Identity Center. No lo edites: lo administra Identity Center."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Antes de habilitar MFA en root: ¿qué tareas SOLO puede hacer root y por qué AWS recomienda no usarlo en el día a día?",
+          "answerEs": "Solo root puede, entre otras cosas, cambiar la configuración de la cuenta (email, cerrar la cuenta), algunos ajustes de facturación y restaurar permisos si bloqueas a todos los admins. Como tiene acceso total sin posibilidad de restringirlo con IAM, se protege con MFA y se guarda."
+        },
+        {
+          "id": "q2",
+          "questionEs": "Predice: si pones un 'Monthly cost budget' de $5, ¿AWS detiene tus recursos cuando llegues a $5?",
+          "answerEs": "No. Un budget por defecto solo alerta (email/SNS). Para frenar recursos automáticamente tendrías que configurar Budget actions (por ejemplo, aplicar una SCP o IAM policy, o detener instancias EC2/RDS). En el examen: Budgets = alertas/acciones sobre costo; Cost Explorer = análisis; Cost Anomaly Detection = anomalías con ML."
+        },
+        {
+          "id": "q3",
+          "questionEs": "Antes de ejecutar get-caller-identity en CloudShell: ¿qué tipo de identidad crees que aparecerá: un IAM user o un role? ¿por qué?",
+          "answerEs": "Un assumed-role. Identity Center federa tu usuario y te entrega credenciales temporales de STS de un role creado por el permission set. No existe un IAM user tuyo en la cuenta."
+        },
+        {
+          "id": "q4",
+          "questionEs": "¿Qué diferencia hay entre un IAM user con access keys y un usuario de Identity Center, desde la perspectiva de seguridad?",
+          "answerEs": "El IAM user tiene credenciales de larga duración (password/access keys) que pueden filtrarse; Identity Center usa credenciales temporales que expiran, centraliza el acceso multi-cuenta y se integra con un IdP externo. AWS recomienda credenciales temporales para humanos."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "No borres nada: los budgets, el MFA de root y tu usuario de Identity Center son permanentes y gratuitos."
+        },
+        {
+          "id": "c2",
+          "textEs": "Si creaste access keys para root en algún momento, elimínalas (Security credentials → Access keys)."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Root: activa MFA, no crees access keys y úsalo solo para tareas que lo requieren.",
+        "Acceso humano multi-cuenta con SSO → IAM Identity Center (antes AWS SSO) con permission sets; integra IdPs externos (Microsoft Entra ID, Okta, AD).",
+        "AWS Budgets alerta (y con Budget actions puede actuar); Cost Explorer analiza; Cost Anomaly Detection detecta gasto inusual.",
+        "Preferir credenciales temporales (roles/STS) sobre access keys de larga duración."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/root-user-best-practices.html",
+        "https://docs.aws.amazon.com/cost-management/latest/userguide/budget-templates.html",
+        "https://docs.aws.amazon.com/singlesignon/latest/userguide/getting-started.html",
+        "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/free-tier.html"
+      ]
+    },
+    {
+      "id": "lab-01-vpc-from-scratch",
+      "order": 1,
+      "title": "VPC from scratch: subnets, IGW, NAT Gateway, route tables, SG vs NACL",
+      "titleEs": "VPC desde cero: subnets, IGW, NAT Gateway, route tables, SG vs NACL",
+      "concepts": [
+        "vpc-cidr-subnets-ip-addressing",
+        "public-vs-private-subnets",
+        "route-tables-internet-gateway",
+        "nat-gateway-vs-nat-instance",
+        "security-groups",
+        "network-acls",
+        "bastion-vs-session-manager"
+      ],
+      "domain": "d1",
+      "minutes": 60,
+      "estimatedCostUsd": "≈ $0.10 (NAT Gateway ~1 h + IPv4 públicas)",
+      "costWarning": "NAT Gateway cuesta ≈ $0.045/hora + $0.045/GB procesado (us-east-1) y NO es Free Tier. Cada IPv4 pública (incluida la Elastic IP del NAT) cuesta $0.005/hora. Borra el NAT Gateway y libera la Elastic IP al terminar.",
+      "objectiveEs": "Construir a mano una VPC con una subnet pública y una privada, entender qué hace público a un subnet (la ruta 0.0.0.0/0 al Internet Gateway), dar salida a internet a la privada con NAT Gateway, y comprobar en vivo la diferencia entre Security Group (stateful, solo allow) y Network ACL (stateless, allow + deny).",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "VPC console → Create VPC → 'VPC only'. Nombre lab-vpc, IPv4 CIDR 10.0.0.0/16.",
+          "detailEs": "Usa 'VPC only' a propósito: el asistente 'VPC and more' lo hace todo por ti y no aprendes las piezas."
+        },
+        {
+          "id": "s2",
+          "textEs": "Subnets → Create subnet: lab-public-a (10.0.1.0/24, AZ a) y lab-private-a (10.0.2.0/24, misma AZ).",
+          "detailEs": "Una subnet vive en UNA sola AZ. Para alta disponibilidad real necesitarías subnets en 2+ AZs (lo harás en el lab de ALB)."
+        },
+        {
+          "id": "s3",
+          "textEs": "Internet gateways → Create internet gateway (lab-igw) → Actions → Attach to VPC → lab-vpc.",
+          "detailEs": null
+        },
+        {
+          "id": "s4",
+          "textEs": "Route tables → Create route table lab-public-rt (en lab-vpc). Edit routes: agrega 0.0.0.0/0 → Internet Gateway lab-igw. Subnet associations → asocia lab-public-a.",
+          "detailEs": "Esto es exactamente lo que convierte a una subnet en 'pública'. La subnet privada sigue usando la main route table (solo ruta local)."
+        },
+        {
+          "id": "s5",
+          "textEs": "En lab-public-a: Actions → Edit subnet settings → activa 'Enable auto-assign public IPv4 address'.",
+          "detailEs": null
+        },
+        {
+          "id": "s6",
+          "textEs": "EC2 → Launch instance: web-public, Amazon Linux 2023, t3.micro (o t2.micro si es la elegible en tu Free Tier), sin key pair, subnet lab-public-a. Security group nuevo sg-web: inbound HTTP 80 desde 0.0.0.0/0 (y SSH 22 desde tu IP o desde el rango de EC2 Instance Connect).",
+          "detailEs": "En Advanced details → User data pega: #!/bin/bash (salto de línea) dnf install -y httpd (salto de línea) echo hola-desde-publica > /var/www/html/index.html (salto de línea) systemctl enable --now httpd"
+        },
+        {
+          "id": "s7",
+          "textEs": "Cuando esté 'running', abre http://IP-publica en tu navegador. Debe mostrar 'hola-desde-publica'.",
+          "detailEs": null
+        },
+        {
+          "id": "s8",
+          "textEs": "Prueba SG: edita sg-web y elimina la regla inbound de HTTP. Recarga el navegador. Luego vuelve a agregarla.",
+          "detailEs": "Observa que la respuesta del servidor nunca necesitó una regla outbound explícita para tu IP: los Security Groups son stateful."
+        },
+        {
+          "id": "s9",
+          "textEs": "Prueba NACL: Network ACLs → la NACL por defecto de lab-vpc → Inbound rules → agrega regla #90 DENY TCP 80 desde TU IP pública /32. Recarga el navegador. Luego borra la regla.",
+          "detailEs": "Las reglas de NACL se evalúan en orden numérico ascendente; la primera que coincide gana. #90 se evalúa antes que la #100 (ALLOW ALL)."
+        },
+        {
+          "id": "s10",
+          "textEs": "Prueba stateless: en la misma NACL, en Outbound rules agrega #90 DENY TCP puertos 1024-65535 hacia 0.0.0.0/0. Recarga. Luego borra la regla.",
+          "detailEs": "La respuesta HTTP sale del servidor hacia el puerto efímero de tu navegador. Si la NACL bloquea la salida a puertos efímeros, la respuesta se pierde aunque la entrada esté permitida."
+        },
+        {
+          "id": "s11",
+          "textEs": "Lanza una segunda instancia private-app en lab-private-a, sin IP pública, SG sg-private con inbound SSH 22 desde el SG del endpoint (siguiente paso).",
+          "detailEs": null
+        },
+        {
+          "id": "s12",
+          "textEs": "VPC → Endpoints → Create endpoint → tipo 'EC2 Instance Connect Endpoint', en lab-vpc, subnet lab-private-a, con un SG sg-eice (outbound 22 hacia sg-private).",
+          "detailEs": "EC2 Instance Connect Endpoint no tiene costo adicional y te deja entrar por SSH a instancias privadas sin bastion ni IP pública. Tarda unos minutos en quedar 'Available'."
+        },
+        {
+          "id": "s13",
+          "textEs": "Conéctate a private-app: EC2 → instancia → Connect → EC2 Instance Connect → 'Connect using EC2 Instance Connect Endpoint'. Ejecuta: curl -m 5 https://checkip.amazonaws.com",
+          "detailEs": "Debe fallar por timeout: la subnet privada no tiene ruta a internet."
+        },
+        {
+          "id": "s14",
+          "textEs": "NAT Gateways → Create NAT gateway: subnet lab-public-a (¡la pública!), Connectivity type Public, Allocate Elastic IP.",
+          "detailEs": "Anota la hora: desde aquí empieza a cobrar."
+        },
+        {
+          "id": "s15",
+          "textEs": "Crea lab-private-rt con ruta 0.0.0.0/0 → NAT Gateway y asóciala a lab-private-a. Repite el curl desde private-app.",
+          "detailEs": "Ahora debe responder con la Elastic IP del NAT: tu instancia privada sale a internet con la IP del NAT, pero nadie desde internet puede iniciar una conexión hacia ella."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Antes de asociar la route table con 0.0.0.0/0 → IGW: si lanzaras la instancia web en esa subnet con IP pública, ¿podrías abrir la página? ¿por qué?",
+          "answerEs": "No. Tener IP pública no basta: sin una ruta al IGW el tráfico de retorno no tiene salida. Una subnet es pública solo si su route table tiene ruta a un Internet Gateway."
+        },
+        {
+          "id": "q2",
+          "questionEs": "Predice: al borrar la regla HTTP inbound del SG, ¿la página falla con 'connection refused' o se queda cargando? ¿por qué?",
+          "answerEs": "Se queda cargando hasta timeout: el SG descarta el paquete en silencio (no envía rechazo). No hay reglas DENY en un SG: todo lo no permitido se descarta."
+        },
+        {
+          "id": "q3",
+          "questionEs": "Predice: con la NACL permitiendo inbound 80 pero bloqueando outbound 1024-65535, ¿funciona la página? ¿y si fuera un SG sin reglas outbound?",
+          "answerEs": "Con la NACL no funciona, porque es stateless y evalúa también la respuesta. Con un SG sí funcionaría: es stateful y permite automáticamente el tráfico de respuesta."
+        },
+        {
+          "id": "q4",
+          "questionEs": "Antes de crear el NAT: ¿en qué subnet va el NAT Gateway y qué route table apunta a él?",
+          "answerEs": "El NAT Gateway (public) va en una subnet PÚBLICA (necesita salir por el IGW). La route table de la subnet PRIVADA es la que tiene 0.0.0.0/0 → NAT."
+        },
+        {
+          "id": "q5",
+          "questionEs": "Si esta arquitectura tuviera subnets privadas en 2 AZs y un solo NAT Gateway en la AZ a, ¿qué pasa si la AZ a cae?",
+          "answerEs": "Las instancias privadas de la AZ b pierden salida a internet (y además pagas transferencia inter-AZ). Para alta disponibilidad: un NAT Gateway por AZ, con cada route table privada apuntando a su NAT local."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Borra el NAT Gateway (NAT gateways → Actions → Delete). Espera a que quede 'Deleted'."
+        },
+        {
+          "id": "c2",
+          "textEs": "Elastic IPs → selecciona la EIP del NAT → Actions → Release Elastic IP addresses (si no la liberas, sigue cobrando $0.005/h)."
+        },
+        {
+          "id": "c3",
+          "textEs": "Termina las instancias web-public y private-app."
+        },
+        {
+          "id": "c4",
+          "textEs": "Borra el EC2 Instance Connect Endpoint."
+        },
+        {
+          "id": "c5",
+          "textEs": "Opcional: conserva lab-vpc (VPC, subnets, IGW y route tables son gratis) para reutilizarla en el lab del Gateway Endpoint; si no, bórrala con Your VPCs → Actions → Delete VPC."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Subnet pública = route table con 0.0.0.0/0 → Internet Gateway. Subnet privada con salida = 0.0.0.0/0 → NAT Gateway ubicado en subnet pública.",
+        "Security Group: stateful, solo reglas allow, a nivel de ENI/instancia, puede referenciar otros SGs. NACL: stateless, allow y deny, a nivel de subnet, reglas numeradas evaluadas en orden.",
+        "Bloquear una IP específica maliciosa → NACL DENY (los SG no tienen deny).",
+        "NAT Gateway es por AZ: para HA, uno por AZ. NAT Gateway (administrado) > NAT instance (autoadministrada) en casi todos los escenarios.",
+        "Acceso SSH a instancias privadas sin bastion → EC2 Instance Connect Endpoint o Systems Manager Session Manager."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/create-vpc.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html",
+        "https://aws.amazon.com/vpc/pricing/"
+      ]
+    },
+    {
+      "id": "lab-02-s3-security-and-lifecycle",
+      "order": 2,
+      "title": "S3: bucket policy vs IAM, Block Public Access, SSE-S3 vs SSE-KMS, versioning, lifecycle, presigned URLs",
+      "titleEs": "S3: bucket policy vs IAM, Block Public Access, SSE-S3 vs SSE-KMS, versioning, lifecycle y presigned URLs",
+      "concepts": [
+        "s3-bucket-policies-block-public-access",
+        "s3-encryption-options",
+        "s3-versioning-mfa-delete",
+        "s3-lifecycle-policies",
+        "s3-storage-classes",
+        "s3-presigned-urls",
+        "resource-based-policies"
+      ],
+      "domain": "d1",
+      "minutes": 55,
+      "estimatedCostUsd": "$0 (unos pocos KB en S3; la AWS managed key aws/s3 no tiene cargo mensual)",
+      "costWarning": null,
+      "objectiveEs": "Ver con tus propios ojos las capas de control de acceso de S3 (Block Public Access, bucket policy, IAM), cómo se ve la encriptación SSE-S3 vs SSE-KMS en un objeto, cómo versioning protege contra borrados, cómo se define una lifecycle rule hacia Glacier y cómo compartir un objeto privado temporalmente con una presigned URL.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "S3 → Create bucket (General purpose), nombre único (p. ej. lab-s3-tu-nombre-2026), deja 'Block all public access' ACTIVADO y Object Ownership en 'ACLs disabled (recommended)'. Activa Bucket Versioning.",
+          "detailEs": "Por defecto todos los buckets nuevos ya encriptan con SSE-S3."
+        },
+        {
+          "id": "s2",
+          "textEs": "Sube un archivo hola.txt. Abre el objeto y copia su 'Object URL'. Ábrela en una ventana de incógnito.",
+          "detailEs": "Verás AccessDenied: por defecto todo en S3 es privado."
+        },
+        {
+          "id": "s3",
+          "textEs": "Genera una presigned URL: selecciona el objeto → Object actions → 'Share with a presigned URL' → 5 minutos. Ábrela en incógnito.",
+          "detailEs": "Alternativa desde CloudShell: aws s3 presign s3://TU-BUCKET/hola.txt --expires-in 300"
+        },
+        {
+          "id": "s4",
+          "textEs": "Intenta hacerlo público: bucket → Permissions → Bucket policy → pega una policy que permita s3:GetObject a Principal '*' sobre arn:aws:s3:::TU-BUCKET/*. Guarda.",
+          "detailEs": "Deberías recibir un error de acceso: Block Public Access impide guardar policies que den acceso público. No desactives BPA a nivel de cuenta."
+        },
+        {
+          "id": "s5",
+          "textEs": "Ahora demuestra que una bucket policy puede DENEGAR incluso a un administrador: agrega una policy con Effect Deny, Principal '*', Action s3:GetObject, Resource arn:aws:s3:::TU-BUCKET/secreto/*. Sube secreto/nota.txt e intenta abrirla/descargarla desde la consola.",
+          "detailEs": "Tu role AdministratorAccess (IAM) permite s3:*, pero el Deny explícito en la resource policy gana. Después borra la policy para poder limpiar."
+        },
+        {
+          "id": "s6",
+          "textEs": "Encriptación: sube kms.txt y en Properties → Server-side encryption elige 'SSE-KMS' con la AWS managed key (aws/s3). Compara las propiedades de hola.txt y kms.txt.",
+          "detailEs": "La AWS managed key aws/s3 no tiene cargo mensual; una customer managed key (CMK) cuesta ~$1/mes y te da control de la key policy y rotación."
+        },
+        {
+          "id": "s7",
+          "textEs": "Versioning: sube otra versión de hola.txt con contenido distinto. Activa el toggle 'Show versions'. Luego borra hola.txt (sin 'Show versions').",
+          "detailEs": "Con 'Show versions' verás un 'Delete marker' encima de las versiones anteriores."
+        },
+        {
+          "id": "s8",
+          "textEs": "Recupera el archivo borrando el Delete marker (con 'Show versions' activado, selecciona el delete marker → Delete).",
+          "detailEs": null
+        },
+        {
+          "id": "s9",
+          "textEs": "Management → Create lifecycle rule: aplica a todo el bucket; 'Transition current versions' a Standard-IA a los 30 días y a Glacier Flexible Retrieval a los 90; 'Transition noncurrent versions' a Glacier Deep Archive a los 30 días; 'Permanently delete noncurrent versions' a los 365 días.",
+          "detailEs": "No esperarás a que ocurra: el objetivo es leer y entender las restricciones que muestra la consola (mínimos de días por clase). Nota: por defecto S3 no transiciona objetos menores de 128 KB."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Predice: ¿la presigned URL funciona en incógnito si el bucket tiene Block Public Access activado? ¿por qué?",
+          "answerEs": "Sí. La presigned URL no es acceso público: va firmada con las credenciales de quien la generó y hereda sus permisos (y expira). BPA bloquea policies/ACLs públicas, no las firmas."
+        },
+        {
+          "id": "q2",
+          "questionEs": "Predice: con un Allow total en IAM y un Deny explícito en la bucket policy, ¿puedes leer secreto/nota.txt?",
+          "answerEs": "No. En la evaluación de políticas de AWS, un Deny explícito en cualquier política aplicable siempre gana sobre cualquier Allow."
+        },
+        {
+          "id": "q3",
+          "questionEs": "¿Por qué un auditor pediría SSE-KMS en vez de SSE-S3?",
+          "answerEs": "SSE-KMS registra el uso de la key en CloudTrail (quién desencripta y cuándo), permite control de acceso separado vía key policy y rotación controlada. SSE-S3 es transparente y sin auditoría por key. Ojo: SSE-KMS tiene cuotas de requests a KMS (mitigable con S3 Bucket Keys)."
+        },
+        {
+          "id": "q4",
+          "questionEs": "Antes de borrar hola.txt con versioning activo: ¿se pierden los datos? ¿qué crea S3?",
+          "answerEs": "No se pierden: S3 crea un delete marker como versión actual; las versiones previas quedan como noncurrent. Borrar el delete marker 'restaura' el objeto."
+        },
+        {
+          "id": "q5",
+          "questionEs": "¿Por qué una lifecycle rule no te deja pasar a Standard-IA antes de 30 días?",
+          "answerEs": "Standard-IA (y One Zone-IA) tienen una duración mínima de almacenamiento de 30 días y S3 exige al menos 30 días en Standard antes de transicionar a IA. Glacier Flexible Retrieval cobra mínimo 90 días y Deep Archive 180."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Borra la bucket policy si queda alguna."
+        },
+        {
+          "id": "c2",
+          "textEs": "Vacía el bucket (botón Empty: borra todas las versiones y delete markers) y luego Delete bucket."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Acceso a S3 = unión de IAM policies y bucket policy, pero cualquier Deny explícito gana. Acceso cross-account a un bucket → bucket policy (resource-based).",
+        "Compartir un objeto privado temporalmente sin hacerlo público → presigned URL (con los permisos de quien la firma).",
+        "SSE-S3 = simple, sin costo extra. SSE-KMS = auditoría en CloudTrail y control por key policy. SSE-C = tú das la key. Encriptación en cliente = antes de subir.",
+        "Protección contra borrados accidentales → Versioning (+ MFA Delete); retención WORM regulatoria → S3 Object Lock (compliance mode).",
+        "Datos poco accedidos → lifecycle a Standard-IA / Glacier; patrón de acceso desconocido → S3 Intelligent-Tiering."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html"
+      ]
+    },
+    {
+      "id": "lab-03-s3-gateway-endpoint",
+      "order": 3,
+      "title": "S3 Gateway VPC endpoint from a private subnet (no NAT)",
+      "titleEs": "Gateway VPC endpoint para S3 desde una subnet privada (sin NAT)",
+      "concepts": [
+        "vpc-endpoints-gateway-vs-interface",
+        "vpc-endpoint-policies",
+        "nat-cost-vpc-endpoints",
+        "iam-roles-for-ec2-and-services",
+        "data-transfer-costs"
+      ],
+      "domain": "d4",
+      "minutes": 40,
+      "estimatedCostUsd": "$0 (el Gateway endpoint es gratis; EC2 t3.micro dentro de Free Tier/créditos)",
+      "costWarning": null,
+      "objectiveEs": "Demostrar que una instancia en subnet privada, SIN NAT Gateway y SIN internet, puede leer S3 usando un Gateway VPC endpoint gratuito, y entender cuándo usar Gateway endpoint vs Interface endpoint (PrivateLink).",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "Reutiliza lab-vpc del Lab 1 (o créala de nuevo: VPC + lab-private-a sin ruta a internet). Verifica que NO exista ningún NAT Gateway y que la route table de la subnet privada solo tenga la ruta local.",
+          "detailEs": null
+        },
+        {
+          "id": "s2",
+          "textEs": "IAM → Roles → Create role → Trusted entity 'AWS service' → Use case 'EC2' → policy AmazonS3ReadOnlyAccess → nombre ec2-s3-readonly.",
+          "detailEs": "Al crear un role para EC2 desde la consola, IAM crea automáticamente el instance profile con el mismo nombre."
+        },
+        {
+          "id": "s3",
+          "textEs": "Crea un bucket de prueba y sube un archivo (o reutiliza uno). Anota el nombre del bucket y la Region.",
+          "detailEs": null
+        },
+        {
+          "id": "s4",
+          "textEs": "Lanza private-app en lab-private-a (sin IP pública) con IAM instance profile ec2-s3-readonly. Crea (o reutiliza) el EC2 Instance Connect Endpoint para entrar.",
+          "detailEs": null
+        },
+        {
+          "id": "s5",
+          "textEs": "Dentro de la instancia ejecuta: aws s3 ls s3://TU-BUCKET --region us-east-1 --cli-read-timeout 10 --cli-connect-timeout 10",
+          "detailEs": "Debe fallar por timeout: no hay ruta hacia el endpoint público de S3."
+        },
+        {
+          "id": "s6",
+          "textEs": "VPC → Endpoints → Create endpoint → categoría 'AWS services' → busca el servicio com.amazonaws.us-east-1.s3 con Type 'Gateway' → VPC lab-vpc → marca la route table de la subnet privada → Policy 'Full access'.",
+          "detailEs": "Cuidado: aparecen dos servicios S3, uno Gateway y otro Interface. Elige Gateway."
+        },
+        {
+          "id": "s7",
+          "textEs": "Ve a la route table privada y mira las rutas nuevas.",
+          "detailEs": "Verás una ruta con destino un prefix list (pl-xxxx, com.amazonaws.us-east-1.s3) → target vpce-xxxx."
+        },
+        {
+          "id": "s8",
+          "textEs": "Repite el aws s3 ls. Luego prueba curl -m 5 https://checkip.amazonaws.com.",
+          "detailEs": "S3 funciona; internet general sigue sin funcionar."
+        },
+        {
+          "id": "s9",
+          "textEs": "Opcional: edita la endpoint policy para permitir s3:GetObject/ListBucket solo sobre TU bucket, y prueba listar otro bucket.",
+          "detailEs": "Endpoint policy = otra capa de control: restringe qué se puede hacer a través del endpoint, además de IAM y bucket policy."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Predice antes de crear el endpoint: ¿el aws s3 ls falla por permisos (AccessDenied) o por red (timeout)? ¿por qué?",
+          "answerEs": "Por red (timeout). El role sí tiene permisos, pero la instancia no tiene ruta hacia la IP pública de S3."
+        },
+        {
+          "id": "q2",
+          "questionEs": "¿Por qué el Gateway endpoint no necesita Security Group y un Interface endpoint sí?",
+          "answerEs": "El Gateway endpoint es un target en la route table (no crea ENIs). El Interface endpoint crea ENIs con IP privada en tus subnets, a las que se aplican Security Groups."
+        },
+        {
+          "id": "q3",
+          "questionEs": "Una empresa descarga TB de S3 desde instancias privadas y paga mucho en NAT Gateway. ¿Cuál es la solución más costo-efectiva?",
+          "answerEs": "Un Gateway VPC endpoint para S3: sin cargo por hora ni por GB y el tráfico deja de pasar por el NAT (que cobra por GB procesado)."
+        },
+        {
+          "id": "q4",
+          "questionEs": "¿Qué servicios soportan Gateway endpoint? Si necesitas acceder a S3 privadamente desde on-premises por Direct Connect/VPN, ¿sirve un Gateway endpoint?",
+          "answerEs": "Solo S3 y DynamoDB. Desde on-premises no sirve el Gateway endpoint (no es alcanzable fuera de la VPC); necesitas un Interface endpoint (PrivateLink) para S3."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Termina la instancia private-app y borra el EC2 Instance Connect Endpoint."
+        },
+        {
+          "id": "c2",
+          "textEs": "Borra el Gateway endpoint (gratis, pero mantén limpio el entorno)."
+        },
+        {
+          "id": "c3",
+          "textEs": "Vacía y borra el bucket de prueba si no lo necesitas."
+        },
+        {
+          "id": "c4",
+          "textEs": "Si ya no usarás lab-vpc, bórrala (Delete VPC borra subnets, IGW y route tables asociadas)."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Acceso privado a S3/DynamoDB desde una VPC sin internet → Gateway VPC endpoint (gratis, vía route table).",
+        "Otros servicios AWS privados, o S3 desde on-premises/otra Region → Interface endpoint (PrivateLink, con ENI, SG y costo por hora/GB).",
+        "Reducir costo de NAT Gateway por tráfico a S3 → Gateway endpoint.",
+        "Endpoint policy + condición aws:SourceVpce en la bucket policy = bucket accesible solo desde tu VPC."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html",
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies-vpc-endpoint.html"
+      ]
+    },
+    {
+      "id": "lab-04-alb-asg-target-tracking",
+      "order": 4,
+      "title": "ALB + Auto Scaling group across 2 AZs with target tracking",
+      "titleEs": "ALB + Auto Scaling group en 2 AZs con target tracking",
+      "concepts": [
+        "elb-types-overview",
+        "alb-routing",
+        "ec2-auto-scaling-groups",
+        "auto-scaling-policies",
+        "asg-health-checks-lifecycle-hooks",
+        "multi-az-high-availability"
+      ],
+      "domain": "d2",
+      "minutes": 60,
+      "estimatedCostUsd": "≈ $0.10–0.20 (ALB ~1 h + 2–3 t3.micro + IPv4 públicas)",
+      "costWarning": "El ALB cuesta ≈ $0.0225/hora + LCU (us-east-1). Cada instancia con IPv4 pública suma $0.005/hora. Si lo dejas encendido un mes serían ~$20+. Borra el ASG y el ALB al terminar.",
+      "objectiveEs": "Montar la arquitectura web altamente disponible más típica del examen: Application Load Balancer en 2 AZs delante de un Auto Scaling group con launch template, ver cómo el ASG reemplaza una instancia no sana y cómo escala con una target tracking policy.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "Usa la default VPC (tiene subnets públicas en cada AZ) para ahorrar tiempo. Crea dos Security Groups: sg-alb (inbound HTTP 80 desde 0.0.0.0/0) y sg-app (inbound HTTP 80 SOLO desde sg-alb).",
+          "detailEs": "Referenciar un SG como origen (SG chaining) es el patrón que el examen espera: las instancias solo aceptan tráfico del ALB."
+        },
+        {
+          "id": "s2",
+          "textEs": "EC2 → Launch Templates → Create launch template: Amazon Linux 2023, t3.micro, SG sg-app, y en User data un script que instale httpd y escriba el hostname/AZ en index.html.",
+          "detailEs": "Ejemplo de user data: #!/bin/bash · dnf install -y httpd stress-ng · TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 60') · AZ=$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/placement/availability-zone) · echo \"<h1>$(hostname) en $AZ</h1>\" > /var/www/html/index.html · systemctl enable --now httpd (cada · es un salto de línea). Si stress-ng no estuviera en el repositorio, usa el comando yes > /dev/null para cargar CPU."
+        },
+        {
+          "id": "s3",
+          "textEs": "EC2 → Target Groups → Create target group: tipo Instances, HTTP 80, health check path /. No registres instancias (lo hará el ASG).",
+          "detailEs": null
+        },
+        {
+          "id": "s4",
+          "textEs": "EC2 → Load Balancers → Create load balancer → Application Load Balancer: internet-facing, 2 subnets públicas en AZs distintas, SG sg-alb, listener HTTP 80 → forward al target group.",
+          "detailEs": null
+        },
+        {
+          "id": "s5",
+          "textEs": "EC2 → Auto Scaling Groups → Create: usa el launch template, 2 subnets en AZs distintas, 'Attach to an existing load balancer' → tu target group, activa 'Turn on Elastic Load Balancing health checks'. Capacidad desired 2, min 2, max 4.",
+          "detailEs": "Scaling policy: Target tracking, métrica 'Average CPU utilization', target 40%."
+        },
+        {
+          "id": "s6",
+          "textEs": "Cuando los targets estén 'healthy', abre el DNS name del ALB y recarga varias veces.",
+          "detailEs": "Deberías ver alternar hostnames/AZs distintas."
+        },
+        {
+          "id": "s7",
+          "textEs": "Simula una falla: conéctate a una instancia (EC2 Instance Connect) y ejecuta sudo systemctl stop httpd. Observa el target group y la pestaña Activity del ASG.",
+          "detailEs": "Con ELB health checks activados, el ASG marca la instancia como unhealthy y la reemplaza. Puede tardar unos minutos."
+        },
+        {
+          "id": "s8",
+          "textEs": "Genera carga: en una instancia ejecuta stress-ng --cpu 2 --timeout 600 (o yes > /dev/null &). Observa CloudWatch alarms (TargetTracking-...) y la Activity del ASG.",
+          "detailEs": "La target tracking crea sus propias alarmas CloudWatch. El scale-out suele tardar varios minutos (métricas de 5 min por defecto); si no llegas a verlo, revisa las alarmas creadas y predice qué harían."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Predice: si el ASG usa solo EC2 health checks (default) y detienes httpd, ¿reemplaza la instancia?",
+          "answerEs": "No. El EC2 health check solo mira el estado de la instancia (running/status checks). La instancia sigue 'running' aunque la app esté caída; el ALB la saca de rotación pero el ASG no la reemplaza. Por eso se activan ELB health checks en el ASG."
+        },
+        {
+          "id": "q2",
+          "questionEs": "¿Por qué sg-app permite HTTP desde sg-alb y no desde 0.0.0.0/0?",
+          "answerEs": "Para que las instancias solo sean alcanzables a través del ALB (defensa en profundidad), aunque tengan IP pública. En producción además irían en subnets privadas."
+        },
+        {
+          "id": "q3",
+          "questionEs": "Predice: si una AZ entera cae, ¿qué hacen el ALB y el ASG?",
+          "answerEs": "El ALB deja de enviar tráfico a los targets no sanos de esa AZ; el ASG lanza instancias de reemplazo en las AZs restantes para mantener la capacidad deseada."
+        },
+        {
+          "id": "q4",
+          "questionEs": "Target tracking vs step scaling vs scheduled scaling: ¿cuál usarías para 'mantener CPU al 50%', para 'picos conocidos cada lunes 9am' y para 'escalar más agresivo cuanto mayor sea la alarma'?",
+          "answerEs": "Target tracking; scheduled scaling (o predictive scaling); step scaling."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Borra el Auto Scaling group (termina sus instancias automáticamente). Espera a que desaparezcan las instancias."
+        },
+        {
+          "id": "c2",
+          "textEs": "Borra el Load Balancer y luego el Target Group."
+        },
+        {
+          "id": "c3",
+          "textEs": "Borra el launch template y los SGs sg-alb y sg-app (opcional, son gratis)."
+        },
+        {
+          "id": "c4",
+          "textEs": "Verifica en EC2 → Instances que no quedó nada 'running'."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Alta disponibilidad web = ALB + ASG en múltiples AZs (mínimo 2).",
+        "Activa ELB health checks en el ASG para reemplazar instancias cuya aplicación falla.",
+        "ALB = capa 7 (rutas por path/host, HTTP/HTTPS, WebSockets); NLB = capa 4, IP estática, latencia ultra baja, TCP/UDP; GWLB = appliances de terceros.",
+        "Target tracking = mantener una métrica en un valor (la opción de 'least operational overhead'); scheduled = patrones conocidos; predictive = patrones recurrentes con ML.",
+        "Instancias solo accesibles desde el ALB → SG de la app con origen = SG del ALB."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/tutorial-ec2-auto-scaling-load-balancer.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html",
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html",
+        "https://aws.amazon.com/elasticloadbalancing/pricing/"
+      ]
+    },
+    {
+      "id": "lab-05-rds-multi-az-vs-read-replica",
+      "order": 5,
+      "title": "RDS Multi-AZ vs read replica: endpoints and failover",
+      "titleEs": "RDS Multi-AZ vs read replica: endpoints y failover",
+      "concepts": [
+        "rds-multi-az",
+        "rds-read-replicas",
+        "rds-backups-pitr",
+        "aurora-replicas-endpoints",
+        "rds-fundamentals"
+      ],
+      "domain": "d2",
+      "minutes": 60,
+      "estimatedCostUsd": "≈ $0.10–0.25 (db.t4g.micro Multi-AZ + réplica ~1 h + storage prorrateado)",
+      "costWarning": "Multi-AZ NO es Free Tier: db.t4g.micro MySQL cuesta ≈ $0.016/hora por instancia en us-east-1, así que Multi-AZ ≈ $0.032/h y la read replica suma otros ≈ $0.016/h, más storage (20 GB gp3 prorrateado). Si lo olvidas un mes: ~$35. Borra réplica e instancia al terminar, sin snapshot final.",
+      "objectiveEs": "Distinguir en vivo los dos conceptos de RDS que más se confunden: Multi-AZ (standby síncrono para alta disponibilidad, mismo endpoint, no sirve lecturas) vs read replica (copia asíncrona con su propio endpoint para escalar lecturas). Forzarás un failover y verás que el endpoint no cambia pero la IP sí.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "RDS → Create database → Standard create → MySQL. Template: 'Dev/Test' (el template Free tier bloquea Multi-AZ).",
+          "detailEs": "Aurora Serverless no es más barato para este lab y su HA funciona distinto; se discute en la pregunta de cierre."
+        },
+        {
+          "id": "s2",
+          "textEs": "Availability and durability: 'Multi-AZ DB instance deployment (2 instances)'. Clase db.t4g.micro (Burstable), storage gp3 20 GB, desactiva storage autoscaling.",
+          "detailEs": "No confundir con 'Multi-AZ DB cluster deployment (3 instances)', que usa 2 standbys legibles y es más caro."
+        },
+        {
+          "id": "s3",
+          "textEs": "Credenciales: usuario admin y contraseña propia (o 'Managed in AWS Secrets Manager', que cuesta ~$0.40/mes prorrateado). Public access: No. Desactiva Enhanced Monitoring y Performance Insights para no sumar costos. Backup retention: 1 día (necesario para crear read replicas).",
+          "detailEs": "Crear tarda ~10–20 min. Mientras esperas, responde las preguntas q1 y q2."
+        },
+        {
+          "id": "s4",
+          "textEs": "Cuando esté 'Available', abre la pestaña Connectivity & security: anota el Endpoint y la AZ primaria. En Configuration verás la Secondary Zone.",
+          "detailEs": null
+        },
+        {
+          "id": "s5",
+          "textEs": "En CloudShell ejecuta: nslookup TU-ENDPOINT (o dig +short TU-ENDPOINT). Anota la IP privada.",
+          "detailEs": "CloudShell resuelve el DNS aunque no pueda conectarse a la base (la base no es pública)."
+        },
+        {
+          "id": "s6",
+          "textEs": "Actions → Create read replica: misma clase db.t4g.micro, Single-AZ. Mientras se crea, continúa.",
+          "detailEs": "Una read replica puede estar en otra AZ o incluso en otra Region (cross-Region read replica)."
+        },
+        {
+          "id": "s7",
+          "textEs": "Fuerza un failover: selecciona la instancia primaria → Actions → Reboot → marca 'Reboot with failover'. Mira la pestaña Logs & events → Recent events.",
+          "detailEs": "Verás eventos del tipo 'Multi-AZ instance failover started/completed'. Suele tardar 1–2 minutos."
+        },
+        {
+          "id": "s8",
+          "textEs": "Repite nslookup sobre el MISMO endpoint. Compara IP y la AZ primaria que ahora muestra la consola.",
+          "detailEs": null
+        },
+        {
+          "id": "s9",
+          "textEs": "Cuando la réplica esté 'Available', compara su endpoint con el de la primaria. Observa también la opción Actions → Promote en la réplica (no la ejecutes, solo lee qué hace).",
+          "detailEs": null
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Antes de crear: ¿el standby de Multi-AZ DB instance puede atender lecturas para descargar a la primaria?",
+          "answerEs": "No. En Multi-AZ DB instance el standby no es accesible; solo existe para failover. Para escalar lecturas se usan read replicas (o un Multi-AZ DB cluster, cuyos standbys sí son legibles)."
+        },
+        {
+          "id": "q2",
+          "questionEs": "¿La replicación a Multi-AZ es síncrona o asíncrona? ¿y a una read replica?",
+          "answerEs": "Multi-AZ: síncrona (sin pérdida de datos commiteados en failover). Read replica: asíncrona (puede haber replica lag)."
+        },
+        {
+          "id": "q3",
+          "questionEs": "Predice antes del reboot con failover: después del failover, ¿la aplicación debe cambiar su connection string?",
+          "answerEs": "No. El endpoint DNS se mantiene y RDS lo actualiza para apuntar al nuevo primario (por eso cambia la IP en nslookup). La app solo necesita reconectar, y no cachear el DNS por mucho tiempo."
+        },
+        {
+          "id": "q4",
+          "questionEs": "Un reporte pesado ralentiza la base de producción. ¿Multi-AZ o read replica? ¿y si el requisito es sobrevivir a la caída de una AZ con failover automático?",
+          "answerEs": "Reportes → read replica (la app de reportes usa el endpoint de la réplica). Caída de AZ con failover automático → Multi-AZ."
+        },
+        {
+          "id": "q5",
+          "questionEs": "¿Qué ofrece Aurora distinto a esto?",
+          "answerEs": "Aurora replica el storage 6 veces en 3 AZs; sus Aurora Replicas (hasta 15) sirven lecturas Y son objetivos de failover; tiene reader endpoint con balanceo; Global Database para DR cross-Region con RPO ~1 s; Aurora Serverless v2 escala capacidad automáticamente."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Borra primero la read replica (Actions → Delete)."
+        },
+        {
+          "id": "c2",
+          "textEs": "Borra la instancia primaria: desmarca 'Create final snapshot' y 'Retain automated backups', y confirma."
+        },
+        {
+          "id": "c3",
+          "textEs": "Verifica en RDS → Snapshots que no quedaron snapshots manuales (cobran storage)."
+        },
+        {
+          "id": "c4",
+          "textEs": "Si elegiste Secrets Manager para la contraseña, el secreto se programa para borrarse; si no, bórralo en Secrets Manager."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Multi-AZ = alta disponibilidad (síncrono, failover automático, mismo endpoint); NO escala lecturas (en Multi-AZ DB instance).",
+        "Read replicas = escalar lecturas (asíncrono, endpoint propio); se pueden promover manualmente; pueden ser cross-Region (útil para DR).",
+        "Failover de Multi-AZ = cambio de DNS del mismo endpoint, ~1–2 min.",
+        "Requisito de mínimo tiempo de failover y muchas réplicas de lectura → Aurora; carga impredecible → Aurora Serverless v2.",
+        "Para crear read replicas se necesitan automated backups habilitados en la instancia origen."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RebootInstance.html",
+        "https://aws.amazon.com/rds/mysql/pricing/"
+      ]
+    },
+    {
+      "id": "lab-06-sns-sqs-fanout-lambda-dlq",
+      "order": 6,
+      "title": "SNS → SQS fan-out, Lambda consumer and dead-letter queue",
+      "titleEs": "Fan-out SNS → SQS, consumidor Lambda y dead-letter queue",
+      "concepts": [
+        "sqs-standard-vs-fifo",
+        "sns-pub-sub-fanout",
+        "sqs-visibility-timeout-dlq",
+        "lambda-fundamentals",
+        "loose-coupling-principles",
+        "event-driven-architecture"
+      ],
+      "domain": "d2",
+      "minutes": 50,
+      "estimatedCostUsd": "$0 (SQS, SNS y Lambda tienen niveles gratuitos permanentes que cubren este lab)",
+      "costWarning": null,
+      "objectiveEs": "Construir el patrón de desacoplamiento más preguntado: un topic SNS que publica a dos colas SQS (fan-out), una de ellas consumida por Lambda, con una dead-letter queue que captura los mensajes que fallan repetidamente.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "SQS → Create queue (Standard): orders-dlq (deja los valores por defecto).",
+          "detailEs": null
+        },
+        {
+          "id": "s2",
+          "textEs": "Crea orders-processing (Standard): Visibility timeout 60 s. En 'Dead-letter queue' → Enabled → orders-dlq, Maximum receives 3.",
+          "detailEs": "AWS recomienda maxReceiveCount ≥ 5 en producción con Lambda; aquí usas 3 para ver el efecto más rápido."
+        },
+        {
+          "id": "s3",
+          "textEs": "Crea orders-analytics (Standard) sin DLQ.",
+          "detailEs": null
+        },
+        {
+          "id": "s4",
+          "textEs": "SNS → Topics → Create topic (Standard): orders-topic.",
+          "detailEs": null
+        },
+        {
+          "id": "s5",
+          "textEs": "Suscribe las dos colas: en SQS abre cada cola → botón 'Subscribe to Amazon SNS topic' → orders-topic.",
+          "detailEs": "Hacerlo desde la consola de SQS agrega automáticamente la access policy de la cola que permite a SNS enviar mensajes."
+        },
+        {
+          "id": "s6",
+          "textEs": "Lambda → Create function: orders-worker, Python 3.x (la versión más reciente disponible), timeout 10 s. Código: def lambda_handler(event, context): recorre event['Records'], imprime record['body'] y si el texto 'FAIL' aparece en el body hace raise Exception('pedido inválido').",
+          "detailEs": null
+        },
+        {
+          "id": "s7",
+          "textEs": "Configuration → Permissions → abre el execution role → Add permissions → Attach policies → AWSLambdaSQSQueueExecutionRole.",
+          "detailEs": "Sin este permiso el trigger falla al crearse: Lambda necesita ReceiveMessage/DeleteMessage/GetQueueAttributes sobre la cola."
+        },
+        {
+          "id": "s8",
+          "textEs": "En la función: Add trigger → SQS → orders-processing, batch size 1.",
+          "detailEs": "Lambda valida que el timeout de la función (10 s) sea ≤ visibility timeout de la cola (60 s). AWS recomienda visibility timeout ≥ 6× el timeout de la función."
+        },
+        {
+          "id": "s9",
+          "textEs": "SNS → orders-topic → Publish message: body 'pedido 1 OK'. Revisa CloudWatch Logs de la función (Monitor → View CloudWatch logs) y en SQS usa 'Send and receive messages' → Poll for messages sobre orders-analytics.",
+          "detailEs": "Por defecto el mensaje que llega a SQS viene envuelto en JSON de SNS. Puedes activar 'raw message delivery' en la suscripción para recibir solo el body."
+        },
+        {
+          "id": "s10",
+          "textEs": "Publica 'pedido 2 FAIL'. Espera ~3–4 minutos y mira el contador 'Messages available' de orders-dlq. Haz Poll sobre la DLQ.",
+          "detailEs": "Opcional: en orders-dlq usa 'Start DLQ redrive' para devolver el mensaje a la cola origen."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Predice: al publicar 1 mensaje en SNS, ¿cuántas copias existen en total en SQS? ¿quién las consume?",
+          "answerEs": "Dos: una en orders-processing (la consume Lambda) y una en orders-analytics (queda esperando a que alguien la lea). Eso es fan-out: cada suscriptor recibe su copia independiente."
+        },
+        {
+          "id": "q2",
+          "questionEs": "Predice con el mensaje FAIL: ¿cuántas veces se ejecuta Lambda antes de que el mensaje llegue a la DLQ y cuánto tarda aproximadamente?",
+          "answerEs": "3 veces (maxReceiveCount = 3). Entre intentos el mensaje queda invisible durante el visibility timeout (60 s), así que tarda ~2–3 minutos en moverse a la DLQ."
+        },
+        {
+          "id": "q3",
+          "questionEs": "¿Qué pasaría si el visibility timeout fuera menor que el tiempo que tarda Lambda en procesar?",
+          "answerEs": "El mensaje volvería a ser visible mientras aún se procesa y otro consumidor lo tomaría: procesamiento duplicado. Por eso visibility timeout ≥ tiempo de procesamiento (Lambda incluso lo valida)."
+        },
+        {
+          "id": "q4",
+          "questionEs": "Si necesitas orden estricto y exactamente-una-vez, ¿qué cambias?",
+          "answerEs": "SQS FIFO (con message group ID y deduplicación) y, para fan-out, SNS FIFO topic. FIFO tiene menor throughput que Standard (aunque con high throughput mode es alto)."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Borra la función Lambda (el trigger se elimina con ella) y su log group en CloudWatch Logs."
+        },
+        {
+          "id": "c2",
+          "textEs": "Borra el topic SNS (sus suscripciones se eliminan)."
+        },
+        {
+          "id": "c3",
+          "textEs": "Borra las tres colas SQS."
+        },
+        {
+          "id": "c4",
+          "textEs": "Opcional: borra el execution role de Lambda en IAM."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Desacoplar componentes / absorber picos → SQS. Un evento a múltiples consumidores → SNS fan-out a varias SQS (o EventBridge para ruteo por reglas).",
+        "Mensajes que fallan repetidamente → dead-letter queue (maxReceiveCount); se pueden reprocesar con DLQ redrive.",
+        "Visibility timeout ≥ tiempo de procesamiento (Lambda: ≥ 6× el timeout recomendado).",
+        "Orden estricto / sin duplicados → SQS FIFO. Standard = at-least-once, orden best-effort, throughput casi ilimitado.",
+        "Streaming en tiempo real con múltiples consumidores y replay → Kinesis Data Streams, no SQS."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html"
+      ]
+    },
+    {
+      "id": "lab-07-iam-roles-instance-profile-assumerole",
+      "order": 7,
+      "title": "IAM roles: EC2 instance profile and AssumeRole with a trust policy",
+      "titleEs": "IAM roles: instance profile de EC2 y AssumeRole con trust policy",
+      "concepts": [
+        "iam-roles-for-ec2-and-services",
+        "sts-assume-role-cross-account",
+        "resource-based-policies",
+        "iam-policy-evaluation-logic",
+        "iam-policy-conditions"
+      ],
+      "domain": "d1",
+      "minutes": 45,
+      "estimatedCostUsd": "$0 (IAM y STS son gratis; t3.micro dentro de Free Tier/créditos)",
+      "costWarning": null,
+      "objectiveEs": "Entender los dos lados de un role: la trust policy (QUIÉN puede asumirlo) y la permissions policy (QUÉ puede hacer). Lo verás con un instance profile de EC2 (sin access keys en el servidor) y simulando acceso cross-account con sts:AssumeRole y un External ID dentro de tu propia cuenta.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "Lanza una instancia t3.micro Amazon Linux 2023 en la default VPC, SIN IAM role. Conéctate con EC2 Instance Connect y ejecuta aws sts get-caller-identity y aws s3 ls.",
+          "detailEs": "Debe fallar con 'Unable to locate credentials'."
+        },
+        {
+          "id": "s2",
+          "textEs": "Crea (o reutiliza del Lab 3) el role ec2-s3-readonly: Trusted entity 'AWS service' → EC2, policy AmazonS3ReadOnlyAccess. Abre la pestaña 'Trust relationships' y lee la trust policy.",
+          "detailEs": "Verás Principal Service ec2.amazonaws.com y Action sts:AssumeRole."
+        },
+        {
+          "id": "s3",
+          "textEs": "EC2 → instancia → Actions → Security → Modify IAM role → ec2-s3-readonly. Repite los comandos en la instancia (espera unos segundos).",
+          "detailEs": "Ahora get-caller-identity devuelve assumed-role/ec2-s3-readonly/i-xxxx. Las credenciales son temporales y rotan solas vía el Instance Metadata Service."
+        },
+        {
+          "id": "s4",
+          "textEs": "Simulación cross-account: IAM → Roles → Create role → Trusted entity 'AWS account' → 'This account' (en un escenario real sería 'Another AWS account' con el ID de la otra cuenta) → marca 'Require external ID' con un valor, p. ej. lab-ext-123 → policy AmazonS3ReadOnlyAccess → nombre partner-readonly.",
+          "detailEs": "Lee la trust policy generada: Principal AWS arn:aws:iam::TU-CUENTA:root y una Condition sts:ExternalId."
+        },
+        {
+          "id": "s5",
+          "textEs": "En CloudShell (con tu usuario de Identity Center) ejecuta: aws sts assume-role --role-arn arn:aws:iam::TU-CUENTA:role/partner-readonly --role-session-name prueba",
+          "detailEs": "Debe fallar con AccessDenied porque falta el External ID."
+        },
+        {
+          "id": "s6",
+          "textEs": "Repite agregando --external-id lab-ext-123. Copia AccessKeyId, SecretAccessKey y SessionToken de la respuesta y expórtalos como AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY y AWS_SESSION_TOKEN. Ejecuta aws sts get-caller-identity, aws s3 ls y luego aws s3 mb s3://algun-nombre-unico-xyz.",
+          "detailEs": "La lectura funciona; la creación de bucket falla: ahora operas con los permisos del role, no con los tuyos."
+        },
+        {
+          "id": "s7",
+          "textEs": "Ejecuta unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN para volver a tu identidad.",
+          "detailEs": null
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Predice: al adjuntar el role a la instancia ya encendida, ¿necesitas reiniciarla o guardar access keys en ~/.aws/credentials?",
+          "answerEs": "Ninguna de las dos. El SDK/CLI obtiene credenciales temporales del Instance Metadata Service automáticamente, y el role se puede asociar/cambiar en caliente."
+        },
+        {
+          "id": "q2",
+          "questionEs": "En la trust policy de partner-readonly el Principal es la cuenta entera (…:root). ¿Significa que cualquier usuario de esa cuenta puede asumir el role?",
+          "answerEs": "No automáticamente. Confiar en la cuenta delega la decisión a esa cuenta: además, la identidad que llama necesita permiso sts:AssumeRole en su propia IAM policy (tu AdministratorAccess lo tiene). Hacen falta ambos lados."
+        },
+        {
+          "id": "q3",
+          "questionEs": "Predice: con el role asumido, ¿aws s3 mb funciona? Tu usuario original es administrador.",
+          "answerEs": "No. Al asumir un role, los permisos efectivos son SOLO los del role (más session policies si las hubiera); no se suman los tuyos."
+        },
+        {
+          "id": "q4",
+          "questionEs": "¿Para qué sirve el External ID y en qué escenario del examen aparece?",
+          "answerEs": "Evita el problema del 'confused deputy' cuando un tercero (p. ej. un SaaS) asume roles en cuentas de muchos clientes: cada cliente exige un External ID único en su trust policy."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Termina la instancia EC2."
+        },
+        {
+          "id": "c2",
+          "textEs": "Borra los roles partner-readonly y ec2-s3-readonly en IAM (este último solo si ya no lo usarás)."
+        },
+        {
+          "id": "c3",
+          "textEs": "Si creaste un bucket de prueba en el paso de mb con tu identidad, bórralo."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Aplicación en EC2 que necesita acceder a AWS → IAM role vía instance profile. Nunca access keys en la instancia o en el código.",
+        "Role = trust policy (quién puede asumirlo) + permissions policy (qué puede hacer).",
+        "Acceso cross-account → role en la cuenta destino que confía en la cuenta origen + permiso sts:AssumeRole en la origen. Terceros → agregar External ID.",
+        "Al asumir un role, pierdes temporalmente tus permisos originales y usas solo los del role.",
+        "Límites máximos para toda una cuenta/OU de AWS Organizations → SCPs (no otorgan permisos, solo limitan)."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html",
+        "https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html"
+      ]
+    },
+    {
+      "id": "lab-08-cloudfront-s3-oac",
+      "order": 8,
+      "title": "CloudFront in front of a private S3 bucket with Origin Access Control (OAC)",
+      "titleEs": "CloudFront delante de un bucket S3 privado con Origin Access Control (OAC)",
+      "concepts": [
+        "cloudfront-fundamentals",
+        "cloudfront-oac-s3",
+        "s3-bucket-policies-block-public-access",
+        "cdn-edge-caching-cost"
+      ],
+      "domain": "d3",
+      "minutes": 45,
+      "estimatedCostUsd": "$0 (CloudFront incluye 1 TB/mes y 10 M requests en su nivel gratuito permanente; S3 unos KB)",
+      "costWarning": "Si la consola te ofrece elegir un plan de precios (planes flat-rate vs pay-as-you-go), elige la opción sin cargo mensual o pay-as-you-go. Si eliges un plan de pago, deberás cancelarlo antes de borrar la distribución. Verifica en la página de precios de CloudFront.",
+      "objectiveEs": "Servir un sitio estático desde un bucket S3 que sigue siendo privado, usando CloudFront con OAC; comprobar que el acceso directo a S3 está bloqueado, entender el caché en edge locations y las invalidaciones.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "Crea un bucket S3 con Block Public Access ACTIVADO (default). Sube un index.html sencillo (por ejemplo, un h1 que diga 'versión 1').",
+          "detailEs": null
+        },
+        {
+          "id": "s2",
+          "textEs": "CloudFront → Create distribution. Sigue el asistente: nombre de la distribución, 'Single website or app', Origin type 'Amazon S3', Browse S3 → tu bucket, y 'Use recommended origin settings' (configura OAC).",
+          "detailEs": "El asistente actual crea el OAC y actualiza la bucket policy por ti. En la pantalla de 'security protections' (AWS WAF) elige no activarlo para evitar costos."
+        },
+        {
+          "id": "s3",
+          "textEs": "Mientras despliega (unos minutos), abre tu bucket → Permissions → Bucket policy y lee la policy que agregó CloudFront.",
+          "detailEs": "Principal Service cloudfront.amazonaws.com, Action s3:GetObject y una Condition AWS:SourceArn con el ARN de TU distribución."
+        },
+        {
+          "id": "s4",
+          "textEs": "Cuando 'Last modified' deje de decir 'Deploying', abre https://TU-DOMINIO.cloudfront.net/index.html.",
+          "detailEs": "Si quieres abrir solo el dominio sin /index.html, configura 'Default root object' = index.html en la distribución (General → Settings → Edit)."
+        },
+        {
+          "id": "s5",
+          "textEs": "Abre el Object URL de S3 del mismo index.html en incógnito.",
+          "detailEs": "Debe dar AccessDenied."
+        },
+        {
+          "id": "s6",
+          "textEs": "Sube una nueva versión de index.html ('versión 2') al bucket y recarga la URL de CloudFront.",
+          "detailEs": null
+        },
+        {
+          "id": "s7",
+          "textEs": "Distribución → Invalidations → Create invalidation → path /index.html. Recarga después de que termine.",
+          "detailEs": "Las primeras 1.000 rutas invalidadas al mes no tienen costo. Alternativa en producción: versionar los nombres de archivo (app.v2.js)."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Predice: ¿el bucket necesita desactivar Block Public Access para que CloudFront lo sirva?",
+          "answerEs": "No. Con OAC, CloudFront firma las peticiones (SigV4) y la bucket policy permite solo al service principal de CloudFront para TU distribución. El bucket sigue totalmente privado."
+        },
+        {
+          "id": "q2",
+          "questionEs": "Predice: tras subir 'versión 2' a S3, ¿qué ves en CloudFront inmediatamente? ¿por qué?",
+          "answerEs": "Probablemente 'versión 1': el edge tiene el objeto en caché hasta que expire el TTL (default 24 h con la cache policy recomendada). Se fuerza con una invalidación o versionando nombres."
+        },
+        {
+          "id": "q3",
+          "questionEs": "¿Por qué no se puede usar OAC con un bucket configurado como 'static website hosting' endpoint?",
+          "answerEs": "El website endpoint es un origen HTTP 'custom' que no soporta firmar peticiones con OAC; se usa como custom origin y el bucket debería ser público. Por eso el patrón seguro es REST endpoint del bucket + OAC."
+        },
+        {
+          "id": "q4",
+          "questionEs": "CloudFront vs Global Accelerator: un juego con tráfico UDP que necesita IPs estáticas globales, ¿qué eliges?",
+          "answerEs": "Global Accelerator (capa 4, TCP/UDP, 2 IPs anycast estáticas, sin caché). CloudFront es para contenido HTTP(S) cacheable y dinámico en el edge."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "CloudFront → selecciona la distribución → Disable. Espera a que termine de desplegar el cambio (puede tardar varios minutos)."
+        },
+        {
+          "id": "c2",
+          "textEs": "Luego → Delete. (Si elegiste un plan flat-rate de pago, cancélalo antes.)"
+        },
+        {
+          "id": "c3",
+          "textEs": "Borra el Origin Access Control sobrante (CloudFront → Origin access) si no se eliminó."
+        },
+        {
+          "id": "c4",
+          "textEs": "Vacía y borra el bucket S3."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Contenido de S3 solo accesible vía CloudFront → OAC (reemplaza al antiguo OAI) + bucket policy con el service principal de CloudFront.",
+        "Menor latencia global para contenido estático/dinámico HTTP → CloudFront; tráfico TCP/UDP no HTTP con IPs estáticas → Global Accelerator.",
+        "Contenido desactualizado tras despliegue → invalidación o nombres versionados.",
+        "Contenido privado para usuarios pagos → CloudFront signed URLs / signed cookies.",
+        "Protección L7 → AWS WAF asociado a CloudFront/ALB; DDoS → Shield (Standard gratis, Advanced de pago)."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/GettingStarted.SimpleDistribution.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowToDeleteDistribution.html",
+        "https://aws.amazon.com/cloudfront/pricing/"
+      ]
+    },
+    {
+      "id": "lab-09-dynamodb-ondemand-ttl",
+      "order": 9,
+      "title": "DynamoDB on-demand, keys, TTL (and when DAX makes sense)",
+      "titleEs": "DynamoDB on-demand, claves, TTL (y cuándo tiene sentido DAX)",
+      "concepts": [
+        "dynamodb-fundamentals",
+        "dynamodb-capacity-modes",
+        "dynamodb-indexes",
+        "dynamodb-ttl",
+        "dynamodb-dax",
+        "caching-strategies"
+      ],
+      "domain": "d3",
+      "minutes": 40,
+      "estimatedCostUsd": "$0 (on-demand cobra por request; unas decenas de requests cuestan fracciones de centavo; storage 25 GB incluido en el nivel gratuito)",
+      "costWarning": null,
+      "objectiveEs": "Crear una tabla DynamoDB en modo on-demand, diseñar partition key + sort key, habilitar TTL para expirar sesiones automáticamente sin pagar escrituras, y razonar (sin crearlo, porque cuesta) cuándo usar DAX vs ElastiCache.",
+      "steps": [
+        {
+          "id": "s1",
+          "textEs": "DynamoDB → Tables → Create table: nombre sessions, Partition key userId (String), Sort key sessionId (String). Table settings: Customize settings → Capacity mode 'On-demand'.",
+          "detailEs": "On-demand = pagas por request y no planificas capacidad. Provisioned (+ auto scaling) es más barato para tráfico predecible."
+        },
+        {
+          "id": "s2",
+          "textEs": "Explore items → Create item: agrega 3–4 items para 2 usuarios distintos. Agrega un atributo expiresAt (Number).",
+          "detailEs": "Para expiresAt usa epoch en SEGUNDOS. En CloudShell: date +%s te da el ahora; suma 120 para 'dentro de 2 minutos' y resta 3600 para 'hace una hora'."
+        },
+        {
+          "id": "s3",
+          "textEs": "Pon a un item expiresAt en el pasado, a otro dentro de 2 minutos y deja uno sin expiresAt.",
+          "detailEs": null
+        },
+        {
+          "id": "s4",
+          "textEs": "Tabla → Additional settings → Time to Live (TTL) → Turn on → nombre de atributo expiresAt.",
+          "detailEs": "Usa 'Preview TTL' si aparece, para ver qué items expirarían en una fecha dada."
+        },
+        {
+          "id": "s5",
+          "textEs": "Haz una Query por userId = uno de tus usuarios. Luego un Scan. Compara qué se lee en cada caso (y el mensaje de capacidad consumida si la consola lo muestra).",
+          "detailEs": null
+        },
+        {
+          "id": "s6",
+          "textEs": "Indexes → Create index: crea un Global Secondary Index con partition key device (String). Agrega el atributo device a algunos items y consulta el índice por device.",
+          "detailEs": "Idea clave: DynamoDB solo consulta eficientemente por claves (tabla o índices). Para 'buscar por otro atributo' → GSI."
+        },
+        {
+          "id": "s7",
+          "textEs": "Vuelve mañana (o al final de la sesión) y revisa si el item expirado ya desapareció. Mientras tanto, lee sobre DAX en la documentación y responde las preguntas.",
+          "detailEs": "No crees un cluster DAX: no está en el nivel gratuito y cobra por hora por nodo."
+        }
+      ],
+      "checkQuestions": [
+        {
+          "id": "q1",
+          "questionEs": "Predice: al activar TTL, ¿el item con expiresAt en el pasado desaparece en segundos?",
+          "answerEs": "No necesariamente. DynamoDB borra items expirados típicamente dentro de unos pocos días; mientras tanto siguen apareciendo en reads, por eso se filtran con filter expression. El borrado por TTL no consume write throughput."
+        },
+        {
+          "id": "q2",
+          "questionEs": "¿Qué pasa con un item cuyo expiresAt es un String o está en milisegundos?",
+          "answerEs": "Si no es Number, TTL lo ignora. Si está en milisegundos, el valor es un número enorme (fecha muy futura) y nunca expira en la práctica."
+        },
+        {
+          "id": "q3",
+          "questionEs": "Query vs Scan: ¿cuál lee toda la tabla y por qué importa en costo/rendimiento?",
+          "answerEs": "Scan lee toda la tabla (consume capacidad por todo lo leído, aunque luego filtres). Query lee solo la partición indicada por la partition key. El examen penaliza Scan en tablas grandes."
+        },
+        {
+          "id": "q4",
+          "questionEs": "Una app con lecturas repetidas en DynamoDB necesita latencia de microsegundos sin cambiar mucho el código. ¿DAX o ElastiCache?",
+          "answerEs": "DAX: caché en memoria compatible con la API de DynamoDB (cambio mínimo de código), latencia de microsegundos para lecturas eventualmente consistentes. ElastiCache es más general (cualquier base/cálculo) pero requiere lógica de caché en la app."
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "c1",
+          "textEs": "Borra la tabla sessions (Actions → Delete table; desmarca crear backup si lo ofrece)."
+        },
+        {
+          "id": "c2",
+          "textEs": "Confirma que no creaste un cluster DAX."
+        }
+      ],
+      "examTakeawaysEs": [
+        "Tráfico impredecible/nuevo o picos repentinos → DynamoDB on-demand; tráfico estable → provisioned con auto scaling (más barato).",
+        "Expirar sesiones/datos temporales sin costo de escritura → TTL (atributo Number en epoch segundos; borrado en días, no instantáneo).",
+        "Acelerar lecturas de DynamoDB a microsegundos con mínimo cambio de código → DAX.",
+        "Consultar por otro atributo → GSI (en cualquier momento); LSI solo al crear la tabla y comparte partition key.",
+        "Replicación multi-Region activa-activa → DynamoDB Global Tables; reaccionar a cambios → DynamoDB Streams + Lambda."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html"
+      ]
+    }
+  ]
+}

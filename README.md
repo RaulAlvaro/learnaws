@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# learnaws
 
-## Getting Started
+App personal para aprobar **AWS Certified Solutions Architect – Associate (SAA-C03)** con 1 h/día, usando métodos con evidencia: pretesting, práctica de recuperación, repetición espaciada (FSRS-6) por concepto, successive relearning, interleaving de servicios confundibles, calibración de confianza y un tutor de IA que solo da pistas después de tu intento.
 
-First, run the development server:
+El método y la estrategia de examen están en [GUIDE.md](GUIDE.md) (también dentro de la app, en *Más → Método y estrategia*).
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+pnpm secrets      # wizard: OpenAI, Clerk, VAPID → .env.local y Dokploy
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`pnpm secrets` corre [`scripts/setup-secrets.sh`](scripts/setup-secrets.sh): abre cada dashboard, te dice qué copiar, guarda los valores en `.env.local` y los sube a la app en Dokploy. Puedes re-ejecutarlo cuando quieras (recuerda lo ya guardado).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Contenido
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+El banco (fichas, ~800 preguntas originales, preguntas de voz) se genera con OpenAI a partir de la guía oficial y la documentación de AWS, y se verifica con un segundo paso (un modelo resuelve sin ver la clave + una auditoría contra la documentación). Solo se publica lo que pasa ambos.
 
-## Learn More
+```bash
+pnpm content docs        # descarga extractos de documentación AWS por concepto
+pnpm content gen         # genera (Batch API, 50% más barato; --direct --limit 3 para probar)
+pnpm content collect     # recoge batches terminados
+pnpm content verify      # verificación (batch)
+pnpm content collect
+pnpm content finalize    # filtra, asigna el 20% reservado para simulacros → content/concepts/*.json
+pnpm content status
+```
 
-To learn more about Next.js, take a look at the following resources:
+- `content/syllabus.json` — 4 dominios, 14 tareas oficiales, 259 conceptos, 32 grupos de servicios confundibles.
+- `content/concepts/*.json` — contenido publicado.
+- `content/labs.json` — 10 labs guiados para tu cuenta de AWS.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Motor
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `src/lib/engine/` — lógica pura y testeada (`pnpm test`): scheduler FSRS con fecha de examen, dominio por successive relearning, planificador de la sesión diaria, estimador de probabilidad de aprobar y gate de reserva.
+- `src/lib/study/` — persistencia (Postgres + Drizzle), sesión, simulacros, voz y métricas.
+- `src/lib/ai/` — tutor (pistas graduadas, evaluación de autoexplicaciones y respuestas por voz), TTS con caché y transcripción, con tope de gasto mensual.
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Dokploy (VPS crafter) construye el `Dockerfile` desde `main`. Las migraciones se aplican solas al arrancar.
