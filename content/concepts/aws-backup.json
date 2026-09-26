@@ -1,0 +1,456 @@
+{
+  "conceptId": "aws-backup",
+  "card": {
+    "en": {
+      "tldr": "AWS Backup centralizes backup plans, resource assignments, and monitoring across supported AWS services. Choose it when a scenario requires one policy-based approach across resource types or AWS accounts, scheduled cross-Region or cross-account copies, or retention protected by AWS Backup Vault Lock.",
+      "whenToUse": [
+        "Apply consistent backup schedules and retention to supported resource types, including resources selected by tag.",
+        "Manage backup policies across accounts in an existing AWS Organizations structure.",
+        "Copy backups to another Region or account for disaster recovery.",
+        "Prevent early deletion of recovery points with AWS Backup Vault Lock."
+      ],
+      "keyFacts": [
+        "Backup plans define requirements and can be assigned to supported resources across services.",
+        "AWS Backup can automatically copy backups across Regions as part of a scheduled plan and can copy them across accounts in an AWS Organizations structure.",
+        "AWS Backup Vault Lock in Compliance mode cannot be removed after its grace time expires; Governance mode can be managed by users with sufficient IAM permissions.",
+        "Vault Lock retention limits apply to new backup and copy jobs, not recovery points already in the vault.",
+        "AWS Backup does not govern backups created outside AWS Backup."
+      ],
+      "gotchas": [
+        "Native service backups are not automatically covered by an AWS Backup plan or its centralized governance.",
+        "The relationship between AWS Backup and native backups varies by service; keeping both can create unintended duplicate costs.",
+        "Not every supported resource type offers incremental backups or cold-storage transitions.",
+        "A locked vault can retain backups until their configured lifecycle ends, creating storage costs if retention is set incorrectly."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EBS snapshots and Data Lifecycle Manager",
+          "difference": "Use them for EBS-focused snapshot or AMI schedules, not centralized plans across multiple supported services."
+        },
+        {
+          "concept": "RDS automated backups",
+          "difference": "They address RDS recovery, not one backup policy across RDS and other resource types."
+        },
+        {
+          "concept": "DynamoDB PITR",
+          "difference": "It protects DynamoDB tables, not organization-wide backup plans and vault retention controls."
+        }
+      ],
+      "examCues": [
+        "one backup policy across several AWS services",
+        "backup plans across organization accounts",
+        "scheduled copies to another Region",
+        "privileged users must not delete backups early",
+        "avoid duplicate native backup costs"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Backup centraliza backup plans, la asignación de recursos y el monitoreo de backups entre servicios AWS compatibles. Elígelo cuando necesites políticas para varios tipos de recursos o cuentas, copias programadas entre Regions o cuentas, o retención protegida con AWS Backup Vault Lock.",
+      "whenToUse": [
+        "Aplicar programas y períodos de retención uniformes a distintos tipos de recursos compatibles, incluso seleccionados mediante etiquetas.",
+        "Administrar políticas de backup entre cuentas de una estructura existente de AWS Organizations.",
+        "Copiar backups a otra Region o cuenta para recuperación ante desastres.",
+        "Impedir la eliminación anticipada de puntos de recuperación con AWS Backup Vault Lock."
+      ],
+      "keyFacts": [
+        "Los backup plans definen requisitos y pueden asignarse a recursos compatibles de distintos servicios.",
+        "AWS Backup puede copiar backups automáticamente entre Regions como parte de un plan programado y entre cuentas de una estructura de AWS Organizations.",
+        "AWS Backup Vault Lock en Compliance mode no puede quitarse después del grace time; Governance mode puede ser administrado por usuarios con permisos IAM suficientes.",
+        "Los límites de retención de Vault Lock se aplican a nuevos trabajos de backup y copia, no a los puntos de recuperación que ya están en el vault.",
+        "AWS Backup no administra los backups creados fuera de AWS Backup."
+      ],
+      "gotchas": [
+        "Los backups nativos de cada servicio no quedan automáticamente bajo un plan de AWS Backup ni bajo su administración centralizada.",
+        "La relación entre AWS Backup y los backups nativos varía según el servicio; mantener ambos puede generar costos duplicados no previstos.",
+        "No todos los tipos de recursos compatibles admiten backups incrementales ni transiciones a cold storage.",
+        "Un vault bloqueado puede conservar backups hasta que termine su ciclo de vida configurado y generar costos si estableces mal la retención."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EBS snapshots y Data Lifecycle Manager",
+          "difference": "Úsalos para programar snapshots o AMI centrados en EBS, no para planes centralizados entre varios servicios compatibles."
+        },
+        {
+          "concept": "RDS automated backups",
+          "difference": "Resuelven la recuperación de RDS, no una política única de backup para RDS y otros tipos de recursos."
+        },
+        {
+          "concept": "DynamoDB PITR",
+          "difference": "Protege tablas de DynamoDB, no ofrece backup plans para toda la organización ni controles de retención de un vault."
+        }
+      ],
+      "examCues": [
+        "one backup policy across several AWS services",
+        "backup plans across organization accounts",
+        "scheduled copies to another Region",
+        "privileged users must not delete backups early",
+        "avoid duplicate native backup costs"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html",
+      "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aws-backup--be524e7a",
+      "conceptId": "aws-backup",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A brokerage stores AWS Backup recovery points for a required retention period. Its compliance team says that, after an initial review window, not even an administrator with full IAM permissions may remove the vault lock or delete recovery points before their lifecycle ends. Which configuration meets this requirement MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable AWS Backup Vault Lock in Compliance mode and let its configured grace time expire after validating retention.",
+          "correct": true,
+          "why": "After the grace time, a Compliance mode lock cannot be removed, and locked recovery points cannot be deleted before their lifecycle ends."
+        },
+        {
+          "id": "B",
+          "text": "Set a long retention period in the backup plan without configuring AWS Backup Vault Lock.",
+          "correct": false,
+          "why": "A retention setting alone does not provide the specified protection against privileged early deletion."
+        },
+        {
+          "id": "C",
+          "text": "Apply a backup vault access policy that denies deletion and let administrators retain permission to update that policy.",
+          "correct": false,
+          "why": "An administrator who can change the policy can remove that protection, contrary to the stated requirement."
+        },
+        {
+          "id": "D",
+          "text": "Enable AWS Backup Vault Lock in Governance mode and restrict vault administration to a small IAM group.",
+          "correct": false,
+          "why": "Users with sufficient IAM permissions can remove a Governance mode lock."
+        }
+      ],
+      "explanation": "The decisive constraint is protection even from privileged administrators after a review window. AWS Backup Vault Lock in Compliance mode has a grace time during which its configuration can be changed; after that time, the lock cannot be removed. Governance mode is a close distractor because sufficiently privileged users can manage its lock. Retention should be validated before the Compliance mode grace time expires because locked backups remain until their lifecycle completes.",
+      "keywordCues": [
+        "after an initial review window",
+        "not even an administrator with full IAM permissions",
+        "remove the vault lock or delete recovery points"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html",
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html"
+      ],
+      "es": {
+        "stem": "Una corredora almacena puntos de recuperación de AWS Backup durante un período de retención obligatorio. El equipo de cumplimiento exige que, después de una ventana inicial de revisión, ni siquiera un administrador con todos los permisos IAM pueda quitar el bloqueo del vault o eliminar puntos de recuperación antes de que termine su ciclo de vida. ¿Qué configuración cumple este requisito de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activar AWS Backup Vault Lock en Compliance mode y dejar que termine el grace time configurado después de validar la retención.",
+            "why": "Después del grace time, no se puede quitar un bloqueo en Compliance mode ni eliminar puntos de recuperación bloqueados antes de que termine su ciclo de vida."
+          },
+          {
+            "id": "B",
+            "text": "Establecer un período de retención largo en el backup plan sin configurar AWS Backup Vault Lock.",
+            "why": "La retención por sí sola no proporciona la protección solicitada frente a la eliminación anticipada por usuarios privilegiados."
+          },
+          {
+            "id": "C",
+            "text": "Aplicar una política de acceso al backup vault que deniegue la eliminación y conservar para los administradores el permiso de modificarla.",
+            "why": "Un administrador que puede cambiar esa política también puede quitar esa protección, lo que incumple el requisito."
+          },
+          {
+            "id": "D",
+            "text": "Activar AWS Backup Vault Lock en Governance mode y restringir la administración del vault a un grupo IAM pequeño.",
+            "why": "Los usuarios con permisos IAM suficientes pueden quitar un bloqueo en Governance mode."
+          }
+        ],
+        "explanation": "La condición decisiva es proteger los backups incluso frente a administradores privilegiados después de una ventana de revisión. AWS Backup Vault Lock en Compliance mode ofrece un grace time durante el cual puedes cambiar su configuración; después, no puedes quitar el bloqueo. Governance mode es una alternativa cercana, pero permite que usuarios con permisos suficientes administren el bloqueo. Debes validar la retención antes de que termine el grace time, ya que los backups bloqueados permanecen hasta completar su ciclo de vida."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-backup--413e37d3",
+      "conceptId": "aws-backup",
+      "secondaryConcepts": [
+        "ebs-snapshots-dlm",
+        "dynamodb-backups-pitr"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab adds supported EBS volumes, EFS file systems, and DynamoDB tables as new projects begin. Each resource is tagged with its project's protection class, and the lab wants new resources to receive the appropriate backup schedule without creating a service-specific schedule every time. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure native backups separately for EBS, EFS, and DynamoDB whenever a new project is tagged.",
+          "correct": false,
+          "why": "Separate native configurations preserve the per-service work the lab explicitly wants to avoid."
+        },
+        {
+          "id": "B",
+          "text": "Create AWS Backup plans for the protection classes and assign supported resources to the plans by tag.",
+          "correct": true,
+          "why": "Tag-based assignments apply centralized backup plans to groups of supported resources across services."
+        },
+        {
+          "id": "C",
+          "text": "Enable DynamoDB point-in-time recovery on each project table and use it to schedule backups for the other resources.",
+          "correct": false,
+          "why": "DynamoDB point-in-time recovery does not assign backup schedules to EBS or EFS resources."
+        },
+        {
+          "id": "D",
+          "text": "Create Amazon Data Lifecycle Manager policies for the protection classes and select all tagged resources.",
+          "correct": false,
+          "why": "Data Lifecycle Manager is not the cross-service backup-plan solution needed for EFS and DynamoDB alongside EBS."
+        }
+      ],
+      "explanation": "The lab needs backup schedules assigned by protection class across several supported services. AWS Backup plans can be applied to resources using tags, avoiding a separate backup configuration for each new resource. Data Lifecycle Manager and DynamoDB point-in-time recovery do not provide the required cross-service plan. Configuring native backups separately also fails the operational-overhead constraint.",
+      "keywordCues": [
+        "EBS volumes, EFS file systems, and DynamoDB tables",
+        "tagged with its project's protection class",
+        "without creating a service-specific schedule"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html",
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación incorpora volúmenes EBS, sistemas de archivos EFS y tablas DynamoDB compatibles a medida que inicia nuevos proyectos. Cada recurso tiene una etiqueta con la clase de protección de su proyecto, y el laboratorio quiere que los recursos nuevos reciban el programa de backup correspondiente sin crear un programa específico por servicio cada vez. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar backups nativos por separado para EBS, EFS y DynamoDB cada vez que se etiquete un proyecto nuevo.",
+            "why": "Las configuraciones nativas separadas mantienen el trabajo por servicio que el laboratorio quiere evitar."
+          },
+          {
+            "id": "B",
+            "text": "Crear AWS Backup plans para las clases de protección y asignarles los recursos compatibles mediante etiquetas.",
+            "why": "Las asignaciones por etiqueta aplican backup plans centralizados a grupos de recursos compatibles de distintos servicios."
+          },
+          {
+            "id": "C",
+            "text": "Activar DynamoDB point-in-time recovery en cada tabla de proyecto y usarlo para programar backups de los demás recursos.",
+            "why": "DynamoDB point-in-time recovery no asigna programas de backup a recursos EBS ni EFS."
+          },
+          {
+            "id": "D",
+            "text": "Crear políticas de Amazon Data Lifecycle Manager para las clases de protección y seleccionar todos los recursos etiquetados.",
+            "why": "Data Lifecycle Manager no es la solución de backup plans entre servicios que se necesita para EFS y DynamoDB además de EBS."
+          }
+        ],
+        "explanation": "El laboratorio necesita asignar programas de backup según la clase de protección en varios servicios compatibles. Puedes aplicar AWS Backup plans a recursos mediante etiquetas y así evitar una configuración individual para cada recurso nuevo. Data Lifecycle Manager y DynamoDB point-in-time recovery no ofrecen el plan requerido entre servicios. Configurar backups nativos por separado tampoco satisface la condición de menor carga operativa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-backup--6f8e0318",
+      "conceptId": "aws-backup",
+      "secondaryConcepts": [
+        "ebs-snapshots-dlm",
+        "dynamodb-backups-pitr"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare network has an existing AWS Organizations structure with workloads in multiple accounts. It must centrally apply backup policies, keep copies in a separate account, and prevent even privileged users from removing the backup vault's retention protection after an approved review period. Which TWO actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable DynamoDB point-in-time recovery on tables in the workload accounts.",
+          "correct": false,
+          "why": "Table-level recovery does not meet the requirements for central policies, account copies, and vault protection."
+        },
+        {
+          "id": "B",
+          "text": "Apply AWS Backup Vault Lock in Compliance mode to the destination vault and allow its grace time to expire.",
+          "correct": true,
+          "why": "After the grace time, privileged users cannot remove the Compliance mode lock or delete locked recovery points early."
+        },
+        {
+          "id": "C",
+          "text": "Create Amazon Data Lifecycle Manager schedules independently in every workload account.",
+          "correct": false,
+          "why": "Independent account schedules do not provide the required centralized policy management."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Backup cross-account management policies and configure cross-account backup copies within the organization.",
+          "correct": true,
+          "why": "AWS Backup can apply plans across organization accounts and copy backups to another account."
+        },
+        {
+          "id": "E",
+          "text": "Apply AWS Backup Vault Lock in Governance mode to the destination vault.",
+          "correct": false,
+          "why": "A user with sufficient IAM permissions can remove a Governance mode lock."
+        }
+      ],
+      "explanation": "There are two separate requirements: centrally managed cross-account protection and retention protection that privileged users cannot remove after review. AWS Backup cross-account policies and copies address the first; they require the organization's existing AWS Organizations structure. Vault Lock in Compliance mode addresses the second once its grace time expires. Governance mode is insufficient because users with sufficient IAM permissions can remove its lock.",
+      "keywordCues": [
+        "existing AWS Organizations structure",
+        "centrally apply backup policies",
+        "copies in a separate account",
+        "prevent even privileged users",
+        "after an approved review period"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html",
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html"
+      ],
+      "es": {
+        "stem": "Una red de atención médica tiene una estructura existente de AWS Organizations con cargas de trabajo en varias cuentas. Debe aplicar políticas de backup de forma centralizada, guardar copias en una cuenta separada e impedir que incluso usuarios privilegiados quiten la protección de retención del backup vault después de un período de revisión aprobado. ¿Qué DOS acciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activar DynamoDB point-in-time recovery en las tablas de las cuentas con cargas de trabajo.",
+            "why": "La recuperación de tablas no satisface los requisitos de políticas centrales, copias entre cuentas y protección del vault."
+          },
+          {
+            "id": "B",
+            "text": "Aplicar AWS Backup Vault Lock en Compliance mode al vault de destino y dejar que termine su grace time.",
+            "why": "Después del grace time, los usuarios privilegiados no pueden quitar el bloqueo en Compliance mode ni eliminar anticipadamente los puntos de recuperación bloqueados."
+          },
+          {
+            "id": "C",
+            "text": "Crear programas de Amazon Data Lifecycle Manager por separado en cada cuenta con cargas de trabajo.",
+            "why": "Los programas independientes por cuenta no proporcionan la administración centralizada de políticas requerida."
+          },
+          {
+            "id": "D",
+            "text": "Usar políticas de administración entre cuentas de AWS Backup y configurar copias de backup entre cuentas dentro de la organización.",
+            "why": "AWS Backup puede aplicar planes entre las cuentas de la organización y copiar backups a otra cuenta."
+          },
+          {
+            "id": "E",
+            "text": "Aplicar AWS Backup Vault Lock en Governance mode al vault de destino.",
+            "why": "Un usuario con permisos IAM suficientes puede quitar un bloqueo en Governance mode."
+          }
+        ],
+        "explanation": "Hay dos requisitos distintos: protección entre cuentas administrada centralmente y una retención que los usuarios privilegiados no puedan desactivar después de la revisión. Las políticas y copias entre cuentas de AWS Backup cubren el primero y aprovechan la estructura existente de AWS Organizations. Vault Lock en Compliance mode cubre el segundo una vez que termina su grace time. Governance mode no basta porque usuarios con permisos IAM suficientes pueden quitar su bloqueo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-backup--617beb33",
+      "conceptId": "aws-backup",
+      "secondaryConcepts": [
+        "ebs-snapshots-dlm",
+        "rds-backups-pitr"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs supported Amazon EBS, Amazon EFS, and Amazon RDS resources in several accounts under AWS Organizations. Its recovery policy requires consistent backup schedules and copies in a second AWS Region, without maintaining separate automation for each service and account. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Data Lifecycle Manager schedules in each account and copy the resulting backups to the second Region.",
+          "correct": false,
+          "why": "Data Lifecycle Manager does not provide the required centralized backup plans across EBS, EFS, and RDS."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Backup policies across the organization and backup plans with scheduled cross-Region copies for the supported resources.",
+          "correct": true,
+          "why": "AWS Backup combines cross-account policy management, cross-service plans, and scheduled cross-Region copies."
+        },
+        {
+          "id": "C",
+          "text": "Create service-specific backup schedules in each account and collect their status in a central dashboard.",
+          "correct": false,
+          "why": "A dashboard does not eliminate the separate schedules and account-level automation the company wants to avoid."
+        },
+        {
+          "id": "D",
+          "text": "Configure RDS automated backups in each account and use their schedules as the recovery policy for all three resource types.",
+          "correct": false,
+          "why": "RDS automated backups do not schedule protection for the EBS and EFS resources."
+        }
+      ],
+      "explanation": "The deciding requirements are consistent protection across three resource types and multiple organization accounts, plus scheduled copies to another Region. AWS Backup provides centrally managed plans and policies for supported resources and can include cross-Region copies in a schedule. EBS-focused lifecycle schedules and RDS automated backups each cover too narrow a set of resources. Separate service-level schedules also retain the operational work the company wants to remove.",
+      "keywordCues": [
+        "Amazon EBS, Amazon EFS, and Amazon RDS resources",
+        "several accounts under AWS Organizations",
+        "copies in a second AWS Region",
+        "without maintaining separate automation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html",
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios usa recursos compatibles de Amazon EBS, Amazon EFS y Amazon RDS en varias cuentas de AWS Organizations. Su política de recuperación exige programas de backup uniformes y copias en una segunda AWS Region, sin mantener automatizaciones separadas por servicio y cuenta. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar programas de Amazon Data Lifecycle Manager en cada cuenta y copiar los backups resultantes a la segunda Region.",
+            "why": "Data Lifecycle Manager no ofrece los backup plans centralizados necesarios para EBS, EFS y RDS."
+          },
+          {
+            "id": "B",
+            "text": "Usar políticas de AWS Backup en toda la organización y backup plans con copias programadas entre Regions para los recursos compatibles.",
+            "why": "AWS Backup combina la administración de políticas entre cuentas, los planes para varios servicios y las copias programadas entre Regions."
+          },
+          {
+            "id": "C",
+            "text": "Crear programas de backup específicos para cada servicio en cada cuenta y reunir su estado en un panel central.",
+            "why": "Un panel no elimina los programas separados ni la automatización por cuenta que la empresa quiere evitar."
+          },
+          {
+            "id": "D",
+            "text": "Configurar RDS automated backups en cada cuenta y usar sus programas como política de recuperación para los tres tipos de recursos.",
+            "why": "RDS automated backups no programan la protección de los recursos EBS y EFS."
+          }
+        ],
+        "explanation": "Lo decisivo es proteger de forma uniforme tres tipos de recursos en varias cuentas, con copias programadas a otra Region. AWS Backup ofrece planes y políticas administrados centralmente para recursos compatibles y permite incluir copias entre Regions en un programa. Los programas centrados en EBS y RDS automated backups cubren un conjunto demasiado limitado de recursos. Los programas separados tampoco reducen el trabajo operativo requerido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aws-backup--r0",
+      "conceptId": "aws-backup",
+      "kind": "recall",
+      "prompt": "An organization needs scheduled backups across supported services and accounts, with copies in another Region. What would you choose and why?",
+      "promptEs": "Una organización necesita backups programados entre servicios y cuentas compatibles, con copias en otra Region. ¿Qué elegirías y por qué?",
+      "idealAnswer": "Choose AWS Backup plans and organization-wide backup policies. They centralize protection across supported services and accounts and can schedule cross-Region backup copies.",
+      "rubric": [
+        "Names AWS Backup plans or policies.",
+        "Explains cross-service and cross-account centralization.",
+        "Mentions scheduled cross-Region copies."
+      ]
+    },
+    {
+      "id": "aws-backup--r1",
+      "conceptId": "aws-backup",
+      "kind": "why-not",
+      "prompt": "Why are EBS snapshot schedules alone insufficient when auditors require one backup policy for EBS, EFS, and RDS?",
+      "promptEs": "¿Por qué no bastan los programas de EBS snapshots si los auditores exigen una política de backup para EBS, EFS y RDS?",
+      "idealAnswer": "EBS snapshot schedules focus on EBS protection and do not provide one backup plan covering EFS and RDS as well. AWS Backup can apply centralized plans to supported resources across those services.",
+      "rubric": [
+        "Identifies the EBS-focused scope of snapshot schedules.",
+        "Explains why EFS and RDS remain outside that single policy.",
+        "Names AWS Backup as the cross-service alternative."
+      ]
+    }
+  ]
+}

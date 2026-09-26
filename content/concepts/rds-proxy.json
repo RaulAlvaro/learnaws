@@ -1,0 +1,398 @@
+{
+  "conceptId": "rds-proxy",
+  "card": {
+    "en": {
+      "tldr": "Amazon RDS Proxy pools and reuses database connections so applications with many or unpredictable connections do not overwhelm an RDS database. Choose it when connection scaling, preserving application connections during database failover, or IAM authentication for proxy clients drives the decision.",
+      "whenToUse": [
+        "Many Lambda functions or application instances open short-lived database connections.",
+        "Traffic surges could oversubscribe the database's available connections.",
+        "Applications need their connections preserved while the proxy reconnects to a standby DB instance.",
+        "Clients must authenticate to the proxy with IAM."
+      ],
+      "keyFacts": [
+        "RDS Proxy pools and shares database connections; it can queue or throttle requests that the pool cannot serve immediately.",
+        "The proxy automatically connects to a standby DB instance after a database failure while preserving application connections.",
+        "Clients can use IAM authentication with the proxy; the proxy can authenticate to the database with IAM or credentials in AWS Secrets Manager.",
+        "An RDS Proxy must be in the same VPC as its database and cannot be publicly accessible.",
+        "For an RDS DB instance in a replication configuration, a proxy can be associated with the writer, not a read replica."
+      ],
+      "gotchas": [
+        "A proxy does not create unlimited database capacity: requests beyond configured limits can be rejected.",
+        "A SQL statement larger than 16 KB pins its session to a database connection, reducing opportunities to share that connection.",
+        "Configuring subnets in three Availability Zones does not make the default proxy endpoint span all three; the default endpoint is provisioned across only two."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "unpredictable surge of database connections",
+        "many short-lived Lambda connections",
+        "preserve application connections during failover",
+        "require IAM authentication for database clients"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon RDS Proxy agrupa y reutiliza conexiones para que muchas conexiones, o aumentos impredecibles de ellas, no saturen una base de datos RDS. Elígelo cuando la decisión dependa de escalar las conexiones, conservar las conexiones de la aplicación durante un failover de la base de datos o exigir autenticación IAM a los clientes del proxy.",
+      "whenToUse": [
+        "Muchas funciones Lambda o instancias de aplicación abren conexiones de corta duración a la base de datos.",
+        "Los picos de tráfico podrían superar la capacidad de conexiones de la base de datos.",
+        "La aplicación necesita conservar sus conexiones mientras el proxy se reconecta a una instancia de base de datos en espera.",
+        "Los clientes deben autenticarse ante el proxy mediante IAM."
+      ],
+      "keyFacts": [
+        "RDS Proxy agrupa y comparte conexiones; puede poner en cola o limitar las solicitudes que el grupo no pueda atender de inmediato.",
+        "Tras una falla de la base de datos, el proxy se conecta automáticamente a una instancia en espera y conserva las conexiones de la aplicación.",
+        "Los clientes pueden usar IAM para autenticarse ante el proxy; este puede autenticarse ante la base de datos con IAM o con credenciales de AWS Secrets Manager.",
+        "RDS Proxy debe estar en la misma VPC que la base de datos y no puede tener acceso público.",
+        "En una configuración de replicación de RDS, puedes asociar el proxy con la instancia escritora, pero no con una read replica."
+      ],
+      "gotchas": [
+        "Un proxy no proporciona capacidad ilimitada a la base de datos: puede rechazar solicitudes que superen los límites configurados.",
+        "Una instrucción SQL de más de 16 KB fija su sesión a una conexión de base de datos y reduce las oportunidades de compartirla.",
+        "Configurar subredes en tres Availability Zones no hace que el endpoint predeterminado abarque las tres; este se aprovisiona solo en dos."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "unpredictable surge of database connections",
+        "many short-lived Lambda connections",
+        "preserve application connections during failover",
+        "require IAM authentication for database clients"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rds-proxy--3c287639",
+      "conceptId": "rds-proxy",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs Lambda functions that write orders to an RDS for MySQL DB instance. Ticket releases cause unpredictable bursts of short-lived database connections, and opening new connections consumes database CPU and memory. The company wants to protect the database without changing most application code. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep direct connections to the DB instance and allow each function to open a new connection per invocation.",
+          "correct": false,
+          "why": "Opening a new database connection for each invocation preserves the CPU and memory overhead the company needs to reduce."
+        },
+        {
+          "id": "B",
+          "text": "Place Amazon RDS Proxy in front of the DB instance and direct the functions to its endpoint.",
+          "correct": true,
+          "why": "RDS Proxy reuses pooled connections and can limit pressure on the database during bursts."
+        },
+        {
+          "id": "C",
+          "text": "Deploy Amazon RDS Proxy in a separate VPC from the database and direct the functions to it.",
+          "correct": false,
+          "why": "RDS Proxy must be in the same VPC as its database."
+        },
+        {
+          "id": "D",
+          "text": "Associate Amazon RDS Proxy with a MySQL read replica and send order writes to the proxy.",
+          "correct": false,
+          "why": "A proxy cannot be associated with a read replica in an RDS replication configuration."
+        }
+      ],
+      "explanation": "The deciding requirement is to absorb bursts of short-lived connections without repeatedly imposing connection-establishment costs on the database. RDS Proxy pools and reuses database connections and supports most applications without code changes. Direct connections retain the stated overhead. A proxy also cannot target a read replica or reside in a different VPC from its database.",
+      "keywordCues": [
+        "unpredictable bursts of short-lived database connections",
+        "opening new connections consumes database CPU and memory",
+        "without changing most application code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta funciones Lambda que escriben pedidos en una instancia de RDS for MySQL. Los lanzamientos de boletos generan picos impredecibles de conexiones de corta duración, y abrir conexiones nuevas consume CPU y memoria de la base de datos. La empresa quiere proteger la base de datos sin cambiar la mayor parte del código. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener conexiones directas a la instancia y permitir que cada función abra una conexión nueva por invocación.",
+            "why": "Abrir una conexión por invocación conserva el consumo de CPU y memoria que la empresa necesita reducir."
+          },
+          {
+            "id": "B",
+            "text": "Colocar Amazon RDS Proxy frente a la instancia y dirigir las funciones a su endpoint.",
+            "why": "RDS Proxy reutiliza conexiones agrupadas y puede limitar la presión sobre la base de datos durante los picos."
+          },
+          {
+            "id": "C",
+            "text": "Implementar Amazon RDS Proxy en una VPC distinta de la base de datos y dirigir allí las funciones.",
+            "why": "RDS Proxy debe estar en la misma VPC que su base de datos."
+          },
+          {
+            "id": "D",
+            "text": "Asociar Amazon RDS Proxy con una read replica de MySQL y enviar las escrituras de pedidos al proxy.",
+            "why": "No puedes asociar un proxy con una read replica en una configuración de replicación de RDS."
+          }
+        ],
+        "explanation": "El requisito decisivo es absorber picos de conexiones cortas sin repetir el costo de establecerlas en la base de datos. RDS Proxy agrupa y reutiliza conexiones, y funciona con la mayoría de las aplicaciones sin cambios de código. Las conexiones directas conservan el consumo indicado. Tampoco puedes asociar el proxy con una read replica ni colocarlo en otra VPC."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-proxy--ebcf26f4",
+      "conceptId": "rds-proxy",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics company has an RDS DB instance with a standby instance for database failover. Its order-processing application maintains many database connections and loses time reestablishing them when the database fails. The company wants application connections preserved while traffic moves to the standby. Which solution meets this requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place RDS Proxy in a separate VPC and direct application connections to that proxy.",
+          "correct": false,
+          "why": "The proxy must reside in the same VPC as the database."
+        },
+        {
+          "id": "B",
+          "text": "Associate RDS Proxy with the writer DB instance and direct application connections to the proxy.",
+          "correct": true,
+          "why": "RDS Proxy can reconnect to a standby DB instance while preserving application connections."
+        },
+        {
+          "id": "C",
+          "text": "Keep application connections directed to the DB instance and have the application reconnect after failure.",
+          "correct": false,
+          "why": "This still requires the application to reestablish the connections it wants preserved."
+        },
+        {
+          "id": "D",
+          "text": "Associate RDS Proxy with a read replica and direct the order-processing connections to the proxy.",
+          "correct": false,
+          "why": "In an RDS replication configuration, the proxy can be associated with the writer, not a read replica."
+        }
+      ],
+      "explanation": "Preserving application connections during database failure is the deciding constraint. RDS Proxy automatically connects to a standby DB instance while preserving those connections. Direct database connections leave the application responsible for reconnecting. The proxy must target the writer rather than a read replica and must share the database's VPC.",
+      "keywordCues": [
+        "standby instance for database failover",
+        "loses time reestablishing them",
+        "application connections preserved"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene una instancia de RDS con una instancia en espera para failover de la base de datos. Su aplicación de procesamiento de pedidos mantiene muchas conexiones y pierde tiempo al restablecerlas después de una falla. La empresa quiere conservar las conexiones de la aplicación mientras el tráfico pasa a la instancia en espera. ¿Qué solución cumple este requisito de la forma MOST directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar RDS Proxy en otra VPC y dirigir las conexiones de la aplicación a ese proxy.",
+            "why": "El proxy debe estar en la misma VPC que la base de datos."
+          },
+          {
+            "id": "B",
+            "text": "Asociar RDS Proxy con la instancia escritora y dirigir al proxy las conexiones de la aplicación.",
+            "why": "RDS Proxy puede reconectarse a una instancia en espera y conservar las conexiones de la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Mantener las conexiones de la aplicación dirigidas a la instancia y hacer que la aplicación se reconecte después de una falla.",
+            "why": "La aplicación todavía tendría que restablecer las conexiones que necesita conservar."
+          },
+          {
+            "id": "D",
+            "text": "Asociar RDS Proxy con una read replica y dirigir al proxy las conexiones de procesamiento de pedidos.",
+            "why": "En una configuración de replicación de RDS, puedes asociar el proxy con la instancia escritora, no con una read replica."
+          }
+        ],
+        "explanation": "La condición decisiva es conservar las conexiones de la aplicación durante una falla de la base de datos. RDS Proxy se conecta automáticamente a una instancia en espera mientras conserva esas conexiones. Con conexiones directas, la aplicación debe reconectarse. El proxy debe asociarse con la instancia escritora, no con una read replica, y compartir la VPC de la base de datos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-proxy--95950a0b",
+      "conceptId": "rds-proxy",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company is configuring an RDS Proxy for a database in a VPC with subnets in three supported Availability Zones. Its network standard requires the endpoint used by applications to be provisioned across all three selected Availability Zones, not just two. The company wants to retain RDS Proxy connection pooling. Which endpoint configuration meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an additional proxy endpoint using subnets in two Availability Zones.",
+          "correct": false,
+          "why": "An additional endpoint is provisioned across the Availability Zones specified for its creation, which would omit the third."
+        },
+        {
+          "id": "B",
+          "text": "Create an additional proxy endpoint and specify subnets in all three Availability Zones.",
+          "correct": true,
+          "why": "Additional proxy endpoints are provisioned across all Availability Zones specified during their creation."
+        },
+        {
+          "id": "C",
+          "text": "Use the proxy's default endpoint and configure the proxy with subnets in all three Availability Zones.",
+          "correct": false,
+          "why": "The default proxy endpoint is provisioned across only two selected Availability Zones."
+        },
+        {
+          "id": "D",
+          "text": "Create a proxy in another VPC and use its default endpoint for the applications.",
+          "correct": false,
+          "why": "A proxy must be in the database's VPC, and its default endpoint still spans only two Availability Zones."
+        }
+      ],
+      "explanation": "The endpoint itself must be provisioned across all three selected Availability Zones. A proxy's default endpoint uses only two Availability Zones, even if the proxy has subnets configured in more than two. An additional endpoint is provisioned across every Availability Zone specified when it is created. Specify subnets in all three for that additional endpoint.",
+      "keywordCues": [
+        "subnets in three supported Availability Zones",
+        "endpoint used by applications to be provisioned across all three",
+        "not just two"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios configura RDS Proxy para una base de datos en una VPC con subredes en tres Availability Zones admitidas. Su estándar de red exige que el endpoint usado por las aplicaciones esté aprovisionado en las tres Availability Zones seleccionadas, no solo en dos. La empresa quiere conservar el grupo de conexiones de RDS Proxy. ¿Qué configuración de endpoint cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un endpoint adicional del proxy con subredes en dos Availability Zones.",
+            "why": "Un endpoint adicional se aprovisiona en las Availability Zones especificadas al crearlo, por lo que faltaría la tercera."
+          },
+          {
+            "id": "B",
+            "text": "Crear un endpoint adicional del proxy y especificar subredes en las tres Availability Zones.",
+            "why": "Los endpoints adicionales se aprovisionan en todas las Availability Zones especificadas al crearlos."
+          },
+          {
+            "id": "C",
+            "text": "Usar el endpoint predeterminado del proxy y configurar el proxy con subredes en las tres Availability Zones.",
+            "why": "El endpoint predeterminado del proxy se aprovisiona solo en dos Availability Zones seleccionadas."
+          },
+          {
+            "id": "D",
+            "text": "Crear un proxy en otra VPC y usar su endpoint predeterminado para las aplicaciones.",
+            "why": "El proxy debe estar en la VPC de la base de datos y su endpoint predeterminado seguiría abarcando solo dos Availability Zones."
+          }
+        ],
+        "explanation": "El endpoint debe estar aprovisionado en las tres Availability Zones seleccionadas. El endpoint predeterminado de un proxy usa solo dos, aunque configures subredes en más de dos. Un endpoint adicional se aprovisiona en todas las Availability Zones especificadas al crearlo. Por eso debes especificar subredes en las tres para ese endpoint adicional."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-proxy--e935e640",
+      "conceptId": "rds-proxy",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A retailer's application writes to an RDS DB instance with IAM database authentication enabled and a standby instance for failover. During promotions, application clients create many short-lived connections; security requires those clients to authenticate with IAM. The retailer wants to pool connections and preserve application connections during database failure. Which TWO design choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Associate Amazon RDS Proxy with the writer DB instance and use its endpoint for application connections.",
+          "correct": true,
+          "why": "A proxy associated with the writer can pool connections and reconnect to a standby while preserving application connections."
+        },
+        {
+          "id": "B",
+          "text": "Send application clients directly to the DB instance and open a new connection for each request.",
+          "correct": false,
+          "why": "Direct connections do not provide proxy connection pooling or preservation of application connections through proxy failover."
+        },
+        {
+          "id": "C",
+          "text": "Allow clients to authenticate to the proxy with database passwords stored in Secrets Manager instead of IAM.",
+          "correct": false,
+          "why": "Clients of this proxy must authenticate with IAM because the RDS DB instance has IAM authentication enabled."
+        },
+        {
+          "id": "D",
+          "text": "Require IAM authentication for clients connecting to the proxy and use Secrets Manager credentials for the proxy's database connection.",
+          "correct": true,
+          "why": "This enforces IAM for clients while using a supported authentication method from the proxy to the database."
+        },
+        {
+          "id": "E",
+          "text": "Associate Amazon RDS Proxy with an RDS read replica and use its endpoint for application writes.",
+          "correct": false,
+          "why": "The proxy cannot be associated with a read replica in an RDS replication configuration."
+        }
+      ],
+      "explanation": "The design must address connection pooling, failover, and IAM authentication for clients. Associate RDS Proxy with the writer and connect applications to the proxy so it can reuse database connections and preserve application connections when reconnecting to a standby. Require IAM for clients; the proxy may use Secrets Manager credentials to connect to the database. A read replica cannot be the proxy's associated target in this replication configuration, and password authentication by clients does not satisfy the IAM requirement.",
+      "keywordCues": [
+        "IAM database authentication enabled",
+        "standby instance for failover",
+        "many short-lived connections",
+        "clients to authenticate with IAM",
+        "pool connections and preserve application connections"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+      ],
+      "es": {
+        "stem": "La aplicación de una tienda escribe en una instancia de RDS con IAM database authentication habilitada y una instancia en espera para failover. Durante las promociones, los clientes de la aplicación crean muchas conexiones de corta duración; seguridad exige que se autentiquen con IAM. La empresa quiere agrupar conexiones y conservar las conexiones de la aplicación durante una falla de la base de datos. ¿Qué DOS decisiones de diseño cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asociar Amazon RDS Proxy con la instancia escritora y usar su endpoint para las conexiones de la aplicación.",
+            "why": "Un proxy asociado con la instancia escritora puede agrupar conexiones y reconectarse a una instancia en espera conservando las conexiones de la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Enviar los clientes directamente a la instancia y abrir una conexión nueva por solicitud.",
+            "why": "Las conexiones directas no proporcionan el grupo de conexiones del proxy ni conservan las conexiones de la aplicación mediante el failover del proxy."
+          },
+          {
+            "id": "C",
+            "text": "Permitir que los clientes se autentiquen ante el proxy con contraseñas de base de datos guardadas en Secrets Manager en lugar de IAM.",
+            "why": "Los clientes de este proxy deben autenticarse con IAM porque la instancia de RDS tiene IAM authentication habilitada."
+          },
+          {
+            "id": "D",
+            "text": "Exigir IAM a los clientes del proxy y usar credenciales de Secrets Manager para la conexión entre el proxy y la base de datos.",
+            "why": "Esto exige IAM a los clientes y usa un método admitido para autenticar al proxy ante la base de datos."
+          },
+          {
+            "id": "E",
+            "text": "Asociar Amazon RDS Proxy con una read replica de RDS y usar su endpoint para las escrituras.",
+            "why": "No puedes asociar el proxy con una read replica en una configuración de replicación de RDS."
+          }
+        ],
+        "explanation": "El diseño debe cubrir el grupo de conexiones, el failover y IAM para los clientes. Asocia RDS Proxy con la instancia escritora y conecta las aplicaciones al proxy para que reutilice conexiones y conserve las de la aplicación al reconectarse a una instancia en espera. Exige IAM a los clientes; el proxy puede usar credenciales de Secrets Manager para conectarse a la base de datos. Una read replica no puede ser el destino asociado en esta configuración, y las contraseñas de los clientes no cumplen el requisito de IAM."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rds-proxy--r0",
+      "conceptId": "rds-proxy",
+      "kind": "recall",
+      "prompt": "Lambda functions cause bursts of new RDS connections. What feature would you add, and how does it protect the database?",
+      "promptEs": "Las funciones Lambda generan picos de conexiones nuevas a RDS. ¿Qué feature agregarías y cómo protege la base de datos?",
+      "idealAnswer": "Add Amazon RDS Proxy between the functions and the database. It pools and reuses database connections, reducing the overhead of repeatedly opening them and controlling how many connections reach the database.",
+      "rubric": [
+        "Names Amazon RDS Proxy.",
+        "Explains pooling or reuse of database connections.",
+        "Explains reduced connection-establishment overhead or protection against connection oversubscription."
+      ]
+    }
+  ]
+}

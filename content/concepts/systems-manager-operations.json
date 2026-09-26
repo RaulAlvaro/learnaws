@@ -1,0 +1,238 @@
+{
+  "conceptId": "systems-manager-operations",
+  "card": {
+    "en": {
+      "tldr": "AWS Systems Manager operates managed nodes at scale without logging into servers. Choose Patch Manager for patch compliance and installation, Run Command for remote commands, and a scheduled diagnosis and remediation runbook when nodes stop reporting as managed.",
+      "whenToUse": [
+        "Apply approved patches and report patch compliance across a fleet.",
+        "Run administrative commands remotely without SSH or a bastion host.",
+        "Repeatedly diagnose why nodes cannot connect to Systems Manager and guide remediation."
+      ],
+      "keyFacts": [
+        "A managed node needs SSM Agent installed and able to communicate with Systems Manager.",
+        "Patch Manager supports Scan for reporting missing patches and Scan and install for installing them.",
+        "A Quick Setup patch policy can define patching across accounts and Regions in an organization.",
+        "Patch compliance is measured against the organization's patch baseline, not against every available patch.",
+        "Systems Manager offers a diagnosis and remediation runbook that can run on a schedule to investigate nodes that are not reporting as managed."
+      ],
+      "gotchas": [
+        "A Scan reports missing patches; it does not install them.",
+        "Quick Setup Host Management patching scans but cannot install patches.",
+        "Patch Manager does not perform major operating system version upgrades.",
+        "Patch-baseline compliance does not, by itself, mean a node is secure."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "approved patches across multiple accounts and Regions",
+        "remote administrative commands without SSH",
+        "nodes no longer reporting as managed",
+        "scan for missing patches before installation"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Systems Manager permite operar nodos administrados a escala sin iniciar sesión en los servidores. Elige Patch Manager para cumplimiento e instalación de parches, Run Command para comandos remotos y un runbook programado de diagnóstico y remediación cuando los nodos dejan de aparecer como administrados.",
+      "whenToUse": [
+        "Necesitas aplicar parches aprobados y consultar el cumplimiento de una flota.",
+        "Necesitas ejecutar comandos administrativos de forma remota sin SSH ni bastion host.",
+        "Necesitas diagnosticar periódicamente por qué algunos nodos no se conectan a Systems Manager y orientar su remediación."
+      ],
+      "keyFacts": [
+        "Para que un nodo sea administrado, debe tener SSM Agent instalado y poder comunicarse con Systems Manager.",
+        "Patch Manager ofrece Scan para informar sobre parches faltantes y Scan and install para instalarlos.",
+        "Una patch policy de Quick Setup puede definir el parcheo entre cuentas y Regions de una organización.",
+        "El cumplimiento de parches se mide según la patch baseline de la organización, no según todos los parches disponibles.",
+        "Systems Manager ofrece un runbook de diagnóstico y remediación que puedes programar para investigar nodos que no aparecen como administrados."
+      ],
+      "gotchas": [
+        "Scan informa sobre parches faltantes, pero no los instala.",
+        "El parcheo mediante Quick Setup Host Management solo analiza; no puede instalar parches.",
+        "Patch Manager no realiza actualizaciones de versión principal del sistema operativo.",
+        "Cumplir una patch baseline no significa, por sí solo, que un nodo sea seguro."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "approved patches across multiple accounts and Regions",
+        "remote administrative commands without SSH",
+        "nodes no longer reporting as managed",
+        "scan for missing patches before installation"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html",
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "systems-manager-operations--85b041df",
+      "conceptId": "systems-manager-operations",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retail company has managed EC2 instances in several AWS accounts and Regions. Its operations team needs recurring scans and installation of approved patches, with patch compliance defined by the company's own rules. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a separate Systems Manager maintenance window for patching in each account-Region pair.",
+          "correct": false,
+          "why": "Maintenance windows can patch nodes, but each task targets only one account-Region pair and requires more separate configurations."
+        },
+        {
+          "id": "B",
+          "text": "Configure a Quick Setup patch policy with a custom patch baseline for the organization.",
+          "correct": true,
+          "why": "A patch policy can schedule scans and installations across accounts and Regions, while the custom baseline defines approved patches."
+        },
+        {
+          "id": "C",
+          "text": "Configure Quick Setup Host Management and use its patch compliance reports.",
+          "correct": false,
+          "why": "Host Management can scan and report missing patches but cannot install them."
+        },
+        {
+          "id": "D",
+          "text": "Use Patch Manager Patch now in each account-Region pair whenever reports show missing patches.",
+          "correct": false,
+          "why": "Patch now can install patches but is on demand rather than the requested recurring, centrally configured approach."
+        }
+      ],
+      "explanation": "The deciding requirements are recurring installation across several accounts and Regions, plus company-defined approval rules. A Quick Setup patch policy can cover an organization with scanning and installation schedules, and a custom patch baseline defines which patches count toward compliance. Host Management is a tempting alternative, but its patch operation only scans and reports. Maintenance windows and Patch now require separate operations for each account-Region pair.",
+      "keywordCues": [
+        "several AWS accounts and Regions",
+        "recurring scans and installation",
+        "company's own rules",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html",
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista tiene instancias EC2 administradas en varias cuentas de AWS y Regions. Su equipo de operaciones necesita análisis e instalación recurrentes de parches aprobados, con el cumplimiento definido por sus propias reglas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura una maintenance window de Systems Manager por separado para parchear en cada par cuenta-Region.",
+            "why": "Las maintenance windows pueden parchear nodos, pero cada tarea abarca solo un par cuenta-Region y requiere más configuraciones independientes."
+          },
+          {
+            "id": "B",
+            "text": "Configura una patch policy de Quick Setup con una custom patch baseline para la organización.",
+            "why": "Una patch policy puede programar análisis e instalaciones entre cuentas y Regions, mientras que la custom patch baseline define los parches aprobados."
+          },
+          {
+            "id": "C",
+            "text": "Configura Quick Setup Host Management y usa sus informes de cumplimiento de parches.",
+            "why": "Host Management puede analizar e informar sobre parches faltantes, pero no puede instalarlos."
+          },
+          {
+            "id": "D",
+            "text": "Usa Patch Manager Patch now en cada par cuenta-Region cuando los informes muestren parches faltantes.",
+            "why": "Patch now puede instalar parches, pero funciona bajo demanda y no proporciona el enfoque recurrente y configurado de forma centralizada que se solicita."
+          }
+        ],
+        "explanation": "Lo decisivo es la instalación recurrente entre varias cuentas y Regions, junto con reglas propias para aprobar parches. Una patch policy de Quick Setup puede abarcar una organización con programas de análisis e instalación; una custom patch baseline define qué parches cuentan para el cumplimiento. Host Management parece una alternativa, pero su operación de parcheo solo analiza y genera informes. Las maintenance windows y Patch now requieren operaciones separadas por cada par cuenta-Region."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "systems-manager-operations--86d32094",
+      "conceptId": "systems-manager-operations",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company must make the same administrative configuration change on a group of managed nodes. Its security policy prohibits operators from logging into servers or opening inbound access for SSH or remote PowerShell. The change is not a patch installation. Which Systems Manager tool meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Patch Manager Scan and install to apply the configuration change.",
+          "correct": false,
+          "why": "Patch Manager Scan and install applies missing approved patches, not the requested administrative configuration change."
+        },
+        {
+          "id": "B",
+          "text": "Start a Session Manager session on each node and make the change interactively.",
+          "correct": false,
+          "why": "Interactive sessions add per-node work when the same change must be sent to a group."
+        },
+        {
+          "id": "C",
+          "text": "Use Systems Manager Run Command to execute the change remotely on the group.",
+          "correct": true,
+          "why": "Run Command executes commands remotely on managed nodes without operators logging into the servers."
+        },
+        {
+          "id": "D",
+          "text": "Use Patch Manager Scan to identify nodes needing the configuration change.",
+          "correct": false,
+          "why": "Patch Manager Scan reports missing patches and does not execute the configuration change."
+        }
+      ],
+      "explanation": "The company needs a remote administrative action across a group, not a patch operation or an interactive visit to each node. Systems Manager Run Command is the fit for running commands remotely on managed nodes without SSH, remote PowerShell, or server logins. Patch Manager Scan and install addresses patches instead. Session Manager provides node access, but interactive changes on each node create unnecessary work here.",
+      "keywordCues": [
+        "same administrative configuration change",
+        "group of managed nodes",
+        "prohibits operators from logging into servers",
+        "not a patch installation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html",
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios debe realizar el mismo cambio de configuración administrativa en un grupo de nodos administrados. Su política de seguridad prohíbe que los operadores inicien sesión en los servidores o abran acceso entrante para SSH o remote PowerShell. El cambio no es una instalación de parches. ¿Qué herramienta de Systems Manager cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Patch Manager Scan and install para aplicar el cambio de configuración.",
+            "why": "Patch Manager Scan and install aplica parches aprobados que faltan, no el cambio de configuración administrativa solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Inicia una sesión de Session Manager en cada nodo y realiza el cambio de forma interactiva.",
+            "why": "Las sesiones interactivas agregan trabajo por nodo cuando debes enviar el mismo cambio a un grupo."
+          },
+          {
+            "id": "C",
+            "text": "Usa Systems Manager Run Command para ejecutar el cambio de forma remota en el grupo.",
+            "why": "Run Command ejecuta comandos de forma remota en nodos administrados sin que los operadores inicien sesión en los servidores."
+          },
+          {
+            "id": "D",
+            "text": "Usa Patch Manager Scan para identificar los nodos que necesitan el cambio de configuración.",
+            "why": "Patch Manager Scan informa sobre parches faltantes y no ejecuta el cambio de configuración."
+          }
+        ],
+        "explanation": "La empresa necesita una acción administrativa remota en un grupo, no una operación de parcheo ni una visita interactiva a cada nodo. Systems Manager Run Command permite ejecutar comandos de forma remota en nodos administrados sin SSH, remote PowerShell ni inicio de sesión en los servidores. Patch Manager Scan and install se ocupa de los parches. Session Manager permite acceder a nodos, pero hacer cambios interactivos en cada uno genera trabajo innecesario en este caso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "systems-manager-operations--r0",
+      "conceptId": "systems-manager-operations",
+      "kind": "recall",
+      "prompt": "How would you centrally schedule approved patch installation across accounts and Regions, and what defines patch compliance?",
+      "promptEs": "¿Cómo programarías de forma centralizada la instalación de parches aprobados entre cuentas y Regions, y qué define el cumplimiento de parches?",
+      "idealAnswer": "Use a Systems Manager Patch Manager patch policy in Quick Setup to schedule patch operations across accounts and Regions. A patch baseline defines which patches are approved and therefore required for a node to be patch compliant.",
+      "rubric": [
+        "Names a Patch Manager patch policy in Quick Setup.",
+        "Explains that it can schedule patching across accounts and Regions.",
+        "Identifies the patch baseline as the definition of approved patches and patch compliance."
+      ]
+    }
+  ]
+}

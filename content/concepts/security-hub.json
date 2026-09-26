@@ -1,0 +1,277 @@
+{
+  "conceptId": "security-hub",
+  "card": {
+    "en": {
+      "tldr": "AWS Security Hub CSPM brings security findings from accounts and integrated services into one view and runs checks against security standards and best practices. Choose it when the requirement is to assess overall security posture, not just consume findings from one source.",
+      "whenToUse": [
+        "Collect findings from GuardDuty, Inspector, and Macie across accounts in one view.",
+        "Run security controls against standards such as AWS Foundational Security Best Practices or CIS.",
+        "Prioritize findings and trigger responses to specific findings."
+      ],
+      "keyFacts": [
+        "Security Hub CSPM receives findings from GuardDuty, Inspector, Macie, and supported third-party products.",
+        "It runs continuous security checks and generates control findings.",
+        "AWS Config must be enabled and record resources for most control findings.",
+        "For full compliance with CIS AWS Foundations Benchmark security checks, enable Security Hub CSPM in all supported AWS Regions.",
+        "It processes findings only in Regions where it is enabled and does not retroactively consolidate findings generated before enablement."
+      ],
+      "gotchas": [
+        "An integrated finding source is not a substitute for Security Hub CSPM's consolidated view and standards checks.",
+        "Enabling Security Hub CSPM in one Region does not make it process findings in every Region.",
+        "Enabling Security Hub CSPM without the required AWS Config recording can leave most control findings unavailable."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon GuardDuty",
+          "difference": "GuardDuty can send findings to Security Hub CSPM; Security Hub CSPM also consolidates other providers' findings and runs standards checks."
+        },
+        {
+          "concept": "AWS Firewall Manager",
+          "difference": "Firewall Manager centrally enforces security policies; Security Hub CSPM consolidates findings and assesses security controls."
+        },
+        {
+          "concept": "Amazon Detective",
+          "difference": "Detective supports investigation of findings; Security Hub CSPM provides the consolidated findings and standards-check view."
+        }
+      ],
+      "examCues": [
+        "one view across accounts and security services",
+        "findings from GuardDuty, Inspector, and Macie",
+        "check against security standards",
+        "control findings for CIS checks"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Security Hub CSPM reúne hallazgos de cuentas y servicios integrados en una sola vista y ejecuta controles basados en estándares y prácticas recomendadas de seguridad. Elígelo cuando necesites evaluar la postura de seguridad general, no solo consultar los hallazgos de una fuente.",
+      "whenToUse": [
+        "Necesitas reunir hallazgos de GuardDuty, Inspector y Macie de varias cuentas en una sola vista.",
+        "Necesitas ejecutar controles de estándares como AWS Foundational Security Best Practices o CIS.",
+        "Necesitas priorizar hallazgos y activar respuestas ante hallazgos específicos."
+      ],
+      "keyFacts": [
+        "Security Hub CSPM recibe hallazgos de GuardDuty, Inspector, Macie y productos de terceros compatibles.",
+        "Ejecuta controles de seguridad continuos y genera hallazgos de controles.",
+        "Para generar la mayoría de los hallazgos de controles, debes habilitar AWS Config y registrar recursos.",
+        "Para cumplir plenamente con los controles de CIS AWS Foundations Benchmark, habilita Security Hub CSPM en todas las AWS Regions compatibles.",
+        "Solo procesa hallazgos en las Regions donde está habilitado y no consolida retroactivamente hallazgos generados antes de habilitarlo."
+      ],
+      "gotchas": [
+        "Un servicio que aporta hallazgos no reemplaza la vista consolidada ni los controles de estándares de Security Hub CSPM.",
+        "Habilitar Security Hub CSPM en una sola Region no hace que procese hallazgos en todas las Regions.",
+        "Sin el registro de recursos requerido en AWS Config, Security Hub CSPM no puede generar la mayoría de los hallazgos de controles."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon GuardDuty",
+          "difference": "GuardDuty puede enviar hallazgos a Security Hub CSPM; Security Hub CSPM también consolida otros proveedores y ejecuta controles de estándares."
+        },
+        {
+          "concept": "AWS Firewall Manager",
+          "difference": "Firewall Manager aplica políticas de seguridad de forma centralizada; Security Hub CSPM consolida hallazgos y evalúa controles."
+        },
+        {
+          "concept": "Amazon Detective",
+          "difference": "Detective ayuda a investigar hallazgos; Security Hub CSPM ofrece la vista consolidada de hallazgos y controles de estándares."
+        }
+      ],
+      "examCues": [
+        "one view across accounts and security services",
+        "findings from GuardDuty, Inspector, and Macie",
+        "check against security standards",
+        "control findings for CIS checks"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "security-hub--0cd06ce7",
+      "conceptId": "security-hub",
+      "secondaryConcepts": [
+        "guardduty"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company wants a cross-account view of findings from its integrated security services and results from security standards checks. When a particular finding appears, it wants to trigger an automatic response without waiting for an analyst to select an action. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Security Hub CSPM for the consolidated findings and checks, and require analysts to invoke custom actions for matching findings.",
+          "correct": false,
+          "why": "Requiring an analyst to select an action conflicts with the automatic-response requirement."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon GuardDuty for the consolidated findings and checks, and integrate its findings with Amazon EventBridge.",
+          "correct": false,
+          "why": "GuardDuty does not provide the requested consolidated view of integrated providers and security standards checks."
+        },
+        {
+          "id": "C",
+          "text": "Use Security Hub CSPM for the consolidated findings and checks, and rely only on automation rules to suppress matching findings.",
+          "correct": false,
+          "why": "Suppressing findings changes how they are handled but does not meet the requirement to trigger an automatic response."
+        },
+        {
+          "id": "D",
+          "text": "Use Security Hub CSPM for the consolidated findings and checks, and integrate it with Amazon EventBridge to trigger responses.",
+          "correct": true,
+          "why": "Security Hub CSPM provides the requested view and checks, and its EventBridge integration can trigger automatic responses to specific findings."
+        }
+      ],
+      "explanation": "The company needs both Security Hub CSPM's consolidated findings and standards checks, plus an automatic response to a specific finding. Security Hub CSPM integrates with Amazon EventBridge for that response. Automation rules can modify or suppress findings, but suppressing one is not the requested response; an analyst-invoked action also fails the no-wait requirement.",
+      "keywordCues": [
+        "cross-account view of findings",
+        "results from security standards checks",
+        "trigger an automatic response",
+        "without waiting for an analyst to select an action"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios quiere una vista entre cuentas de los hallazgos de sus servicios de seguridad integrados y los resultados de los controles de estándares de seguridad. Cuando aparezca un hallazgo específico, quiere activar una respuesta automática sin esperar a que un analista seleccione una acción. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Security Hub CSPM para consolidar hallazgos y controles, y pedir a los analistas que invoquen custom actions para los hallazgos coincidentes.",
+            "why": "Pedir a un analista que seleccione una acción contradice el requisito de respuesta automática."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon GuardDuty para consolidar hallazgos y controles, e integrar sus hallazgos con Amazon EventBridge.",
+            "why": "GuardDuty no ofrece la vista consolidada de proveedores integrados ni los controles de estándares solicitados."
+          },
+          {
+            "id": "C",
+            "text": "Usar Security Hub CSPM para consolidar hallazgos y controles, y depender solo de automation rules para suprimir los hallazgos coincidentes.",
+            "why": "Suprimir hallazgos cambia su tratamiento, pero no cumple el requisito de activar una respuesta automática."
+          },
+          {
+            "id": "D",
+            "text": "Usar Security Hub CSPM para consolidar hallazgos y controles, e integrarlo con Amazon EventBridge para activar respuestas.",
+            "why": "Security Hub CSPM ofrece la vista y los controles solicitados, y su integración con EventBridge permite activar respuestas automáticas ante hallazgos específicos."
+          }
+        ],
+        "explanation": "La empresa necesita tanto los hallazgos consolidados y los controles de Security Hub CSPM como una respuesta automática ante un hallazgo específico. Security Hub CSPM se integra con Amazon EventBridge para activar esa respuesta. Las automation rules pueden modificar o suprimir hallazgos, pero suprimir uno no es la respuesta solicitada; una acción iniciada por un analista tampoco cumple el requisito de no esperar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "security-hub--e8250624",
+      "conceptId": "security-hub",
+      "secondaryConcepts": [
+        "guardduty",
+        "inspector",
+        "macie"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retail company has several AWS accounts. Its security team already receives findings from Amazon GuardDuty, Amazon Inspector, and Amazon Macie, but reviews each source separately. The team also needs checks against AWS security best practices and a consolidated view across accounts. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Macie as the central view for the existing findings and best-practice checks.",
+          "correct": false,
+          "why": "Macie can send findings to Security Hub CSPM but does not fulfill the combined aggregation and standards-check requirement."
+        },
+        {
+          "id": "B",
+          "text": "Enable AWS Security Hub CSPM to collect the integrated findings and run security standards checks.",
+          "correct": true,
+          "why": "Security Hub CSPM consolidates findings across accounts and integrated services and generates control findings from standards checks."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon GuardDuty as the central view for the existing findings and best-practice checks.",
+          "correct": false,
+          "why": "GuardDuty is a finding source, not the service described for consolidating these providers and running standards checks."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon Inspector as the central view for the existing findings and best-practice checks.",
+          "correct": false,
+          "why": "Inspector can send findings to Security Hub CSPM but does not provide the requested consolidated standards-check view."
+        }
+      ],
+      "explanation": "The deciding requirements are a consolidated view across accounts and checks against security best practices. Security Hub CSPM collects findings from the named services and runs controls that generate findings. GuardDuty, Inspector, and Macie are integrated finding sources, so choosing any one of them does not meet both requirements.",
+      "keywordCues": [
+        "findings from Amazon GuardDuty, Amazon Inspector, and Amazon Macie",
+        "checks against AWS security best practices",
+        "consolidated view across accounts"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista tiene varias cuentas de AWS. Su equipo de seguridad ya recibe hallazgos de Amazon GuardDuty, Amazon Inspector y Amazon Macie, pero revisa cada fuente por separado. El equipo también necesita controles basados en las prácticas recomendadas de seguridad de AWS y una vista consolidada entre cuentas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon Macie como vista central de los hallazgos existentes y los controles de prácticas recomendadas.",
+            "why": "Macie puede enviar hallazgos a Security Hub CSPM, pero no satisface el requisito conjunto de consolidación y controles de estándares."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar AWS Security Hub CSPM para recopilar los hallazgos integrados y ejecutar controles de estándares de seguridad.",
+            "why": "Security Hub CSPM consolida hallazgos entre cuentas y servicios integrados, y genera hallazgos de controles de estándares."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon GuardDuty como vista central de los hallazgos existentes y los controles de prácticas recomendadas.",
+            "why": "GuardDuty aporta hallazgos, pero no es el servicio indicado para consolidar estos proveedores y ejecutar controles de estándares."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon Inspector como vista central de los hallazgos existentes y los controles de prácticas recomendadas.",
+            "why": "Inspector puede enviar hallazgos a Security Hub CSPM, pero no proporciona la vista consolidada de controles de estándares solicitada."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son una vista consolidada entre cuentas y controles basados en prácticas recomendadas de seguridad. Security Hub CSPM recopila hallazgos de los servicios mencionados y ejecuta controles que generan hallazgos. GuardDuty, Inspector y Macie son fuentes integradas de hallazgos; elegir solo uno no cumple ambos requisitos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "security-hub--r0",
+      "conceptId": "security-hub",
+      "kind": "recall",
+      "prompt": "Which service gives you cross-account findings from GuardDuty, Inspector, and Macie alongside security standards checks, and why?",
+      "promptEs": "¿Qué servicio te da hallazgos entre cuentas de GuardDuty, Inspector y Macie junto con controles de estándares de seguridad, y por qué?",
+      "idealAnswer": "AWS Security Hub CSPM collects findings from those integrated services across accounts into a consolidated view. It also runs security controls against standards and generates control findings.",
+      "rubric": [
+        "Names AWS Security Hub CSPM.",
+        "Explains cross-account aggregation of integrated findings.",
+        "Mentions standards checks and control findings."
+      ]
+    },
+    {
+      "id": "security-hub--r1",
+      "conceptId": "security-hub",
+      "kind": "why-not",
+      "prompt": "Why isn't GuardDuty alone sufficient when a team needs one view of several providers' findings and best-practice control checks?",
+      "promptEs": "¿Por qué GuardDuty por sí solo no basta si un equipo necesita una vista de hallazgos de varios proveedores y controles de prácticas recomendadas?",
+      "idealAnswer": "GuardDuty can provide findings to Security Hub CSPM, but it is not the consolidated standards-check view in this scenario. Security Hub CSPM brings together providers' findings and generates its own control findings.",
+      "rubric": [
+        "Identifies GuardDuty as a source of findings rather than the requested consolidated view.",
+        "Identifies Security Hub CSPM as the aggregator.",
+        "Mentions Security Hub CSPM's standards checks or control findings."
+      ]
+    }
+  ]
+}

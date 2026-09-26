@@ -1,0 +1,441 @@
+{
+  "conceptId": "database-migration-dms-sct",
+  "card": {
+    "en": {
+      "tldr": "AWS DMS moves database data and can replicate ongoing changes to keep a target in sync before cutover. For a change of database engine, convert and apply the schema with DMS Schema Conversion or AWS SCT, then use DMS to move the data; a same-engine move generally does not need schema conversion.",
+      "whenToUse": [
+        "A database must move while source data continues to change.",
+        "A source and target use different database engines, requiring compatible schema and code objects.",
+        "A database is moving to AWS while retaining its current engine."
+      ],
+      "keyFacts": [
+        "AWS DMS supports one-time data migrations and ongoing change replication.",
+        "DMS Schema Conversion converts schemas, not data; DMS data migration features move the data.",
+        "DMS Schema Conversion can assess which objects convert automatically and which need manual work.",
+        "DMS Schema Conversion is fully managed and web-based; AWS SCT is a downloadable local tool.",
+        "DMS Schema Conversion can convert schemas for supported targets on Aurora, Amazon RDS, or Amazon Redshift."
+      ],
+      "gotchas": [
+        "Ongoing replication alone does not load existing rows; include an initial data load when the target starts empty.",
+        "DMS data movement is not a substitute for converting incompatible schema objects.",
+        "Do not choose a server-rehosting or disaster-recovery service when the requirement is a database-engine migration."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Application Migration Service (MGN)",
+          "difference": "MGN rehosts servers to EC2; DMS moves database data and can pair with schema conversion for an engine change."
+        },
+        {
+          "concept": "AWS Elastic Disaster Recovery (DRS)",
+          "difference": "DRS replicates servers for recovery; it does not replace database schema conversion and data migration."
+        }
+      ],
+      "examCues": [
+        "existing rows plus ongoing changes",
+        "same database engine, short cutover",
+        "Oracle to Aurora PostgreSQL",
+        "assess schema conversion effort"
+      ]
+    },
+    "es": {
+      "tldr": "AWS DMS mueve datos de bases de datos y puede replicar los cambios continuos para mantener sincronizado el destino antes del cambio. Si cambias de motor, convierte y aplica el esquema con DMS Schema Conversion o AWS SCT y luego usa DMS para mover los datos; un traslado al mismo motor normalmente no requiere conversión del esquema.",
+      "whenToUse": [
+        "Necesitas trasladar una base de datos mientras siguen cambiando los datos de origen.",
+        "El origen y el destino usan motores distintos y necesitas adaptar el esquema y los objetos de código.",
+        "Trasladas una base de datos a AWS sin cambiar de motor."
+      ],
+      "keyFacts": [
+        "AWS DMS admite migraciones de datos de una sola vez y replicación de cambios continuos.",
+        "DMS Schema Conversion convierte esquemas, no datos; las funciones de migración de DMS mueven los datos.",
+        "DMS Schema Conversion puede evaluar qué objetos se convierten automáticamente y cuáles requieren trabajo manual.",
+        "DMS Schema Conversion es una función web totalmente administrada; AWS SCT se descarga para usarlo localmente.",
+        "DMS Schema Conversion puede convertir esquemas para destinos admitidos en Aurora, Amazon RDS o Amazon Redshift."
+      ],
+      "gotchas": [
+        "La replicación de cambios por sí sola no carga las filas existentes; incluye una carga inicial si el destino comienza vacío.",
+        "Mover datos con DMS no sustituye la conversión de objetos de esquema incompatibles.",
+        "No elijas un servicio para rehostear servidores o para recuperación ante desastres si necesitas cambiar el motor de una base de datos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Application Migration Service (MGN)",
+          "difference": "MGN rehostea servidores en EC2; DMS mueve datos y puede combinarse con conversión del esquema para cambiar de motor."
+        },
+        {
+          "concept": "AWS Elastic Disaster Recovery (DRS)",
+          "difference": "DRS replica servidores para su recuperación; no sustituye la conversión del esquema ni la migración de datos."
+        }
+      ],
+      "examCues": [
+        "existing rows plus ongoing changes",
+        "same database engine, short cutover",
+        "Oracle to Aurora PostgreSQL",
+        "assess schema conversion effort"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html",
+      "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_SchemaConversion.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "database-migration-dms-sct--2dafa45b",
+      "conceptId": "database-migration-dms-sct",
+      "secondaryConcepts": [
+        "application-migration-service"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher plans to move a SQL Server catalog to Amazon RDS for PostgreSQL but has not committed to the migration. The catalog uses views and functions, and the team needs to identify which schema objects require manual work before estimating the project. Which approach meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run an AWS DMS data migration task and use the transferred row count to estimate schema work.",
+          "correct": false,
+          "why": "A row count does not identify views or functions that need manual conversion."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Application Migration Service to replicate the SQL Server host and inspect the replicated server.",
+          "correct": false,
+          "why": "Replicating a server does not assess SQL Server objects for conversion to PostgreSQL."
+        },
+        {
+          "id": "C",
+          "text": "Run DMS Fleet Advisor and use its infrastructure inventory as the schema conversion assessment.",
+          "correct": false,
+          "why": "Fleet Advisor inventories migration candidates rather than reporting which schema objects need manual conversion."
+        },
+        {
+          "id": "D",
+          "text": "Run a DMS Schema Conversion assessment for the source and target.",
+          "correct": true,
+          "why": "Its assessment reports what can convert automatically and what needs manual work."
+        }
+      ],
+      "explanation": "The deciding requirement is to estimate manual schema work before committing to a different engine. DMS Schema Conversion can assess source metadata and report what converts automatically and what needs manual attention. DMS Fleet Advisor helps inventory infrastructure, but its inventory is not a schema conversion assessment. Moving rows or replicating a server likewise does not answer the question about views and functions.",
+      "keywordCues": [
+        "SQL Server catalog to Amazon RDS for PostgreSQL",
+        "has not committed to the migration",
+        "which schema objects require manual work"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html",
+        "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_SchemaConversion.html"
+      ],
+      "es": {
+        "stem": "Una editorial planea trasladar un catálogo de SQL Server a Amazon RDS for PostgreSQL, pero aún no ha aprobado la migración. El catálogo usa vistas y funciones, y el equipo necesita identificar qué objetos del esquema requieren trabajo manual antes de estimar el proyecto. ¿Qué enfoque cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta una tarea de migración de datos de AWS DMS y usa el número de filas transferidas para estimar el trabajo del esquema.",
+            "why": "El número de filas no identifica vistas ni funciones que requieren conversión manual."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS Application Migration Service para replicar el servidor de SQL Server e inspecciona el servidor replicado.",
+            "why": "Replicar un servidor no evalúa los objetos de SQL Server para convertirlos a PostgreSQL."
+          },
+          {
+            "id": "C",
+            "text": "Ejecuta DMS Fleet Advisor y usa su inventario de infraestructura como evaluación de conversión del esquema.",
+            "why": "Fleet Advisor inventaría candidatos para migración, pero no informa qué objetos del esquema requieren conversión manual."
+          },
+          {
+            "id": "D",
+            "text": "Ejecuta una evaluación de DMS Schema Conversion para el origen y el destino.",
+            "why": "Su evaluación indica qué se puede convertir automáticamente y qué requiere trabajo manual."
+          }
+        ],
+        "explanation": "El requisito decisivo es estimar el trabajo manual del esquema antes de aprobar el cambio de motor. DMS Schema Conversion puede evaluar los metadatos de origen e indicar qué se convierte automáticamente y qué requiere atención manual. DMS Fleet Advisor ayuda a inventariar la infraestructura, pero ese inventario no es una evaluación de conversión del esquema. Mover filas o replicar un servidor tampoco responde la pregunta sobre vistas y funciones."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "database-migration-dms-sct--c86b96d8",
+      "conceptId": "database-migration-dms-sct",
+      "secondaryConcepts": [
+        "elastic-disaster-recovery"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics firm will retire an on-premises PostgreSQL server and move its application data to Amazon RDS for PostgreSQL. The target already has the required schema, but dispatch records will keep changing during the move. The firm wants to avoid running a database migration server itself and minimize the time the target falls behind. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Elastic Disaster Recovery to replicate the on-premises server and recover it when the firm retires the host.",
+          "correct": false,
+          "why": "Server recovery does not populate and synchronize the specified RDS database target."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS DMS for a one-time load to the RDS target and perform cutover after the load finishes.",
+          "correct": false,
+          "why": "A one-time load misses dispatch records changed during the move."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS DMS to load the existing data and replicate ongoing changes to the RDS target.",
+          "correct": true,
+          "why": "DMS manages migration infrastructure and supports both the existing data load and ongoing change replication."
+        },
+        {
+          "id": "D",
+          "text": "Use DMS Schema Conversion to recreate the PostgreSQL schema and then copy the data once.",
+          "correct": false,
+          "why": "The schema is already present, and a one-time copy does not keep up with changing dispatch records."
+        }
+      ],
+      "explanation": "The existing schema removes the need for schema conversion, but changing dispatch records still require synchronization. AWS DMS can load existing data and replicate ongoing changes, and it manages the migration infrastructure. A one-time load is insufficient because records can change after they are copied. Disaster recovery of the server does not satisfy the requirement to populate the RDS target.",
+      "keywordCues": [
+        "PostgreSQL server",
+        "Amazon RDS for PostgreSQL",
+        "target already has the required schema",
+        "dispatch records will keep changing"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html",
+        "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_SchemaConversion.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística retirará un servidor PostgreSQL local y trasladará los datos de su aplicación a Amazon RDS for PostgreSQL. El destino ya tiene el esquema necesario, pero los registros de despacho seguirán cambiando durante el traslado. La empresa quiere evitar administrar por sí misma un servidor de migración y minimizar el retraso del destino. ¿Qué solución cumple los requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa AWS Elastic Disaster Recovery para replicar el servidor local y recupéralo cuando la empresa retire el servidor.",
+            "why": "Recuperar el servidor no carga ni sincroniza el destino especificado en RDS."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS DMS para una carga única al destino en RDS y realiza el cambio al terminar la carga.",
+            "why": "Una carga única omite los registros de despacho que cambien durante el traslado."
+          },
+          {
+            "id": "C",
+            "text": "Usa AWS DMS para cargar los datos existentes y replicar los cambios continuos al destino en RDS.",
+            "why": "DMS administra la infraestructura de migración y admite tanto la carga de datos existentes como la replicación de cambios."
+          },
+          {
+            "id": "D",
+            "text": "Usa DMS Schema Conversion para recrear el esquema PostgreSQL y luego copia los datos una sola vez.",
+            "why": "El esquema ya existe, y una copia única no mantiene el ritmo de los cambios en los registros de despacho."
+          }
+        ],
+        "explanation": "Como el esquema ya existe, no hace falta convertirlo, pero los registros de despacho cambiantes sí requieren sincronización. AWS DMS puede cargar los datos existentes y replicar los cambios continuos, además de administrar la infraestructura de migración. Una carga única no basta porque los registros pueden cambiar después de copiarse. Recuperar el servidor no cumple el requisito de cargar el destino en RDS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "database-migration-dms-sct--fb0d9000",
+      "conceptId": "database-migration-dms-sct",
+      "secondaryConcepts": [
+        "application-migration-service",
+        "elastic-disaster-recovery"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare analytics team is moving a SQL Server database to Aurora PostgreSQL. The team must adapt its stored procedures for the new engine and move existing patient records while keeping up with new records until cutover. Which TWO actions together meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Assess, convert, and apply the schema with DMS Schema Conversion.",
+          "correct": true,
+          "why": "This addresses compatibility of stored procedures and other schema objects for the supported engine change."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Application Migration Service to rehost the SQL Server machine on EC2.",
+          "correct": false,
+          "why": "Rehosting the machine does not migrate its data into Aurora PostgreSQL."
+        },
+        {
+          "id": "C",
+          "text": "Use DMS Fleet Advisor to inventory the source and treat its report as the converted target schema.",
+          "correct": false,
+          "why": "An infrastructure inventory does not convert or apply the target schema."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS DMS to load existing records and replicate ongoing changes.",
+          "correct": true,
+          "why": "This moves the current data and keeps up with records arriving before cutover."
+        },
+        {
+          "id": "E",
+          "text": "Use AWS Elastic Disaster Recovery to replicate the source server for recovery.",
+          "correct": false,
+          "why": "Server recovery does not adapt stored procedures or move records to the new database engine."
+        }
+      ],
+      "explanation": "This migration has two distinct jobs: adapting schema objects to Aurora PostgreSQL and transferring records that continue to change. DMS Schema Conversion handles the supported SQL Server-to-Aurora PostgreSQL conversion path; AWS DMS handles the initial data load and ongoing replication. Fleet Advisor inventories infrastructure rather than converting stored procedures. Server rehosting or disaster recovery would not produce the requested database-engine migration.",
+      "keywordCues": [
+        "SQL Server database to Aurora PostgreSQL",
+        "adapt its stored procedures",
+        "existing patient records",
+        "new records until cutover"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html",
+        "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_SchemaConversion.html"
+      ],
+      "es": {
+        "stem": "Un equipo de análisis del sector salud traslada una base de datos SQL Server a Aurora PostgreSQL. Debe adaptar sus procedimientos almacenados al nuevo motor y mover los registros existentes de pacientes mientras incorpora los nuevos hasta el cambio. ¿Qué DOS acciones juntas cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Evalúa, convierte y aplica el esquema con DMS Schema Conversion.",
+            "why": "Esto resuelve la compatibilidad de los procedimientos almacenados y otros objetos del esquema en este cambio de motor admitido."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS Application Migration Service para rehostear la máquina SQL Server en EC2.",
+            "why": "Rehostear la máquina no migra sus datos a Aurora PostgreSQL."
+          },
+          {
+            "id": "C",
+            "text": "Usa DMS Fleet Advisor para inventariar el origen y considera su informe como el esquema convertido del destino.",
+            "why": "Un inventario de infraestructura no convierte ni aplica el esquema del destino."
+          },
+          {
+            "id": "D",
+            "text": "Usa AWS DMS para cargar los registros existentes y replicar los cambios continuos.",
+            "why": "Esto mueve los datos actuales y mantiene el ritmo de los registros que llegan antes del cambio."
+          },
+          {
+            "id": "E",
+            "text": "Usa AWS Elastic Disaster Recovery para replicar el servidor de origen con fines de recuperación.",
+            "why": "Recuperar el servidor no adapta los procedimientos almacenados ni mueve registros al nuevo motor."
+          }
+        ],
+        "explanation": "Esta migración tiene dos tareas distintas: adaptar los objetos del esquema a Aurora PostgreSQL y transferir registros que siguen cambiando. DMS Schema Conversion cubre la ruta admitida de SQL Server a Aurora PostgreSQL; AWS DMS realiza la carga inicial y la replicación continua. Fleet Advisor inventaría la infraestructura, pero no convierte procedimientos almacenados. Rehostear o recuperar un servidor tampoco produce la migración solicitada a otro motor."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "database-migration-dms-sct--71bfd3e1",
+      "conceptId": "database-migration-dms-sct",
+      "secondaryConcepts": [
+        "application-migration-service"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is moving an on-premises MySQL database to an Amazon RDS for MySQL database. The target is empty, and agents must keep updating tickets while the initial data is copied. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS DMS to replicate ongoing changes only, then switch the application to the target.",
+          "correct": false,
+          "why": "Ongoing changes alone would not load the existing tickets into the empty target."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Application Migration Service to rehost the database server on EC2 and direct agents to that server.",
+          "correct": false,
+          "why": "Rehosting a server on EC2 does not populate the specified RDS for MySQL target."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS DMS for an initial data load and ongoing change replication, then switch the application to the target.",
+          "correct": true,
+          "why": "DMS moves existing data and keeps the target synchronized as agents continue to update tickets."
+        },
+        {
+          "id": "D",
+          "text": "Use DMS Schema Conversion to convert the MySQL schema and apply it to the target instead of migrating data.",
+          "correct": false,
+          "why": "Schema conversion does not move the existing ticket data, and this move retains the same engine."
+        }
+      ],
+      "explanation": "The empty target needs the existing rows, and updates must continue while those rows are copied. An initial AWS DMS data load addresses the first requirement; ongoing change replication keeps the target synchronized before cutover. Replicating changes without the initial load misses the existing tickets. Changing to the same MySQL engine does not itself call for schema conversion.",
+      "keywordCues": [
+        "Amazon RDS for MySQL",
+        "The target is empty",
+        "keep updating tickets while the initial data is copied"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html",
+        "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_SchemaConversion.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas traslada una base de datos MySQL local a Amazon RDS for MySQL. El destino está vacío y los agentes deben seguir actualizando entradas mientras se copian los datos iniciales. ¿Qué solución cumple los requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa AWS DMS para replicar solo los cambios continuos y luego dirige la aplicación al destino.",
+            "why": "Replicar solo los cambios no cargaría las entradas existentes en el destino vacío."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS Application Migration Service para rehostear el servidor de base de datos en EC2 y dirige allí a los agentes.",
+            "why": "Rehostear un servidor en EC2 no carga el destino especificado de RDS for MySQL."
+          },
+          {
+            "id": "C",
+            "text": "Usa AWS DMS para una carga inicial de datos y la replicación de cambios continuos; luego dirige la aplicación al destino.",
+            "why": "DMS mueve los datos existentes y mantiene sincronizado el destino mientras los agentes siguen actualizando entradas."
+          },
+          {
+            "id": "D",
+            "text": "Usa DMS Schema Conversion para convertir el esquema MySQL y aplicarlo al destino en lugar de migrar los datos.",
+            "why": "La conversión del esquema no mueve los datos existentes y el traslado conserva el mismo motor."
+          }
+        ],
+        "explanation": "El destino vacío necesita las filas existentes, y las actualizaciones deben continuar durante la copia. Una carga inicial con AWS DMS satisface el primer requisito; la replicación de cambios continuos mantiene sincronizado el destino antes del cambio. Replicar cambios sin la carga inicial omite las entradas existentes. Conservar MySQL no exige por sí mismo convertir el esquema."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "database-migration-dms-sct--r0",
+      "conceptId": "database-migration-dms-sct",
+      "kind": "recall",
+      "prompt": "A same-engine database target is empty, but source writes continue. What migration approach would you choose, and why?",
+      "promptEs": "El destino de una base de datos con el mismo motor está vacío, pero siguen las escrituras en el origen. ¿Qué enfoque eliges y por qué?",
+      "idealAnswer": "Use AWS DMS to load the existing data and replicate ongoing changes so the target stays in sync before cutover. Schema conversion is generally unnecessary when the engine remains the same.",
+      "rubric": [
+        "Names AWS DMS for data migration.",
+        "Includes both initial data load and ongoing change replication.",
+        "Explains why a same-engine move generally needs no schema conversion."
+      ]
+    },
+    {
+      "id": "database-migration-dms-sct--r1",
+      "conceptId": "database-migration-dms-sct",
+      "kind": "why-not",
+      "prompt": "Why would Application Migration Service not replace DMS and schema conversion when moving Oracle data to Aurora PostgreSQL?",
+      "promptEs": "¿Por qué AWS Application Migration Service no sustituye a DMS y la conversión del esquema al mover datos de Oracle a Aurora PostgreSQL?",
+      "idealAnswer": "Application Migration Service rehosts servers to EC2; it does not convert an Oracle schema for Aurora PostgreSQL or move the data into that target as a database-engine migration. Convert and apply the schema with DMS Schema Conversion or AWS SCT, then use AWS DMS to migrate the data.",
+      "rubric": [
+        "Identifies Application Migration Service as server rehosting.",
+        "Explains the need to convert schema objects for the engine change.",
+        "Names AWS DMS for moving the database data."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,444 @@
+{
+  "conceptId": "efs-fundamentals",
+  "card": {
+    "en": {
+      "tldr": "Amazon EFS is elastic, managed NFS file storage for shared access from Linux workloads, including EC2, containers, and Lambda. Choose a Regional file system when the shared files must remain available across Availability Zones; then match throughput and storage class to the access pattern.",
+      "whenToUse": [
+        "Multiple Linux workloads need to read and write the same files using NFS or POSIX permissions.",
+        "Shared files must remain available if an Availability Zone becomes unavailable.",
+        "File-system throughput is unpredictable and should scale without provisioning capacity.",
+        "Infrequently accessed files can tolerate higher first-byte latency."
+      ],
+      "keyFacts": [
+        "EFS supports NFSv4.0 and NFSv4.1 and is accessible from EC2, ECS, EKS, Lambda, and Fargate.",
+        "Regional EFS stores data redundantly across multiple Availability Zones; One Zone stores it in one Availability Zone.",
+        "General Purpose is the default performance mode and has lower per-operation latency than Max I/O.",
+        "Elastic throughput automatically scales with activity; Provisioned throughput specifies a level independently of file-system size; Bursting throughput scales with data stored in Standard.",
+        "Standard is intended for frequently accessed files needing the lowest latency. Infrequent Access and Archive have first-byte latencies of tens of milliseconds.",
+        "EFS does not support use with Windows-based EC2 instances."
+      ],
+      "gotchas": [
+        "One Zone EFS is not a substitute for Regional EFS when data must survive an Availability Zone loss.",
+        "Max I/O has higher per-operation latency than General Purpose and cannot be used with Elastic throughput.",
+        "Bursting throughput depends on the amount of data in Standard and uses burst credits; it is not the automatic, activity-based choice for unpredictable demand.",
+        "A shared NFS file system is not interchangeable with S3 object storage or an EBS block volume."
+      ],
+      "confusedWith": [
+        {
+          "concept": "s3-fundamentals",
+          "difference": "S3 stores objects; EFS provides shared NFS file-system access and POSIX permissions."
+        },
+        {
+          "concept": "ebs-volume-types",
+          "difference": "EBS provides block volumes; EFS provides an elastic file system shared by many compute clients."
+        },
+        {
+          "concept": "fsx-windows-file-server",
+          "difference": "Choose FSx for Windows File Server for Windows file-sharing requirements, not EFS for Windows-based EC2 instances."
+        }
+      ],
+      "examCues": [
+        "shared NFS directory across Linux instances",
+        "same files from containers and Lambda",
+        "shared files available after an AZ outage",
+        "unpredictable file-system throughput",
+        "infrequently accessed files can tolerate higher latency"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon EFS ofrece almacenamiento de archivos NFS elástico y administrado para acceso compartido desde cargas Linux, incluidas EC2, contenedores y Lambda. Elige un sistema de archivos Regional si los archivos deben seguir disponibles entre Availability Zones; después ajusta el throughput y la clase de almacenamiento al patrón de acceso.",
+      "whenToUse": [
+        "Varias cargas Linux necesitan leer y escribir los mismos archivos mediante NFS o permisos POSIX.",
+        "Los archivos compartidos deben seguir disponibles si una Availability Zone deja de estar disponible.",
+        "El throughput del sistema de archivos es impredecible y debe ajustarse sin aprovisionar capacidad.",
+        "Los archivos de acceso poco frecuente pueden tolerar mayor latencia para obtener el primer byte."
+      ],
+      "keyFacts": [
+        "EFS admite NFSv4.0 y NFSv4.1, y es accesible desde EC2, ECS, EKS, Lambda y Fargate.",
+        "EFS Regional almacena los datos de forma redundante en varias Availability Zones; One Zone los almacena en una sola.",
+        "General Purpose es el performance mode predeterminado y tiene menor latencia por operación que Max I/O.",
+        "Elastic throughput se ajusta automáticamente a la actividad; Provisioned throughput establece un nivel independiente del tamaño; Bursting throughput depende de los datos almacenados en Standard.",
+        "Standard está orientada a archivos de acceso frecuente que necesitan la menor latencia. Infrequent Access y Archive tienen latencias de decenas de milisegundos para el primer byte.",
+        "EFS no admite su uso con instancias EC2 basadas en Windows."
+      ],
+      "gotchas": [
+        "One Zone EFS no sustituye a Regional EFS cuando los datos deben sobrevivir a la pérdida de una Availability Zone.",
+        "Max I/O tiene mayor latencia por operación que General Purpose y no se puede usar con Elastic throughput.",
+        "Bursting throughput depende de la cantidad de datos en Standard y utiliza burst credits; no es la opción que se ajusta automáticamente a una demanda impredecible.",
+        "Un sistema de archivos NFS compartido no equivale al almacenamiento de objetos de S3 ni a un volumen de bloques EBS."
+      ],
+      "confusedWith": [
+        {
+          "concept": "s3-fundamentals",
+          "difference": "S3 almacena objetos; EFS proporciona acceso compartido a un sistema de archivos NFS y permisos POSIX."
+        },
+        {
+          "concept": "ebs-volume-types",
+          "difference": "EBS proporciona volúmenes de bloques; EFS proporciona un sistema de archivos elástico compartido por muchos clientes de cómputo."
+        },
+        {
+          "concept": "fsx-windows-file-server",
+          "difference": "Elige FSx for Windows File Server para requisitos de archivos compartidos de Windows, no EFS para instancias EC2 basadas en Windows."
+        }
+      ],
+      "examCues": [
+        "shared NFS directory across Linux instances",
+        "same files from containers and Lambda",
+        "shared files available after an AZ outage",
+        "unpredictable file-system throughput",
+        "infrequently accessed files can tolerate higher latency"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html",
+      "https://docs.aws.amazon.com/efs/latest/ug/performance.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "efs-fundamentals--355877cb",
+      "conceptId": "efs-fundamentals",
+      "secondaryConcepts": [
+        "s3-fundamentals",
+        "ebs-volume-types",
+        "instance-store"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher runs Linux web servers in several Availability Zones. Every server must read and update the same directory of uploaded files using the application's existing NFS file operations. The publisher does not want to manage file servers or provision storage capacity. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the directory on EC2 instance store and replicate it between servers.",
+          "correct": false,
+          "why": "Instance-local storage and replication do not satisfy the requirement to avoid managing shared-file infrastructure."
+        },
+        {
+          "id": "B",
+          "text": "Mount a Regional Amazon EFS file system from the Linux web servers.",
+          "correct": true,
+          "why": "Regional EFS supplies managed, elastic NFS storage shared across Availability Zones."
+        },
+        {
+          "id": "C",
+          "text": "Store uploads in Amazon S3 and have each server access them as objects.",
+          "correct": false,
+          "why": "S3 object access does not preserve the application's required NFS file operations."
+        },
+        {
+          "id": "D",
+          "text": "Attach an Amazon EBS volume to each server and synchronize the directories.",
+          "correct": false,
+          "why": "Separate block volumes require synchronization and do not provide one managed shared NFS directory."
+        }
+      ],
+      "explanation": "The deciding requirements are shared NFS file operations across Linux servers and no storage-capacity management. Regional EFS provides an elastic, managed file system whose data is stored redundantly across Availability Zones. S3 is a plausible scalable alternative, but object access does not meet the application's NFS requirement.",
+      "keywordCues": [
+        "Linux web servers in several Availability Zones",
+        "same directory of uploaded files",
+        "existing NFS file operations",
+        "does not want to manage file servers or provision storage capacity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html",
+        "https://docs.aws.amazon.com/efs/latest/ug/performance.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta servidores web Linux en varias Availability Zones. Todos los servidores deben leer y actualizar el mismo directorio de archivos cargados mediante las operaciones NFS que ya usa la aplicación. La editorial no quiere administrar servidores de archivos ni aprovisionar capacidad de almacenamiento. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar el directorio en EC2 instance store y replicarlo entre servidores.",
+            "why": "El almacenamiento local de las instancias y su replicación no cumplen el requisito de evitar la administración de infraestructura de archivos compartidos."
+          },
+          {
+            "id": "B",
+            "text": "Montar un sistema de archivos Amazon EFS Regional desde los servidores web Linux.",
+            "why": "EFS Regional proporciona almacenamiento NFS administrado y elástico compartido entre Availability Zones."
+          },
+          {
+            "id": "C",
+            "text": "Almacenar los archivos cargados en Amazon S3 y hacer que cada servidor acceda a ellos como objetos.",
+            "why": "El acceso a objetos de S3 no conserva las operaciones de archivos NFS que requiere la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Adjuntar un volumen Amazon EBS a cada servidor y sincronizar los directorios.",
+            "why": "Los volúmenes de bloques separados requieren sincronización y no proporcionan un único directorio NFS compartido y administrado."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son las operaciones NFS compartidas entre servidores Linux y no tener que administrar capacidad de almacenamiento. EFS Regional proporciona un sistema de archivos elástico y administrado cuyos datos se almacenan de forma redundante entre Availability Zones. S3 es una alternativa escalable, pero su acceso a objetos no cumple el requisito NFS de la aplicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "efs-fundamentals--e0247849",
+      "conceptId": "efs-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A video-production team keeps project files on Amazon EFS for Linux-based tools. Brief editing events cause unpredictable spikes in file-system throughput, followed by long quiet periods; the team cannot forecast the required throughput. It wants throughput to follow activity without setting a capacity level or tracking burst credits. Which EFS throughput mode meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Provisioned throughput, with its configured level raised before each editing event.",
+          "correct": false,
+          "why": "Provisioned throughput requires specifying and adjusting a level that the team cannot forecast."
+        },
+        {
+          "id": "B",
+          "text": "Bursting throughput, using credits earned while the file system is idle.",
+          "correct": false,
+          "why": "Bursting uses credits and ties its baseline to data stored in Standard, contrary to the stated preference."
+        },
+        {
+          "id": "C",
+          "text": "Elastic throughput, allowing throughput to scale with workload activity.",
+          "correct": true,
+          "why": "Elastic throughput adjusts automatically to unpredictable activity without provisioning throughput or using burst credits."
+        },
+        {
+          "id": "D",
+          "text": "Max I/O performance mode, to make throughput automatically follow demand.",
+          "correct": false,
+          "why": "Max I/O is a performance mode, not the throughput mode that automatically follows activity."
+        }
+      ],
+      "explanation": "Unpredictable spikes and the inability to forecast throughput point to Elastic throughput. It scales with workload activity without a specified throughput level or burst credits. Bursting might appear suitable for intermittent work, but its throughput depends on Standard storage size and credit availability.",
+      "keywordCues": [
+        "unpredictable spikes in file-system throughput",
+        "cannot forecast the required throughput",
+        "without setting a capacity level or tracking burst credits"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html",
+        "https://docs.aws.amazon.com/efs/latest/ug/performance.html"
+      ],
+      "es": {
+        "stem": "Un equipo de producción de video guarda archivos de proyectos en Amazon EFS para herramientas basadas en Linux. Las sesiones breves de edición causan picos impredecibles de throughput, seguidos de largos periodos de poca actividad; el equipo no puede pronosticar el throughput necesario. Quiere que el throughput se ajuste a la actividad sin establecer un nivel de capacidad ni hacer seguimiento de burst credits. ¿Qué throughput mode de EFS cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Provisioned throughput, aumentando el nivel configurado antes de cada sesión de edición.",
+            "why": "Provisioned throughput exige especificar y ajustar un nivel que el equipo no puede pronosticar."
+          },
+          {
+            "id": "B",
+            "text": "Bursting throughput, utilizando créditos acumulados mientras el sistema de archivos está inactivo.",
+            "why": "Bursting usa créditos y vincula su nivel base a los datos almacenados en Standard, en contra de la preferencia indicada."
+          },
+          {
+            "id": "C",
+            "text": "Elastic throughput, para que el throughput se ajuste a la actividad de la carga.",
+            "why": "Elastic throughput se ajusta automáticamente a la actividad impredecible sin aprovisionar throughput ni usar burst credits."
+          },
+          {
+            "id": "D",
+            "text": "Max I/O performance mode, para que el throughput siga automáticamente la demanda.",
+            "why": "Max I/O es un performance mode, no el throughput mode que se ajusta automáticamente a la actividad."
+          }
+        ],
+        "explanation": "Los picos impredecibles y la imposibilidad de pronosticar el throughput indican Elastic throughput. Este se ajusta a la actividad sin especificar un nivel de throughput ni usar burst credits. Bursting podría parecer adecuado para trabajo intermitente, pero su throughput depende del tamaño de los datos en Standard y de los créditos disponibles."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "efs-fundamentals--a202d9d5",
+      "conceptId": "efs-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research organization serves a Linux application whose users open and lock shared files during interactive sessions. The files are accessed frequently, and users notice added delay on individual file operations. Throughput demand is otherwise predictable. Which EFS configuration best meets the latency requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Max I/O performance mode with Archive storage.",
+          "correct": false,
+          "why": "Both Max I/O's per-operation latency and Archive's first-byte latency work against interactive access."
+        },
+        {
+          "id": "B",
+          "text": "Use General Purpose performance mode with Standard storage.",
+          "correct": true,
+          "why": "General Purpose minimizes per-operation latency, while Standard serves frequently accessed files with the lowest storage-class latency."
+        },
+        {
+          "id": "C",
+          "text": "Use General Purpose performance mode with Infrequent Access storage.",
+          "correct": false,
+          "why": "Infrequent Access has higher first-byte latency and is not suited to frequently accessed interactive files."
+        },
+        {
+          "id": "D",
+          "text": "Use Max I/O performance mode with Standard storage.",
+          "correct": false,
+          "why": "Max I/O has higher per-operation latency than General Purpose."
+        }
+      ],
+      "explanation": "This decision is about latency during frequent, interactive file operations, not maximizing a throughput setting. General Purpose has the lowest per-operation latency, and Standard is the EFS storage class for frequently accessed files needing the lowest latency. Max I/O is a tempting choice for parallel work, but it increases per-operation latency.",
+      "keywordCues": [
+        "open and lock shared files during interactive sessions",
+        "accessed frequently",
+        "added delay on individual file operations"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html",
+        "https://docs.aws.amazon.com/efs/latest/ug/performance.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación ofrece una aplicación Linux cuyos usuarios abren y bloquean archivos compartidos durante sesiones interactivas. Acceden a los archivos con frecuencia y perciben cualquier demora adicional en cada operación. Por lo demás, la demanda de throughput es predecible. ¿Qué configuración de EFS satisface mejor el requisito de latencia?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Max I/O performance mode con almacenamiento Archive.",
+            "why": "Tanto la latencia por operación de Max I/O como la latencia para el primer byte de Archive perjudican el acceso interactivo."
+          },
+          {
+            "id": "B",
+            "text": "Usar General Purpose performance mode con almacenamiento Standard.",
+            "why": "General Purpose minimiza la latencia por operación, mientras que Standard ofrece la menor latencia entre las clases para archivos de acceso frecuente."
+          },
+          {
+            "id": "C",
+            "text": "Usar General Purpose performance mode con almacenamiento Infrequent Access.",
+            "why": "Infrequent Access tiene mayor latencia para el primer byte y no se ajusta a archivos interactivos de acceso frecuente."
+          },
+          {
+            "id": "D",
+            "text": "Usar Max I/O performance mode con almacenamiento Standard.",
+            "why": "Max I/O tiene mayor latencia por operación que General Purpose."
+          }
+        ],
+        "explanation": "La decisión depende de la latencia durante operaciones frecuentes e interactivas, no de maximizar un ajuste de throughput. General Purpose tiene la menor latencia por operación y Standard es la clase de EFS para archivos de acceso frecuente que necesitan la menor latencia. Max I/O puede parecer atractivo para trabajo paralelo, pero aumenta la latencia por operación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "efs-fundamentals--296d2c76",
+      "conceptId": "efs-fundamentals",
+      "secondaryConcepts": [
+        "s3-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A legal-services firm keeps older case files in a shared NFS directory used by Linux instances in multiple Availability Zones. Staff access these files infrequently and can tolerate tens of milliseconds of first-byte latency, but the files must remain available if an Availability Zone fails. The firm wants a storage class suited to this access pattern rather than the lowest-latency class. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon S3 for the older files and have the instances retrieve objects.",
+          "correct": false,
+          "why": "Retrieving S3 objects does not provide the required shared NFS directory."
+        },
+        {
+          "id": "B",
+          "text": "Use an EFS Regional file system with the files in Infrequent Access.",
+          "correct": true,
+          "why": "Regional EFS provides multi-AZ redundancy, and Infrequent Access suits files accessed rarely that can tolerate higher latency."
+        },
+        {
+          "id": "C",
+          "text": "Use an EFS Regional file system with all older files in Standard.",
+          "correct": false,
+          "why": "Standard targets frequently accessed, lowest-latency files rather than the stated infrequent-access pattern."
+        },
+        {
+          "id": "D",
+          "text": "Use an EFS One Zone file system with the files in Infrequent Access.",
+          "correct": false,
+          "why": "One Zone stores data in one Availability Zone and does not meet the AZ-failure requirement."
+        }
+      ],
+      "explanation": "The directory must retain NFS access and remain available through an Availability Zone failure, so Regional EFS is the appropriate file-system type. Infrequent Access matches files that are rarely opened and do not need Standard's lowest latency. One Zone misses the availability requirement, while S3 changes the required file-access model.",
+      "keywordCues": [
+        "shared NFS directory",
+        "multiple Availability Zones",
+        "access these files infrequently",
+        "tolerate tens of milliseconds of first-byte latency",
+        "available if an Availability Zone fails"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html",
+        "https://docs.aws.amazon.com/efs/latest/ug/performance.html"
+      ],
+      "es": {
+        "stem": "Un bufete conserva expedientes antiguos en un directorio NFS compartido que usan instancias Linux en varias Availability Zones. El personal accede a esos archivos con poca frecuencia y puede tolerar decenas de milisegundos de latencia para el primer byte, pero los archivos deben seguir disponibles si falla una Availability Zone. El bufete quiere una clase de almacenamiento adecuada para ese patrón de acceso, en lugar de la clase de menor latencia. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon S3 para los expedientes antiguos y hacer que las instancias recuperen objetos.",
+            "why": "Recuperar objetos de S3 no proporciona el directorio NFS compartido requerido."
+          },
+          {
+            "id": "B",
+            "text": "Usar un sistema de archivos EFS Regional con los archivos en Infrequent Access.",
+            "why": "EFS Regional proporciona redundancia entre Availability Zones, e Infrequent Access se ajusta a archivos de acceso poco frecuente que toleran mayor latencia."
+          },
+          {
+            "id": "C",
+            "text": "Usar un sistema de archivos EFS Regional con todos los expedientes antiguos en Standard.",
+            "why": "Standard está orientada a archivos de acceso frecuente que necesitan la menor latencia, no al patrón de acceso indicado."
+          },
+          {
+            "id": "D",
+            "text": "Usar un sistema de archivos EFS One Zone con los archivos en Infrequent Access.",
+            "why": "One Zone almacena los datos en una sola Availability Zone y no cumple el requisito ante una falla de esa zona."
+          }
+        ],
+        "explanation": "El directorio debe conservar el acceso NFS y seguir disponible ante la falla de una Availability Zone; por eso corresponde EFS Regional. Infrequent Access se ajusta a archivos que se abren rara vez y no necesitan la menor latencia de Standard. One Zone no cumple el requisito de disponibilidad, mientras que S3 cambia el modelo de acceso a archivos requerido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "efs-fundamentals--r0",
+      "conceptId": "efs-fundamentals",
+      "kind": "recall",
+      "prompt": "Which EFS file-system type and throughput mode fit shared Linux files across AZs with unpredictable demand, and why?",
+      "promptEs": "¿Qué file-system type y throughput mode de EFS elegirías para archivos Linux compartidos entre Availability Zones con demanda impredecible, y por qué?",
+      "idealAnswer": "Choose Regional EFS because it stores shared files redundantly across Availability Zones. Use Elastic throughput because it scales with activity without specifying a throughput level or consuming burst credits.",
+      "rubric": [
+        "Names Regional EFS for cross-AZ redundancy.",
+        "Names Elastic throughput for unpredictable activity.",
+        "Explains that Elastic throughput needs no provisioned level or burst credits."
+      ]
+    },
+    {
+      "id": "efs-fundamentals--r1",
+      "conceptId": "efs-fundamentals",
+      "kind": "why-not",
+      "prompt": "Why doesn't Amazon S3 replace EFS when several Linux instances must update the same directory through existing NFS operations?",
+      "promptEs": "¿Por qué Amazon S3 no sustituye a EFS cuando varias instancias Linux deben actualizar el mismo directorio mediante operaciones NFS existentes?",
+      "idealAnswer": "S3 provides object access, not the shared NFS file-system interface the application requires. EFS supports NFS and lets multiple compute clients access the shared files without changing that access model.",
+      "rubric": [
+        "Distinguishes S3 object access from NFS file-system access.",
+        "Identifies the application's existing NFS operations as the deciding requirement.",
+        "Explains why EFS fits access from multiple clients."
+      ]
+    }
+  ]
+}

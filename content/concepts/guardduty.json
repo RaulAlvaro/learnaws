@@ -1,0 +1,430 @@
+{
+  "conceptId": "guardduty",
+  "card": {
+    "en": {
+      "tldr": "Amazon GuardDuty detects suspicious and potentially malicious activity in AWS accounts. Choose it when a scenario calls for threat findings about compromised credentials or instances, rather than investigation of an existing finding or aggregation of findings.",
+      "whenToUse": [
+        "Detect signs of compromised AWS credentials or unauthorized EC2 cryptomining.",
+        "Analyze CloudTrail management events, VPC flow logs from EC2 instances, and DNS logs without separately enabling those foundational sources for GuardDuty.",
+        "Extend detection to a specific workload, such as S3 or RDS, with the relevant GuardDuty protection plan."
+      ],
+      "keyFacts": [
+        "Enabling GuardDuty starts ingestion of its foundational sources: CloudTrail management events, VPC flow logs from EC2 instances, and DNS logs.",
+        "GuardDuty uses threat intelligence and machine learning to generate security findings.",
+        "S3 Protection identifies potential S3 data exfiltration and destruction attempts; RDS Protection analyzes supported RDS and Aurora login activity.",
+        "GuardDuty can create events for finding changes that Amazon EventBridge uses for near-real-time notification."
+      ],
+      "gotchas": [
+        "Foundational threat detection does not require separately enabling its three foundational data sources for GuardDuty.",
+        "A specialized protection plan is not interchangeable with foundational detection: Malware Protection for EC2 scans EBS volumes, while RDS Protection analyzes database logins.",
+        "Detective investigates findings; Security Hub CSPM aggregates and prioritizes findings. Neither replaces GuardDuty's threat detection."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Detective",
+          "difference": "Use GuardDuty to detect potential threats; use Detective to investigate their nature and root cause."
+        },
+        {
+          "concept": "AWS Security Hub CSPM",
+          "difference": "Security Hub CSPM consolidates findings and checks security posture; GuardDuty generates threat findings."
+        },
+        {
+          "concept": "GuardDuty Malware Protection for EC2",
+          "difference": "It scans associated EBS volumes for malware; foundational GuardDuty detection analyzes account events and logs for suspicious activity."
+        }
+      ],
+      "examCues": [
+        "compromised AWS credentials",
+        "EC2 cryptomining activity",
+        "analyze CloudTrail management events, VPC flow logs, and DNS logs",
+        "generate findings for suspicious activity"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon GuardDuty detecta actividad sospechosa y potencialmente maliciosa en cuentas de AWS. Elígelo cuando necesites hallazgos sobre credenciales o instancias comprometidas, en vez de investigar un hallazgo existente o reunir hallazgos de varios servicios.",
+      "whenToUse": [
+        "Detectar indicios de credenciales de AWS comprometidas o cryptomining no autorizado en EC2.",
+        "Analizar eventos de administración de CloudTrail, VPC flow logs de instancias EC2 y registros DNS sin habilitar por separado esas fuentes fundamentales para GuardDuty.",
+        "Ampliar la detección a una carga específica, como S3 o RDS, mediante el protection plan correspondiente de GuardDuty."
+      ],
+      "keyFacts": [
+        "Al habilitar GuardDuty, comienza la ingesta de sus fuentes fundamentales: eventos de administración de CloudTrail, VPC flow logs de instancias EC2 y registros DNS.",
+        "GuardDuty usa inteligencia de amenazas y machine learning para generar hallazgos de seguridad.",
+        "S3 Protection identifica posibles intentos de exfiltración y destrucción de datos en S3; RDS Protection analiza la actividad de inicio de sesión en versiones compatibles de RDS y Aurora.",
+        "GuardDuty puede crear eventos cuando cambian los hallazgos, que Amazon EventBridge utiliza para notificaciones casi en tiempo real."
+      ],
+      "gotchas": [
+        "La detección fundamental no exige que habilites por separado sus tres fuentes de datos para GuardDuty.",
+        "Un protection plan especializado no equivale a la detección fundamental: Malware Protection for EC2 analiza volúmenes EBS, mientras que RDS Protection analiza inicios de sesión en bases de datos.",
+        "Detective investiga hallazgos; Security Hub CSPM los reúne y prioriza. Ninguno sustituye la detección de amenazas de GuardDuty."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Detective",
+          "difference": "Usa GuardDuty para detectar posibles amenazas y Detective para investigar su naturaleza y causa raíz."
+        },
+        {
+          "concept": "AWS Security Hub CSPM",
+          "difference": "Security Hub CSPM consolida hallazgos y revisa la postura de seguridad; GuardDuty genera hallazgos de amenazas."
+        },
+        {
+          "concept": "GuardDuty Malware Protection for EC2",
+          "difference": "Analiza volúmenes EBS asociados en busca de malware; la detección fundamental de GuardDuty analiza eventos y registros de la cuenta para identificar actividad sospechosa."
+        }
+      ],
+      "examCues": [
+        "compromised AWS credentials",
+        "EC2 cryptomining activity",
+        "analyze CloudTrail management events, VPC flow logs, and DNS logs",
+        "generate findings for suspicious activity"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "guardduty--a8c1f411",
+      "conceptId": "guardduty",
+      "secondaryConcepts": [
+        "detective",
+        "security-hub"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A subscription company runs application servers on Amazon EC2. Its security team wants findings for potentially compromised AWS credentials and unauthorized cryptomining, using CloudTrail management events, VPC flow logs from the instances, and DNS logs. The team does not want to separately configure those sources for the detection service. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Security Hub CSPM to aggregate security findings from the account.",
+          "correct": false,
+          "why": "Aggregating findings does not itself provide the requested GuardDuty threat detection."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Detective to investigate activity across the application servers.",
+          "correct": false,
+          "why": "Detective helps investigate suspicious activity but does not replace the requested GuardDuty threat findings."
+        },
+        {
+          "id": "C",
+          "text": "Enable Amazon GuardDuty for the account.",
+          "correct": true,
+          "why": "GuardDuty automatically ingests the specified foundational sources and generates findings for potential threats."
+        },
+        {
+          "id": "D",
+          "text": "Enable GuardDuty Malware Protection for EC2 to scan the instances' EBS volumes.",
+          "correct": false,
+          "why": "EBS malware scanning does not provide the requested foundational analysis of account events and logs."
+        }
+      ],
+      "explanation": "The deciding requirement is detection from three foundational sources without configuring them separately for the detection service. Enabling GuardDuty automatically starts its analysis of CloudTrail management events, EC2 VPC flow logs, and DNS logs. Malware Protection for EC2 addresses malware on EBS volumes instead of this broader activity-detection requirement.",
+      "keywordCues": [
+        "potentially compromised AWS credentials and unauthorized cryptomining",
+        "using CloudTrail management events, VPC flow logs from the instances, and DNS logs",
+        "does not want to separately configure those sources"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+      ],
+      "es": {
+        "stem": "Una empresa de suscripciones ejecuta servidores de aplicaciones en Amazon EC2. Su equipo de seguridad quiere hallazgos sobre posibles credenciales de AWS comprometidas y cryptomining no autorizado, a partir de eventos de administración de CloudTrail, VPC flow logs de las instancias y registros DNS. El equipo no quiere configurar por separado esas fuentes para el servicio de detección. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Security Hub CSPM para reunir los hallazgos de seguridad de la cuenta.",
+            "why": "Reunir hallazgos no proporciona por sí mismo la detección de amenazas solicitada."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon Detective para investigar la actividad de los servidores de aplicaciones.",
+            "why": "Detective ayuda a investigar actividad sospechosa, pero no sustituye los hallazgos de amenazas solicitados."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar Amazon GuardDuty en la cuenta.",
+            "why": "GuardDuty ingiere automáticamente las fuentes fundamentales indicadas y genera hallazgos sobre posibles amenazas."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar GuardDuty Malware Protection for EC2 para analizar los volúmenes EBS de las instancias.",
+            "why": "El análisis de malware en EBS no proporciona el análisis fundamental solicitado de eventos y registros de la cuenta."
+          }
+        ],
+        "explanation": "El requisito decisivo es detectar amenazas a partir de tres fuentes fundamentales sin configurarlas por separado para el servicio de detección. Al habilitar GuardDuty, comienza automáticamente el análisis de eventos de administración de CloudTrail, VPC flow logs de EC2 y registros DNS. Malware Protection for EC2 se centra en malware en volúmenes EBS, no en esta detección más amplia de actividad."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "guardduty--8335e201",
+      "conceptId": "guardduty",
+      "secondaryConcepts": [
+        "detective",
+        "security-hub"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A game studio already uses Amazon GuardDuty for its AWS accounts. Analysts receive findings about suspicious EC2 activity but spend too long establishing how related events fit together and what caused the incident. They do not need another source of initial threat findings or a cross-service compliance dashboard. Which service should they add to investigate the findings MOST effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Detective, to analyze linked activity and help identify the root cause.",
+          "correct": true,
+          "why": "Detective is designed to investigate suspicious activity and the root cause of security findings."
+        },
+        {
+          "id": "B",
+          "text": "AWS Security Hub CSPM, to aggregate and prioritize findings from security services.",
+          "correct": false,
+          "why": "Aggregation and prioritization do not meet the specific need to investigate how the events relate."
+        },
+        {
+          "id": "C",
+          "text": "GuardDuty Malware Protection for EC2, to scan associated EBS volumes.",
+          "correct": false,
+          "why": "A malware scan does not investigate the relationships and root cause behind the existing findings."
+        },
+        {
+          "id": "D",
+          "text": "Amazon EventBridge, to receive events when GuardDuty findings change.",
+          "correct": false,
+          "why": "Finding-change notifications do not provide the requested investigation of event relationships."
+        }
+      ],
+      "explanation": "GuardDuty is already producing the findings, so initial detection is not the gap. Detective helps analysts investigate findings by providing context and visualizations of related data to identify root cause. Security Hub CSPM can aggregate findings, but the scenario explicitly asks for investigation rather than a consolidated view.",
+      "keywordCues": [
+        "already uses Amazon GuardDuty",
+        "how related events fit together and what caused the incident",
+        "do not need another source of initial threat findings or a cross-service compliance dashboard"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos ya usa Amazon GuardDuty en sus cuentas de AWS. Los analistas reciben hallazgos sobre actividad sospechosa en EC2, pero tardan demasiado en establecer cómo se relacionan los eventos y qué causó el incidente. No necesitan otra fuente de hallazgos iniciales ni un panel de cumplimiento de varios servicios. ¿Qué servicio deberían agregar para investigar los hallazgos de la manera MOST effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Amazon Detective, para analizar la actividad relacionada y ayudar a identificar la causa raíz.",
+            "why": "Detective está diseñado para investigar actividad sospechosa y la causa raíz de los hallazgos de seguridad."
+          },
+          {
+            "id": "B",
+            "text": "AWS Security Hub CSPM, para reunir y priorizar hallazgos de servicios de seguridad.",
+            "why": "Reunir y priorizar hallazgos no cubre la necesidad específica de investigar cómo se relacionan los eventos."
+          },
+          {
+            "id": "C",
+            "text": "GuardDuty Malware Protection for EC2, para analizar los volúmenes EBS asociados.",
+            "why": "Un análisis de malware no investiga las relaciones ni la causa raíz de los hallazgos existentes."
+          },
+          {
+            "id": "D",
+            "text": "Amazon EventBridge, para recibir eventos cuando cambien los hallazgos de GuardDuty.",
+            "why": "Las notificaciones de cambios no proporcionan la investigación solicitada de las relaciones entre eventos."
+          }
+        ],
+        "explanation": "GuardDuty ya produce los hallazgos, así que la detección inicial no es el problema. Detective ayuda a investigar hallazgos mediante contexto y visualizaciones de datos relacionados para identificar la causa raíz. Security Hub CSPM puede reunir hallazgos, pero el caso pide investigar, no obtener una vista consolidada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "guardduty--5e605da8",
+      "conceptId": "guardduty",
+      "secondaryConcepts": [
+        "detective",
+        "security-hub"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional retailer wants to detect suspicious activity involving AWS credentials and EC2 instances. Its operations team also needs to receive notifications soon after the resulting threat findings change so it can start its response workflow. Which solution meets both requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Amazon GuardDuty and use Amazon EventBridge for finding-change notifications.",
+          "correct": true,
+          "why": "GuardDuty generates threat findings, and EventBridge can deliver notifications when those findings change."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Detective for detection and Security Hub CSPM for notifications.",
+          "correct": false,
+          "why": "Detective investigates activity rather than supplying the requested initial threat detection."
+        },
+        {
+          "id": "C",
+          "text": "Use Security Hub CSPM for detection and Amazon Detective for notifications.",
+          "correct": false,
+          "why": "Security Hub CSPM aggregates findings rather than generating the requested GuardDuty threat findings."
+        },
+        {
+          "id": "D",
+          "text": "Use GuardDuty Malware Protection for EC2 for detection and Detective for notifications.",
+          "correct": false,
+          "why": "EBS malware scanning is narrower than the requested credential and instance threat detection, and Detective is for investigation."
+        }
+      ],
+      "explanation": "This scenario requires both detection and timely notification, which are separate jobs. GuardDuty generates findings about potential threats, including compromised credentials and unauthorized EC2 activity. EventBridge can receive events when GuardDuty findings change, whereas Detective focuses on investigation after suspicious activity is identified.",
+      "keywordCues": [
+        "detect suspicious activity involving AWS credentials and EC2 instances",
+        "receive notifications soon after the resulting threat findings change"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+      ],
+      "es": {
+        "stem": "Una cadena minorista regional quiere detectar actividad sospechosa relacionada con credenciales de AWS e instancias EC2. Su equipo de operaciones también necesita recibir notificaciones poco después de que cambien los hallazgos de amenazas para iniciar su flujo de respuesta. ¿Qué solución cumple ambos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar Amazon GuardDuty y usar Amazon EventBridge para notificaciones de cambios en los hallazgos.",
+            "why": "GuardDuty genera hallazgos de amenazas y EventBridge puede enviar notificaciones cuando estos cambian."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon Detective para la detección y Security Hub CSPM para las notificaciones.",
+            "why": "Detective investiga actividad, pero no proporciona la detección inicial de amenazas solicitada."
+          },
+          {
+            "id": "C",
+            "text": "Usar Security Hub CSPM para la detección y Amazon Detective para las notificaciones.",
+            "why": "Security Hub CSPM reúne hallazgos, pero no genera los hallazgos de amenazas solicitados."
+          },
+          {
+            "id": "D",
+            "text": "Usar GuardDuty Malware Protection for EC2 para la detección y Detective para las notificaciones.",
+            "why": "El análisis de malware en EBS es más limitado que la detección de amenazas relacionadas con credenciales e instancias, y Detective sirve para investigar."
+          }
+        ],
+        "explanation": "El caso exige detección y notificaciones oportunas, que son funciones distintas. GuardDuty genera hallazgos sobre posibles amenazas, incluidas credenciales comprometidas y actividad no autorizada en EC2. EventBridge puede recibir eventos cuando cambian los hallazgos de GuardDuty, mientras que Detective se centra en investigar la actividad sospechosa ya identificada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "guardduty--602afcf7",
+      "conceptId": "guardduty",
+      "secondaryConcepts": [
+        "detective"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A clinic already uses GuardDuty's foundational threat detection for its EC2 environment. It now wants to identify unusual login patterns in supported Amazon RDS and Aurora databases that could indicate unauthorized access. The team wants to extend its existing threat detection rather than investigate findings that have already been produced. Which solution meets the new requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep foundational GuardDuty detection unchanged and review its EC2 VPC flow log findings.",
+          "correct": false,
+          "why": "EC2 VPC flow log analysis does not provide the specified profiling of supported database login activity."
+        },
+        {
+          "id": "B",
+          "text": "Enable the GuardDuty RDS Protection plan.",
+          "correct": true,
+          "why": "RDS Protection analyzes and profiles login activity in supported RDS and Aurora databases."
+        },
+        {
+          "id": "C",
+          "text": "Enable GuardDuty Malware Protection for EC2 to scan EBS volumes.",
+          "correct": false,
+          "why": "Scanning EC2-associated EBS volumes does not analyze RDS or Aurora login patterns."
+        },
+        {
+          "id": "D",
+          "text": "Add Amazon Detective to investigate related log data.",
+          "correct": false,
+          "why": "Detective helps investigate findings rather than adding the requested database-login threat detection."
+        }
+      ],
+      "explanation": "The new signal is anomalous database login activity, not the foundational sources used for EC2-oriented detection. GuardDuty RDS Protection is the dedicated plan that analyzes and profiles login activity for supported RDS and Aurora databases. Detective would help investigate suspicious activity, but it does not add this requested detection source.",
+      "keywordCues": [
+        "already uses GuardDuty's foundational threat detection",
+        "unusual login patterns in supported Amazon RDS and Aurora databases",
+        "extend its existing threat detection"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+      ],
+      "es": {
+        "stem": "Una clínica ya usa la detección fundamental de GuardDuty para su entorno EC2. Ahora quiere identificar patrones inusuales de inicio de sesión en versiones compatibles de Amazon RDS y Aurora que podrían indicar acceso no autorizado. El equipo quiere ampliar la detección existente en vez de investigar hallazgos ya producidos. ¿Qué solución cumple el nuevo requisito de la forma MOST direct?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener sin cambios la detección fundamental de GuardDuty y revisar sus hallazgos de VPC flow logs de EC2.",
+            "why": "El análisis de VPC flow logs de EC2 no proporciona el perfilado solicitado de inicios de sesión en bases de datos compatibles."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar el plan GuardDuty RDS Protection.",
+            "why": "RDS Protection analiza y perfila la actividad de inicio de sesión en versiones compatibles de RDS y Aurora."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar GuardDuty Malware Protection for EC2 para analizar volúmenes EBS.",
+            "why": "Analizar volúmenes EBS asociados a EC2 no analiza patrones de inicio de sesión en RDS o Aurora."
+          },
+          {
+            "id": "D",
+            "text": "Agregar Amazon Detective para investigar datos de registros relacionados.",
+            "why": "Detective ayuda a investigar hallazgos, pero no agrega la detección solicitada de inicios de sesión en bases de datos."
+          }
+        ],
+        "explanation": "La nueva señal es la actividad anómala de inicio de sesión en bases de datos, no las fuentes fundamentales usadas para la detección orientada a EC2. GuardDuty RDS Protection es el plan específico que analiza y perfila los inicios de sesión en versiones compatibles de RDS y Aurora. Detective ayudaría a investigar actividad sospechosa, pero no agrega esta fuente de detección."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "guardduty--r0",
+      "conceptId": "guardduty",
+      "kind": "recall",
+      "prompt": "Which service would you enable to detect compromised credentials and EC2 cryptomining from foundational AWS logs, and why?",
+      "promptEs": "¿Qué servicio habilitarías para detectar credenciales comprometidas y cryptomining en EC2 a partir de registros fundamentales de AWS, y por qué?",
+      "idealAnswer": "Enable Amazon GuardDuty. It automatically analyzes CloudTrail management events, VPC flow logs from EC2 instances, and DNS logs as foundational sources and generates findings for potential threats.",
+      "rubric": [
+        "Names Amazon GuardDuty.",
+        "Connects it to threat findings for compromised credentials or EC2 cryptomining.",
+        "Mentions automatic analysis of foundational event and log sources."
+      ]
+    },
+    {
+      "id": "guardduty--r1",
+      "conceptId": "guardduty",
+      "kind": "why-not",
+      "prompt": "Why isn't Amazon Detective a replacement for GuardDuty when the requirement is to detect suspicious credential use?",
+      "promptEs": "¿Por qué Amazon Detective no sustituye a GuardDuty cuando necesitas detectar uso sospechoso de credenciales?",
+      "idealAnswer": "Detective helps investigate suspicious activity and identify the root cause of security findings. GuardDuty is the service that monitors AWS data sources and generates findings for potentially compromised credentials.",
+      "rubric": [
+        "States that Detective is for investigation or root-cause analysis.",
+        "States that GuardDuty generates threat findings.",
+        "Applies the distinction to suspicious credential use."
+      ]
+    }
+  ]
+}

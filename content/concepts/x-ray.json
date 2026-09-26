@@ -1,0 +1,353 @@
+{
+  "conceptId": "x-ray",
+  "card": {
+    "en": {
+      "tldr": "AWS X-Ray collects traces of application requests so you can follow a request through front-end services, downstream services, databases, and web APIs. Choose it when the decision depends on finding which part of a distributed request is slow or failing.",
+      "whenToUse": [
+        "Users report intermittent latency, and the team needs to identify the slow step within an individual request.",
+        "A request crosses microservices or Lambda functions, and the team needs visibility into downstream calls.",
+        "The team needs a trace map to locate bottlenecks or latency spikes."
+      ],
+      "keyFacts": [
+        "X-Ray provides request and response details plus details of downstream calls made by the application.",
+        "Applications send trace data through instrumentation; available approaches include SDKs, agents, tools, and, in some cases, configuration changes.",
+        "Lambda can send trace data about requests to Lambda functions.",
+        "The X-Ray trace map shows the client, front-end service, and backend services involved in processing requests."
+      ],
+      "gotchas": [
+        "CloudWatch metrics and alarms can show that performance has degraded; they do not replace a trace of the steps within a request.",
+        "CloudTrail answers who made an API call, not which application dependency caused request latency.",
+        "X-Ray needs trace data from the relevant parts of the application; enabling tracing at one entry point does not automatically describe every custom downstream call."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon CloudWatch",
+          "difference": "Use CloudWatch for metrics, logs, and alarms; use X-Ray to follow individual requests across services."
+        },
+        {
+          "concept": "AWS CloudTrail",
+          "difference": "CloudTrail audits API activity; X-Ray investigates the path and performance of application requests."
+        },
+        {
+          "concept": "VPC Flow Logs",
+          "difference": "Flow Logs capture IP traffic metadata; X-Ray shows traced application requests and downstream calls."
+        }
+      ],
+      "examCues": [
+        "which downstream call is slow",
+        "trace an individual request across microservices",
+        "Lambda request and backend latency",
+        "identify a bottleneck in the request path"
+      ]
+    },
+    "es": {
+      "tldr": "AWS X-Ray recopila trazas de solicitudes para que puedas seguirlas por servicios de frontend, servicios posteriores, bases de datos y web APIs. Elígelo cuando necesites identificar qué parte de una solicitud distribuida es lenta o falla.",
+      "whenToUse": [
+        "Los usuarios reportan latencia intermitente y necesitas identificar el paso lento dentro de una solicitud.",
+        "Una solicitud pasa por microservicios o funciones Lambda y necesitas visibilidad de las llamadas posteriores.",
+        "Necesitas un trace map para localizar cuellos de botella o picos de latencia."
+      ],
+      "keyFacts": [
+        "X-Ray muestra detalles de la solicitud y la respuesta, además de las llamadas posteriores que hace la aplicación.",
+        "Las aplicaciones envían datos de trazas mediante instrumentación; puedes usar SDKs, agentes, herramientas y, en algunos casos, cambios de configuración.",
+        "Lambda puede enviar datos de trazas sobre las solicitudes a funciones Lambda.",
+        "El trace map de X-Ray muestra el cliente, el servicio de frontend y los servicios de backend que procesan las solicitudes."
+      ],
+      "gotchas": [
+        "Las métricas y alarmas de CloudWatch pueden mostrar una degradación, pero no sustituyen una traza de los pasos de una solicitud.",
+        "CloudTrail responde quién hizo una llamada a la API, no qué dependencia de la aplicación causó la latencia.",
+        "X-Ray necesita datos de trazas de las partes relevantes de la aplicación; habilitar trazas en un punto de entrada no describe automáticamente todas las llamadas posteriores personalizadas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon CloudWatch",
+          "difference": "Usa CloudWatch para métricas, logs y alarmas; usa X-Ray para seguir solicitudes individuales entre servicios."
+        },
+        {
+          "concept": "AWS CloudTrail",
+          "difference": "CloudTrail audita la actividad de la API; X-Ray permite investigar la ruta y el rendimiento de las solicitudes de la aplicación."
+        },
+        {
+          "concept": "VPC Flow Logs",
+          "difference": "Flow Logs registra metadatos del tráfico IP; X-Ray muestra solicitudes trazadas y llamadas posteriores."
+        }
+      ],
+      "examCues": [
+        "which downstream call is slow",
+        "trace an individual request across microservices",
+        "Lambda request and backend latency",
+        "identify a bottleneck in the request path"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "x-ray--47a12b0d",
+      "conceptId": "x-ray",
+      "secondaryConcepts": [
+        "cloudwatch-metrics-alarms",
+        "aws-config",
+        "cloudtrail"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company receives reports that some checkout requests take much longer than others. Its front-end service calls several backend services, and the team needs to determine which call delays each affected request. Which solution meets this requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Instrument the application for AWS X-Ray and inspect traces of affected requests.",
+          "correct": true,
+          "why": "X-Ray traces expose downstream calls within a request so the team can locate the delay."
+        },
+        {
+          "id": "B",
+          "text": "Review AWS CloudTrail records for API calls made during checkout.",
+          "correct": false,
+          "why": "API audit records do not provide the application request path needed to identify its slow backend call."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Config to review configuration changes to the backend resources.",
+          "correct": false,
+          "why": "Configuration history does not show where time was spent processing an individual checkout request."
+        },
+        {
+          "id": "D",
+          "text": "Create Amazon CloudWatch dashboards for front-end and backend performance metrics.",
+          "correct": false,
+          "why": "Dashboards can show performance trends but do not identify the slow downstream call within each affected request."
+        }
+      ],
+      "explanation": "The deciding requirement is to identify the delayed call within each affected checkout request. X-Ray collects request traces that include calls to downstream services. CloudWatch dashboards are useful for monitoring performance, but aggregate metrics do not answer this per-request question. Config and CloudTrail address configuration history and API auditing instead.",
+      "keywordCues": [
+        "which call delays each affected request",
+        "front-end service calls several backend services"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas recibe reportes de que algunas solicitudes de pago tardan mucho más que otras. Su servicio de frontend llama a varios servicios de backend, y el equipo necesita determinar qué llamada retrasa cada solicitud afectada. ¿Qué solución cumple este requisito MOST directly?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Instrumenta la aplicación para AWS X-Ray e inspecciona las trazas de las solicitudes afectadas.",
+            "why": "Las trazas de X-Ray muestran las llamadas posteriores dentro de una solicitud para que el equipo localice el retraso."
+          },
+          {
+            "id": "B",
+            "text": "Revisa los registros de AWS CloudTrail de las llamadas a la API realizadas durante el pago.",
+            "why": "Los registros de auditoría de la API no proporcionan la ruta de la solicitud de la aplicación necesaria para identificar su llamada lenta al backend."
+          },
+          {
+            "id": "C",
+            "text": "Usa AWS Config para revisar los cambios de configuración de los recursos de backend.",
+            "why": "El historial de configuración no muestra en qué se invirtió el tiempo al procesar una solicitud de pago individual."
+          },
+          {
+            "id": "D",
+            "text": "Crea dashboards de Amazon CloudWatch para las métricas de rendimiento del frontend y el backend.",
+            "why": "Los dashboards muestran tendencias de rendimiento, pero no identifican la llamada posterior lenta dentro de cada solicitud afectada."
+          }
+        ],
+        "explanation": "El requisito decisivo es identificar la llamada que retrasa cada solicitud de pago afectada. X-Ray recopila trazas que incluyen las llamadas a servicios posteriores. Los dashboards de CloudWatch sirven para monitorear el rendimiento, pero sus métricas agregadas no responden esta pregunta por solicitud. Config y CloudTrail se enfocan en el historial de configuración y la auditoría de la API."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "x-ray--068e4d48",
+      "conceptId": "x-ray",
+      "secondaryConcepts": [
+        "vpc-flow-logs",
+        "cloudwatch-metrics-alarms",
+        "cloudtrail"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A healthcare application invokes a Lambda function that calls an internal service and an external web API. Some patient-submission requests fail, but the team cannot tell which downstream interaction was involved in each failure. Which approach meets the troubleshooting requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable VPC Flow Logs for the application's network interfaces and review traffic records.",
+          "correct": false,
+          "why": "IP traffic metadata does not identify the downstream application interaction associated with each traced request."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS X-Ray tracing for the Lambda requests and instrument the downstream calls.",
+          "correct": true,
+          "why": "Traces that include the Lambda request and downstream calls provide the requested per-request visibility."
+        },
+        {
+          "id": "C",
+          "text": "Create Amazon CloudWatch alarms for the application's error metrics.",
+          "correct": false,
+          "why": "Alarms can report errors but do not show which downstream interaction occurred within an individual failed request."
+        },
+        {
+          "id": "D",
+          "text": "Review AWS CloudTrail for API activity associated with the application.",
+          "correct": false,
+          "why": "API auditing does not trace a patient-submission request through its internal service and web API calls."
+        }
+      ],
+      "explanation": "The team needs to relate failures to downstream interactions within individual patient-submission requests. Lambda can send request trace data to X-Ray, and application instrumentation can provide data about outbound calls. CloudWatch alarms can indicate that failures occurred, but they do not provide this request-by-request path. Flow Logs and CloudTrail answer network-traffic and API-audit questions instead.",
+      "keywordCues": [
+        "which downstream interaction was involved in each failure",
+        "Lambda function that calls an internal service and an external web API"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de salud invoca una función Lambda que llama a un servicio interno y a una web API externa. Algunas solicitudes de envío de datos de pacientes fallan, pero el equipo no sabe qué interacción posterior intervino en cada falla. ¿Qué enfoque cumple la necesidad de diagnóstico MOST directly?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita VPC Flow Logs para las interfaces de red de la aplicación y revisa los registros de tráfico.",
+            "why": "Los metadatos del tráfico IP no identifican la interacción posterior de la aplicación asociada a cada solicitud trazada."
+          },
+          {
+            "id": "B",
+            "text": "Usa trazas de AWS X-Ray para las solicitudes de Lambda e instrumenta las llamadas posteriores.",
+            "why": "Las trazas que incluyen la solicitud a Lambda y las llamadas posteriores proporcionan la visibilidad por solicitud que se necesita."
+          },
+          {
+            "id": "C",
+            "text": "Crea alarmas de Amazon CloudWatch para las métricas de errores de la aplicación.",
+            "why": "Las alarmas pueden informar sobre errores, pero no muestran qué interacción posterior ocurrió dentro de cada solicitud fallida."
+          },
+          {
+            "id": "D",
+            "text": "Revisa AWS CloudTrail para consultar la actividad de la API asociada con la aplicación.",
+            "why": "La auditoría de la API no traza una solicitud de envío de datos de pacientes a través del servicio interno y las llamadas a la web API."
+          }
+        ],
+        "explanation": "El equipo necesita relacionar las fallas con las interacciones posteriores de cada solicitud de envío de datos de pacientes. Lambda puede enviar datos de trazas a X-Ray, y la instrumentación de la aplicación puede aportar datos sobre las llamadas salientes. Las alarmas de CloudWatch indican que hubo fallas, pero no muestran la ruta de cada solicitud. Flow Logs y CloudTrail responden preguntas sobre tráfico de red y auditoría de la API."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "x-ray--7e1dec72",
+      "conceptId": "x-ray",
+      "secondaryConcepts": [
+        "cloudwatch-metrics-alarms",
+        "vpc-flow-logs",
+        "aws-config"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An online learning platform has a Java front end that calls AWS services and a database while loading course pages. After a release, page loads occasionally slow down, and engineers need to locate latency spikes along the path from the client through the backends. Which solution meets this requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Instrument the application for AWS X-Ray and examine its trace map.",
+          "correct": true,
+          "why": "The trace map helps locate bottlenecks and latency spikes across the front end and backends."
+        },
+        {
+          "id": "B",
+          "text": "Publish page-load metrics to Amazon CloudWatch and create a dashboard.",
+          "correct": false,
+          "why": "A metrics dashboard can show slow page loads but not their traced path through the backends."
+        },
+        {
+          "id": "C",
+          "text": "Enable VPC Flow Logs and compare accepted and rejected traffic records.",
+          "correct": false,
+          "why": "Traffic metadata does not show where application-request latency occurs across services."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Config to inspect resource configuration history after the release.",
+          "correct": false,
+          "why": "Configuration history cannot locate latency spikes along the path of a page-load request."
+        }
+      ],
+      "explanation": "The requirement is to locate latency spikes along an application request path, not merely detect that pages are slow. X-Ray uses trace data to generate a map showing the client, front end, and backend services. A CloudWatch dashboard is a plausible monitoring choice, but it does not supply that traced request path. Flow Logs and Config provide different kinds of operational evidence.",
+      "keywordCues": [
+        "locate latency spikes along the path",
+        "from the client through the backends"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de aprendizaje en línea tiene un frontend Java que llama a servicios de AWS y a una base de datos mientras carga páginas de cursos. Después de un lanzamiento, las páginas ocasionalmente cargan lento, y los ingenieros necesitan localizar picos de latencia en la ruta desde el cliente hasta los backends. ¿Qué solución cumple este requisito MOST directly?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Instrumenta la aplicación para AWS X-Ray y examina su trace map.",
+            "why": "El trace map ayuda a localizar cuellos de botella y picos de latencia entre el frontend y los backends."
+          },
+          {
+            "id": "B",
+            "text": "Publica métricas de carga de páginas en Amazon CloudWatch y crea un dashboard.",
+            "why": "Un dashboard de métricas puede mostrar que las páginas cargan lento, pero no su ruta trazada por los backends."
+          },
+          {
+            "id": "C",
+            "text": "Habilita VPC Flow Logs y compara los registros de tráfico aceptado y rechazado.",
+            "why": "Los metadatos de tráfico no muestran dónde ocurre la latencia de una solicitud de la aplicación entre servicios."
+          },
+          {
+            "id": "D",
+            "text": "Usa AWS Config para inspeccionar el historial de configuración de los recursos después del lanzamiento.",
+            "why": "El historial de configuración no puede localizar picos de latencia a lo largo de la ruta de una solicitud de carga de página."
+          }
+        ],
+        "explanation": "El requisito es localizar picos de latencia en la ruta de una solicitud, no solo detectar que las páginas cargan lento. X-Ray utiliza datos de trazas para generar un mapa que muestra al cliente, el frontend y los servicios de backend. Un dashboard de CloudWatch es útil para monitorear, pero no proporciona esa ruta trazada. Flow Logs y Config aportan otros tipos de evidencia operativa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "x-ray--r0",
+      "conceptId": "x-ray",
+      "kind": "recall",
+      "prompt": "Requests cross a front end and several backends. Which service helps locate a per-request latency bottleneck, and why?",
+      "promptEs": "Las solicitudes pasan por un frontend y varios backends. ¿Qué servicio ayuda a localizar un cuello de botella de latencia por solicitud y por qué?",
+      "idealAnswer": "Use AWS X-Ray. Its traces and trace map show the request path and downstream calls, helping identify where latency occurs.",
+      "rubric": [
+        "Names AWS X-Ray.",
+        "Mentions tracing individual requests across services or downstream calls.",
+        "Connects the trace data to locating latency bottlenecks."
+      ]
+    },
+    {
+      "id": "x-ray--r1",
+      "conceptId": "x-ray",
+      "kind": "why-not",
+      "prompt": "Why aren't CloudWatch performance dashboards enough to identify which downstream call slowed a specific application request?",
+      "promptEs": "¿Por qué los dashboards de rendimiento de CloudWatch no bastan para identificar qué llamada posterior retrasó una solicitud específica de la aplicación?",
+      "idealAnswer": "CloudWatch dashboards display performance metrics but do not provide the traced path of a specific request through downstream calls. Instrument the application for X-Ray to inspect that request's trace.",
+      "rubric": [
+        "Explains that dashboards show metrics or trends rather than the downstream path of an individual request.",
+        "Identifies X-Ray as the request-tracing choice.",
+        "Mentions instrumenting relevant application calls to provide trace data."
+      ]
+    }
+  ]
+}

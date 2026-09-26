@@ -1,0 +1,447 @@
+{
+  "conceptId": "data-firehose",
+  "card": {
+    "en": {
+      "tldr": "Amazon Data Firehose is a fully managed way to deliver streaming records to destinations such as S3, Redshift, OpenSearch Service, and Splunk without writing a delivery application. Choose it when the requirement is managed delivery rather than custom stream consumption, and account for buffering before delivery.",
+      "whenToUse": [
+        "Producers must send streaming records to S3, Redshift, OpenSearch Service, or Splunk with little delivery infrastructure to manage.",
+        "An existing Kinesis data stream must also feed a managed delivery pipeline.",
+        "The destination is Redshift and the team wants Firehose to handle the S3 staging and COPY step."
+      ],
+      "keyFacts": [
+        "Firehose buffers records by size or time before delivering them.",
+        "A Firehose stream can read from an existing Kinesis data stream.",
+        "For Redshift delivery, Firehose first writes to S3, then issues a Redshift COPY command.",
+        "OpenSearch Service and Splunk deliveries can optionally be backed up to S3.",
+        "Firehose can be configured to transform data before delivery."
+      ],
+      "gotchas": [
+        "Do not assume delivery is immediate: Firehose buffers records.",
+        "A Redshift destination does not bypass S3 staging.",
+        "Selecting S3 as the destination does not also configure delivery to Splunk or OpenSearch Service."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Kinesis Data Streams",
+          "difference": "Choose it for requirements such as multiple stream consumers, replay, or custom processing; Firehose is the managed destination-delivery choice."
+        },
+        {
+          "concept": "Amazon MSK",
+          "difference": "Choose MSK when existing Apache Kafka producers or consumers require Kafka compatibility, not merely to deliver records to a Firehose-supported destination."
+        },
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS is for queue-based message processing, not managed delivery of a streaming feed to these destinations."
+        }
+      ],
+      "examCues": [
+        "deliver streaming logs to S3 without a delivery application",
+        "load Redshift through managed streaming delivery",
+        "send search events to OpenSearch with an S3 backup",
+        "read an existing Kinesis data stream and deliver to a destination"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Data Firehose entrega registros de streaming a destinos como S3, Redshift, OpenSearch Service y Splunk sin que tengas que escribir una aplicación de entrega. Elígelo cuando necesitas entrega administrada en vez de consumidores de streaming personalizados, y considera el buffering previo a la entrega.",
+      "whenToUse": [
+        "Los productores deben enviar registros de streaming a S3, Redshift, OpenSearch Service o Splunk con poca infraestructura de entrega que administrar.",
+        "Un Kinesis data stream existente también debe alimentar una canalización de entrega administrada.",
+        "El destino es Redshift y quieres que Firehose gestione el paso por S3 y el comando COPY."
+      ],
+      "keyFacts": [
+        "Firehose acumula registros según el tamaño o el intervalo de tiempo antes de entregarlos.",
+        "Un Firehose stream puede leer de un Kinesis data stream existente.",
+        "Para entregar a Redshift, Firehose primero escribe en S3 y después ejecuta un comando COPY de Redshift.",
+        "Las entregas a OpenSearch Service y Splunk pueden tener un respaldo opcional en S3.",
+        "Puedes configurar Firehose para transformar los datos antes de entregarlos."
+      ],
+      "gotchas": [
+        "No supongas que la entrega es inmediata: Firehose acumula registros.",
+        "Un destino Redshift no elimina el paso intermedio por S3.",
+        "Elegir S3 como destino no configura también la entrega a Splunk u OpenSearch Service."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Kinesis Data Streams",
+          "difference": "Elígelo si necesitas varios consumidores del streaming, reproducción o procesamiento personalizado; Firehose es la opción para entrega administrada a destinos."
+        },
+        {
+          "concept": "Amazon MSK",
+          "difference": "Elige MSK si tus productores o consumidores Apache Kafka existentes necesitan compatibilidad con Kafka, no solo para entregar registros a un destino compatible con Firehose."
+        },
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS sirve para procesar mensajes de una cola, no para la entrega administrada de un flujo a estos destinos."
+        }
+      ],
+      "examCues": [
+        "deliver streaming logs to S3 without a delivery application",
+        "load Redshift through managed streaming delivery",
+        "send search events to OpenSearch with an S3 backup",
+        "read an existing Kinesis data stream and deliver to a destination"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "data-firehose--4d7c1505",
+      "conceptId": "data-firehose",
+      "secondaryConcepts": [
+        "kinesis-data-streams",
+        "amazon-msk"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A bicycle rental company sends trip events from its application servers throughout the day. Analysts need the events delivered to an S3 bucket, and the small platform team does not want to build or operate a delivery application. Buffered delivery is acceptable. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send events to a Firehose stream configured with the S3 bucket as its destination.",
+          "correct": true,
+          "why": "Firehose manages buffered delivery of producer records to the specified S3 destination."
+        },
+        {
+          "id": "B",
+          "text": "Send events to Kinesis Data Streams and build a consumer that writes them to S3.",
+          "correct": false,
+          "why": "A custom consumer adds delivery code and operations that the team wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Send events to an SQS queue and run workers that delete messages after writing them to S3.",
+          "correct": false,
+          "why": "Queue workers introduce the delivery application the team explicitly wants to avoid."
+        },
+        {
+          "id": "D",
+          "text": "Send events to an Amazon MSK topic and build a Kafka consumer that writes them to S3.",
+          "correct": false,
+          "why": "A Kafka consumer still requires the team to build and operate the delivery component."
+        }
+      ],
+      "explanation": "The deciding requirements are delivery to S3, acceptance of buffering, and no delivery application to manage. A Firehose stream accepts records from producers and delivers them to its configured S3 destination. Kinesis Data Streams could be part of a broader streaming design, but the proposed S3 consumer would still need to be built and operated.",
+      "keywordCues": [
+        "delivered to an S3 bucket",
+        "does not want to build or operate a delivery application",
+        "Buffered delivery is acceptable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"
+      ],
+      "es": {
+        "stem": "Una empresa de alquiler de bicicletas envía eventos de viajes desde sus servidores de aplicaciones durante el día. Los analistas necesitan que los eventos lleguen a un bucket de S3, y el pequeño equipo de plataforma no quiere desarrollar ni operar una aplicación de entrega. La entrega con buffering es aceptable. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Envía los eventos a un Firehose stream configurado con el bucket de S3 como destino.",
+            "why": "Firehose gestiona la entrega con buffering de los registros al destino S3 configurado."
+          },
+          {
+            "id": "B",
+            "text": "Envía los eventos a Kinesis Data Streams y desarrolla un consumidor que los escriba en S3.",
+            "why": "Un consumidor personalizado agrega código y tareas operativas de entrega que el equipo quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Envía los eventos a una cola de SQS y ejecuta procesos que eliminen los mensajes después de escribirlos en S3.",
+            "why": "Esos procesos introducen la aplicación de entrega que el equipo quiere evitar."
+          },
+          {
+            "id": "D",
+            "text": "Envía los eventos a un tema de Amazon MSK y desarrolla un consumidor Kafka que los escriba en S3.",
+            "why": "Un consumidor Kafka todavía exige desarrollar y operar el componente de entrega."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son entregar a S3, aceptar buffering y no administrar una aplicación de entrega. Un Firehose stream recibe registros de los productores y los entrega al destino S3 configurado. Kinesis Data Streams podría formar parte de otra arquitectura de streaming, pero el consumidor propuesto para S3 tendría que desarrollarse y operarse."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-firehose--e0f96ffe",
+      "conceptId": "data-firehose",
+      "secondaryConcepts": [
+        "kinesis-data-streams",
+        "amazon-msk"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An online marketplace generates a stream of product-search events. Its operations team wants the events delivered to an Amazon OpenSearch Service cluster and an optional copy stored in S3, without writing a delivery application. Buffered delivery is acceptable. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a Firehose stream with S3 as the destination and expect it to populate OpenSearch Service.",
+          "correct": false,
+          "why": "Selecting S3 as the destination does not configure delivery to the OpenSearch Service cluster."
+        },
+        {
+          "id": "B",
+          "text": "Configure a Firehose stream with OpenSearch Service as the destination and enable S3 backup.",
+          "correct": true,
+          "why": "Firehose supports OpenSearch Service delivery with an optional concurrent S3 backup."
+        },
+        {
+          "id": "C",
+          "text": "Write the events to an Amazon MSK topic and operate a consumer for OpenSearch Service and S3.",
+          "correct": false,
+          "why": "The consumer adds an application to build and operate for the required deliveries."
+        },
+        {
+          "id": "D",
+          "text": "Write the events to Kinesis Data Streams and operate a consumer for OpenSearch Service and S3.",
+          "correct": false,
+          "why": "Operating a consumer conflicts with the requirement not to write a delivery application."
+        }
+      ],
+      "explanation": "The destination is OpenSearch Service, with an optional S3 backup and no delivery code. Firehose supports that destination and can back up its records to S3 concurrently. An S3-destination Firehose stream alone does not meet the stated OpenSearch Service delivery requirement.",
+      "keywordCues": [
+        "delivered to an Amazon OpenSearch Service cluster",
+        "an optional copy stored in S3",
+        "without writing a delivery application",
+        "Buffered delivery is acceptable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"
+      ],
+      "es": {
+        "stem": "Un marketplace genera un flujo de eventos de búsqueda de productos. El equipo de operaciones quiere entregar los eventos a un clúster de Amazon OpenSearch Service y guardar una copia opcional en S3, sin escribir una aplicación de entrega. La entrega con buffering es aceptable. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura un Firehose stream con S3 como destino y espera que también alimente OpenSearch Service.",
+            "why": "Seleccionar S3 como destino no configura la entrega al clúster de OpenSearch Service."
+          },
+          {
+            "id": "B",
+            "text": "Configura un Firehose stream con OpenSearch Service como destino y habilita el respaldo en S3.",
+            "why": "Firehose admite la entrega a OpenSearch Service con un respaldo simultáneo opcional en S3."
+          },
+          {
+            "id": "C",
+            "text": "Escribe los eventos en un tema de Amazon MSK y opera un consumidor para OpenSearch Service y S3.",
+            "why": "El consumidor agrega una aplicación que se debe desarrollar y operar para las entregas requeridas."
+          },
+          {
+            "id": "D",
+            "text": "Escribe los eventos en Kinesis Data Streams y opera un consumidor para OpenSearch Service y S3.",
+            "why": "Operar un consumidor contradice el requisito de no escribir una aplicación de entrega."
+          }
+        ],
+        "explanation": "El destino es OpenSearch Service, con un respaldo opcional en S3 y sin código de entrega. Firehose admite ese destino y puede respaldar los registros en S3 al mismo tiempo. Un Firehose stream cuyo destino sea S3 no cumple por sí solo el requisito de entrega a OpenSearch Service."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-firehose--20485b15",
+      "conceptId": "data-firehose",
+      "secondaryConcepts": [
+        "kinesis-data-streams"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A concert venue sends entry-scan records throughout each event. Its security team needs the records delivered to Splunk and wants an optional S3 backup, while the venue's developers avoid maintaining a forwarding service. Some buffering before delivery is acceptable. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send records to a Firehose stream with Splunk as the destination and S3 backup enabled.",
+          "correct": true,
+          "why": "Firehose delivers to Splunk and can concurrently back up the delivered records to S3."
+        },
+        {
+          "id": "B",
+          "text": "Send records to Kinesis Data Streams and maintain a consumer that forwards them to Splunk and S3.",
+          "correct": false,
+          "why": "Maintaining the forwarding consumer violates the team's operational constraint."
+        },
+        {
+          "id": "C",
+          "text": "Send records to an SQS queue and maintain workers that forward them to Splunk and S3.",
+          "correct": false,
+          "why": "The workers are a forwarding service the developers would have to maintain."
+        },
+        {
+          "id": "D",
+          "text": "Send records to a Firehose stream whose destination is S3 and use that as the Splunk feed.",
+          "correct": false,
+          "why": "An S3 destination does not itself configure Firehose to deliver the records to Splunk."
+        }
+      ],
+      "explanation": "The venue needs managed delivery to Splunk plus an optional S3 copy, and it accepts buffering. Firehose supports Splunk as a destination with optional concurrent S3 backup. Choosing S3 as the Firehose destination instead misses the explicit Splunk delivery requirement.",
+      "keywordCues": [
+        "delivered to Splunk",
+        "an optional S3 backup",
+        "avoid maintaining a forwarding service",
+        "buffering before delivery is acceptable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"
+      ],
+      "es": {
+        "stem": "Un recinto de conciertos envía registros de escaneo de entradas durante cada evento. El equipo de seguridad necesita entregar los registros a Splunk y quiere un respaldo opcional en S3, mientras los desarrolladores evitan mantener un servicio de reenvío. Se acepta algo de buffering antes de la entrega. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Envía los registros a un Firehose stream con Splunk como destino y el respaldo en S3 habilitado.",
+            "why": "Firehose entrega los registros a Splunk y puede respaldarlos simultáneamente en S3."
+          },
+          {
+            "id": "B",
+            "text": "Envía los registros a Kinesis Data Streams y mantén un consumidor que los reenvíe a Splunk y S3.",
+            "why": "Mantener el consumidor de reenvío incumple la restricción operativa del equipo."
+          },
+          {
+            "id": "C",
+            "text": "Envía los registros a una cola de SQS y mantén procesos que los reenvíen a Splunk y S3.",
+            "why": "Los procesos constituyen un servicio de reenvío que los desarrolladores tendrían que mantener."
+          },
+          {
+            "id": "D",
+            "text": "Envía los registros a un Firehose stream cuyo destino sea S3 y úsalo como fuente para Splunk.",
+            "why": "Un destino S3 no configura por sí mismo la entrega de Firehose a Splunk."
+          }
+        ],
+        "explanation": "El recinto necesita entrega administrada a Splunk y una copia opcional en S3, y acepta buffering. Firehose admite Splunk como destino con respaldo simultáneo opcional en S3. Elegir S3 como destino de Firehose no satisface el requisito explícito de entrega a Splunk."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-firehose--bcbdce73",
+      "conceptId": "data-firehose",
+      "secondaryConcepts": [
+        "kinesis-data-streams",
+        "amazon-msk"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A weather-data company already sends sensor readings to a Kinesis data stream used by existing consumers. It now wants to load the same incoming readings into an Amazon Redshift cluster without changing the producers or building a new delivery application. S3 staging is acceptable. Which TWO design choices meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a Firehose stream to read from the existing Kinesis data stream.",
+          "correct": true,
+          "why": "Firehose can read an existing Kinesis data stream without changing its producers."
+        },
+        {
+          "id": "B",
+          "text": "Configure the Firehose stream with Redshift as its destination.",
+          "correct": true,
+          "why": "For a Redshift destination, Firehose handles S3 staging and issues the Redshift COPY command."
+        },
+        {
+          "id": "C",
+          "text": "Replace the existing Kinesis data stream with an Amazon MSK topic for all producers.",
+          "correct": false,
+          "why": "Replacing the source would change the existing producer path rather than reuse it."
+        },
+        {
+          "id": "D",
+          "text": "Configure S3 as the Firehose destination and maintain a job to run Redshift COPY.",
+          "correct": false,
+          "why": "The separate COPY job is a new delivery component the company does not want to maintain."
+        },
+        {
+          "id": "E",
+          "text": "Replace the existing Kinesis data stream with an SQS queue before loading Redshift.",
+          "correct": false,
+          "why": "Replacing the source would disrupt the stated requirement to retain the existing stream and producers."
+        }
+      ],
+      "explanation": "The existing Kinesis data stream must remain the source, and the new Redshift load must not require a delivery application. Firehose can read that stream and deliver to Redshift, staging records in S3 before issuing COPY. Configuring only an S3 destination would leave the company maintaining the Redshift COPY job.",
+      "keywordCues": [
+        "already sends sensor readings to a Kinesis data stream",
+        "without changing the producers",
+        "without building a new delivery application",
+        "S3 staging is acceptable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"
+      ],
+      "es": {
+        "stem": "Una empresa de datos meteorológicos ya envía lecturas de sensores a un Kinesis data stream utilizado por consumidores existentes. Ahora quiere cargar las mismas lecturas entrantes en un clúster de Amazon Redshift sin cambiar los productores ni desarrollar una nueva aplicación de entrega. La preparación intermedia en S3 es aceptable. ¿Qué DOS decisiones de diseño cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura un Firehose stream para leer del Kinesis data stream existente.",
+            "why": "Firehose puede leer un Kinesis data stream existente sin cambiar sus productores."
+          },
+          {
+            "id": "B",
+            "text": "Configura el Firehose stream con Redshift como destino.",
+            "why": "Para un destino Redshift, Firehose gestiona la preparación en S3 y ejecuta el comando Redshift COPY."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza el Kinesis data stream existente por un tema de Amazon MSK para todos los productores.",
+            "why": "Reemplazar el origen cambiaría la ruta de los productores existentes en vez de reutilizarla."
+          },
+          {
+            "id": "D",
+            "text": "Configura S3 como destino de Firehose y mantén un proceso que ejecute Redshift COPY.",
+            "why": "El proceso independiente de COPY es un nuevo componente de entrega que la empresa no quiere mantener."
+          },
+          {
+            "id": "E",
+            "text": "Reemplaza el Kinesis data stream existente por una cola de SQS antes de cargar Redshift.",
+            "why": "Reemplazar el origen incumpliría el requisito de conservar el flujo y los productores existentes."
+          }
+        ],
+        "explanation": "El Kinesis data stream existente debe seguir siendo el origen, y la nueva carga en Redshift no debe requerir una aplicación de entrega. Firehose puede leer ese flujo y entregar a Redshift, preparando los registros en S3 antes de ejecutar COPY. Configurar solo S3 como destino dejaría a la empresa a cargo de mantener el proceso de Redshift COPY."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "data-firehose--r0",
+      "conceptId": "data-firehose",
+      "kind": "recall",
+      "prompt": "You need managed streaming delivery into Redshift without maintaining a COPY job. What do you choose, and what role does S3 play?",
+      "promptEs": "Necesitas entrega administrada de streaming a Redshift sin mantener un proceso COPY. ¿Qué eliges y qué función cumple S3?",
+      "idealAnswer": "Configure an Amazon Data Firehose stream with Redshift as its destination. Firehose first delivers the data to S3, then issues a Redshift COPY command.",
+      "rubric": [
+        "Chooses Amazon Data Firehose with Redshift as the destination.",
+        "Identifies S3 as the intermediate delivery location.",
+        "States that Firehose issues the Redshift COPY command."
+      ]
+    },
+    {
+      "id": "data-firehose--r1",
+      "conceptId": "data-firehose",
+      "kind": "why-not",
+      "prompt": "Why not choose Kinesis Data Streams alone when a team only needs managed delivery of buffered streaming records to S3?",
+      "promptEs": "¿Por qué no elegir solo Kinesis Data Streams cuando un equipo únicamente necesita entrega administrada de registros de streaming con buffering a S3?",
+      "idealAnswer": "Kinesis Data Streams alone does not provide the managed S3 delivery requested in this scenario; the team would need a delivery consumer. A Firehose stream can accept the records and deliver them to S3 after buffering.",
+      "rubric": [
+        "Explains that Kinesis Data Streams alone leaves an S3 delivery component to implement.",
+        "Chooses Firehose for managed delivery to S3.",
+        "Mentions Firehose buffering rather than assuming immediate delivery."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,451 @@
+{
+  "conceptId": "dr-multi-site-active-active",
+  "card": {
+    "en": {
+      "tldr": "Multi-site active-active runs a workload in multiple AWS Regions and serves users from each of them. Choose it when continued service after a Region loss and recovery time near zero justify the highest cost and complexity of the DR strategies described.",
+      "whenToUse": [
+        "Users must normally be served from multiple Regions, not just switch to a recovery Region during an outage.",
+        "The remaining Region or Regions must be ready to handle traffic when one Region is lost.",
+        "The business accepts greater cost and complexity to minimize recovery time."
+      ],
+      "keyFacts": [
+        "Unlike active/passive strategies, every deployed Region serves traffic during normal operation.",
+        "With appropriate technology and implementation, recovery time can be near zero for most disasters; it is not a guarantee of zero data loss.",
+        "Testing should verify that traffic moves away from a lost Region and that the remaining Regions can handle the load.",
+        "Backups and recovery testing are still necessary: corruption or deletion of data can require a non-zero recovery point.",
+        "Amazon Route 53 can route to regional endpoints and use health checks to send traffic only to healthy endpoints; DynamoDB global tables provide continuous, cross-Region asynchronous data replication."
+      ],
+      "gotchas": [
+        "A fully provisioned secondary Region that receives no normal traffic is hot standby, not multi-site active-active.",
+        "A scaled-down, running recovery stack is warm standby; needing to scale it up adds a recovery dependency.",
+        "Replicating data across Regions does not, by itself, make the application active-active.",
+        "Active-active does not replace point-in-time backups for data corruption or deletion."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Warm standby",
+          "difference": "Its scaled-down recovery stack is running, but normal traffic goes to the primary Region and the recovery stack must scale up."
+        },
+        {
+          "concept": "Pilot light",
+          "difference": "Core data and infrastructure are available, but application resources must be switched on before they can process requests."
+        },
+        {
+          "concept": "Backup and restore",
+          "difference": "The recovery environment must be restored or redeployed rather than already serving users."
+        }
+      ],
+      "examCues": [
+        "users served from both Regions during normal operation",
+        "near-zero recovery time after loss of a Region",
+        "remaining Region must handle the full workload",
+        "cost and complexity are acceptable"
+      ]
+    },
+    "es": {
+      "tldr": "Multi-site active-active ejecuta una carga de trabajo en varias AWS Regions y atiende usuarios desde cada una. Elígelo cuando mantener el servicio ante la pérdida de una Region y lograr un tiempo de recuperación cercano a cero justifique el mayor costo y complejidad de las estrategias de DR descritas.",
+      "whenToUse": [
+        "Los usuarios deben recibir servicio desde varias Regions durante la operación normal, no solo después de un incidente.",
+        "Las Regions restantes deben estar listas para recibir tráfico si se pierde una Region.",
+        "La empresa acepta más costo y complejidad para minimizar el tiempo de recuperación."
+      ],
+      "keyFacts": [
+        "A diferencia de las estrategias active/passive, cada Region desplegada atiende tráfico durante la operación normal.",
+        "Con la tecnología y la implementación adecuadas, el tiempo de recuperación puede ser cercano a cero para la mayoría de los desastres; esto no garantiza cero pérdida de datos.",
+        "Las pruebas deben verificar que el tráfico deje de ir a una Region caída y que las demás puedan soportar la carga.",
+        "Todavía necesitas respaldos y pruebas de recuperación: la corrupción o eliminación de datos puede exigir un punto de recuperación distinto de cero.",
+        "Amazon Route 53 puede dirigir tráfico a endpoints regionales y usar health checks para enviarlo solo a endpoints saludables; DynamoDB global tables ofrece replicación continua y asíncrona entre Regions."
+      ],
+      "gotchas": [
+        "Una Region secundaria con capacidad completa que no recibe tráfico normal es hot standby, no multi-site active-active.",
+        "Un entorno de recuperación activo pero reducido es warm standby; ampliarlo introduce una dependencia durante la recuperación.",
+        "Replicar datos entre Regions no convierte, por sí solo, a la aplicación en active-active.",
+        "Active-active no sustituye los respaldos de un momento específico ante corrupción o eliminación de datos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Warm standby",
+          "difference": "Su entorno de recuperación reducido está activo, pero el tráfico normal va a la Region principal y el entorno debe ampliarse."
+        },
+        {
+          "concept": "Pilot light",
+          "difference": "Los datos y la infraestructura esenciales están disponibles, pero debes activar recursos de aplicación antes de procesar solicitudes."
+        },
+        {
+          "concept": "Backup and restore",
+          "difference": "Debes restaurar o volver a desplegar el entorno de recuperación; este no está atendiendo usuarios."
+        }
+      ],
+      "examCues": [
+        "users served from both Regions during normal operation",
+        "near-zero recovery time after loss of a Region",
+        "remaining Region must handle the full workload",
+        "cost and complexity are acceptable"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dr-multi-site-active-active--139974d4",
+      "conceptId": "dr-multi-site-active-active",
+      "secondaryConcepts": [
+        "dr-backup-restore"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research platform serves users from two Regions at the same time and has enough application capacity in either Region to continue serving them if the other is lost. Its operators now worry that an accidental deletion of shared data could affect what users see in both Regions. Which addition MOST directly addresses this remaining DR risk?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add more application capacity in both Regions to increase tolerance of regional traffic shifts.",
+          "correct": false,
+          "why": "Application capacity addresses a Region loss, not recovery of deleted data."
+        },
+        {
+          "id": "B",
+          "text": "Move normal traffic to one Region and reserve the other as a scaled-down warm standby.",
+          "correct": false,
+          "why": "Changing traffic to active/passive does not provide a recoverable version of accidentally deleted data."
+        },
+        {
+          "id": "C",
+          "text": "Use continuous cross-Region replication as the sole data recovery mechanism.",
+          "correct": false,
+          "why": "Continuous replication alone may not protect against data deletion or corruption."
+        },
+        {
+          "id": "D",
+          "text": "Keep point-in-time data backups and regularly test recovery from them.",
+          "correct": true,
+          "why": "Point-in-time backups and recovery testing address data disasters that active-active operation alone cannot resolve."
+        }
+      ],
+      "explanation": "The platform already addresses regional application availability; the stated gap is accidental data deletion. AWS guidance says backups and recovery testing remain necessary with multi-site active-active, because a data disaster can require restoring an earlier point. More regional capacity does not recover deleted data, and continuous replication alone may not protect against deletion.",
+      "keywordCues": [
+        "serves users from two Regions at the same time",
+        "accidental deletion of shared data",
+        "remaining DR risk"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de investigación atiende usuarios desde dos Regions al mismo tiempo y tiene suficiente capacidad de aplicación en cualquiera de ellas para continuar si se pierde la otra. Ahora los operadores temen que una eliminación accidental de datos compartidos afecte lo que ven los usuarios en ambas Regions. ¿Qué medida adicional atiende MÁS directamente este riesgo de DR?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar más capacidad de aplicación en ambas Regions para soportar mejor los cambios de tráfico regional.",
+            "why": "La capacidad de aplicación atiende la pérdida de una Region, no la recuperación de datos eliminados."
+          },
+          {
+            "id": "B",
+            "text": "Enviar el tráfico normal a una sola Region y reservar la otra como warm standby de capacidad reducida.",
+            "why": "Cambiar a tráfico active/passive no ofrece una versión recuperable de los datos eliminados accidentalmente."
+          },
+          {
+            "id": "C",
+            "text": "Usar la replicación continua entre Regions como único mecanismo de recuperación de datos.",
+            "why": "La replicación continua por sí sola puede no proteger contra eliminación o corrupción de datos."
+          },
+          {
+            "id": "D",
+            "text": "Mantener respaldos de datos de momentos específicos y probar regularmente su recuperación.",
+            "why": "Los respaldos de momentos específicos y las pruebas de recuperación atienden desastres de datos que active-active no resuelve por sí solo."
+          }
+        ],
+        "explanation": "La plataforma ya atiende la disponibilidad de la aplicación ante una falla regional; el problema indicado es la eliminación accidental de datos. La guía de AWS señala que los respaldos y las pruebas de recuperación siguen siendo necesarios con multi-site active-active, porque un desastre de datos puede exigir restaurar un punto anterior. Más capacidad regional no recupera datos eliminados, y la replicación continua por sí sola puede no proteger contra su eliminación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-multi-site-active-active--f0408494",
+      "conceptId": "dr-multi-site-active-active",
+      "secondaryConcepts": [
+        "dr-warm-standby",
+        "dr-pilot-light",
+        "dr-backup-restore"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A museum's reservation platform runs in two Regions, but today only one serves visitors. A new exhibit requires visitors to use both Regions during normal operations, with the remaining Region ready to handle the load if one Region is lost. The team uses DynamoDB for reservation metadata and accepts asynchronous cross-Region replication. Which TWO changes together best meet these requirements while keeping traffic away from unhealthy regional endpoints? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the reservation application with sufficient capacity in each Region and use DynamoDB global tables.",
+          "correct": true,
+          "why": "This prepares both applications to serve visitors and supplies continuous asynchronous cross-Region data replication."
+        },
+        {
+          "id": "B",
+          "text": "Keep the second Region's application servers switched off until an outage is declared.",
+          "correct": false,
+          "why": "Switched-off servers cannot serve visitors normally or immediately accept the failed Region's traffic."
+        },
+        {
+          "id": "C",
+          "text": "Configure Amazon Route 53 to route normal traffic to both regional endpoints, using health checks to exclude unhealthy endpoints.",
+          "correct": true,
+          "why": "This serves visitors from both Regions and directs traffic only to healthy regional endpoints."
+        },
+        {
+          "id": "D",
+          "text": "Copy DynamoDB backups across Regions and restore the second application after a failure.",
+          "correct": false,
+          "why": "Restoration does not make both Regions available to serve visitors during normal operations."
+        },
+        {
+          "id": "E",
+          "text": "Keep the second application scaled down and increase its capacity only after the first Region fails.",
+          "correct": false,
+          "why": "It depends on scaling during recovery instead of keeping the remaining Region ready for the load."
+        }
+      ],
+      "explanation": "The application, data, and routing must all support two active Regions. Sufficient running application capacity and DynamoDB global tables address regional service and asynchronous replication; Route 53 health checks address routing around unhealthy endpoints. Warm standby scale-out and pilot-light server startup each leave a recovery-time action that the scenario rejects.",
+      "keywordCues": [
+        "visitors to use both Regions during normal operations",
+        "remaining Region ready to handle the load",
+        "accepts asynchronous cross-Region replication",
+        "traffic away from unhealthy regional endpoints"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "La plataforma de reservas de un museo se ejecuta en dos Regions, pero hoy solo una atiende visitantes. Una nueva exposición exige que los visitantes usen ambas Regions durante la operación normal y que la Region restante esté lista para soportar la carga si se pierde una. El equipo usa DynamoDB para los metadatos de reservas y acepta replicación asíncrona entre Regions. ¿Qué DOS cambios, en conjunto, cumplen mejor estos requisitos y evitan enviar tráfico a endpoints regionales no saludables? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar la aplicación de reservas con capacidad suficiente en cada Region y usar DynamoDB global tables.",
+            "why": "Prepara ambas aplicaciones para atender visitantes y proporciona replicación continua y asíncrona entre Regions."
+          },
+          {
+            "id": "B",
+            "text": "Mantener apagados los servidores de aplicación de la segunda Region hasta que se declare una interrupción.",
+            "why": "Los servidores apagados no pueden atender visitantes normalmente ni recibir de inmediato el tráfico de la Region fallida."
+          },
+          {
+            "id": "C",
+            "text": "Configurar Amazon Route 53 para dirigir tráfico normal a ambos endpoints regionales y usar health checks para excluir los no saludables.",
+            "why": "Esto atiende visitantes desde ambas Regions y dirige tráfico solo a endpoints regionales saludables."
+          },
+          {
+            "id": "D",
+            "text": "Copiar respaldos de DynamoDB entre Regions y restaurar la segunda aplicación después de una falla.",
+            "why": "La restauración no permite que ambas Regions atiendan visitantes durante la operación normal."
+          },
+          {
+            "id": "E",
+            "text": "Mantener la segunda aplicación con capacidad reducida y ampliarla solo cuando falle la primera Region.",
+            "why": "Depende de ampliar capacidad durante la recuperación en vez de mantener la Region restante lista para la carga."
+          }
+        ],
+        "explanation": "La aplicación, los datos y el enrutamiento deben admitir dos Regions activas. La capacidad de aplicación en ejecución y DynamoDB global tables atienden el servicio regional y la replicación asíncrona; los health checks de Route 53 permiten evitar endpoints no saludables. La ampliación de warm standby y el inicio de servidores de pilot light requieren acciones durante la recuperación que el escenario descarta."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-multi-site-active-active--798a040d",
+      "conceptId": "dr-multi-site-active-active",
+      "secondaryConcepts": [
+        "dr-backup-restore",
+        "dr-pilot-light",
+        "dr-warm-standby"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is redesigning its application after a regional outage. Customers must be able to use the application in either of two Regions during normal operations, and losing one Region must not require starting application servers in the other. The company accepts higher ongoing costs to minimize recovery time. Which DR strategy meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep cross-Region backups and redeploy the application in the recovery Region after an outage.",
+          "correct": false,
+          "why": "Backup and restore requires recovery-time deployment and does not serve customers from both Regions normally."
+        },
+        {
+          "id": "B",
+          "text": "Replicate data to the second Region and provision its application servers only after an outage.",
+          "correct": false,
+          "why": "Pilot light must switch on application resources and does not serve customers from both Regions normally."
+        },
+        {
+          "id": "C",
+          "text": "Run the application in both Regions and direct customer traffic to both during normal operations.",
+          "correct": true,
+          "why": "Multi-site active-active serves traffic from both deployed Regions without starting the second application's servers during recovery."
+        },
+        {
+          "id": "D",
+          "text": "Run a scaled-down application in the second Region and send it traffic only after an outage.",
+          "correct": false,
+          "why": "Warm standby keeps a functional recovery stack but does not serve normal traffic from both Regions."
+        }
+      ],
+      "explanation": "The deciding requirement is that both Regions serve customers before an outage. Multi-site active-active does that and can reduce recovery time to near zero for most disasters when implemented appropriately. Warm standby is already running, but it is scaled down and receives traffic only after recovery is initiated.",
+      "keywordCues": [
+        "use the application in either of two Regions during normal operations",
+        "must not require starting application servers",
+        "accepts higher ongoing costs"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos rediseña su aplicación después de una interrupción regional. Los clientes deben poder usarla en cualquiera de dos Regions durante la operación normal, y la pérdida de una Region no debe exigir iniciar servidores de aplicación en la otra. La empresa acepta mayores costos continuos para minimizar el tiempo de recuperación. ¿Qué estrategia de DR cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener respaldos entre Regions y volver a desplegar la aplicación en la Region de recuperación después de una interrupción.",
+            "why": "Backup and restore requiere un despliegue durante la recuperación y no atiende clientes desde ambas Regions normalmente."
+          },
+          {
+            "id": "B",
+            "text": "Replicar los datos a la segunda Region y aprovisionar allí los servidores de aplicación solo después de una interrupción.",
+            "why": "Pilot light debe activar los recursos de aplicación y no atiende clientes desde ambas Regions normalmente."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar la aplicación en ambas Regions y dirigir tráfico de clientes a las dos durante la operación normal.",
+            "why": "Multi-site active-active atiende tráfico desde ambas Regions sin tener que iniciar servidores de aplicación durante la recuperación."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar una versión reducida de la aplicación en la segunda Region y enviarle tráfico solo después de una interrupción.",
+            "why": "Warm standby mantiene un entorno funcional de recuperación, pero no atiende tráfico normal desde ambas Regions."
+          }
+        ],
+        "explanation": "El requisito decisivo es que ambas Regions atiendan clientes antes de una interrupción. Multi-site active-active lo hace y, con una implementación adecuada, puede reducir el tiempo de recuperación a casi cero para la mayoría de los desastres. Warm standby ya está en ejecución, pero tiene capacidad reducida y recibe tráfico solo cuando se inicia la recuperación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-multi-site-active-active--029a8630",
+      "conceptId": "dr-multi-site-active-active",
+      "secondaryConcepts": [
+        "dr-pilot-light",
+        "dr-warm-standby",
+        "dr-backup-restore"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher operates a global article service from two Regions. It wants readers to reach the application in both Regions on ordinary days, while traffic to an unhealthy regional endpoint should stop if that Region fails. Article metadata is stored in DynamoDB, and the team accepts asynchronous cross-Region replication. Which design best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the application in both Regions, use DynamoDB global tables, and configure Amazon Route 53 health checks for the regional endpoints.",
+          "correct": true,
+          "why": "It combines active application deployments, documented cross-Region data replication, and health-based endpoint routing."
+        },
+        {
+          "id": "B",
+          "text": "Run the application in one Region, use DynamoDB global tables, and deploy application servers in the other Region during recovery.",
+          "correct": false,
+          "why": "Replicated data does not let readers use the second Region's application on ordinary days."
+        },
+        {
+          "id": "C",
+          "text": "Copy DynamoDB backups to the second Region and restore the application there when the first Region fails.",
+          "correct": false,
+          "why": "Restoration after failure cannot satisfy the requirement to serve readers from both Regions ordinarily."
+        },
+        {
+          "id": "D",
+          "text": "Run a scaled-down application in the second Region and configure Amazon Route 53 to send it traffic only when the primary Region fails.",
+          "correct": false,
+          "why": "This active/passive routing prevents both Regions from serving readers during normal operations."
+        }
+      ],
+      "explanation": "Normal traffic must reach both Regions, so the application must be active in each. DynamoDB global tables supplies continuous, asynchronous cross-Region replication, while Route 53 health checks can keep traffic away from unhealthy endpoints. A global table alone is insufficient if the second Region's application servers are not running.",
+      "keywordCues": [
+        "both Regions on ordinary days",
+        "traffic to an unhealthy regional endpoint should stop",
+        "accepts asynchronous cross-Region replication"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una editorial opera un servicio global de artículos desde dos Regions. Quiere que los lectores accedan a la aplicación en ambas Regions durante los días normales, pero que el tráfico deje de ir a un endpoint regional no saludable si falla esa Region. Los metadatos de los artículos se almacenan en DynamoDB y el equipo acepta replicación asíncrona entre Regions. ¿Qué diseño cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar la aplicación en ambas Regions, usar DynamoDB global tables y configurar health checks de Amazon Route 53 para los endpoints regionales.",
+            "why": "Combina aplicaciones activas, replicación de datos entre Regions y enrutamiento según el estado de los endpoints."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar la aplicación en una Region, usar DynamoDB global tables y desplegar servidores de aplicación en la otra Region durante la recuperación.",
+            "why": "La replicación de datos no permite que los lectores usen la aplicación de la segunda Region en días normales."
+          },
+          {
+            "id": "C",
+            "text": "Copiar respaldos de DynamoDB a la segunda Region y restaurar allí la aplicación cuando falle la primera.",
+            "why": "Restaurar después de la falla no cumple el requisito de atender lectores desde ambas Regions habitualmente."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar una versión reducida de la aplicación en la segunda Region y configurar Amazon Route 53 para enviarle tráfico solo si falla la Region principal.",
+            "why": "Este enrutamiento active/passive impide que ambas Regions atiendan lectores durante la operación normal."
+          }
+        ],
+        "explanation": "El tráfico normal debe llegar a ambas Regions, así que la aplicación debe estar activa en cada una. DynamoDB global tables proporciona replicación continua y asíncrona entre Regions, mientras que los health checks de Route 53 pueden evitar enviar tráfico a endpoints no saludables. Una global table por sí sola no basta si los servidores de aplicación de la segunda Region no están en ejecución."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dr-multi-site-active-active--r0",
+      "conceptId": "dr-multi-site-active-active",
+      "kind": "recall",
+      "prompt": "Users must be served from two Regions normally, with near-zero recovery time after a Region loss. Which DR strategy fits, and what must you test?",
+      "promptEs": "Los usuarios deben recibir servicio desde dos Regions normalmente, con un tiempo de recuperación cercano a cero si se pierde una. ¿Qué estrategia de DR elegirías y qué probarías?",
+      "idealAnswer": "Use multi-site active-active because both Regions serve traffic during normal operation. Test whether traffic moves away from a lost Region and whether the remaining Region can handle the load; also test backup recovery for data disasters.",
+      "rubric": [
+        "Identifies multi-site active-active.",
+        "Explains that multiple Regions serve traffic normally.",
+        "Mentions testing routing and remaining-region capacity.",
+        "Mentions backups or recovery testing for data disasters."
+      ]
+    },
+    {
+      "id": "dr-multi-site-active-active--r1",
+      "conceptId": "dr-multi-site-active-active",
+      "kind": "why-not",
+      "prompt": "Why does warm standby not satisfy a requirement to serve users from both Regions normally without scaling up after a Region loss?",
+      "promptEs": "¿Por qué warm standby no cumple el requisito de atender usuarios desde ambas Regions normalmente y sin ampliar capacidad después de perder una Region?",
+      "idealAnswer": "Warm standby is active/passive: its scaled-down recovery stack runs, but normal traffic goes to the primary Region. It must scale up to support full production traffic after failover, whereas multi-site active-active serves traffic from both Regions already.",
+      "rubric": [
+        "Identifies warm standby as active/passive.",
+        "Notes that its recovery stack is scaled down and must scale up.",
+        "Contrasts this with normal traffic being served from both Regions in multi-site active-active."
+      ]
+    }
+  ]
+}

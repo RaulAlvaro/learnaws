@@ -1,0 +1,362 @@
+{
+  "conceptId": "vpc-peering",
+  "card": {
+    "en": {
+      "tldr": "VPC peering directly connects two VPCs so resources can communicate using private IP addresses. For a small number of VPCs that need direct connections, choose it over a transitive hub when the address ranges do not overlap.",
+      "whenToUse": [
+        "Two VPCs need private connectivity, including VPCs in different accounts or Regions.",
+        "A small topology needs direct VPC-to-VPC connections rather than transitive routing.",
+        "The design should avoid a gateway or VPN connection."
+      ],
+      "keyFacts": [
+        "A peering connection links two VPCs and supports private IPv4 or IPv6 communication.",
+        "Peering can connect VPCs in different accounts or Regions.",
+        "Inter-Region peering traffic stays on the AWS backbone, does not traverse the public internet, and is encrypted before leaving AWS facilities.",
+        "Creating a peering connection has no charge. Data transfer within an Availability Zone is free; transfers across Availability Zones or Regions incur charges.",
+        "Peering is not transitive, and VPCs with overlapping CIDR ranges cannot be peered."
+      ],
+      "gotchas": [
+        "A–B and B–C peering connections do not give A a route to C; A and C need their own connection.",
+        "Private inter-Region connectivity does not mean free inter-Region data transfer.",
+        "Do not select peering before checking for overlapping CIDR ranges."
+      ],
+      "confusedWith": [
+        {
+          "concept": "transit-gateway",
+          "difference": "Transit Gateway is a transitive hub for many networks; peering directly connects two VPCs without transitive routing."
+        },
+        {
+          "concept": "site-to-site-vpn",
+          "difference": "Site-to-Site VPN connects networks using encrypted IPsec tunnels, typically over the internet (private IP VPN can run over Direct Connect); VPC peering does not use a VPN."
+        },
+        {
+          "concept": "client-vpn",
+          "difference": "Client VPN connects individual remote users; VPC peering connects VPCs."
+        }
+      ],
+      "examCues": [
+        "two VPCs in separate accounts",
+        "private IP connectivity between Regions",
+        "no VPN or gateway",
+        "A–B and B–C must also reach A–C",
+        "overlapping CIDR ranges"
+      ]
+    },
+    "es": {
+      "tldr": "VPC peering conecta directamente dos VPC para que sus recursos se comuniquen mediante direcciones IP privadas. Para pocas VPC que necesitan conexiones directas, elígelo en lugar de un hub transitivo cuando los rangos de direcciones no se superponen.",
+      "whenToUse": [
+        "Dos VPC necesitan conectividad privada, incluso si pertenecen a distintas cuentas o Regions.",
+        "Una topología pequeña necesita conexiones directas entre VPC, no enrutamiento transitivo.",
+        "El diseño debe evitar un gateway o una conexión VPN."
+      ],
+      "keyFacts": [
+        "Una conexión de peering enlaza dos VPC y permite comunicación mediante IPv4 o IPv6 privados.",
+        "Peering puede conectar VPC de distintas cuentas o Regions.",
+        "El tráfico de peering entre Regions permanece en la red troncal de AWS, no atraviesa internet público y se cifra antes de salir de las instalaciones de AWS.",
+        "Crear una conexión de peering no tiene cargo. La transferencia dentro de una Availability Zone es gratuita; las transferencias entre Availability Zones o Regions generan cargos.",
+        "Peering no es transitivo y no permite conectar VPC con rangos CIDR superpuestos."
+      ],
+      "gotchas": [
+        "Las conexiones A–B y B–C no dan a A una ruta hacia C; A y C necesitan su propia conexión.",
+        "La conectividad privada entre Regions no implica que la transferencia de datos sea gratuita.",
+        "Antes de elegir peering, comprueba que los rangos CIDR no se superpongan."
+      ],
+      "confusedWith": [
+        {
+          "concept": "transit-gateway",
+          "difference": "Transit Gateway es un hub transitivo para muchas redes; peering conecta directamente dos VPC sin enrutamiento transitivo."
+        },
+        {
+          "concept": "site-to-site-vpn",
+          "difference": "Site-to-Site VPN conecta redes mediante túneles IPsec cifrados, normalmente sobre internet (una private IP VPN puede ir sobre Direct Connect); VPC peering no usa una VPN."
+        },
+        {
+          "concept": "client-vpn",
+          "difference": "Client VPN conecta a usuarios remotos individuales; VPC peering conecta VPC."
+        }
+      ],
+      "examCues": [
+        "two VPCs in separate accounts",
+        "private IP connectivity between Regions",
+        "no VPN or gateway",
+        "A–B and B–C must also reach A–C",
+        "overlapping CIDR ranges"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "vpc-peering--5515073c",
+      "conceptId": "vpc-peering",
+      "secondaryConcepts": [
+        "transit-gateway",
+        "site-to-site-vpn",
+        "client-vpn"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher keeps a catalog service and a reporting service in two VPCs owned by separate AWS accounts. The services need to communicate using private IP addresses, and their traffic stays within one Availability Zone. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a VPC peering connection between the accounts' VPCs.",
+          "correct": true,
+          "why": "Peering supports cross-account private communication, and data transfer over the connection within an Availability Zone is free."
+        },
+        {
+          "id": "B",
+          "text": "Connect the VPCs through AWS Site-to-Site VPN.",
+          "correct": false,
+          "why": "A VPN is unnecessary for direct private communication between these two VPCs."
+        },
+        {
+          "id": "C",
+          "text": "Connect each VPC to AWS Transit Gateway.",
+          "correct": false,
+          "why": "A transitive hub is unnecessary for this single VPC-to-VPC connection."
+        },
+        {
+          "id": "D",
+          "text": "Give reporting employees AWS Client VPN access to the catalog VPC.",
+          "correct": false,
+          "why": "Client VPN addresses remote-user access, not the required connection between the services' VPCs."
+        }
+      ],
+      "explanation": "The deciding requirements are private communication between two VPCs in separate accounts and traffic that remains within one Availability Zone. VPC peering supports cross-account private IP communication, and transfer over a peering connection within an Availability Zone is free. Transit Gateway adds a hub when the scenario calls only for one direct connection.",
+      "keywordCues": [
+        "two VPCs owned by separate AWS accounts",
+        "private IP addresses",
+        "traffic stays within one Availability Zone",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html"
+      ],
+      "es": {
+        "stem": "Una editorial tiene un servicio de catálogo y otro de informes en dos VPC de distintas cuentas de AWS. Los servicios deben comunicarse mediante direcciones IP privadas y su tráfico permanece dentro de una Availability Zone. ¿Qué solución cumple estos requisitos de la forma MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una conexión de VPC peering entre las VPC de las dos cuentas.",
+            "why": "Peering permite comunicación privada entre cuentas y la transferencia dentro de una Availability Zone por esa conexión es gratuita."
+          },
+          {
+            "id": "B",
+            "text": "Conectar las VPC mediante AWS Site-to-Site VPN.",
+            "why": "No necesitas una VPN para la comunicación privada directa entre estas dos VPC."
+          },
+          {
+            "id": "C",
+            "text": "Conectar cada VPC a AWS Transit Gateway.",
+            "why": "No necesitas un hub transitivo para esta única conexión entre VPC."
+          },
+          {
+            "id": "D",
+            "text": "Dar al personal de informes acceso al VPC del catálogo mediante AWS Client VPN.",
+            "why": "Client VPN resuelve el acceso de usuarios remotos, no la conexión requerida entre las VPC de los servicios."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la comunicación privada entre dos VPC de distintas cuentas y que el tráfico permanezca dentro de una Availability Zone. VPC peering permite la comunicación entre cuentas mediante IP privadas y la transferencia por peering dentro de una Availability Zone es gratuita. Transit Gateway agrega un hub cuando el escenario solo requiere una conexión directa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-peering--975e103d",
+      "conceptId": "vpc-peering",
+      "secondaryConcepts": [
+        "transit-gateway",
+        "site-to-site-vpn"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab has three VPCs with nonoverlapping CIDR ranges: Instruments, Processing, and Archive. Instruments is peered with Processing, and Processing is peered with Archive. Instruments now needs private IP connectivity to Archive, but the lab wants to keep its small topology of direct connections. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a VPC peering connection directly between Instruments and Archive.",
+          "correct": true,
+          "why": "A direct peering connection supplies the missing private path without relying on transit through Processing."
+        },
+        {
+          "id": "B",
+          "text": "Connect Instruments and Archive using Site-to-Site VPN.",
+          "correct": false,
+          "why": "A VPN does not preserve the requested topology of direct VPC peering connections."
+        },
+        {
+          "id": "C",
+          "text": "Send Instruments-to-Archive traffic through the two existing peering connections.",
+          "correct": false,
+          "why": "VPC peering is not transitive, so the existing connections do not provide that path."
+        },
+        {
+          "id": "D",
+          "text": "Move all three VPCs to a Transit Gateway hub.",
+          "correct": false,
+          "why": "A transitive hub would work for a different topology but misses the request to keep direct connections."
+        }
+      ],
+      "explanation": "The existing peering connections do not provide transitive routing from Instruments through Processing to Archive. A direct Instruments–Archive peering connection adds the required private path while retaining the lab's small, direct-connection topology. Transit Gateway would change that topology to a hub.",
+      "keywordCues": [
+        "three VPCs with nonoverlapping CIDR ranges",
+        "Instruments is peered with Processing",
+        "Processing is peered with Archive",
+        "keep its small topology of direct connections"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio tiene tres VPC con rangos CIDR que no se superponen: Instruments, Processing y Archive. Instruments tiene peering con Processing, y Processing tiene peering con Archive. Ahora Instruments necesita conectividad por IP privadas con Archive, pero el laboratorio quiere mantener su pequeña topología de conexiones directas. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una conexión de VPC peering directamente entre Instruments y Archive.",
+            "why": "Una conexión directa de peering proporciona la ruta privada faltante sin depender de Processing como tránsito."
+          },
+          {
+            "id": "B",
+            "text": "Conectar Instruments y Archive mediante Site-to-Site VPN.",
+            "why": "Una VPN no mantiene la topología solicitada de conexiones directas de VPC peering."
+          },
+          {
+            "id": "C",
+            "text": "Enviar el tráfico de Instruments a Archive por las dos conexiones de peering existentes.",
+            "why": "VPC peering no es transitivo, por lo que esas conexiones no proporcionan esa ruta."
+          },
+          {
+            "id": "D",
+            "text": "Trasladar las tres VPC a un hub de Transit Gateway.",
+            "why": "Un hub transitivo serviría para otra topología, pero no mantiene las conexiones directas solicitadas."
+          }
+        ],
+        "explanation": "Las conexiones de peering existentes no ofrecen enrutamiento transitivo desde Instruments hasta Archive a través de Processing. Una conexión directa de peering entre Instruments y Archive agrega la ruta privada requerida y conserva la topología pequeña de conexiones directas. Transit Gateway cambiaría esa topología por un hub."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-peering--0f8d71f5",
+      "conceptId": "vpc-peering",
+      "secondaryConcepts": [
+        "transit-gateway",
+        "client-vpn",
+        "site-to-site-vpn"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company is adding VPCs across several AWS accounts and plans to connect its office network as well. The network team wants VPCs to communicate through a central, transitive hub rather than maintain individual connections between every pair. Which solution best meets the company's planned topology?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create VPC peering connections between selected pairs and route through intermediate VPCs.",
+          "correct": false,
+          "why": "Peering does not support the transitive paths required by this topology."
+        },
+        {
+          "id": "B",
+          "text": "Establish Site-to-Site VPN only between the office and one VPC.",
+          "correct": false,
+          "why": "That single connection does not provide the requested central connectivity among the VPCs."
+        },
+        {
+          "id": "C",
+          "text": "Connect the VPCs and office network through AWS Transit Gateway.",
+          "correct": true,
+          "why": "Transit Gateway provides the central, transitive hub requested for VPCs and the office network."
+        },
+        {
+          "id": "D",
+          "text": "Give office employees Client VPN access to one VPC.",
+          "correct": false,
+          "why": "Remote-user access does not create the required transitive network hub."
+        }
+      ],
+      "explanation": "The deciding phrase is the requirement for a central, transitive hub across several VPCs and an office network. Transit Gateway fits that topology. VPC peering links pairs of VPCs but cannot route traffic transitively through an intermediate VPC.",
+      "keywordCues": [
+        "VPCs across several AWS accounts",
+        "connect its office network",
+        "central, transitive hub",
+        "rather than maintain individual connections between every pair"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística agrega VPC en varias cuentas de AWS y también planea conectar su red de oficinas. El equipo de redes quiere que las VPC se comuniquen mediante un hub central y transitivo, en lugar de mantener conexiones individuales entre cada par. ¿Qué solución se ajusta mejor a la topología planificada?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear conexiones de VPC peering entre pares seleccionados y enrutar a través de VPC intermedias.",
+            "why": "Peering no admite las rutas transitivas que requiere esta topología."
+          },
+          {
+            "id": "B",
+            "text": "Establecer Site-to-Site VPN solo entre la oficina y una VPC.",
+            "why": "Esa única conexión no proporciona la conectividad central solicitada entre las VPC."
+          },
+          {
+            "id": "C",
+            "text": "Conectar las VPC y la red de oficinas mediante AWS Transit Gateway.",
+            "why": "Transit Gateway proporciona el hub central y transitivo solicitado para las VPC y la red de oficinas."
+          },
+          {
+            "id": "D",
+            "text": "Dar a los empleados de la oficina acceso a una VPC mediante Client VPN.",
+            "why": "El acceso de usuarios remotos no crea el hub de red transitivo requerido."
+          }
+        ],
+        "explanation": "La frase decisiva es el requisito de un hub central y transitivo para varias VPC y una red de oficinas. Transit Gateway se ajusta a esa topología. VPC peering conecta pares de VPC, pero no permite enrutar tráfico de forma transitiva por una VPC intermedia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "vpc-peering--r0",
+      "conceptId": "vpc-peering",
+      "kind": "recall",
+      "prompt": "Two VPCs in different accounts need private connectivity within one Availability Zone. What would you choose, and what is the relevant transfer-cost detail?",
+      "promptEs": "Dos VPC de distintas cuentas necesitan conectividad privada dentro de una Availability Zone. ¿Qué eliges y cuál es el detalle importante sobre el costo de transferencia?",
+      "idealAnswer": "I would create a VPC peering connection: it supports private IP communication between VPCs in different accounts. Creating the connection has no charge, and transfer over peering that stays within one Availability Zone is free.",
+      "rubric": [
+        "Names VPC peering.",
+        "Explains that it supports cross-account private IP communication.",
+        "States that transfer over peering within an Availability Zone is free."
+      ]
+    },
+    {
+      "id": "vpc-peering--r1",
+      "conceptId": "vpc-peering",
+      "kind": "why-not",
+      "prompt": "Why is peering A–B and B–C insufficient when A must privately reach C? When would Transit Gateway be a better fit?",
+      "promptEs": "¿Por qué el peering entre A–B y B–C no basta si A debe comunicarse de forma privada con C? ¿Cuándo conviene más Transit Gateway?",
+      "idealAnswer": "VPC peering is not transitive, so A cannot reach C through B using those two peering connections; a direct A–C peering connection would be needed. Transit Gateway is a better fit when many networks need connectivity through a transitive hub.",
+      "rubric": [
+        "Identifies the lack of transitive routing in VPC peering.",
+        "States that a direct A–C connection is needed if retaining peering.",
+        "Associates Transit Gateway with a transitive hub for many networks."
+      ]
+    }
+  ]
+}

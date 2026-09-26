@@ -1,0 +1,365 @@
+{
+  "conceptId": "rds-backups-pitr",
+  "card": {
+    "en": {
+      "tldr": "Amazon RDS automated backups support point-in-time recovery (PITR) within the configured retention period. Choose manual DB snapshots when a recovery copy must survive deletion of the DB instance, and copy a snapshot to another Region when the recovery copy must be there.",
+      "whenToUse": [
+        "An RDS DB instance must be restored to a time before an accidental change.",
+        "A recovery copy must remain after the source DB instance is deleted.",
+        "A DB snapshot is needed in another AWS Region for disaster recovery."
+      ],
+      "keyFacts": [
+        "RDS can restore a DB instance to a point within its backup retention period, up to 35 days.",
+        "PITR creates a new DB instance; it does not modify the source.",
+        "The latest restorable time can lag behind the present: RDS uploads transaction logs every five minutes.",
+        "Manual DB snapshots are not deleted when the DB instance is deleted.",
+        "RDS supports copying automatic and manual DB snapshots to another Region."
+      ],
+      "gotchas": [
+        "A manual snapshot is not a substitute for selecting a precise restore time within the automated-backup retention period.",
+        "Deleting a DB instance deletes its automated backups unless you choose to retain them; manual snapshots are unaffected.",
+        "Do not assume that a time in the current minute is already restorable—check LatestRestorableTime."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Backup",
+          "difference": "Use it for centralized backup plans across services; native RDS automated backups directly support RDS PITR."
+        },
+        {
+          "concept": "EBS snapshots and Data Lifecycle Manager",
+          "difference": "They manage EBS snapshots and AMIs, not native RDS point-in-time restores."
+        },
+        {
+          "concept": "DynamoDB PITR",
+          "difference": "It restores DynamoDB tables, not RDS DB instances."
+        }
+      ],
+      "examCues": [
+        "RDS restore to a time before an accidental update",
+        "recovery copy after DB instance deletion",
+        "RDS snapshot in another Region",
+        "check the latest restorable time"
+      ]
+    },
+    "es": {
+      "tldr": "Los automated backups de Amazon RDS permiten point-in-time recovery (PITR) dentro del período de retención configurado. Elige manual DB snapshots si necesitas conservar una copia después de eliminar la DB instance, y copia un snapshot a otra Region si necesitas una copia de recuperación allí.",
+      "whenToUse": [
+        "Necesitas restaurar una RDS DB instance a un momento anterior a un cambio accidental.",
+        "Necesitas conservar una copia de recuperación después de eliminar la DB instance de origen.",
+        "Necesitas un DB snapshot en otra AWS Region para disaster recovery."
+      ],
+      "keyFacts": [
+        "RDS puede restaurar una DB instance a un momento dentro del período de retención de backups, de hasta 35 días.",
+        "PITR crea una DB instance nueva; no modifica la de origen.",
+        "El momento más reciente disponible para restauración puede ser anterior al momento actual: RDS carga transaction logs cada cinco minutos.",
+        "Los manual DB snapshots no se eliminan cuando eliminas la DB instance.",
+        "RDS permite copiar automatic y manual DB snapshots a otra Region."
+      ],
+      "gotchas": [
+        "Un manual snapshot no sustituye la selección de un momento preciso dentro del período de retención de automated backups.",
+        "Al eliminar una DB instance, se eliminan sus automated backups salvo que elijas conservarlos; los manual snapshots no se ven afectados.",
+        "No supongas que ya puedes restaurar a un momento del minuto actual: consulta LatestRestorableTime."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Backup",
+          "difference": "Úsalo para backup plans centralizados entre servicios; los automated backups nativos de RDS permiten RDS PITR directamente."
+        },
+        {
+          "concept": "EBS snapshots y Data Lifecycle Manager",
+          "difference": "Administran EBS snapshots y AMIs, no restauraciones point-in-time nativas de RDS."
+        },
+        {
+          "concept": "DynamoDB PITR",
+          "difference": "Restaura tablas de DynamoDB, no RDS DB instances."
+        }
+      ],
+      "examCues": [
+        "RDS restore to a time before an accidental update",
+        "recovery copy after DB instance deletion",
+        "RDS snapshot in another Region",
+        "check the latest restorable time"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rds-backups-pitr--3fd94f86",
+      "conceptId": "rds-backups-pitr",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research group will delete an Amazon RDS DB instance when a project ends. Its records must remain recoverable after deletion, but the group does not need to select an exact time for recovery. Which approach meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rely on automated backups without selecting Retain automated backups when deleting the instance.",
+          "correct": false,
+          "why": "RDS deletes those automated backups with the DB instance."
+        },
+        {
+          "id": "B",
+          "text": "Enable RDS automated backups and increase the retention period before deletion.",
+          "correct": false,
+          "why": "Changing retention alone does not preserve automated backups if the instance is deleted without choosing to retain them."
+        },
+        {
+          "id": "C",
+          "text": "Record the instance's LatestRestorableTime before deleting it.",
+          "correct": false,
+          "why": "Recording a restore time does not retain the backup data needed for recovery."
+        },
+        {
+          "id": "D",
+          "text": "Create a manual RDS DB snapshot before deleting the instance.",
+          "correct": true,
+          "why": "A manual DB snapshot is not deleted when its DB instance is deleted."
+        }
+      ],
+      "explanation": "The group needs a recovery copy that survives deletion, not an exact point-in-time restore. Manual RDS DB snapshots are independent of automated backups and are not deleted with the DB instance. Automated backups are deleted at instance deletion unless the group explicitly chooses to retain them; increasing retention alone does not make that choice.",
+      "keywordCues": [
+        "delete an Amazon RDS DB instance",
+        "recoverable after deletion",
+        "does not need to select an exact time"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html"
+      ],
+      "es": {
+        "stem": "Un grupo de investigación eliminará una Amazon RDS DB instance cuando termine un proyecto. Sus registros deben seguir siendo recuperables después de eliminarla, pero el grupo no necesita elegir un momento exacto para la recuperación. ¿Qué enfoque cumple el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Depender de automated backups sin seleccionar Retain automated backups al eliminar la instancia.",
+            "why": "RDS elimina esos automated backups junto con la DB instance."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar RDS automated backups y aumentar el período de retención antes de eliminar la instancia.",
+            "why": "Cambiar la retención no conserva por sí solo los automated backups si eliminas la instancia sin elegir conservarlos."
+          },
+          {
+            "id": "C",
+            "text": "Registrar el LatestRestorableTime de la instancia antes de eliminarla.",
+            "why": "Registrar un momento de restauración no conserva los datos de backup necesarios para recuperar la instancia."
+          },
+          {
+            "id": "D",
+            "text": "Crear un manual RDS DB snapshot antes de eliminar la instancia.",
+            "why": "Un manual DB snapshot no se elimina cuando eliminas su DB instance."
+          }
+        ],
+        "explanation": "El grupo necesita una copia que sobreviva a la eliminación, no una restauración a un momento exacto. Los manual RDS DB snapshots son independientes de los automated backups y no se eliminan con la DB instance. Los automated backups sí se eliminan, a menos que el grupo elija explícitamente conservarlos; aumentar la retención no equivale a tomar esa decisión."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-backups-pitr--c4fd253d",
+      "conceptId": "rds-backups-pitr",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An online publisher discovers an incorrect update to its Amazon RDS DB instance and wants to restore to the latest available moment before that update. The update happened only minutes ago, so the team must verify that its requested time is actually available before starting the restore. Which action should the team take?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Select the current time for an RDS point-in-time restore because automated backups make it immediately available.",
+          "correct": false,
+          "why": "The current time is not necessarily restorable; transaction logs are uploaded periodically."
+        },
+        {
+          "id": "B",
+          "text": "Restore the newest manual DB snapshot because it identifies the latest restorable point in time.",
+          "correct": false,
+          "why": "A manual snapshot represents its captured state, not the latest available point for PITR."
+        },
+        {
+          "id": "C",
+          "text": "Copy the latest DB snapshot to another Region to determine the most recent restorable time.",
+          "correct": false,
+          "why": "A cross-Region snapshot copy provides a copy in another Region but does not establish the PITR limit."
+        },
+        {
+          "id": "D",
+          "text": "Check the instance's LatestRestorableTime and choose an eligible time within backup retention.",
+          "correct": true,
+          "why": "LatestRestorableTime shows how far the instance's point-in-time recovery currently extends."
+        }
+      ],
+      "explanation": "The update was recent, so the requested restore time must be checked against the time currently available for PITR. RDS uploads transaction logs every five minutes and exposes LatestRestorableTime for the DB instance. A snapshot copy or the newest manual snapshot does not tell the team that an arbitrary recent time is restorable.",
+      "keywordCues": [
+        "latest available moment",
+        "only minutes ago",
+        "verify that its requested time is actually available"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html"
+      ],
+      "es": {
+        "stem": "Una editorial digital detecta una actualización incorrecta en su Amazon RDS DB instance y quiere restaurarla al momento disponible más reciente anterior a esa actualización. La actualización ocurrió hace solo unos minutos, por lo que el equipo debe verificar que el momento solicitado esté disponible antes de iniciar la restauración. ¿Qué acción debe tomar?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Elegir el momento actual para un RDS point-in-time restore porque los automated backups lo ofrecen de inmediato.",
+            "why": "El momento actual no necesariamente está disponible para restauración; los transaction logs se cargan periódicamente."
+          },
+          {
+            "id": "B",
+            "text": "Restaurar el manual DB snapshot más reciente porque identifica el momento más reciente disponible para restauración.",
+            "why": "Un manual snapshot representa el estado que capturó, no el límite más reciente de PITR."
+          },
+          {
+            "id": "C",
+            "text": "Copiar el DB snapshot más reciente a otra Region para determinar el momento más reciente disponible para restauración.",
+            "why": "Una copia cross-Region proporciona una copia en otra Region, pero no establece el límite de PITR."
+          },
+          {
+            "id": "D",
+            "text": "Consultar LatestRestorableTime de la instancia y elegir un momento disponible dentro de la retención de backups.",
+            "why": "LatestRestorableTime muestra hasta qué momento llega actualmente el point-in-time recovery de la instancia."
+          }
+        ],
+        "explanation": "Como la actualización fue reciente, debes comparar el momento solicitado con el período disponible actualmente para PITR. RDS carga transaction logs cada cinco minutos y expone LatestRestorableTime para la DB instance. Ni copiar un snapshot ni elegir el manual snapshot más reciente confirma que un momento reciente arbitrario esté disponible para restauración."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-backups-pitr--4ae44f35",
+      "conceptId": "rds-backups-pitr",
+      "secondaryConcepts": [
+        "ebs-snapshots-dlm",
+        "dynamodb-backups-pitr"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A regional logistics company runs an Amazon RDS DB instance. It needs to recover from mistaken updates to a selected time within the past two weeks and keep a DB snapshot in another AWS Region for disaster recovery. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rely on an in-Region manual RDS DB snapshot for both selected-time recovery and recovery in the other Region.",
+          "correct": false,
+          "why": "An in-Region snapshot neither provides a selected PITR time nor places a copy in the other Region."
+        },
+        {
+          "id": "B",
+          "text": "Enable DynamoDB PITR for the RDS DB instance's records.",
+          "correct": false,
+          "why": "DynamoDB PITR protects DynamoDB tables, not the RDS instance in this scenario."
+        },
+        {
+          "id": "C",
+          "text": "Create a manual RDS DB snapshot and copy it to the other Region.",
+          "correct": true,
+          "why": "RDS supports copying manual DB snapshots to another Region for a recovery copy there."
+        },
+        {
+          "id": "D",
+          "text": "Enable RDS automated backups with a retention period that covers the past two weeks.",
+          "correct": true,
+          "why": "Automated backups permit PITR to a selected time within the configured retention period."
+        },
+        {
+          "id": "E",
+          "text": "Schedule EBS snapshots with Data Lifecycle Manager as the mechanism for RDS point-in-time restores.",
+          "correct": false,
+          "why": "An EBS snapshot schedule is not the native RDS PITR mechanism required here."
+        }
+      ],
+      "explanation": "Two distinct requirements drive the design: selected-time recovery and a snapshot in another Region. RDS automated backups cover point-in-time restores within retention, while a manual DB snapshot can be copied across Regions. An EBS snapshot schedule is not RDS PITR, and a snapshot left only in the original Region misses the disaster-recovery location requirement.",
+      "keywordCues": [
+        "Amazon RDS DB instance",
+        "selected time within the past two weeks",
+        "DB snapshot in another AWS Region",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html"
+      ],
+      "es": {
+        "stem": "Una empresa regional de logística usa una Amazon RDS DB instance. Necesita recuperarse de actualizaciones equivocadas a un momento elegido dentro de las últimas dos semanas y mantener un DB snapshot en otra AWS Region para disaster recovery. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Depender de un manual RDS DB snapshot que permanezca en la Region original tanto para la recuperación a un momento elegido como para la recuperación en la otra Region.",
+            "why": "Ese snapshot no permite elegir un momento de PITR ni coloca una copia en la otra Region."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar DynamoDB PITR para los registros de la RDS DB instance.",
+            "why": "DynamoDB PITR protege tablas de DynamoDB, no la RDS instance de este escenario."
+          },
+          {
+            "id": "C",
+            "text": "Crear un manual RDS DB snapshot y copiarlo a la otra Region.",
+            "why": "RDS permite copiar manual DB snapshots a otra Region para tener allí una copia de recuperación."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar RDS automated backups con un período de retención que cubra las últimas dos semanas.",
+            "why": "Los automated backups permiten PITR a un momento elegido dentro del período de retención configurado."
+          },
+          {
+            "id": "E",
+            "text": "Programar EBS snapshots con Data Lifecycle Manager como mecanismo de RDS point-in-time restores.",
+            "why": "Una programación de EBS snapshots no es el mecanismo nativo de RDS PITR requerido."
+          }
+        ],
+        "explanation": "Hay dos requisitos distintos: recuperar a un momento elegido y tener un snapshot en otra Region. Los RDS automated backups cubren point-in-time restores dentro de la retención, mientras que puedes copiar un manual DB snapshot entre Regions. Una programación de EBS snapshots no proporciona RDS PITR, y dejar el snapshot solo en la Region original no cumple el requisito de ubicación para disaster recovery."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rds-backups-pitr--r0",
+      "conceptId": "rds-backups-pitr",
+      "kind": "recall",
+      "prompt": "An RDS update corrupts data. What enables recovery to a selected earlier time, and what happens to the source instance?",
+      "promptEs": "Una actualización de RDS daña los datos. ¿Qué permite recuperar a un momento anterior elegido y qué ocurre con la instancia de origen?",
+      "idealAnswer": "Configure RDS automated backups with a retention period covering the desired time, then use point-in-time recovery. The restore creates a new DB instance without modifying the source.",
+      "rubric": [
+        "Names RDS automated backups and PITR.",
+        "States that the selected time must be within backup retention.",
+        "States that restoration creates a new instance and leaves the source unchanged."
+      ]
+    },
+    {
+      "id": "rds-backups-pitr--r1",
+      "conceptId": "rds-backups-pitr",
+      "kind": "why-not",
+      "prompt": "Why would scheduled EBS snapshots not replace RDS automated backups when an RDS instance needs a selected-time restore?",
+      "promptEs": "¿Por qué los EBS snapshots programados no sustituyen los RDS automated backups si una RDS instance necesita restaurarse a un momento elegido?",
+      "idealAnswer": "EBS snapshot schedules manage EBS snapshots rather than native RDS point-in-time recovery. RDS automated backups allow restoration to a selected time within their configured retention period.",
+      "rubric": [
+        "Distinguishes EBS snapshot scheduling from RDS backup functionality.",
+        "Identifies RDS automated backups as the PITR mechanism.",
+        "Mentions the configured retention period."
+      ]
+    }
+  ]
+}

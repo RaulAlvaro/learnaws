@@ -1,0 +1,361 @@
+{
+  "conceptId": "application-migration-service",
+  "card": {
+    "en": {
+      "tldr": "AWS Application Migration Service (MGN) rehosts physical, virtual, and cloud servers on AWS through continuous block-level replication and a migration cutover with minimal downtime. Choose it when the goal is to move whole servers rather than migrate only a database or maintain a disaster-recovery standby.",
+      "whenToUse": [
+        "Move physical, VMware, Hyper-V, or cloud servers to AWS without first refactoring their applications.",
+        "Keep source servers running during replication and minimize downtime at cutover.",
+        "Coordinate a large migration in application groups and waves."
+      ],
+      "keyFacts": [
+        "MGN continuously replicates source servers at the block level and converts them for launch on AWS.",
+        "Cutover windows are typically measured in minutes.",
+        "Replication, launch, and post-launch templates set defaults for newly added servers; individual servers can have overrides.",
+        "Servers can be grouped into applications and applications into waves for bulk actions, including launch and cutover.",
+        "MGN can replicate into standard Availability Zones or AWS Local Zones without special configuration."
+      ],
+      "gotchas": [
+        "Continuous replication alone does not identify the right service: the objective must be migration and cutover, not ongoing disaster recovery.",
+        "DMS moves database data; it does not rehost an entire application server.",
+        "MGN is a rehosting first step, not a requirement to refactor the application before migration."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DMS and Schema Conversion",
+          "difference": "Choose DMS for database migration; add schema conversion when changing to a heterogeneous database engine."
+        },
+        {
+          "concept": "AWS Elastic Disaster Recovery",
+          "difference": "Choose Elastic Disaster Recovery to keep servers ready for recovery; choose MGN to migrate them and complete a cutover."
+        }
+      ],
+      "examCues": [
+        "rehost whole servers",
+        "continuous replication before cutover",
+        "minimal migration downtime",
+        "coordinate application migration waves"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Application Migration Service (MGN) permite rehost de servidores físicos, virtuales y en la nube en AWS mediante replicación continua a nivel de bloques y un cutover de migración con tiempo de inactividad mínimo. Elígelo cuando necesitas trasladar servidores completos, no solo migrar una base de datos o mantener un entorno de disaster recovery.",
+      "whenToUse": [
+        "Necesitas trasladar servidores físicos, VMware, Hyper-V o en la nube a AWS sin refactorizar primero sus aplicaciones.",
+        "Necesitas mantener los servidores de origen en funcionamiento durante la replicación y minimizar la interrupción en el cutover.",
+        "Debes coordinar una migración grande mediante grupos de aplicaciones y waves."
+      ],
+      "keyFacts": [
+        "MGN replica continuamente los servidores de origen a nivel de bloques y los convierte para iniciarlos en AWS.",
+        "Las ventanas de cutover suelen medirse en minutos.",
+        "Las plantillas de replicación, launch y post-launch definen valores iniciales para servidores nuevos; puedes configurar excepciones por servidor.",
+        "Puedes agrupar servidores en aplicaciones y aplicaciones en waves para ejecutar acciones masivas, como launch y cutover.",
+        "MGN puede replicar en Availability Zones estándar o AWS Local Zones sin configuración especial."
+      ],
+      "gotchas": [
+        "La replicación continua no basta para elegir el servicio: distingue entre migración con cutover y disaster recovery permanente.",
+        "DMS migra datos de bases de datos; no hace rehost de un servidor de aplicaciones completo.",
+        "MGN permite empezar con rehost; no exige refactorizar la aplicación antes de migrarla."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DMS y Schema Conversion",
+          "difference": "Elige DMS para migrar bases de datos; agrega schema conversion si cambias a un motor de base de datos heterogéneo."
+        },
+        {
+          "concept": "AWS Elastic Disaster Recovery",
+          "difference": "Elige Elastic Disaster Recovery para mantener servidores listos para recuperarlos; elige MGN para migrarlos y completar un cutover."
+        }
+      ],
+      "examCues": [
+        "rehost whole servers",
+        "continuous replication before cutover",
+        "minimal migration downtime",
+        "coordinate application migration waves"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/mgn/latest/ug/what-is-application-migration-service.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "application-migration-service--ccd50f84",
+      "conceptId": "application-migration-service",
+      "secondaryConcepts": [
+        "database-migration-dms-sct",
+        "elastic-disaster-recovery"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturer plans to move several groups of legacy production servers to AWS without refactoring them. Source servers must remain in service while changes are replicated, and each group must have a scheduled migration cutover rather than remain a permanent disaster-recovery environment. Which two actions best meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Elastic Disaster Recovery to keep each server group as a continuing recovery environment.",
+          "correct": false,
+          "why": "A continuing recovery environment does not satisfy the requirement to complete scheduled migrations."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS DMS full load and change data capture as the migration process for every application server.",
+          "correct": false,
+          "why": "DMS can migrate databases but does not rehost the complete legacy servers."
+        },
+        {
+          "id": "C",
+          "text": "Rebuild each server on EC2 and transfer its data only during that group's cutover.",
+          "correct": false,
+          "why": "Rebuilding adds work and transferring data only at cutover misses the continuous-replication requirement."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Application Migration Service for continuous block-level replication of the source servers.",
+          "correct": true,
+          "why": "MGN replicates whole servers continuously before a migration cutover."
+        },
+        {
+          "id": "E",
+          "text": "Organize the MGN servers into applications and waves to coordinate group cutovers.",
+          "correct": true,
+          "why": "MGN supports grouping servers into applications and waves for bulk actions, including cutover."
+        }
+      ],
+      "explanation": "The manufacturer needs both continuous replication of entire servers and coordinated migration cutovers. MGN supplies block-level server replication, and its applications and waves support bulk cutover actions. DMS addresses database migration rather than whole servers. An ongoing Elastic Disaster Recovery environment serves a recovery objective, not the requested completed migration.",
+      "keywordCues": [
+        "without refactoring them",
+        "changes are replicated",
+        "each group must have a scheduled migration cutover",
+        "rather than remain a permanent disaster-recovery environment"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/mgn/latest/ug/what-is-application-migration-service.html"
+      ],
+      "es": {
+        "stem": "Una fábrica planea trasladar varios grupos de servidores de producción heredados a AWS sin refactorizarlos. Los servidores de origen deben seguir en servicio mientras se replican los cambios, y cada grupo debe tener un cutover de migración programado en vez de permanecer como entorno permanente de disaster recovery. ¿Qué dos acciones cumplen mejor estos requisitos con el LEAST operational overhead? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa AWS Elastic Disaster Recovery para mantener cada grupo de servidores como entorno permanente de recuperación.",
+            "why": "Un entorno permanente de recuperación no cumple el requisito de completar migraciones programadas."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS DMS con full load y change data capture como proceso de migración para cada servidor de aplicaciones.",
+            "why": "DMS puede migrar bases de datos, pero no hace rehost de los servidores heredados completos."
+          },
+          {
+            "id": "C",
+            "text": "Reconstruye cada servidor en EC2 y transfiere sus datos solo durante el cutover de su grupo.",
+            "why": "Reconstruirlos agrega trabajo, y transferir datos solo en el cutover no cumple el requisito de replicación continua."
+          },
+          {
+            "id": "D",
+            "text": "Usa AWS Application Migration Service para replicar continuamente los servidores de origen a nivel de bloques.",
+            "why": "MGN replica continuamente servidores completos antes de un cutover de migración."
+          },
+          {
+            "id": "E",
+            "text": "Organiza los servidores de MGN en aplicaciones y waves para coordinar los cutovers por grupo.",
+            "why": "MGN permite agrupar servidores en aplicaciones y waves para realizar acciones masivas, incluido el cutover."
+          }
+        ],
+        "explanation": "La fábrica necesita replicación continua de servidores completos y cutovers de migración coordinados. MGN ofrece replicación de servidores a nivel de bloques, y sus aplicaciones y waves permiten realizar cutovers masivos. DMS se ocupa de migrar bases de datos, no servidores completos. Un entorno permanente de AWS Elastic Disaster Recovery responde a un objetivo de recuperación, no a completar la migración solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "application-migration-service--fcca469b",
+      "conceptId": "application-migration-service",
+      "secondaryConcepts": [
+        "database-migration-dms-sct",
+        "elastic-disaster-recovery"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional wholesaler runs its ordering application on physical servers and VMware virtual machines. The company wants to move the servers to AWS without changing the application, while keeping the source systems running until a short migration cutover. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Application Migration Service to replicate the servers continuously and launch the migrated servers on AWS at cutover.",
+          "correct": true,
+          "why": "MGN automates whole-server rehosting with continuous replication and minimal cutover downtime."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Elastic Disaster Recovery to maintain a recovery environment instead of planning a migration cutover.",
+          "correct": false,
+          "why": "A continuing disaster-recovery arrangement does not address the stated goal of completing a server migration."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS DMS to replicate the application's database, then rebuild the application servers separately.",
+          "correct": false,
+          "why": "DMS addresses database migration but leaves the required whole-server rehosting to a separate process."
+        },
+        {
+          "id": "D",
+          "text": "Rebuild the application on new EC2 instances and transfer its data during the cutover window.",
+          "correct": false,
+          "why": "Rebuilding the servers adds work when the requirement is to rehost the existing application with minimal cutover downtime."
+        }
+      ],
+      "explanation": "The deciding requirement is to rehost entire physical and virtual servers without changing the application. MGN continuously replicates source servers and converts them for launch on AWS, supporting a short cutover. DMS is aimed at database migration, not the complete servers. Rebuilding the application also adds operational work that the scenario seeks to avoid.",
+      "keywordCues": [
+        "physical servers and VMware virtual machines",
+        "without changing the application",
+        "short migration cutover",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/mgn/latest/ug/what-is-application-migration-service.html"
+      ],
+      "es": {
+        "stem": "Una distribuidora regional ejecuta su aplicación de pedidos en servidores físicos y máquinas virtuales VMware. Quiere trasladar los servidores a AWS sin cambiar la aplicación y mantener los sistemas de origen en funcionamiento hasta un cutover de migración breve. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa AWS Application Migration Service para replicar continuamente los servidores e iniciar los servidores migrados en AWS durante el cutover.",
+            "why": "MGN automatiza el rehost de servidores completos mediante replicación continua y minimiza el tiempo de inactividad durante el cutover."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS Elastic Disaster Recovery para mantener un entorno de recuperación en lugar de planificar un cutover de migración.",
+            "why": "Un entorno permanente de disaster recovery no cumple el objetivo de completar la migración de los servidores."
+          },
+          {
+            "id": "C",
+            "text": "Usa AWS DMS para replicar la base de datos de la aplicación y después reconstruye los servidores de aplicaciones por separado.",
+            "why": "DMS resuelve la migración de la base de datos, pero deja el rehost de los servidores completos para otro proceso."
+          },
+          {
+            "id": "D",
+            "text": "Reconstruye la aplicación en nuevas instancias EC2 y transfiere sus datos durante la ventana de cutover.",
+            "why": "Reconstruir los servidores agrega trabajo cuando se requiere rehost de la aplicación existente con una interrupción mínima."
+          }
+        ],
+        "explanation": "El requisito decisivo es hacer rehost de servidores físicos y virtuales completos sin cambiar la aplicación. MGN replica continuamente los servidores de origen y los convierte para iniciarlos en AWS, lo que permite un cutover breve. DMS se centra en migrar bases de datos, no los servidores completos. Reconstruir la aplicación también aumenta el trabajo operativo que la empresa busca evitar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "application-migration-service--ed7f39c9",
+      "conceptId": "application-migration-service",
+      "secondaryConcepts": [
+        "database-migration-dms-sct",
+        "elastic-disaster-recovery"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A university is moving many Windows and Linux lab servers to AWS over several scheduled weekends. Most servers can share migration settings, but a few need different launch or post-launch settings; administrators also want to cut over related servers together. Which approach meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS DMS migration tasks for each lab and manage server launch settings separately.",
+          "correct": false,
+          "why": "DMS migration tasks do not provide the requested whole-server migration and coordinated server cutover."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Elastic Disaster Recovery to maintain the labs as recovery servers and defer the migration cutovers.",
+          "correct": false,
+          "why": "Maintaining recovery capability instead of performing scheduled cutovers misses the migration requirement."
+        },
+        {
+          "id": "C",
+          "text": "Create separate manual server-migration procedures for every lab and apply launch settings during each cutover.",
+          "correct": false,
+          "why": "Per-lab manual procedures do not take advantage of shared templates and bulk migration actions."
+        },
+        {
+          "id": "D",
+          "text": "Use MGN templates, override settings for exceptional servers, and organize servers into applications and waves.",
+          "correct": true,
+          "why": "MGN provides shared template settings, individual server overrides, and application-and-wave bulk actions."
+        }
+      ],
+      "explanation": "The university needs repeatable settings with a small number of exceptions and coordinated cutovers. MGN templates apply settings to newly added servers, while administrators can override individual servers. Applications and waves allow bulk migration actions for related servers. DMS does not migrate entire lab servers, and manual procedures add operational work.",
+      "keywordCues": [
+        "many Windows and Linux lab servers",
+        "share migration settings",
+        "different launch or post-launch settings",
+        "cut over related servers together"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/mgn/latest/ug/what-is-application-migration-service.html"
+      ],
+      "es": {
+        "stem": "Una universidad trasladará muchos servidores de laboratorio Windows y Linux a AWS durante varios fines de semana programados. La mayoría puede compartir la configuración de migración, pero algunos necesitan ajustes distintos de launch o post-launch; los administradores también quieren hacer cutover de servidores relacionados en conjunto. ¿Qué enfoque cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa tareas de migración de AWS DMS para cada laboratorio y administra por separado la configuración de launch de los servidores.",
+            "why": "Las tareas de DMS no proporcionan la migración de servidores completos ni el cutover coordinado que se necesitan."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS Elastic Disaster Recovery para mantener los laboratorios como servidores de recuperación y posponer los cutovers de migración.",
+            "why": "Mantener capacidad de recuperación en vez de ejecutar los cutovers programados no cumple el requisito de migración."
+          },
+          {
+            "id": "C",
+            "text": "Crea procedimientos manuales de migración de servidores para cada laboratorio y aplica la configuración de launch en cada cutover.",
+            "why": "Los procedimientos manuales por laboratorio no aprovechan las plantillas compartidas ni las acciones masivas de migración."
+          },
+          {
+            "id": "D",
+            "text": "Usa plantillas de MGN, configura excepciones por servidor y organiza los servidores en aplicaciones y waves.",
+            "why": "MGN ofrece plantillas compartidas, excepciones por servidor y acciones masivas para aplicaciones y waves."
+          }
+        ],
+        "explanation": "La universidad necesita ajustes reutilizables, algunas excepciones y cutovers coordinados. Las plantillas de MGN aplican ajustes a servidores nuevos, y puedes configurarlos de forma distinta para servidores individuales. Las aplicaciones y waves permiten realizar acciones de migración masivas para servidores relacionados. DMS no migra servidores de laboratorio completos, y los procedimientos manuales aumentan el trabajo operativo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "application-migration-service--r0",
+      "conceptId": "application-migration-service",
+      "kind": "recall",
+      "prompt": "Which service would you use to rehost physical and virtual servers on AWS with minimal cutover downtime, and why?",
+      "promptEs": "¿Qué servicio usarías para hacer rehost de servidores físicos y virtuales en AWS con tiempo de inactividad mínimo durante el cutover, y por qué?",
+      "idealAnswer": "Use AWS Application Migration Service (MGN). It continuously replicates whole servers at the block level and converts them for launch on AWS, enabling a migration cutover with minimal downtime.",
+      "rubric": [
+        "Names AWS Application Migration Service (MGN).",
+        "Explains continuous, block-level replication of whole servers.",
+        "Connects replication to launch on AWS and minimal cutover downtime."
+      ]
+    },
+    {
+      "id": "application-migration-service--r1",
+      "conceptId": "application-migration-service",
+      "kind": "why-not",
+      "prompt": "Why would you not choose AWS DMS instead of MGN to move unchanged application servers to AWS?",
+      "promptEs": "¿Por qué no elegirías AWS DMS en lugar de MGN para trasladar a AWS servidores de aplicaciones sin cambios?",
+      "idealAnswer": "AWS DMS is for migrating databases, not rehosting complete application servers. MGN replicates and converts whole source servers for launch on AWS, which fits a lift-and-shift migration.",
+      "rubric": [
+        "Identifies DMS as a database-migration service.",
+        "States that the requirement is to move whole application servers.",
+        "Explains that MGN supports whole-server rehosting."
+      ]
+    }
+  ]
+}

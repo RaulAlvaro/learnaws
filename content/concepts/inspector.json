@@ -1,0 +1,375 @@
+{
+  "conceptId": "inspector",
+  "card": {
+    "en": {
+      "tldr": "Amazon Inspector automatically discovers eligible EC2 instances, ECR container images, and Lambda functions, then continually scans them for software vulnerabilities and unintended network exposure. Choose it when the requirement is to find and track vulnerabilities in workloads, rather than detect malicious activity or aggregate findings.",
+      "whenToUse": [
+        "Continuously assess EC2 instances, ECR images, or Lambda functions for vulnerabilities.",
+        "Identify unintended network exposure and receive findings with remediation recommendations.",
+        "Manage vulnerability scanning and findings across AWS Organizations accounts."
+      ],
+      "keyFacts": [
+        "Inspector automatically discovers eligible resources; you do not manually schedule assessment scans.",
+        "It rescans in response to changes such as EC2 package updates, patches, or newly published relevant CVEs.",
+        "Findings include details about the issue and affected resource, plus remediation recommendations.",
+        "Inspector can automatically close a finding after it detects appropriate remediation.",
+        "A delegated administrator can manage Inspector findings and certain scan settings across member accounts.",
+        "Inspector publishes finding events to Amazon EventBridge and, when activated, findings to AWS Security Hub CSPM."
+      ],
+      "gotchas": [
+        "Security Hub CSPM can provide a broader view of findings, but it does not replace enabling Inspector to scan workloads.",
+        "GuardDuty-style threat detection is not the same requirement as scanning software for vulnerabilities.",
+        "Inspector reports unintended network exposure; it is not the service chosen to filter VPC traffic."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon GuardDuty",
+          "difference": "Choose Inspector for workload vulnerability scanning, not detection of malicious activity."
+        },
+        {
+          "concept": "AWS Security Hub CSPM",
+          "difference": "Inspector produces vulnerability findings; Security Hub CSPM helps view findings within broader security-posture analysis."
+        },
+        {
+          "concept": "AWS Network Firewall",
+          "difference": "Inspector identifies exposure; Network Firewall inspects and filters VPC traffic."
+        }
+      ],
+      "examCues": [
+        "new CVE affects running instances",
+        "continuously scan ECR images",
+        "Lambda function vulnerabilities",
+        "unintended network exposure",
+        "vulnerability findings across member accounts"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Inspector descubre automáticamente instancias EC2, imágenes de contenedor en ECR y funciones Lambda elegibles, y las analiza continuamente para detectar vulnerabilidades de software y exposición de red no deseada. Elígelo cuando necesites identificar y dar seguimiento a vulnerabilidades en cargas de trabajo, no detectar actividad maliciosa ni solo reunir hallazgos.",
+      "whenToUse": [
+        "Necesitas evaluar continuamente instancias EC2, imágenes de ECR o funciones Lambda para detectar vulnerabilidades.",
+        "Necesitas identificar exposición de red no deseada y recibir hallazgos con recomendaciones de corrección.",
+        "Necesitas administrar el análisis de vulnerabilidades y sus hallazgos en cuentas de AWS Organizations."
+      ],
+      "keyFacts": [
+        "Inspector descubre automáticamente los recursos elegibles; no tienes que programar análisis de evaluación manualmente.",
+        "Vuelve a analizar los recursos ante cambios como paquetes nuevos en EC2, parches o la publicación de CVE relevantes.",
+        "Los hallazgos incluyen detalles del problema y del recurso afectado, además de recomendaciones de corrección.",
+        "Inspector puede cerrar automáticamente un hallazgo cuando detecta que se corrigió adecuadamente.",
+        "Una cuenta de administrador delegado puede administrar hallazgos y ciertas opciones de análisis de Inspector en las cuentas miembro.",
+        "Inspector publica eventos de hallazgos en Amazon EventBridge y, si está activado, también publica hallazgos en AWS Security Hub CSPM."
+      ],
+      "gotchas": [
+        "AWS Security Hub CSPM ofrece una vista más amplia de los hallazgos, pero no sustituye la activación de Inspector para analizar cargas de trabajo.",
+        "Detectar amenazas con GuardDuty no es lo mismo que analizar software en busca de vulnerabilidades.",
+        "Inspector informa sobre exposición de red no deseada; no es el servicio que eliges para filtrar tráfico de VPC."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon GuardDuty",
+          "difference": "Elige Inspector para analizar vulnerabilidades en cargas de trabajo, no para detectar actividad maliciosa."
+        },
+        {
+          "concept": "AWS Security Hub CSPM",
+          "difference": "Inspector genera hallazgos de vulnerabilidades; Security Hub CSPM permite verlos dentro de un análisis más amplio de la postura de seguridad."
+        },
+        {
+          "concept": "AWS Network Firewall",
+          "difference": "Inspector identifica exposición; Network Firewall inspecciona y filtra tráfico de VPC."
+        }
+      ],
+      "examCues": [
+        "new CVE affects running instances",
+        "continuously scan ECR images",
+        "Lambda function vulnerabilities",
+        "unintended network exposure",
+        "vulnerability findings across member accounts"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "inspector--9514be1c",
+      "conceptId": "inspector",
+      "secondaryConcepts": [
+        "guardduty",
+        "security-hub",
+        "macie"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs video-processing workers on EC2 and distributes their container images through Amazon ECR. Security staff need to discover software vulnerabilities when packages change or a relevant CVE is published, without scheduling repeated assessments. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Amazon GuardDuty to detect suspicious activity affecting the workers.",
+          "correct": false,
+          "why": "Detecting suspicious activity does not meet the requirement to continually scan packages and images for vulnerabilities."
+        },
+        {
+          "id": "B",
+          "text": "Enable Amazon Inspector scanning for the EC2 instances and ECR images.",
+          "correct": true,
+          "why": "Inspector automatically discovers eligible workloads and continually scans them as relevant changes occur."
+        },
+        {
+          "id": "C",
+          "text": "Enable AWS Security Hub CSPM to review the company's security posture.",
+          "correct": false,
+          "why": "A broader view of security posture does not replace the requested vulnerability scanning."
+        },
+        {
+          "id": "D",
+          "text": "Enable Amazon Macie to discover sensitive data in the company's S3 buckets.",
+          "correct": false,
+          "why": "Discovering sensitive S3 data does not assess EC2 packages or ECR images for vulnerabilities."
+        }
+      ],
+      "explanation": "The deciding requirement is continuous vulnerability assessment of EC2 instances and ECR images without scheduled scans. Amazon Inspector discovers eligible resources and rescans when changes or newly published relevant CVEs can affect them. GuardDuty addresses malicious activity instead, while Security Hub CSPM provides a broader view of security posture rather than performing the requested Inspector scans.",
+      "keywordCues": [
+        "EC2",
+        "Amazon ECR",
+        "when packages change or a relevant CVE is published",
+        "without scheduling repeated assessments"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta procesos de video en EC2 y distribuye sus imágenes de contenedor mediante Amazon ECR. El equipo de seguridad necesita descubrir vulnerabilidades de software cuando cambian los paquetes o se publica un CVE relevante, sin programar evaluaciones repetidas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activar Amazon GuardDuty para detectar actividad sospechosa que afecte a los procesos.",
+            "why": "Detectar actividad sospechosa no cumple el requisito de analizar continuamente paquetes e imágenes en busca de vulnerabilidades."
+          },
+          {
+            "id": "B",
+            "text": "Activar el análisis de Amazon Inspector para las instancias EC2 y las imágenes de ECR.",
+            "why": "Inspector descubre automáticamente las cargas de trabajo elegibles y las analiza continuamente cuando ocurren cambios relevantes."
+          },
+          {
+            "id": "C",
+            "text": "Activar AWS Security Hub CSPM para revisar la postura de seguridad de la empresa.",
+            "why": "Una vista más amplia de la postura de seguridad no sustituye el análisis de vulnerabilidades solicitado."
+          },
+          {
+            "id": "D",
+            "text": "Activar Amazon Macie para descubrir datos confidenciales en los buckets de S3 de la empresa.",
+            "why": "Descubrir datos confidenciales en S3 no evalúa los paquetes de EC2 ni las imágenes de ECR en busca de vulnerabilidades."
+          }
+        ],
+        "explanation": "El requisito decisivo es evaluar continuamente las vulnerabilidades de instancias EC2 e imágenes de ECR sin programar análisis. Amazon Inspector descubre recursos elegibles y los vuelve a analizar cuando los cambios o los CVE relevantes recién publicados pueden afectarlos. GuardDuty se centra en la actividad maliciosa, mientras que Security Hub CSPM ofrece una vista más amplia de la postura de seguridad en lugar de realizar los análisis solicitados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "inspector--3d85e3dc",
+      "conceptId": "inspector",
+      "secondaryConcepts": [
+        "network-firewall",
+        "waf",
+        "guardduty"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A healthcare software team wants a finding when an EC2 instance has unintended network exposure, along with details about the affected resource and remediation recommendations. The team is not asking for a service to filter traffic. Which solution best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Amazon Inspector scanning for the EC2 instance.",
+          "correct": true,
+          "why": "Inspector identifies unintended network exposure and creates findings with resource details and remediation recommendations."
+        },
+        {
+          "id": "B",
+          "text": "Deploy AWS Network Firewall to inspect traffic in the application's VPC.",
+          "correct": false,
+          "why": "Traffic inspection does not provide the requested Inspector assessment findings for unintended exposure."
+        },
+        {
+          "id": "C",
+          "text": "Configure AWS WAF rules for the application's public web endpoint.",
+          "correct": false,
+          "why": "Web-request filtering does not assess EC2 instances for unintended network exposure."
+        },
+        {
+          "id": "D",
+          "text": "Enable Amazon GuardDuty to detect malicious activity involving the instance.",
+          "correct": false,
+          "why": "Malicious-activity detection does not satisfy the request for an unintended-exposure assessment finding."
+        }
+      ],
+      "explanation": "The team needs an assessment finding about unintended network exposure, not a control that filters traffic. Amazon Inspector scans eligible EC2 instances and creates findings with details and remediation recommendations. Network Firewall and WAF address traffic inspection or filtering, so neither fulfills the stated finding requirement.",
+      "keywordCues": [
+        "unintended network exposure",
+        "details about the affected resource and remediation recommendations",
+        "not asking for a service to filter traffic"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html"
+      ],
+      "es": {
+        "stem": "El equipo de software de una empresa de salud quiere recibir un hallazgo cuando una instancia EC2 tenga exposición de red no deseada, con detalles del recurso afectado y recomendaciones de corrección. El equipo no busca un servicio para filtrar tráfico. ¿Qué solución cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activar el análisis de Amazon Inspector para la instancia EC2.",
+            "why": "Inspector identifica exposición de red no deseada y crea hallazgos con detalles del recurso y recomendaciones de corrección."
+          },
+          {
+            "id": "B",
+            "text": "Implementar AWS Network Firewall para inspeccionar el tráfico en la VPC de la aplicación.",
+            "why": "La inspección de tráfico no proporciona los hallazgos de evaluación solicitados sobre exposición no deseada."
+          },
+          {
+            "id": "C",
+            "text": "Configurar reglas de AWS WAF para el endpoint web público de la aplicación.",
+            "why": "Filtrar solicitudes web no evalúa las instancias EC2 para detectar exposición de red no deseada."
+          },
+          {
+            "id": "D",
+            "text": "Activar Amazon GuardDuty para detectar actividad maliciosa relacionada con la instancia.",
+            "why": "Detectar actividad maliciosa no satisface la solicitud de un hallazgo de evaluación sobre exposición no deseada."
+          }
+        ],
+        "explanation": "El equipo necesita un hallazgo de evaluación sobre exposición de red no deseada, no un control que filtre tráfico. Amazon Inspector analiza instancias EC2 elegibles y crea hallazgos con detalles y recomendaciones de corrección. Network Firewall y WAF se enfocan en inspeccionar o filtrar tráfico, por lo que ninguno cumple el requisito del hallazgo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "inspector--41f21065",
+      "conceptId": "inspector",
+      "secondaryConcepts": [
+        "guardduty",
+        "security-hub",
+        "macie"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A retailer deploys Lambda functions and stores container images in Amazon ECR. The security team needs continuous vulnerability findings for both resource types and wants new findings routed to an Amazon SNS topic in near-real time for its existing workflow. Which TWO actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon EventBridge to route Inspector finding events to the Amazon SNS topic.",
+          "correct": true,
+          "why": "Inspector publishes finding events to EventBridge, which can route them to SNS in near-real time."
+        },
+        {
+          "id": "B",
+          "text": "Enable Amazon GuardDuty to detect malicious activity in the AWS environment.",
+          "correct": false,
+          "why": "Malicious-activity detection does not provide the requested vulnerability scans of Lambda functions and ECR images."
+        },
+        {
+          "id": "C",
+          "text": "Enable Amazon Macie to discover sensitive data in Amazon S3.",
+          "correct": false,
+          "why": "Sensitive-data discovery in S3 meets neither the workload-scanning nor the finding-routing requirement."
+        },
+        {
+          "id": "D",
+          "text": "Activate AWS Security Hub CSPM and use its broader security-posture view as the scanning service.",
+          "correct": false,
+          "why": "Security Hub CSPM can receive Inspector findings but does not replace Inspector scanning."
+        },
+        {
+          "id": "E",
+          "text": "Enable Amazon Inspector scanning for Lambda functions and ECR images.",
+          "correct": true,
+          "why": "Inspector automatically discovers and continually scans eligible resources of both requested types."
+        }
+      ],
+      "explanation": "There are two distinct requirements: continually scan Lambda functions and ECR images, then route new findings to SNS in near-real time. Amazon Inspector performs the scans and publishes finding events to EventBridge, which can route them to an SNS topic. Security Hub CSPM can receive Inspector findings, but treating it as the scanning service leaves the first requirement unmet.",
+      "keywordCues": [
+        "Lambda functions",
+        "container images in Amazon ECR",
+        "continuous vulnerability findings",
+        "routed to an Amazon SNS topic in near-real time"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista implementa funciones Lambda y almacena imágenes de contenedor en Amazon ECR. El equipo de seguridad necesita hallazgos continuos de vulnerabilidades para ambos tipos de recursos y quiere enviar los hallazgos nuevos a un tema de Amazon SNS casi en tiempo real para su flujo de trabajo actual. ¿Qué DOS acciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon EventBridge para enviar los eventos de hallazgos de Inspector al tema de Amazon SNS.",
+            "why": "Inspector publica eventos de hallazgos en EventBridge, que puede enviarlos a SNS casi en tiempo real."
+          },
+          {
+            "id": "B",
+            "text": "Activar Amazon GuardDuty para detectar actividad maliciosa en el entorno de AWS.",
+            "why": "Detectar actividad maliciosa no proporciona el análisis de vulnerabilidades solicitado para funciones Lambda e imágenes de ECR."
+          },
+          {
+            "id": "C",
+            "text": "Activar Amazon Macie para descubrir datos confidenciales en Amazon S3.",
+            "why": "Descubrir datos confidenciales en S3 no cumple ni el requisito de analizar las cargas de trabajo ni el de enviar hallazgos."
+          },
+          {
+            "id": "D",
+            "text": "Activar AWS Security Hub CSPM y usar su vista más amplia de la postura de seguridad como servicio de análisis.",
+            "why": "Security Hub CSPM puede recibir hallazgos de Inspector, pero no sustituye sus análisis."
+          },
+          {
+            "id": "E",
+            "text": "Activar el análisis de Amazon Inspector para funciones Lambda e imágenes de ECR.",
+            "why": "Inspector descubre automáticamente los recursos elegibles de ambos tipos y los analiza continuamente."
+          }
+        ],
+        "explanation": "Hay dos requisitos distintos: analizar continuamente las funciones Lambda y las imágenes de ECR, y después enviar los hallazgos nuevos a SNS casi en tiempo real. Amazon Inspector realiza los análisis y publica eventos de hallazgos en EventBridge, que puede enviarlos a un tema de SNS. Security Hub CSPM puede recibir hallazgos de Inspector, pero usarlo como servicio de análisis dejaría sin cumplir el primer requisito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "inspector--r0",
+      "conceptId": "inspector",
+      "kind": "recall",
+      "prompt": "Which service would you choose to continually find vulnerabilities in EC2 instances and ECR images, and why?",
+      "promptEs": "¿Qué servicio elegirías para detectar continuamente vulnerabilidades en instancias EC2 e imágenes de ECR, y por qué?",
+      "idealAnswer": "Choose Amazon Inspector. It automatically discovers eligible resources and continually scans them, including rescanning when relevant changes or new CVEs arise.",
+      "rubric": [
+        "Names Amazon Inspector.",
+        "Identifies EC2 and ECR vulnerability scanning.",
+        "Explains automatic discovery and continuous reassessment."
+      ]
+    },
+    {
+      "id": "inspector--r1",
+      "conceptId": "inspector",
+      "kind": "why-not",
+      "prompt": "Why isn't AWS Security Hub CSPM alone sufficient when a team needs continuous vulnerability scanning of Lambda functions?",
+      "promptEs": "¿Por qué AWS Security Hub CSPM por sí solo no basta si un equipo necesita analizar continuamente las vulnerabilidades de funciones Lambda?",
+      "idealAnswer": "Security Hub CSPM provides a broader view of security posture and can receive Inspector findings, but it does not replace Inspector scanning. Enable Amazon Inspector to continually assess eligible Lambda functions for vulnerabilities.",
+      "rubric": [
+        "Distinguishes security-posture visibility from vulnerability scanning.",
+        "Names Amazon Inspector as the scanning service.",
+        "Mentions eligible Lambda functions as an Inspector resource type."
+      ]
+    }
+  ]
+}

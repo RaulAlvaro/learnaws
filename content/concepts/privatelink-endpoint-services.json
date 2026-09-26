@@ -1,0 +1,366 @@
+{
+  "conceptId": "privatelink-endpoint-services",
+  "card": {
+    "en": {
+      "tldr": "AWS PrivateLink lets you share your own service privately with other VPCs or AWS accounts. Put a Network Load Balancer (NLB) in front of the service, create an endpoint service, and have consumers connect through interface VPC endpoints—without VPC peering, even when CIDR ranges overlap.",
+      "whenToUse": [
+        "Other accounts need private access to an application you operate, not just to an AWS service.",
+        "Consumer VPCs have overlapping CIDR ranges or must not be peered with the provider VPC.",
+        "You need to limit which AWS principals can connect to your service."
+      ],
+      "keyFacts": [
+        "The provider selects an NLB when creating the endpoint service configuration.",
+        "The provider grants specific AWS principals permission to connect; each consumer creates an interface VPC endpoint.",
+        "A consumer endpoint gets a network interface and private IP address in each selected subnet.",
+        "For high availability, enable the NLB in at least two Availability Zones and deploy registered targets in each.",
+        "A provider can associate a private DNS name so consumers can keep using an existing service name."
+      ],
+      "gotchas": [
+        "A consumer interface endpoint does not, by itself, publish the provider's application; the provider must create an endpoint service.",
+        "Cross-zone load balancing is not a substitute for hosting the service in multiple Availability Zones: failure of the zone hosting it can cut off access.",
+        "A NAT gateway provides outbound connectivity (a public NAT gateway to the internet, a private one only to other private networks), not private inbound access to your service."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Gateway VPC endpoint",
+          "difference": "It privately reaches Amazon S3 or DynamoDB; it does not publish your own application."
+        },
+        {
+          "concept": "Interface VPC endpoint",
+          "difference": "It is the consumer-side connection; the provider publishes its NLB-fronted application as an endpoint service."
+        },
+        {
+          "concept": "NAT gateway",
+          "difference": "It supports outbound connections from private subnets, not consumer access to a provider's service."
+        }
+      ],
+      "examCues": [
+        "share our application with customer VPCs",
+        "overlapping VPC CIDR ranges",
+        "private access without peering",
+        "service behind a Network Load Balancer"
+      ]
+    },
+    "es": {
+      "tldr": "AWS PrivateLink te permite compartir tu propio servicio de forma privada con otras VPC o cuentas de AWS. Coloca un Network Load Balancer (NLB) frente al servicio, crea un endpoint service y haz que los consumidores se conecten mediante interface VPC endpoints, sin VPC peering incluso si los rangos CIDR se superponen.",
+      "whenToUse": [
+        "Otras cuentas necesitan acceso privado a una aplicación que tú operas, no solo a un servicio de AWS.",
+        "Las VPC consumidoras tienen rangos CIDR superpuestos o no deben usar VPC peering con la VPC proveedora.",
+        "Necesitas limitar qué AWS principals pueden conectarse a tu servicio."
+      ],
+      "keyFacts": [
+        "El proveedor selecciona un NLB al crear la configuración del endpoint service.",
+        "El proveedor concede permiso de conexión a AWS principals específicos; cada consumidor crea un interface VPC endpoint.",
+        "El endpoint del consumidor recibe una interfaz de red y una dirección IP privada en cada subred seleccionada.",
+        "Para alta disponibilidad, habilita el NLB en al menos dos Availability Zones e implementa targets registrados en cada una.",
+        "El proveedor puede asociar un private DNS name para que los consumidores sigan usando el nombre existente del servicio."
+      ],
+      "gotchas": [
+        "Un interface endpoint del consumidor no publica por sí solo la aplicación del proveedor; el proveedor debe crear un endpoint service.",
+        "Cross-zone load balancing no sustituye alojar el servicio en varias Availability Zones: si falla la zona que lo aloja, los consumidores pueden perder acceso.",
+        "Un NAT gateway proporciona conectividad saliente (uno público hacia internet, uno privado solo hacia otras redes privadas), no acceso privado entrante a tu servicio."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Gateway VPC endpoint",
+          "difference": "Permite acceder de forma privada a Amazon S3 o DynamoDB; no publica tu propia aplicación."
+        },
+        {
+          "concept": "Interface VPC endpoint",
+          "difference": "Es la conexión del lado del consumidor; el proveedor publica su aplicación detrás de un NLB como endpoint service."
+        },
+        {
+          "concept": "NAT gateway",
+          "difference": "Permite conexiones salientes desde subredes privadas, no acceso de consumidores al servicio de un proveedor."
+        }
+      ],
+      "examCues": [
+        "share our application with customer VPCs",
+        "overlapping VPC CIDR ranges",
+        "private access without peering",
+        "service behind a Network Load Balancer"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-share-your-services.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "privatelink-endpoint-services--bd65511f",
+      "conceptId": "privatelink-endpoint-services",
+      "secondaryConcepts": [
+        "vpc-endpoints-gateway-vs-interface",
+        "nat-gateway-vs-nat-instance"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A software vendor runs a private telemetry collector in its VPC. Several customers need to send telemetry from their own VPCs to the vendor without VPC peering or an internet-facing entry point. The vendor wants a repeatable connection pattern as new customers sign up. Which two actions are required for the AWS PrivateLink design? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an NLB in the vendor VPC and select it when creating an endpoint service configuration.",
+          "correct": true,
+          "why": "The provider publishes its application through an endpoint service backed by an NLB."
+        },
+        {
+          "id": "B",
+          "text": "Create VPC peering connections between the vendor VPC and each customer VPC.",
+          "correct": false,
+          "why": "Peering directly violates the stated requirement and is not needed for this PrivateLink design."
+        },
+        {
+          "id": "C",
+          "text": "Grant the customer AWS principals permission to connect and have customers create interface VPC endpoints.",
+          "correct": true,
+          "why": "Permission and consumer-side interface endpoints complete the private connection to the published service."
+        },
+        {
+          "id": "D",
+          "text": "Have each customer create a gateway VPC endpoint for the collector.",
+          "correct": false,
+          "why": "Gateway endpoints do not connect to a vendor-operated endpoint service."
+        },
+        {
+          "id": "E",
+          "text": "Give each customer a NAT gateway to reach the collector from private subnets.",
+          "correct": false,
+          "why": "A NAT gateway is an outbound access component, not the consumer connection to a PrivateLink service."
+        }
+      ],
+      "explanation": "This scenario needs both sides of a PrivateLink connection to a vendor-operated service. The vendor creates an NLB-backed endpoint service and grants customer AWS principals permission; customers create interface VPC endpoints. Gateway endpoints are for supported AWS services, and NAT gateways do not connect consumers to this private service. VPC peering is explicitly excluded.",
+      "keywordCues": [
+        "private telemetry collector in its VPC",
+        "without VPC peering or an internet-facing entry point",
+        "as new customers sign up"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-share-your-services.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de software opera un recolector privado de telemetría en su VPC. Varios clientes necesitan enviar telemetría desde sus propias VPC al proveedor sin VPC peering ni un punto de entrada público en internet. El proveedor quiere un patrón de conexión repetible a medida que se incorporen clientes. ¿Qué dos acciones requiere el diseño con AWS PrivateLink? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un NLB en la VPC del proveedor y selecciónalo al crear la configuración del endpoint service.",
+            "why": "El proveedor publica su aplicación mediante un endpoint service respaldado por un NLB."
+          },
+          {
+            "id": "B",
+            "text": "Crea conexiones de VPC peering entre la VPC del proveedor y cada VPC de cliente.",
+            "why": "VPC peering incumple directamente el requisito y no es necesario para este diseño con PrivateLink."
+          },
+          {
+            "id": "C",
+            "text": "Concede permiso de conexión a los AWS principals de los clientes y haz que estos creen interface VPC endpoints.",
+            "why": "El permiso y los interface endpoints del lado del consumidor completan la conexión privada con el servicio publicado."
+          },
+          {
+            "id": "D",
+            "text": "Haz que cada cliente cree un gateway VPC endpoint para el recolector.",
+            "why": "Los gateway endpoints no se conectan a un endpoint service operado por el proveedor."
+          },
+          {
+            "id": "E",
+            "text": "Asigna a cada cliente un NAT gateway para llegar al recolector desde subredes privadas.",
+            "why": "Un NAT gateway permite acceso saliente, pero no es la conexión del consumidor a un servicio de PrivateLink."
+          }
+        ],
+        "explanation": "Este escenario necesita ambos lados de una conexión de PrivateLink a un servicio operado por el proveedor. El proveedor crea un endpoint service respaldado por un NLB y concede permiso a los AWS principals de los clientes; ellos crean interface VPC endpoints. Los gateway endpoints son para servicios de AWS compatibles, y los NAT gateways no conectan a los consumidores con este servicio privado. VPC peering está explícitamente descartado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "privatelink-endpoint-services--8859effb",
+      "conceptId": "privatelink-endpoint-services",
+      "secondaryConcepts": [
+        "vpc-endpoints-gateway-vs-interface",
+        "nat-gateway-vs-nat-instance"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A payroll platform runs in a provider VPC and must serve several customer accounts. Some customer VPCs have overlapping CIDR ranges, and the customers cannot use VPC peering or send requests over the internet. The platform must permit only designated customer accounts to connect. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place a NAT gateway in each customer VPC and direct application requests through it to the provider.",
+          "correct": false,
+          "why": "A NAT gateway provides outbound access rather than a private connection to the provider's endpoint service."
+        },
+        {
+          "id": "B",
+          "text": "Create a gateway VPC endpoint in each customer VPC and add routes to the provider application.",
+          "correct": false,
+          "why": "Gateway endpoints are for Amazon S3 or DynamoDB, not a customer-operated payroll application."
+        },
+        {
+          "id": "C",
+          "text": "Peer each customer VPC with the provider VPC and allow the application port in the provider security group.",
+          "correct": false,
+          "why": "Peering violates the no-peering requirement and does not solve the overlapping-CIDR constraint."
+        },
+        {
+          "id": "D",
+          "text": "Front the application with an NLB, create an endpoint service, grant the customer AWS principals permission, and have them create interface VPC endpoints.",
+          "correct": true,
+          "why": "This publishes the application privately to permitted consumers without requiring peering."
+        }
+      ],
+      "explanation": "The deciding requirements are private access to a provider-operated application, designated consumers, and no peering despite overlapping CIDRs. The provider creates an NLB-backed endpoint service and grants the customer principals permission; customers create interface endpoints to connect. A gateway endpoint targets supported AWS services, while a NAT gateway does not publish the provider's application.",
+      "keywordCues": [
+        "overlapping CIDR ranges",
+        "cannot use VPC peering",
+        "permit only designated customer accounts"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-share-your-services.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de nómina opera en una VPC proveedora y debe atender a varias cuentas de clientes. Algunas VPC de clientes tienen rangos CIDR superpuestos, y los clientes no pueden usar VPC peering ni enviar solicitudes por internet. La plataforma debe permitir que se conecten solo las cuentas designadas. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Coloca un NAT gateway en cada VPC de cliente y dirige por él las solicitudes hacia el proveedor.",
+            "why": "Un NAT gateway proporciona acceso saliente, no una conexión privada al endpoint service del proveedor."
+          },
+          {
+            "id": "B",
+            "text": "Crea un gateway VPC endpoint en cada VPC de cliente y agrega rutas hacia la aplicación del proveedor.",
+            "why": "Los gateway endpoints sirven para Amazon S3 o DynamoDB, no para una aplicación de nómina operada por el proveedor."
+          },
+          {
+            "id": "C",
+            "text": "Configura VPC peering entre cada VPC de cliente y la VPC proveedora, y permite el puerto de la aplicación en el security group del proveedor.",
+            "why": "VPC peering incumple el requisito de no usarlo y no resuelve la superposición de rangos CIDR."
+          },
+          {
+            "id": "D",
+            "text": "Coloca un NLB frente a la aplicación, crea un endpoint service, concede permiso a los AWS principals de los clientes y haz que creen interface VPC endpoints.",
+            "why": "Esta opción publica la aplicación de forma privada para los consumidores autorizados sin requerir VPC peering."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el acceso privado a una aplicación del proveedor, consumidores designados y la ausencia de VPC peering pese a los CIDR superpuestos. El proveedor crea un endpoint service detrás de un NLB y concede permiso a los AWS principals de los clientes; ellos crean interface endpoints para conectarse. Un gateway endpoint se usa para servicios de AWS compatibles, mientras que un NAT gateway no publica la aplicación del proveedor."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "privatelink-endpoint-services--451c36b5",
+      "conceptId": "privatelink-endpoint-services",
+      "secondaryConcepts": [
+        "vpc-endpoints-gateway-vs-interface",
+        "nat-gateway-vs-nat-instance"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company is moving an internal licensing service to an AWS PrivateLink endpoint service. Its partner applications already call the service using an established DNS name, and the partners will create interface VPC endpoints. The company wants the partners to keep using that name with the LEAST application changes. Which solution should the company choose?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have partners replace the established name with a zonal DNS name generated for each interface endpoint.",
+          "correct": false,
+          "why": "A zonal endpoint name changes the name used by the applications and does not meet the minimal-change requirement."
+        },
+        {
+          "id": "B",
+          "text": "Create NAT gateways in the partner VPCs so applications can keep using the established name.",
+          "correct": false,
+          "why": "NAT gateways do not provide private DNS naming for a PrivateLink endpoint service."
+        },
+        {
+          "id": "C",
+          "text": "Associate the established private DNS name with the endpoint service and have partners enable private DNS names on their interface endpoints.",
+          "correct": true,
+          "why": "Provider-associated private DNS lets consumers continue using the existing name through their interface endpoints."
+        },
+        {
+          "id": "D",
+          "text": "Have partners replace the established name with the Regional DNS name generated for each interface endpoint.",
+          "correct": false,
+          "why": "The Regional endpoint name can reach the service but requires partner application configuration changes."
+        }
+      ],
+      "explanation": "The deciding constraint is preserving the applications' established service name. The provider can associate that private DNS name with its endpoint service, and consumers can enable private DNS on their interface endpoints. Regional and zonal endpoint names are usable alternatives, but switching applications to those names requires changes. NAT gateways do not address endpoint-service DNS.",
+      "keywordCues": [
+        "established DNS name",
+        "partners will create interface VPC endpoints",
+        "LEAST application changes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-share-your-services.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios está migrando un servicio interno de licencias a un AWS PrivateLink endpoint service. Las aplicaciones de sus socios ya llaman al servicio mediante un nombre DNS establecido, y los socios crearán interface VPC endpoints. La empresa quiere que sigan usando ese nombre con los LEAST application changes. ¿Qué solución debe elegir?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Haz que los socios sustituyan el nombre establecido por un nombre DNS zonal generado para cada interface endpoint.",
+            "why": "Un nombre zonal cambia el nombre usado por las aplicaciones y no cumple el requisito de minimizar cambios."
+          },
+          {
+            "id": "B",
+            "text": "Crea NAT gateways en las VPC de los socios para que las aplicaciones puedan conservar el nombre establecido.",
+            "why": "Los NAT gateways no proporcionan nombres DNS privados para un PrivateLink endpoint service."
+          },
+          {
+            "id": "C",
+            "text": "Asocia el private DNS name establecido al endpoint service y haz que los socios habiliten private DNS names en sus interface endpoints.",
+            "why": "El private DNS asociado por el proveedor permite que los consumidores sigan usando el nombre existente mediante sus interface endpoints."
+          },
+          {
+            "id": "D",
+            "text": "Haz que los socios sustituyan el nombre establecido por el nombre DNS Regional generado para cada interface endpoint.",
+            "why": "El nombre Regional puede llegar al servicio, pero exige cambios en la configuración de las aplicaciones de los socios."
+          }
+        ],
+        "explanation": "La restricción decisiva es conservar el nombre establecido del servicio en las aplicaciones. El proveedor puede asociar ese private DNS name a su endpoint service, y los consumidores pueden habilitar private DNS en sus interface endpoints. Los nombres Regional y zonal son alternativas utilizables, pero adoptarlos exige cambios en las aplicaciones. Los NAT gateways no resuelven el DNS del endpoint service."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "privatelink-endpoint-services--r0",
+      "conceptId": "privatelink-endpoint-services",
+      "kind": "recall",
+      "prompt": "How would you privately share your own application with customer VPCs that have overlapping CIDRs, and what does each side create?",
+      "promptEs": "¿Cómo compartirías de forma privada tu aplicación con VPC de clientes cuyos CIDR se superponen, y qué crea cada lado?",
+      "idealAnswer": "Use AWS PrivateLink: the provider creates an NLB-backed endpoint service and grants customer AWS principals permission to connect. Each customer creates an interface VPC endpoint, so VPC peering is unnecessary.",
+      "rubric": [
+        "Names AWS PrivateLink and an NLB-backed endpoint service on the provider side.",
+        "Identifies consumer interface VPC endpoints and provider-granted permissions.",
+        "Explains that overlapping CIDRs do not require VPC peering."
+      ]
+    },
+    {
+      "id": "privatelink-endpoint-services--r1",
+      "conceptId": "privatelink-endpoint-services",
+      "kind": "why-not",
+      "prompt": "Why would a gateway VPC endpoint not let another account privately access an application you operate behind an NLB?",
+      "promptEs": "¿Por qué un gateway VPC endpoint no permitiría que otra cuenta acceda de forma privada a una aplicación que operas detrás de un NLB?",
+      "idealAnswer": "Gateway VPC endpoints are for private access to Amazon S3 or DynamoDB, not for publishing your own application. Publish the NLB-backed application as an AWS PrivateLink endpoint service, then have the other account connect through an interface VPC endpoint.",
+      "rubric": [
+        "States that gateway endpoints serve Amazon S3 or DynamoDB rather than provider-operated applications.",
+        "Identifies the NLB-backed endpoint service as the provider-side solution.",
+        "Identifies an interface VPC endpoint as the consumer-side connection."
+      ]
+    }
+  ]
+}

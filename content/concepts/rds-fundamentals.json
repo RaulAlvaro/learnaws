@@ -1,0 +1,452 @@
+{
+  "conceptId": "rds-fundamentals",
+  "card": {
+    "en": {
+      "tldr": "Amazon RDS is the default managed choice for an existing relational database when its engine must be retained and the team does not need operating-system access. If operating-system access is a requirement, evaluate RDS Custom instead of standard RDS.",
+      "whenToUse": [
+        "An application must keep its Oracle, SQL Server, Db2, MariaDB, MySQL, or PostgreSQL engine.",
+        "The team wants AWS to handle routine database administration, including backups, patching, and recovery.",
+        "The database needs relational features without a customer-managed operating system."
+      ],
+      "keyFacts": [
+        "A DB instance is an isolated database environment that can contain one or more user-created databases, depending on the engine.",
+        "RDS manages backups, database software patching, automatic failure detection, and recovery; customers remain responsible for query tuning.",
+        "A Multi-AZ DB instance deployment provides a synchronous standby for failover, but that standby does not serve reads.",
+        "Read replicas can increase read capacity.",
+        "General Purpose SSD storage is a cost-effective fit for development and testing; Provisioned IOPS storage targets workloads needing low I/O latency and consistent throughput."
+      ],
+      "gotchas": [
+        "Do not assume standard RDS gives you operating-system access.",
+        "Do not send read traffic to the standby of a Multi-AZ DB instance deployment; a Multi-AZ DB cluster is different.",
+        "Managed patching does not mean AWS tunes application SQL queries.",
+        "Check engine-version and Region support rather than assuming every RDS feature is available everywhere."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Aurora",
+          "difference": "Aurora is a separate MySQL- or PostgreSQL-compatible choice; it is not a drop-in choice when Oracle, SQL Server, or Db2 must be retained."
+        },
+        {
+          "concept": "Amazon DynamoDB",
+          "difference": "DynamoDB fits key-value or document access patterns, not a requirement to keep an existing relational engine."
+        },
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB targets MongoDB-compatible document workloads, not a requirement to retain an RDS relational engine."
+        }
+      ],
+      "examCues": [
+        "retain the Oracle database engine",
+        "offload backups and patching",
+        "no operating-system access required",
+        "must modify the database host operating system",
+        "existing Multi-AZ DB instance"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon RDS es la opción administrada predeterminada para una base de datos relacional existente cuando debes conservar su motor y no necesitas acceso al sistema operativo. Si necesitas ese acceso, evalúa RDS Custom en lugar de RDS estándar.",
+      "whenToUse": [
+        "Tu aplicación debe conservar Oracle, SQL Server, Db2, MariaDB, MySQL o PostgreSQL.",
+        "Quieres que AWS se encargue de tareas habituales como respaldos, parches y recuperación.",
+        "Necesitas una base de datos relacional sin administrar el sistema operativo."
+      ],
+      "keyFacts": [
+        "Una DB instance es un entorno de base de datos aislado que puede contener una o más bases de datos creadas por el usuario, según el motor.",
+        "RDS administra respaldos, parches del software de base de datos, detección automática de fallas y recuperación; tú sigues a cargo de optimizar las consultas.",
+        "Una implementación Multi-AZ DB instance mantiene una instancia secundaria síncrona para failover, pero esa instancia no atiende lecturas.",
+        "Las read replicas pueden aumentar la capacidad de lectura.",
+        "General Purpose SSD es una opción cost-effective para desarrollo y pruebas; Provisioned IOPS está orientado a cargas que requieren baja latencia de E/S y rendimiento constante."
+      ],
+      "gotchas": [
+        "No supongas que RDS estándar te da acceso al sistema operativo.",
+        "No dirijas lecturas a la instancia secundaria de una Multi-AZ DB instance; una Multi-AZ DB cluster funciona de otra manera.",
+        "Que AWS administre los parches no significa que optimice tus consultas SQL.",
+        "Verifica la compatibilidad de funciones por versión del motor y por Región."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Aurora",
+          "difference": "Aurora es una opción distinta, compatible con MySQL o PostgreSQL; no reemplaza directamente una exigencia de conservar Oracle, SQL Server o Db2."
+        },
+        {
+          "concept": "Amazon DynamoDB",
+          "difference": "DynamoDB se ajusta a patrones de clave-valor o documentos, no a conservar un motor relacional existente."
+        },
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB está orientado a cargas de documentos compatibles con MongoDB, no a conservar un motor relacional de RDS."
+        }
+      ],
+      "examCues": [
+        "retain the Oracle database engine",
+        "offload backups and patching",
+        "no operating-system access required",
+        "must modify the database host operating system",
+        "existing Multi-AZ DB instance"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html",
+      "https://aws.amazon.com/rds/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rds-fundamentals--bb366a67",
+      "conceptId": "rds-fundamentals",
+      "secondaryConcepts": [
+        "aurora-architecture",
+        "dynamodb-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional shipping company is moving an order database to AWS. Its application must retain the Oracle database engine and existing SQL integrations, but the operations team wants to offload backups, patching, and failure recovery. No operating-system access is required. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the order data to Amazon DynamoDB and keep the existing SQL integrations.",
+          "correct": false,
+          "why": "DynamoDB does not preserve the required Oracle engine and existing relational integrations."
+        },
+        {
+          "id": "B",
+          "text": "Move the database to Amazon Aurora and keep the application’s Oracle connections.",
+          "correct": false,
+          "why": "Aurora does not satisfy the requirement to retain the Oracle engine."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon RDS for Oracle with automated backups.",
+          "correct": true,
+          "why": "RDS retains Oracle while offloading backups, patching, failure detection, and recovery."
+        },
+        {
+          "id": "D",
+          "text": "Run Oracle Database on Amazon EC2 and schedule backups and patches.",
+          "correct": false,
+          "why": "EC2 preserves the engine, but the team would still manage database backups and software patching."
+        }
+      ],
+      "explanation": "The deciding constraint is retaining Oracle while transferring routine administration to AWS. Amazon RDS supports Oracle and manages backups, software patching, failure detection, and recovery. Running Oracle on EC2 preserves the engine but leaves more administration with the company; the other choices do not retain Oracle.",
+      "keywordCues": [
+        "retain the Oracle database engine",
+        "offload backups, patching, and failure recovery",
+        "No operating-system access is required"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/rds/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa regional de envíos está trasladando una base de datos de pedidos a AWS. Su aplicación debe conservar el motor Oracle y las integraciones SQL existentes, pero el equipo de operaciones quiere delegar los respaldos, los parches y la recuperación ante fallas. No necesita acceso al sistema operativo. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Trasladar los datos de pedidos a Amazon DynamoDB y mantener las integraciones SQL existentes.",
+            "why": "DynamoDB no conserva el motor Oracle ni las integraciones relacionales requeridas."
+          },
+          {
+            "id": "B",
+            "text": "Trasladar la base de datos a Amazon Aurora y mantener las conexiones Oracle de la aplicación.",
+            "why": "Aurora no cumple el requisito de conservar el motor Oracle."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon RDS for Oracle con respaldos automáticos.",
+            "why": "RDS conserva Oracle y se encarga de los respaldos, los parches, la detección de fallas y la recuperación."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar Oracle Database en Amazon EC2 y programar respaldos y parches.",
+            "why": "EC2 conserva el motor, pero el equipo seguiría administrando los respaldos y los parches del software de base de datos."
+          }
+        ],
+        "explanation": "La condición decisiva es conservar Oracle y delegar en AWS la administración habitual. Amazon RDS admite Oracle y administra respaldos, parches del software, detección de fallas y recuperación. Ejecutar Oracle en EC2 conserva el motor, pero te deja más tareas administrativas; las otras opciones no conservan Oracle."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-fundamentals--8ce85a2d",
+      "conceptId": "rds-fundamentals",
+      "secondaryConcepts": [
+        "dynamodb-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research publisher runs a managed PostgreSQL database on Amazon RDS. A new reporting feature has increased CPU utilization, and queries are slowing down even when the number of requests is steady. The publisher wants more compute capacity without changing its database engine or rewriting the reporting application. Which action meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a Multi-AZ DB instance deployment and run reports on its standby.",
+          "correct": false,
+          "why": "The standby in a Multi-AZ DB instance deployment does not serve read traffic."
+        },
+        {
+          "id": "B",
+          "text": "Move the reporting tables to DynamoDB and preserve the existing PostgreSQL queries.",
+          "correct": false,
+          "why": "Moving to DynamoDB does not meet the requirement to retain PostgreSQL queries without an application rewrite."
+        },
+        {
+          "id": "C",
+          "text": "Change the RDS DB instance class to one with more compute capacity.",
+          "correct": true,
+          "why": "A larger DB instance class increases compute capacity while retaining PostgreSQL and the application’s database access."
+        },
+        {
+          "id": "D",
+          "text": "Add an RDS read replica and keep every reporting connection pointed at the primary.",
+          "correct": false,
+          "why": "A read replica will not relieve the primary if reporting connections continue to use it."
+        }
+      ],
+      "explanation": "The publisher specifically needs more compute without changing its engine or application. RDS lets the team change the DB instance class as capacity needs evolve. A read replica could help a read-heavy workload only if reads were directed to it, which this option does not do; a Multi-AZ DB instance standby cannot serve reports.",
+      "keywordCues": [
+        "increased CPU utilization",
+        "more compute capacity",
+        "without changing its database engine or rewriting the reporting application"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/rds/faqs/"
+      ],
+      "es": {
+        "stem": "Una editorial de investigación usa una base de datos PostgreSQL administrada en Amazon RDS. Una nueva función de informes elevó el uso de CPU y las consultas se están volviendo lentas, aunque la cantidad de solicitudes se mantiene estable. La editorial quiere más capacidad de cómputo sin cambiar el motor ni reescribir la aplicación de informes. ¿Qué acción cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una Multi-AZ DB instance y ejecutar los informes en su instancia secundaria.",
+            "why": "La instancia secundaria de una Multi-AZ DB instance no atiende tráfico de lectura."
+          },
+          {
+            "id": "B",
+            "text": "Mover las tablas de informes a DynamoDB y conservar las consultas PostgreSQL existentes.",
+            "why": "Moverlas a DynamoDB no permite conservar las consultas PostgreSQL sin reescribir la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Cambiar la RDS DB instance class por una con más capacidad de cómputo.",
+            "why": "Una DB instance class mayor aumenta la capacidad de cómputo sin cambiar PostgreSQL ni el acceso de la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Agregar una RDS read replica y mantener todas las conexiones de informes dirigidas a la instancia principal.",
+            "why": "La read replica no reducirá la carga de la instancia principal si las conexiones de informes siguen usándola."
+          }
+        ],
+        "explanation": "La editorial necesita específicamente más capacidad de cómputo sin cambiar el motor ni la aplicación. RDS permite cambiar la DB instance class cuando cambian las necesidades de capacidad. Una read replica solo ayudaría a la carga de lectura si dirigieras las lecturas hacia ella, lo que esta opción no hace; la instancia secundaria de una Multi-AZ DB instance tampoco puede atender informes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-fundamentals--c271e77b",
+      "conceptId": "rds-fundamentals",
+      "secondaryConcepts": [
+        "aurora-architecture"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer is moving a Microsoft SQL Server application to AWS. A required database component needs changes to the database host operating system, and the team must retain SQL Server. The team still wants a managed RDS-based approach rather than managing the entire database deployment on EC2. Which solution best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Aurora and install the SQL Server component on its database host.",
+          "correct": false,
+          "why": "Aurora does not retain the required SQL Server engine."
+        },
+        {
+          "id": "B",
+          "text": "Run SQL Server on Amazon EC2 and administer its operating system and database.",
+          "correct": false,
+          "why": "EC2 permits customer administration but misses the requirement for a managed RDS-based approach."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon RDS Custom for SQL Server to accommodate the host-level requirement.",
+          "correct": true,
+          "why": "RDS Custom is the RDS choice when retaining SQL Server also requires database host operating-system access."
+        },
+        {
+          "id": "D",
+          "text": "Use standard Amazon RDS for SQL Server and make the host operating-system changes.",
+          "correct": false,
+          "why": "Standard RDS is not the choice when the team must modify the database host operating system."
+        }
+      ],
+      "explanation": "Operating-system access is the requirement that separates RDS Custom from standard RDS in this scenario. RDS Custom accommodates the host-level need while retaining the requested RDS-based approach and SQL Server engine. EC2 would leave the team managing the database deployment, and Aurora would not retain SQL Server.",
+      "keywordCues": [
+        "needs changes to the database host operating system",
+        "must retain SQL Server",
+        "managed RDS-based approach rather than managing the entire database deployment on EC2"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/rds/faqs/"
+      ],
+      "es": {
+        "stem": "Un fabricante está trasladando una aplicación de Microsoft SQL Server a AWS. Un componente obligatorio de la base de datos requiere cambios en el sistema operativo del host y el equipo debe conservar SQL Server. El equipo también quiere una opción administrada basada en RDS, en vez de administrar toda la implementación de la base de datos en EC2. ¿Qué solución cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon Aurora e instalar el componente de SQL Server en su host de base de datos.",
+            "why": "Aurora no conserva el motor SQL Server requerido."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar SQL Server en Amazon EC2 y administrar su sistema operativo y su base de datos.",
+            "why": "EC2 permite administrar el host, pero no cumple el requisito de usar una opción administrada basada en RDS."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon RDS Custom for SQL Server para atender el requisito de acceso al host.",
+            "why": "RDS Custom es la opción de RDS cuando debes conservar SQL Server y necesitas acceso al sistema operativo del host."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon RDS for SQL Server estándar y realizar los cambios en el sistema operativo del host.",
+            "why": "RDS estándar no es la opción cuando debes modificar el sistema operativo del host de la base de datos."
+          }
+        ],
+        "explanation": "El acceso al sistema operativo distingue a RDS Custom de RDS estándar en este caso. RDS Custom atiende la necesidad de modificar el host y conserva tanto SQL Server como el enfoque basado en RDS. Con EC2, el equipo administraría la implementación de la base de datos; Aurora no conservaría SQL Server."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-fundamentals--afca9813",
+      "conceptId": "rds-fundamentals",
+      "secondaryConcepts": [
+        "dynamodb-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "An online ticketing company has an existing Amazon RDS for MySQL Multi-AZ DB instance deployment. It must keep automatic failover if an Availability Zone fails, and a new seat-browsing feature must read current ticket records without overloading the primary DB instance. The company wants to retain MySQL and avoid moving the workload to a different database service. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an RDS read replica and direct seat-browsing queries to it.",
+          "correct": true,
+          "why": "An RDS read replica increases read capacity when browsing queries are directed to it."
+        },
+        {
+          "id": "B",
+          "text": "Remove the Multi-AZ deployment after adding capacity for reads.",
+          "correct": false,
+          "why": "Removing Multi-AZ would discard the required standby-based failover."
+        },
+        {
+          "id": "C",
+          "text": "Send seat-browsing queries to the existing Multi-AZ standby DB instance.",
+          "correct": false,
+          "why": "The standby of a Multi-AZ DB instance deployment does not serve read traffic."
+        },
+        {
+          "id": "D",
+          "text": "Replace MySQL with DynamoDB and move seat-browsing reads there.",
+          "correct": false,
+          "why": "Replacing MySQL violates the requirement to retain the existing database engine."
+        },
+        {
+          "id": "E",
+          "text": "Keep the Multi-AZ DB instance deployment for standby-based failover.",
+          "correct": true,
+          "why": "The existing Multi-AZ deployment provides a synchronous standby and failover support."
+        }
+      ],
+      "explanation": "The company has two separate needs: failover protection and more read capacity. Keeping its Multi-AZ DB instance deployment addresses failover, while a read replica can serve the new read-heavy feature. The existing Multi-AZ standby is not a read endpoint, and replacing MySQL or removing Multi-AZ violates an explicit constraint.",
+      "keywordCues": [
+        "existing Amazon RDS for MySQL Multi-AZ DB instance deployment",
+        "keep automatic failover if an Availability Zone fails",
+        "without overloading the primary DB instance",
+        "retain MySQL"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/rds/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos en línea tiene una implementación existente de Amazon RDS for MySQL Multi-AZ DB instance. Debe mantener el failover automático si falla una Availability Zone, y una nueva función de consulta de asientos debe leer los registros de boletos sin sobrecargar la DB instance principal. La empresa quiere conservar MySQL y evitar trasladar la carga a otro servicio de base de datos. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar una RDS read replica y dirigirle las consultas de asientos.",
+            "why": "Una RDS read replica aumenta la capacidad de lectura cuando diriges a ella las consultas."
+          },
+          {
+            "id": "B",
+            "text": "Eliminar la implementación Multi-AZ después de agregar capacidad de lectura.",
+            "why": "Eliminar Multi-AZ quitaría el failover mediante una instancia secundaria que se requiere."
+          },
+          {
+            "id": "C",
+            "text": "Dirigir las consultas de asientos a la instancia secundaria existente de Multi-AZ.",
+            "why": "La instancia secundaria de una Multi-AZ DB instance no atiende tráfico de lectura."
+          },
+          {
+            "id": "D",
+            "text": "Reemplazar MySQL por DynamoDB y trasladar allí las lecturas de asientos.",
+            "why": "Reemplazar MySQL incumple el requisito de conservar el motor existente."
+          },
+          {
+            "id": "E",
+            "text": "Mantener la Multi-AZ DB instance para contar con failover mediante una instancia secundaria.",
+            "why": "La implementación Multi-AZ existente proporciona una instancia secundaria síncrona y soporte de failover."
+          }
+        ],
+        "explanation": "La empresa tiene dos necesidades distintas: protección mediante failover y más capacidad de lectura. Mantener la Multi-AZ DB instance atiende el failover; una read replica puede atender la nueva función con muchas lecturas. La instancia secundaria Multi-AZ existente no atiende lecturas, y reemplazar MySQL o eliminar Multi-AZ incumple una condición explícita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": "Minor: 'read current ticket records' could be read as needing up-to-date data, while read replicas are asynchronous and can lag. The key is still the best option."
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rds-fundamentals--r0",
+      "conceptId": "rds-fundamentals",
+      "kind": "recall",
+      "prompt": "A team must keep SQL Server, avoid managing backups and patching, and needs no OS access. Which database service fits, and why?",
+      "promptEs": "Un equipo debe conservar SQL Server, evitar administrar respaldos y parches, y no necesita acceso al sistema operativo. ¿Qué servicio encaja y por qué?",
+      "idealAnswer": "Use Amazon RDS for SQL Server. It retains the required relational engine while RDS handles backups, software patching, failure detection, and recovery.",
+      "rubric": [
+        "Names Amazon RDS for SQL Server.",
+        "Explains that it retains the SQL Server engine.",
+        "Identifies managed backups and patching as benefits."
+      ]
+    },
+    {
+      "id": "rds-fundamentals--r1",
+      "conceptId": "rds-fundamentals",
+      "kind": "why-not",
+      "prompt": "Why is Aurora not the right substitution for an existing Oracle application that must retain its database engine?",
+      "promptEs": "¿Por qué Aurora no sustituye adecuadamente a una aplicación Oracle existente que debe conservar su motor de base de datos?",
+      "idealAnswer": "Aurora is a different database choice and does not retain the Oracle engine. Amazon RDS for Oracle fits when keeping Oracle is mandatory and managed database administration is desired.",
+      "rubric": [
+        "States that Aurora does not retain Oracle.",
+        "Identifies Amazon RDS for Oracle as the managed choice.",
+        "Connects the decision to the requirement to preserve the existing engine."
+      ]
+    }
+  ]
+}

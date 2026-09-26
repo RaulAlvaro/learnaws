@@ -1,0 +1,339 @@
+{
+  "conceptId": "backup-archival-selection",
+  "card": {
+    "en": {
+      "tldr": "Choose AWS Backup when the requirement is to schedule, manage, and restore protected resources through centralized backup plans. For backups that must be retained longer but are rarely needed, consider a plan that transitions eligible backups from warm to cold storage.",
+      "whenToUse": [
+        "Several AWS resource types need consistent backup schedules and centralized monitoring.",
+        "Resources need recoverable backups now and lower-cost storage later.",
+        "Backup policies must be applied by resource tags or across accounts in an AWS Organization."
+      ],
+      "keyFacts": [
+        "AWS Backup uses backup plans to define requirements and apply them to resources.",
+        "Backup plans can be assigned to resources using tags.",
+        "Lifecycle policies can transition backups from warm to cold storage on a defined schedule; cold-storage eligibility depends on the resource type.",
+        "AWS Backup can back up and restore AWS Storage Gateway volumes.",
+        "Incremental backups are available for supported resource types, but not every resource type supports them."
+      ],
+      "gotchas": [
+        "An archive of exported data is not a substitute for a centralized plan that backs up the source resources.",
+        "Do not assume every AWS Backup resource type can transition to cold storage or use incremental backups.",
+        "AWS Backup does not govern backups created outside AWS Backup."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon S3 Glacier",
+          "difference": "Consider archival storage for retained objects; choose AWS Backup when the requirement is to schedule and govern backups of supported resources."
+        },
+        {
+          "concept": "Native service backups",
+          "difference": "A service's own backup mechanism may protect that service, but AWS Backup provides centralized plans and monitoring across supported resources."
+        }
+      ],
+      "examCues": [
+        "central backup policy across resource types",
+        "restore recent backups, retain older backups at lower cost",
+        "apply backup schedules by tag",
+        "protect Storage Gateway volumes"
+      ]
+    },
+    "es": {
+      "tldr": "Elige AWS Backup cuando necesites programar, administrar y restaurar recursos protegidos mediante planes de respaldo centralizados. Si debes conservar los respaldos por más tiempo, pero rara vez los necesitas, considera un plan que traslade los respaldos elegibles de almacenamiento warm a cold.",
+      "whenToUse": [
+        "Varios tipos de recursos de AWS necesitan calendarios de respaldo consistentes y monitoreo centralizado.",
+        "Necesitas respaldos recuperables ahora y almacenamiento de menor costo más adelante.",
+        "Debes aplicar políticas de respaldo mediante etiquetas de recursos o entre cuentas de una AWS Organization."
+      ],
+      "keyFacts": [
+        "AWS Backup usa backup plans para definir requisitos y aplicarlos a los recursos.",
+        "Puedes asignar backup plans a los recursos mediante etiquetas.",
+        "Las políticas de ciclo de vida pueden trasladar respaldos de almacenamiento warm a cold según un calendario; la elegibilidad para cold depende del tipo de recurso.",
+        "AWS Backup puede respaldar y restaurar volúmenes de AWS Storage Gateway.",
+        "Hay respaldos incrementales para los tipos de recursos compatibles, pero no todos los tipos los admiten."
+      ],
+      "gotchas": [
+        "Un archivo de datos exportados no reemplaza un plan centralizado que respalde los recursos de origen.",
+        "No supongas que todos los tipos de recursos de AWS Backup pueden pasar a almacenamiento cold o usar respaldos incrementales.",
+        "AWS Backup no administra los respaldos creados fuera de AWS Backup."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon S3 Glacier",
+          "difference": "Considera el almacenamiento de archivo para objetos conservados; elige AWS Backup si necesitas programar y administrar respaldos de recursos compatibles."
+        },
+        {
+          "concept": "Respaldos nativos del servicio",
+          "difference": "El mecanismo de respaldo propio de un servicio puede proteger ese servicio, pero AWS Backup ofrece planes y monitoreo centralizados para recursos compatibles."
+        }
+      ],
+      "examCues": [
+        "central backup policy across resource types",
+        "restore recent backups, retain older backups at lower cost",
+        "apply backup schedules by tag",
+        "protect Storage Gateway volumes"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "backup-archival-selection--f5fdbdbe",
+      "conceptId": "backup-archival-selection",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A media company regularly adds supported AWS resources to a production environment. It wants newly tagged resources to receive a consistent backup plan without maintaining resource lists by hand. For resource types eligible for cold storage, older backups should move to a lower-cost tier on a defined schedule. Which TWO actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set a lifecycle policy in the backup plan to transition eligible backups from warm to cold storage.",
+          "correct": true,
+          "why": "A scheduled lifecycle transition addresses the lower-cost storage requirement for eligible backups."
+        },
+        {
+          "id": "B",
+          "text": "Keep all backups in warm storage throughout their retention periods.",
+          "correct": false,
+          "why": "This does not move eligible older backups to lower-cost cold storage."
+        },
+        {
+          "id": "C",
+          "text": "Assign the backup plan to each resource individually whenever it is created.",
+          "correct": false,
+          "why": "Individual assignments require the ongoing manual resource tracking the company wants to avoid."
+        },
+        {
+          "id": "D",
+          "text": "Replace the backup plan with separate native backup schedules for each resource type.",
+          "correct": false,
+          "why": "Separate schedules do not meet the requirement for one consistent, centrally assigned plan."
+        },
+        {
+          "id": "E",
+          "text": "Assign an AWS Backup plan to resources by tag.",
+          "correct": true,
+          "why": "Tag-based assignment applies a consistent plan without maintaining individual resource assignments."
+        }
+      ],
+      "explanation": "The company has two distinct requirements: assign one plan as resources are tagged, and reduce storage costs for eligible older backups. AWS Backup supports tag-based plan assignment and scheduled warm-to-cold lifecycle transitions. Assigning every resource individually creates ongoing work, while keeping every backup warm misses the cost objective.",
+      "keywordCues": [
+        "newly tagged resources",
+        "without maintaining resource lists by hand",
+        "eligible for cold storage",
+        "lower-cost tier on a defined schedule"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios agrega con frecuencia recursos de AWS compatibles a su entorno de producción. Quiere que los recursos nuevos con la etiqueta correspondiente reciban un backup plan consistente sin mantener listas de recursos a mano. Para los tipos de recursos elegibles para almacenamiento cold, los respaldos antiguos deben pasar a un nivel de menor costo según un calendario definido. ¿Qué DOS acciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura una política de ciclo de vida en el backup plan para trasladar respaldos elegibles de almacenamiento warm a cold.",
+            "why": "Una transición programada cumple el requisito de almacenamiento de menor costo para los respaldos elegibles."
+          },
+          {
+            "id": "B",
+            "text": "Mantén todos los respaldos en almacenamiento warm durante sus períodos de retención.",
+            "why": "Esto no traslada los respaldos antiguos elegibles a almacenamiento cold de menor costo."
+          },
+          {
+            "id": "C",
+            "text": "Asigna el backup plan a cada recurso individualmente cada vez que se cree.",
+            "why": "Las asignaciones individuales exigen el seguimiento manual continuo que la empresa quiere evitar."
+          },
+          {
+            "id": "D",
+            "text": "Reemplaza el backup plan por calendarios de respaldo nativos separados para cada tipo de recurso.",
+            "why": "Los calendarios separados no cumplen el requisito de un plan consistente y asignado centralmente."
+          },
+          {
+            "id": "E",
+            "text": "Asigna un AWS Backup plan a los recursos mediante etiquetas.",
+            "why": "La asignación por etiquetas aplica un plan consistente sin mantener asignaciones individuales."
+          }
+        ],
+        "explanation": "La empresa tiene dos requisitos distintos: asignar un mismo plan conforme se etiquetan los recursos y reducir el costo de almacenamiento de los respaldos antiguos elegibles. AWS Backup admite la asignación de planes mediante etiquetas y las transiciones programadas de warm a cold. Asignar cada recurso por separado genera trabajo continuo, mientras que mantener todos los respaldos en warm no cumple el objetivo de costo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "backup-archival-selection--bc879413",
+      "conceptId": "backup-archival-selection",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio runs applications on Amazon EC2 instances backed by EBS volumes and stores shared project files on Amazon EFS. Administrators currently maintain separate backup scripts and need one place to schedule protection and check backup activity. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure each resource type's native backup process independently and review backup activity in each service.",
+          "correct": false,
+          "why": "Service-by-service management misses the requirement for one place to schedule and monitor backups."
+        },
+        {
+          "id": "B",
+          "text": "Keep separate backup scripts for EC2 and EFS, and combine their logs in an administrator-managed dashboard.",
+          "correct": false,
+          "why": "This retains the separate scripts and monitoring work the studio wants to eliminate."
+        },
+        {
+          "id": "C",
+          "text": "Export project files to Amazon S3 Glacier and continue using separate scripts to protect the EC2 instances.",
+          "correct": false,
+          "why": "Archiving files does not provide the requested centralized schedules and activity view for both resource types."
+        },
+        {
+          "id": "D",
+          "text": "Create AWS Backup plans for the EBS-backed instances and EFS file systems, and monitor backup jobs in AWS Backup.",
+          "correct": true,
+          "why": "AWS Backup supports both resource types and centralizes backup schedules and activity monitoring."
+        }
+      ],
+      "explanation": "The deciding requirement is centralized protection for two supported resource types, with less script maintenance. AWS Backup provides backup plans and a consolidated view of backup activity for supported resources, including EBS-backed EC2 instances and EFS file systems. Exporting files for archival does not establish a centrally managed backup plan for both sources.",
+      "keywordCues": [
+        "EBS volumes",
+        "Amazon EFS",
+        "one place to schedule protection and check backup activity",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño ejecuta aplicaciones en instancias de Amazon EC2 respaldadas por volúmenes EBS y guarda archivos de proyectos compartidos en Amazon EFS. Los administradores mantienen scripts de respaldo separados y necesitan un solo lugar para programar la protección y consultar la actividad. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura de forma independiente el mecanismo de respaldo nativo de cada tipo de recurso y revisa la actividad en cada servicio.",
+            "why": "La administración servicio por servicio no cumple el requisito de programar y monitorear respaldos en un solo lugar."
+          },
+          {
+            "id": "B",
+            "text": "Conserva scripts de respaldo separados para EC2 y EFS, y combina sus registros en un panel administrado por los propios administradores.",
+            "why": "Esto mantiene los scripts separados y el trabajo de monitoreo que el estudio quiere eliminar."
+          },
+          {
+            "id": "C",
+            "text": "Exporta los archivos de proyectos a Amazon S3 Glacier y sigue usando scripts separados para proteger las instancias EC2.",
+            "why": "Archivar archivos no proporciona calendarios centralizados ni una vista de actividad para ambos tipos de recursos."
+          },
+          {
+            "id": "D",
+            "text": "Crea backup plans de AWS Backup para las instancias respaldadas por EBS y los sistemas de archivos EFS, y monitorea los trabajos en AWS Backup.",
+            "why": "AWS Backup admite ambos tipos de recursos y centraliza los calendarios y el monitoreo de la actividad."
+          }
+        ],
+        "explanation": "El requisito decisivo es proteger de forma centralizada dos tipos de recursos compatibles sin seguir manteniendo scripts. AWS Backup ofrece backup plans y una vista consolidada de la actividad para recursos compatibles, incluidas las instancias EC2 respaldadas por EBS y los sistemas de archivos EFS. Exportar archivos para archivarlos no establece un plan de respaldo administrado de forma centralizada para ambos orígenes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "backup-archival-selection--cc9e12d7",
+      "conceptId": "backup-archival-selection",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research group uses AWS Backup plans to protect a set of resources whose backups are eligible for cold storage. The group expects to use recent backups for recovery, but older backups must be retained for a long time and are rarely needed. Which change meets these requirements MOST cost-effectively while keeping backup management centralized?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep every backup in warm storage for its entire retention period.",
+          "correct": false,
+          "why": "This preserves the backup plans but does not use the available lower-cost cold storage for older backups."
+        },
+        {
+          "id": "B",
+          "text": "Replace the centralized plans with independently managed native backups for each resource type.",
+          "correct": false,
+          "why": "Separate native processes abandon the required centralized backup management."
+        },
+        {
+          "id": "C",
+          "text": "Stop the backup plans and export only the oldest research files to Amazon S3 Glacier.",
+          "correct": false,
+          "why": "An export of files does not preserve centralized backup-plan protection of the resources."
+        },
+        {
+          "id": "D",
+          "text": "Add lifecycle policies that transition eligible backups from warm to cold storage after the recent-recovery period.",
+          "correct": true,
+          "why": "AWS Backup lifecycle policies retain centralized management while moving eligible older backups to a lower-cost tier."
+        }
+      ],
+      "explanation": "The group needs backups for recent recovery and long retention, but older backups are rarely used. AWS Backup lifecycle policies can transition eligible backups from warm to lower-cost cold storage on a defined schedule without replacing the backup plans. Keeping everything warm misses the storage-cost objective; exporting files instead would not maintain managed backups of the resources.",
+      "keywordCues": [
+        "backups are eligible for cold storage",
+        "recent backups for recovery",
+        "older backups must be retained",
+        "keeping backup management centralized"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html"
+      ],
+      "es": {
+        "stem": "Un grupo de investigación usa backup plans de AWS Backup para proteger recursos cuyos respaldos son elegibles para almacenamiento cold. Espera usar los respaldos recientes para recuperación, pero debe conservar los más antiguos durante mucho tiempo y rara vez los necesita. ¿Qué cambio cumple estos requisitos de la forma MOST cost-effective y mantiene la administración centralizada?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantén todos los respaldos en almacenamiento warm durante todo el período de retención.",
+            "why": "Esto conserva los backup plans, pero no aprovecha el almacenamiento cold de menor costo para los respaldos antiguos."
+          },
+          {
+            "id": "B",
+            "text": "Reemplaza los planes centralizados por respaldos nativos administrados de forma independiente para cada tipo de recurso.",
+            "why": "Los procesos nativos separados abandonan la administración centralizada requerida."
+          },
+          {
+            "id": "C",
+            "text": "Detén los backup plans y exporta solo los archivos de investigación más antiguos a Amazon S3 Glacier.",
+            "why": "Exportar archivos no conserva la protección centralizada de los recursos mediante backup plans."
+          },
+          {
+            "id": "D",
+            "text": "Agrega políticas de ciclo de vida que trasladen los respaldos elegibles de almacenamiento warm a cold después del período de recuperación reciente.",
+            "why": "Las políticas de ciclo de vida de AWS Backup mantienen la administración centralizada y trasladan los respaldos antiguos elegibles a un nivel de menor costo."
+          }
+        ],
+        "explanation": "El grupo necesita respaldos para recuperación reciente y retención prolongada, aunque rara vez usa los más antiguos. Las políticas de ciclo de vida de AWS Backup pueden trasladar los respaldos elegibles de almacenamiento warm a cold, de menor costo, según un calendario sin reemplazar los backup plans. Mantener todo en warm no cumple el objetivo de costo; exportar archivos tampoco mantendría los respaldos administrados de los recursos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "backup-archival-selection--r0",
+      "conceptId": "backup-archival-selection",
+      "kind": "recall",
+      "prompt": "How would you protect several supported resource types centrally while lowering storage costs for eligible older backups?",
+      "promptEs": "¿Cómo protegerías de forma centralizada varios tipos de recursos compatibles y reducirías el costo de almacenamiento de sus respaldos antiguos elegibles?",
+      "idealAnswer": "Use AWS Backup plans to schedule and manage protection across the supported resources. For resource types eligible for cold storage, add a lifecycle policy that moves older backups from warm to cold storage on a defined schedule.",
+      "rubric": [
+        "Names AWS Backup and its centralized backup plans.",
+        "Identifies a scheduled warm-to-cold lifecycle transition.",
+        "Qualifies cold-storage transition by resource eligibility."
+      ]
+    }
+  ]
+}

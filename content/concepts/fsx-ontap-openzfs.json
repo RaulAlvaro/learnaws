@@ -1,0 +1,273 @@
+{
+  "conceptId": "fsx-ontap-openzfs",
+  "card": {
+    "en": {
+      "tldr": "Amazon FSx for NetApp ONTAP is the managed choice for migrating NetApp workloads that need ONTAP capabilities or access through NFS, SMB, and iSCSI. Choose Amazon FSx for OpenZFS when moving a ZFS or Linux-based file server and retaining familiar OpenZFS features through NFS access.",
+      "whenToUse": [
+        "An on-premises NetApp application must move to AWS without changing its code or data-management practices.",
+        "One workload needs NFS, SMB, and iSCSI access to storage.",
+        "A ZFS-based file server must move to managed storage while retaining snapshots and data cloning."
+      ],
+      "keyFacts": [
+        "FSx for ONTAP supports file access (NFS, SMB) and block access (iSCSI, NVMe) in one file system, plus NetApp tools and API operations.",
+        "FSx for ONTAP supports SnapMirror replication and automatically tiers infrequently accessed data to lower-cost storage.",
+        "FSx for OpenZFS provides NFS access from Linux, Windows, and macOS clients; its documented NFS versions are v3, v4.0, v4.1, and v4.2.",
+        "FSx for OpenZFS supports OpenZFS snapshots and data cloning.",
+        "FSx for OpenZFS offers Multi-AZ (HA), Single-AZ (HA), and Single-AZ (non-HA) deployments; its Intelligent-Tiering storage class is elastic."
+      ],
+      "gotchas": [
+        "A Windows client does not automatically imply SMB: FSx for OpenZFS is accessible from Windows clients through NFS.",
+        "Snapshots and cloning alone do not distinguish the two services; both offer them. Look for ONTAP or OpenZFS migration requirements.",
+        "Single-AZ (HA) for OpenZFS provides failover within one Availability Zone, not across Availability Zones."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EFS",
+          "difference": "For a migration requiring ONTAP tools or native OpenZFS capabilities, choose the matching FSx file system rather than a general shared NFS file system."
+        },
+        {
+          "concept": "Amazon FSx for Windows File Server",
+          "difference": "SMB alone may point to Windows File Server; combined NFS, SMB, and iSCSI access with NetApp continuity points to FSx for ONTAP."
+        }
+      ],
+      "examCues": [
+        "migrate on-premises NetApp ONTAP without code changes",
+        "NFS, SMB, and iSCSI access from one file system",
+        "replace an on-premises ZFS file server",
+        "retain OpenZFS snapshots and cloning",
+        "ZFS workload must survive an Availability Zone failure"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon FSx for NetApp ONTAP es la opción administrada para migrar cargas de NetApp que necesitan capacidades de ONTAP o acceso mediante NFS, SMB e iSCSI. Elige Amazon FSx for OpenZFS al migrar un servidor de archivos ZFS o Linux y conservar funciones conocidas de OpenZFS mediante NFS.",
+      "whenToUse": [
+        "Una aplicación de NetApp local debe migrarse a AWS sin cambiar su código ni la forma de administrar los datos.",
+        "Una carga necesita acceso al almacenamiento mediante NFS, SMB e iSCSI.",
+        "Debes migrar un servidor ZFS a almacenamiento administrado y conservar snapshots y clonación de datos."
+      ],
+      "keyFacts": [
+        "FSx for ONTAP admite acceso a archivos (NFS, SMB) y a bloques (iSCSI, NVMe) en un mismo file system, además de herramientas y API de NetApp.",
+        "FSx for ONTAP admite la replicación con SnapMirror y mueve automáticamente los datos de acceso poco frecuente a almacenamiento de menor costo.",
+        "FSx for OpenZFS permite el acceso por NFS desde clientes Linux, Windows y macOS; las versiones documentadas son v3, v4.0, v4.1 y v4.2.",
+        "FSx for OpenZFS admite snapshots de OpenZFS y clonación de datos.",
+        "FSx for OpenZFS ofrece implementaciones Multi-AZ (HA), Single-AZ (HA) y Single-AZ (non-HA); su clase de almacenamiento Intelligent-Tiering es elástica."
+      ],
+      "gotchas": [
+        "Un cliente Windows no implica necesariamente SMB: los clientes Windows pueden acceder a FSx for OpenZFS mediante NFS.",
+        "Los snapshots y la clonación por sí solos no distinguen los servicios; ambos los ofrecen. Busca requisitos de migración de ONTAP o OpenZFS.",
+        "Single-AZ (HA) para OpenZFS permite failover dentro de una sola Availability Zone, no entre Availability Zones."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EFS",
+          "difference": "Si la migración exige herramientas de ONTAP o capacidades nativas de OpenZFS, elige el sistema FSx correspondiente en lugar de un sistema NFS compartido de propósito general."
+        },
+        {
+          "concept": "Amazon FSx for Windows File Server",
+          "difference": "SMB por sí solo puede apuntar a Windows File Server; la combinación de NFS, SMB e iSCSI con continuidad de NetApp apunta a FSx for ONTAP."
+        }
+      ],
+      "examCues": [
+        "migrate on-premises NetApp ONTAP without code changes",
+        "NFS, SMB, and iSCSI access from one file system",
+        "replace an on-premises ZFS file server",
+        "retain OpenZFS snapshots and cloning",
+        "ZFS workload must survive an Availability Zone failure"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/what-is-fsx-ontap.html",
+      "https://docs.aws.amazon.com/fsx/latest/OpenZFSGuide/what-is-fsx.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "fsx-ontap-openzfs--1a6bf912",
+      "conceptId": "fsx-ontap-openzfs",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media team is moving its ZFS-based NFS file server to AWS. Its dataset grows unpredictably, so the team does not want to specify a fixed file-system size, and the service must remain available if an Availability Zone fails. The team also needs to retain its OpenZFS snapshot and cloning workflow. Which configuration meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy FSx for OpenZFS as Single-AZ (non-HA) with Intelligent-Tiering storage.",
+          "correct": false,
+          "why": "Intelligent-Tiering addresses variable storage needs, but Single-AZ (non-HA) does not provide cross-AZ failover."
+        },
+        {
+          "id": "B",
+          "text": "Deploy FSx for NetApp ONTAP as Multi-AZ with automatic data tiering.",
+          "correct": false,
+          "why": "ONTAP offers Multi-AZ deployment and tiering, but it does not retain the required OpenZFS workflow."
+        },
+        {
+          "id": "C",
+          "text": "Deploy FSx for OpenZFS as Multi-AZ (HA) with Intelligent-Tiering storage.",
+          "correct": true,
+          "why": "This retains OpenZFS capabilities, supports cross-AZ failover, and provides elastic storage without specifying a file-system size."
+        },
+        {
+          "id": "D",
+          "text": "Deploy FSx for OpenZFS as Single-AZ (HA) with SSD storage.",
+          "correct": false,
+          "why": "Single-AZ (HA) fails over within one AZ, and SSD storage requires a specified file-system size."
+        }
+      ],
+      "explanation": "The configuration must satisfy three requirements together: OpenZFS capabilities, elastic storage without a specified file-system size, and availability across AZs. FSx for OpenZFS Multi-AZ (HA) provides cross-AZ replication and failover, while its Intelligent-Tiering storage class is elastic and does not require a file-system size. Single-AZ (HA) can fail over only within its AZ, so its HA label does not meet the AZ-failure requirement. ONTAP's tiering and Multi-AZ options do not make it an OpenZFS file system.",
+      "keywordCues": [
+        "ZFS-based NFS file server",
+        "does not want to specify a fixed file-system size",
+        "remain available if an Availability Zone fails",
+        "retain its OpenZFS snapshot and cloning workflow"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/what-is-fsx-ontap.html",
+        "https://docs.aws.amazon.com/fsx/latest/OpenZFSGuide/what-is-fsx.html"
+      ],
+      "es": {
+        "stem": "Un equipo de medios está migrando a AWS su servidor de archivos NFS basado en ZFS. El conjunto de datos crece de forma impredecible, por lo que el equipo no quiere especificar un tamaño fijo para el sistema de archivos, y el servicio debe seguir disponible si falla una Availability Zone. También necesita conservar su flujo de trabajo de snapshots y clonación de OpenZFS. ¿Qué configuración cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar FSx for OpenZFS como Single-AZ (non-HA) con almacenamiento Intelligent-Tiering.",
+            "why": "Intelligent-Tiering atiende las necesidades variables de almacenamiento, pero Single-AZ (non-HA) no proporciona failover entre AZ."
+          },
+          {
+            "id": "B",
+            "text": "Implementar FSx for NetApp ONTAP como Multi-AZ con organización automática de datos en niveles.",
+            "why": "ONTAP ofrece Multi-AZ y organización de datos en niveles, pero no conserva el flujo de trabajo de OpenZFS requerido."
+          },
+          {
+            "id": "C",
+            "text": "Implementar FSx for OpenZFS como Multi-AZ (HA) con almacenamiento Intelligent-Tiering.",
+            "why": "Esta opción conserva las capacidades de OpenZFS, admite failover entre AZ y ofrece almacenamiento elástico sin especificar el tamaño del sistema de archivos."
+          },
+          {
+            "id": "D",
+            "text": "Implementar FSx for OpenZFS como Single-AZ (HA) con almacenamiento SSD.",
+            "why": "Single-AZ (HA) realiza failover dentro de una AZ, y el almacenamiento SSD requiere especificar el tamaño del sistema de archivos."
+          }
+        ],
+        "explanation": "La configuración debe satisfacer tres requisitos a la vez: capacidades de OpenZFS, almacenamiento elástico sin especificar el tamaño del sistema de archivos y disponibilidad entre AZ. FSx for OpenZFS Multi-AZ (HA) proporciona replicación y failover entre AZ, mientras que su clase Intelligent-Tiering es elástica y no exige definir un tamaño. Single-AZ (HA) solo puede realizar failover dentro de su AZ, por lo que su etiqueta HA no satisface el requisito ante la falla de una AZ. La organización en niveles y las opciones Multi-AZ de ONTAP no lo convierten en un sistema de archivos OpenZFS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fsx-ontap-openzfs--20174c0d",
+      "conceptId": "fsx-ontap-openzfs",
+      "secondaryConcepts": [
+        "fsx-windows-file-server",
+        "efs-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company is moving an on-premises NetApp ONTAP application to AWS. Its Linux editors use NFS, its Windows editors use SMB, and a processing component requires iSCSI access to the same storage environment. The company wants to keep its existing application code and NetApp management practices. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy Amazon FSx for OpenZFS and connect all components to its NFS endpoints.",
+          "correct": false,
+          "why": "FSx for OpenZFS provides NFS access but does not provide the required SMB and iSCSI access or ONTAP management continuity."
+        },
+        {
+          "id": "B",
+          "text": "Deploy Amazon EFS and connect the editors and processing component through NFS.",
+          "correct": false,
+          "why": "An NFS file system does not provide the required SMB and iSCSI access or preserve ONTAP management practices."
+        },
+        {
+          "id": "C",
+          "text": "Deploy Amazon FSx for Windows File Server and connect the editors through SMB.",
+          "correct": false,
+          "why": "An SMB-focused file system does not meet the stated NFS, iSCSI, and NetApp continuity requirements."
+        },
+        {
+          "id": "D",
+          "text": "Deploy Amazon FSx for NetApp ONTAP and connect each component using its required protocol.",
+          "correct": true,
+          "why": "FSx for ONTAP is managed storage that supports NFS, SMB, and iSCSI while preserving familiar NetApp capabilities and management."
+        }
+      ],
+      "explanation": "The deciding requirement is the combination of NetApp continuity and three access protocols: NFS, SMB, and iSCSI. FSx for ONTAP supports all three and lets customers migrate on-premises ONTAP applications without changing application code or data-management practices. FSx for OpenZFS is also fully managed, but its documented client access is through NFS, so it misses two required protocols.",
+      "keywordCues": [
+        "on-premises NetApp ONTAP application",
+        "Linux editors use NFS",
+        "Windows editors use SMB",
+        "requires iSCSI access",
+        "keep its existing application code and NetApp management practices"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/what-is-fsx-ontap.html",
+        "https://docs.aws.amazon.com/fsx/latest/OpenZFSGuide/what-is-fsx.html"
+      ],
+      "es": {
+        "stem": "Una editorial está migrando a AWS una aplicación local de NetApp ONTAP. Sus editores Linux usan NFS, sus editores Windows usan SMB y un componente de procesamiento requiere acceso iSCSI al mismo entorno de almacenamiento. La empresa quiere conservar el código de la aplicación y sus prácticas de administración de NetApp. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar Amazon FSx for OpenZFS y conectar todos los componentes a sus puntos de acceso NFS.",
+            "why": "FSx for OpenZFS ofrece acceso NFS, pero no proporciona el acceso SMB e iSCSI requerido ni la continuidad de administración de ONTAP."
+          },
+          {
+            "id": "B",
+            "text": "Implementar Amazon EFS y conectar a los editores y al componente de procesamiento mediante NFS.",
+            "why": "Un sistema de archivos NFS no proporciona el acceso SMB e iSCSI requerido ni conserva las prácticas de administración de ONTAP."
+          },
+          {
+            "id": "C",
+            "text": "Implementar Amazon FSx for Windows File Server y conectar a los editores mediante SMB.",
+            "why": "Un sistema de archivos centrado en SMB no cumple los requisitos de NFS, iSCSI y continuidad de NetApp."
+          },
+          {
+            "id": "D",
+            "text": "Implementar Amazon FSx for NetApp ONTAP y conectar cada componente mediante el protocolo que necesita.",
+            "why": "FSx for ONTAP es almacenamiento administrado que admite NFS, SMB e iSCSI y conserva capacidades y prácticas de administración conocidas de NetApp."
+          }
+        ],
+        "explanation": "El requisito decisivo es la combinación de continuidad de NetApp y tres protocolos de acceso: NFS, SMB e iSCSI. FSx for ONTAP admite los tres y permite migrar aplicaciones ONTAP locales sin cambiar el código ni las prácticas de administración de datos. FSx for OpenZFS también es completamente administrado, pero el acceso de clientes documentado es mediante NFS, por lo que no satisface dos de los protocolos requeridos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "fsx-ontap-openzfs--r0",
+      "conceptId": "fsx-ontap-openzfs",
+      "kind": "recall",
+      "prompt": "Which managed storage would you choose for an on-premises ZFS server using NFS, snapshots, and cloning, and why?",
+      "promptEs": "¿Qué almacenamiento administrado elegirías para un servidor ZFS local que usa NFS, snapshots y clonación, y por qué?",
+      "idealAnswer": "Choose Amazon FSx for OpenZFS. It supports NFS and familiar OpenZFS snapshots and cloning, making it suitable for moving a ZFS file server without re-architecting applications or tools.",
+      "rubric": [
+        "Names Amazon FSx for OpenZFS.",
+        "Connects the choice to migrating a ZFS file server with NFS access.",
+        "Mentions retaining OpenZFS snapshots or cloning without re-architecting."
+      ]
+    },
+    {
+      "id": "fsx-ontap-openzfs--r1",
+      "conceptId": "fsx-ontap-openzfs",
+      "kind": "why-not",
+      "prompt": "Why is FSx for OpenZFS not the fit for a NetApp migration requiring NFS, SMB, and iSCSI?",
+      "promptEs": "¿Por qué FSx for OpenZFS no es adecuado para una migración de NetApp que requiere NFS, SMB e iSCSI?",
+      "idealAnswer": "FSx for OpenZFS provides NFS client access, but it does not supply the required SMB and iSCSI access or ONTAP management continuity. FSx for NetApp ONTAP supports those protocols and is designed for migrating on-premises ONTAP applications.",
+      "rubric": [
+        "Identifies NFS as the documented client-access protocol for FSx for OpenZFS.",
+        "Explains that SMB and iSCSI requirements point away from OpenZFS.",
+        "Selects FSx for NetApp ONTAP for protocol support and NetApp continuity."
+      ]
+    }
+  ]
+}

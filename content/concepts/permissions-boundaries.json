@@ -1,0 +1,272 @@
+{
+  "conceptId": "permissions-boundaries",
+  "card": {
+    "en": {
+      "tldr": "An IAM permissions boundary is a managed policy that caps the permissions an IAM user or role can receive through identity-based policies. Choose it when you need to delegate IAM user or role creation without letting the new identities exceed a defined maximum.",
+      "whenToUse": [
+        "A developer may create IAM users or roles and attach permissions policies, but the resulting identities must stay within a fixed limit.",
+        "A particular user or role needs a permissions ceiling without imposing that ceiling on every principal in the account."
+      ],
+      "keyFacts": [
+        "For identity-based permissions, effective access is the intersection of the identity-based policy and the permissions boundary.",
+        "A permissions boundary limits permissions; it does not grant them.",
+        "Delegated user creation can be conditioned on assigning a specified permissions boundary.",
+        "The delegation design must prevent the delegate from removing the boundary or editing its managed policy."
+      ],
+      "gotchas": [
+        "Attaching a broad identity-based policy cannot grant actions outside the boundary.",
+        "An SCP is attached to an organization, OU, or account and applies to all its principals by default; targeting one user or role requires conditions such as aws:PrincipalArn, whereas a boundary is attached directly to that identity.",
+        "A boundary's implicit deny does not universally block permissions granted by resource-based policies; evaluation depends on the principal named in the resource policy."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Identity-based policy",
+          "difference": "It grants actions to a user, group, or role; a permissions boundary caps what those grants can provide."
+        },
+        {
+          "concept": "Service control policy (SCP)",
+          "difference": "It is attached at the organization, OU, or account level (conditions can target specific principals), whereas a permissions boundary is attached directly to a specific IAM user or role."
+        },
+        {
+          "concept": "Resource-based policy",
+          "difference": "It controls access to a particular resource rather than setting an identity-based permissions ceiling."
+        }
+      ],
+      "examCues": [
+        "delegate IAM role creation",
+        "developers can attach policies but must not escalate",
+        "maximum permissions for newly created users",
+        "require a boundary on created identities"
+      ]
+    },
+    "es": {
+      "tldr": "Un IAM permissions boundary es una managed policy que limita los permisos que un usuario o rol de IAM puede recibir mediante identity-based policies. Elígelo cuando necesitas delegar la creación de usuarios o roles sin permitir que las nuevas identidades superen un máximo definido.",
+      "whenToUse": [
+        "Un desarrollador puede crear usuarios o roles de IAM y adjuntar permisos, pero las identidades resultantes deben mantenerse dentro de un límite fijo.",
+        "Un usuario o rol específico necesita un límite de permisos sin imponerlo a todos los principales de la cuenta."
+      ],
+      "keyFacts": [
+        "Para los permisos basados en identidad, el acceso efectivo es la intersección de la identity-based policy y el permissions boundary.",
+        "Un permissions boundary limita permisos; no los concede.",
+        "Puedes condicionar la creación delegada de usuarios a que se asigne un permissions boundary específico.",
+        "El diseño de delegación debe impedir que la persona delegada elimine el boundary o modifique su managed policy."
+      ],
+      "gotchas": [
+        "Una identity-based policy amplia no puede conceder acciones fuera del boundary.",
+        "Un SCP se adjunta a una organización, OU o cuenta y se aplica por defecto a todos sus principales; para dirigirlo a un usuario o rol concreto necesitas condiciones como aws:PrincipalArn, mientras que un boundary se adjunta directamente a esa identidad.",
+        "Una denegación implícita del boundary no bloquea universalmente los permisos concedidos por resource-based policies; la evaluación depende del principal indicado en la política del recurso."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Identity-based policy",
+          "difference": "Concede acciones a un usuario, grupo o rol; un permissions boundary limita lo que esas concesiones pueden permitir."
+        },
+        {
+          "concept": "Service control policy (SCP)",
+          "difference": "Se adjunta a nivel de organización, OU o cuenta (sus condiciones pueden dirigirse a principales específicos), mientras que un permissions boundary se adjunta directamente a un usuario o rol de IAM específico."
+        },
+        {
+          "concept": "Resource-based policy",
+          "difference": "Controla el acceso a un recurso concreto en vez de establecer un límite para permisos basados en identidad."
+        }
+      ],
+      "examCues": [
+        "delegate IAM role creation",
+        "developers can attach policies but must not escalate",
+        "maximum permissions for newly created users",
+        "require a boundary on created identities"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "permissions-boundaries--70b8ff35",
+      "conceptId": "permissions-boundaries",
+      "secondaryConcepts": [
+        "iam-identity-based-policies",
+        "service-control-policies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturing team uses an IAM role for a monitoring application. Its identity-based policy allows cloudwatch:GetMetricData and s3:ListBucket, but its permissions boundary allows only Amazon S3 actions. The application must read CloudWatch metrics while retaining the existing S3 limit and without granting unrelated CloudWatch actions. Which change meets these requirements with the LEAST increase in permissions?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an SCP allowing cloudwatch:GetMetricData for the account.",
+          "correct": false,
+          "why": "An SCP does not grant the action or override the role's permissions boundary."
+        },
+        {
+          "id": "B",
+          "text": "Add cloudwatch:* to the role's identity-based policy.",
+          "correct": false,
+          "why": "The boundary still excludes CloudWatch, so expanding the identity-based policy does not enable metric reads."
+        },
+        {
+          "id": "C",
+          "text": "Add cloudwatch:* to the role's permissions boundary.",
+          "correct": false,
+          "why": "This enables the currently allowed metric read but leaves a broader CloudWatch ceiling than required."
+        },
+        {
+          "id": "D",
+          "text": "Add cloudwatch:GetMetricData to the role's permissions boundary.",
+          "correct": true,
+          "why": "That action is already allowed by the identity-based policy, so adding only it to the boundary enables the required read."
+        }
+      ],
+      "explanation": "For these identity-based permissions, the role needs an allow in both its identity-based policy and its permissions boundary. The policy already allows cloudwatch:GetMetricData, so adding that action to the boundary is the narrowest sufficient change. Expanding the identity-based policy does not help while the boundary excludes CloudWatch. Allowing every CloudWatch action in the boundary would exceed the requested ceiling.",
+      "keywordCues": [
+        "identity-based policy allows cloudwatch:GetMetricData",
+        "permissions boundary allows only Amazon S3 actions",
+        "without granting unrelated CloudWatch actions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html"
+      ],
+      "es": {
+        "stem": "Un equipo de manufactura usa un rol de IAM para una aplicación de monitoreo. Su identity-based policy permite cloudwatch:GetMetricData y s3:ListBucket, pero su permissions boundary solo permite acciones de Amazon S3. La aplicación debe leer métricas de CloudWatch, conservar el límite existente para S3 y no habilitar otras acciones de CloudWatch. ¿Qué cambio cumple estos requisitos con el LEAST increase in permissions?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega un SCP que permita cloudwatch:GetMetricData en la cuenta.",
+            "why": "Un SCP no concede la acción ni anula el permissions boundary del rol."
+          },
+          {
+            "id": "B",
+            "text": "Agrega cloudwatch:* a la identity-based policy del rol.",
+            "why": "El boundary sigue excluyendo CloudWatch, por lo que ampliar la identity-based policy no habilita la lectura de métricas."
+          },
+          {
+            "id": "C",
+            "text": "Agrega cloudwatch:* al permissions boundary del rol.",
+            "why": "Esto habilita la lectura de métricas ya permitida, pero deja un límite de CloudWatch más amplio de lo necesario."
+          },
+          {
+            "id": "D",
+            "text": "Agrega cloudwatch:GetMetricData al permissions boundary del rol.",
+            "why": "La identity-based policy ya permite esa acción, así que agregar solo esa acción al boundary habilita la lectura requerida."
+          }
+        ],
+        "explanation": "Para estos permisos basados en identidad, el rol necesita que tanto su identity-based policy como su permissions boundary permitan la acción. La política ya permite cloudwatch:GetMetricData, así que agregar esa acción al boundary es el cambio suficiente más limitado. Ampliar la identity-based policy no ayuda mientras el boundary excluya CloudWatch. Permitir todas las acciones de CloudWatch en el boundary excedería el límite solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "permissions-boundaries--d13a54cd",
+      "conceptId": "permissions-boundaries",
+      "secondaryConcepts": [
+        "iam-identity-based-policies",
+        "service-control-policies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research organization has several workloads in one AWS account. A project team may create IAM roles and attach identity-based policies, but roles it creates must not gain identity-based access to a protected dataset. Other teams' existing roles in the same account must retain their current access. Which approach meets these requirements MOST precisely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Restrict the project team's own identity-based policy to exclude the protected dataset while allowing role creation and policy attachment.",
+          "correct": false,
+          "why": "Limiting the creators' access does not set a permissions ceiling on roles they create."
+        },
+        {
+          "id": "B",
+          "text": "Require the project team to attach a managed permissions boundary to each new role that excludes the protected dataset, and prevent boundary removal or modification.",
+          "correct": true,
+          "why": "The boundary limits roles created by this team without changing other teams' roles."
+        },
+        {
+          "id": "C",
+          "text": "Apply an SCP to the account that excludes access to the protected dataset.",
+          "correct": false,
+          "why": "An account-level SCP would also restrict other teams' roles."
+        },
+        {
+          "id": "D",
+          "text": "Pass a session policy when project team members assume their own roles, excluding the protected dataset.",
+          "correct": false,
+          "why": "Limiting the creators' sessions does not enforce a lasting ceiling on newly created roles."
+        }
+      ],
+      "explanation": "The restriction must follow the roles the project team creates while leaving existing roles in the account unchanged. A required permissions boundary caps those new roles' identity-based permissions, and protections against removal or modification preserve the cap. An SCP is too broad because it applies at the account level. Restricting only the creators' own policies or sessions does not establish a maximum for the roles they create.",
+      "keywordCues": [
+        "may create IAM roles and attach identity-based policies",
+        "roles it creates must not gain identity-based access",
+        "Other teams' existing roles in the same account must retain their current access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación tiene varias cargas de trabajo en una cuenta de AWS. Un equipo de proyecto puede crear roles de IAM y adjuntarles identity-based policies, pero los roles que cree no deben obtener acceso basado en identidad a un conjunto de datos protegido. Los roles existentes de otros equipos en la misma cuenta deben conservar su acceso actual. ¿Qué enfoque cumple estos requisitos de la forma MOST precise?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Restringe la identity-based policy del propio equipo para excluir el conjunto de datos protegido, pero permite crear roles y adjuntar políticas.",
+            "why": "Limitar el acceso de quienes crean los roles no establece un máximo de permisos para los roles creados."
+          },
+          {
+            "id": "B",
+            "text": "Exige que el equipo adjunte a cada rol nuevo un managed permissions boundary que excluya el conjunto de datos protegido e impide que se elimine o modifique.",
+            "why": "El boundary limita los roles creados por este equipo sin cambiar los roles de los otros equipos."
+          },
+          {
+            "id": "C",
+            "text": "Aplica a la cuenta un SCP que excluya el acceso al conjunto de datos protegido.",
+            "why": "Un SCP a nivel de cuenta también restringiría los roles de los otros equipos."
+          },
+          {
+            "id": "D",
+            "text": "Pasa una session policy cuando los miembros del equipo asuman sus propios roles, excluyendo el conjunto de datos protegido.",
+            "why": "Limitar las sesiones de quienes crean los roles no impone un límite permanente a los roles nuevos."
+          }
+        ],
+        "explanation": "La restricción debe aplicarse a los roles que cree el equipo sin cambiar los roles existentes de la cuenta. Un permissions boundary obligatorio limita los permisos basados en identidad de esos roles nuevos, y la protección contra su eliminación o modificación conserva ese límite. Un SCP es demasiado amplio porque se aplica a nivel de cuenta. Restringir solo las políticas o sesiones de quienes crean los roles no establece un máximo para los roles creados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "permissions-boundaries--r0",
+      "conceptId": "permissions-boundaries",
+      "kind": "recall",
+      "prompt": "Developers can create IAM roles and attach policies. How do you cap the roles' identity-based permissions, and what prevents bypass?",
+      "promptEs": "Unos desarrolladores pueden crear roles de IAM y adjuntar políticas. ¿Cómo limitas los permisos basados en identidad de esos roles y evitas que se eluda el límite?",
+      "idealAnswer": "Require a managed permissions boundary on each new role; its allowed actions cap what attached identity-based policies can grant. Condition delegated creation on the required boundary and prevent its removal or modification.",
+      "rubric": [
+        "Names a permissions boundary on the created roles.",
+        "Explains that it caps, rather than grants, identity-based permissions.",
+        "Requires the boundary on creation and protects it from removal or modification."
+      ]
+    },
+    {
+      "id": "permissions-boundaries--r1",
+      "conceptId": "permissions-boundaries",
+      "kind": "why-not",
+      "prompt": "Why not use an account-level SCP to cap only roles created by one team while preserving other roles' access?",
+      "promptEs": "¿Por qué no usarías un SCP a nivel de cuenta para limitar solo los roles creados por un equipo y conservar el acceso de los demás roles?",
+      "idealAnswer": "An SCP limits permissions across the account, so it could also affect the other roles. A required permissions boundary targets the newly created roles without imposing that ceiling on every principal in the account.",
+      "rubric": [
+        "Identifies the SCP's account-level scope.",
+        "Notes the requirement to preserve other roles' access.",
+        "Contrasts that scope with boundaries attached to specific roles."
+      ]
+    }
+  ]
+}

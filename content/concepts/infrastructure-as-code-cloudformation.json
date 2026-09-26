@@ -1,0 +1,309 @@
+{
+  "conceptId": "infrastructure-as-code-cloudformation",
+  "card": {
+    "en": {
+      "tldr": "AWS CloudFormation provisions and configures resources from a template, making an environment repeatable. Use a stack for a collection of resources; use StackSets when the same template must be deployed across multiple accounts and Regions.",
+      "whenToUse": [
+        "Recreate an application environment consistently, including in a disaster recovery Region.",
+        "Provision or update stacks across multiple accounts and Regions with a single operation.",
+        "Check whether deployed StackSet resources have drifted from their intended configuration."
+      ],
+      "keyFacts": [
+        "A CloudFormation template describes resources and their properties; a stack manages the resulting resources as a unit.",
+        "The same template can be reused to provision resources in multiple Regions.",
+        "StackSets creates, updates, or deletes stacks in selected accounts and Regions with a single operation.",
+        "CloudFormation documentation includes drift detection for StackSets."
+      ],
+      "gotchas": [
+        "A template describes infrastructure; merely storing it does not provision resources in a recovery Region.",
+        "A stack is not the same as a StackSet operation targeting multiple accounts and Regions.",
+        "Recreating infrastructure does not, by itself, establish application data replication or failover."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "recreate the same environment in a recovery Region",
+        "deploy to selected accounts and Regions",
+        "single operation across accounts",
+        "check StackSet drift"
+      ]
+    },
+    "es": {
+      "tldr": "AWS CloudFormation aprovisiona y configura recursos a partir de una plantilla para que puedas repetir un entorno de forma consistente. Usa un stack para administrar un conjunto de recursos; usa StackSets cuando debas desplegar la misma plantilla en varias cuentas y Regions.",
+      "whenToUse": [
+        "Necesitas recrear de forma consistente un entorno de aplicación, incluso en una Region de recuperación ante desastres.",
+        "Debes aprovisionar o actualizar stacks en varias cuentas y Regions con una sola operación.",
+        "Quieres comprobar si los recursos desplegados mediante StackSets presentan drift respecto de la configuración prevista."
+      ],
+      "keyFacts": [
+        "Una plantilla de CloudFormation describe los recursos y sus propiedades; un stack administra los recursos resultantes como una unidad.",
+        "Puedes reutilizar la misma plantilla para aprovisionar recursos en varias Regions.",
+        "StackSets crea, actualiza o elimina stacks en las cuentas y Regions seleccionadas con una sola operación.",
+        "La documentación de CloudFormation incluye detección de drift para StackSets."
+      ],
+      "gotchas": [
+        "Una plantilla describe infraestructura; guardarla no aprovisiona por sí sola recursos en una Region de recuperación.",
+        "Un stack no equivale a una operación de StackSets dirigida a varias cuentas y Regions.",
+        "Recrear infraestructura no establece, por sí solo, replicación de datos ni failover de la aplicación."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "recreate the same environment in a recovery Region",
+        "deploy to selected accounts and Regions",
+        "single operation across accounts",
+        "check StackSet drift"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html",
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "infrastructure-as-code-cloudformation--ec0891a3",
+      "conceptId": "infrastructure-as-code-cloudformation",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small publisher runs a web application with an Auto Scaling group, a load balancer, and an Amazon RDS DB instance. The team wants to create a test environment in the same AWS account and Region, then remove the environment as a unit when testing ends. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Record the resource settings in a document and create and delete each resource individually.",
+          "correct": false,
+          "why": "The document records settings but still requires individual provisioning and deletion."
+        },
+        {
+          "id": "B",
+          "text": "Keep a CloudFormation template in version control and create the resources individually from its specifications.",
+          "correct": false,
+          "why": "The template helps track settings, but individual resource management misses the requested unit of management."
+        },
+        {
+          "id": "C",
+          "text": "Create the resources individually, then maintain separate templates containing their intended settings.",
+          "correct": false,
+          "why": "Separate templates do not remove the need to manage the individually created resources."
+        },
+        {
+          "id": "D",
+          "text": "Define the resources in a CloudFormation template and create and delete a stack for each test environment.",
+          "correct": true,
+          "why": "A stack provisions the described resources and lets the team manage and delete them as a unit."
+        }
+      ],
+      "explanation": "The deciding requirement is to create and remove the test environment as a unit in one account and Region. A CloudFormation template describes the resources, and a stack provisions and manages them together. Keeping a template only as a reference does not eliminate individual creation and deletion.",
+      "keywordCues": [
+        "same AWS account and Region",
+        "remove the environment as a unit",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html",
+        "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html"
+      ],
+      "es": {
+        "stem": "Una editorial pequeña ejecuta una aplicación web con un grupo de Auto Scaling, un load balancer y una instancia de base de datos de Amazon RDS. El equipo quiere crear un entorno de pruebas en la misma cuenta y Region de AWS y, al terminar las pruebas, eliminarlo como una unidad. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Registrar la configuración de los recursos en un documento y crear y eliminar cada recurso por separado.",
+            "why": "El documento registra la configuración, pero aún tendrías que aprovisionar y eliminar los recursos individualmente."
+          },
+          {
+            "id": "B",
+            "text": "Guardar una plantilla de CloudFormation en un sistema de control de versiones y crear los recursos individualmente según sus especificaciones.",
+            "why": "La plantilla ayuda a seguir la configuración, pero administrar cada recurso por separado no cumple el requisito de tratarlos como una unidad."
+          },
+          {
+            "id": "C",
+            "text": "Crear los recursos individualmente y después mantener plantillas separadas con la configuración prevista.",
+            "why": "Las plantillas separadas no evitan que tengas que administrar los recursos creados de forma individual."
+          },
+          {
+            "id": "D",
+            "text": "Definir los recursos en una plantilla de CloudFormation y crear y eliminar un stack para cada entorno de pruebas.",
+            "why": "Un stack aprovisiona los recursos descritos y permite administrarlos y eliminarlos como una unidad."
+          }
+        ],
+        "explanation": "El requisito decisivo es crear y eliminar el entorno de pruebas como una unidad en una sola cuenta y Region. Una plantilla de CloudFormation describe los recursos y un stack los aprovisiona y administra en conjunto. Conservar una plantilla solo como referencia no elimina la creación y eliminación individual."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "infrastructure-as-code-cloudformation--137c78ba",
+      "conceptId": "infrastructure-as-code-cloudformation",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retailer has application accounts for separate business units and has selected a primary and recovery Region for each account. Its platform team maintains one approved template for the infrastructure in every selected account and Region. The team needs to roll out template updates to all those targets with a single operation. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use CloudFormation StackSets to manage stacks in the selected accounts and Regions from the approved template.",
+          "correct": true,
+          "why": "StackSets supports stack operations across selected accounts and Regions with a single operation."
+        },
+        {
+          "id": "B",
+          "text": "Use the approved template to update a stack in each account and Region in separate operations.",
+          "correct": false,
+          "why": "Individual stack updates do not meet the single-operation requirement."
+        },
+        {
+          "id": "C",
+          "text": "Keep identical template copies for each business unit and have each unit update its own stacks.",
+          "correct": false,
+          "why": "Delegating separate updates does not provide one operation across all selected targets."
+        },
+        {
+          "id": "D",
+          "text": "Create a stack from the template in one account and each primary Region, then document its settings for recovery Regions.",
+          "correct": false,
+          "why": "Documenting settings does not update stacks in the selected recovery Regions."
+        }
+      ],
+      "explanation": "The requirement is an update across multiple accounts and Regions in a single operation. CloudFormation StackSets extends stacks to create, update, or delete them across selected targets in that way. Updating ordinary stacks separately can use the same template, but it misses the operational requirement.",
+      "keywordCues": [
+        "primary and recovery Region for each account",
+        "every selected account and Region",
+        "single operation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html",
+        "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista tiene cuentas de aplicación para distintas unidades de negocio y ha seleccionado una Region principal y otra de recuperación para cada cuenta. Su equipo de plataforma mantiene una plantilla aprobada para la infraestructura de cada cuenta y Region seleccionada. El equipo necesita implementar las actualizaciones de la plantilla en todos esos destinos con una sola operación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar CloudFormation StackSets para administrar stacks en las cuentas y Regions seleccionadas a partir de la plantilla aprobada.",
+            "why": "StackSets permite operar sobre stacks en las cuentas y Regions seleccionadas mediante una sola operación."
+          },
+          {
+            "id": "B",
+            "text": "Usar la plantilla aprobada para actualizar un stack en cada cuenta y Region mediante operaciones separadas.",
+            "why": "Las actualizaciones individuales de stacks no cumplen el requisito de una sola operación."
+          },
+          {
+            "id": "C",
+            "text": "Mantener copias idénticas de la plantilla para cada unidad de negocio y pedir que cada unidad actualice sus propios stacks.",
+            "why": "Delegar actualizaciones separadas no proporciona una sola operación para todos los destinos seleccionados."
+          },
+          {
+            "id": "D",
+            "text": "Crear un stack a partir de la plantilla en una cuenta y en cada Region principal, y documentar su configuración para las Regions de recuperación.",
+            "why": "Documentar la configuración no actualiza los stacks en las Regions de recuperación seleccionadas."
+          }
+        ],
+        "explanation": "El requisito decisivo es actualizar varias cuentas y Regions mediante una sola operación. CloudFormation StackSets amplía la capacidad de los stacks para crearlos, actualizarlos o eliminarlos de esa manera en los destinos seleccionados. Puedes usar la misma plantilla para actualizar stacks individuales, pero eso no satisface el requisito operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "infrastructure-as-code-cloudformation--4e4adc37",
+      "conceptId": "infrastructure-as-code-cloudformation",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization deployed a standard set of resources to several accounts and Regions from one CloudFormation template. An audit now needs to check whether the deployed stack resources have drifted from their intended configuration. The organization also wants to keep managing deployments across those accounts and Regions centrally. Which approach meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Manage the deployments with CloudFormation StackSets and perform drift detection on the StackSets deployments.",
+          "correct": true,
+          "why": "StackSets provides central operations across accounts and Regions and supports drift detection."
+        },
+        {
+          "id": "B",
+          "text": "Create a new stack from the template in one Region and use its successful creation to verify the existing deployments.",
+          "correct": false,
+          "why": "Creating another stack does not check existing deployed resources for drift across the targets."
+        },
+        {
+          "id": "C",
+          "text": "Inspect resource settings in each account and Region manually, then maintain separate stacks for future updates.",
+          "correct": false,
+          "why": "Manual inspections and separate updates add overhead instead of retaining central cross-account and cross-Region management."
+        },
+        {
+          "id": "D",
+          "text": "Compare versions of the template in source control and treat unchanged template text as proof that deployed resources have not drifted.",
+          "correct": false,
+          "why": "Template version history tracks template changes, not whether deployed resources have drifted."
+        }
+      ],
+      "explanation": "The audit asks about deployed resources, not just changes to template text. CloudFormation StackSets supports managing stacks across accounts and Regions, and its documentation includes drift detection. Comparing template versions is useful for tracking edits to the template, but an unchanged template does not answer whether deployments have drifted.",
+      "keywordCues": [
+        "deployed stack resources have drifted",
+        "across those accounts and Regions centrally",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html",
+        "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación desplegó un conjunto estándar de recursos en varias cuentas y Regions a partir de una plantilla de CloudFormation. Ahora una auditoría necesita comprobar si los recursos desplegados en los stacks presentan drift respecto de la configuración prevista. La organización también quiere seguir administrando de forma centralizada los despliegues en esas cuentas y Regions. ¿Qué enfoque cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Administrar los despliegues con CloudFormation StackSets y realizar detección de drift en los despliegues de StackSets.",
+            "why": "StackSets permite operar de forma centralizada entre cuentas y Regions y admite la detección de drift."
+          },
+          {
+            "id": "B",
+            "text": "Crear un stack nuevo a partir de la plantilla en una Region y usar su creación exitosa para verificar los despliegues existentes.",
+            "why": "Crear otro stack no comprueba si los recursos ya desplegados presentan drift en los destinos."
+          },
+          {
+            "id": "C",
+            "text": "Inspeccionar manualmente la configuración de los recursos en cada cuenta y Region y, después, mantener stacks separados para futuras actualizaciones.",
+            "why": "Las inspecciones manuales y las actualizaciones separadas agregan trabajo en vez de conservar la administración centralizada entre cuentas y Regions."
+          },
+          {
+            "id": "D",
+            "text": "Comparar las versiones de la plantilla en el sistema de control de versiones y considerar que el texto sin cambios demuestra que los recursos desplegados no presentan drift.",
+            "why": "El historial de versiones registra cambios en la plantilla, no si los recursos desplegados presentan drift."
+          }
+        ],
+        "explanation": "La auditoría pregunta por los recursos desplegados, no solo por los cambios en el texto de la plantilla. CloudFormation StackSets permite administrar stacks en varias cuentas y Regions, y su documentación incluye detección de drift. Comparar versiones de la plantilla sirve para seguir sus modificaciones, pero una plantilla sin cambios no demuestra que los despliegues no presenten drift."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "infrastructure-as-code-cloudformation--r0",
+      "conceptId": "infrastructure-as-code-cloudformation",
+      "kind": "recall",
+      "prompt": "How would you provision the same infrastructure in selected recovery Regions across several AWS accounts with one operation, and why?",
+      "promptEs": "¿Cómo aprovisionarías la misma infraestructura en las Regions de recuperación seleccionadas de varias cuentas de AWS con una sola operación y por qué?",
+      "idealAnswer": "Describe the resources in a reusable CloudFormation template and deploy it with StackSets. StackSets uses the template to provision stacks across selected accounts and Regions with a single operation.",
+      "rubric": [
+        "Names a reusable CloudFormation template as the infrastructure description.",
+        "Names StackSets for deployment across accounts and Regions.",
+        "Explains that StackSets supports a single operation for the selected targets."
+      ]
+    }
+  ]
+}

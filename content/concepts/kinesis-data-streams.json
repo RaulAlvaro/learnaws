@@ -1,0 +1,459 @@
+{
+  "conceptId": "kinesis-data-streams",
+  "card": {
+    "en": {
+      "tldr": "Amazon Kinesis Data Streams ingests records for real-time processing by multiple independent applications. Choose it when consumers need custom processing, ordered reads within shards, or access to retained records rather than only managed delivery to a destination.",
+      "whenToUse": [
+        "Several applications must independently process the same incoming records.",
+        "Producers need continuous ingestion for custom, real-time analytics or alerts.",
+        "Consumers need to read retained records again after a processing change.",
+        "Records from one entity must be routed together for ordered processing within a shard."
+      ],
+      "keyFacts": [
+        "A shard is the base throughput unit and contains a sequence of records; consumers can read records in the order stored in that shard.",
+        "A producer supplies a partition key to route records to shards. Using an entity ID as the key routes that entity's records together.",
+        "Multiple applications can consume the same stream independently.",
+        "Shared fan-out consumers share a shard's read throughput; an enhanced fan-out consumer receives its own read-throughput allotment.",
+        "On-demand Standard automatically manages capacity; provisioned mode lets you manage throughput yourself.",
+        "Records are available until they expire. Extended retention can keep data beyond 24 hours."
+      ],
+      "gotchas": [
+        "Per-shard ordering does not promise one global order across the entire stream.",
+        "A single partition key for every entity can concentrate traffic on one shard.",
+        "Multiple shared fan-out consumers still compete for a shard's shared read throughput.",
+        "If the only goal is managed delivery into a destination, a custom stream-processing application may be unnecessary."
+      ],
+      "confusedWith": [
+        {
+          "concept": "data-firehose",
+          "difference": "Data Firehose is the managed-delivery choice; Data Streams is the retained stream for independent, custom consumers."
+        },
+        {
+          "concept": "amazon-msk",
+          "difference": "Choose MSK when Apache Kafka compatibility is a requirement, rather than introducing Kafka for a new Data Streams workload."
+        },
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS supports per-message queue processing, not independent consumers rereading the same retained stream."
+        }
+      ],
+      "examCues": [
+        "multiple independent real-time consumers",
+        "reprocess retained events",
+        "preserve order for each device",
+        "unpredictable ingest rate with automatic capacity",
+        "consumers competing for shard read throughput"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Kinesis Data Streams ingiere registros para que varias aplicaciones independientes los procesen en tiempo real. Elígelo cuando los consumidores necesiten procesamiento personalizado, lecturas ordenadas dentro de cada shard o acceso a registros retenidos, y no solo entrega administrada a un destino.",
+      "whenToUse": [
+        "Varias aplicaciones deben procesar de forma independiente los mismos registros entrantes.",
+        "Los productores necesitan ingesta continua para análisis o alertas personalizados en tiempo real.",
+        "Los consumidores deben volver a leer registros retenidos después de cambiar el procesamiento.",
+        "Los registros de una misma entidad deben dirigirse juntos para procesarlos en orden dentro de un shard."
+      ],
+      "keyFacts": [
+        "Un shard es la unidad básica de capacidad y contiene una secuencia de registros; los consumidores pueden leerlos en el orden en que se almacenaron en ese shard.",
+        "El productor proporciona una partition key para dirigir registros a shards. Usar el ID de la entidad como clave dirige juntos sus registros.",
+        "Varias aplicaciones pueden consumir el mismo stream de forma independiente.",
+        "Los consumidores con shared fan-out comparten la capacidad de lectura de un shard; cada consumidor con enhanced fan-out recibe su propia asignación.",
+        "On-demand Standard administra la capacidad automáticamente; provisioned mode te permite administrarla.",
+        "Los registros están disponibles hasta que vencen. Extended retention puede conservar datos durante más de 24 horas."
+      ],
+      "gotchas": [
+        "El orden por shard no garantiza un orden global para todo el stream.",
+        "Usar una sola partition key para todas las entidades puede concentrar el tráfico en un shard.",
+        "Varios consumidores con shared fan-out siguen compitiendo por la capacidad de lectura compartida de un shard.",
+        "Si solo necesitas entrega administrada a un destino, quizá no haga falta una aplicación personalizada de procesamiento de streams."
+      ],
+      "confusedWith": [
+        {
+          "concept": "data-firehose",
+          "difference": "Data Firehose sirve para entrega administrada; Data Streams ofrece un stream retenido para consumidores independientes y personalizados."
+        },
+        {
+          "concept": "amazon-msk",
+          "difference": "Elige MSK si necesitas compatibilidad con Apache Kafka, no para introducir Kafka en una carga nueva de Data Streams."
+        },
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS sirve para procesar mensajes de una cola, no para que consumidores independientes relean el mismo stream retenido."
+        }
+      ],
+      "examCues": [
+        "multiple independent real-time consumers",
+        "reprocess retained events",
+        "preserve order for each device",
+        "unpredictable ingest rate with automatic capacity",
+        "consumers competing for shard read throughput"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/streams/latest/dev/introduction.html",
+      "https://aws.amazon.com/kinesis/data-streams/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "kinesis-data-streams--361cbabb",
+      "conceptId": "kinesis-data-streams",
+      "secondaryConcepts": [
+        "data-firehose"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer sends temperature and vibration events from many machines to a Kinesis data stream. A custom consumer must process each machine's events in their stored order, while the producer should distribute different machines across shards rather than route all events together. Which producer configuration BEST meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Generate a new random partition key for each event from every machine.",
+          "correct": false,
+          "why": "Changing keys for one machine can route its events to different shards, undermining the requested per-machine ordering."
+        },
+        {
+          "id": "B",
+          "text": "Use one fixed partition key for all events from all machines.",
+          "correct": false,
+          "why": "A single key routes the machines' records together instead of distributing different machines across shards."
+        },
+        {
+          "id": "C",
+          "text": "Use the machine ID as the partition key when publishing each event to Kinesis Data Streams.",
+          "correct": true,
+          "why": "A consistent partition key routes one machine's records together for ordered reads within a shard."
+        },
+        {
+          "id": "D",
+          "text": "Send events directly to Amazon Data Firehose and use the machine ID as a field in the delivered records.",
+          "correct": false,
+          "why": "A field in delivered records does not establish partition-key routing for the requested custom shard consumer."
+        }
+      ],
+      "explanation": "The requirement is ordering for each machine, not a global order across all machines. Kinesis Data Streams uses the producer-supplied partition key to route records to shards, whose records consumers can read in stored order. Using the machine ID keeps a machine's records together while allowing different IDs to be routed across shards. A random key per event loses that grouping, whereas one universal key defeats the requested distribution.",
+      "keywordCues": [
+        "each machine's events in their stored order",
+        "distribute different machines across shards",
+        "rather than route all events together"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/streams/latest/dev/introduction.html",
+        "https://aws.amazon.com/kinesis/data-streams/faqs/"
+      ],
+      "es": {
+        "stem": "Un fabricante envía eventos de temperatura y vibración de muchas máquinas a un stream de Kinesis. Un consumidor personalizado debe procesar los eventos de cada máquina en el orden en que se almacenaron, mientras que el productor debe distribuir las distintas máquinas entre shards en lugar de dirigir todos los eventos juntos. ¿Qué configuración del productor cumple MEJOR estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Generar una nueva partition key aleatoria para cada evento de todas las máquinas.",
+            "why": "Cambiar la clave de una máquina puede dirigir sus eventos a distintos shards y perjudicar el orden solicitado por máquina."
+          },
+          {
+            "id": "B",
+            "text": "Usar una sola partition key fija para todos los eventos de todas las máquinas.",
+            "why": "Una sola clave dirige juntos los registros de todas las máquinas en vez de distribuir las distintas máquinas entre shards."
+          },
+          {
+            "id": "C",
+            "text": "Usar el ID de la máquina como partition key al publicar cada evento en Kinesis Data Streams.",
+            "why": "Una partition key constante dirige juntos los registros de una máquina para leerlos en orden dentro de un shard."
+          },
+          {
+            "id": "D",
+            "text": "Enviar los eventos directamente a Amazon Data Firehose y usar el ID de la máquina como campo en los registros entregados.",
+            "why": "Un campo en los registros entregados no establece el enrutamiento por partition key que necesita el consumidor personalizado de shards."
+          }
+        ],
+        "explanation": "El requisito es mantener el orden de cada máquina, no un orden global de todas las máquinas. Kinesis Data Streams usa la partition key que proporciona el productor para dirigir los registros a shards, donde los consumidores pueden leerlos en el orden almacenado. Usar el ID de la máquina agrupa sus registros y permite dirigir otros IDs a distintos shards. Una clave aleatoria por evento pierde esa agrupación; una clave universal impide la distribución solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kinesis-data-streams--3b51e879",
+      "conceptId": "kinesis-data-streams",
+      "secondaryConcepts": [
+        "data-firehose",
+        "amazon-msk"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A live sports application ingests fan interactions for custom, real-time analysis. Traffic varies substantially between games, and the team cannot reliably estimate the stream's required throughput in advance. It wants AWS to manage stream capacity instead of adjusting it manually. Which configuration meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move interactions to Amazon MSK and have the team manage the Kafka-based ingestion design.",
+          "correct": false,
+          "why": "The scenario has no Kafka compatibility requirement and asks to minimize capacity-management work."
+        },
+        {
+          "id": "B",
+          "text": "Send interactions directly through Amazon Data Firehose to Amazon S3 for later analysis.",
+          "correct": false,
+          "why": "Delivery to S3 for later analysis misses the requested custom, real-time stream processing."
+        },
+        {
+          "id": "C",
+          "text": "Create a Kinesis Data Streams stream in provisioned mode and adjust its capacity between games.",
+          "correct": false,
+          "why": "Provisioned mode leaves throughput management with the team, contrary to the stated preference."
+        },
+        {
+          "id": "D",
+          "text": "Create a Kinesis Data Streams stream in On-demand Standard mode for the analysis application.",
+          "correct": true,
+          "why": "On-demand Standard automatically manages capacity and suits unpredictable, variable traffic."
+        }
+      ],
+      "explanation": "The application needs a stream for custom real-time processing, but its throughput is unpredictable. Kinesis Data Streams On-demand Standard automatically manages capacity and is intended for variable traffic when expected throughput is unknown. Provisioned mode can serve a stream, but it requires the team to manage throughput. Direct delivery to S3 changes the processing pattern from the one requested.",
+      "keywordCues": [
+        "custom, real-time analysis",
+        "cannot reliably estimate the stream's required throughput",
+        "AWS to manage stream capacity",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/streams/latest/dev/introduction.html",
+        "https://aws.amazon.com/kinesis/data-streams/faqs/"
+      ],
+      "es": {
+        "stem": "Una aplicación de deportes en vivo ingiere interacciones de aficionados para analizarlas de forma personalizada y en tiempo real. El tráfico varía mucho entre partidos y el equipo no puede estimar con confianza la capacidad necesaria del stream por adelantado. Quiere que AWS administre la capacidad del stream en lugar de ajustarla manualmente. ¿Qué configuración cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mover las interacciones a Amazon MSK y hacer que el equipo administre el diseño de ingesta basado en Kafka.",
+            "why": "El caso no requiere compatibilidad con Kafka y pide minimizar el trabajo de administración de la capacidad."
+          },
+          {
+            "id": "B",
+            "text": "Enviar las interacciones directamente mediante Amazon Data Firehose a Amazon S3 para analizarlas después.",
+            "why": "Entregar datos a S3 para analizarlos después no cumple el procesamiento personalizado del stream en tiempo real."
+          },
+          {
+            "id": "C",
+            "text": "Crear un stream de Kinesis Data Streams en provisioned mode y ajustar su capacidad entre partidos.",
+            "why": "En provisioned mode, el equipo administra la capacidad, lo que contradice su preferencia."
+          },
+          {
+            "id": "D",
+            "text": "Crear un stream de Kinesis Data Streams en On-demand Standard mode para la aplicación de análisis.",
+            "why": "On-demand Standard administra automáticamente la capacidad y se adapta al tráfico variable e impredecible."
+          }
+        ],
+        "explanation": "La aplicación necesita un stream para procesamiento personalizado en tiempo real, pero su capacidad requerida es impredecible. Kinesis Data Streams On-demand Standard administra la capacidad automáticamente y es adecuado cuando el tráfico varía y se desconoce la capacidad esperada. Provisioned mode también puede ofrecer un stream, pero exige que el equipo administre esa capacidad. La entrega directa a S3 cambia el patrón de procesamiento solicitado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kinesis-data-streams--c990ce3d",
+      "conceptId": "kinesis-data-streams",
+      "secondaryConcepts": [
+        "data-firehose"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A city transit system has several applications reading the same Kinesis data stream to update arrival estimates and trigger service alerts. As more applications are added, their shared reads contend for a shard's read throughput. Each application still needs to receive the stream independently with high performance. Which change BEST addresses the read contention?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deliver the stream to Amazon S3 with Data Firehose and have applications read delivered objects.",
+          "correct": false,
+          "why": "Reading delivered objects replaces independent, high-performance stream consumption rather than resolving its read contention."
+        },
+        {
+          "id": "B",
+          "text": "Replace the stream with a single Amazon SQS queue polled by all applications.",
+          "correct": false,
+          "why": "A single queue does not provide the required independent consumption of the same stream."
+        },
+        {
+          "id": "C",
+          "text": "Register the applications as enhanced fan-out consumers and use SubscribeToShard.",
+          "correct": true,
+          "why": "Enhanced fan-out gives each registered consumer its own read-throughput allotment per shard."
+        },
+        {
+          "id": "D",
+          "text": "Keep all applications as shared fan-out consumers using GetRecords.",
+          "correct": false,
+          "why": "Shared fan-out consumers continue to share the shard's read-throughput allotment."
+        }
+      ],
+      "explanation": "The bottleneck is competition among applications reading the same shard, not an inability to ingest events. Shared fan-out consumers share a shard's read throughput, while enhanced fan-out provides each registered consumer a separate allotment. Those consumers use SubscribeToShard to retrieve records. Moving applications to a queue or delivered S3 objects would change the required independent stream-consumption pattern.",
+      "keywordCues": [
+        "shared reads contend for a shard's read throughput",
+        "Each application still needs to receive the stream independently",
+        "high performance"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/streams/latest/dev/introduction.html",
+        "https://aws.amazon.com/kinesis/data-streams/faqs/"
+      ],
+      "es": {
+        "stem": "Un sistema de transporte urbano tiene varias aplicaciones que leen el mismo stream de Kinesis para actualizar tiempos de llegada y generar alertas de servicio. Al agregar aplicaciones, sus lecturas compartidas compiten por la capacidad de lectura de un shard. Cada aplicación debe seguir recibiendo el stream de forma independiente y con alto rendimiento. ¿Qué cambio resuelve MEJOR la competencia por la capacidad de lectura?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Entregar el stream a Amazon S3 con Data Firehose y hacer que las aplicaciones lean los objetos entregados.",
+            "why": "Leer objetos entregados reemplaza el consumo independiente y de alto rendimiento del stream, en vez de resolver la competencia entre lectores."
+          },
+          {
+            "id": "B",
+            "text": "Reemplazar el stream por una sola cola de Amazon SQS consultada por todas las aplicaciones.",
+            "why": "Una sola cola no permite que cada aplicación consuma de forma independiente el mismo stream."
+          },
+          {
+            "id": "C",
+            "text": "Registrar las aplicaciones como consumidores con enhanced fan-out y usar SubscribeToShard.",
+            "why": "Enhanced fan-out da a cada consumidor registrado su propia asignación de capacidad de lectura por shard."
+          },
+          {
+            "id": "D",
+            "text": "Mantener todas las aplicaciones como consumidores con shared fan-out que usan GetRecords.",
+            "why": "Los consumidores con shared fan-out siguen compartiendo la capacidad de lectura del shard."
+          }
+        ],
+        "explanation": "El problema es la competencia entre aplicaciones que leen el mismo shard, no la ingesta de eventos. Los consumidores con shared fan-out comparten la capacidad de lectura del shard, mientras que enhanced fan-out proporciona una asignación independiente a cada consumidor registrado. Estos consumidores usan SubscribeToShard para obtener registros. Pasar a una cola u objetos entregados en S3 cambiaría el patrón de consumo independiente del stream que se necesita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kinesis-data-streams--08d74a74",
+      "conceptId": "kinesis-data-streams",
+      "secondaryConcepts": [
+        "data-firehose",
+        "amazon-msk"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "An online learning platform receives a continuous stream of lesson interactions. A custom application must update engagement metrics as events arrive, and analysts must be able to revisit retained events after revising that logic. The platform also wants managed delivery of the same source events to Amazon S3 for an archive, without writing an archive-delivery application. Which TWO components together meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Data Firehose as the only ingestion point and deliver events directly to Amazon S3.",
+          "correct": false,
+          "why": "Direct delivery alone does not supply the retained stream needed by the custom live consumer."
+        },
+        {
+          "id": "B",
+          "text": "Introduce Amazon MSK as a second ingestion platform for the archive workflow.",
+          "correct": false,
+          "why": "A second streaming platform does not provide the requested low-overhead managed S3 delivery from the same source stream."
+        },
+        {
+          "id": "C",
+          "text": "Put interactions in one Amazon SQS queue for both the metrics application and archive workflow.",
+          "correct": false,
+          "why": "One queue does not provide the requested independent reading and revisiting of a retained stream."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon Data Firehose to deliver data from Kinesis Data Streams to Amazon S3.",
+          "correct": true,
+          "why": "The prebuilt integration delivers records from the stream to S3 without a custom archive-delivery application."
+        },
+        {
+          "id": "E",
+          "text": "Ingest interactions into Amazon Kinesis Data Streams for the custom application to consume.",
+          "correct": true,
+          "why": "Data Streams supports custom real-time consumption and access to records while they are retained."
+        }
+      ],
+      "explanation": "The custom metrics application and its need to revisit retained events call for Kinesis Data Streams as the source. Its prebuilt integration with Data Firehose can deliver records to S3 without a separately written archive application. Using Data Firehose alone loses the requested retained-stream design for the live consumer. Introducing a second platform does not meet the same-source, low-overhead archive requirement.",
+      "keywordCues": [
+        "custom application must update engagement metrics as events arrive",
+        "revisit retained events",
+        "managed delivery of the same source events to Amazon S3",
+        "without writing an archive-delivery application",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/streams/latest/dev/introduction.html",
+        "https://aws.amazon.com/kinesis/data-streams/faqs/"
+      ],
+      "es": {
+        "stem": "Una plataforma de aprendizaje en línea recibe un flujo continuo de interacciones con las lecciones. Una aplicación personalizada debe actualizar métricas de participación conforme llegan los eventos, y los analistas deben poder volver a revisar eventos retenidos después de modificar esa lógica. La plataforma también quiere entrega administrada de los mismos eventos de origen a Amazon S3 como archivo, sin desarrollar una aplicación para entregarlos. ¿Qué DOS componentes cumplen juntos estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon Data Firehose como único punto de ingesta y entregar los eventos directamente a Amazon S3.",
+            "why": "La entrega directa por sí sola no proporciona el stream retenido que necesita el consumidor personalizado en vivo."
+          },
+          {
+            "id": "B",
+            "text": "Introducir Amazon MSK como segunda plataforma de ingesta para el flujo de archivo.",
+            "why": "Una segunda plataforma de streaming no proporciona la entrega administrada y de baja carga operativa a S3 desde el mismo stream de origen."
+          },
+          {
+            "id": "C",
+            "text": "Colocar las interacciones en una sola cola de Amazon SQS para la aplicación de métricas y el flujo de archivo.",
+            "why": "Una sola cola no permite leer de forma independiente ni volver a revisar el stream retenido que se solicita."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon Data Firehose para entregar datos de Kinesis Data Streams a Amazon S3.",
+            "why": "La integración preconfigurada entrega registros del stream a S3 sin una aplicación personalizada de entrega al archivo."
+          },
+          {
+            "id": "E",
+            "text": "Ingerir las interacciones en Amazon Kinesis Data Streams para que las consuma la aplicación personalizada.",
+            "why": "Data Streams permite consumo personalizado en tiempo real y acceso a los registros mientras estén retenidos."
+          }
+        ],
+        "explanation": "La aplicación personalizada de métricas y la necesidad de volver a revisar eventos retenidos requieren Kinesis Data Streams como origen. Su integración preconfigurada con Data Firehose puede entregar registros a S3 sin desarrollar otra aplicación para el archivo. Usar solo Data Firehose no proporciona el diseño de stream retenido que necesita el consumidor en vivo. Introducir otra plataforma tampoco cumple el requisito de archivar desde el mismo origen con baja carga operativa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "kinesis-data-streams--r0",
+      "conceptId": "kinesis-data-streams",
+      "kind": "recall",
+      "prompt": "Which service would you choose for independent real-time consumers that may revisit retained records, and why?",
+      "promptEs": "¿Qué servicio elegirías para consumidores independientes en tiempo real que quizá deban volver a leer registros retenidos, y por qué?",
+      "idealAnswer": "Choose Amazon Kinesis Data Streams. Multiple applications can independently process the same stream, and records remain available to read until they expire.",
+      "rubric": [
+        "Names Amazon Kinesis Data Streams.",
+        "Mentions independent consumption of the same stream.",
+        "Explains that retained records remain readable until expiration."
+      ]
+    },
+    {
+      "id": "kinesis-data-streams--r1",
+      "conceptId": "kinesis-data-streams",
+      "kind": "why-not",
+      "prompt": "Why isn't direct Data Firehose delivery to S3 enough for two custom applications that must process and revisit the same live events?",
+      "promptEs": "¿Por qué no basta con entregar datos directamente a S3 mediante Data Firehose si dos aplicaciones personalizadas deben procesar y volver a leer los mismos eventos en vivo?",
+      "idealAnswer": "Direct Data Firehose delivery addresses managed delivery to S3, not the requested retained stream for independent custom consumers. Put the events in Kinesis Data Streams for those applications; Data Firehose can also deliver records from that stream to S3.",
+      "rubric": [
+        "Identifies Data Firehose's managed-delivery role.",
+        "Explains why a retained stream serves independent custom consumers.",
+        "Notes that Data Firehose can deliver from Kinesis Data Streams to S3."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,437 @@
+{
+  "conceptId": "storage-gateway-file",
+  "card": {
+    "en": {
+      "tldr": "Amazon S3 File Gateway gives applications NFS or SMB file shares backed by objects in Amazon S3. Choose it when existing applications need file access to S3 data and a local cache for low-latency access.",
+      "whenToUse": [
+        "On-premises applications must keep using NFS or SMB while storing files as S3 objects.",
+        "Frequently accessed files need low-latency access through a local cache.",
+        "AWS applications must also be able to access the stored data directly in S3."
+      ],
+      "keyFacts": [
+        "S3 File Gateway supports NFS versions 3 and 4.1 and SMB versions 2 and 3.",
+        "The gateway presents S3 objects as files through file share mount points.",
+        "Transparent local caching provides low-latency access; the gateway manages transfers and bandwidth consumption.",
+        "Data stored in S3 can use S3 lifecycle policies, cross-Region replication, and versioning."
+      ],
+      "gotchas": [
+        "A requirement for NFS or SMB file shares does not call for an iSCSI volume.",
+        "Local caching does not mean the full dataset must remain on premises.",
+        "A virtual tape library is for backup software that expects tapes, not applications that mount file shares."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Storage Gateway: Volume Gateway",
+          "difference": "Volume Gateway presents iSCSI volumes; S3 File Gateway presents NFS or SMB file shares backed by S3 objects."
+        },
+        {
+          "concept": "Storage Gateway: Tape Gateway",
+          "difference": "Tape Gateway presents a virtual tape library to backup software; S3 File Gateway presents file shares to applications."
+        }
+      ],
+      "examCues": [
+        "existing application mounts an NFS share",
+        "SMB access to files stored as S3 objects",
+        "local cache for frequently accessed files",
+        "AWS application also reads the objects from S3"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon S3 File Gateway ofrece a las aplicaciones recursos compartidos NFS o SMB respaldados por objetos en Amazon S3. Elígelo cuando las aplicaciones existentes necesitan acceso a archivos almacenados en S3 y una caché local para acceder con baja latencia.",
+      "whenToUse": [
+        "Las aplicaciones locales deben seguir usando NFS o SMB mientras los archivos se almacenan como objetos de S3.",
+        "Los archivos de uso frecuente necesitan acceso de baja latencia mediante una caché local.",
+        "Las aplicaciones en AWS también deben poder acceder directamente a los datos en S3."
+      ],
+      "keyFacts": [
+        "S3 File Gateway admite NFS versiones 3 y 4.1, y SMB versiones 2 y 3.",
+        "El gateway presenta los objetos de S3 como archivos mediante puntos de montaje de recursos compartidos.",
+        "La caché local transparente permite acceso de baja latencia; el gateway administra las transferencias y el consumo de ancho de banda.",
+        "Los datos en S3 pueden usar políticas de ciclo de vida, replicación entre regiones y control de versiones de S3."
+      ],
+      "gotchas": [
+        "Un requisito de recursos compartidos NFS o SMB no requiere un volumen iSCSI.",
+        "Tener una caché local no significa que todo el conjunto de datos deba permanecer en las instalaciones.",
+        "Una biblioteca de cintas virtuales sirve para software de respaldo que espera cintas, no para aplicaciones que montan recursos compartidos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Storage Gateway: Volume Gateway",
+          "difference": "Volume Gateway presenta volúmenes iSCSI; S3 File Gateway presenta recursos compartidos NFS o SMB respaldados por objetos de S3."
+        },
+        {
+          "concept": "Storage Gateway: Tape Gateway",
+          "difference": "Tape Gateway presenta una biblioteca de cintas virtuales al software de respaldo; S3 File Gateway presenta recursos compartidos a las aplicaciones."
+        }
+      ],
+      "examCues": [
+        "existing application mounts an NFS share",
+        "SMB access to files stored as S3 objects",
+        "local cache for frequently accessed files",
+        "AWS application also reads the objects from S3"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/filegateway/latest/files3/what-is-file-s3.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "storage-gateway-file--0af46e5e",
+      "conceptId": "storage-gateway-file",
+      "secondaryConcepts": [
+        "storage-gateway-volume",
+        "storage-gateway-tape"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional newspaper has an on-premises editing application that writes photographs to an NFS share. It wants to store the photographs as S3 objects so a cloud-based publishing application can access them directly, while retaining low-latency access to frequently used files at the newsroom. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy a Tape Gateway and direct the editing application to its virtual tape library.",
+          "correct": false,
+          "why": "A virtual tape library does not provide the NFS file share the editing application needs."
+        },
+        {
+          "id": "B",
+          "text": "Deploy a cached Volume Gateway and present an iSCSI volume to the editing application.",
+          "correct": false,
+          "why": "An iSCSI volume does not preserve the application's required NFS share."
+        },
+        {
+          "id": "C",
+          "text": "Deploy an S3 File Gateway and present an NFS share backed by the S3 bucket.",
+          "correct": true,
+          "why": "It preserves NFS access, stores files as S3 objects, and provides transparent local caching."
+        },
+        {
+          "id": "D",
+          "text": "Deploy a stored Volume Gateway and present an iSCSI volume to the editing application.",
+          "correct": false,
+          "why": "It presents an iSCSI volume rather than the required NFS share backed by S3 objects."
+        }
+      ],
+      "explanation": "The deciding requirements are an unchanged NFS interface, S3 object storage, and low-latency access to frequently used files. S3 File Gateway provides an NFS share backed by S3 objects and uses transparent local caching. Volume Gateway's iSCSI interface and Tape Gateway's virtual tape interface do not satisfy the application's file-share requirement.",
+      "keywordCues": [
+        "writes photographs to an NFS share",
+        "store the photographs as S3 objects",
+        "low-latency access to frequently used files"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/filegateway/latest/files3/what-is-file-s3.html"
+      ],
+      "es": {
+        "stem": "Un periódico regional tiene una aplicación de edición local que escribe fotografías en un recurso compartido NFS. Quiere almacenar las fotografías como objetos de S3 para que una aplicación de publicación en la nube pueda acceder a ellas directamente, sin perder el acceso de baja latencia a los archivos de uso frecuente en la redacción. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar un Tape Gateway y dirigir la aplicación de edición a su biblioteca de cintas virtuales.",
+            "why": "Una biblioteca de cintas virtuales no proporciona el recurso compartido NFS que necesita la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Implementar un cached Volume Gateway y presentar un volumen iSCSI a la aplicación de edición.",
+            "why": "Un volumen iSCSI no conserva el recurso compartido NFS que requiere la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Implementar un S3 File Gateway y presentar un recurso compartido NFS respaldado por el bucket de S3.",
+            "why": "Conserva el acceso NFS, almacena los archivos como objetos de S3 y ofrece caché local transparente."
+          },
+          {
+            "id": "D",
+            "text": "Implementar un stored Volume Gateway y presentar un volumen iSCSI a la aplicación de edición.",
+            "why": "Presenta un volumen iSCSI en lugar del recurso compartido NFS respaldado por objetos de S3 que se necesita."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son conservar la interfaz NFS, almacenar los datos como objetos de S3 y acceder con baja latencia a los archivos frecuentes. S3 File Gateway ofrece un recurso compartido NFS respaldado por objetos de S3 y usa caché local transparente. Las interfaces iSCSI de Volume Gateway y de cintas virtuales de Tape Gateway no cumplen el requisito de acceso mediante archivos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-gateway-file--60e8cfb9",
+      "conceptId": "storage-gateway-file",
+      "secondaryConcepts": [
+        "storage-gateway-volume",
+        "storage-gateway-tape"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A field research lab mounts an NFS share from its on-premises analysis servers. Researchers want new files available as objects to an AWS application, but the lab's network connection sometimes becomes congested. They want to retain the NFS workflow and have the storage service manage transfers and bandwidth consumption. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy an S3 File Gateway with an NFS share backed by an S3 bucket.",
+          "correct": true,
+          "why": "It retains the NFS workflow, exposes the stored files as S3 objects, and manages transfers and bandwidth consumption."
+        },
+        {
+          "id": "B",
+          "text": "Deploy a stored Volume Gateway with an iSCSI volume for the analysis servers.",
+          "correct": false,
+          "why": "Keeping the full dataset locally through an iSCSI volume does not provide the required NFS share backed by S3 objects."
+        },
+        {
+          "id": "C",
+          "text": "Deploy a cached Volume Gateway with an iSCSI volume for the analysis servers.",
+          "correct": false,
+          "why": "Its iSCSI interface does not retain the lab's required NFS workflow."
+        },
+        {
+          "id": "D",
+          "text": "Deploy a Tape Gateway with virtual tapes for the analysis servers.",
+          "correct": false,
+          "why": "Virtual tapes target tape-based backup workflows rather than NFS file access."
+        }
+      ],
+      "explanation": "The lab needs its existing NFS mounts and direct S3 object access for an AWS application. S3 File Gateway supports that combination and manages data transfer, including buffering applications from network congestion and managing bandwidth consumption. The volume options instead present iSCSI, while Tape Gateway presents a tape-oriented interface.",
+      "keywordCues": [
+        "mounts an NFS share",
+        "available as objects to an AWS application",
+        "network connection sometimes becomes congested",
+        "manage transfers and bandwidth consumption"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/filegateway/latest/files3/what-is-file-s3.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación de campo monta un recurso compartido NFS desde sus servidores de análisis locales. Los investigadores quieren que los archivos nuevos estén disponibles como objetos para una aplicación en AWS, pero la conexión de red del laboratorio a veces se congestiona. Quieren conservar el flujo de trabajo NFS y que el servicio de almacenamiento administre las transferencias y el consumo de ancho de banda. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar un S3 File Gateway con un recurso compartido NFS respaldado por un bucket de S3.",
+            "why": "Conserva el flujo de trabajo NFS, expone los archivos almacenados como objetos de S3 y administra las transferencias y el consumo de ancho de banda."
+          },
+          {
+            "id": "B",
+            "text": "Implementar un stored Volume Gateway con un volumen iSCSI para los servidores de análisis.",
+            "why": "Conservar todo el conjunto de datos localmente mediante un volumen iSCSI no proporciona el recurso compartido NFS respaldado por objetos de S3 que se requiere."
+          },
+          {
+            "id": "C",
+            "text": "Implementar un cached Volume Gateway con un volumen iSCSI para los servidores de análisis.",
+            "why": "Su interfaz iSCSI no conserva el flujo de trabajo NFS requerido por el laboratorio."
+          },
+          {
+            "id": "D",
+            "text": "Implementar un Tape Gateway con cintas virtuales para los servidores de análisis.",
+            "why": "Las cintas virtuales sirven para flujos de respaldo basados en cintas, no para acceso a archivos mediante NFS."
+          }
+        ],
+        "explanation": "El laboratorio necesita conservar sus montajes NFS y permitir que una aplicación en AWS acceda directamente a los objetos de S3. S3 File Gateway admite esa combinación y administra las transferencias, incluso cuando hay congestión de red, así como el consumo de ancho de banda. Las opciones de volumen presentan iSCSI, mientras que Tape Gateway ofrece una interfaz orientada a cintas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-gateway-file--1a7ca2ba",
+      "conceptId": "storage-gateway-file",
+      "secondaryConcepts": [
+        "storage-gateway-tape",
+        "storage-gateway-volume"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A nonprofit collects scanned forms through an on-premises application that mounts an SMB share. It needs AWS services to access the stored forms directly in S3 and wants S3 versioning for the objects. Its backup software does not use a tape library. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an S3 File Gateway SMB share and enable versioning on the backing S3 bucket.",
+          "correct": true,
+          "why": "The gateway supplies SMB access to S3 objects, which can use S3 versioning."
+        },
+        {
+          "id": "B",
+          "text": "Use a stored Volume Gateway iSCSI volume and keep the full form dataset on premises.",
+          "correct": false,
+          "why": "It substitutes iSCSI for SMB and does not provide the requested S3-object file share."
+        },
+        {
+          "id": "C",
+          "text": "Use a cached Volume Gateway iSCSI volume and enable S3 versioning for the stored forms.",
+          "correct": false,
+          "why": "An iSCSI volume does not preserve the application's SMB file-share interface."
+        },
+        {
+          "id": "D",
+          "text": "Use a Tape Gateway virtual tape library and enable S3 versioning for the stored forms.",
+          "correct": false,
+          "why": "The application needs an SMB share, and its backup software does not use a tape library."
+        }
+      ],
+      "explanation": "The forms must remain accessible through SMB while AWS services access them as S3 objects. S3 File Gateway supplies that file interface, and its S3 data can use versioning. Tape Gateway is a poor fit because no tape-library workflow is required; the volume gateways also miss the SMB requirement.",
+      "keywordCues": [
+        "mounts an SMB share",
+        "access the stored forms directly in S3",
+        "wants S3 versioning",
+        "does not use a tape library"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/filegateway/latest/files3/what-is-file-s3.html"
+      ],
+      "es": {
+        "stem": "Una organización sin fines de lucro recopila formularios escaneados mediante una aplicación local que monta un recurso compartido SMB. Necesita que los servicios de AWS accedan directamente a los formularios almacenados en S3 y quiere usar el control de versiones de S3 para los objetos. Su software de respaldo no usa una biblioteca de cintas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un recurso compartido SMB de S3 File Gateway y habilitar el control de versiones en el bucket de S3 subyacente.",
+            "why": "El gateway proporciona acceso SMB a objetos de S3, que pueden usar el control de versiones de S3."
+          },
+          {
+            "id": "B",
+            "text": "Usar un volumen iSCSI de stored Volume Gateway y mantener localmente todos los formularios.",
+            "why": "Sustituye SMB por iSCSI y no proporciona el recurso compartido de archivos respaldado por objetos de S3 que se solicita."
+          },
+          {
+            "id": "C",
+            "text": "Usar un volumen iSCSI de cached Volume Gateway y habilitar el control de versiones de S3 para los formularios almacenados.",
+            "why": "Un volumen iSCSI no conserva la interfaz de recurso compartido SMB de la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Usar una biblioteca de cintas virtuales de Tape Gateway y habilitar el control de versiones de S3 para los formularios almacenados.",
+            "why": "La aplicación necesita un recurso compartido SMB y su software de respaldo no usa una biblioteca de cintas."
+          }
+        ],
+        "explanation": "Los formularios deben seguir disponibles mediante SMB mientras los servicios de AWS acceden a ellos como objetos de S3. S3 File Gateway proporciona esa interfaz de archivos y los datos en S3 pueden usar control de versiones. Tape Gateway no corresponde porque no se requiere un flujo de trabajo con cintas; las opciones de Volume Gateway tampoco cumplen el requisito de SMB."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-gateway-file--a2cb9c0c",
+      "conceptId": "storage-gateway-file",
+      "secondaryConcepts": [
+        "storage-gateway-volume",
+        "storage-gateway-tape"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A chain of clinics has an on-premises records application that must keep mounting an NFS share. The clinics want the records stored as S3 objects so an AWS application can access them directly, and they want low-latency access to frequently used files at each clinic. Which two design choices meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Present a cached Volume Gateway iSCSI volume to each clinic's records application.",
+          "correct": false,
+          "why": "It provides iSCSI rather than the NFS share the records application must keep mounting."
+        },
+        {
+          "id": "B",
+          "text": "Use the S3 File Gateway's transparent local cache for frequently accessed files.",
+          "correct": true,
+          "why": "Its local caching addresses the clinics' low-latency requirement for frequently used files."
+        },
+        {
+          "id": "C",
+          "text": "Present a stored Volume Gateway iSCSI volume and retain the full dataset at each clinic.",
+          "correct": false,
+          "why": "An iSCSI volume does not preserve NFS access or provide the requested S3-object file share."
+        },
+        {
+          "id": "D",
+          "text": "Present a Tape Gateway virtual tape library to each clinic's records application.",
+          "correct": false,
+          "why": "A virtual tape library does not supply the required NFS file share."
+        },
+        {
+          "id": "E",
+          "text": "Create an NFS share on an S3 File Gateway backed by an S3 bucket.",
+          "correct": true,
+          "why": "It preserves NFS access while storing the records as objects accessible directly in S3."
+        }
+      ],
+      "explanation": "The application must continue mounting NFS, the records must be S3 objects, and frequently used files need low-latency local access. An S3 File Gateway NFS share provides the file interface and S3 storage; its transparent local cache addresses the latency requirement. Neither an iSCSI volume nor a virtual tape library preserves the stated NFS workflow.",
+      "keywordCues": [
+        "keep mounting an NFS share",
+        "stored as S3 objects",
+        "low-latency access to frequently used files"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/filegateway/latest/files3/what-is-file-s3.html"
+      ],
+      "es": {
+        "stem": "Una cadena de clínicas tiene una aplicación local de historiales que debe seguir montando un recurso compartido NFS. Las clínicas quieren almacenar los historiales como objetos de S3 para que una aplicación en AWS acceda directamente a ellos y necesitan acceso de baja latencia a los archivos de uso frecuente en cada clínica. ¿Qué dos decisiones de diseño cumplen estos requisitos con el LEAST operational overhead? (Elige dos).",
+        "options": [
+          {
+            "id": "A",
+            "text": "Presentar un volumen iSCSI de cached Volume Gateway a la aplicación de historiales de cada clínica.",
+            "why": "Proporciona iSCSI en lugar del recurso compartido NFS que la aplicación debe seguir montando."
+          },
+          {
+            "id": "B",
+            "text": "Usar la caché local transparente de S3 File Gateway para los archivos de uso frecuente.",
+            "why": "Su caché local satisface el requisito de acceso de baja latencia a los archivos frecuentes."
+          },
+          {
+            "id": "C",
+            "text": "Presentar un volumen iSCSI de stored Volume Gateway y conservar todos los datos en cada clínica.",
+            "why": "Un volumen iSCSI no conserva el acceso NFS ni proporciona el recurso compartido respaldado por objetos de S3 que se solicita."
+          },
+          {
+            "id": "D",
+            "text": "Presentar una biblioteca de cintas virtuales de Tape Gateway a la aplicación de historiales de cada clínica.",
+            "why": "Una biblioteca de cintas virtuales no proporciona el recurso compartido NFS requerido."
+          },
+          {
+            "id": "E",
+            "text": "Crear un recurso compartido NFS en un S3 File Gateway respaldado por un bucket de S3.",
+            "why": "Conserva el acceso NFS y almacena los historiales como objetos accesibles directamente en S3."
+          }
+        ],
+        "explanation": "La aplicación debe seguir montando NFS, los historiales deben ser objetos de S3 y los archivos frecuentes necesitan acceso local de baja latencia. Un recurso compartido NFS de S3 File Gateway proporciona la interfaz de archivos y el almacenamiento en S3; su caché local transparente atiende el requisito de latencia. Ni un volumen iSCSI ni una biblioteca de cintas virtuales conservan el flujo de trabajo NFS indicado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "storage-gateway-file--r0",
+      "conceptId": "storage-gateway-file",
+      "kind": "recall",
+      "prompt": "An on-premises app needs an SMB share backed by S3 objects and fast access to frequently used files. What do you choose, and why?",
+      "promptEs": "Una aplicación local necesita un recurso compartido SMB respaldado por objetos de S3 y acceso rápido a archivos frecuentes. ¿Qué eliges y por qué?",
+      "idealAnswer": "Choose Amazon S3 File Gateway with an SMB share backed by an S3 bucket. It presents S3 objects through the existing file protocol and uses transparent local caching for low-latency access.",
+      "rubric": [
+        "Names Amazon S3 File Gateway.",
+        "Explains that it presents an SMB share backed by S3 objects.",
+        "Mentions transparent local caching for low-latency access."
+      ]
+    },
+    {
+      "id": "storage-gateway-file--r1",
+      "conceptId": "storage-gateway-file",
+      "kind": "why-not",
+      "prompt": "Why is a cached Volume Gateway not the right replacement for an NFS share when files must be accessible as S3 objects?",
+      "promptEs": "¿Por qué cached Volume Gateway no reemplaza adecuadamente un recurso compartido NFS cuando los archivos deben estar disponibles como objetos de S3?",
+      "idealAnswer": "A cached Volume Gateway presents an iSCSI volume, so it does not preserve the application's NFS file-share interface. S3 File Gateway provides an NFS share backed by S3 objects.",
+      "rubric": [
+        "Identifies iSCSI as the cached Volume Gateway interface.",
+        "States that the application requires NFS file access.",
+        "Identifies S3 File Gateway as the NFS-to-S3-object fit."
+      ]
+    }
+  ]
+}

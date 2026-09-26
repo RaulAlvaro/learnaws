@@ -1,0 +1,439 @@
+{
+  "conceptId": "kms-key-types",
+  "card": {
+    "en": {
+      "tldr": "Choose a customer managed KMS key when you must control its policy, lifecycle, or cross-account access. If you do not need that control, an AWS managed key avoids key administration; an AWS owned key offers even less visibility and no customer key charges.",
+      "whenToUse": [
+        "Choose customer managed when you must edit the key policy, disable the key, or control rotation.",
+        "Choose customer managed when another account needs permission to use the key.",
+        "Choose AWS managed when an integrated service can manage the key and you only need to view its policy or audit its use.",
+        "Choose AWS owned when supported by the service and automated encryption without customer-visible key activity is acceptable."
+      ],
+      "keyFacts": [
+        "Customer managed keys are in your account; you can manage their policies and lifecycle and audit their use in CloudTrail.",
+        "AWS managed keys are in your account. You can view their policies and audit their use in CloudTrail, but you cannot change their policies or lifecycle.",
+        "AWS managed keys are automatically rotated every year; you cannot change that schedule.",
+        "AWS owned keys reside in an AWS service account. You cannot view their policies or audit their key activity.",
+        "Customer managed keys have a monthly fee and usage charges. AWS managed keys have no monthly fee but may incur usage charges; AWS owned keys have no customer key charges."
+      ],
+      "gotchas": [
+        "AWS managed does not mean customer-manageable: a visible key policy is not an editable key policy.",
+        "AWS managed keys are limited to use by principals in the key's account; they cannot support sharing resources encrypted under them with another account.",
+        "AWS owned and AWS managed keys both remove key administration, but only AWS managed key use is visible in your CloudTrail logs."
+      ],
+      "confusedWith": [
+        {
+          "concept": "kms-multi-region-keys",
+          "difference": "Multi-Region keys address use of related key material across Regions; they do not replace the decision about who controls a key's policy and lifecycle."
+        },
+        {
+          "concept": "cloudhsm",
+          "difference": "CloudHSM is for requirements such as a single-tenant HSM and exclusive customer key control, not merely an editable KMS key policy."
+        }
+      ],
+      "examCues": [
+        "must edit the key policy",
+        "share encrypted resources with another account",
+        "audit key use without managing the key",
+        "encryption by default with no customer key charges"
+      ]
+    },
+    "es": {
+      "tldr": "Elige una customer managed KMS key cuando debas controlar su política, su ciclo de vida o el acceso entre cuentas. Si no necesitas ese control, una AWS managed key evita administrar la clave; una AWS owned key ofrece aún menos visibilidad y no genera cargos por la clave al cliente.",
+      "whenToUse": [
+        "Elige customer managed si debes editar la key policy, deshabilitar la clave o controlar su rotación.",
+        "Elige customer managed si otra cuenta necesita permiso para usar la clave.",
+        "Elige AWS managed si un servicio integrado puede administrar la clave y solo necesitas consultar su política o auditar su uso.",
+        "Elige AWS owned si el servicio la admite y aceptas el cifrado automatizado sin visibilidad de la actividad de la clave."
+      ],
+      "keyFacts": [
+        "Las customer managed keys están en tu cuenta; puedes administrar sus políticas y su ciclo de vida, y auditar su uso en CloudTrail.",
+        "Las AWS managed keys están en tu cuenta. Puedes consultar sus políticas y auditar su uso en CloudTrail, pero no puedes cambiar sus políticas ni su ciclo de vida.",
+        "Las AWS managed keys rotan automáticamente cada año; no puedes modificar ese calendario.",
+        "Las AWS owned keys están en una cuenta del servicio de AWS. No puedes consultar sus políticas ni auditar la actividad de esas claves.",
+        "Las customer managed keys tienen un cargo mensual y cargos por uso. Las AWS managed keys no tienen cargo mensual, pero pueden generar cargos por uso; las AWS owned keys no generan cargos por la clave al cliente."
+      ],
+      "gotchas": [
+        "AWS managed no significa que tú puedas administrarla: poder consultar una key policy no significa poder editarla.",
+        "Las AWS managed keys solo permiten el uso por entidades principales de la cuenta donde está la clave; no permiten compartir con otra cuenta recursos cifrados con ellas.",
+        "AWS owned y AWS managed evitan administrar la clave, pero solo el uso de una AWS managed key es visible en tus registros de CloudTrail."
+      ],
+      "confusedWith": [
+        {
+          "concept": "kms-multi-region-keys",
+          "difference": "Las Multi-Region keys atienden el uso de material de clave relacionado en distintas Regions; no sustituyen la decisión sobre quién controla la política y el ciclo de vida."
+        },
+        {
+          "concept": "cloudhsm",
+          "difference": "CloudHSM corresponde a requisitos como un HSM de un solo inquilino y control exclusivo de las claves, no solo a necesitar una key policy editable."
+        }
+      ],
+      "examCues": [
+        "must edit the key policy",
+        "share encrypted resources with another account",
+        "audit key use without managing the key",
+        "encryption by default with no customer key charges"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html",
+      "https://aws.amazon.com/kms/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "kms-key-types--73c4d583",
+      "conceptId": "kms-key-types",
+      "secondaryConcepts": [
+        "cloudhsm"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A claims platform encrypts records through an AWS service that supports customer managed KMS keys. Its security team must define which roles may use the key and must be able to disable the key immediately during an incident. Which key choice meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an AWS managed key created by the service in the platform's account.",
+          "correct": false,
+          "why": "The team can view an AWS managed key's policy but cannot change it or disable the key."
+        },
+        {
+          "id": "B",
+          "text": "Provision a CloudHSM cluster and keep the record-encryption key there.",
+          "correct": false,
+          "why": "A CloudHSM cluster adds infrastructure management when a customer managed KMS key supplies the requested controls."
+        },
+        {
+          "id": "C",
+          "text": "Create a customer managed KMS key and configure the service to use it.",
+          "correct": true,
+          "why": "A customer managed key lets the team define permissions and disable the key without operating an HSM."
+        },
+        {
+          "id": "D",
+          "text": "Use the service's AWS owned key for the records.",
+          "correct": false,
+          "why": "AWS owned keys do not let the security team set key permissions or disable the key."
+        }
+      ],
+      "explanation": "The deciding requirements are control over key permissions and the ability to disable the key. A customer managed KMS key provides both and can be selected by the integrated service. An AWS managed key is easier to adopt, but its policy and lifecycle cannot be changed by the customer. CloudHSM adds operational work that the scenario does not require.",
+      "keywordCues": [
+        "define which roles may use the key",
+        "disable the key immediately",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html",
+        "https://aws.amazon.com/kms/faqs/"
+      ],
+      "es": {
+        "stem": "Una plataforma de reclamaciones cifra expedientes mediante un servicio de AWS que admite customer managed KMS keys. Su equipo de seguridad debe definir qué roles pueden usar la clave y poder deshabilitarla de inmediato durante un incidente. ¿Qué opción cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar una AWS managed key creada por el servicio en la cuenta de la plataforma.",
+            "why": "El equipo puede consultar la política de una AWS managed key, pero no puede cambiarla ni deshabilitar la clave."
+          },
+          {
+            "id": "B",
+            "text": "Aprovisionar un clúster de CloudHSM y conservar allí la clave de cifrado de los expedientes.",
+            "why": "Un clúster de CloudHSM añade administración de infraestructura cuando una customer managed KMS key ofrece los controles solicitados."
+          },
+          {
+            "id": "C",
+            "text": "Crear una customer managed KMS key y configurar el servicio para usarla.",
+            "why": "Una customer managed key permite definir permisos y deshabilitar la clave sin operar un HSM."
+          },
+          {
+            "id": "D",
+            "text": "Usar la AWS owned key del servicio para los expedientes.",
+            "why": "Las AWS owned keys no permiten que el equipo establezca permisos de la clave ni la deshabilite."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son controlar los permisos de la clave y poder deshabilitarla. Una customer managed KMS key ofrece ambas capacidades y el servicio integrado puede usarla. Una AWS managed key es más sencilla de adoptar, pero el cliente no puede cambiar su política ni su ciclo de vida. CloudHSM añade trabajo operativo que el escenario no exige."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-key-types--e9ce1285",
+      "conceptId": "kms-key-types",
+      "secondaryConcepts": [
+        "kms-multi-region-keys"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company is enabling encryption by default for a large archive. The AWS service offers an AWS owned key, and the company does not need to inspect key activity or set key permissions. It wants to avoid both key administration and customer charges for key existence or use. Which choice meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a customer managed multi-Region KMS key for the archive.",
+          "correct": false,
+          "why": "A customer managed multi-Region key adds management and cost without a stated cross-Region key requirement."
+        },
+        {
+          "id": "B",
+          "text": "Use an AWS managed key in the company's account.",
+          "correct": false,
+          "why": "An AWS managed key has no monthly fee but may incur charges for its use."
+        },
+        {
+          "id": "C",
+          "text": "Create a customer managed KMS key for the archive.",
+          "correct": false,
+          "why": "A customer managed key adds a monthly fee and key administration that the company does not need."
+        },
+        {
+          "id": "D",
+          "text": "Use the AWS owned key offered by the service.",
+          "correct": true,
+          "why": "An AWS owned key requires no customer administration and has no customer charges for key existence or use."
+        }
+      ],
+      "explanation": "The service offers an AWS owned key, and the company needs neither customer-visible key activity nor policy control. AWS owned keys are managed by the service and have no customer charges for their existence or use. An AWS managed key also avoids a monthly fee, but its use can incur charges. A customer managed key adds charges and administration without satisfying an additional requirement.",
+      "keywordCues": [
+        "offers an AWS owned key",
+        "does not need to inspect key activity or set key permissions",
+        "avoid both key administration and customer charges for key existence or use"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html",
+        "https://aws.amazon.com/kms/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de medios está habilitando encryption by default para un archivo grande. El servicio de AWS ofrece una AWS owned key y la empresa no necesita revisar la actividad de la clave ni establecer sus permisos. Quiere evitar tanto la administración de claves como los cargos al cliente por su existencia o uso. ¿Qué opción cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar una customer managed multi-Region KMS key para el archivo.",
+            "why": "Una customer managed multi-Region key añade administración y costo sin que exista un requisito de uso de claves entre Regions."
+          },
+          {
+            "id": "B",
+            "text": "Usar una AWS managed key en la cuenta de la empresa.",
+            "why": "Una AWS managed key no tiene cargo mensual, pero su uso puede generar cargos."
+          },
+          {
+            "id": "C",
+            "text": "Crear una customer managed KMS key para el archivo.",
+            "why": "Una customer managed key añade un cargo mensual y administración que la empresa no necesita."
+          },
+          {
+            "id": "D",
+            "text": "Usar la AWS owned key que ofrece el servicio.",
+            "why": "Una AWS owned key no requiere administración por parte del cliente ni genera cargos al cliente por su existencia o uso."
+          }
+        ],
+        "explanation": "El servicio ofrece una AWS owned key y la empresa no necesita visibilidad de la actividad de la clave ni control de su política. El servicio administra las AWS owned keys y estas no generan cargos al cliente por su existencia o uso. Una AWS managed key tampoco tiene cargo mensual, pero su uso puede generar cargos. Una customer managed key añade cargos y administración sin atender un requisito adicional."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-key-types--507280a1",
+      "conceptId": "kms-key-types",
+      "secondaryConcepts": [
+        "cloudhsm"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization stores encrypted datasets in an AWS account and grants a partner in a different AWS account access to selected datasets. The encryption key must permit authorized principals in the partner account to use it, and the organization must maintain the key policy. The service storing the datasets supports customer managed KMS keys. Which approach meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the storage service's AWS owned key and edit its policy for the partner account.",
+          "correct": false,
+          "why": "The organization cannot view or edit the policy of an AWS owned key."
+        },
+        {
+          "id": "B",
+          "text": "Use the storage service's AWS managed key and grant the partner access to the datasets.",
+          "correct": false,
+          "why": "Resources encrypted under an AWS managed key cannot be shared with another account using that key."
+        },
+        {
+          "id": "C",
+          "text": "Store the encryption key in a CloudHSM cluster and manage partner permissions there.",
+          "correct": false,
+          "why": "CloudHSM adds HSM operations when a customer managed KMS key supplies the required cross-account policy control."
+        },
+        {
+          "id": "D",
+          "text": "Use a customer managed KMS key and configure its policy for the partner account.",
+          "correct": true,
+          "why": "The organization can maintain a customer managed key policy and grant cross-account key access."
+        }
+      ],
+      "explanation": "Cross-account key use and customer-maintained policy control determine the choice. A customer managed KMS key supports both and works with the stated service integration. Granting dataset access alone does not make an AWS managed key usable by principals in another account. CloudHSM introduces operational work that is unnecessary for these requirements.",
+      "keywordCues": [
+        "partner in a different AWS account",
+        "authorized principals in the partner account",
+        "maintain the key policy",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html",
+        "https://aws.amazon.com/kms/faqs/"
+      ],
+      "es": {
+        "stem": "Una organización de investigación guarda conjuntos de datos cifrados en una cuenta de AWS y da acceso a un socio de otra cuenta de AWS a algunos de ellos. La clave de cifrado debe permitir su uso a entidades principales autorizadas de la cuenta del socio, y la organización debe mantener la key policy. El servicio que almacena los datos admite customer managed KMS keys. ¿Qué enfoque cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar la AWS owned key del servicio de almacenamiento y editar su política para la cuenta del socio.",
+            "why": "La organización no puede consultar ni editar la política de una AWS owned key."
+          },
+          {
+            "id": "B",
+            "text": "Usar la AWS managed key del servicio de almacenamiento y dar acceso al socio a los conjuntos de datos.",
+            "why": "Los recursos cifrados con una AWS managed key no pueden compartirse con otra cuenta usando esa clave."
+          },
+          {
+            "id": "C",
+            "text": "Guardar la clave de cifrado en un clúster de CloudHSM y administrar allí los permisos del socio.",
+            "why": "CloudHSM añade operaciones de HSM cuando una customer managed KMS key ofrece el control de políticas entre cuentas requerido."
+          },
+          {
+            "id": "D",
+            "text": "Usar una customer managed KMS key y configurar su política para la cuenta del socio.",
+            "why": "La organización puede mantener la política de una customer managed key y conceder acceso a la clave entre cuentas."
+          }
+        ],
+        "explanation": "El uso de la clave entre cuentas y el control de la política por parte de la organización determinan la elección. Una customer managed KMS key permite ambos y funciona con la integración indicada del servicio. Dar acceso a los conjuntos de datos no hace que una AWS managed key pueda ser usada por entidades principales de otra cuenta. CloudHSM introduce trabajo operativo innecesario para estos requisitos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-key-types--603f5780",
+      "conceptId": "kms-key-types",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A hospital is assigning KMS key types to several AWS-service encryption workloads. Each listed service supports customer managed KMS keys, and the hospital wants to use them only where the stated control requires them. Which TWO workload decisions correctly identify a need for a customer managed key? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a customer managed key when security staff must be able to disable the key.",
+          "correct": true,
+          "why": "Customer managed keys can be disabled by the customer; AWS managed and AWS owned keys cannot."
+        },
+        {
+          "id": "B",
+          "text": "Use a customer managed key when staff must merely view the key policy.",
+          "correct": false,
+          "why": "The hospital can view an AWS managed key's policy without creating a customer managed key."
+        },
+        {
+          "id": "C",
+          "text": "Use a customer managed key when staff need only to audit key use in CloudTrail.",
+          "correct": false,
+          "why": "AWS managed key use is also auditable in CloudTrail, so audit visibility alone does not require customer management."
+        },
+        {
+          "id": "D",
+          "text": "Use a customer managed key when a service needs encryption by default with no customer key charges.",
+          "correct": false,
+          "why": "If the service offers one, an AWS owned key provides default encryption without customer key charges."
+        },
+        {
+          "id": "E",
+          "text": "Use a customer managed key when security staff must edit the key policy.",
+          "correct": true,
+          "why": "Only a customer managed key gives the hospital control over its key policy."
+        }
+      ],
+      "explanation": "The question asks which requirements make customer control necessary, not merely useful. Editing a key policy and disabling a key both require a customer managed key. AWS managed keys already provide customer-visible policies and CloudTrail auditability, although customers cannot edit those policies. Where offered, an AWS owned key is the better match for default encryption with no customer key charges.",
+      "keywordCues": [
+        "only where the stated control requires them",
+        "edit the key policy",
+        "disable the key"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html",
+        "https://aws.amazon.com/kms/faqs/"
+      ],
+      "es": {
+        "stem": "Un hospital está asignando tipos de KMS keys a varias cargas de cifrado mediante servicios de AWS. Cada servicio mencionado admite customer managed KMS keys, y el hospital quiere usarlas solo cuando el control indicado las haga necesarias. ¿Qué DOS decisiones identifican correctamente la necesidad de una customer managed key? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar una customer managed key cuando el equipo de seguridad deba poder deshabilitar la clave.",
+            "why": "El cliente puede deshabilitar una customer managed key, pero no una AWS managed ni una AWS owned key."
+          },
+          {
+            "id": "B",
+            "text": "Usar una customer managed key cuando el personal únicamente deba consultar la key policy.",
+            "why": "El hospital puede consultar la política de una AWS managed key sin crear una customer managed key."
+          },
+          {
+            "id": "C",
+            "text": "Usar una customer managed key cuando el personal solo necesite auditar el uso de la clave en CloudTrail.",
+            "why": "El uso de una AWS managed key también se puede auditar en CloudTrail, así que la visibilidad de auditoría por sí sola no exige que el cliente administre la clave."
+          },
+          {
+            "id": "D",
+            "text": "Usar una customer managed key cuando un servicio necesite encryption by default sin cargos al cliente por la clave.",
+            "why": "Si el servicio la ofrece, una AWS owned key brinda encryption by default sin cargos al cliente por la clave."
+          },
+          {
+            "id": "E",
+            "text": "Usar una customer managed key cuando el equipo de seguridad deba editar la key policy.",
+            "why": "Solo una customer managed key da al hospital control sobre su key policy."
+          }
+        ],
+        "explanation": "La pregunta pide identificar qué requisitos hacen necesario el control por parte del cliente, no solo cuándo sería útil. Editar una key policy y deshabilitar una clave requieren una customer managed key. Las AWS managed keys ya permiten consultar sus políticas y auditar su uso en CloudTrail, aunque el cliente no puede editar esas políticas. Cuando el servicio la ofrece, una AWS owned key se ajusta mejor al requisito de encryption by default sin cargos al cliente por la clave."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "kms-key-types--r0",
+      "conceptId": "kms-key-types",
+      "kind": "recall",
+      "prompt": "An integrated service encrypts records, but your team must edit key permissions and disable the key during incidents. Which key type and why?",
+      "promptEs": "Un servicio integrado cifra registros, pero tu equipo debe editar los permisos de la clave y deshabilitarla durante incidentes. ¿Qué tipo de clave eliges y por qué?",
+      "idealAnswer": "Use a customer managed KMS key. It lets your team control the key policy and disable the key, unlike AWS managed or AWS owned keys.",
+      "rubric": [
+        "Names a customer managed KMS key.",
+        "Explains that the customer can edit its policy or permissions.",
+        "Explains that the customer can disable it."
+      ]
+    },
+    {
+      "id": "kms-key-types--r1",
+      "conceptId": "kms-key-types",
+      "kind": "why-not",
+      "prompt": "Why is an AWS managed key unsuitable when a partner account must use the encryption key for shared datasets?",
+      "promptEs": "¿Por qué una AWS managed key no sirve cuando la cuenta de un socio debe usar la clave de cifrado para conjuntos de datos compartidos?",
+      "idealAnswer": "An AWS managed key is limited to use by principals in the account containing the key, so resources encrypted under it cannot be shared with another account using that key. Use a customer managed KMS key to grant the partner account appropriate key access.",
+      "rubric": [
+        "States the same-account restriction on AWS managed key use.",
+        "Connects that restriction to the cross-account sharing requirement.",
+        "Identifies a customer managed KMS key as the alternative."
+      ]
+    }
+  ]
+}

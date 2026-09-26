@@ -1,0 +1,326 @@
+{
+  "conceptId": "data-retention-policies",
+  "card": {
+    "en": {
+      "tldr": "Set retention by data classification: decide how long usable data and backups must be kept, then automate archiving or deletion. For S3 objects, use S3 Lifecycle transitions when a cheaper storage class fits and expiration when the required retention period ends; protect backups separately when the requirement calls for it.",
+      "whenToUse": [
+        "S3 objects need automatic archiving or deletion after defined periods.",
+        "Different data classes have different access and retention requirements.",
+        "Backups need their own retention and protection strategy, separate from usable data."
+      ],
+      "keyFacts": [
+        "S3 Lifecycle transition actions change an object's storage class; expiration actions delete expired objects.",
+        "Lifecycle rules apply to both existing and newly added objects.",
+        "Lifecycle transition requests have costs, so a transition is not automatically worthwhile for short-lived data.",
+        "A bucket policy cannot prevent an S3 Lifecycle rule from deleting or transitioning objects in a general purpose bucket.",
+        "AWS Backup can automate backups across AWS services; AWS Backup Vault Lock and S3 Object Lock are protection mechanisms to consider for backups."
+      ],
+      "gotchas": [
+        "Do not give every data class the same retention period when its requirements differ.",
+        "Do not treat durable usable data as a substitute for backups.",
+        "Do not assume a bucket-policy deny overrides a configured S3 Lifecycle action."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "delete objects after the required retention period",
+        "archive rarely accessed records before expiration",
+        "different retention periods by data classification",
+        "protect backups separately from production data"
+      ]
+    },
+    "es": {
+      "tldr": "Define la retención según la clasificación de los datos: decide cuánto tiempo conservar los datos utilizables y las copias de seguridad, y luego automatiza el archivado o la eliminación. Para objetos de S3, usa transiciones de S3 Lifecycle cuando convenga una clase de almacenamiento de menor costo y expiration cuando termine el período obligatorio; protege las copias de seguridad por separado si el requisito lo exige.",
+      "whenToUse": [
+        "Los objetos de S3 necesitan archivado o eliminación automáticos después de períodos definidos.",
+        "Distintas clases de datos tienen requisitos diferentes de acceso y retención.",
+        "Las copias de seguridad necesitan una estrategia propia de retención y protección, separada de los datos utilizables."
+      ],
+      "keyFacts": [
+        "Las acciones transition de S3 Lifecycle cambian la clase de almacenamiento; las acciones expiration eliminan objetos vencidos.",
+        "Las reglas de Lifecycle se aplican tanto a objetos existentes como a los nuevos.",
+        "Las solicitudes de transición de Lifecycle tienen costos; una transición no siempre conviene para datos de corta duración.",
+        "Una bucket policy no puede impedir que una regla de S3 Lifecycle elimine o traslade objetos en un bucket de uso general.",
+        "AWS Backup puede automatizar copias de seguridad entre servicios de AWS; AWS Backup Vault Lock y S3 Object Lock son mecanismos de protección que puedes considerar para ellas."
+      ],
+      "gotchas": [
+        "No asignes el mismo período de retención a todas las clases de datos si sus requisitos difieren.",
+        "No consideres la durabilidad de los datos utilizables como sustituto de las copias de seguridad.",
+        "No supongas que una denegación en una bucket policy anula una acción configurada en S3 Lifecycle."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "delete objects after the required retention period",
+        "archive rarely accessed records before expiration",
+        "different retention periods by data classification",
+        "protect backups separately from production data"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/sec_data_classification_lifecycle_management.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "data-retention-policies--11cd6f8b",
+      "conceptId": "data-retention-policies",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small publisher uploads temporary delivery logs to S3. The logs are consulted throughout their required 14-day retention period and must be deleted afterward; the team has no archival requirement. It wants an automated policy and wants to avoid unnecessary transition requests. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the logs indefinitely and restrict access with a bucket policy after day 14.",
+          "correct": false,
+          "why": "Restricting access does not delete logs when their required retention period ends."
+        },
+        {
+          "id": "B",
+          "text": "Transition the logs to another S3 storage class during the retention period, then review them for deletion.",
+          "correct": false,
+          "why": "The extra transition has a request cost and leaves deletion as a manual task."
+        },
+        {
+          "id": "C",
+          "text": "Configure an S3 Lifecycle expiration rule to delete the logs after 14 days without a transition.",
+          "correct": true,
+          "why": "Expiration automates the required deletion without adding an unneeded transition request."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Backup to retain copies of the logs after removing the originals at day 14.",
+          "correct": false,
+          "why": "Keeping backup copies beyond the required period conflicts with the stated deletion goal."
+        }
+      ],
+      "explanation": "These logs remain in use during their short retention period and need deletion, not archiving. An S3 Lifecycle expiration rule automates deletion after the specified period. Adding a transition is not justified by the scenario and incurs transition-request costs; it also does not replace an expiration action. Retaining backups or merely restricting access would miss the deletion requirement.",
+      "keywordCues": [
+        "consulted throughout their required 14-day retention period",
+        "must be deleted afterward",
+        "no archival requirement",
+        "avoid unnecessary transition requests"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/sec_data_classification_lifecycle_management.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+      ],
+      "es": {
+        "stem": "Una editorial pequeña carga registros temporales de entrega en S3. Consulta los registros durante todo el período de retención obligatorio de 14 días y debe eliminarlos después; no necesita archivarlos. El equipo quiere una política automática y evitar solicitudes de transición innecesarias. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conserva los registros indefinidamente y restringe el acceso mediante una bucket policy después del día 14.",
+            "why": "Restringir el acceso no elimina los registros cuando termina su período de retención obligatorio."
+          },
+          {
+            "id": "B",
+            "text": "Traslada los registros a otra clase de almacenamiento de S3 durante el período de retención y luego revísalos para eliminarlos.",
+            "why": "La transición adicional tiene un costo por solicitud y deja la eliminación como tarea manual."
+          },
+          {
+            "id": "C",
+            "text": "Configura una regla de expiration de S3 Lifecycle para eliminar los registros después de 14 días, sin transición.",
+            "why": "Expiration automatiza la eliminación exigida sin agregar una solicitud de transición innecesaria."
+          },
+          {
+            "id": "D",
+            "text": "Usa AWS Backup para conservar copias de los registros después de eliminar los originales el día 14.",
+            "why": "Conservar copias de seguridad más allá del período requerido contradice el objetivo de eliminación."
+          }
+        ],
+        "explanation": "Estos registros se usan durante su breve período de retención y requieren eliminación, no archivado. Una regla de expiration de S3 Lifecycle automatiza la eliminación tras el período indicado. El escenario no justifica una transición, que además genera costos por solicitud y no sustituye una acción de expiration. Conservar copias de seguridad o solo restringir el acceso incumpliría el requisito de eliminación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-retention-policies--63785bd6",
+      "conceptId": "data-retention-policies",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A film studio stores approved project records in S3. Editors access the records frequently at first; later, access drops, but policy requires retaining them for a defined archival period and deleting them when that period ends. The studio wants to automate both the storage-cost change and final deletion. Which TWO actions should the studio include in its S3 Lifecycle configuration? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a transition action at the end of the archival period instead of deleting the records.",
+          "correct": false,
+          "why": "A storage-class transition retains objects rather than meeting the required final deletion."
+        },
+        {
+          "id": "B",
+          "text": "Add an expiration action for the end of the required retention period.",
+          "correct": true,
+          "why": "Lifecycle expiration deletes objects when their configured retention period ends."
+        },
+        {
+          "id": "C",
+          "text": "Add a transition action to move records to an appropriate lower-cost storage class when access drops.",
+          "correct": true,
+          "why": "A Lifecycle transition can change storage class as the records become less frequently accessed."
+        },
+        {
+          "id": "D",
+          "text": "Add a bucket-policy deny that takes effect at the end of the archival period.",
+          "correct": false,
+          "why": "Denying access does not delete the records at the end of the required period."
+        },
+        {
+          "id": "E",
+          "text": "Use AWS Backup copies as the only retention mechanism and leave the original objects unchanged.",
+          "correct": false,
+          "why": "Backup copies alone do not automate the requested storage-class change and deletion of the original objects."
+        }
+      ],
+      "explanation": "The scenario has two distinct stages: reduce storage cost when access declines, then delete the records after their required retention period. S3 Lifecycle provides transition actions for the first stage and expiration actions for the second. A transition alone leaves the objects in storage, while a bucket-policy deny only changes access. The studio should also evaluate transition costs when selecting the storage class and timing.",
+      "keywordCues": [
+        "later, access drops",
+        "defined archival period",
+        "deleting them when that period ends",
+        "automate both the storage-cost change and final deletion"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/sec_data_classification_lifecycle_management.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+      ],
+      "es": {
+        "stem": "Un estudio cinematográfico guarda registros de proyectos aprobados en S3. Al principio, los editores acceden a ellos con frecuencia; después, el acceso disminuye, pero la política exige conservarlos durante un período de archivo definido y eliminarlos al finalizar. El estudio quiere automatizar tanto el cambio en el costo de almacenamiento como la eliminación final. ¿Qué DOS acciones debe incluir en su configuración de S3 Lifecycle? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega una acción transition al terminar el período de archivo en lugar de eliminar los registros.",
+            "why": "Una transición conserva los objetos en otra clase de almacenamiento y no cumple la eliminación final requerida."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una acción expiration para el final del período de retención obligatorio.",
+            "why": "Expiration de Lifecycle elimina los objetos cuando termina el período de retención configurado."
+          },
+          {
+            "id": "C",
+            "text": "Agrega una acción transition para mover los registros a una clase de almacenamiento adecuada de menor costo cuando disminuya el acceso.",
+            "why": "Una transición de Lifecycle puede cambiar la clase de almacenamiento cuando se accede a los registros con menos frecuencia."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una denegación en la bucket policy que entre en vigor al terminar el período de archivo.",
+            "why": "Denegar el acceso no elimina los registros al terminar el período requerido."
+          },
+          {
+            "id": "E",
+            "text": "Usa copias de AWS Backup como único mecanismo de retención y deja sin cambios los objetos originales.",
+            "why": "Las copias de seguridad por sí solas no automatizan el cambio de clase de almacenamiento ni la eliminación de los objetos originales."
+          }
+        ],
+        "explanation": "El escenario tiene dos etapas: reducir el costo de almacenamiento cuando disminuye el acceso y eliminar los registros tras el período de retención obligatorio. S3 Lifecycle ofrece acciones transition para la primera y acciones expiration para la segunda. Una transición sola deja los objetos almacenados, mientras que una denegación en la bucket policy solo cambia el acceso. El estudio también debe evaluar los costos de transición al elegir la clase de almacenamiento y el momento del cambio."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-retention-policies--f6f36594",
+      "conceptId": "data-retention-policies",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research firm stores two classified datasets in one S3 bucket: temporary instrument output must be deleted after 60 days, while approved study records must remain available for a longer, separately defined period. The bucket contains older objects as well as new uploads, and the firm wants automatic enforcement for both groups. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move all objects to an archival storage class and review them periodically for deletion.",
+          "correct": false,
+          "why": "Archiving does not automatically delete objects at their different required expiration times."
+        },
+        {
+          "id": "B",
+          "text": "Create S3 Lifecycle expiration rules for the relevant groups of objects, using each group's required retention period.",
+          "correct": true,
+          "why": "Lifecycle rules can target groups of objects, apply to existing and new objects, and expire them according to different periods."
+        },
+        {
+          "id": "C",
+          "text": "Apply one S3 Lifecycle expiration period to the entire bucket and use a bucket policy to exempt approved records.",
+          "correct": false,
+          "why": "A bucket-policy deny cannot stop a configured Lifecycle rule from expiring objects in a general purpose bucket."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Backup for both datasets and remove objects from the bucket when each backup is created.",
+          "correct": false,
+          "why": "Creating backups does not implement the distinct retention periods required for usable objects in the bucket."
+        }
+      ],
+      "explanation": "The deciding requirement is automatic deletion at different times for two classified groups, including objects already in the bucket. S3 Lifecycle expiration rules can act on groups of objects and apply to both existing and future objects. A single bucket-wide period would disregard the classification requirements, and a bucket policy cannot override Lifecycle deletion in a general purpose bucket. Backups and archiving address different parts of the data lifecycle, not the requested expiration rules.",
+      "keywordCues": [
+        "two classified datasets",
+        "deleted after 60 days",
+        "longer, separately defined period",
+        "older objects as well as new uploads",
+        "automatic enforcement"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/sec_data_classification_lifecycle_management.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+      ],
+      "es": {
+        "stem": "Una empresa de investigación guarda dos conjuntos de datos clasificados en un bucket de S3: los resultados temporales de instrumentos deben eliminarse después de 60 días, mientras que los registros de estudios aprobados deben permanecer disponibles durante un período más largo definido por separado. El bucket contiene objetos antiguos y cargas nuevas, y la empresa quiere aplicar ambas reglas automáticamente. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mueve todos los objetos a una clase de almacenamiento de archivo y revísalos periódicamente para eliminarlos.",
+            "why": "Archivar no elimina automáticamente los objetos cuando llegan sus diferentes fechas de expiration."
+          },
+          {
+            "id": "B",
+            "text": "Crea reglas de expiration de S3 Lifecycle para los grupos de objetos correspondientes, con el período de retención requerido para cada grupo.",
+            "why": "Las reglas de Lifecycle pueden dirigirse a grupos de objetos, aplicarse a objetos existentes y nuevos, y eliminarlos según períodos distintos."
+          },
+          {
+            "id": "C",
+            "text": "Aplica un único período de expiration de S3 Lifecycle a todo el bucket y usa una bucket policy para excluir los registros aprobados.",
+            "why": "Una denegación en la bucket policy no puede impedir que una regla de Lifecycle configurada elimine objetos de un bucket de uso general."
+          },
+          {
+            "id": "D",
+            "text": "Usa AWS Backup para ambos conjuntos de datos y elimina los objetos del bucket cuando se cree cada copia de seguridad.",
+            "why": "Crear copias de seguridad no establece los distintos períodos de retención exigidos para los objetos utilizables del bucket."
+          }
+        ],
+        "explanation": "El requisito decisivo es eliminar automáticamente dos grupos clasificados en momentos diferentes, incluso si los objetos ya están en el bucket. Las reglas de expiration de S3 Lifecycle pueden actuar sobre grupos de objetos y se aplican tanto a los existentes como a los futuros. Un único período para todo el bucket ignoraría la clasificación, y una bucket policy no puede anular la eliminación de Lifecycle en un bucket de uso general. Las copias de seguridad y el archivado resuelven otras partes del ciclo de vida, no estas reglas de expiration."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "data-retention-policies--r0",
+      "conceptId": "data-retention-policies",
+      "kind": "recall",
+      "prompt": "S3 records become rarely accessed before their required deletion date. Which lifecycle actions would you configure, and why?",
+      "promptEs": "Los registros de S3 pasan a consultarse rara vez antes de su fecha obligatoria de eliminación. ¿Qué acciones de Lifecycle configurarías y por qué?",
+      "idealAnswer": "Configure an S3 Lifecycle transition when a lower-cost storage class suits the reduced access, and an expiration action when the retention period ends. Evaluate transition costs rather than assuming every transition saves money.",
+      "rubric": [
+        "Names an S3 Lifecycle transition for the less-accessed stage.",
+        "Names expiration for deletion after the required retention period.",
+        "Notes that transition costs should be considered."
+      ]
+    }
+  ]
+}

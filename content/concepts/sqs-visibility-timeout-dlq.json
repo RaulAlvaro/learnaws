@@ -1,0 +1,332 @@
+{
+  "conceptId": "sqs-visibility-timeout-dlq",
+  "card": {
+    "en": {
+      "tldr": "A received SQS message stays in the queue but is temporarily invisible to other consumers. Set the visibility timeout to cover processing and deletion, extend it when work runs long, and use a dead-letter queue (DLQ) to isolate messages that repeatedly fail.",
+      "whenToUse": [
+        "Workers need time to process messages without another worker picking them up prematurely.",
+        "Processing duration varies, so workers must extend visibility while work continues.",
+        "Repeatedly failing messages need separate inspection without circulating indefinitely in the source queue.",
+        "Consumers poll an often-empty queue; long polling can reduce empty receives."
+      ],
+      "keyFacts": [
+        "The default visibility timeout is 30 seconds; an undeleted message becomes visible again when its timeout expires.",
+        "ChangeMessageVisibility can adjust a received message’s timeout, but extensions cannot exceed 12 hours from its first receipt.",
+        "Delete messages after successful processing. Visibility timeout does not guarantee that a message will never be delivered more than once.",
+        "A DLQ must be in the same AWS account and Region as its source queue. The source queue’s redrive policy sets maxReceiveCount.",
+        "For a standard queue, set DLQ retention longer than source-queue retention because expiration remains based on the original enqueue timestamp.",
+        "At the standard-queue in-flight limit, long polling returns no new messages rather than an OverLimit error."
+      ],
+      "gotchas": [
+        "A visibility timeout that is too short permits premature reprocessing; one that is too long delays retries after a worker fails.",
+        "Extending visibility does not reset the 12-hour limit.",
+        "A DLQ can break the exact order required by some FIFO workflows.",
+        "Long polling does not resolve a backlog of received but undeleted messages."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "processing time varies between messages",
+        "message reappears before the worker finishes",
+        "repeated failures need separate inspection",
+        "FIFO workflow must preserve exact order",
+        "long polls return no messages despite a backlog"
+      ]
+    },
+    "es": {
+      "tldr": "Un mensaje recibido de SQS permanece en la cola, pero queda temporalmente invisible para otros consumidores. Ajusta el visibility timeout para cubrir el procesamiento y la eliminación, extiéndelo cuando el trabajo tarde más y usa una dead-letter queue (DLQ) para aislar mensajes que fallan repetidamente.",
+      "whenToUse": [
+        "Tus trabajadores necesitan procesar mensajes sin que otro trabajador los reciba prematuramente.",
+        "La duración del procesamiento varía y los trabajadores deben extender la visibilidad mientras siguen trabajando.",
+        "Necesitas inspeccionar por separado los mensajes que fallan repetidamente, sin que sigan circulando en la cola de origen.",
+        "Los consumidores consultan una cola que suele estar vacía; long polling puede reducir las recepciones vacías."
+      ],
+      "keyFacts": [
+        "El visibility timeout predeterminado es de 30 segundos; un mensaje no eliminado vuelve a estar visible cuando vence.",
+        "ChangeMessageVisibility permite ajustar el timeout de un mensaje recibido, pero las extensiones no pueden superar las 12 horas desde su primera recepción.",
+        "Elimina los mensajes después de procesarlos correctamente. El visibility timeout no garantiza que un mensaje nunca se entregue más de una vez.",
+        "La DLQ debe estar en la misma cuenta y AWS Region que la cola de origen. La redrive policy de la cola de origen establece maxReceiveCount.",
+        "Para una cola standard, configura una retención de la DLQ mayor que la de la cola de origen, porque la expiración sigue basándose en la marca de tiempo de envío original.",
+        "Cuando una cola standard alcanza el límite de mensajes in-flight, long polling deja de devolver mensajes nuevos en lugar de generar un error OverLimit."
+      ],
+      "gotchas": [
+        "Un visibility timeout demasiado corto permite reprocesamiento prematuro; uno demasiado largo retrasa los reintentos si falla un trabajador.",
+        "Extender la visibilidad no reinicia el límite de 12 horas.",
+        "Una DLQ puede romper el orden exacto que requieren algunos flujos FIFO.",
+        "Long polling no resuelve una acumulación de mensajes recibidos pero no eliminados."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "processing time varies between messages",
+        "message reappears before the worker finishes",
+        "repeated failures need separate inspection",
+        "FIFO workflow must preserve exact order",
+        "long polls return no messages despite a backlog"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+      "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "sqs-visibility-timeout-dlq--89a1ed3a",
+      "conceptId": "sqs-visibility-timeout-dlq",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing platform uses long polling on a busy SQS standard queue. During a surge, approximately 120,000 messages have been received but not deleted, and long-polling requests stop returning new messages without reporting OverLimit. An audit shows that workers finish processing but frequently leave completed messages in the queue. Which change should the platform make to restore deliveries MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Delete messages promptly after successful processing and monitor the in-flight message count.",
+          "correct": true,
+          "why": "Deleting completed messages reduces the in-flight count that prevents long polling from returning new messages."
+        },
+        {
+          "id": "B",
+          "text": "Extend visibility for all received messages until the long-polling requests return new messages.",
+          "correct": false,
+          "why": "Visibility extensions leave the messages in flight and do not clear the condition blocking new deliveries."
+        },
+        {
+          "id": "C",
+          "text": "Increase the long-polling wait so each request has more time to receive a message.",
+          "correct": false,
+          "why": "A longer wait does not make new messages available while the in-flight limit is reached."
+        },
+        {
+          "id": "D",
+          "text": "Lower maxReceiveCount so completed messages move to a DLQ sooner.",
+          "correct": false,
+          "why": "A DLQ handles messages that are not successfully processed; it does not replace deletion after successful processing."
+        }
+      ],
+      "explanation": "The decisive constraint is the in-flight backlog, not an empty queue. At the approximate standard-queue in-flight limit, long polling returns no new messages rather than an OverLimit error. Promptly deleting successfully processed messages reduces that count; monitoring helps detect the condition before deliveries stall. Increasing the polling wait or visibility timeout does not remove completed messages from the in-flight count.",
+      "keywordCues": [
+        "long polling",
+        "approximately 120,000 messages have been received but not deleted",
+        "without reporting OverLimit",
+        "workers finish processing but frequently leave completed messages"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de venta de entradas usa long polling en una cola SQS standard con mucho tráfico. Durante un aumento de demanda, se han recibido aproximadamente 120,000 mensajes que no se han eliminado, y las solicitudes de long polling dejan de devolver mensajes nuevos sin informar OverLimit. Una auditoría muestra que los trabajadores terminan de procesar, pero con frecuencia dejan los mensajes completados en la cola. ¿Qué cambio debe hacer la plataforma para restablecer las entregas MOST directly?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Elimina los mensajes oportunamente después de procesarlos correctamente y monitorea el número de mensajes in-flight.",
+            "why": "Eliminar los mensajes completados reduce el número de mensajes in-flight que impide que long polling devuelva mensajes nuevos."
+          },
+          {
+            "id": "B",
+            "text": "Extiende la visibilidad de todos los mensajes recibidos hasta que las solicitudes de long polling devuelvan mensajes nuevos.",
+            "why": "Las extensiones mantienen los mensajes in-flight y no eliminan la condición que bloquea las entregas nuevas."
+          },
+          {
+            "id": "C",
+            "text": "Aumenta la espera de long polling para que cada solicitud tenga más tiempo de recibir un mensaje.",
+            "why": "Una espera mayor no habilita mensajes nuevos mientras se haya alcanzado el límite de mensajes in-flight."
+          },
+          {
+            "id": "D",
+            "text": "Reduce maxReceiveCount para que los mensajes completados pasen antes a una DLQ.",
+            "why": "Una DLQ maneja mensajes que no se procesan correctamente; no sustituye su eliminación después de procesarlos."
+          }
+        ],
+        "explanation": "La restricción decisiva es la acumulación de mensajes in-flight, no una cola vacía. En el límite aproximado de mensajes in-flight de una cola standard, long polling deja de devolver mensajes nuevos en lugar de generar un error OverLimit. Eliminar oportunamente los mensajes procesados reduce ese número; el monitoreo ayuda a detectar el problema antes de que se detengan las entregas. Aumentar la espera de consulta o el visibility timeout no quita los mensajes completados del número de mensajes in-flight."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-visibility-timeout-dlq--79c573d3",
+      "conceptId": "sqs-visibility-timeout-dlq",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A video production team sends editing instructions through an SQS FIFO queue. Instructions within each message group must retain their exact processing order, and a worker sometimes needs several hours to finish one instruction. If a worker fails, the instruction must remain available for another attempt rather than be skipped. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use long polling to prevent a received instruction from becoming visible during processing.",
+          "correct": false,
+          "why": "Long polling affects receiving messages, not the visibility timeout of an instruction already received."
+        },
+        {
+          "id": "B",
+          "text": "Route repeatedly received instructions to a DLQ so later instructions can proceed.",
+          "correct": false,
+          "why": "Moving an instruction to a DLQ can break the exact order this workflow requires."
+        },
+        {
+          "id": "C",
+          "text": "Delete each instruction after successful processing, leaving unfinished instructions to reappear if visibility expires.",
+          "correct": true,
+          "why": "Deletion completes successful work, while an undeleted instruction becomes available again after its visibility timeout."
+        },
+        {
+          "id": "D",
+          "text": "Have active workers extend message visibility with ChangeMessageVisibility when processing exceeds the initial timeout.",
+          "correct": true,
+          "why": "Extending visibility keeps an active instruction unavailable to another consumer while work continues."
+        },
+        {
+          "id": "E",
+          "text": "Set visibility to more than 12 hours and extend it again if the worker is still active.",
+          "correct": false,
+          "why": "Visibility cannot exceed 12 hours from first receipt, and extending it does not reset that limit."
+        }
+      ],
+      "explanation": "The exact-order requirement makes a DLQ unsuitable if moving an instruction aside would change the sequence of operations. An active worker can extend visibility during a long edit, within the 12-hour limit from first receipt. It should delete the instruction only after success; if it fails before deletion, the instruction becomes visible for another attempt when the timeout expires. Long polling cannot protect an instruction that a worker has already received.",
+      "keywordCues": [
+        "SQS FIFO queue",
+        "retain their exact processing order",
+        "several hours to finish",
+        "must remain available for another attempt"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html"
+      ],
+      "es": {
+        "stem": "Un equipo de producción de video envía instrucciones de edición mediante una cola SQS FIFO. Las instrucciones de cada grupo de mensajes deben conservar su orden exacto de procesamiento, y a veces un trabajador necesita varias horas para terminar una instrucción. Si un trabajador falla, la instrucción debe seguir disponible para otro intento en lugar de omitirse. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa long polling para evitar que una instrucción ya recibida vuelva a estar visible durante el procesamiento.",
+            "why": "Long polling afecta la recepción de mensajes, no el visibility timeout de una instrucción que ya se recibió."
+          },
+          {
+            "id": "B",
+            "text": "Envía a una DLQ las instrucciones recibidas repetidamente para que las siguientes puedan avanzar.",
+            "why": "Mover una instrucción a una DLQ puede romper el orden exacto que requiere este flujo."
+          },
+          {
+            "id": "C",
+            "text": "Elimina cada instrucción después de procesarla correctamente y deja que las instrucciones inconclusas reaparezcan si vence su visibilidad.",
+            "why": "La eliminación completa el trabajo exitoso, mientras que una instrucción no eliminada vuelve a estar disponible al vencer su visibility timeout."
+          },
+          {
+            "id": "D",
+            "text": "Haz que los trabajadores activos extiendan la visibilidad del mensaje con ChangeMessageVisibility cuando el procesamiento supere el timeout inicial.",
+            "why": "Extender la visibilidad impide que otro consumidor reciba una instrucción mientras el trabajador activo continúa procesándola."
+          },
+          {
+            "id": "E",
+            "text": "Configura la visibilidad por más de 12 horas y vuelve a extenderla si el trabajador sigue activo.",
+            "why": "La visibilidad no puede superar las 12 horas desde la primera recepción, y extenderla no reinicia ese límite."
+          }
+        ],
+        "explanation": "El requisito de orden exacto hace que una DLQ no sea adecuada si apartar una instrucción cambia la secuencia de operaciones. Un trabajador activo puede extender la visibilidad durante una edición larga, dentro del límite de 12 horas desde la primera recepción. Debe eliminar la instrucción solo al terminar correctamente; si falla antes, la instrucción vuelve a estar visible para otro intento cuando vence el timeout. Long polling no protege una instrucción que un trabajador ya recibió."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-visibility-timeout-dlq--3967f51a",
+      "conceptId": "sqs-visibility-timeout-dlq",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company uses an SQS queue to distribute rendering jobs among workers. Most jobs finish quickly, but some take several minutes; those longer jobs sometimes become visible to another worker before the first worker finishes. The company also wants failed workers’ jobs to become eligible for retry without an unnecessarily long delay. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set a long, fixed visibility timeout for every job and leave each message in the queue after successful processing.",
+          "correct": false,
+          "why": "A long fixed timeout can delay retries, and leaving completed messages undeleted allows them to reappear."
+        },
+        {
+          "id": "B",
+          "text": "Set a reasonable initial visibility timeout, extend it with ChangeMessageVisibility while a worker is still processing, and delete the message after success.",
+          "correct": true,
+          "why": "Extensions protect long-running work without imposing the same long retry delay on every job, and deletion completes processing."
+        },
+        {
+          "id": "C",
+          "text": "Increase the queue’s long-polling wait and delete each message as soon as a worker receives it.",
+          "correct": false,
+          "why": "Long polling does not extend visibility, and deleting before processing prevents a failed job from being retried."
+        },
+        {
+          "id": "D",
+          "text": "Set a low maxReceiveCount and move jobs to a DLQ after their first unsuccessful attempt.",
+          "correct": false,
+          "why": "A DLQ isolates failures but does not keep an active long-running job invisible until its worker finishes."
+        }
+      ],
+      "explanation": "The deciding requirements are variable processing time and prompt retries after worker failure. Workers can extend visibility only while they need it, then delete successfully processed messages. A uniformly long timeout would delay failed jobs from becoming visible again, while a DLQ does not solve premature visibility during active processing. Visibility timeout reduces concurrent processing but is not an absolute duplicate-delivery guarantee.",
+      "keywordCues": [
+        "some take several minutes",
+        "become visible to another worker before the first worker finishes",
+        "without an unnecessarily long delay"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+        "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios usa una cola SQS para distribuir trabajos de renderizado entre trabajadores. La mayoría termina rápido, pero algunos tardan varios minutos; esos trabajos a veces vuelven a estar visibles para otro trabajador antes de que termine el primero. La empresa también quiere que los trabajos de trabajadores que fallan puedan reintentarse sin una demora innecesariamente larga. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura un visibility timeout fijo y largo para todos los trabajos y deja cada mensaje en la cola después de procesarlo correctamente.",
+            "why": "Un timeout fijo y largo puede retrasar los reintentos, y los mensajes completados que no se eliminan vuelven a aparecer."
+          },
+          {
+            "id": "B",
+            "text": "Configura un visibility timeout inicial razonable, extiéndelo con ChangeMessageVisibility mientras el trabajador siga procesando y elimina el mensaje al terminar correctamente.",
+            "why": "Las extensiones protegen los trabajos largos sin imponer la misma demora de reintento a todos, y la eliminación completa el procesamiento."
+          },
+          {
+            "id": "C",
+            "text": "Aumenta la espera de long polling de la cola y elimina cada mensaje en cuanto un trabajador lo reciba.",
+            "why": "Long polling no extiende la visibilidad, y eliminar antes de procesar impide reintentar un trabajo si el trabajador falla."
+          },
+          {
+            "id": "D",
+            "text": "Configura un maxReceiveCount bajo y mueve los trabajos a una DLQ después del primer intento fallido.",
+            "why": "Una DLQ aísla fallas, pero no mantiene invisible un trabajo largo mientras su trabajador sigue procesándolo."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la duración variable del procesamiento y los reintentos oportunos tras una falla. Los trabajadores pueden extender la visibilidad solo mientras la necesiten y luego eliminar los mensajes procesados correctamente. Un timeout largo para todos retrasaría los trabajos fallidos, mientras que una DLQ no evita que un mensaje vuelva a estar visible durante el procesamiento. El visibility timeout reduce el procesamiento simultáneo, pero no garantiza de forma absoluta que no haya entregas duplicadas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "sqs-visibility-timeout-dlq--r0",
+      "conceptId": "sqs-visibility-timeout-dlq",
+      "kind": "recall",
+      "prompt": "An SQS worker’s task duration varies, and some messages fail repeatedly. Which queue features would you use, and why?",
+      "promptEs": "La duración de las tareas de un trabajador de SQS varía y algunos mensajes fallan repetidamente. ¿Qué funciones de la cola usarías y por qué?",
+      "idealAnswer": "Set an appropriate initial visibility timeout and extend it with ChangeMessageVisibility while a task is still running; delete the message after successful processing. Configure a DLQ with sufficient allowed receives to isolate persistent failures for investigation.",
+      "rubric": [
+        "Matches or extends visibility to cover active processing.",
+        "Deletes successfully processed messages.",
+        "Uses a DLQ and sufficient retry attempts for persistent failures."
+      ]
+    }
+  ]
+}

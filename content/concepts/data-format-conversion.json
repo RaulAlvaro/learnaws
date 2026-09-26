@@ -1,0 +1,321 @@
+{
+  "conceptId": "data-format-conversion",
+  "card": {
+    "en": {
+      "tldr": "Convert CSV or JSON data in Amazon S3 to columnar Parquet or ORC when Athena queries need to read data more efficiently. For existing data, choose Athena CTAS or an AWS Glue job; for incoming JSON, Amazon Data Firehose can convert records before delivering them to S3. Plan partitions around frequently filtered values as a separate data-layout decision.",
+      "whenToUse": [
+        "Existing CSV or JSON files in S3 need conversion to Parquet or ORC.",
+        "Incoming JSON records should arrive in S3 in a columnar format.",
+        "Analytical queries repeatedly filter a large dataset or request only some columns."
+      ],
+      "keyFacts": [
+        "Parquet and ORC compress data by column and support predicate pushdown, helping Athena avoid reading unneeded blocks.",
+        "Athena CTAS and AWS Glue jobs can convert existing CSV or JSON data to Parquet or ORC.",
+        "Amazon Data Firehose converts JSON input to Parquet or ORC before storing it in S3; CSV input needs a Lambda transformation to JSON first.",
+        "Firehose format conversion uses a JSON deserializer, a matching AWS Glue Data Catalog schema, and a Parquet or ORC serializer."
+      ],
+      "gotchas": [
+        "Creating a catalog schema is not the same as rewriting existing files in a columnar format.",
+        "Firehose does not directly convert CSV input to Parquet or ORC without a preceding transformation to JSON.",
+        "A Firehose catalog schema that omits an input attribute will omit that attribute from the converted data."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing CSV files in S3",
+        "streaming JSON to S3 as Parquet",
+        "CSV records through Firehose",
+        "reduce Athena data reads"
+      ]
+    },
+    "es": {
+      "tldr": "Convierte datos CSV o JSON en Amazon S3 a los formatos columnares Parquet u ORC cuando las consultas de Athena necesiten leer los datos con mayor eficiencia. Para datos existentes, elige Athena CTAS o un trabajo de AWS Glue; para JSON entrante, Amazon Data Firehose puede convertir los registros antes de entregarlos a S3. Planifica las particiones según los valores que se filtran con frecuencia como una decisión aparte sobre la organización de los datos.",
+      "whenToUse": [
+        "Necesitas convertir archivos CSV o JSON existentes en S3 a Parquet u ORC.",
+        "Quieres que los registros JSON entrantes lleguen a S3 en un formato columnar.",
+        "Tus consultas analíticas filtran repetidamente un conjunto de datos grande o solicitan solo algunas columnas."
+      ],
+      "keyFacts": [
+        "Parquet y ORC comprimen los datos por columna y admiten predicate pushdown, lo que ayuda a Athena a evitar leer bloques innecesarios.",
+        "Athena CTAS y los trabajos de AWS Glue pueden convertir datos CSV o JSON existentes a Parquet u ORC.",
+        "Amazon Data Firehose convierte entradas JSON a Parquet u ORC antes de almacenarlas en S3; una entrada CSV requiere primero una transformación a JSON con Lambda.",
+        "La conversión de formatos en Firehose utiliza un deserializador JSON, un esquema correspondiente en AWS Glue Data Catalog y un serializador Parquet u ORC."
+      ],
+      "gotchas": [
+        "Crear un esquema en el catálogo no equivale a reescribir los archivos existentes en un formato columnar.",
+        "Firehose no convierte directamente entradas CSV a Parquet u ORC sin transformarlas primero a JSON.",
+        "Si el esquema del catálogo de Firehose omite un atributo de entrada, ese atributo no aparecerá en los datos convertidos."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing CSV files in S3",
+        "streaming JSON to S3 as Parquet",
+        "CSV records through Firehose",
+        "reduce Athena data reads"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/athena/latest/ug/columnar-storage.html",
+      "https://docs.aws.amazon.com/firehose/latest/dev/record-format-conversion.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "data-format-conversion--8733faf5",
+      "conceptId": "data-format-conversion",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum stores years of visitor-event CSV files in Amazon S3. Analysts query the historical dataset with Athena and want the files rewritten in a columnar format to improve query efficiency. The team prefers to perform this one-time conversion with an Athena query rather than build an ingestion pipeline. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run an Athena CTAS query over the CSV data and specify Parquet for the new table's stored data.",
+          "correct": true,
+          "why": "Athena CTAS can convert existing CSV data to Parquet in one step."
+        },
+        {
+          "id": "B",
+          "text": "Run an AWS Glue job that reads the CSV files and writes Parquet files to S3.",
+          "correct": false,
+          "why": "A Glue job can convert the files, but it does not satisfy the team's preference to use an Athena query."
+        },
+        {
+          "id": "C",
+          "text": "Create an AWS Glue Data Catalog schema for the CSV files and continue querying the original files.",
+          "correct": false,
+          "why": "A schema does not rewrite the existing CSV files into a columnar format."
+        },
+        {
+          "id": "D",
+          "text": "Send new visitor events through Amazon Data Firehose with Parquet conversion enabled.",
+          "correct": false,
+          "why": "Converting newly ingested events does not perform the requested one-time conversion of historical S3 files."
+        }
+      ],
+      "explanation": "The deciding requirement is a one-time rewrite of existing S3 files using an Athena query. CTAS can write query results as Parquet, providing the requested columnar conversion in one step. A Glue job is another valid conversion method but misses the stated preference. A catalog schema alone does not change the stored file format.",
+      "keywordCues": [
+        "historical dataset",
+        "one-time conversion",
+        "with an Athena query"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/athena/latest/ug/columnar-storage.html",
+        "https://docs.aws.amazon.com/firehose/latest/dev/record-format-conversion.html"
+      ],
+      "es": {
+        "stem": "Un museo almacena años de archivos CSV de eventos de visitantes en Amazon S3. Los analistas consultan el conjunto histórico con Athena y quieren reescribir los archivos en un formato columnar para mejorar la eficiencia de las consultas. El equipo prefiere realizar esta conversión única con una consulta de Athena, en lugar de crear un pipeline de ingesta. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta una consulta Athena CTAS sobre los datos CSV y especifica Parquet para los datos almacenados de la tabla nueva.",
+            "why": "Athena CTAS puede convertir datos CSV existentes a Parquet en un solo paso."
+          },
+          {
+            "id": "B",
+            "text": "Ejecuta un trabajo de AWS Glue que lea los archivos CSV y escriba archivos Parquet en S3.",
+            "why": "Un trabajo de AWS Glue puede convertir los archivos, pero no cumple la preferencia del equipo de usar una consulta de Athena."
+          },
+          {
+            "id": "C",
+            "text": "Crea un esquema en AWS Glue Data Catalog para los archivos CSV y sigue consultando los archivos originales.",
+            "why": "Un esquema no reescribe los archivos CSV existentes en un formato columnar."
+          },
+          {
+            "id": "D",
+            "text": "Envía los eventos nuevos de visitantes mediante Amazon Data Firehose con la conversión a Parquet habilitada.",
+            "why": "Convertir eventos nuevos durante la ingesta no realiza la conversión única solicitada de los archivos históricos en S3."
+          }
+        ],
+        "explanation": "El requisito decisivo es reescribir una vez los archivos existentes en S3 mediante una consulta de Athena. CTAS puede escribir los resultados de la consulta como Parquet y realizar la conversión columnar en un solo paso. Un trabajo de AWS Glue también puede convertir los datos, pero no cumple la preferencia indicada. Un esquema de catálogo por sí solo no cambia el formato de los archivos almacenados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-format-conversion--fc2bef8b",
+      "conceptId": "data-format-conversion",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A public-health research team has existing CSV and JSON datasets in Amazon S3. Researchers want new Parquet copies of these historical datasets for Athena analysis; they do not need to change how future records arrive. The team will consider either a query-based conversion or an ETL job. Which TWO solutions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run AWS Glue jobs that read the existing datasets and write new Parquet files.",
+          "correct": true,
+          "why": "AWS Glue jobs can convert CSV or JSON source data into Parquet."
+        },
+        {
+          "id": "B",
+          "text": "Query the CSV and JSON files in Athena without writing results to new files.",
+          "correct": false,
+          "why": "Queries that do not write converted output cannot produce the required Parquet copies."
+        },
+        {
+          "id": "C",
+          "text": "Add Parquet table definitions to the AWS Glue Data Catalog without processing the source files.",
+          "correct": false,
+          "why": "Catalog definitions alone do not create Parquet copies of existing files."
+        },
+        {
+          "id": "D",
+          "text": "Run Athena CTAS queries over the existing datasets and specify Parquet for the new stored data.",
+          "correct": true,
+          "why": "CTAS can convert existing CSV or JSON source data to Parquet."
+        },
+        {
+          "id": "E",
+          "text": "Configure Firehose format conversion to read the existing CSV objects directly from S3.",
+          "correct": false,
+          "why": "Firehose's format converter does not directly accept CSV, and this does not describe converting stored S3 objects."
+        }
+      ],
+      "explanation": "The team needs Parquet copies of data already stored in S3, not a change to future ingestion. Both Athena CTAS and AWS Glue jobs can convert existing CSV or JSON data to Parquet. Catalog definitions and read-only queries do not rewrite the source data or create converted copies. Firehose format conversion is not a direct conversion mechanism for existing CSV objects.",
+      "keywordCues": [
+        "existing CSV and JSON datasets",
+        "new Parquet copies",
+        "either a query-based conversion or an ETL job",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/athena/latest/ug/columnar-storage.html",
+        "https://docs.aws.amazon.com/firehose/latest/dev/record-format-conversion.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación de salud pública tiene conjuntos de datos CSV y JSON existentes en Amazon S3. Los investigadores quieren copias nuevas en Parquet de esos conjuntos históricos para analizarlos con Athena; no necesitan cambiar cómo llegan los registros futuros. El equipo considera tanto una conversión mediante consultas como un trabajo de ETL. ¿Qué DOS soluciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta trabajos de AWS Glue que lean los conjuntos existentes y escriban archivos Parquet nuevos.",
+            "why": "Los trabajos de AWS Glue pueden convertir datos de origen CSV o JSON a Parquet."
+          },
+          {
+            "id": "B",
+            "text": "Consulta los archivos CSV y JSON en Athena sin escribir los resultados en archivos nuevos.",
+            "why": "Las consultas que no escriben resultados convertidos no pueden producir las copias Parquet requeridas."
+          },
+          {
+            "id": "C",
+            "text": "Agrega definiciones de tablas Parquet a AWS Glue Data Catalog sin procesar los archivos de origen.",
+            "why": "Las definiciones de catálogo por sí solas no crean copias Parquet de los archivos existentes."
+          },
+          {
+            "id": "D",
+            "text": "Ejecuta consultas Athena CTAS sobre los conjuntos existentes y especifica Parquet para los datos nuevos almacenados.",
+            "why": "CTAS puede convertir datos de origen CSV o JSON existentes a Parquet."
+          },
+          {
+            "id": "E",
+            "text": "Configura la conversión de formatos de Firehose para leer directamente los objetos CSV existentes en S3.",
+            "why": "El conversor de formatos de Firehose no acepta CSV directamente, y esta opción tampoco describe una conversión de objetos ya almacenados en S3."
+          }
+        ],
+        "explanation": "El equipo necesita copias Parquet de datos que ya están en S3, no cambiar la ingesta futura. Tanto Athena CTAS como los trabajos de AWS Glue pueden convertir datos CSV o JSON existentes a Parquet. Las definiciones de catálogo y las consultas de solo lectura no reescriben los datos ni crean copias convertidas. La conversión de formatos de Firehose no convierte directamente objetos CSV existentes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-format-conversion--9a973a7d",
+      "conceptId": "data-format-conversion",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing platform sends CSV records continuously to Amazon Data Firehose for delivery to Amazon S3. Its Athena users need the delivered records in ORC rather than CSV, and the platform wants conversion during ingestion. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an AWS Glue Data Catalog schema for the CSV records and deliver the CSV files unchanged.",
+          "correct": false,
+          "why": "A catalog schema does not convert the delivered CSV files to ORC."
+        },
+        {
+          "id": "B",
+          "text": "Use Lambda to transform CSV records to JSON, then configure Firehose ORC conversion with a matching catalog schema.",
+          "correct": true,
+          "why": "Lambda supplies the JSON input that Firehose requires before it can serialize the records as ORC."
+        },
+        {
+          "id": "C",
+          "text": "Enable ORC format conversion directly on the Firehose CSV input and reference a matching catalog schema.",
+          "correct": false,
+          "why": "Firehose format conversion requires JSON input, not direct CSV input."
+        },
+        {
+          "id": "D",
+          "text": "Deliver CSV files to S3 and periodically run Athena CTAS to create ORC files.",
+          "correct": false,
+          "why": "CTAS can convert existing files, but this design postpones conversion rather than performing it during ingestion."
+        }
+      ],
+      "explanation": "The requirement is to convert continuous CSV input while it is being ingested. Firehose converts JSON—not CSV directly—to ORC or Parquet, so Lambda must first transform the CSV records to JSON. Firehose then uses its configured deserializer, catalog schema, and ORC serializer. Athena CTAS is useful for conversion after data is stored, but misses the requested ingestion-time conversion.",
+      "keywordCues": [
+        "CSV records continuously",
+        "delivered records in ORC",
+        "conversion during ingestion"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/athena/latest/ug/columnar-storage.html",
+        "https://docs.aws.amazon.com/firehose/latest/dev/record-format-conversion.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de venta de boletos envía registros CSV continuamente a Amazon Data Firehose para entregarlos a Amazon S3. Sus usuarios de Athena necesitan los registros entregados en ORC en lugar de CSV, y la plataforma quiere convertirlos durante la ingesta. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un esquema en AWS Glue Data Catalog para los registros CSV y entrega los archivos CSV sin cambios.",
+            "why": "Un esquema de catálogo no convierte los archivos CSV entregados a ORC."
+          },
+          {
+            "id": "B",
+            "text": "Usa Lambda para transformar los registros CSV a JSON y después configura la conversión a ORC de Firehose con un esquema de catálogo correspondiente.",
+            "why": "Lambda proporciona la entrada JSON que Firehose necesita antes de serializar los registros como ORC."
+          },
+          {
+            "id": "C",
+            "text": "Habilita la conversión a ORC directamente sobre la entrada CSV de Firehose y referencia un esquema de catálogo correspondiente.",
+            "why": "La conversión de formatos de Firehose requiere entrada JSON, no entrada CSV directa."
+          },
+          {
+            "id": "D",
+            "text": "Entrega los archivos CSV a S3 y ejecuta periódicamente Athena CTAS para crear archivos ORC.",
+            "why": "CTAS puede convertir archivos existentes, pero este diseño pospone la conversión en lugar de hacerla durante la ingesta."
+          }
+        ],
+        "explanation": "El requisito es convertir la entrada CSV continua mientras se ingiere. Firehose convierte JSON a ORC o Parquet, pero no convierte CSV directamente, por lo que Lambda debe transformar primero los registros CSV a JSON. Después, Firehose utiliza el deserializador, el esquema de catálogo y el serializador ORC configurados. Athena CTAS sirve para convertir datos después de almacenarlos, pero no cumple el requisito de conversión durante la ingesta."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "data-format-conversion--r0",
+      "conceptId": "data-format-conversion",
+      "kind": "recall",
+      "prompt": "Historical CSV files are already in S3. Which Athena feature converts them to Parquet, and why choose Parquet for analysis?",
+      "promptEs": "Ya tienes archivos CSV históricos en S3. ¿Qué función de Athena los convierte a Parquet y por qué elegirías Parquet para el análisis?",
+      "idealAnswer": "Use an Athena CREATE TABLE AS SELECT (CTAS) query that specifies Parquet as the stored format. Parquet's column compression and predicate pushdown can reduce the data Athena needs to read during analysis.",
+      "rubric": [
+        "Names Athena CTAS.",
+        "States that CTAS writes the existing data as Parquet.",
+        "Connects Parquet's columnar behavior to more efficient Athena reads."
+      ]
+    }
+  ]
+}

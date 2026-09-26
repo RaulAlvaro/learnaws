@@ -1,0 +1,418 @@
+{
+  "conceptId": "public-vs-private-subnets",
+  "card": {
+    "en": {
+      "tldr": "A public subnet has a direct route to an internet gateway; a private subnet does not. For an internet-facing application, place load balancer nodes in public subnets and application servers in private subnets so clients reach the servers through the load balancer rather than directly.",
+      "whenToUse": [
+        "Users must reach an application from the internet, but must not connect directly to its servers.",
+        "Private application servers need outbound internet access.",
+        "A workload must remain available if one Availability Zone fails."
+      ],
+      "keyFacts": [
+        "Subnet type is determined by routing, not by its name.",
+        "A private subnet has no direct route to an internet gateway; for outbound internet access its resources use a NAT device (IPv4) or an egress-only internet gateway (IPv6).",
+        "A subnet resides entirely within one Availability Zone.",
+        "AWS's two-AZ production example places load balancer nodes and NAT gateways in public subnets, with application servers in private subnets.",
+        "In that example, server security groups allow load balancer traffic and health checks."
+      ],
+      "gotchas": [
+        "Putting servers in public subnets exposes a tier that could instead receive requests through a load balancer.",
+        "A NAT route provides outbound access for private servers; it is not the path for incoming client requests.",
+        "Security group rules do not turn a subnet without an internet-gateway route into a public subnet."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Isolated subnet",
+          "difference": "An isolated subnet has no route to destinations outside its VPC; a private subnet can use a NAT device or an egress-only internet gateway for outbound internet access."
+        },
+        {
+          "concept": "Security group",
+          "difference": "A security group controls traffic for associated resources, while the subnet's route table determines whether it has a direct internet-gateway route."
+        }
+      ],
+      "examCues": [
+        "internet-facing application without publicly reachable servers",
+        "private servers need outbound internet access",
+        "load balancer across two Availability Zones",
+        "database needs only VPC-internal connectivity"
+      ]
+    },
+    "es": {
+      "tldr": "Una public subnet tiene una ruta directa hacia un internet gateway; una private subnet no. Para una aplicación accesible desde internet, coloca los nodos del load balancer en public subnets y los servidores de aplicación en private subnets, de modo que los clientes lleguen a ellos a través del load balancer.",
+      "whenToUse": [
+        "Los usuarios deben acceder a una aplicación desde internet, pero no conectarse directamente a sus servidores.",
+        "Los servidores de aplicación en private subnets necesitan salida a internet.",
+        "La carga de trabajo debe seguir disponible si falla una Availability Zone."
+      ],
+      "keyFacts": [
+        "El tipo de subnet depende de sus rutas, no de su nombre.",
+        "Una private subnet no tiene una ruta directa hacia un internet gateway; para salir a internet sus recursos usan un dispositivo NAT (IPv4) o un egress-only internet gateway (IPv6).",
+        "Cada subnet está completamente dentro de una sola Availability Zone.",
+        "El ejemplo de producción de AWS en dos Availability Zones coloca los nodos del load balancer y los NAT gateways en public subnets, y los servidores de aplicación en private subnets.",
+        "En ese ejemplo, los security groups de los servidores permiten el tráfico y los health checks del load balancer."
+      ],
+      "gotchas": [
+        "Colocar los servidores en public subnets expone una capa que podría recibir solicitudes a través de un load balancer.",
+        "Una ruta hacia NAT permite la salida de servidores privados; no es la ruta para las solicitudes entrantes de los clientes.",
+        "Las reglas de un security group no convierten en public subnet una subnet sin ruta hacia un internet gateway."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Isolated subnet",
+          "difference": "Una isolated subnet no tiene rutas hacia destinos fuera de su VPC; una private subnet puede usar un dispositivo NAT o un egress-only internet gateway para salir a internet."
+        },
+        {
+          "concept": "Security group",
+          "difference": "Un security group controla el tráfico de los recursos asociados, mientras que la route table de la subnet determina si existe una ruta directa hacia un internet gateway."
+        }
+      ],
+      "examCues": [
+        "internet-facing application without publicly reachable servers",
+        "private servers need outbound internet access",
+        "load balancer across two Availability Zones",
+        "database needs only VPC-internal connectivity"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "public-vs-private-subnets--ac4db6e1",
+      "conceptId": "public-vs-private-subnets",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics platform runs application servers in private subnets across two Availability Zones. The servers must download updates from the public internet without receiving direct internet traffic. Outbound access must remain available if either Availability Zone fails. Which TWO configurations meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy one NAT gateway in a public subnet in a single Availability Zone.",
+          "correct": false,
+          "why": "A NAT gateway in only one Availability Zone does not meet the stated AZ-failure requirement."
+        },
+        {
+          "id": "B",
+          "text": "Add a direct internet-gateway route to each application subnet.",
+          "correct": false,
+          "why": "Direct internet-gateway routes would make the application subnets public."
+        },
+        {
+          "id": "C",
+          "text": "Deploy a NAT gateway in a public subnet in each Availability Zone.",
+          "correct": true,
+          "why": "A NAT gateway in each Availability Zone supports resilient outbound access for private servers."
+        },
+        {
+          "id": "D",
+          "text": "Remove all routes to destinations outside the VPC from both application subnets.",
+          "correct": false,
+          "why": "That would prevent the servers from downloading updates from the public internet."
+        },
+        {
+          "id": "E",
+          "text": "Route each private application's outbound internet traffic to its Availability Zone's NAT gateway, while routing the public NAT subnets to the internet gateway.",
+          "correct": true,
+          "why": "This gives each private subnet outbound internet access through NAT without a direct internet-gateway route."
+        }
+      ],
+      "explanation": "The servers need internet egress, no direct internet-gateway route in their subnets, and resilience across Availability Zones. Deploying NAT gateways in public subnets in both AZs and routing each private application's outbound traffic through its AZ's NAT gateway satisfies those constraints. A single-AZ NAT deployment misses the failure requirement. Direct internet-gateway routes would make the application subnets public, while removing external routes would block downloads.",
+      "keywordCues": [
+        "private subnets across two Availability Zones",
+        "download updates from the public internet",
+        "without receiving direct internet traffic",
+        "remain available if either Availability Zone fails"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html"
+      ],
+      "es": {
+        "stem": "Una plataforma logística ejecuta servidores de aplicación en private subnets de dos Availability Zones. Los servidores deben descargar actualizaciones desde internet sin recibir tráfico directo de internet. La salida debe seguir disponible si falla cualquiera de las Availability Zones. ¿Qué DOS configuraciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementa un solo NAT gateway en una public subnet de una única Availability Zone.",
+            "why": "Un NAT gateway en una sola Availability Zone no cumple el requisito de resistir la falla de una zona."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una ruta directa al internet gateway en cada subnet de aplicación.",
+            "why": "Las rutas directas al internet gateway convertirían las subnets de aplicación en públicas."
+          },
+          {
+            "id": "C",
+            "text": "Implementa un NAT gateway en una public subnet de cada Availability Zone.",
+            "why": "Un NAT gateway en cada Availability Zone ofrece salida resiliente a los servidores privados."
+          },
+          {
+            "id": "D",
+            "text": "Elimina todas las rutas hacia destinos fuera de la VPC de ambas subnets de aplicación.",
+            "why": "Eso impediría que los servidores descarguen actualizaciones desde internet."
+          },
+          {
+            "id": "E",
+            "text": "Dirige el tráfico saliente a internet de cada aplicación privada hacia el NAT gateway de su Availability Zone y dirige las subnets públicas de NAT hacia el internet gateway.",
+            "why": "Así, cada private subnet obtiene salida a internet mediante NAT sin una ruta directa al internet gateway."
+          }
+        ],
+        "explanation": "Los servidores necesitan salida a internet, ninguna ruta directa al internet gateway en sus subnets y resiliencia entre Availability Zones. Implementar NAT gateways en public subnets de ambas zonas y dirigir la salida de cada aplicación privada al NAT gateway de su zona satisface esas condiciones. Un único NAT gateway en una sola zona no cumple el requisito ante fallas. Las rutas directas al internet gateway volverían públicas las subnets de aplicación; quitar las rutas externas impediría las descargas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "public-vs-private-subnets--72b18388",
+      "conceptId": "public-vs-private-subnets",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is moving a public web application to EC2 in two Availability Zones. Customers must reach the application over the internet, but must not connect directly to the application instances. Which subnet layout meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the Application Load Balancer and application instances in private subnets across both Availability Zones.",
+          "correct": false,
+          "why": "This layout provides no public-subnet entry point for internet customers."
+        },
+        {
+          "id": "B",
+          "text": "Place the internet-facing Application Load Balancer in public subnets and the application instances in private subnets across both Availability Zones.",
+          "correct": true,
+          "why": "The load balancer accepts public requests while the instances receive traffic through it from private subnets."
+        },
+        {
+          "id": "C",
+          "text": "Place the Application Load Balancer and application instances in public subnets across both Availability Zones.",
+          "correct": false,
+          "why": "Public subnets unnecessarily place the application instances in the internet-routed tier."
+        },
+        {
+          "id": "D",
+          "text": "Place the application instances in public subnets and the Application Load Balancer in private subnets across both Availability Zones.",
+          "correct": false,
+          "why": "It reverses the required exposure: the instances occupy the public tier while the load balancer does not."
+        }
+      ],
+      "explanation": "The deciding constraint is public customer access without direct access to application instances. An internet-facing Application Load Balancer in public subnets can receive requests and forward them to instances in private subnets. Using subnets in both Availability Zones also protects against a single-AZ failure. Placing the instances in public subnets needlessly moves the protected tier into the internet-routed portion of the VPC.",
+      "keywordCues": [
+        "public web application",
+        "two Availability Zones",
+        "must not connect directly to the application instances"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos migra una aplicación web pública a EC2 en dos Availability Zones. Los clientes deben acceder a la aplicación desde internet, pero no deben conectarse directamente a las instancias de aplicación. ¿Qué distribución de subnets cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Coloca el Application Load Balancer y las instancias de aplicación en private subnets de ambas Availability Zones.",
+            "why": "Esta distribución no ofrece un punto de entrada en public subnets para los clientes de internet."
+          },
+          {
+            "id": "B",
+            "text": "Coloca el Application Load Balancer internet-facing en public subnets y las instancias de aplicación en private subnets de ambas Availability Zones.",
+            "why": "El load balancer recibe las solicitudes públicas, mientras que las instancias reciben el tráfico a través de él desde private subnets."
+          },
+          {
+            "id": "C",
+            "text": "Coloca el Application Load Balancer y las instancias de aplicación en public subnets de ambas Availability Zones.",
+            "why": "Las public subnets colocan innecesariamente las instancias de aplicación en la capa con ruta a internet."
+          },
+          {
+            "id": "D",
+            "text": "Coloca las instancias de aplicación en public subnets y el Application Load Balancer en private subnets de ambas Availability Zones.",
+            "why": "Invierte la exposición requerida: las instancias quedan en la capa pública y el load balancer no."
+          }
+        ],
+        "explanation": "La condición decisiva es permitir el acceso de los clientes sin darles acceso directo a las instancias. Un Application Load Balancer internet-facing en public subnets puede recibir solicitudes y enviarlas a instancias en private subnets. Usar subnets en ambas Availability Zones también protege frente a la falla de una zona. Poner las instancias en public subnets mueve innecesariamente la capa protegida a la parte de la VPC con ruta a internet."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "public-vs-private-subnets--12518b53",
+      "conceptId": "public-vs-private-subnets",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company has placed its rendering workers in a subnet intended to be private. The workers must download software from the public internet, but inbound client traffic must continue to arrive only through an Application Load Balancer in public subnets. Which routing change meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a default route from the workers' subnet directly to the internet gateway.",
+          "correct": false,
+          "why": "A direct internet-gateway route makes the workers' subnet public rather than keeping it private."
+        },
+        {
+          "id": "B",
+          "text": "Remove every route to destinations outside the VPC from the workers' subnet.",
+          "correct": false,
+          "why": "An isolated subnet cannot provide the required downloads from the public internet."
+        },
+        {
+          "id": "C",
+          "text": "Route outbound internet traffic from the workers' subnet to the Application Load Balancer.",
+          "correct": false,
+          "why": "The load balancer handles incoming application requests, not the workers' outbound internet access."
+        },
+        {
+          "id": "D",
+          "text": "Route outbound internet traffic from the workers' subnet to a NAT gateway in a public subnet.",
+          "correct": true,
+          "why": "A NAT gateway provides outbound internet access without adding a direct internet-gateway route to the workers' subnet."
+        }
+      ],
+      "explanation": "The workers need outbound internet access while remaining in a subnet without a direct internet-gateway route. A route to a NAT gateway in a public subnet meets that requirement, while the load balancer remains the entry point for client requests. Routing the private subnet directly to the internet gateway would change its routing classification to public. Removing outside-VPC routes would prevent the required downloads.",
+      "keywordCues": [
+        "subnet intended to be private",
+        "download software from the public internet",
+        "inbound client traffic must continue to arrive only through an Application Load Balancer"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios colocó sus servidores de renderizado en una subnet que debe seguir siendo privada. Los servidores necesitan descargar software desde internet, pero el tráfico entrante de los clientes debe seguir llegando solo a través de un Application Load Balancer en public subnets. ¿Qué cambio de rutas cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega una ruta predeterminada desde la subnet de los servidores directamente al internet gateway.",
+            "why": "Una ruta directa al internet gateway convierte la subnet de los servidores en pública en lugar de mantenerla privada."
+          },
+          {
+            "id": "B",
+            "text": "Elimina todas las rutas hacia destinos fuera de la VPC de la subnet de los servidores.",
+            "why": "Una isolated subnet no permite las descargas necesarias desde internet."
+          },
+          {
+            "id": "C",
+            "text": "Dirige el tráfico saliente a internet desde la subnet de los servidores hacia el Application Load Balancer.",
+            "why": "El load balancer procesa solicitudes entrantes de la aplicación, no la salida a internet de los servidores."
+          },
+          {
+            "id": "D",
+            "text": "Dirige el tráfico saliente a internet desde la subnet de los servidores hacia un NAT gateway en una public subnet.",
+            "why": "Un NAT gateway permite salir a internet sin agregar una ruta directa al internet gateway en la subnet de los servidores."
+          }
+        ],
+        "explanation": "Los servidores necesitan salir a internet sin que su subnet tenga una ruta directa al internet gateway. Una ruta hacia un NAT gateway en una public subnet satisface esa necesidad, mientras que el load balancer sigue siendo el punto de entrada de las solicitudes de clientes. Enrutar la private subnet directamente al internet gateway la convertiría en pública según sus rutas. Eliminar las rutas fuera de la VPC impediría las descargas."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "public-vs-private-subnets--2c251eae",
+      "conceptId": "public-vs-private-subnets",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research institute runs an application behind an internet-facing load balancer. Its application servers need outbound internet access for updates, but the database accepts connections only from resources inside the VPC and needs no external destinations. Which subnet design minimizes the database tier's network exposure?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Put the application servers and database in private subnets, and route both subnets to a NAT gateway.",
+          "correct": false,
+          "why": "The database does not need the outbound access supplied by a NAT route."
+        },
+        {
+          "id": "B",
+          "text": "Put the application servers in isolated subnets, and put the database in private subnets with a route to a NAT gateway.",
+          "correct": false,
+          "why": "It denies the servers their required updates while giving the database unnecessary outbound routing."
+        },
+        {
+          "id": "C",
+          "text": "Put the application servers in private subnets with a route to a NAT gateway, and put the database in isolated subnets.",
+          "correct": true,
+          "why": "This gives application servers the required outbound access while leaving the database without routes outside the VPC."
+        },
+        {
+          "id": "D",
+          "text": "Put the application servers and database in public subnets; restrict database traffic with a security group.",
+          "correct": false,
+          "why": "Security groups can restrict traffic, but this places a database with no external-access requirement in an internet-routed subnet."
+        }
+      ],
+      "explanation": "The application servers and database have different egress requirements. Private application subnets can route to a NAT gateway for updates, while isolated database subnets have no routes to destinations outside the VPC. A private subnet with a NAT route is more connectivity than the database requires. Reversing the placement would prevent application servers from reaching the update source.",
+      "keywordCues": [
+        "application servers need outbound internet access for updates",
+        "database accepts connections only from resources inside the VPC",
+        "needs no external destinations"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación ejecuta una aplicación detrás de un load balancer internet-facing. Sus servidores de aplicación necesitan salida a internet para obtener actualizaciones, pero la base de datos solo acepta conexiones de recursos dentro de la VPC y no necesita destinos externos. ¿Qué diseño de subnets minimiza la exposición de red de la capa de base de datos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Coloca los servidores de aplicación y la base de datos en private subnets, y dirige ambas subnets hacia un NAT gateway.",
+            "why": "La base de datos no necesita el acceso saliente que proporciona una ruta hacia NAT."
+          },
+          {
+            "id": "B",
+            "text": "Coloca los servidores de aplicación en isolated subnets y la base de datos en private subnets con una ruta hacia un NAT gateway.",
+            "why": "Impide las actualizaciones de los servidores y proporciona a la base de datos una ruta saliente innecesaria."
+          },
+          {
+            "id": "C",
+            "text": "Coloca los servidores de aplicación en private subnets con una ruta hacia un NAT gateway y la base de datos en isolated subnets.",
+            "why": "Así, los servidores tienen la salida requerida y la base de datos no tiene rutas hacia destinos fuera de la VPC."
+          },
+          {
+            "id": "D",
+            "text": "Coloca los servidores de aplicación y la base de datos en public subnets; restringe el tráfico de la base de datos con un security group.",
+            "why": "Los security groups pueden restringir el tráfico, pero esta opción coloca una base de datos que no necesita acceso externo en una subnet con ruta a internet."
+          }
+        ],
+        "explanation": "Los servidores de aplicación y la base de datos tienen distintas necesidades de salida. Las private subnets de la aplicación pueden dirigirse a un NAT gateway para obtener actualizaciones; las isolated subnets de la base de datos no tienen rutas hacia destinos fuera de la VPC. Una private subnet con ruta hacia NAT ofrece más conectividad de la que necesita la base de datos. Invertir la ubicación impediría que los servidores lleguen al origen de las actualizaciones."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "public-vs-private-subnets--r0",
+      "conceptId": "public-vs-private-subnets",
+      "kind": "recall",
+      "prompt": "Where would you place a public application's load balancer and servers if users must not reach the servers directly, and why?",
+      "promptEs": "¿Dónde colocarías el load balancer y los servidores de una aplicación pública si los usuarios no deben llegar directamente a los servidores, y por qué?",
+      "idealAnswer": "Place the internet-facing load balancer in public subnets and the servers in private subnets. Users reach the load balancer, which forwards requests to the servers without requiring a direct internet-gateway route in the servers' subnets.",
+      "rubric": [
+        "Places the load balancer in public subnets.",
+        "Places application servers in private subnets.",
+        "Explains that client requests reach servers through the load balancer, not directly from the internet."
+      ]
+    }
+  ]
+}

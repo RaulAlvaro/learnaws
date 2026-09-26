@@ -1,0 +1,338 @@
+{
+  "conceptId": "rds-storage-piops",
+  "card": {
+    "en": {
+      "tldr": "For RDS OLTP workloads that need consistently low latency and sustained IOPS, choose Provisioned IOPS SSD io2 Block Express and an instance class that can use the provisioned performance. Choose gp3 when its engine-specific performance range meets the requirement and cost matters more than the lowest latency.",
+      "whenToUse": [
+        "Choose io2 Block Express for latency-sensitive production transactions that require predictable, sustained I/O.",
+        "Consider gp3 when the workload can tolerate General Purpose SSD latency and its available IOPS and throughput meet the target.",
+        "Check the DB instance class’s IOPS limit before increasing provisioned storage IOPS."
+      ],
+      "keyFacts": [
+        "On AWS Nitro System-based RDS instances, io2 Block Express provides sub-millisecond average latency; RDS recommends it for I/O-intensive, latency-sensitive workloads.",
+        "For RDS MySQL and PostgreSQL, gp3 provides a 3,000-IOPS baseline below 400 GiB. At 400 GiB or more, its baseline is 12,000 IOPS and additional IOPS can be provisioned up to 64,000.",
+        "gp3 lets you customize storage performance independently of capacity, but additional IOPS are not available below the engine’s storage-size threshold, except for RDS SQL Server.",
+        "Provisioned storage IOPS do not override the DB instance class’s maximum IOPS rate.",
+        "RDS recommends combining Provisioned IOPS storage with Multi-AZ for production OLTP fault tolerance; a MySQL, MariaDB, or PostgreSQL read replica can use a different storage type from its primary."
+      ],
+      "gotchas": [
+        "Do not assume that gp3 on a small MySQL or PostgreSQL volume can provision IOPS above its 3,000-IOPS baseline.",
+        "Paying for more io2 IOPS does not remove a lower instance-class IOPS ceiling.",
+        "io1 is also Provisioned IOPS storage, but it does not offer the same documented latency characteristics as io2 Block Express."
+      ],
+      "confusedWith": [
+        {
+          "concept": "gp3 General Purpose SSD",
+          "difference": "gp3 can provide configurable performance within engine-specific ranges; prefer io2 Block Express when the requirement is sustained IOPS with sub-millisecond latency."
+        },
+        {
+          "concept": "io1 Provisioned IOPS SSD",
+          "difference": "io1 is the previous generation; io2 Block Express is recommended where available for latency-sensitive workloads."
+        }
+      ],
+      "examCues": [
+        "sustained IOPS and sub-millisecond latency",
+        "400 GiB PostgreSQL volume with a moderate IOPS target",
+        "provisioned IOPS exceed the DB instance class limit",
+        "production OLTP with fault tolerance"
+      ]
+    },
+    "es": {
+      "tldr": "Para cargas OLTP de RDS que necesitan latencia baja y constante e IOPS sostenidas, elige Provisioned IOPS SSD io2 Block Express y una clase de instancia capaz de aprovechar ese rendimiento. Elige gp3 cuando su rango de rendimiento para el motor cubra la necesidad y el costo importe más que obtener la menor latencia.",
+      "whenToUse": [
+        "Elige io2 Block Express para transacciones de producción sensibles a la latencia que requieran I/O predecible y sostenida.",
+        "Considera gp3 cuando la carga tolere la latencia de General Purpose SSD y sus IOPS y throughput disponibles cumplan el objetivo.",
+        "Comprueba el límite de IOPS de la clase de instancia de base de datos antes de aumentar las IOPS provisionadas."
+      ],
+      "keyFacts": [
+        "En instancias de RDS basadas en AWS Nitro System, io2 Block Express ofrece una latencia promedio inferior a un milisegundo; RDS lo recomienda para cargas intensivas en I/O y sensibles a la latencia.",
+        "Para RDS MySQL y PostgreSQL, gp3 ofrece una base de 3,000 IOPS por debajo de 400 GiB. Desde 400 GiB, la base es de 12,000 IOPS y puedes provisionar IOPS adicionales hasta 64,000.",
+        "gp3 permite ajustar el rendimiento de almacenamiento independientemente de la capacidad, pero no ofrece IOPS adicionales por debajo del umbral de tamaño del motor, excepto en RDS SQL Server.",
+        "Las IOPS provisionadas del almacenamiento no superan el máximo de IOPS de la clase de instancia de base de datos.",
+        "RDS recomienda combinar Provisioned IOPS con Multi-AZ para la tolerancia a fallos de OLTP en producción; una read replica de MySQL, MariaDB o PostgreSQL puede usar un tipo de almacenamiento distinto al de su instancia primaria."
+      ],
+      "gotchas": [
+        "No supongas que gp3 en un volumen pequeño de MySQL o PostgreSQL permite provisionar más que sus 3,000 IOPS de base.",
+        "Pagar por más IOPS de io2 no elimina un límite menor de IOPS de la clase de instancia.",
+        "io1 también es almacenamiento Provisioned IOPS, pero no tiene las mismas características de latencia documentadas que io2 Block Express."
+      ],
+      "confusedWith": [
+        {
+          "concept": "gp3 General Purpose SSD",
+          "difference": "gp3 ofrece rendimiento configurable dentro de rangos que dependen del motor; prefiere io2 Block Express si necesitas IOPS sostenidas y latencia inferior a un milisegundo."
+        },
+        {
+          "concept": "io1 Provisioned IOPS SSD",
+          "difference": "io1 es la generación anterior; se recomienda io2 Block Express donde esté disponible para cargas sensibles a la latencia."
+        }
+      ],
+      "examCues": [
+        "sustained IOPS and sub-millisecond latency",
+        "400 GiB PostgreSQL volume with a moderate IOPS target",
+        "provisioned IOPS exceed the DB instance class limit",
+        "production OLTP with fault tolerance"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rds-storage-piops--0022ab01",
+      "conceptId": "rds-storage-piops",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company is moving a reporting application to RDS for PostgreSQL. Its 400 GiB database needs 20,000 provisioned storage IOPS, but it has no sub-millisecond latency requirement; minimizing storage cost is the priority. Which storage choice meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use gp2 at 400 GiB and provision 20,000 IOPS independently of capacity.",
+          "correct": false,
+          "why": "gp2 does not allow IOPS to be provisioned directly and independently of allocated storage."
+        },
+        {
+          "id": "B",
+          "text": "Use gp3 at 400 GiB and provision 20,000 IOPS.",
+          "correct": true,
+          "why": "At 400 GiB, PostgreSQL gp3 supports additional provisioned IOPS and avoids choosing io2 solely for a latency requirement the application does not have."
+        },
+        {
+          "id": "C",
+          "text": "Use gp3 at 100 GiB and provision 20,000 IOPS.",
+          "correct": false,
+          "why": "This reduces the required 400 GiB capacity, and PostgreSQL gp3 below 400 GiB cannot provision additional IOPS."
+        },
+        {
+          "id": "D",
+          "text": "Use io2 Block Express at 400 GiB and provision 20,000 IOPS.",
+          "correct": false,
+          "why": "io2 can meet the performance target, but its latency-oriented Provisioned IOPS storage is unnecessary when gp3 meets the stated target."
+        }
+      ],
+      "explanation": "The database needs a defined IOPS target but not the lowest storage latency. PostgreSQL gp3 at 400 GiB supports additional provisioned IOPS, including the 20,000-IOPS target. io2 is a valid high-performance design, but its latency-focused characteristics do not address an additional requirement here. gp2 cannot provision IOPS directly, and the smaller gp3 option misses both capacity and performance requirements.",
+      "keywordCues": [
+        "400 GiB database",
+        "20,000 provisioned storage IOPS",
+        "no sub-millisecond latency requirement",
+        "minimizing storage cost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios está migrando una aplicación de reportes a RDS for PostgreSQL. Su base de datos de 400 GiB necesita 20,000 IOPS de almacenamiento provisionadas, pero no exige latencia inferior a un milisegundo; la prioridad es minimizar el costo de almacenamiento. ¿Qué opción cumple los requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar gp2 con 400 GiB y provisionar 20,000 IOPS independientemente de la capacidad.",
+            "why": "gp2 no permite provisionar IOPS directamente e independientemente del almacenamiento asignado."
+          },
+          {
+            "id": "B",
+            "text": "Usar gp3 con 400 GiB y provisionar 20,000 IOPS.",
+            "why": "Con 400 GiB, gp3 para PostgreSQL admite IOPS provisionadas adicionales y evita elegir io2 solo por una exigencia de latencia que la aplicación no tiene."
+          },
+          {
+            "id": "C",
+            "text": "Usar gp3 con 100 GiB y provisionar 20,000 IOPS.",
+            "why": "Esto reduce la capacidad requerida de 400 GiB, y gp3 para PostgreSQL por debajo de 400 GiB no permite provisionar IOPS adicionales."
+          },
+          {
+            "id": "D",
+            "text": "Usar io2 Block Express con 400 GiB y provisionar 20,000 IOPS.",
+            "why": "io2 puede cumplir el objetivo de rendimiento, pero su almacenamiento Provisioned IOPS orientado a baja latencia es innecesario cuando gp3 cumple el objetivo indicado."
+          }
+        ],
+        "explanation": "La base de datos necesita un objetivo definido de IOPS, pero no la menor latencia de almacenamiento. gp3 para PostgreSQL con 400 GiB permite provisionar IOPS adicionales, incluido el objetivo de 20,000. io2 ofrece alto rendimiento, pero sus características orientadas a baja latencia no satisfacen un requisito adicional en este caso. gp2 no permite provisionar IOPS directamente, y la opción gp3 más pequeña incumple tanto la capacidad como el rendimiento requeridos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-storage-piops--d333b3a1",
+      "conceptId": "rds-storage-piops",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A healthcare scheduling service runs production OLTP on RDS for PostgreSQL. Its primary needs predictable, low-latency writes and fault tolerance, while a read replica serves noncritical reports whose storage latency can be higher; the team wants to reduce replica storage cost. Which TWO design choices meet these requirements together? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use gp3 on the primary because its IOPS can be configured independently of capacity.",
+          "correct": false,
+          "why": "Configurable gp3 IOPS do not make it the recommended choice for the primary’s predictable, low-latency OLTP writes."
+        },
+        {
+          "id": "B",
+          "text": "Use io1 on the primary with a Multi-AZ deployment to prioritize the lowest storage latency.",
+          "correct": false,
+          "why": "Multi-AZ helps fault tolerance, but io2 Block Express is the recommended Provisioned IOPS choice for latency-sensitive workloads."
+        },
+        {
+          "id": "C",
+          "text": "Use io2 Block Express on the primary with a suitable instance class and a Multi-AZ deployment.",
+          "correct": true,
+          "why": "io2 supports predictable low-latency I/O, the instance class must support the provisioned performance, and Multi-AZ enhances fault tolerance."
+        },
+        {
+          "id": "D",
+          "text": "Use gp3 on the read replica if its performance meets the reporting workload.",
+          "correct": true,
+          "why": "The replica’s storage type can differ from the primary’s, and General Purpose SSD on a replica can reduce costs when its performance is acceptable."
+        },
+        {
+          "id": "E",
+          "text": "Use io2 Block Express on the read replica to match the primary’s storage type.",
+          "correct": false,
+          "why": "A PostgreSQL read replica can use a different storage type, so matching io2 needlessly misses the stated replica cost objective."
+        }
+      ],
+      "explanation": "The primary and replica have different performance requirements, so they need not use the same storage type. io2 Block Express with a suitable instance class serves the primary’s low-latency writes, and Multi-AZ adds fault tolerance. A gp3 read replica can reduce costs because the reporting workload tolerates different performance. Matching the primary’s io2 storage on the replica overlooks that cost requirement.",
+      "keywordCues": [
+        "production OLTP",
+        "primary needs predictable, low-latency writes and fault tolerance",
+        "read replica serves noncritical reports",
+        "reduce replica storage cost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html"
+      ],
+      "es": {
+        "stem": "Un servicio de programación de citas médicas ejecuta OLTP de producción en RDS for PostgreSQL. Su instancia primaria necesita escrituras predecibles, de baja latencia y con tolerancia a fallos, mientras que una read replica genera reportes no críticos que pueden tolerar mayor latencia de almacenamiento; el equipo quiere reducir el costo de almacenamiento de la réplica. ¿Qué DOS decisiones de diseño cumplen estos requisitos en conjunto? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar gp3 en la instancia primaria porque sus IOPS se pueden configurar independientemente de la capacidad.",
+            "why": "La configuración de IOPS de gp3 no lo convierte en la opción recomendada para las escrituras OLTP predecibles y de baja latencia de la instancia primaria."
+          },
+          {
+            "id": "B",
+            "text": "Usar io1 en la instancia primaria con un despliegue Multi-AZ para priorizar la menor latencia de almacenamiento.",
+            "why": "Multi-AZ ayuda con la tolerancia a fallos, pero io2 Block Express es la opción Provisioned IOPS recomendada para cargas sensibles a la latencia."
+          },
+          {
+            "id": "C",
+            "text": "Usar io2 Block Express en la instancia primaria con una clase de instancia adecuada y un despliegue Multi-AZ.",
+            "why": "io2 admite I/O predecible y de baja latencia, la clase de instancia debe admitir el rendimiento provisionado y Multi-AZ mejora la tolerancia a fallos."
+          },
+          {
+            "id": "D",
+            "text": "Usar gp3 en la read replica si su rendimiento satisface la carga de reportes.",
+            "why": "El tipo de almacenamiento de la réplica puede diferir del de la instancia primaria, y General Purpose SSD puede reducir costos si su rendimiento es aceptable."
+          },
+          {
+            "id": "E",
+            "text": "Usar io2 Block Express en la read replica para igualar el tipo de almacenamiento de la instancia primaria.",
+            "why": "Una read replica de PostgreSQL puede usar otro tipo de almacenamiento, por lo que igualar io2 incumple sin necesidad el objetivo de costo de la réplica."
+          }
+        ],
+        "explanation": "La instancia primaria y la réplica tienen requisitos de rendimiento distintos, por lo que no necesitan el mismo tipo de almacenamiento. io2 Block Express con una clase de instancia adecuada atiende las escrituras de baja latencia de la primaria, y Multi-AZ añade tolerancia a fallos. Una read replica con gp3 puede reducir costos porque la carga de reportes tolera un rendimiento diferente. Igualar el almacenamiento io2 de la primaria en la réplica pasa por alto ese objetivo de costo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-storage-piops--c85918fb",
+      "conceptId": "rds-storage-piops",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics platform uses a 400 GiB RDS for MySQL database on io2 storage. Monitoring shows the selected DB instance class has a 40,000-IOPS maximum, while a new transaction feed requires 60,000 sustained IOPS; the platform must retain io2 for its latency-sensitive writes. Which change meets the new requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a Multi-AZ standby and keep the current instance class and io2 allocation.",
+          "correct": false,
+          "why": "A Multi-AZ deployment improves fault tolerance but does not remove the selected instance class’s IOPS limit."
+        },
+        {
+          "id": "B",
+          "text": "Provision 128,000 io2 IOPS and keep the current instance class.",
+          "correct": false,
+          "why": "The current instance class still limits usable IOPS to 40,000."
+        },
+        {
+          "id": "C",
+          "text": "Provision 64,000 io2 IOPS and select an instance class whose IOPS limit supports the target.",
+          "correct": true,
+          "why": "Both the io2 allocation and the instance-class IOPS limit must support the sustained 60,000-IOPS target."
+        },
+        {
+          "id": "D",
+          "text": "Switch to gp3 with 64,000 provisioned IOPS and a higher-limit instance class.",
+          "correct": false,
+          "why": "This could address the IOPS target but violates the requirement to retain io2."
+        }
+      ],
+      "explanation": "The limiting resource is the DB instance class, not just the io2 volume allocation. Provisioning 64,000 io2 IOPS with a class capable of using the required 60,000 IOPS addresses both limits while retaining io2. Provisioning even more IOPS on the current class leaves the 40,000-IOPS ceiling in place. Multi-AZ addresses fault tolerance rather than this capacity bottleneck.",
+      "keywordCues": [
+        "40,000-IOPS maximum",
+        "60,000 sustained IOPS",
+        "must retain io2"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de logística usa una base de datos RDS for MySQL de 400 GiB con almacenamiento io2. El monitoreo muestra que la clase de instancia de base de datos seleccionada tiene un máximo de 40,000 IOPS, mientras que un nuevo flujo de transacciones requiere 60,000 IOPS sostenidas; la plataforma debe conservar io2 para sus escrituras sensibles a la latencia. ¿Qué cambio cumple el nuevo requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar una instancia en espera Multi-AZ y conservar la clase de instancia y la asignación io2 actuales.",
+            "why": "Un despliegue Multi-AZ mejora la tolerancia a fallos, pero no elimina el límite de IOPS de la clase de instancia seleccionada."
+          },
+          {
+            "id": "B",
+            "text": "Provisionar 128,000 IOPS de io2 y conservar la clase de instancia actual.",
+            "why": "La clase de instancia actual sigue limitando las IOPS utilizables a 40,000."
+          },
+          {
+            "id": "C",
+            "text": "Provisionar 64,000 IOPS de io2 y seleccionar una clase de instancia cuyo límite de IOPS admita el objetivo.",
+            "why": "Tanto la asignación io2 como el límite de IOPS de la clase de instancia deben admitir el objetivo de 60,000 IOPS sostenidas."
+          },
+          {
+            "id": "D",
+            "text": "Cambiar a gp3 con 64,000 IOPS provisionadas y una clase de instancia con un límite mayor.",
+            "why": "Esto podría cubrir el objetivo de IOPS, pero incumple el requisito de conservar io2."
+          }
+        ],
+        "explanation": "El recurso limitante es la clase de instancia de base de datos, no solo la asignación del volumen io2. Provisionar 64,000 IOPS de io2 con una clase capaz de usar las 60,000 IOPS requeridas resuelve ambos límites y conserva io2. Provisionar todavía más IOPS en la clase actual mantiene el límite de 40,000 IOPS. Multi-AZ aborda la tolerancia a fallos, no este cuello de botella de capacidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rds-storage-piops--r0",
+      "conceptId": "rds-storage-piops",
+      "kind": "recall",
+      "prompt": "An RDS OLTP primary needs sustained IOPS and sub-millisecond average latency. Which storage type would you choose, and what instance-class check matters?",
+      "promptEs": "Una instancia primaria OLTP de RDS necesita IOPS sostenidas y latencia promedio inferior a un milisegundo. ¿Qué almacenamiento eliges y qué debes comprobar en la clase de instancia?",
+      "idealAnswer": "Choose io2 Block Express on a suitable Nitro-based RDS instance for predictable I/O and sub-millisecond average latency. Check that the DB instance class’s IOPS limit can support the required provisioned IOPS.",
+      "rubric": [
+        "Names io2 Block Express for the latency-sensitive OLTP primary.",
+        "Connects Nitro-based instances with sub-millisecond average latency.",
+        "Checks the DB instance class’s IOPS limit rather than assuming provisioned storage IOPS are fully usable."
+      ]
+    }
+  ]
+}

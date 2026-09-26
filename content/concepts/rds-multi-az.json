@@ -1,0 +1,428 @@
+{
+  "conceptId": "rds-multi-az",
+  "card": {
+    "en": {
+      "tldr": "Amazon RDS has two Multi-AZ deployment types. Choose a Multi-AZ DB instance deployment when one non-readable standby is needed for failover; choose a Multi-AZ DB cluster when the application also needs readable failover targets.",
+      "whenToUse": [
+        "The database needs failover support, but its standby must not serve read traffic: choose a Multi-AZ DB instance deployment.",
+        "The database needs high availability and additional read capacity in the same Region: consider a Multi-AZ DB cluster."
+      ],
+      "keyFacts": [
+        "A Multi-AZ DB instance deployment has one standby DB instance that supports failover but does not serve reads.",
+        "A Multi-AZ DB cluster has one writer and two readable DB instances in three Availability Zones in the same Region.",
+        "Multi-AZ DB clusters use semisynchronous replication: a commit requires acknowledgment from at least one reader, not confirmation that every reader has applied the change.",
+        "If a cluster writer fails, RDS manages failover to a reader DB instance.",
+        "Cluster readers can develop replica lag; CloudWatch ReplicaLag measures the difference between the writer’s latest transaction and a reader’s latest applied transaction."
+      ],
+      "gotchas": [
+        "Do not assume every RDS Multi-AZ standby can serve reports: the standby in a DB instance deployment cannot.",
+        "Do not describe Multi-AZ DB cluster replication as fully synchronous across both readers.",
+        "Do not assume two readers eliminate replica lag or its potential effect on failover."
+      ],
+      "confusedWith": [
+        {
+          "concept": "rds-read-replicas",
+          "difference": "A read replica addresses read capacity; the one-standby Multi-AZ DB instance deployment specifically provides a non-readable failover standby."
+        },
+        {
+          "concept": "aurora-global-database",
+          "difference": "An RDS Multi-AZ DB cluster places its writer and readers across Availability Zones within one Region, not across Regions."
+        },
+        {
+          "concept": "dynamodb-global-tables",
+          "difference": "An RDS Multi-AZ DB cluster has one writer and two readers, not multiple writable Regions."
+        }
+      ],
+      "examCues": [
+        "one standby for failover, no reporting reads",
+        "readable failover targets in three Availability Zones",
+        "at least one reader acknowledges a commit",
+        "reader lag may delay failover"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon RDS ofrece dos tipos de despliegue Multi-AZ. Elige Multi-AZ DB instance deployment si necesitas una instancia de reserva que no atienda lecturas; elige Multi-AZ DB cluster si también necesitas instancias legibles que puedan asumir el rol de writer.",
+      "whenToUse": [
+        "Necesitas soporte de failover, pero la instancia de reserva no debe atender lecturas: elige Multi-AZ DB instance deployment.",
+        "Necesitas alta disponibilidad y capacidad adicional de lectura en la misma Region: considera Multi-AZ DB cluster."
+      ],
+      "keyFacts": [
+        "Multi-AZ DB instance deployment tiene una instancia de reserva que ofrece soporte de failover, pero no atiende lecturas.",
+        "Multi-AZ DB cluster tiene un writer y dos instancias legibles en tres Availability Zones de la misma Region.",
+        "Multi-AZ DB cluster usa replicación semisíncrona: un commit requiere confirmación de al menos un reader, no que ambos hayan aplicado el cambio.",
+        "Si falla el writer de un cluster, RDS administra el failover hacia un reader.",
+        "Los readers pueden acumular replica lag; la métrica CloudWatch ReplicaLag compara la última transacción del writer con la última aplicada por un reader."
+      ],
+      "gotchas": [
+        "No supongas que toda instancia de reserva Multi-AZ puede atender reportes: la de DB instance deployment no puede.",
+        "No describas la replicación de Multi-AZ DB cluster como totalmente síncrona en ambos readers.",
+        "No supongas que tener dos readers elimina replica lag o su posible efecto en el failover."
+      ],
+      "confusedWith": [
+        {
+          "concept": "rds-read-replicas",
+          "difference": "Una read replica aporta capacidad de lectura; Multi-AZ DB instance deployment proporciona específicamente una instancia de reserva no legible para failover."
+        },
+        {
+          "concept": "aurora-global-database",
+          "difference": "Multi-AZ DB cluster de RDS distribuye su writer y sus readers entre Availability Zones de una sola Region, no entre Regions."
+        },
+        {
+          "concept": "dynamodb-global-tables",
+          "difference": "Multi-AZ DB cluster de RDS tiene un writer y dos readers, no varias Regions con capacidad de escritura."
+        }
+      ],
+      "examCues": [
+        "one standby for failover, no reporting reads",
+        "readable failover targets in three Availability Zones",
+        "at least one reader acknowledges a commit",
+        "reader lag may delay failover"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rds-multi-az--627e31b9",
+      "conceptId": "rds-multi-az",
+      "secondaryConcepts": [
+        "rds-read-replicas"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional ticketing company runs its transactional database on Amazon RDS. It wants a standby in another Availability Zone for failover, but it has no requirement to run queries on that standby. Which deployment meets these requirements without adding readable standby instances?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a Multi-AZ DB instance deployment.",
+          "correct": true,
+          "why": "It provides one standby for failover, and that standby does not serve reads."
+        },
+        {
+          "id": "B",
+          "text": "Keep a Single-AZ DB instance and add a read replica for reporting.",
+          "correct": false,
+          "why": "This addresses a reporting need the company does not have rather than selecting the requested non-readable Multi-AZ standby."
+        },
+        {
+          "id": "C",
+          "text": "Keep a Single-AZ DB instance and rely on its automated backups.",
+          "correct": false,
+          "why": "Backups do not provide the requested standby DB instance for failover."
+        },
+        {
+          "id": "D",
+          "text": "Configure a Multi-AZ DB cluster deployment.",
+          "correct": false,
+          "why": "Its two standby instances can serve reads, adding readable standbys the company does not need."
+        }
+      ],
+      "explanation": "The deciding requirement is one standby for failover with no need for standby reads. An RDS Multi-AZ DB instance deployment has exactly that arrangement. A Multi-AZ DB cluster instead includes two readable standby instances, while backups do not supply a standby DB instance.",
+      "keywordCues": [
+        "a standby in another Availability Zone for failover",
+        "no requirement to run queries on that standby",
+        "without adding readable standby instances"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html"
+      ],
+      "es": {
+        "stem": "Una empresa regional de venta de boletos ejecuta su base de datos transaccional en Amazon RDS. Quiere una instancia de reserva en otra Availability Zone para failover, pero no necesita ejecutar consultas en ella. ¿Qué despliegue cumple estos requisitos sin agregar instancias de reserva legibles?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura Multi-AZ DB instance deployment.",
+            "why": "Proporciona una instancia de reserva para failover que no atiende lecturas."
+          },
+          {
+            "id": "B",
+            "text": "Mantén una instancia de base de datos Single-AZ y agrega una read replica para reportes.",
+            "why": "Atiende una necesidad de reportes que la empresa no tiene, en vez de seleccionar la instancia de reserva Multi-AZ no legible solicitada."
+          },
+          {
+            "id": "C",
+            "text": "Mantén una instancia de base de datos Single-AZ y usa sus automated backups.",
+            "why": "Los backups no proporcionan la instancia de reserva solicitada para failover."
+          },
+          {
+            "id": "D",
+            "text": "Configura Multi-AZ DB cluster deployment.",
+            "why": "Sus dos instancias de reserva pueden atender lecturas y agregan capacidad legible que la empresa no necesita."
+          }
+        ],
+        "explanation": "El requisito decisivo es tener una instancia de reserva para failover sin necesitar lecturas en ella. Multi-AZ DB instance deployment de RDS ofrece exactamente esa configuración. Multi-AZ DB cluster incluye dos instancias de reserva legibles, mientras que los backups no proporcionan una instancia de reserva."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-multi-az--6b2ce532",
+      "conceptId": "rds-multi-az",
+      "secondaryConcepts": [
+        "rds-read-replicas"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A healthcare scheduling application needs an RDS database with automatic writer failover. Its appointment-search queries must also run on database instances other than the writer, and the deployment must span three Availability Zones in one Region. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Multi-AZ DB instance deployment and send all searches to its primary.",
+          "correct": false,
+          "why": "It does not run the required search queries on instances other than the writer."
+        },
+        {
+          "id": "B",
+          "text": "Use a Multi-AZ DB instance deployment and send searches to its standby.",
+          "correct": false,
+          "why": "The standby in this deployment cannot serve search reads."
+        },
+        {
+          "id": "C",
+          "text": "Use a Multi-AZ DB cluster and send searches to its reader instances.",
+          "correct": true,
+          "why": "Its two readers serve reads, act as automatic failover targets, and occupy separate Availability Zones with the writer."
+        },
+        {
+          "id": "D",
+          "text": "Use one Single-AZ DB instance and restore a snapshot when it fails.",
+          "correct": false,
+          "why": "A snapshot restore does not provide running readers or automatic writer failover."
+        }
+      ],
+      "explanation": "The application needs both readable non-writer instances and automatic failover across three Availability Zones. An RDS Multi-AZ DB cluster has a writer and two readers in three separate Availability Zones; the readers serve traffic and are automatic failover targets. The standby of a Multi-AZ DB instance deployment cannot serve the searches.",
+      "keywordCues": [
+        "automatic writer failover",
+        "instances other than the writer",
+        "three Availability Zones in one Region"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de programación de citas médicas necesita una base de datos RDS con automatic writer failover. Las consultas de búsqueda de citas también deben ejecutarse en instancias distintas del writer, y el despliegue debe abarcar tres Availability Zones de una Region. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Multi-AZ DB instance deployment y envía todas las búsquedas a su primary.",
+            "why": "No ejecuta las búsquedas requeridas en instancias distintas del writer."
+          },
+          {
+            "id": "B",
+            "text": "Usa Multi-AZ DB instance deployment y envía las búsquedas a su standby.",
+            "why": "El standby de este despliegue no puede atender las lecturas de búsqueda."
+          },
+          {
+            "id": "C",
+            "text": "Usa Multi-AZ DB cluster y envía las búsquedas a sus reader instances.",
+            "why": "Sus dos readers atienden lecturas, pueden asumir el rol de writer mediante failover automático y están en Availability Zones distintas de la del writer."
+          },
+          {
+            "id": "D",
+            "text": "Usa una instancia de base de datos Single-AZ y restaura un snapshot cuando falle.",
+            "why": "Restaurar un snapshot no proporciona readers en funcionamiento ni automatic writer failover."
+          }
+        ],
+        "explanation": "La aplicación necesita instancias legibles distintas del writer y failover automático en tres Availability Zones. Multi-AZ DB cluster de RDS tiene un writer y dos readers en tres Availability Zones distintas; los readers atienden tráfico y son destinos de failover automático. El standby de Multi-AZ DB instance deployment no puede atender las búsquedas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-multi-az--0a2731ed",
+      "conceptId": "rds-multi-az",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company is choosing an Amazon RDS deployment for a write-heavy application. It requires a writer and two readable failover targets within one Region, and it accepts a commit after at least one reader acknowledges the change rather than waiting for both readers to apply it. Which deployment matches these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A Multi-AZ DB instance deployment with a second standby added to it.",
+          "correct": false,
+          "why": "A deployment with two standby DB instances is the Multi-AZ DB cluster type, not the DB instance type."
+        },
+        {
+          "id": "B",
+          "text": "A Multi-AZ DB instance deployment with its standby used for reads.",
+          "correct": false,
+          "why": "It has only one standby, which does not serve reads."
+        },
+        {
+          "id": "C",
+          "text": "A Multi-AZ DB cluster deployment with its two reader instances.",
+          "correct": true,
+          "why": "It has two readable failover targets and uses the specified semisynchronous acknowledgment behavior."
+        },
+        {
+          "id": "D",
+          "text": "A Single-AZ DB instance with automated backups and point-in-time restore.",
+          "correct": false,
+          "why": "Backups do not provide the two running, readable failover targets."
+        }
+      ],
+      "explanation": "The combination of two readable failover targets and acknowledgment from at least one reader identifies a Multi-AZ DB cluster. Its replication is semisynchronous: acknowledgment is needed from at least one reader, but changes need not be fully applied and committed on all replicas before the writer commits. A Multi-AZ DB instance deployment has just one non-readable standby.",
+      "keywordCues": [
+        "two readable failover targets",
+        "within one Region",
+        "at least one reader acknowledges the change"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística elige un despliegue de Amazon RDS para una aplicación con muchas escrituras. Necesita un writer y dos destinos de failover legibles en una Region, y acepta un commit después de que al menos un reader confirme el cambio, sin esperar a que ambos readers lo apliquen. ¿Qué despliegue cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Multi-AZ DB instance deployment al que se agrega un segundo standby.",
+            "why": "Un despliegue con dos instancias de reserva es del tipo Multi-AZ DB cluster, no del tipo DB instance."
+          },
+          {
+            "id": "B",
+            "text": "Multi-AZ DB instance deployment con su standby dedicado a lecturas.",
+            "why": "Tiene un solo standby y este no atiende lecturas."
+          },
+          {
+            "id": "C",
+            "text": "Multi-AZ DB cluster deployment con sus dos reader instances.",
+            "why": "Tiene dos destinos de failover legibles y usa el comportamiento de confirmación semisíncrona solicitado."
+          },
+          {
+            "id": "D",
+            "text": "Una instancia de base de datos Single-AZ con automated backups y point-in-time restore.",
+            "why": "Los backups no proporcionan los dos destinos de failover legibles y en funcionamiento."
+          }
+        ],
+        "explanation": "La combinación de dos destinos de failover legibles y la confirmación de al menos un reader identifica a Multi-AZ DB cluster. Su replicación es semisíncrona: al menos un reader debe confirmar, pero no es necesario que todas las réplicas hayan aplicado y confirmado el cambio antes del commit del writer. Multi-AZ DB instance deployment solo tiene un standby no legible."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-multi-az--edad55de",
+      "conceptId": "rds-multi-az",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company runs large reporting queries on the readers of an RDS Multi-AZ DB cluster. During reporting periods, it wants to identify a condition that could affect writer failover and take an action relevant to that condition. Which approach best meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Assume that readers in separate Availability Zones cannot fall behind the writer.",
+          "correct": false,
+          "why": "Cluster readers can experience replica lag despite being in separate Availability Zones."
+        },
+        {
+          "id": "B",
+          "text": "Monitor CloudWatch ReplicaLag and reduce heavy reader queries if lag grows.",
+          "correct": true,
+          "why": "ReplicaLag tracks reader delay, and heavy reader queries can interfere with applying changes."
+        },
+        {
+          "id": "C",
+          "text": "Check automated backup completion and move reporting queries to the writer.",
+          "correct": false,
+          "why": "Backup completion does not measure reader replica lag, the condition relevant to this failover concern."
+        },
+        {
+          "id": "D",
+          "text": "Enable flow control and assume it eliminates replica lag during reporting.",
+          "correct": false,
+          "why": "Flow control does not guarantee elimination of lag."
+        }
+      ],
+      "explanation": "The concern is reader replica lag: failover must resolve lag before promoting a new writer. CloudWatch ReplicaLag measures the difference between the writer’s latest transaction and a reader’s latest applied transaction. Large or slow reader queries can contribute to lag, so monitoring the metric and reducing that load addresses the stated risk; flow control cannot guarantee that lag disappears.",
+      "keywordCues": [
+        "large reporting queries on the readers",
+        "condition that could affect writer failover"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta consultas grandes de reportes en los readers de un RDS Multi-AZ DB cluster. Durante los períodos de reportes, quiere identificar una condición que podría afectar writer failover y tomar una medida relacionada. ¿Qué enfoque cumple mejor este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Supón que los readers en distintas Availability Zones no pueden quedar rezagados respecto del writer.",
+            "why": "Los readers del cluster pueden presentar replica lag aunque estén en distintas Availability Zones."
+          },
+          {
+            "id": "B",
+            "text": "Monitorea CloudWatch ReplicaLag y reduce las consultas pesadas en los readers si aumenta el lag.",
+            "why": "ReplicaLag mide el retraso de los readers, y las consultas pesadas pueden dificultar que apliquen los cambios."
+          },
+          {
+            "id": "C",
+            "text": "Revisa si terminaron los automated backups y traslada los reportes al writer.",
+            "why": "La finalización de backups no mide el replica lag de los readers, que es la condición relevante para este failover."
+          },
+          {
+            "id": "D",
+            "text": "Activa flow control y supón que elimina replica lag durante los reportes.",
+            "why": "Flow control no garantiza que desaparezca el lag."
+          }
+        ],
+        "explanation": "La preocupación es el replica lag: el failover debe resolverlo antes de promover a un nuevo writer. CloudWatch ReplicaLag mide la diferencia entre la última transacción del writer y la última aplicada por un reader. Las consultas grandes o lentas en los readers pueden aumentar el lag, por lo que monitorear la métrica y reducir esa carga atiende el riesgo; flow control no garantiza eliminarlo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rds-multi-az--r0",
+      "conceptId": "rds-multi-az",
+      "kind": "recall",
+      "prompt": "An RDS database needs failover support and one standby that never serves reads. Which Multi-AZ deployment fits, and why?",
+      "promptEs": "Una base de datos RDS necesita soporte de failover y un standby que nunca atienda lecturas. ¿Qué despliegue Multi-AZ eliges y por qué?",
+      "idealAnswer": "Choose a Multi-AZ DB instance deployment. It has one standby DB instance that provides failover support but does not serve read traffic.",
+      "rubric": [
+        "Names Multi-AZ DB instance deployment.",
+        "Identifies its single standby as a failover resource.",
+        "States that the standby does not serve reads."
+      ]
+    },
+    {
+      "id": "rds-multi-az--r1",
+      "conceptId": "rds-multi-az",
+      "kind": "why-not",
+      "prompt": "Why is a reporting read replica not the best match for a requirement specifically calling for an RDS Multi-AZ non-readable failover standby?",
+      "promptEs": "¿Por qué una read replica para reportes no es la mejor opción si se pide específicamente un standby Multi-AZ de RDS no legible para failover?",
+      "idealAnswer": "The requirement describes the one-standby Multi-AZ DB instance deployment: its standby supports failover and cannot serve reads. A reporting read replica is proposed to serve queries, so it does not match the requested non-readable standby role.",
+      "rubric": [
+        "Identifies Multi-AZ DB instance deployment as the matching configuration.",
+        "Explains that its standby supports failover without serving reads.",
+        "Contrasts that role with a replica proposed for reporting queries."
+      ]
+    }
+  ]
+}

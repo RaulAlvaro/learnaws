@@ -1,0 +1,359 @@
+{
+  "conceptId": "fsx-lustre",
+  "card": {
+    "en": {
+      "tldr": "Amazon FSx for Lustre is a managed, high-performance file system for Linux-based HPC and ML workloads. Choose it when compute needs fast file access to large datasets, especially when those datasets are in Amazon S3; then choose scratch or persistent based on whether file-server failure can cause data loss.",
+      "whenToUse": [
+        "Linux HPC, ML, or video-processing jobs need a shared POSIX file system with very low latency and high throughput.",
+        "Jobs need S3 objects presented as files and may need to write processed data back to S3.",
+        "A short-lived processing job can tolerate loss of file-system data, or a longer-running job needs replicated file-system data."
+      ],
+      "keyFacts": [
+        "FSx for Lustre provides sub-millisecond latencies, up to multiple TBps of throughput, and up to millions of IOPS.",
+        "An S3-linked file system presents S3 objects as files and can write file-system data back to S3.",
+        "Scratch file systems do not replicate data; data does not persist if a file server fails.",
+        "Persistent file systems replicate data and replace failed file servers.",
+        "The SSD storage class provides consistent sub-millisecond access across the full dataset."
+      ],
+      "gotchas": [
+        "An S3-linked file system is not the same as having an application access S3 objects directly: Lustre supplies a native file-system interface.",
+        "Do not choose scratch when data must remain available after a file-server failure.",
+        "Do not assume every Lustre storage class gives consistent sub-millisecond access to the full dataset."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS supplies elastic shared NFS storage; FSx for Lustre targets high-performance HPC/ML processing and can present linked S3 objects as files."
+        },
+        {
+          "concept": "Amazon S3",
+          "difference": "S3 is object storage; FSx for Lustre gives Linux applications a native file-system interface to a linked S3 dataset."
+        },
+        {
+          "concept": "EC2 instance store",
+          "difference": "Instance store is ephemeral storage attached to an instance, rather than a Lustre file system shared by compute workers."
+        }
+      ],
+      "examCues": [
+        "Linux HPC workers processing an S3 dataset",
+        "S3 objects must appear as files",
+        "temporary processing; file-server failure is tolerable",
+        "replicated file-system data required",
+        "sub-millisecond access across the full dataset"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon FSx for Lustre es un sistema de archivos administrado de alto rendimiento para cargas HPC y ML basadas en Linux. Elígelo cuando el cómputo necesite acceso rápido a archivos de grandes conjuntos de datos, especialmente si están en Amazon S3; después, elige scratch o persistent según si se puede tolerar la pérdida de datos ante una falla del servidor de archivos.",
+      "whenToUse": [
+        "Los trabajos HPC, ML o de procesamiento de video en Linux necesitan un sistema de archivos POSIX compartido, con latencia muy baja y alto rendimiento.",
+        "Los trabajos necesitan ver objetos de S3 como archivos y posiblemente escribir los resultados de vuelta en S3.",
+        "Un trabajo breve puede tolerar la pérdida de datos del sistema de archivos, o un trabajo de mayor duración necesita datos replicados."
+      ],
+      "keyFacts": [
+        "FSx for Lustre ofrece latencias inferiores a un milisegundo, hasta varios TBps de rendimiento y hasta millones de IOPS.",
+        "Un sistema de archivos vinculado con S3 presenta los objetos de S3 como archivos y puede escribir datos del sistema de archivos de vuelta en S3.",
+        "Los sistemas de archivos scratch no replican los datos; estos no persisten si falla un servidor de archivos.",
+        "Los sistemas de archivos persistent replican los datos y reemplazan los servidores de archivos que fallan.",
+        "La clase de almacenamiento SSD ofrece acceso constante con latencia inferior a un milisegundo a todo el conjunto de datos."
+      ],
+      "gotchas": [
+        "Vincular un sistema de archivos con S3 no equivale a que la aplicación acceda directamente a objetos de S3: Lustre proporciona una interfaz de sistema de archivos nativa.",
+        "No elijas scratch si los datos deben seguir disponibles después de la falla de un servidor de archivos.",
+        "No supongas que todas las clases de almacenamiento de Lustre ofrecen acceso constante con latencia inferior a un milisegundo a todo el conjunto de datos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS proporciona almacenamiento NFS compartido y elástico; FSx for Lustre está orientado al procesamiento HPC/ML de alto rendimiento y puede presentar objetos de S3 vinculados como archivos."
+        },
+        {
+          "concept": "Amazon S3",
+          "difference": "S3 es almacenamiento de objetos; FSx for Lustre proporciona a las aplicaciones Linux una interfaz de sistema de archivos nativa para un conjunto de datos vinculado en S3."
+        },
+        {
+          "concept": "EC2 instance store",
+          "difference": "Instance store es almacenamiento efímero adjunto a una instancia, no un sistema de archivos Lustre compartido entre trabajadores de cómputo."
+        }
+      ],
+      "examCues": [
+        "Linux HPC workers processing an S3 dataset",
+        "S3 objects must appear as files",
+        "temporary processing; file-server failure is tolerable",
+        "replicated file-system data required",
+        "sub-millisecond access across the full dataset"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/fsx/latest/LustreGuide/what-is.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "fsx-lustre--36918490",
+      "conceptId": "fsx-lustre",
+      "secondaryConcepts": [
+        "s3-fundamentals",
+        "efs-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab runs short-lived simulations on Linux EC2 instances. Input data is in Amazon S3, but the existing application expects files and directories; the lab can rerun a simulation if its temporary working data is lost when a file server fails. Which storage solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a scratch Amazon FSx for Lustre file system linked to the S3 bucket.",
+          "correct": true,
+          "why": "It presents S3 objects as files for the workers, and scratch suits temporary data that can be lost after a file-server failure."
+        },
+        {
+          "id": "B",
+          "text": "Use an Amazon EFS file system for the workers and copy the S3 input into it before each run.",
+          "correct": false,
+          "why": "EFS provides shared file access, but copying the input adds a preparation step instead of presenting linked S3 objects as files."
+        },
+        {
+          "id": "C",
+          "text": "Use a persistent Amazon FSx for Lustre file system linked to the S3 bucket.",
+          "correct": false,
+          "why": "It meets the file-access requirement, but its replicated deployment is unnecessary for data the lab can recreate."
+        },
+        {
+          "id": "D",
+          "text": "Have each worker read the input directly from Amazon S3 using object requests.",
+          "correct": false,
+          "why": "Direct object requests do not provide the files-and-directories interface expected by the existing application."
+        }
+      ],
+      "explanation": "The application requires a file-system interface to data held in S3, and the working data is disposable. An S3-linked FSx for Lustre file system presents objects as files; scratch is intended for temporary, shorter-term processing. Persistent Lustre would also supply the interface, but replication does not address a requirement in this scenario.",
+      "keywordCues": [
+        "Input data is in Amazon S3",
+        "expects files and directories",
+        "can rerun a simulation",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/LustreGuide/what-is.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ejecuta simulaciones breves en instancias EC2 con Linux. Los datos de entrada están en Amazon S3, pero la aplicación existente espera archivos y directorios; el laboratorio puede repetir una simulación si pierde sus datos de trabajo temporales cuando falla un servidor de archivos. ¿Qué solución de almacenamiento cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un sistema de archivos scratch de Amazon FSx for Lustre vinculado al bucket de S3.",
+            "why": "Presenta los objetos de S3 como archivos para los trabajadores, y scratch es adecuado para datos temporales que pueden perderse tras la falla de un servidor de archivos."
+          },
+          {
+            "id": "B",
+            "text": "Usar un sistema de archivos Amazon EFS para los trabajadores y copiar allí los datos de S3 antes de cada ejecución.",
+            "why": "EFS ofrece acceso compartido a archivos, pero copiar los datos agrega un paso de preparación en lugar de presentar directamente los objetos vinculados de S3 como archivos."
+          },
+          {
+            "id": "C",
+            "text": "Usar un sistema de archivos persistent de Amazon FSx for Lustre vinculado al bucket de S3.",
+            "why": "Cumple el requisito de acceso a archivos, pero la implementación replicada no es necesaria para datos que el laboratorio puede recrear."
+          },
+          {
+            "id": "D",
+            "text": "Hacer que cada trabajador lea los datos directamente de Amazon S3 mediante solicitudes de objetos.",
+            "why": "Las solicitudes directas de objetos no proporcionan la interfaz de archivos y directorios que espera la aplicación existente."
+          }
+        ],
+        "explanation": "La aplicación necesita una interfaz de sistema de archivos para los datos almacenados en S3, y los datos de trabajo se pueden descartar. Un sistema de archivos FSx for Lustre vinculado con S3 presenta los objetos como archivos; scratch está diseñado para procesamiento temporal y de corta duración. Persistent también ofrecería esa interfaz, pero la replicación no responde a un requisito de este escenario."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fsx-lustre--eb954b4f",
+      "conceptId": "fsx-lustre",
+      "secondaryConcepts": [
+        "ebs-volume-types",
+        "instance-store"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media studio's Linux render workers share an active project dataset through a POSIX file system. The project runs for weeks, requires high-throughput file access, and must remain available if a file server fails. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a scratch Amazon FSx for Lustre file system mounted by the render workers.",
+          "correct": false,
+          "why": "Scratch does not replicate file-system data, which may not persist after a file-server failure."
+        },
+        {
+          "id": "B",
+          "text": "Use a persistent Amazon FSx for Lustre file system mounted by the render workers.",
+          "correct": true,
+          "why": "Persistent Lustre combines managed high-performance shared file access with replicated data and replacement of failed file servers."
+        },
+        {
+          "id": "C",
+          "text": "Attach an Amazon EBS volume to each render worker and synchronize project files between workers.",
+          "correct": false,
+          "why": "Synchronizing separate worker volumes adds management effort instead of providing one managed shared file system."
+        },
+        {
+          "id": "D",
+          "text": "Use instance store on each render worker and copy the project dataset to every instance.",
+          "correct": false,
+          "why": "Per-instance ephemeral storage does not provide the required shared, failure-resilient project file system."
+        }
+      ],
+      "explanation": "The deciding constraint is that the active shared dataset must survive a file-server failure. Persistent FSx for Lustre replicates data and replaces failed file servers while providing a managed high-performance POSIX file system. Scratch Lustre is attractive for fast temporary processing, but its data is not replicated and does not persist if a file server fails.",
+      "keywordCues": [
+        "Linux render workers share an active project dataset",
+        "POSIX file system",
+        "must remain available if a file server fails",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/LustreGuide/what-is.html"
+      ],
+      "es": {
+        "stem": "Los trabajadores de renderizado con Linux de un estudio audiovisual comparten los datos de un proyecto activo mediante un sistema de archivos POSIX. El proyecto dura semanas, necesita acceso a archivos de alto rendimiento y debe seguir disponible si falla un servidor de archivos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un sistema de archivos scratch de Amazon FSx for Lustre montado por los trabajadores.",
+            "why": "Scratch no replica los datos del sistema de archivos, que podrían no persistir después de la falla de un servidor de archivos."
+          },
+          {
+            "id": "B",
+            "text": "Usar un sistema de archivos persistent de Amazon FSx for Lustre montado por los trabajadores.",
+            "why": "Persistent Lustre combina acceso compartido de alto rendimiento administrado con datos replicados y reemplazo de servidores de archivos que fallan."
+          },
+          {
+            "id": "C",
+            "text": "Adjuntar un volumen Amazon EBS a cada trabajador y sincronizar los archivos del proyecto entre trabajadores.",
+            "why": "Sincronizar volúmenes separados agrega trabajo de administración en vez de proporcionar un único sistema de archivos compartido y administrado."
+          },
+          {
+            "id": "D",
+            "text": "Usar instance store en cada trabajador y copiar el conjunto de datos del proyecto a cada instancia.",
+            "why": "El almacenamiento efímero por instancia no proporciona el sistema de archivos compartido y resistente a fallas que se requiere."
+          }
+        ],
+        "explanation": "La condición decisiva es que el conjunto de datos activo y compartido debe sobrevivir a la falla de un servidor de archivos. Persistent FSx for Lustre replica los datos y reemplaza los servidores que fallan, además de ofrecer un sistema de archivos POSIX administrado de alto rendimiento. Scratch Lustre puede ser atractivo para procesamiento temporal rápido, pero no replica sus datos y estos no persisten si falla un servidor de archivos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fsx-lustre--b9a9fd3d",
+      "conceptId": "fsx-lustre",
+      "secondaryConcepts": [
+        "s3-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A genomics team has a Linux analysis application that makes small, random file reads throughout its active dataset. The team has selected Amazon FSx for Lustre but requires consistent sub-millisecond access to the entire dataset, not just frequently accessed files. Which storage configuration meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Choose the FSx for Lustre SSD storage class.",
+          "correct": true,
+          "why": "SSD is optimized for small, random file operations and provides consistent sub-millisecond access across the full dataset."
+        },
+        {
+          "id": "B",
+          "text": "Choose the FSx for Lustre Intelligent-Tiering storage class with an SSD read cache.",
+          "correct": false,
+          "why": "Intelligent-Tiering offers sub-millisecond access to frequently accessed data but is not intended for consistent low latency across the full dataset."
+        },
+        {
+          "id": "C",
+          "text": "Choose the FSx for Lustre HDD storage class with an SSD read cache.",
+          "correct": false,
+          "why": "The HDD class is described as providing consistent single-digit-millisecond access to the full dataset, not sub-millisecond access."
+        },
+        {
+          "id": "D",
+          "text": "Store the dataset as Amazon S3 objects and have the application retrieve each object directly.",
+          "correct": false,
+          "why": "Direct object retrieval does not meet the Linux application's file-access requirement or the specified Lustre storage-class decision."
+        }
+      ],
+      "explanation": "The requirement applies to small, random reads across the entire dataset, rather than only its frequently accessed portion. FSx for Lustre SSD is the class documented to provide consistent sub-millisecond access to the full dataset. Intelligent-Tiering can provide that latency for frequently accessed data, while HDD is described with consistent single-digit-millisecond access.",
+      "keywordCues": [
+        "small, random file reads",
+        "consistent sub-millisecond access",
+        "entire dataset",
+        "not just frequently accessed files"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/LustreGuide/what-is.html"
+      ],
+      "es": {
+        "stem": "Un equipo de genómica tiene una aplicación de análisis en Linux que hace lecturas pequeñas y aleatorias de archivos en todo su conjunto de datos activo. El equipo eligió Amazon FSx for Lustre, pero necesita acceso constante con latencia inferior a un milisegundo a todo el conjunto de datos, no solo a los archivos de uso frecuente. ¿Qué configuración de almacenamiento cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Elegir la clase de almacenamiento SSD de FSx for Lustre.",
+            "why": "SSD está optimizada para operaciones pequeñas y aleatorias con archivos y ofrece acceso constante con latencia inferior a un milisegundo a todo el conjunto de datos."
+          },
+          {
+            "id": "B",
+            "text": "Elegir la clase de almacenamiento Intelligent-Tiering de FSx for Lustre con una caché de lectura SSD.",
+            "why": "Intelligent-Tiering ofrece acceso con latencia inferior a un milisegundo a los datos de uso frecuente, pero no está pensada para mantener esa baja latencia en todo el conjunto de datos."
+          },
+          {
+            "id": "C",
+            "text": "Elegir la clase de almacenamiento HDD de FSx for Lustre con una caché de lectura SSD.",
+            "why": "La clase HDD ofrece acceso constante con latencia de unos pocos milisegundos a todo el conjunto de datos, no inferior a un milisegundo."
+          },
+          {
+            "id": "D",
+            "text": "Guardar el conjunto de datos como objetos de Amazon S3 y hacer que la aplicación recupere cada objeto directamente.",
+            "why": "La recuperación directa de objetos no cumple el requisito de acceso a archivos de la aplicación Linux ni resuelve la elección de la clase de almacenamiento de Lustre."
+          }
+        ],
+        "explanation": "El requisito se aplica a lecturas pequeñas y aleatorias en todo el conjunto de datos, no solo en la parte de uso frecuente. FSx for Lustre SSD es la clase documentada para ofrecer acceso constante con latencia inferior a un milisegundo a todo el conjunto de datos. Intelligent-Tiering puede ofrecer esa latencia para datos de uso frecuente, mientras que HDD ofrece acceso constante con latencia de unos pocos milisegundos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "fsx-lustre--r0",
+      "conceptId": "fsx-lustre",
+      "kind": "recall",
+      "prompt": "A Linux HPC job needs fast file access to an S3 dataset. What would you choose, and when would you use scratch versus persistent?",
+      "promptEs": "Un trabajo HPC en Linux necesita acceso rápido a archivos de un conjunto de datos en S3. ¿Qué elegirías y cuándo usarías scratch o persistent?",
+      "idealAnswer": "Use Amazon FSx for Lustre linked to the S3 bucket so the application sees objects as files. Choose scratch for temporary data that can be lost after a file-server failure; choose persistent when file-system data must survive that failure.",
+      "rubric": [
+        "Names FSx for Lustre linked to S3.",
+        "Explains that S3 objects appear as files.",
+        "Distinguishes scratch from persistent by file-server failure behavior."
+      ]
+    },
+    {
+      "id": "fsx-lustre--r1",
+      "conceptId": "fsx-lustre",
+      "kind": "why-not",
+      "prompt": "Why is shared Amazon EFS not the best match when Linux HPC workers need a high-performance file system that presents S3 objects as files?",
+      "promptEs": "¿Por qué Amazon EFS compartido no es la mejor opción si trabajadores HPC en Linux necesitan un sistema de archivos de alto rendimiento que presente objetos de S3 como archivos?",
+      "idealAnswer": "EFS provides shared NFS storage, but the stated requirement points to FSx for Lustre's HPC-focused file system and S3 data repository integration. Linking FSx for Lustre to S3 presents the source objects as files without a separate copy into EFS.",
+      "rubric": [
+        "Acknowledges that EFS can provide shared file storage.",
+        "Identifies FSx for Lustre as the HPC-focused choice.",
+        "Mentions that the S3 link presents objects as files."
+      ]
+    }
+  ]
+}

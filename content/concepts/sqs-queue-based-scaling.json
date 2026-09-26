@@ -1,0 +1,403 @@
+{
+  "conceptId": "sqs-queue-based-scaling",
+  "card": {
+    "en": {
+      "tldr": "Put work in Amazon SQS to decouple incoming requests from consumers during bursts. For EC2 queue workers, scale on backlog per InService instance—not raw queue depth—and set the target from acceptable queue delay and processing time.",
+      "whenToUse": [
+        "Requests arrive faster than workers can process them during unpredictable spikes.",
+        "EC2 workers must scale to meet a specified queue-delay target.",
+        "A Lambda function can process queued work without managing EC2 workers."
+      ],
+      "keyFacts": [
+        "Backlog per instance is the number of messages available for retrieval divided by the Auto Scaling group's InService instance count.",
+        "The acceptable backlog-per-instance target is acceptable queue latency divided by average processing time per message.",
+        "Metric math can avoid the cost and effort of publishing a custom backlog-per-instance metric.",
+        "Lambda polls SQS through an event source mapping; the queue and function must be in the same Region, but may be in different accounts.",
+        "Lambda's SQS event source mapping processes messages at least once, so function code should be idempotent."
+      ],
+      "gotchas": [
+        "Raw visible-message count alone does not account for how many EC2 workers are processing the queue.",
+        "A failed Lambda batch is retried after the visibility timeout by default, including messages that succeeded earlier in that batch.",
+        "Terminating an EC2 worker returns its unfinished messages to the queue; consider scale-in protection for long-running work."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "bursty requests with asynchronous processing",
+        "acceptable queue delay",
+        "messages waiting per worker",
+        "long-running queue workers during scale-in",
+        "some records in a Lambda batch fail"
+      ]
+    },
+    "es": {
+      "tldr": "Coloca el trabajo en Amazon SQS para desacoplar las solicitudes entrantes de los consumidores durante los picos. Si usas trabajadores EC2, escala según el backlog por instancia InService, no solo por la cantidad total de mensajes, y calcula el objetivo a partir de la demora aceptable y el tiempo de procesamiento.",
+      "whenToUse": [
+        "Las solicitudes llegan más rápido de lo que los trabajadores pueden procesarlas durante picos impredecibles.",
+        "Los trabajadores EC2 deben escalar para cumplir un objetivo de demora en la cola.",
+        "Una función Lambda puede procesar el trabajo en cola sin que administres trabajadores EC2."
+      ],
+      "keyFacts": [
+        "El backlog por instancia es la cantidad de mensajes disponibles para recuperar dividida entre las instancias InService del Auto Scaling group.",
+        "El objetivo de backlog aceptable por instancia es la latencia aceptable en la cola dividida entre el tiempo promedio de procesamiento por mensaje.",
+        "Metric math puede evitar el costo y el esfuerzo de publicar una métrica personalizada de backlog por instancia.",
+        "Lambda consulta SQS mediante un event source mapping; la cola y la función deben estar en la misma Región, aunque pueden estar en cuentas distintas.",
+        "El event source mapping de SQS para Lambda procesa los mensajes al menos una vez; por eso, tu función debe ser idempotente."
+      ],
+      "gotchas": [
+        "La cantidad total de mensajes visibles no considera cuántos trabajadores EC2 procesan la cola.",
+        "Si falla un lote de Lambda, de forma predeterminada se reintenta después del visibility timeout, incluso si algunos mensajes del lote ya se procesaron.",
+        "Si se termina un trabajador EC2, sus mensajes sin terminar vuelven a la cola; considera scale-in protection para trabajos prolongados."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "bursty requests with asynchronous processing",
+        "acceptable queue delay",
+        "messages waiting per worker",
+        "long-running queue workers during scale-in",
+        "some records in a Lambda batch fail"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+      "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "sqs-queue-based-scaling--0c220734",
+      "conceptId": "sqs-queue-based-scaling",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing platform sends reservation updates to an SQS queue, and a Lambda function processes them in batches. Occasionally one update fails after other updates in the same batch have succeeded. The team wants to avoid retrying those successful updates while continuing to process the failed one. Which change meets this requirement with the LEAST custom deletion logic?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Reduce the Lambda batch window so the function receives records sooner.",
+          "correct": false,
+          "why": "The batch window affects when records are invoked, not which records are retried after a failure."
+        },
+        {
+          "id": "B",
+          "text": "Keep the default batch failure behavior and make each update idempotent.",
+          "correct": false,
+          "why": "Idempotency limits duplicate side effects but does not avoid retrying successful records."
+        },
+        {
+          "id": "C",
+          "text": "Increase the SQS visibility timeout so the entire batch stays hidden longer.",
+          "correct": false,
+          "why": "A longer visibility timeout delays retries but does not distinguish successful records from failed ones."
+        },
+        {
+          "id": "D",
+          "text": "Implement partial batch responses that identify the failed records.",
+          "correct": true,
+          "why": "Partial batch responses prevent successfully processed messages from being retried when other batch items fail."
+        }
+      ],
+      "explanation": "By default, a Lambda failure makes all messages in the SQS batch visible again after the visibility timeout. Partial batch response logic identifies failed records so successfully processed records need not be retried. Increasing the timeout merely postpones the retry; idempotency remains important because duplicate processing can still occur. Partial batch responses meet the selective-retry requirement without per-message DeleteMessage calls.",
+      "keywordCues": [
+        "one update fails after other updates in the same batch have succeeded",
+        "avoid retrying those successful updates",
+        "LEAST custom deletion logic"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de venta de entradas envía actualizaciones de reservas a una cola SQS, y una función Lambda las procesa en lotes. A veces, una actualización falla después de que otras del mismo lote se procesaron correctamente. El equipo quiere evitar reintentar las actualizaciones correctas y seguir procesando la que falló. ¿Qué cambio cumple este requisito con el LEAST custom deletion logic?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reducir el batch window de Lambda para que la función reciba los registros antes.",
+            "why": "El batch window afecta cuándo se invoca la función, no qué registros se reintentan después de una falla."
+          },
+          {
+            "id": "B",
+            "text": "Mantener el comportamiento predeterminado ante fallas del lote y hacer idempotente cada actualización.",
+            "why": "La idempotencia limita los efectos de procesar duplicados, pero no evita reintentar los registros correctos."
+          },
+          {
+            "id": "C",
+            "text": "Aumentar el visibility timeout de SQS para que todo el lote permanezca oculto más tiempo.",
+            "why": "Un visibility timeout mayor retrasa los reintentos, pero no distingue los registros correctos de los fallidos."
+          },
+          {
+            "id": "D",
+            "text": "Implementar partial batch responses que identifiquen los registros fallidos.",
+            "why": "Las partial batch responses evitan reintentar mensajes procesados correctamente cuando fallan otros elementos del lote."
+          }
+        ],
+        "explanation": "De forma predeterminada, una falla de Lambda hace que todos los mensajes del lote de SQS vuelvan a estar visibles después del visibility timeout. La lógica de partial batch response identifica los registros fallidos para que no debas reintentar los procesados correctamente. Aumentar el timeout solo pospone el reintento; la idempotencia sigue siendo importante porque puede haber procesamiento duplicado. Las partial batch responses cumplen el requisito de reintento selectivo sin llamadas DeleteMessage por mensaje."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-queue-based-scaling--15c4ad10",
+      "conceptId": "sqs-queue-based-scaling",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A document-processing company receives submissions in brief surges, but its EC2 workers take much longer to process each document than the front end takes to accept it. The company wants to buffer accepted work and scale its worker Auto Scaling group according to an acceptable queue-delay target, with minimal metric-publishing effort. Which TWO design choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set a target tracking policy directly on the queue's visible-message count.",
+          "correct": false,
+          "why": "Raw queue depth does not account for the number of workers or the acceptable delay per worker."
+        },
+        {
+          "id": "B",
+          "text": "Place accepted document jobs in an SQS queue for the EC2 workers to retrieve.",
+          "correct": true,
+          "why": "SQS holds work for asynchronous processing and decouples submissions from the worker fleet."
+        },
+        {
+          "id": "C",
+          "text": "Use metric math to target available messages per InService instance based on acceptable delay and average processing time.",
+          "correct": true,
+          "why": "This supplies the appropriate backlog-per-instance target without publishing a custom metric."
+        },
+        {
+          "id": "D",
+          "text": "Publish a custom metric for available messages per InService instance.",
+          "correct": false,
+          "why": "The metric could support scaling, but publishing it adds effort that metric math can avoid."
+        },
+        {
+          "id": "E",
+          "text": "Set the worker group's minimum capacity to the fleet size required for every surge.",
+          "correct": false,
+          "why": "A fixed surge-sized fleet does not scale capacity according to the queue-delay target."
+        }
+      ],
+      "explanation": "SQS separates the quick submission path from slower document processing so jobs can wait for workers during a surge. For EC2 Auto Scaling, target tracking should use backlog per InService instance; its target follows from acceptable queue delay divided by average time per document. Metric math avoids publishing that value as a custom metric. Raw visible-message count omits fleet size, while a published custom metric misses the minimal-effort requirement.",
+      "keywordCues": [
+        "buffer accepted work",
+        "acceptable queue-delay target",
+        "minimal metric-publishing effort",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"
+      ],
+      "es": {
+        "stem": "Una empresa de procesamiento de documentos recibe envíos en picos breves, pero sus trabajadores EC2 tardan mucho más en procesar cada documento que el front-end en aceptarlo. La empresa quiere mantener en cola el trabajo aceptado y escalar el Auto Scaling group de trabajadores según un objetivo de demora aceptable, con un esfuerzo mínimo para publicar métricas. ¿Qué DOS decisiones de diseño cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar una política de target tracking directamente sobre la cantidad de mensajes visibles en la cola.",
+            "why": "La cantidad total de mensajes no considera cuántos trabajadores hay ni la demora aceptable por trabajador."
+          },
+          {
+            "id": "B",
+            "text": "Colocar los trabajos de documentos aceptados en una cola SQS para que los trabajadores EC2 los recuperen.",
+            "why": "SQS conserva el trabajo para procesamiento asíncrono y desacopla los envíos de los trabajadores."
+          },
+          {
+            "id": "C",
+            "text": "Usar metric math para establecer un objetivo de mensajes disponibles por instancia InService basado en la demora aceptable y el tiempo promedio de procesamiento.",
+            "why": "Esto proporciona el objetivo adecuado de backlog por instancia sin publicar una métrica personalizada."
+          },
+          {
+            "id": "D",
+            "text": "Publicar una métrica personalizada de mensajes disponibles por instancia InService.",
+            "why": "La métrica podría servir para escalar, pero publicarla agrega trabajo que metric math puede evitar."
+          },
+          {
+            "id": "E",
+            "text": "Establecer la capacidad mínima del grupo de trabajadores en el tamaño necesario para todos los picos.",
+            "why": "Mantener siempre una flota dimensionada para los picos no escala la capacidad según el objetivo de demora."
+          }
+        ],
+        "explanation": "SQS separa la recepción rápida de los envíos del procesamiento más lento de documentos, de modo que los trabajos puedan esperar a los trabajadores durante un pico. Para EC2 Auto Scaling, target tracking debe usar el backlog por instancia InService; su objetivo se obtiene al dividir la demora aceptable en la cola entre el tiempo promedio por documento. Metric math evita publicar ese valor como una métrica personalizada. La cantidad total de mensajes visibles omite el tamaño de la flota, mientras que publicar una métrica personalizada no cumple el requisito de esfuerzo mínimo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-queue-based-scaling--a5bb6e19",
+      "conceptId": "sqs-queue-based-scaling",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A photo-printing company places uploaded image-processing jobs in Amazon SQS. Ten InService EC2 workers each take an average of 0.2 seconds per job, and the business accepts at most 8 seconds of queue delay. The queue now has 800 available messages. Which scaling configuration meets the delay target with the LEAST metric-publishing overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Publish a custom available-messages-per-InService-instance metric and target 40.",
+          "correct": false,
+          "why": "This uses the appropriate target but adds metric-publishing effort that metric math avoids."
+        },
+        {
+          "id": "B",
+          "text": "Use metric math for available messages divided by InService instances, with a target of 40.",
+          "correct": true,
+          "why": "The target is 8 ÷ 0.2 = 40 messages per instance, and metric math avoids publishing a custom metric."
+        },
+        {
+          "id": "C",
+          "text": "Use target tracking on the queue's visible-message count with a target of 40 messages.",
+          "correct": false,
+          "why": "Forty is the acceptable backlog per instance, not a target for the entire queue."
+        },
+        {
+          "id": "D",
+          "text": "Use metric math for available messages divided by InService instances, with a target of 80.",
+          "correct": false,
+          "why": "Eighty is the current backlog per instance, not the backlog allowed by the delay target."
+        }
+      ],
+      "explanation": "The acceptable backlog per instance is 8 seconds divided by 0.2 seconds per job, or 40. The current backlog is 800 ÷ 10 = 80 messages per InService instance, so capacity needs to increase to meet that target. Metric math provides the per-instance scaling signal without the cost and effort of publishing a custom metric. Targeting raw queue depth or using the current backlog as the target misses the stated delay requirement.",
+      "keywordCues": [
+        "0.2 seconds per job",
+        "8 seconds of queue delay",
+        "800 available messages",
+        "LEAST metric-publishing overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"
+      ],
+      "es": {
+        "stem": "Una empresa de impresión de fotos coloca los trabajos de procesamiento de imágenes en Amazon SQS. Diez trabajadores EC2 InService tardan en promedio 0,2 segundos por trabajo, y la empresa acepta como máximo 8 segundos de demora en la cola. La cola tiene ahora 800 mensajes disponibles. ¿Qué configuración de escalado cumple el objetivo de demora con el LEAST metric-publishing overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Publicar una métrica personalizada de mensajes disponibles por instancia InService y establecer un objetivo de 40.",
+            "why": "Usa el objetivo adecuado, pero agrega trabajo de publicación de métricas que metric math evita."
+          },
+          {
+            "id": "B",
+            "text": "Usar metric math para dividir los mensajes disponibles entre las instancias InService, con un objetivo de 40.",
+            "why": "El objetivo es 8 ÷ 0,2 = 40 mensajes por instancia, y metric math evita publicar una métrica personalizada."
+          },
+          {
+            "id": "C",
+            "text": "Usar target tracking sobre la cantidad de mensajes visibles en la cola, con un objetivo de 40 mensajes.",
+            "why": "Cuarenta es el backlog aceptable por instancia, no un objetivo para toda la cola."
+          },
+          {
+            "id": "D",
+            "text": "Usar metric math para dividir los mensajes disponibles entre las instancias InService, con un objetivo de 80.",
+            "why": "Ochenta es el backlog actual por instancia, no el backlog permitido por el objetivo de demora."
+          }
+        ],
+        "explanation": "El backlog aceptable por instancia es 8 segundos divididos entre 0,2 segundos por trabajo: 40. El backlog actual es 800 ÷ 10 = 80 mensajes por instancia InService, por lo que debes aumentar la capacidad para cumplir el objetivo. Metric math proporciona la señal de escalado por instancia sin el costo ni el esfuerzo de publicar una métrica personalizada. Usar la cantidad total de mensajes o tomar el backlog actual como objetivo no cumple la demora indicada."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sqs-queue-based-scaling--ebecfc05",
+      "conceptId": "sqs-queue-based-scaling",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab's EC2 Auto Scaling group processes simulation jobs from SQS. Some jobs run for a long time, and the group must scale in when demand falls. The lab wants an active worker to finish its current job before it is selected for scale-in, while still allowing idle workers to terminate. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable instance scale-in protection while a worker processes a job, then remove it when the worker is idle.",
+          "correct": true,
+          "why": "This protects active workers from scale-in while allowing idle workers to be terminated."
+        },
+        {
+          "id": "B",
+          "text": "Increase the SQS visibility timeout and leave scale-in behavior unchanged.",
+          "correct": false,
+          "why": "Visibility timeout does not stop the Auto Scaling group from terminating an active worker."
+        },
+        {
+          "id": "C",
+          "text": "Keep every worker protected from scale-in for the lifetime of the instance.",
+          "correct": false,
+          "why": "Permanent protection conflicts with the requirement to terminate idle workers."
+        },
+        {
+          "id": "D",
+          "text": "Scale in when the queue has no visible messages, without tracking workers' active jobs.",
+          "correct": false,
+          "why": "A queue can have no available messages while workers are still processing jobs."
+        }
+      ],
+      "explanation": "The deciding requirement is to finish a long-running job before its worker is selected for scale-in. Instance scale-in protection can be set during processing and removed while the worker is idle. If an instance is terminated with unfinished messages, those messages return to SQS for another worker, but that does not satisfy the lab's preference to let active jobs finish. A visibility timeout does not control which EC2 instance scales in.",
+      "keywordCues": [
+        "Some jobs run for a long time",
+        "finish its current job before it is selected for scale-in",
+        "allowing idle workers to terminate"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"
+      ],
+      "es": {
+        "stem": "El EC2 Auto Scaling group de un laboratorio de investigación procesa trabajos de simulación desde SQS. Algunos trabajos tardan mucho, y el grupo debe reducir su capacidad cuando baja la demanda. El laboratorio quiere que un trabajador activo termine su trabajo antes de que pueda ser seleccionado para scale-in, pero que los trabajadores inactivos puedan terminarse. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activar instance scale-in protection mientras un trabajador procesa un trabajo y quitarla cuando esté inactivo.",
+            "why": "Así proteges a los trabajadores activos durante scale-in y permites terminar los inactivos."
+          },
+          {
+            "id": "B",
+            "text": "Aumentar el visibility timeout de SQS y no modificar el comportamiento de scale-in.",
+            "why": "El visibility timeout no impide que el Auto Scaling group termine un trabajador activo."
+          },
+          {
+            "id": "C",
+            "text": "Mantener a todos los trabajadores protegidos contra scale-in durante toda la vida de la instancia.",
+            "why": "La protección permanente impide cumplir el requisito de terminar trabajadores inactivos."
+          },
+          {
+            "id": "D",
+            "text": "Hacer scale-in cuando la cola no tenga mensajes visibles, sin seguir los trabajos activos de los trabajadores.",
+            "why": "Una cola puede no tener mensajes disponibles mientras los trabajadores todavía procesan trabajos."
+          }
+        ],
+        "explanation": "El requisito decisivo es que un trabajo prolongado termine antes de que su trabajador pueda ser seleccionado para scale-in. Puedes activar instance scale-in protection durante el procesamiento y quitarla cuando el trabajador esté inactivo. Si se termina una instancia con mensajes pendientes, estos vuelven a SQS para que otro trabajador los procese, pero eso no cumple la preferencia del laboratorio de dejar terminar los trabajos activos. El visibility timeout no controla qué instancia EC2 se termina."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "sqs-queue-based-scaling--r0",
+      "conceptId": "sqs-queue-based-scaling",
+      "kind": "recall",
+      "prompt": "A web app receives bursty jobs processed by EC2 workers. How would you buffer the jobs and choose a scaling target for a required queue delay?",
+      "promptEs": "Una aplicación web recibe trabajos en picos que procesan trabajadores EC2. ¿Cómo mantendrías los trabajos en cola y elegirías un objetivo de escalado según la demora requerida?",
+      "idealAnswer": "Place the jobs in SQS and have EC2 workers retrieve them. Scale the Auto Scaling group using backlog per InService instance, targeting acceptable queue delay divided by average processing time per job; metric math can avoid publishing a custom metric.",
+      "rubric": [
+        "Uses SQS to buffer work separately from request handling.",
+        "Scales on available messages per InService instance rather than raw queue depth.",
+        "Derives the target from acceptable delay divided by average processing time."
+      ]
+    }
+  ]
+}

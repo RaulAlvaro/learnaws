@@ -1,0 +1,270 @@
+{
+  "conceptId": "dynamodb-dax",
+  "card": {
+    "en": {
+      "tldr": "DynamoDB Accelerator (DAX) is a managed, DynamoDB-compatible in-memory cache that can deliver microsecond responses for eventually consistent reads. Choose it when an existing DynamoDB application repeatedly reads the same items and needs faster reads or less load on the table with minimal application changes.",
+      "whenToUse": [
+        "A read-heavy DynamoDB application repeatedly accesses the same keys.",
+        "Bursts of reads against hot items could otherwise require more provisioned read capacity.",
+        "The application accepts eventually consistent reads and needs microsecond latency."
+      ],
+      "keyFacts": [
+        "DAX is API-compatible with DynamoDB and requires minimal functional changes to an existing application.",
+        "DAX can reduce eventually consistent read latency from single-digit milliseconds to microseconds.",
+        "Offloading repeated reads can reduce the need to overprovision DynamoDB read capacity units.",
+        "DAX performs best when cache hit rates exceed 90%.",
+        "DAX supports encryption at rest and TLS encryption in transit."
+      ],
+      "gotchas": [
+        "Do not choose DAX when reads must be strongly consistent.",
+        "Write-intensive workloads and workloads with few repeated reads are poor DAX fits.",
+        "DAX is a DynamoDB-specific cache, not a substitute for Redis/Valkey features such as pub/sub or sorted sets."
+      ],
+      "confusedWith": [
+        {
+          "concept": "ElastiCache for Redis OSS/Valkey",
+          "difference": "Choose Redis/Valkey for needs such as pub/sub or sorted sets; choose DAX for DynamoDB-compatible caching of repeated, eventually consistent reads."
+        },
+        {
+          "concept": "ElastiCache for Memcached",
+          "difference": "Memcached is a general-purpose simple cache; DAX is DynamoDB-compatible and needs minimal functional changes to an existing DynamoDB application."
+        }
+      ],
+      "examCues": [
+        "repeated reads of hot DynamoDB keys",
+        "microsecond eventually consistent reads",
+        "minimal changes to an existing DynamoDB application",
+        "offload bursts of DynamoDB read activity"
+      ]
+    },
+    "es": {
+      "tldr": "DynamoDB Accelerator (DAX) es un caché administrado en memoria, compatible con DynamoDB, que puede ofrecer respuestas en microsegundos para lecturas con consistencia eventual. Elígelo cuando tu aplicación DynamoDB lee repetidamente los mismos elementos y necesita lecturas más rápidas o menos carga en la tabla con cambios mínimos.",
+      "whenToUse": [
+        "Tu aplicación DynamoDB tiene muchas lecturas repetidas de las mismas claves.",
+        "Los picos de lectura sobre elementos populares podrían requerir más capacidad de lectura aprovisionada.",
+        "Tu aplicación acepta lecturas con consistencia eventual y necesita latencia de microsegundos."
+      ],
+      "keyFacts": [
+        "DAX es compatible con la API de DynamoDB y requiere cambios funcionales mínimos en una aplicación existente.",
+        "DAX puede reducir la latencia de lecturas con consistencia eventual de milisegundos de un solo dígito a microsegundos.",
+        "Desviar lecturas repetidas al caché puede reducir la necesidad de aprovisionar capacidad de lectura adicional en DynamoDB.",
+        "DAX funciona mejor cuando la tasa de aciertos del caché supera el 90%.",
+        "DAX admite cifrado en reposo y cifrado en tránsito mediante TLS."
+      ],
+      "gotchas": [
+        "No elijas DAX si las lecturas deben ser fuertemente consistentes.",
+        "Las cargas con muchas escrituras o pocas lecturas repetidas no son buenas candidatas para DAX.",
+        "DAX es un caché específico para DynamoDB; no sustituye funciones de Redis/Valkey como pub/sub o sorted sets."
+      ],
+      "confusedWith": [
+        {
+          "concept": "ElastiCache for Redis OSS/Valkey",
+          "difference": "Elige Redis/Valkey si necesitas pub/sub o sorted sets; elige DAX para almacenar en caché lecturas repetidas de DynamoDB con consistencia eventual."
+        },
+        {
+          "concept": "ElastiCache for Memcached",
+          "difference": "Memcached es un caché simple de uso general; DAX es compatible con DynamoDB y requiere cambios funcionales mínimos en una aplicación DynamoDB existente."
+        }
+      ],
+      "examCues": [
+        "repeated reads of hot DynamoDB keys",
+        "microsecond eventually consistent reads",
+        "minimal changes to an existing DynamoDB application",
+        "offload bursts of DynamoDB read activity"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-dax--252899d9",
+      "conceptId": "dynamodb-dax",
+      "secondaryConcepts": [
+        "elasticache-redis-valkey",
+        "elasticache-memcached"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company stores event availability in DynamoDB. During ticket releases, customers repeatedly request the same popular event records; the application accepts eventually consistent reads but needs microsecond responses. The team wants to change as little application functionality as possible. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place ElastiCache for Redis OSS/Valkey in front of DynamoDB and implement application-managed cache lookups.",
+          "correct": false,
+          "why": "It introduces application-managed caching rather than using the DynamoDB-compatible cache that requires minimal functional changes."
+        },
+        {
+          "id": "B",
+          "text": "Add a DAX cluster and use a DAX client for the event-record reads.",
+          "correct": true,
+          "why": "DAX provides managed, DynamoDB-compatible caching with microsecond responses for repeated, eventually consistent reads."
+        },
+        {
+          "id": "C",
+          "text": "Increase DynamoDB provisioned read capacity for ticket-release periods.",
+          "correct": false,
+          "why": "Additional read capacity does not address the stated need for microsecond read responses."
+        },
+        {
+          "id": "D",
+          "text": "Add ElastiCache for Memcached and implement cache population for each event record.",
+          "correct": false,
+          "why": "This requires application-managed cache behavior instead of the minimal functional changes supported by DAX."
+        }
+      ],
+      "explanation": "The deciding constraints are microsecond reads of repeatedly accessed DynamoDB items and minimal application changes. DAX is a managed, DynamoDB-compatible cache for eventually consistent reads and can offload reads of hot keys. Redis/Valkey and Memcached would require the team to implement cache behavior in the application. Increasing read capacity addresses throughput rather than the requested read latency.",
+      "keywordCues": [
+        "repeatedly request the same popular event records",
+        "accepts eventually consistent reads",
+        "needs microsecond responses",
+        "change as little application functionality as possible"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos guarda la disponibilidad de eventos en DynamoDB. Durante los lanzamientos, los clientes consultan repetidamente los mismos eventos populares; tu aplicación acepta lecturas con consistencia eventual, pero necesita respuestas en microsegundos. Tu equipo quiere cambiar lo menos posible la funcionalidad de la aplicación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar ElastiCache for Redis OSS/Valkey delante de DynamoDB e implementar consultas al caché administradas por la aplicación.",
+            "why": "Introduce lógica de caché administrada por la aplicación en lugar de usar el caché compatible con DynamoDB que requiere cambios funcionales mínimos."
+          },
+          {
+            "id": "B",
+            "text": "Agregar un clúster DAX y usar un cliente DAX para las lecturas de los registros de eventos.",
+            "why": "DAX ofrece un caché administrado y compatible con DynamoDB, con respuestas en microsegundos para lecturas repetidas con consistencia eventual."
+          },
+          {
+            "id": "C",
+            "text": "Aumentar la capacidad de lectura aprovisionada de DynamoDB durante los lanzamientos.",
+            "why": "La capacidad de lectura adicional no resuelve el requisito de respuestas en microsegundos."
+          },
+          {
+            "id": "D",
+            "text": "Agregar ElastiCache for Memcached e implementar la carga del caché para cada registro de evento.",
+            "why": "Requiere administrar el comportamiento del caché en la aplicación, en vez de aprovechar los cambios funcionales mínimos que permite DAX."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son lecturas en microsegundos de elementos DynamoDB consultados repetidamente y cambios mínimos en la aplicación. DAX es un caché administrado, compatible con DynamoDB, para lecturas con consistencia eventual y puede descargar las lecturas de claves populares. Redis/Valkey y Memcached exigirían que tu equipo implemente el comportamiento del caché en la aplicación. Aumentar la capacidad de lectura aborda el volumen de solicitudes, no la latencia requerida."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-dax--17414585",
+      "conceptId": "dynamodb-dax",
+      "secondaryConcepts": [
+        "elasticache-redis-valkey",
+        "elasticache-memcached"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company keeps article metadata in DynamoDB. Its home page repeatedly reads a small set of featured articles, and editors accept eventually consistent results; the home page needs microsecond read responses. Security policy also requires encryption for traffic to the cache and for data the cache persists to disk. Which solution meets these requirements with the LEAST application change?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use DAX with encryption in transit and encryption at rest enabled.",
+          "correct": true,
+          "why": "DAX meets the repeated-read latency and minimal-change requirements and supports both specified encryption protections."
+        },
+        {
+          "id": "B",
+          "text": "Use ElastiCache for Redis OSS/Valkey and add application-managed metadata caching.",
+          "correct": false,
+          "why": "This requires application-managed cache integration instead of DAX's DynamoDB-compatible integration."
+        },
+        {
+          "id": "C",
+          "text": "Use ElastiCache for Memcached and add application-managed metadata caching.",
+          "correct": false,
+          "why": "Application-managed caching misses the requirement for minimal application change."
+        },
+        {
+          "id": "D",
+          "text": "Increase DynamoDB read capacity and keep the existing read path.",
+          "correct": false,
+          "why": "More read capacity does not provide the requested microsecond cache responses."
+        }
+      ],
+      "explanation": "Repeated reads of a few DynamoDB items with acceptable eventual consistency are a good fit for DAX's microsecond in-memory reads. DAX is DynamoDB-compatible, so adopting it requires minimal functional changes. It also supports TLS encryption in transit and encryption of data it persists to disk. Increasing read capacity does not target microsecond latency, while the other caches call for application-managed integration.",
+      "keywordCues": [
+        "repeatedly reads a small set of featured articles",
+        "accept eventually consistent results",
+        "microsecond read responses",
+        "encryption for traffic to the cache and for data the cache persists to disk"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios guarda metadatos de artículos en DynamoDB. Su página principal lee repetidamente un pequeño grupo de artículos destacados y los editores aceptan resultados con consistencia eventual; la página necesita respuestas de lectura en microsegundos. La política de seguridad también exige cifrar el tráfico hacia el caché y los datos que el caché persiste en disco. ¿Qué solución cumple estos requisitos con el LEAST application change?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar DAX con encryption in transit y encryption at rest habilitados.",
+            "why": "DAX cumple los requisitos de latencia y cambios mínimos para lecturas repetidas, y admite ambas protecciones de cifrado."
+          },
+          {
+            "id": "B",
+            "text": "Usar ElastiCache for Redis OSS/Valkey y agregar almacenamiento de metadatos en caché administrado por la aplicación.",
+            "why": "Requiere integrar el caché desde la aplicación en vez de aprovechar la compatibilidad de DAX con DynamoDB."
+          },
+          {
+            "id": "C",
+            "text": "Usar ElastiCache for Memcached y agregar almacenamiento de metadatos en caché administrado por la aplicación.",
+            "why": "Administrar el caché desde la aplicación no cumple el requisito de cambios mínimos."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar la capacidad de lectura de DynamoDB y conservar la ruta de lectura actual.",
+            "why": "Más capacidad de lectura no proporciona las respuestas de caché en microsegundos solicitadas."
+          }
+        ],
+        "explanation": "Las lecturas repetidas de unos pocos elementos DynamoDB, cuando se acepta consistencia eventual, encajan con las lecturas en memoria de DAX en microsegundos. DAX es compatible con DynamoDB, por lo que adoptarlo requiere cambios funcionales mínimos. También admite cifrado TLS en tránsito y cifrado de los datos que persiste en disco. Aumentar la capacidad de lectura no se enfoca en la latencia de microsegundos, mientras que los otros cachés requieren integración administrada por la aplicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-dax--r0",
+      "conceptId": "dynamodb-dax",
+      "kind": "recall",
+      "prompt": "An existing DynamoDB app repeatedly reads hot items, accepts eventual consistency, and needs microsecond responses. What would you add, and why?",
+      "promptEs": "Tu aplicación DynamoDB lee repetidamente elementos populares, acepta consistencia eventual y necesita respuestas en microsegundos. ¿Qué agregarías y por qué?",
+      "idealAnswer": "Add DAX. It caches eventually consistent DynamoDB reads in memory for microsecond responses, and its DynamoDB compatibility means minimal functional changes to the existing application.",
+      "rubric": [
+        "Names DAX.",
+        "Connects repeated, eventually consistent reads to microsecond cached responses.",
+        "Mentions DynamoDB compatibility or minimal functional changes."
+      ]
+    },
+    {
+      "id": "dynamodb-dax--r1",
+      "conceptId": "dynamodb-dax",
+      "kind": "why-not",
+      "prompt": "Why choose DAX rather than Redis/Valkey for repeated DynamoDB reads when minimal application changes matter?",
+      "promptEs": "¿Por qué elegirías DAX en vez de Redis/Valkey para lecturas repetidas de DynamoDB cuando importan los cambios mínimos en la aplicación?",
+      "idealAnswer": "DAX is a managed, DynamoDB-compatible cache that requires minimal functional changes and accelerates repeated, eventually consistent reads. Redis/Valkey is a better match when the application needs features such as pub/sub or sorted sets, not when DynamoDB-compatible read caching is the deciding requirement.",
+      "rubric": [
+        "Identifies DAX as DynamoDB-compatible.",
+        "Explains its fit for repeated, eventually consistent reads with minimal changes.",
+        "Distinguishes a Redis/Valkey-specific feature or the need for separate cache integration."
+      ]
+    }
+  ]
+}

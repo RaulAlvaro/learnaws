@@ -1,0 +1,444 @@
+{
+  "conceptId": "datasync",
+  "card": {
+    "en": {
+      "tldr": "AWS DataSync moves files and objects online between supported storage locations, including on-premises NFS, SMB, HDFS, and object storage and AWS storage such as S3, EFS, and FSx. Choose it when a migration or recurring copy needs managed scheduling, integrity checks, or bandwidth control.",
+      "whenToUse": [
+        "An active on-premises dataset needs an initial copy to AWS followed by scheduled incremental transfers.",
+        "Files or objects must move regularly into S3 for processing, or into EFS or FSx for a standby file system.",
+        "Transfers must be verified or kept within a limited network-bandwidth budget."
+      ],
+      "keyFacts": [
+        "Each task run scans the source and destination and copies data and metadata differences.",
+        "DataSync performs integrity checks during transfer; optional end-of-transfer verification can compare full-file checksums.",
+        "Tasks support scheduling, include and exclude filters, and a built-in bandwidth throttle.",
+        "Transfers involving on-premises storage require a DataSync agent; transfers between AWS storage services in the same account do not."
+      ],
+      "gotchas": [
+        "DataSync moves data over the network; it is not the offline-shipping choice for a site with inadequate connectivity.",
+        "A partner that must keep using an SFTP client needs a managed file-transfer endpoint, not a DataSync task.",
+        "Built-in integrity checks and optional end-of-transfer checksum verification are not the same setting."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Snow Family",
+          "difference": "Choose Snow Family for offline transfer when network transfer is impractical; choose DataSync for online migration or recurring copies."
+        },
+        {
+          "concept": "AWS Transfer Family",
+          "difference": "Transfer Family provides endpoints for existing SFTP, FTPS, FTP, or AS2 clients; DataSync copies data between storage locations."
+        }
+      ],
+      "examCues": [
+        "scheduled incremental copy from an NFS share",
+        "throttle migration traffic on a shared link",
+        "verify files copied to Amazon S3",
+        "replicate an SMB share to a standby file system"
+      ]
+    },
+    "es": {
+      "tldr": "AWS DataSync mueve archivos y objetos en línea entre ubicaciones de almacenamiento compatibles, como NFS, SMB, HDFS y almacenamiento de objetos local, y servicios de AWS como S3, EFS y FSx. Elígelo cuando una migración o copia recurrente necesite programación administrada, comprobaciones de integridad o control del ancho de banda.",
+      "whenToUse": [
+        "Un conjunto de datos local y activo necesita una copia inicial en AWS y transferencias incrementales programadas.",
+        "Es necesario mover archivos u objetos regularmente a S3 para procesarlos, o a EFS o FSx para mantener un sistema de archivos de respaldo.",
+        "Debes verificar las transferencias o limitar su consumo de ancho de banda."
+      ],
+      "keyFacts": [
+        "En cada ejecución, la tarea examina el origen y el destino y copia las diferencias de datos y metadatos.",
+        "DataSync comprueba la integridad durante la transferencia; una verificación opcional al final puede comparar checksums de archivos completos.",
+        "Las tareas admiten programación, filtros de inclusión y exclusión, y un límite de ancho de banda integrado.",
+        "Las transferencias con almacenamiento local requieren un agente de DataSync; las transferencias entre servicios de almacenamiento de AWS en la misma cuenta no lo requieren."
+      ],
+      "gotchas": [
+        "DataSync mueve datos por la red; no es la opción de envío sin conexión cuando la conectividad es insuficiente.",
+        "Si un socio debe seguir usando un cliente SFTP, necesita un endpoint administrado de transferencia de archivos, no una tarea de DataSync.",
+        "Las comprobaciones de integridad integradas y la verificación opcional de checksums al final de la transferencia no son la misma configuración."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Snow Family",
+          "difference": "Elige Snow Family para transferencias sin conexión cuando usar la red no es práctico; elige DataSync para migraciones en línea o copias recurrentes."
+        },
+        {
+          "concept": "AWS Transfer Family",
+          "difference": "Transfer Family ofrece endpoints para clientes SFTP, FTPS, FTP o AS2 existentes; DataSync copia datos entre ubicaciones de almacenamiento."
+        }
+      ],
+      "examCues": [
+        "scheduled incremental copy from an NFS share",
+        "throttle migration traffic on a shared link",
+        "verify files copied to Amazon S3",
+        "replicate an SMB share to a standby file system"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html",
+      "https://aws.amazon.com/datasync/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "datasync--564c76b2",
+      "conceptId": "datasync",
+      "secondaryConcepts": [
+        "transfer-family",
+        "snow-family"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A regional hospital retains patient documents on an on-premises SMB share and wants a standby file system on AWS. Staff continue to update the source, so the hospital needs changes copied periodically and wants validation that the transferred data arrives intact. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send periodic AWS Snow Family shipments and load the documents into Amazon FSx for Windows File Server.",
+          "correct": false,
+          "why": "Recurring offline shipments do not provide the requested managed, periodic online copies."
+        },
+        {
+          "id": "B",
+          "text": "Write a scheduled script to copy the SMB share to Amazon FSx for Windows File Server and validate the results.",
+          "correct": false,
+          "why": "Building and maintaining copying and validation scripts adds overhead that DataSync avoids."
+        },
+        {
+          "id": "C",
+          "text": "Deploy a DataSync agent and schedule copies from the SMB share to Amazon FSx for Windows File Server.",
+          "correct": true,
+          "why": "DataSync supports SMB-to-FSx transfers, periodic tasks, and transfer integrity checks."
+        },
+        {
+          "id": "D",
+          "text": "Create an AWS Transfer Family SFTP endpoint and ask staff to upload changed documents to Amazon S3.",
+          "correct": false,
+          "why": "This changes the staff workflow and does not copy the existing SMB share to the requested standby file system."
+        }
+      ],
+      "explanation": "The destination must be a standby file system, not simply an upload bucket, and the SMB source keeps changing. DataSync supports SMB and Amazon FSx for Windows File Server, with scheduled tasks and integrity checks. Transfer Family would require a different client workflow and would not automatically copy the existing share. A custom script misses the least-operational-overhead qualifier.",
+      "keywordCues": [
+        "on-premises SMB share",
+        "standby file system",
+        "changes copied periodically",
+        "validation that the transferred data arrives intact"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html",
+        "https://aws.amazon.com/datasync/faqs/"
+      ],
+      "es": {
+        "stem": "Un hospital regional conserva documentos de pacientes en un recurso compartido SMB local y quiere un sistema de archivos de respaldo en AWS. El personal sigue actualizando el origen, por lo que el hospital necesita copiar los cambios periódicamente y comprobar que los datos transferidos lleguen intactos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Envía dispositivos de AWS Snow Family periódicamente y carga los documentos en Amazon FSx for Windows File Server.",
+            "why": "Los envíos recurrentes sin conexión no proporcionan las copias periódicas en línea y administradas que se solicitan."
+          },
+          {
+            "id": "B",
+            "text": "Escribe un script programado que copie el recurso SMB a Amazon FSx for Windows File Server y valide los resultados.",
+            "why": "Desarrollar y mantener scripts de copia y validación agrega trabajo operativo que DataSync evita."
+          },
+          {
+            "id": "C",
+            "text": "Implementa un agente de DataSync y programa copias del recurso SMB a Amazon FSx for Windows File Server.",
+            "why": "DataSync admite transferencias de SMB a FSx, tareas periódicas y comprobaciones de integridad."
+          },
+          {
+            "id": "D",
+            "text": "Crea un endpoint SFTP de AWS Transfer Family y pide al personal que suba los documentos modificados a Amazon S3.",
+            "why": "Esto cambia el flujo de trabajo del personal y no copia el recurso SMB existente al sistema de archivos de respaldo solicitado."
+          }
+        ],
+        "explanation": "El destino debe ser un sistema de archivos de respaldo, no solo un bucket para cargas, y el origen SMB sigue cambiando. DataSync admite SMB y Amazon FSx for Windows File Server, además de tareas programadas y comprobaciones de integridad. Transfer Family requeriría otro flujo de trabajo para los clientes y no copiaría automáticamente el recurso existente. Un script personalizado no cumple el requisito de LEAST operational overhead."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "datasync--bb7a457d",
+      "conceptId": "datasync",
+      "secondaryConcepts": [
+        "transfer-family",
+        "snow-family"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retail analytics team is moving image objects from Azure Blob Storage to an Amazon S3 data lake. New objects arrive throughout the week, and the team wants scheduled online transfers without operating a transfer agent. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a scheduled DataSync Enhanced mode task from Azure Blob Storage to S3.",
+          "correct": true,
+          "why": "DataSync supports this source and destination, and Enhanced mode does not require an agent to connect to cloud storage."
+        },
+        {
+          "id": "B",
+          "text": "Give the source team an AWS Transfer Family SFTP endpoint backed by S3 for its weekly uploads.",
+          "correct": false,
+          "why": "An SFTP endpoint requires a client upload workflow rather than scheduled copies from Azure Blob Storage."
+        },
+        {
+          "id": "C",
+          "text": "Export the objects to AWS Snow Family devices for repeated offline delivery into AWS.",
+          "correct": false,
+          "why": "Repeated offline delivery does not meet the scheduled online-transfer requirement."
+        },
+        {
+          "id": "D",
+          "text": "Build a scheduled application that lists Azure objects and writes changes to S3.",
+          "correct": false,
+          "why": "A custom application adds maintenance when a managed transfer task is available."
+        }
+      ],
+      "explanation": "The source is cloud object storage, the destination is S3, and the copies must run online on a schedule. DataSync supports Azure Blob Storage and scheduled transfers; an Enhanced mode task can connect to cloud storage without an agent. Transfer Family provides a client-facing endpoint rather than a scheduled copy from the existing source. A custom application would increase operational overhead.",
+      "keywordCues": [
+        "Azure Blob Storage",
+        "Amazon S3 data lake",
+        "scheduled online transfers",
+        "without operating a transfer agent"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html",
+        "https://aws.amazon.com/datasync/faqs/"
+      ],
+      "es": {
+        "stem": "Un equipo de análisis de ventas minoristas está trasladando objetos de imágenes desde Azure Blob Storage a un data lake en Amazon S3. Llegan objetos nuevos durante toda la semana y el equipo quiere transferencias en línea programadas sin operar un agente de transferencia. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura una tarea programada de DataSync Enhanced mode desde Azure Blob Storage a S3.",
+            "why": "DataSync admite este origen y destino, y Enhanced mode no requiere un agente para conectarse al almacenamiento en la nube."
+          },
+          {
+            "id": "B",
+            "text": "Da al equipo de origen un endpoint SFTP de AWS Transfer Family respaldado por S3 para sus cargas semanales.",
+            "why": "Un endpoint SFTP requiere que un cliente cargue los datos, en lugar de copiar de forma programada desde Azure Blob Storage."
+          },
+          {
+            "id": "C",
+            "text": "Exporta los objetos a dispositivos AWS Snow Family para entregarlos repetidamente sin conexión a AWS.",
+            "why": "La entrega repetida sin conexión no cumple el requisito de transferencias en línea programadas."
+          },
+          {
+            "id": "D",
+            "text": "Desarrolla una aplicación programada que enumere los objetos de Azure y escriba los cambios en S3.",
+            "why": "Una aplicación personalizada agrega mantenimiento cuando existe una tarea de transferencia administrada."
+          }
+        ],
+        "explanation": "El origen es almacenamiento de objetos en la nube, el destino es S3 y las copias deben ejecutarse en línea según un horario. DataSync admite Azure Blob Storage y transferencias programadas; una tarea de Enhanced mode puede conectarse al almacenamiento en la nube sin agente. Transfer Family proporciona un endpoint para clientes, no una copia programada desde el origen existente. Una aplicación personalizada aumentaría el trabajo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "datasync--5cb967c1",
+      "conceptId": "datasync",
+      "secondaryConcepts": [
+        "transfer-family"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research institute keeps experiment records in an on-premises HDFS cluster. It must copy only the records selected for retention to Amazon S3 every weekend, limit use of a shared network link, and compare the copied files with the source after each transfer. The institute plans to use AWS DataSync. Which TWO task choices together meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set up an AWS Transfer Family SFTP endpoint for the HDFS cluster to submit records.",
+          "correct": false,
+          "why": "An SFTP endpoint does not configure the planned DataSync task to select and copy HDFS records."
+        },
+        {
+          "id": "B",
+          "text": "Set a DataSync bandwidth throttle and enable optional end-of-transfer full-file verification.",
+          "correct": true,
+          "why": "These settings protect the shared link and compare source and destination files after transfer."
+        },
+        {
+          "id": "C",
+          "text": "Set an exclude filter that omits the records selected for retention.",
+          "correct": false,
+          "why": "Omitting the selected records prevents the required files from reaching S3."
+        },
+        {
+          "id": "D",
+          "text": "Schedule the HDFS-to-S3 task for weekends and use an include filter for the selected records.",
+          "correct": true,
+          "why": "Scheduling and an include filter address the required timing and file selection."
+        },
+        {
+          "id": "E",
+          "text": "Run the task manually after each weekend and copy the entire HDFS dataset.",
+          "correct": false,
+          "why": "Manual runs and copying everything miss the scheduled, selected-record requirements."
+        }
+      ],
+      "explanation": "The task must satisfy four constraints: weekend execution, selected records, bounded bandwidth, and comparison after copying. Scheduling with an include filter addresses the first two; a bandwidth throttle and optional full-file verification address the other two. Excluding the retention records would omit precisely the data the institute needs. Built-in transfer integrity checks do not replace the specifically requested end-of-transfer comparison.",
+      "keywordCues": [
+        "on-premises HDFS cluster",
+        "only the records selected for retention",
+        "every weekend",
+        "limit use of a shared network link",
+        "compare the copied files with the source after each transfer"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html",
+        "https://aws.amazon.com/datasync/faqs/"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación conserva registros de experimentos en un clúster HDFS local. Debe copiar a Amazon S3 solo los registros seleccionados para conservación cada fin de semana, limitar el uso de una conexión de red compartida y comparar los archivos copiados con el origen después de cada transferencia. El instituto planea usar AWS DataSync. ¿Qué DOS opciones de configuración de la tarea cumplen estos requisitos en conjunto? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura un endpoint SFTP de AWS Transfer Family para que el clúster HDFS envíe los registros.",
+            "why": "Un endpoint SFTP no configura la tarea de DataSync prevista para seleccionar y copiar registros HDFS."
+          },
+          {
+            "id": "B",
+            "text": "Configura un límite de ancho de banda de DataSync y activa la verificación opcional de archivos completos al final de la transferencia.",
+            "why": "Estas opciones protegen la conexión compartida y comparan los archivos del origen y destino después de la transferencia."
+          },
+          {
+            "id": "C",
+            "text": "Configura un filtro de exclusión que omita los registros seleccionados para conservación.",
+            "why": "Omitir los registros seleccionados impide que los archivos requeridos lleguen a S3."
+          },
+          {
+            "id": "D",
+            "text": "Programa la tarea de HDFS a S3 para los fines de semana y usa un filtro de inclusión para los registros seleccionados.",
+            "why": "La programación y el filtro de inclusión cubren el horario y la selección de archivos requeridos."
+          },
+          {
+            "id": "E",
+            "text": "Ejecuta la tarea manualmente después de cada fin de semana y copia todo el conjunto de datos HDFS.",
+            "why": "Las ejecuciones manuales y la copia completa no cumplen los requisitos de programación y selección de registros."
+          }
+        ],
+        "explanation": "La tarea debe cumplir cuatro condiciones: ejecutarse en fin de semana, seleccionar registros, limitar el ancho de banda y comparar los archivos después de copiarlos. La programación y un filtro de inclusión cubren las dos primeras; un límite de ancho de banda y la verificación opcional de archivos completos cubren las otras dos. Excluir los registros para conservación omitiría precisamente los datos que el instituto necesita. Las comprobaciones de integridad durante la transferencia no sustituyen la comparación solicitada al final."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "datasync--2692e530",
+      "conceptId": "datasync",
+      "secondaryConcepts": [
+        "snow-family",
+        "transfer-family"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio stores active project files on an on-premises NFS server. It wants an initial copy in Amazon S3, followed by nightly copies of changes, but its shared internet connection must remain available for daytime collaboration. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Ship the initial files with AWS Snow Family and repeat shipments for nightly changes.",
+          "correct": false,
+          "why": "Offline shipments do not provide the required nightly online copies."
+        },
+        {
+          "id": "B",
+          "text": "Run a nightly custom copy program from the NFS server to S3 and manage its network usage.",
+          "correct": false,
+          "why": "A custom program adds operational work compared with DataSync's built-in scheduling and throttle."
+        },
+        {
+          "id": "C",
+          "text": "Provide an AWS Transfer Family SFTP endpoint and have the NFS server submit files each night.",
+          "correct": false,
+          "why": "An SFTP endpoint does not itself scan the NFS share and copy its changes."
+        },
+        {
+          "id": "D",
+          "text": "Deploy a DataSync agent, schedule an NFS-to-S3 task for off-hours, and set a bandwidth throttle.",
+          "correct": true,
+          "why": "DataSync supports the source and destination, scheduled copies of changes, and bandwidth control."
+        }
+      ],
+      "explanation": "The deciding requirements are an online NFS-to-S3 migration, recurring copies of changes, and protection of a shared connection. A DataSync task can make the initial copy, run on a schedule, and limit its bandwidth. Snow Family is an offline transfer approach, so repeated shipments do not meet the nightly-copy requirement. A custom program could move data but would require more operational work.",
+      "keywordCues": [
+        "on-premises NFS server",
+        "followed by nightly copies of changes",
+        "shared internet connection",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html",
+        "https://aws.amazon.com/datasync/faqs/"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño guarda archivos de proyectos activos en un servidor NFS local. Quiere hacer una copia inicial en Amazon S3 y luego copiar los cambios cada noche, pero debe mantener disponible su conexión compartida a internet durante el horario de trabajo. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Envía los archivos iniciales con AWS Snow Family y repite los envíos para los cambios de cada noche.",
+            "why": "Los envíos sin conexión no proporcionan las copias en línea requeridas cada noche."
+          },
+          {
+            "id": "B",
+            "text": "Ejecuta cada noche un programa de copia personalizado desde el servidor NFS a S3 y administra su uso de la red.",
+            "why": "Un programa personalizado implica más trabajo operativo que la programación y el límite de ancho de banda integrados de DataSync."
+          },
+          {
+            "id": "C",
+            "text": "Proporciona un endpoint SFTP de AWS Transfer Family y haz que el servidor NFS envíe archivos cada noche.",
+            "why": "Un endpoint SFTP no examina por sí mismo el recurso NFS ni copia sus cambios."
+          },
+          {
+            "id": "D",
+            "text": "Implementa un agente de DataSync, programa una tarea de NFS a S3 fuera del horario de trabajo y configura un límite de ancho de banda.",
+            "why": "DataSync admite el origen y el destino, las copias programadas de cambios y el control del ancho de banda."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son migrar de NFS a S3 en línea, copiar cambios de forma recurrente y proteger la conexión compartida. Una tarea de DataSync puede realizar la copia inicial, ejecutarse según un horario y limitar su ancho de banda. Snow Family usa transferencias sin conexión, por lo que los envíos repetidos no cumplen el requisito de copia nocturna. Un programa personalizado podría mover los datos, pero requeriría más trabajo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "datasync--r0",
+      "conceptId": "datasync",
+      "kind": "recall",
+      "prompt": "An NFS share needs an initial copy to S3 and scheduled incremental copies over a constrained link. What would you choose and why?",
+      "promptEs": "Un recurso NFS necesita una copia inicial en S3 y copias incrementales programadas por una conexión limitada. ¿Qué elegirías y por qué?",
+      "idealAnswer": "Use AWS DataSync with an agent that can access the on-premises NFS share. Schedule the task for recurring copies and configure its bandwidth throttle to limit use of the shared link.",
+      "rubric": [
+        "Names AWS DataSync.",
+        "Mentions an agent for the on-premises NFS source.",
+        "Explains scheduled copies of changes and bandwidth throttling."
+      ]
+    },
+    {
+      "id": "datasync--r1",
+      "conceptId": "datasync",
+      "kind": "why-not",
+      "prompt": "Why isn't AWS Transfer Family the best fit for periodically copying changes from an existing SMB share to Amazon FSx?",
+      "promptEs": "¿Por qué AWS Transfer Family no es la mejor opción para copiar periódicamente cambios de un recurso SMB existente a Amazon FSx?",
+      "idealAnswer": "Transfer Family provides managed endpoints for file-transfer clients; it does not scan an existing SMB share for changes as a DataSync task does. DataSync supports SMB-to-FSx transfers and can schedule recurring copies.",
+      "rubric": [
+        "Identifies Transfer Family as a client-facing file-transfer endpoint.",
+        "Explains that the requirement is to copy changes from an existing SMB share.",
+        "Identifies DataSync as supporting scheduled SMB-to-FSx transfers."
+      ]
+    }
+  ]
+}

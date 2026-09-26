@@ -1,0 +1,426 @@
+{
+  "conceptId": "data-transfer-time-math",
+  "card": {
+    "en": {
+      "tldr": "Estimate transfer time before choosing a transfer method: data size in bits divided by usable bandwidth in bits per second. If online transfer meets the deadline, compare its cost with the alternatives; if it cannot, consider AWS Snowball or an available higher-bandwidth connection, accounting for their full timelines and costs.",
+      "whenToUse": [
+        "A scenario provides data volume, available bandwidth, and a migration deadline.",
+        "You must choose between an online transfer, an existing or proposed AWS Direct Connect connection, and AWS Snowball.",
+        "The lowest-cost choice must still meet the stated deadline."
+      ],
+      "keyFacts": [
+        "For decimal units, 1 TB is 8,000 Gb; at 100 Mbps, transferring 1 TB takes about 22 hours at sustained full bandwidth.",
+        "AWS DataSync supports efficient online transfers between on-premises environments and AWS storage services, including Amazon S3.",
+        "AWS Direct Connect provides a dedicated private connection suited to ongoing, high-volume transfers.",
+        "Bandwidth limits can make online transfer insufficient for very large datasets; include the scenario's stated Snowball turnaround when comparing alternatives.",
+        "A transfer tool and a network connection solve different problems: AWS DataSync can move data over a connection, but it cannot remove that connection's bandwidth constraint."
+      ],
+      "gotchas": [
+        "Comparing costs before checking whether each option meets the deadline.",
+        "Treating an optimized transfer service as though it increases the site's available bandwidth.",
+        "Ignoring connection setup time or device turnaround time in a one-time migration.",
+        "Assuming AWS Direct Connect and AWS DataSync are interchangeable rather than potentially complementary."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DataSync vs. AWS Direct Connect",
+          "difference": "DataSync is an online data-transfer service; Direct Connect supplies a dedicated network connection."
+        },
+        {
+          "concept": "AWS Snowball vs. online transfer",
+          "difference": "Compare the stated end-to-end Snowball timeline with the time required to transmit the data over the available connection."
+        }
+      ],
+      "examCues": [
+        "TB of data over a limited uplink",
+        "deadline shorter than calculated online transfer time",
+        "existing Direct Connect connection",
+        "one-time migration versus ongoing monthly transfers",
+        "lowest-cost option that meets the deadline"
+      ]
+    },
+    "es": {
+      "tldr": "Antes de elegir el método de transferencia, estima el tiempo: tamaño de los datos en bits dividido entre el ancho de banda utilizable en bits por segundo. Si la transferencia en línea cumple el plazo, compara su costo con las alternativas; si no, evalúa AWS Snowball o una conexión disponible de mayor capacidad, incluidos sus tiempos y costos totales.",
+      "whenToUse": [
+        "El escenario indica volumen de datos, ancho de banda disponible y fecha límite de migración.",
+        "Debes elegir entre una transferencia en línea, una conexión AWS Direct Connect existente o propuesta, y AWS Snowball.",
+        "La opción de menor costo también debe cumplir el plazo indicado."
+      ],
+      "keyFacts": [
+        "Con unidades decimales, 1 TB equivale a 8,000 Gb; a 100 Mbps, transferir 1 TB tarda alrededor de 22 horas si se mantiene todo ese ancho de banda.",
+        "AWS DataSync permite transferencias eficientes en línea entre entornos locales y servicios de almacenamiento de AWS, incluido Amazon S3.",
+        "AWS Direct Connect ofrece una conexión privada dedicada adecuada para transferencias continuas de gran volumen.",
+        "Los límites de ancho de banda pueden hacer insuficiente una transferencia en línea para conjuntos de datos muy grandes; incluye el tiempo total de AWS Snowball indicado en el escenario.",
+        "Una herramienta de transferencia y una conexión de red cumplen funciones distintas: AWS DataSync puede mover datos por una conexión, pero no elimina el límite de ancho de banda de esa conexión."
+      ],
+      "gotchas": [
+        "Comparar costos antes de verificar qué opciones cumplen el plazo.",
+        "Suponer que un servicio de transferencia optimizado aumenta el ancho de banda disponible del sitio.",
+        "Omitir el tiempo de instalación de la conexión o el tiempo total de uso de un dispositivo en una migración única.",
+        "Tratar AWS Direct Connect y AWS DataSync como sustitutos cuando pueden complementarse."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DataSync vs. AWS Direct Connect",
+          "difference": "AWS DataSync es un servicio de transferencia de datos en línea; AWS Direct Connect proporciona una conexión de red dedicada."
+        },
+        {
+          "concept": "AWS Snowball vs. transferencia en línea",
+          "difference": "Compara el tiempo total de AWS Snowball indicado con el tiempo necesario para transmitir los datos por la conexión disponible."
+        }
+      ],
+      "examCues": [
+        "TB of data over a limited uplink",
+        "deadline shorter than calculated online transfer time",
+        "existing Direct Connect connection",
+        "one-time migration versus ongoing monthly transfers",
+        "lowest-cost option that meets the deadline"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/decision-guides/latest/migration-on-aws-how-to-choose/migration-on-aws-how-to-choose.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "data-transfer-time-math--f99e6902",
+      "conceptId": "data-transfer-time-math",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research center must migrate a one-time 80 TB image collection to Amazon S3 within 14 days. Its internet connection has only 100 Mbps of sustained capacity available for the migration, and a proposed AWS Direct Connect connection would take 21 days to establish. The center has a quoted AWS Snowball plan costing $900 with nine days end-to-end; assume decimal units and full utilization when estimating network transfer time. Which approach meets the deadline MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Amazon S3 Transfer Acceleration for uploads over the available internet connection.",
+          "correct": false,
+          "why": "Upload optimization cannot make 80 TB traverse a 100 Mbps site uplink within 14 days."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS DataSync over the available internet connection.",
+          "correct": false,
+          "why": "Moving 80 TB at 100 Mbps takes roughly 74 days, beyond the deadline."
+        },
+        {
+          "id": "C",
+          "text": "Establish AWS Direct Connect and then use AWS DataSync for the transfer.",
+          "correct": false,
+          "why": "The quoted 21-day connection setup already exceeds the 14-day deadline."
+        },
+        {
+          "id": "D",
+          "text": "Use the quoted AWS Snowball plan for the one-time migration.",
+          "correct": true,
+          "why": "Its stated nine-day end-to-end timeline is the only listed plan that meets the deadline."
+        }
+      ],
+      "explanation": "An 80 TB transfer contains 640,000 Gb in decimal units, requiring roughly 74 days at a sustained 100 Mbps. AWS DataSync and Amazon S3 Transfer Acceleration still depend on that limited uplink. The proposed AWS Direct Connect connection cannot be established before the deadline, while the scenario's AWS Snowball quote provides a nine-day end-to-end plan.",
+      "keywordCues": [
+        "one-time 80 TB image collection",
+        "within 14 days",
+        "100 Mbps of sustained capacity",
+        "21 days to establish",
+        "nine days end-to-end"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/decision-guides/latest/migration-on-aws-how-to-choose/migration-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Un centro de investigación debe migrar una colección única de imágenes de 80 TB a Amazon S3 en un máximo de 14 días. Su conexión a internet solo tiene 100 Mbps de capacidad sostenida disponible para la migración, y establecer una conexión AWS Direct Connect propuesta tardaría 21 días. El centro tiene un presupuesto de AWS Snowball de $900 con un plazo total de nueve días; para estimar el tiempo por red, usa unidades decimales y supone utilización completa. ¿Qué enfoque cumple el plazo de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activar Amazon S3 Transfer Acceleration para las cargas por la conexión a internet disponible.",
+            "why": "Optimizar la carga no permite que 80 TB atraviesen una conexión local de 100 Mbps en 14 días."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS DataSync por la conexión a internet disponible.",
+            "why": "Mover 80 TB a 100 Mbps tarda aproximadamente 74 días, más que el plazo permitido."
+          },
+          {
+            "id": "C",
+            "text": "Establecer AWS Direct Connect y luego usar AWS DataSync para la transferencia.",
+            "why": "Los 21 días indicados solo para establecer la conexión ya superan el plazo de 14 días."
+          },
+          {
+            "id": "D",
+            "text": "Usar el plan presupuestado de AWS Snowball para la migración única.",
+            "why": "Su plazo total indicado de nueve días es el único plan presentado que cumple la fecha límite."
+          }
+        ],
+        "explanation": "Con unidades decimales, 80 TB equivalen a 640,000 Gb y requieren aproximadamente 74 días a 100 Mbps sostenidos. AWS DataSync y Amazon S3 Transfer Acceleration siguen dependiendo de esa conexión limitada. La conexión AWS Direct Connect propuesta no estaría lista a tiempo, mientras que el presupuesto de AWS Snowball indica nueve días en total."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-transfer-time-math--0dfef901",
+      "conceptId": "data-transfer-time-math",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturer must transfer a one-time 6 TB set of quality-control files to Amazon S3 within four days. It has a 50 Mbps internet uplink and an existing AWS Direct Connect connection with 500 Mbps of spare capacity. The estimated incremental cost is $250 to use the existing connection, compared with $600 for an AWS Snowball plan with a three-day end-to-end turnaround; use decimal units and assume full utilization. Which solution meets the deadline MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS DataSync over the 50 Mbps internet uplink.",
+          "correct": false,
+          "why": "At 50 Mbps, transmitting 6 TB takes about 11 days and misses the deadline."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS DataSync over the existing AWS Direct Connect connection.",
+          "correct": true,
+          "why": "At 500 Mbps, the ideal transfer takes about 27 hours and costs less than the quoted AWS Snowball plan."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon S3 Transfer Acceleration over the 50 Mbps internet uplink.",
+          "correct": false,
+          "why": "The site's 50 Mbps uplink cannot transmit 6 TB within four days."
+        },
+        {
+          "id": "D",
+          "text": "Use the quoted AWS Snowball plan for the file set.",
+          "correct": false,
+          "why": "Its three-day plan meets the deadline but costs more than the eligible existing-connection plan."
+        }
+      ],
+      "explanation": "The 6 TB dataset is 48,000 Gb in decimal units. At 500 Mbps, its ideal transfer time is about 27 hours, whereas the 50 Mbps path takes about 11 days. Both the existing-connection plan and the quoted AWS Snowball plan meet the four-day deadline, but the existing-connection plan has the lower stated incremental cost.",
+      "keywordCues": [
+        "one-time 6 TB",
+        "within four days",
+        "50 Mbps internet uplink",
+        "existing AWS Direct Connect connection with 500 Mbps",
+        "$250 to use the existing connection",
+        "$600 for an AWS Snowball plan"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/decision-guides/latest/migration-on-aws-how-to-choose/migration-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Un fabricante debe transferir un conjunto único de archivos de control de calidad de 6 TB a Amazon S3 en un máximo de cuatro días. Tiene una conexión a internet de 50 Mbps y una conexión AWS Direct Connect existente con 500 Mbps de capacidad libre. El costo incremental estimado es de $250 por usar la conexión existente, frente a $600 por un plan de AWS Snowball con un tiempo total de tres días; usa unidades decimales y supone utilización completa. ¿Qué solución cumple el plazo de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS DataSync por la conexión a internet de 50 Mbps.",
+            "why": "A 50 Mbps, transmitir 6 TB toma unos 11 días y no cumple el plazo."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS DataSync por la conexión AWS Direct Connect existente.",
+            "why": "A 500 Mbps, la transferencia ideal tarda unas 27 horas y cuesta menos que el plan presupuestado de AWS Snowball."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon S3 Transfer Acceleration por la conexión a internet de 50 Mbps.",
+            "why": "La conexión local de 50 Mbps no puede transmitir 6 TB en cuatro días."
+          },
+          {
+            "id": "D",
+            "text": "Usar el plan presupuestado de AWS Snowball para los archivos.",
+            "why": "El plan de tres días cumple el plazo, pero cuesta más que usar la conexión existente."
+          }
+        ],
+        "explanation": "Con unidades decimales, los 6 TB equivalen a 48,000 Gb. A 500 Mbps, el tiempo ideal es de unas 27 horas, mientras que la ruta de 50 Mbps tarda unos 11 días. Tanto el plan con la conexión existente como el de AWS Snowball cumplen los cuatro días, pero el primero tiene el menor costo incremental indicado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-transfer-time-math--e1505cac",
+      "conceptId": "data-transfer-time-math",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A retailer is consolidating files from two branches into Amazon S3. Branch A must send 1 TB within three days over a 100 Mbps available internet uplink; its quoted internet transfer costs $50, while its AWS Snowball plan costs $400 and takes four days end-to-end. Branch B must send 40 TB within 12 days over a 40 Mbps available internet uplink; its AWS Snowball plan costs $700 and takes eight days end-to-end. A new AWS Direct Connect connection at either branch would take 20 days to establish. Using decimal units and assuming full uplink utilization, which two branch-specific choices meet their deadlines MOST cost-effectively? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "For Branch B, use AWS DataSync over its existing internet uplink.",
+          "correct": false,
+          "why": "At 40 Mbps, 40 TB requires about 93 days, exceeding Branch B's deadline."
+        },
+        {
+          "id": "B",
+          "text": "For Branch A, use AWS DataSync over its existing internet uplink.",
+          "correct": true,
+          "why": "At 100 Mbps, 1 TB takes about 22 hours and uses the lower-cost quoted option."
+        },
+        {
+          "id": "C",
+          "text": "For Branch B, use its quoted AWS Snowball plan.",
+          "correct": true,
+          "why": "Its stated eight-day end-to-end timeline meets Branch B's 12-day deadline."
+        },
+        {
+          "id": "D",
+          "text": "For Branch A, use its quoted AWS Snowball plan.",
+          "correct": false,
+          "why": "Its stated four-day turnaround misses Branch A's three-day deadline."
+        },
+        {
+          "id": "E",
+          "text": "For Branch B, establish AWS Direct Connect and transfer the files online.",
+          "correct": false,
+          "why": "The 20-day connection setup alone exceeds Branch B's 12-day deadline."
+        }
+      ],
+      "explanation": "Branch A's 1 TB takes about 22 hours at 100 Mbps, so its quoted internet transfer meets the three-day deadline at the lower stated cost. Branch B's 40 TB takes about 93 days at 40 Mbps, making its eight-day AWS Snowball plan the eligible choice. Branch A's Snowball turnaround and Branch B's proposed AWS Direct Connect setup each exceed their respective deadlines.",
+      "keywordCues": [
+        "Branch A must send 1 TB within three days",
+        "100 Mbps available internet uplink",
+        "Branch B must send 40 TB within 12 days",
+        "40 Mbps available internet uplink",
+        "eight days end-to-end",
+        "20 days to establish"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/decision-guides/latest/migration-on-aws-how-to-choose/migration-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista está consolidando archivos de dos sucursales en Amazon S3. La sucursal A debe enviar 1 TB en un máximo de tres días por una conexión a internet con 100 Mbps disponibles; su transferencia por internet cuesta $50 según el presupuesto, mientras que su plan de AWS Snowball cuesta $400 y tarda cuatro días en total. La sucursal B debe enviar 40 TB en un máximo de 12 días por una conexión a internet con 40 Mbps disponibles; su plan de AWS Snowball cuesta $700 y tarda ocho días en total. Establecer una nueva conexión AWS Direct Connect en cualquiera de las sucursales tardaría 20 días. Si usas unidades decimales y supones utilización completa de las conexiones, ¿qué dos opciones, una para cada sucursal, cumplen sus plazos de la forma MOST cost-effective? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Para la sucursal B, usar AWS DataSync por su conexión a internet existente.",
+            "why": "A 40 Mbps, los 40 TB requieren unos 93 días y exceden el plazo de la sucursal B."
+          },
+          {
+            "id": "B",
+            "text": "Para la sucursal A, usar AWS DataSync por su conexión a internet existente.",
+            "why": "A 100 Mbps, 1 TB tarda alrededor de 22 horas y usa la opción presupuestada de menor costo."
+          },
+          {
+            "id": "C",
+            "text": "Para la sucursal B, usar su plan presupuestado de AWS Snowball.",
+            "why": "El tiempo total indicado de ocho días cumple el plazo de 12 días de la sucursal B."
+          },
+          {
+            "id": "D",
+            "text": "Para la sucursal A, usar su plan presupuestado de AWS Snowball.",
+            "why": "Los cuatro días indicados para completar el proceso exceden el plazo de tres días de la sucursal A."
+          },
+          {
+            "id": "E",
+            "text": "Para la sucursal B, establecer AWS Direct Connect y transferir los archivos en línea.",
+            "why": "Solo establecer la conexión tomaría 20 días, más que el plazo de 12 días de la sucursal B."
+          }
+        ],
+        "explanation": "El 1 TB de la sucursal A tarda unas 22 horas a 100 Mbps, por lo que su transferencia por internet cumple los tres días al menor costo indicado. Los 40 TB de la sucursal B tardan unos 93 días a 40 Mbps, así que su plan de AWS Snowball de ocho días es la opción que cumple el plazo. El plan de AWS Snowball de la sucursal A y la instalación de AWS Direct Connect para la sucursal B superan sus respectivos plazos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-transfer-time-math--cd07fa11",
+      "conceptId": "data-transfer-time-math",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio needs to move a one-time 2 TB file archive to Amazon S3 within 48 hours. Its available internet uplink can sustain 200 Mbps for the transfer; for planning, use decimal units and assume full utilization. The studio's estimates are $40 for AWS DataSync over the internet, $300 and three days end-to-end for AWS Snowball, and at least five days to establish a new AWS Direct Connect connection. Which solution meets the deadline MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Transfer the archive with AWS Snowball using the quoted device plan.",
+          "correct": false,
+          "why": "The quoted three-day turnaround exceeds the 48-hour deadline."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS DataSync over the existing internet connection to transfer the archive to Amazon S3.",
+          "correct": true,
+          "why": "At 200 Mbps, 2 TB takes about 22 hours, meeting the deadline at the lowest stated cost."
+        },
+        {
+          "id": "C",
+          "text": "Deploy AWS Storage Gateway as a hybrid-storage interface for the archive.",
+          "correct": false,
+          "why": "A hybrid-storage interface does not provide a faster connection than the available uplink for this one-time transfer."
+        },
+        {
+          "id": "D",
+          "text": "Establish a new AWS Direct Connect connection and transfer the archive through it.",
+          "correct": false,
+          "why": "The stated connection setup time alone exceeds the deadline."
+        }
+      ],
+      "explanation": "At decimal units, 2 TB is 16,000 Gb; divided by 200 Mbps, the ideal transfer time is about 22 hours. AWS DataSync over the existing connection therefore meets the 48-hour deadline at the lowest stated price. The quoted AWS Snowball turnaround and AWS Direct Connect setup time each miss the deadline; AWS Storage Gateway addresses hybrid storage rather than the stated one-time transfer decision.",
+      "keywordCues": [
+        "one-time 2 TB file archive",
+        "within 48 hours",
+        "sustain 200 Mbps",
+        "$40 for AWS DataSync over the internet",
+        "$300 and three days end-to-end for AWS Snowball"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/decision-guides/latest/migration-on-aws-how-to-choose/migration-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño necesita mover un archivo único de 2 TB a Amazon S3 en un máximo de 48 horas. Su conexión a internet puede mantener 200 Mbps durante la transferencia; para el cálculo, usa unidades decimales y supone utilización completa. El estudio estima $40 para AWS DataSync por internet, $300 y tres días en total para AWS Snowball, y al menos cinco días para establecer una nueva conexión AWS Direct Connect. ¿Qué solución cumple el plazo de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Transferir el archivo con AWS Snowball según el plan presupuestado.",
+            "why": "Los tres días estimados para completar el proceso superan el plazo de 48 horas."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS DataSync por la conexión a internet existente para transferir el archivo a Amazon S3.",
+            "why": "A 200 Mbps, los 2 TB tardan alrededor de 22 horas, por lo que se cumple el plazo al menor costo indicado."
+          },
+          {
+            "id": "C",
+            "text": "Implementar AWS Storage Gateway como interfaz de almacenamiento híbrido para el archivo.",
+            "why": "Una interfaz de almacenamiento híbrido no proporciona una conexión más rápida que la disponible para esta transferencia única."
+          },
+          {
+            "id": "D",
+            "text": "Establecer una nueva conexión AWS Direct Connect y transferir el archivo por ella.",
+            "why": "Solo el tiempo indicado para establecer la conexión supera el plazo."
+          }
+        ],
+        "explanation": "Con unidades decimales, 2 TB equivalen a 16,000 Gb; divididos entre 200 Mbps, el tiempo ideal es de unas 22 horas. AWS DataSync por la conexión existente cumple las 48 horas al menor precio indicado. El tiempo total estimado de AWS Snowball y la instalación de AWS Direct Connect exceden el plazo; AWS Storage Gateway responde a una necesidad de almacenamiento híbrido, no a esta decisión de transferencia única."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "data-transfer-time-math--r0",
+      "conceptId": "data-transfer-time-math",
+      "kind": "recall",
+      "prompt": "A one-time dataset fits through the existing uplink before its deadline. How do you decide whether to use online transfer or Snowball?",
+      "promptEs": "Un conjunto de datos único puede transferirse por la conexión existente antes del plazo. ¿Cómo decides entre una transferencia en línea y AWS Snowball?",
+      "idealAnswer": "Estimate online transfer time from data size and usable bandwidth, then compare it with the deadline and the stated end-to-end Snowball timeline. If both meet the deadline, choose the lower-cost eligible plan rather than assuming the larger dataset requires Snowball.",
+      "rubric": [
+        "Calculates or describes transfer time as data size divided by usable bandwidth.",
+        "Checks the deadline against both the online estimate and the Snowball end-to-end timeline.",
+        "Compares costs only among options that meet the deadline."
+      ]
+    }
+  ]
+}

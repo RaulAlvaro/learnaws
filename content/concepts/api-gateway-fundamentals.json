@@ -1,0 +1,422 @@
+{
+  "conceptId": "api-gateway-fundamentals",
+  "card": {
+    "en": {
+      "tldr": "Amazon API Gateway provides managed REST, HTTP, and WebSocket APIs in front of Lambda functions, AWS services, and web backends. Choose an HTTP API for a lower-priced RESTful API when its features suffice, a REST API for capabilities such as caching or private endpoints, and a WebSocket API for stateful, full-duplex communication.",
+      "whenToUse": [
+        "Choose an HTTP API for a RESTful endpoint that needs Lambda or HTTP integration but no REST-only features.",
+        "Choose a REST API when requirements include API keys, per-client throttling, request validation, caching, AWS WAF integration, or a private API endpoint.",
+        "Choose a WebSocket API when clients and the server must exchange messages over a stateful, full-duplex connection."
+      ],
+      "keyFacts": [
+        "REST APIs and HTTP APIs both support Lambda functions, AWS services, and public HTTP endpoints as integrations.",
+        "HTTP APIs are offered at a lower price than REST APIs and support JWT authorization.",
+        "Private API endpoints, API keys, caching, and request validation are available for REST APIs but not HTTP APIs.",
+        "Both REST APIs and HTTP APIs support regional endpoints; only REST APIs support edge-optimized and private endpoint types.",
+        "WebSocket APIs can route incoming messages based on message content."
+      ],
+      "gotchas": [
+        "Do not choose an HTTP API solely because it supports Lambda if the scenario also requires API Gateway caching or API keys.",
+        "A private integration to a load balancer is not the same requirement as a private API endpoint; HTTP APIs support the former, not the latter.",
+        "Do not choose a REST or HTTP API when the requirement is a stateful, full-duplex client-server connection."
+      ],
+      "confusedWith": [
+        {
+          "concept": "HTTP API vs REST API",
+          "difference": "Both can expose RESTful backends, but REST APIs provide features such as private endpoints and caching; HTTP APIs have a lower price when those features are unnecessary."
+        },
+        {
+          "concept": "WebSocket API vs RESTful API",
+          "difference": "WebSocket APIs support stateful, full-duplex messaging; REST and HTTP APIs use stateless client-server communication."
+        }
+      ],
+      "examCues": [
+        "API keys and per-client throttling",
+        "private API endpoint",
+        "cache responses at the API",
+        "lower-priced RESTful Lambda endpoint",
+        "stateful, full-duplex messaging"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon API Gateway ofrece API REST, HTTP y WebSocket administradas delante de funciones Lambda, servicios de AWS y aplicaciones web. Elige una HTTP API para una API RESTful de menor precio si sus funciones bastan, una REST API si necesitas capacidades como caching o private API endpoints, y una WebSocket API para comunicación stateful y full-duplex.",
+      "whenToUse": [
+        "Elige una HTTP API para un endpoint RESTful que integre Lambda o HTTP y no necesite funciones exclusivas de REST APIs.",
+        "Elige una REST API si necesitas API keys, per-client throttling, request validation, caching, AWS WAF integration o un private API endpoint.",
+        "Elige una WebSocket API si los clientes y el servidor deben intercambiar mensajes mediante una conexión stateful y full-duplex."
+      ],
+      "keyFacts": [
+        "Tanto REST APIs como HTTP APIs admiten integraciones con funciones Lambda, servicios de AWS y endpoints HTTP públicos.",
+        "HTTP APIs tienen un precio menor que REST APIs y admiten autorización JWT.",
+        "Private API endpoints, API keys, caching y request validation están disponibles en REST APIs, pero no en HTTP APIs.",
+        "REST APIs y HTTP APIs admiten endpoints regionales; solo REST APIs admiten los tipos edge-optimized y private.",
+        "WebSocket APIs pueden enrutar mensajes entrantes según su contenido."
+      ],
+      "gotchas": [
+        "No elijas una HTTP API solo porque admite Lambda si también necesitas API Gateway caching o API keys.",
+        "Una private integration con un load balancer no equivale a un private API endpoint: HTTP APIs admiten la primera opción, pero no la segunda.",
+        "No elijas una REST API ni una HTTP API cuando se requiera una conexión stateful y full-duplex entre cliente y servidor."
+      ],
+      "confusedWith": [
+        {
+          "concept": "HTTP API vs REST API",
+          "difference": "Ambas pueden exponer backends RESTful, pero REST APIs ofrecen funciones como private endpoints y caching; HTTP APIs cuestan menos cuando no necesitas esas funciones."
+        },
+        {
+          "concept": "WebSocket API vs RESTful API",
+          "difference": "WebSocket APIs admiten mensajes stateful y full-duplex; REST APIs y HTTP APIs usan comunicación stateless entre cliente y servidor."
+        }
+      ],
+      "examCues": [
+        "API keys and per-client throttling",
+        "private API endpoint",
+        "cache responses at the API",
+        "lower-priced RESTful Lambda endpoint",
+        "stateful, full-duplex messaging"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html",
+      "https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "api-gateway-fundamentals--dabbb67e",
+      "conceptId": "api-gateway-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics company is building a dispatcher console. While an operator is connected, the backend must send new vehicle assignments to the console, and the operator must send acknowledgments over the same connection. Incoming messages must be routed according to their content. Which API Gateway API type best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A REST API with caching enabled for assignment responses",
+          "correct": false,
+          "why": "Caching responses does not provide stateful, full-duplex messaging."
+        },
+        {
+          "id": "B",
+          "text": "A REST API that invokes a Lambda function for each client request",
+          "correct": false,
+          "why": "A REST API uses stateless communication and does not meet the same-connection, full-duplex requirement."
+        },
+        {
+          "id": "C",
+          "text": "An HTTP API that invokes a Lambda function for each client request",
+          "correct": false,
+          "why": "An HTTP API uses stateless communication rather than the required full-duplex connection."
+        },
+        {
+          "id": "D",
+          "text": "A WebSocket API that routes messages based on their content",
+          "correct": true,
+          "why": "A WebSocket API supports stateful, full-duplex communication and content-based message routing."
+        }
+      ],
+      "explanation": "The console needs the client and server to exchange messages over the same connection. WebSocket APIs support stateful, full-duplex communication and can route incoming messages based on content. REST and HTTP APIs are stateless, even when they integrate with Lambda. Adding REST API caching does not change that communication model.",
+      "keywordCues": [
+        "send new vehicle assignments to the console",
+        "over the same connection",
+        "routed according to their content"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística está creando una consola para despachadores. Mientras un operador esté conectado, el backend debe enviar nuevas asignaciones de vehículos a la consola, y el operador debe enviar confirmaciones por la misma conexión. Los mensajes entrantes deben enrutarse según su contenido. ¿Qué tipo de API de API Gateway cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Una REST API con caching habilitado para las respuestas de asignaciones",
+            "why": "Guardar respuestas en caché no proporciona mensajes stateful y full-duplex."
+          },
+          {
+            "id": "B",
+            "text": "Una REST API que invoca una función Lambda por cada solicitud del cliente",
+            "why": "Una REST API usa comunicación stateless y no cumple el requisito de comunicación full-duplex por la misma conexión."
+          },
+          {
+            "id": "C",
+            "text": "Una HTTP API que invoca una función Lambda por cada solicitud del cliente",
+            "why": "Una HTTP API usa comunicación stateless, no la conexión full-duplex requerida."
+          },
+          {
+            "id": "D",
+            "text": "Una WebSocket API que enruta mensajes según su contenido",
+            "why": "Una WebSocket API admite comunicación stateful y full-duplex y enrutamiento de mensajes según su contenido."
+          }
+        ],
+        "explanation": "La consola necesita que el cliente y el servidor intercambien mensajes por la misma conexión. WebSocket APIs admiten comunicación stateful y full-duplex y pueden enrutar mensajes entrantes según su contenido. REST APIs y HTTP APIs son stateless, incluso si integran Lambda. Agregar caching a una REST API no cambia ese modelo de comunicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "api-gateway-fundamentals--47210ddb",
+      "conceptId": "api-gateway-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A public museum exposes a regional API backed by an HTTP application. Most visitors repeatedly request the same exhibit descriptions, and the museum wants responses cached at API Gateway. It also requires request validation before requests reach the application. Which solution meets both requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A WebSocket API with the application caching exhibit messages",
+          "correct": false,
+          "why": "A WebSocket API does not provide the requested RESTful response caching and request validation at API Gateway."
+        },
+        {
+          "id": "B",
+          "text": "An HTTP API with a regional endpoint and HTTP backend integration",
+          "correct": false,
+          "why": "An HTTP API supports the backend integration but not API Gateway caching or request validation."
+        },
+        {
+          "id": "C",
+          "text": "An HTTP API with the application implementing caching and request validation",
+          "correct": false,
+          "why": "Application-level caching is not the required caching at API Gateway and adds application work."
+        },
+        {
+          "id": "D",
+          "text": "A REST API with caching and request validation enabled",
+          "correct": true,
+          "why": "A REST API supports both required features directly in API Gateway."
+        }
+      ],
+      "explanation": "Both caching at API Gateway and request validation are explicit requirements. REST APIs support both features, as well as regional endpoints and HTTP backend integrations. HTTP APIs can use an HTTP backend but do not provide either required gateway feature. Moving those tasks into the application also fails the specified caching location and adds operational work.",
+      "keywordCues": [
+        "regional API",
+        "cached at API Gateway",
+        "request validation before requests reach the application",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html"
+      ],
+      "es": {
+        "stem": "Un museo público expone una API regional respaldada por una aplicación HTTP. Muchos visitantes solicitan repetidamente las mismas descripciones de las exhibiciones, y el museo quiere guardar las respuestas en caché en API Gateway. También requiere request validation antes de que las solicitudes lleguen a la aplicación. ¿Qué solución cumple ambos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Una WebSocket API con la aplicación guardando en caché los mensajes de exhibiciones",
+            "why": "Una WebSocket API no proporciona el caching de respuestas RESTful ni request validation solicitados en API Gateway."
+          },
+          {
+            "id": "B",
+            "text": "Una HTTP API con un endpoint regional e integración con el backend HTTP",
+            "why": "Una HTTP API admite esa integración, pero no API Gateway caching ni request validation."
+          },
+          {
+            "id": "C",
+            "text": "Una HTTP API con caching y request validation implementados en la aplicación",
+            "why": "El caching en la aplicación no es el caching requerido en API Gateway y agrega trabajo a la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Una REST API con caching y request validation habilitados",
+            "why": "Una REST API admite ambas funciones requeridas directamente en API Gateway."
+          }
+        ],
+        "explanation": "Tanto el caching en API Gateway como request validation son requisitos explícitos. REST APIs admiten ambas funciones, además de endpoints regionales e integraciones con backends HTTP. HTTP APIs pueden usar un backend HTTP, pero no proporcionan ninguna de las dos funciones requeridas en el gateway. Trasladar esas tareas a la aplicación también incumple la ubicación solicitada para el caching y agrega trabajo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "api-gateway-fundamentals--4546aa14",
+      "conceptId": "api-gateway-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A publisher is launching two independent regional APIs, both backed by Lambda. A reader API needs JWT authorization but no API keys or per-client throttling; its price should be kept as low as possible. A partner API must issue API keys and enforce per-client throttling. Which two API Gateway choices satisfy these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a REST API with JWT validation in a Lambda authorizer for the reader API.",
+          "correct": false,
+          "why": "JWT validation is possible with a REST API Lambda authorizer, but an HTTP API provides native JWT authorization at a lower price for this reader API."
+        },
+        {
+          "id": "B",
+          "text": "Use a REST API with API keys and per-client throttling for the partner API.",
+          "correct": true,
+          "why": "REST APIs support both API keys and per-client throttling."
+        },
+        {
+          "id": "C",
+          "text": "Use an HTTP API with a Lambda authorizer for the partner API.",
+          "correct": false,
+          "why": "Adding a Lambda authorizer does not give an HTTP API the required API keys and per-client throttling."
+        },
+        {
+          "id": "D",
+          "text": "Use a WebSocket API for the partner API.",
+          "correct": false,
+          "why": "The partner requirement calls for REST API management features, not stateful, full-duplex messaging."
+        },
+        {
+          "id": "E",
+          "text": "Use an HTTP API with JWT authorization for the reader API.",
+          "correct": true,
+          "why": "HTTP APIs support JWT authorization and meet the reader API's lower-price priority."
+        }
+      ],
+      "explanation": "The two APIs have different deciding requirements, so they need not use the same API type. An HTTP API supports JWT authorization and is the lower-priced fit for the reader API. A REST API is required for the partner API's API keys and per-client throttling. A Lambda authorizer does not add those REST-only management features to an HTTP API.",
+      "keywordCues": [
+        "two independent regional APIs",
+        "JWT authorization but no API keys or per-client throttling",
+        "price should be kept as low as possible",
+        "issue API keys and enforce per-client throttling"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html"
+      ],
+      "es": {
+        "stem": "Una editorial lanzará dos API regionales independientes, ambas respaldadas por Lambda. La API para lectores necesita autorización JWT, pero no API keys ni per-client throttling; su precio debe ser lo más bajo posible. La API para socios debe emitir API keys y aplicar per-client throttling. ¿Qué dos opciones de API Gateway cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar una REST API con validación JWT mediante un Lambda authorizer para la API de lectores.",
+            "why": "La validación JWT es posible con un Lambda authorizer en una REST API, pero una HTTP API ofrece autorización JWT a un precio menor para esta API."
+          },
+          {
+            "id": "B",
+            "text": "Usar una REST API con API keys y per-client throttling para la API de socios.",
+            "why": "REST APIs admiten tanto API keys como per-client throttling."
+          },
+          {
+            "id": "C",
+            "text": "Usar una HTTP API con un Lambda authorizer para la API de socios.",
+            "why": "Agregar un Lambda authorizer no proporciona a una HTTP API las API keys ni el per-client throttling requeridos."
+          },
+          {
+            "id": "D",
+            "text": "Usar una WebSocket API para la API de socios.",
+            "why": "La API de socios necesita funciones de administración de REST APIs, no mensajes stateful y full-duplex."
+          },
+          {
+            "id": "E",
+            "text": "Usar una HTTP API con autorización JWT para la API de lectores.",
+            "why": "HTTP APIs admiten autorización JWT y cumplen la prioridad de menor precio de la API de lectores."
+          }
+        ],
+        "explanation": "Las dos API tienen requisitos decisivos distintos, por lo que no necesitan usar el mismo tipo de API. Una HTTP API admite autorización JWT y es la opción de menor precio para lectores. Una REST API es necesaria para las API keys y el per-client throttling de la API de socios. Un Lambda authorizer no agrega esas funciones de administración exclusivas de REST APIs a una HTTP API."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "api-gateway-fundamentals--fc11f999",
+      "conceptId": "api-gateway-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing startup is exposing Lambda functions to a mobile app through standard HTTP methods. The app will send JWTs, and the team does not need API keys, caching, or private API endpoints. Which API Gateway API type meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "An HTTP API with a Lambda integration and JWT authorization",
+          "correct": true,
+          "why": "An HTTP API supports Lambda integration and JWT authorization at a lower price than a REST API."
+        },
+        {
+          "id": "B",
+          "text": "A REST API with API keys for each mobile user",
+          "correct": false,
+          "why": "The scenario does not require API keys, so this adds a REST-only capability without meeting the cost priority."
+        },
+        {
+          "id": "C",
+          "text": "A REST API with a Lambda integration",
+          "correct": false,
+          "why": "A REST API can integrate with Lambda, but its additional features are unnecessary for this lower-priced API requirement."
+        },
+        {
+          "id": "D",
+          "text": "A WebSocket API with a Lambda backend",
+          "correct": false,
+          "why": "A WebSocket API is intended for stateful, full-duplex communication rather than the stated RESTful requests."
+        }
+      ],
+      "explanation": "The deciding requirement is a lower-priced RESTful API that accepts JWTs and invokes Lambda. HTTP APIs support both JWT authorization and Lambda integrations and are offered at a lower price than REST APIs. A REST API would work as a backend front door, but its additional capabilities do not satisfy any stated need. A WebSocket API addresses a different communication pattern.",
+      "keywordCues": [
+        "standard HTTP methods",
+        "send JWTs",
+        "does not need API keys, caching, or private API endpoints",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html"
+      ],
+      "es": {
+        "stem": "Una startup de venta de entradas expondrá funciones Lambda a una aplicación móvil mediante métodos HTTP estándar. La aplicación enviará JWTs y el equipo no necesita API keys, caching ni private API endpoints. ¿Qué tipo de API de API Gateway cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Una HTTP API con integración de Lambda y autorización JWT",
+            "why": "Una HTTP API admite integración de Lambda y autorización JWT a un precio menor que una REST API."
+          },
+          {
+            "id": "B",
+            "text": "Una REST API con API keys para cada usuario móvil",
+            "why": "El escenario no requiere API keys, por lo que esta opción agrega una función exclusiva de REST APIs sin atender la prioridad de costo."
+          },
+          {
+            "id": "C",
+            "text": "Una REST API con integración de Lambda",
+            "why": "Una REST API puede integrar Lambda, pero sus funciones adicionales no son necesarias para este requisito de menor precio."
+          },
+          {
+            "id": "D",
+            "text": "Una WebSocket API con un backend de Lambda",
+            "why": "Una WebSocket API está destinada a comunicación stateful y full-duplex, no a las solicitudes RESTful descritas."
+          }
+        ],
+        "explanation": "El requisito decisivo es una API RESTful de menor precio que acepte JWTs e invoque Lambda. HTTP APIs admiten autorización JWT e integraciones de Lambda, y tienen un precio menor que REST APIs. Una REST API podría servir como punto de entrada, pero sus funciones adicionales no responden a ninguna necesidad indicada. Una WebSocket API atiende un patrón de comunicación diferente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "api-gateway-fundamentals--r0",
+      "conceptId": "api-gateway-fundamentals",
+      "kind": "recall",
+      "prompt": "A Lambda-backed RESTful API needs JWT authorization but no API keys or caching. Which API Gateway type favors lower price, and why?",
+      "promptEs": "Una API RESTful respaldada por Lambda necesita autorización JWT, pero no API keys ni caching. ¿Qué tipo de API Gateway favorece un menor precio y por qué?",
+      "idealAnswer": "Choose an HTTP API. It supports Lambda integration and JWT authorization and is offered at a lower price than a REST API when REST-only features are unnecessary.",
+      "rubric": [
+        "Names HTTP API.",
+        "States that it supports Lambda integration and JWT authorization.",
+        "Connects its lower price to the absence of required REST-only features."
+      ]
+    }
+  ]
+}

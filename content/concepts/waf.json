@@ -1,0 +1,458 @@
+{
+  "conceptId": "waf",
+  "card": {
+    "en": {
+      "tldr": "AWS WAF filters HTTP(S) requests to supported application resources using rules in a web ACL. Choose it when the requirement is to control application-layer requests, such as suspicious query strings, unwanted source IPs, or request floods.",
+      "whenToUse": [
+        "Protect a CloudFront distribution, Application Load Balancer, API Gateway REST API, AppSync GraphQL API, or Cognito user pool from unwanted web requests.",
+        "Block requests associated with SQL injection or XSS patterns, specified IP addresses, or countries.",
+        "Rate-limit HTTP(S) requests that arrive too quickly."
+      ],
+      "keyFacts": [
+        "AWS WAF monitors HTTP(S) requests forwarded to supported protected resources.",
+        "Rules can evaluate request characteristics such as source IP address and query-string values.",
+        "A rate-based rule counts requests by configured aggregation criteria and rate-limits groups that exceed its configured limit.",
+        "A rate-based rule can use a scope-down statement to narrow which requests it tracks.",
+        "If the same rate-based rule is used in two web ACLs, AWS WAF tracks each rule instance separately."
+      ],
+      "gotchas": [
+        "DDoS protection alone is not the same decision as filtering requests for SQL injection or XSS.",
+        "Threat findings do not themselves supply a web ACL that blocks matching HTTP(S) requests.",
+        "Rate-based rules in separate web ACLs do not share one request count."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Shield",
+          "difference": "Choose AWS WAF for rules that inspect and control application-layer web requests; Shield addresses DDoS protection."
+        },
+        {
+          "concept": "AWS Firewall Manager",
+          "difference": "Choose Firewall Manager to enforce security policies centrally across accounts, not as a substitute for WAF request-matching rules."
+        },
+        {
+          "concept": "AWS Network Firewall",
+          "difference": "Choose Network Firewall for stateful VPC traffic inspection; choose WAF for HTTP(S) requests to supported web resources."
+        }
+      ],
+      "examCues": [
+        "block SQL injection in query strings",
+        "rate-limit HTTP requests to an ALB",
+        "deny requests from specified IP addresses",
+        "protect an API Gateway REST API from XSS"
+      ]
+    },
+    "es": {
+      "tldr": "AWS WAF filtra solicitudes HTTP(S) dirigidas a recursos de aplicación compatibles mediante reglas en una web ACL. Elígelo cuando necesites controlar solicitudes de capa de aplicación, como query strings sospechosas, direcciones IP no deseadas o ráfagas de solicitudes.",
+      "whenToUse": [
+        "Proteger una distribución de CloudFront, un Application Load Balancer, una API REST de API Gateway, una API GraphQL de AppSync o un user pool de Cognito frente a solicitudes web no deseadas.",
+        "Bloquear solicitudes asociadas con patrones de SQL injection o XSS, direcciones IP especificadas o países.",
+        "Aplicar rate limiting a solicitudes HTTP(S) que llegan demasiado rápido."
+      ],
+      "keyFacts": [
+        "AWS WAF supervisa las solicitudes HTTP(S) enviadas a recursos protegidos compatibles.",
+        "Las reglas pueden evaluar características como la dirección IP de origen y los valores de las query strings.",
+        "Una rate-based rule cuenta solicitudes según los criterios de agrupación configurados y aplica rate limiting a los grupos que superan el límite configurado.",
+        "Una rate-based rule puede usar una scope-down statement para restringir qué solicitudes contabiliza.",
+        "Si usas la misma rate-based rule en dos web ACLs, AWS WAF lleva el seguimiento de cada instancia por separado."
+      ],
+      "gotchas": [
+        "La protección contra DDoS por sí sola no equivale a filtrar solicitudes por SQL injection o XSS.",
+        "Los hallazgos de amenazas no proporcionan por sí mismos una web ACL que bloquee solicitudes HTTP(S) coincidentes.",
+        "Las rate-based rules de distintas web ACLs no comparten un único conteo de solicitudes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Shield",
+          "difference": "Elige AWS WAF para reglas que inspeccionan y controlan solicitudes web de capa de aplicación; Shield se enfoca en la protección contra DDoS."
+        },
+        {
+          "concept": "AWS Firewall Manager",
+          "difference": "Elige Firewall Manager para aplicar políticas de seguridad de forma centralizada entre cuentas, no como sustituto de las reglas de AWS WAF que evalúan solicitudes."
+        },
+        {
+          "concept": "AWS Network Firewall",
+          "difference": "Elige Network Firewall para inspección con estado del tráfico de VPC; elige AWS WAF para solicitudes HTTP(S) a recursos web compatibles."
+        }
+      ],
+      "examCues": [
+        "block SQL injection in query strings",
+        "rate-limit HTTP requests to an ALB",
+        "deny requests from specified IP addresses",
+        "protect an API Gateway REST API from XSS"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+      "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "waf--ece08daf",
+      "conceptId": "waf",
+      "secondaryConcepts": [
+        "network-firewall",
+        "guardduty",
+        "security-hub"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A publishing company has a public website behind an Application Load Balancer and a separate Amazon AppSync GraphQL API. Both receive HTTP(S) requests with unwanted source IP addresses, and the website also experiences bursts of requests that need rate limiting. The company wants request filtering on these existing resources rather than findings or VPC-wide traffic inspection. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Security Hub to aggregate findings from security services for both applications.",
+          "correct": false,
+          "why": "Aggregating findings does not filter incoming requests to either application."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Network Firewall to inspect VPC traffic and apply domain filtering for both applications.",
+          "correct": false,
+          "why": "VPC traffic and domain filtering do not provide the requested WAF rules on the two existing HTTP(S) resources."
+        },
+        {
+          "id": "C",
+          "text": "Associate an AWS WAF web ACL with the AppSync GraphQL API and configure a source-IP rule.",
+          "correct": true,
+          "why": "AWS WAF supports AppSync GraphQL APIs and can control their HTTP(S) requests by source IP address."
+        },
+        {
+          "id": "D",
+          "text": "Associate an AWS WAF web ACL with the Application Load Balancer and configure source-IP and rate-based rules.",
+          "correct": true,
+          "why": "AWS WAF supports Application Load Balancers, IP-based filtering, and rate-based rules for the website's requests."
+        },
+        {
+          "id": "E",
+          "text": "Use Amazon GuardDuty to produce findings about suspicious activity associated with the applications.",
+          "correct": false,
+          "why": "Findings do not block unwanted source IPs or rate-limit the website's requests."
+        }
+      ],
+      "explanation": "Both named resources support AWS WAF, which can control HTTP(S) requests based on source IP address. The load balancer's web ACL can also use a rate-based rule for the website's bursts of requests. Network Firewall addresses a different inspection layer, while GuardDuty and Security Hub provide findings rather than the requested request filtering.",
+      "keywordCues": [
+        "Application Load Balancer",
+        "Amazon AppSync GraphQL API",
+        "unwanted source IP addresses",
+        "bursts of requests that need rate limiting",
+        "rather than findings or VPC-wide traffic inspection"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html"
+      ],
+      "es": {
+        "stem": "Una editorial tiene un sitio web público detrás de un Application Load Balancer y una API GraphQL de Amazon AppSync por separado. Ambos reciben solicitudes HTTP(S) desde direcciones IP de origen no deseadas, y el sitio web también tiene ráfagas de solicitudes que requieren rate limiting. La empresa quiere filtrar solicitudes en estos recursos existentes, no obtener hallazgos ni inspeccionar el tráfico de toda la VPC. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Security Hub para agregar hallazgos de los servicios de seguridad de ambas aplicaciones.",
+            "why": "Agregar hallazgos no filtra las solicitudes entrantes a ninguna de las aplicaciones."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS Network Firewall para inspeccionar el tráfico de la VPC y aplicar filtrado de dominios a ambas aplicaciones.",
+            "why": "La inspección del tráfico de VPC y el filtrado de dominios no proporcionan las reglas de AWS WAF solicitadas en los dos recursos HTTP(S) existentes."
+          },
+          {
+            "id": "C",
+            "text": "Asociar una web ACL de AWS WAF con la API GraphQL de AppSync y configurar una regla por IP de origen.",
+            "why": "AWS WAF admite las API GraphQL de AppSync y puede controlar sus solicitudes HTTP(S) según la dirección IP de origen."
+          },
+          {
+            "id": "D",
+            "text": "Asociar una web ACL de AWS WAF con el Application Load Balancer y configurar reglas por IP de origen y una rate-based rule.",
+            "why": "AWS WAF admite Application Load Balancers, filtrado por IP y rate-based rules para las solicitudes del sitio web."
+          },
+          {
+            "id": "E",
+            "text": "Usar Amazon GuardDuty para generar hallazgos sobre actividad sospechosa relacionada con las aplicaciones.",
+            "why": "Los hallazgos no bloquean las IP de origen no deseadas ni aplican rate limiting a las solicitudes del sitio web."
+          }
+        ],
+        "explanation": "Los dos recursos mencionados son compatibles con AWS WAF, que puede controlar solicitudes HTTP(S) según la dirección IP de origen. La web ACL del load balancer también puede incluir una rate-based rule para las ráfagas de solicitudes al sitio web. Network Firewall aborda otra capa de inspección; GuardDuty y Security Hub proporcionan hallazgos, no el filtrado de solicitudes requerido."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "waf--4fe0f744",
+      "conceptId": "waf",
+      "secondaryConcepts": [
+        "shield",
+        "guardduty",
+        "inspector"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retailer serves its storefront through Amazon CloudFront. Its security team has identified malicious query-string patterns associated with SQL injection and wants matching HTTP requests blocked before they reach the application. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Amazon GuardDuty and use its findings to identify suspicious storefront requests.",
+          "correct": false,
+          "why": "GuardDuty produces threat findings rather than applying a request-matching rule to block these storefront requests."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Shield to protect the distribution from DDoS traffic.",
+          "correct": false,
+          "why": "DDoS protection does not address the stated need to match SQL injection patterns in query strings."
+        },
+        {
+          "id": "C",
+          "text": "Associate an AWS WAF web ACL with the CloudFront distribution and add a rule that blocks the identified query-string patterns.",
+          "correct": true,
+          "why": "AWS WAF can evaluate query-string values in HTTP(S) requests to CloudFront and block requests that match a web ACL rule."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon Inspector to scan the storefront's application components for vulnerabilities.",
+          "correct": false,
+          "why": "Vulnerability scanning does not block incoming requests that match the identified query-string patterns."
+        }
+      ],
+      "explanation": "The deciding requirement is to block HTTP requests based on their query-string values. AWS WAF can protect a CloudFront distribution and use a web ACL rule to control requests matching those values. Shield addresses a different threat category, while GuardDuty findings and Inspector scans do not perform the requested request filtering.",
+      "keywordCues": [
+        "Amazon CloudFront",
+        "malicious query-string patterns",
+        "SQL injection",
+        "matching HTTP requests blocked"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista publica su tienda mediante Amazon CloudFront. Su equipo de seguridad identificó patrones maliciosos en las query strings asociados con SQL injection y quiere bloquear las solicitudes HTTP coincidentes antes de que lleguen a la aplicación. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activar Amazon GuardDuty y usar sus hallazgos para identificar solicitudes sospechosas a la tienda.",
+            "why": "GuardDuty genera hallazgos de amenazas, pero no aplica una regla de coincidencia para bloquear esas solicitudes a la tienda."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS Shield para proteger la distribución frente a tráfico DDoS.",
+            "why": "La protección contra DDoS no cumple el requisito de detectar patrones de SQL injection en las query strings."
+          },
+          {
+            "id": "C",
+            "text": "Asociar una web ACL de AWS WAF con la distribución de CloudFront y agregar una regla que bloquee los patrones identificados en las query strings.",
+            "why": "AWS WAF puede evaluar valores de query strings en solicitudes HTTP(S) a CloudFront y bloquear las que coincidan con una regla de la web ACL."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon Inspector para analizar los componentes de la aplicación en busca de vulnerabilidades.",
+            "why": "El análisis de vulnerabilidades no bloquea las solicitudes entrantes que coincidan con los patrones identificados."
+          }
+        ],
+        "explanation": "El requisito decisivo es bloquear solicitudes HTTP según los valores de sus query strings. AWS WAF puede proteger una distribución de CloudFront y controlar las solicitudes coincidentes mediante una regla de la web ACL. Shield aborda otra clase de amenaza; los hallazgos de GuardDuty y los análisis de Inspector no filtran estas solicitudes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "waf--21914999",
+      "conceptId": "waf",
+      "secondaryConcepts": [
+        "network-firewall",
+        "shield",
+        "guardduty"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing company routes checkout traffic through an Application Load Balancer. During popular releases, automated clients send too many requests to the checkout path, but the company wants normal traffic to that path and all traffic to other paths to continue. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Associate an AWS WAF web ACL with the load balancer and configure a rate-based rule scoped to checkout requests.",
+          "correct": true,
+          "why": "A WAF rate-based rule can count and limit requests, while a scope-down statement restricts the rule to checkout traffic."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon GuardDuty findings to identify clients that generate checkout traffic.",
+          "correct": false,
+          "why": "Findings do not themselves rate-limit requests on the specified application path."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Network Firewall domain filtering for traffic leaving the application's VPC.",
+          "correct": false,
+          "why": "Filtering VPC egress by domain does not rate-limit incoming HTTP requests to the checkout path."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Shield to protect the load balancer from DDoS events.",
+          "correct": false,
+          "why": "DDoS protection does not provide the requested path-scoped HTTP request rate rule."
+        }
+      ],
+      "explanation": "The requirement combines request-rate control with a narrow scope: checkout traffic should be limited without applying that limit to other paths. An AWS WAF rate-based rule can rate-limit an aggregate group of requests, and its scope-down statement can narrow the requests it tracks. Network Firewall egress filtering and GuardDuty findings do not implement this HTTP request control; Shield is not the requested path-specific rule.",
+      "keywordCues": [
+        "Application Load Balancer",
+        "too many requests to the checkout path",
+        "all traffic to other paths to continue"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos dirige el tráfico de pago mediante un Application Load Balancer. Durante lanzamientos populares, clientes automatizados envían demasiadas solicitudes a la ruta de pago, pero la empresa quiere que continúen las solicitudes normales a esa ruta y todo el tráfico a las demás rutas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asociar una web ACL de AWS WAF con el load balancer y configurar una rate-based rule limitada a las solicitudes de pago.",
+            "why": "Una rate-based rule de AWS WAF puede contar y limitar solicitudes, mientras que una scope-down statement restringe la regla al tráfico de pago."
+          },
+          {
+            "id": "B",
+            "text": "Usar los hallazgos de Amazon GuardDuty para identificar a los clientes que generan tráfico de pago.",
+            "why": "Los hallazgos no aplican por sí mismos rate limiting a las solicitudes de la ruta indicada."
+          },
+          {
+            "id": "C",
+            "text": "Usar el filtrado de dominios de AWS Network Firewall para el tráfico que sale de la VPC de la aplicación.",
+            "why": "Filtrar la salida de la VPC por dominio no aplica rate limiting a las solicitudes HTTP entrantes de la ruta de pago."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS Shield para proteger el load balancer frente a eventos DDoS.",
+            "why": "La protección contra DDoS no proporciona la regla de tasa de solicitudes HTTP limitada a la ruta que se necesita."
+          }
+        ],
+        "explanation": "El requisito combina control de la tasa de solicitudes con un alcance limitado: debes restringir el tráfico de pago sin aplicar el límite a otras rutas. Una rate-based rule de AWS WAF puede aplicar rate limiting, y su scope-down statement puede restringir qué solicitudes contabiliza. El filtrado de salida de Network Firewall y los hallazgos de GuardDuty no implementan este control HTTP; Shield no proporciona la regla específica para esa ruta."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "waf--baf65b0a",
+      "conceptId": "waf",
+      "secondaryConcepts": [
+        "macie",
+        "security-hub",
+        "detective"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company exposes a partner endpoint through an Amazon API Gateway REST API. The API owner needs to block requests from a maintained list of unwanted source IP addresses without changing the application code. Which solution meets the requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Associate an AWS WAF web ACL with the REST API and add a rule for the unwanted source IP addresses.",
+          "correct": true,
+          "why": "AWS WAF supports API Gateway REST APIs and can control requests according to their source IP addresses."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Detective to investigate activity from the unwanted IP addresses.",
+          "correct": false,
+          "why": "Investigation does not prevent those IP addresses from sending requests to the REST API."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Security Hub to consolidate security findings for the partner application.",
+          "correct": false,
+          "why": "Consolidating findings does not apply the requested IP-based access rule to the REST API."
+        },
+        {
+          "id": "D",
+          "text": "Enable Amazon Macie to classify sensitive data stored by the partner application.",
+          "correct": false,
+          "why": "Classifying stored data does not block requests from the unwanted source IP addresses."
+        }
+      ],
+      "explanation": "The API owner needs preventive filtering based on source IP address, not classification, findings aggregation, or investigation. AWS WAF can protect an API Gateway REST API and evaluate the IP addresses from which requests originate. A web ACL rule meets that requirement without changing application code.",
+      "keywordCues": [
+        "Amazon API Gateway REST API",
+        "block requests",
+        "unwanted source IP addresses",
+        "without changing the application code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios publica un endpoint para socios mediante una API REST de Amazon API Gateway. El responsable de la API necesita bloquear solicitudes provenientes de una lista mantenida de direcciones IP de origen no deseadas sin modificar el código de la aplicación. ¿Qué solución cumple el requisito MOST directamente?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asociar una web ACL de AWS WAF con la API REST y agregar una regla para las direcciones IP de origen no deseadas.",
+            "why": "AWS WAF es compatible con las API REST de API Gateway y puede controlar solicitudes según sus direcciones IP de origen."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon Detective para investigar la actividad de las direcciones IP no deseadas.",
+            "why": "Investigar la actividad no impide que esas direcciones IP envíen solicitudes a la API REST."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS Security Hub para consolidar los hallazgos de seguridad de la aplicación para socios.",
+            "why": "Consolidar hallazgos no aplica la regla de acceso por IP solicitada a la API REST."
+          },
+          {
+            "id": "D",
+            "text": "Activar Amazon Macie para clasificar los datos sensibles almacenados por la aplicación para socios.",
+            "why": "Clasificar datos almacenados no bloquea solicitudes de las direcciones IP de origen no deseadas."
+          }
+        ],
+        "explanation": "El responsable de la API necesita un filtro preventivo basado en la dirección IP de origen, no clasificación, consolidación de hallazgos ni investigación. AWS WAF puede proteger una API REST de API Gateway y evaluar las direcciones IP desde las que se originan las solicitudes. Una regla de la web ACL cumple el requisito sin modificar el código de la aplicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "waf--r0",
+      "conceptId": "waf",
+      "kind": "recall",
+      "prompt": "A CloudFront storefront needs to block suspicious query strings and rate-limit request floods. What would you configure, and why?",
+      "promptEs": "Una tienda en CloudFront necesita bloquear query strings sospechosas y aplicar rate limiting a ráfagas de solicitudes. ¿Qué configurarías y por qué?",
+      "idealAnswer": "Associate an AWS WAF web ACL with the CloudFront distribution. Use a rule for the suspicious request values and a rate-based rule to limit requests arriving too quickly.",
+      "rubric": [
+        "Names AWS WAF and a web ACL associated with CloudFront.",
+        "Mentions filtering requests by suspicious query-string values.",
+        "Mentions a rate-based rule for request floods."
+      ]
+    },
+    {
+      "id": "waf--r1",
+      "conceptId": "waf",
+      "kind": "why-not",
+      "prompt": "Why would AWS Shield alone not satisfy a requirement to block SQL injection patterns in requests to a CloudFront distribution?",
+      "promptEs": "¿Por qué AWS Shield por sí solo no cumpliría un requisito de bloquear patrones de SQL injection en solicitudes a una distribución de CloudFront?",
+      "idealAnswer": "The requirement is to evaluate application-layer request content and block matching HTTP(S) requests. Configure AWS WAF rules on a web ACL associated with the CloudFront distribution; Shield addresses DDoS protection rather than that request-matching requirement.",
+      "rubric": [
+        "Identifies the need to match and block application-layer request patterns.",
+        "Distinguishes Shield's DDoS role from AWS WAF request filtering.",
+        "Names a WAF web ACL on CloudFront as the fitting approach."
+      ]
+    }
+  ]
+}

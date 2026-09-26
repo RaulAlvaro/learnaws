@@ -1,0 +1,252 @@
+{
+  "conceptId": "mysql-vs-postgresql-engine",
+  "card": {
+    "en": {
+      "tldr": "Choose the database engine that preserves the application's required compatibility: MySQL clients and applications point to RDS for MySQL; PostgreSQL clients and required supported extensions point to RDS for PostgreSQL. Then choose deployment features such as Multi-AZ or read replicas according to the stated requirement.",
+      "whenToUse": [
+        "An existing application must keep using standard MySQL utilities and applications.",
+        "A workload depends on PostgreSQL clients or an extension confirmed as supported by RDS for PostgreSQL.",
+        "The team wants a managed relational database with backups, restores, or replicas."
+      ],
+      "keyFacts": [
+        "RDS for MySQL supports standard MySQL utilities and applications, Multi-AZ deployments, read replicas, backups, and point-in-time restores.",
+        "RDS for PostgreSQL supports standard PostgreSQL clients, Multi-AZ deployments, read replicas, backups, and point-in-time restores.",
+        "RDS for PostgreSQL provides supported extensions; check that a required extension is supported before selecting it.",
+        "RDS does not provide direct SSH or other host access to MySQL or PostgreSQL DB instances."
+      ],
+      "gotchas": [
+        "Do not change engines merely because both support Multi-AZ or read replicas; application compatibility still matters.",
+        "Do not treat a read replica as a substitute for the documented Multi-AZ high-availability option for RDS for MySQL.",
+        "Do not assume every PostgreSQL extension is available on RDS or that RDS provides host-level control."
+      ],
+      "confusedWith": [
+        {
+          "concept": "RDS for MySQL",
+          "difference": "Choose it when the application must retain MySQL utilities and application compatibility, not PostgreSQL-specific requirements."
+        },
+        {
+          "concept": "Self-managed database",
+          "difference": "RDS reduces database-management work but does not meet a requirement for direct host access."
+        }
+      ],
+      "examCues": [
+        "existing MySQL application and utilities",
+        "supported PostgreSQL extension",
+        "managed database with point-in-time restore",
+        "Multi-AZ failover rather than read scaling"
+      ]
+    },
+    "es": {
+      "tldr": "Elige el motor que conserve la compatibilidad requerida por la aplicación: las aplicaciones y herramientas MySQL apuntan a RDS for MySQL; los clientes PostgreSQL y las extensiones compatibles requeridas apuntan a RDS for PostgreSQL. Después, elige funciones de implementación como Multi-AZ o read replicas según el requisito.",
+      "whenToUse": [
+        "Una aplicación existente debe seguir usando herramientas y aplicaciones MySQL estándar.",
+        "Una carga de trabajo depende de clientes PostgreSQL o de una extensión confirmada como compatible con RDS for PostgreSQL.",
+        "El equipo quiere una base de datos relacional administrada con respaldos, restauraciones o réplicas."
+      ],
+      "keyFacts": [
+        "RDS for MySQL admite herramientas y aplicaciones MySQL estándar, implementaciones Multi-AZ, read replicas, respaldos y point-in-time restores.",
+        "RDS for PostgreSQL admite clientes PostgreSQL estándar, implementaciones Multi-AZ, read replicas, respaldos y point-in-time restores.",
+        "RDS for PostgreSQL ofrece extensiones compatibles; verifica que una extensión requerida sea compatible antes de elegirla.",
+        "RDS no proporciona acceso directo por SSH ni otro acceso al host de las instancias de base de datos MySQL o PostgreSQL."
+      ],
+      "gotchas": [
+        "No cambies de motor solo porque ambos admiten Multi-AZ o read replicas; la compatibilidad de la aplicación sigue siendo decisiva.",
+        "No trates una read replica como sustituto de la opción Multi-AZ documentada para alta disponibilidad en RDS for MySQL.",
+        "No supongas que todas las extensiones PostgreSQL están disponibles en RDS ni que RDS ofrece control del host."
+      ],
+      "confusedWith": [
+        {
+          "concept": "RDS for MySQL",
+          "difference": "Elígelo cuando la aplicación deba conservar la compatibilidad con herramientas y aplicaciones MySQL, no cuando necesite funciones específicas de PostgreSQL."
+        },
+        {
+          "concept": "Base de datos autoadministrada",
+          "difference": "RDS reduce el trabajo de administración de la base de datos, pero no cumple un requisito de acceso directo al host."
+        }
+      ],
+      "examCues": [
+        "existing MySQL application and utilities",
+        "supported PostgreSQL extension",
+        "managed database with point-in-time restore",
+        "Multi-AZ failover rather than read scaling"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "mysql-vs-postgresql-engine--d989ab17",
+      "conceptId": "mysql-vs-postgresql-engine",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is moving an existing MySQL application to AWS without changing its database clients or application queries. The team wants AWS to manage the database and needs a high-availability failover solution, not additional read capacity. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy RDS for PostgreSQL with a Multi-AZ deployment.",
+          "correct": false,
+          "why": "Multi-AZ addresses availability, but PostgreSQL does not preserve the application's stated MySQL compatibility."
+        },
+        {
+          "id": "B",
+          "text": "Deploy RDS for MySQL with a Multi-AZ deployment.",
+          "correct": true,
+          "why": "It preserves the application's MySQL compatibility and uses the documented Multi-AZ high-availability and failover option."
+        },
+        {
+          "id": "C",
+          "text": "Deploy RDS for MySQL with a read replica instead of Multi-AZ.",
+          "correct": false,
+          "why": "The stated need is high-availability failover, for which the RDS for MySQL documentation identifies Multi-AZ."
+        },
+        {
+          "id": "D",
+          "text": "Run MySQL on Amazon EC2 and manage a secondary database server.",
+          "correct": false,
+          "why": "It preserves the engine but makes the team manage the database and secondary server."
+        }
+      ],
+      "explanation": "Keeping the existing MySQL clients and queries makes MySQL compatibility decisive. RDS for MySQL supports standard MySQL applications and provides Multi-AZ as a high-availability failover solution. A PostgreSQL deployment changes the engine, while a self-managed MySQL deployment adds operational work. A read replica does not replace the documented Multi-AZ choice for this stated failover requirement.",
+      "keywordCues": [
+        "without changing its database clients or application queries",
+        "AWS to manage the database",
+        "high-availability failover solution, not additional read capacity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos trasladará a AWS una aplicación MySQL existente sin cambiar sus clientes de base de datos ni sus consultas. El equipo quiere que AWS administre la base de datos y necesita una solución de conmutación por error para alta disponibilidad, no capacidad de lectura adicional. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar RDS for PostgreSQL con Multi-AZ.",
+            "why": "Multi-AZ atiende la disponibilidad, pero PostgreSQL no conserva la compatibilidad MySQL requerida por la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Implementar RDS for MySQL con Multi-AZ.",
+            "why": "Conserva la compatibilidad MySQL y usa la opción Multi-AZ documentada para alta disponibilidad y conmutación por error."
+          },
+          {
+            "id": "C",
+            "text": "Implementar RDS for MySQL con una read replica en lugar de Multi-AZ.",
+            "why": "El requisito es conmutación por error para alta disponibilidad, para lo cual la documentación de RDS for MySQL identifica Multi-AZ."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar MySQL en Amazon EC2 y administrar un servidor secundario de base de datos.",
+            "why": "Conserva el motor, pero obliga al equipo a administrar la base de datos y el servidor secundario."
+          }
+        ],
+        "explanation": "Conservar los clientes y las consultas MySQL existentes hace decisiva la compatibilidad con MySQL. RDS for MySQL admite aplicaciones MySQL estándar y ofrece Multi-AZ como solución de alta disponibilidad y conmutación por error. PostgreSQL cambia el motor y una implementación autoadministrada de MySQL añade trabajo operativo. Una read replica no sustituye la opción Multi-AZ documentada para este requisito de conmutación por error."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "mysql-vs-postgresql-engine--45ae2938",
+      "conceptId": "mysql-vs-postgresql-engine",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher is migrating a PostgreSQL application whose support staff use pgAdmin to run SQL commands. The database must run inside a VPC, support point-in-time restores, and require no direct host administration. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run PostgreSQL on Amazon EC2 in the VPC and administer its backups.",
+          "correct": false,
+          "why": "It retains PostgreSQL but adds direct database-host and backup administration that the team wants to avoid."
+        },
+        {
+          "id": "B",
+          "text": "Deploy RDS for MySQL in the VPC and use its point-in-time restore capability.",
+          "correct": false,
+          "why": "It meets the VPC and restore requirements but changes the PostgreSQL engine used by the existing application."
+        },
+        {
+          "id": "C",
+          "text": "Run MySQL on Amazon EC2 in the VPC and administer its backups.",
+          "correct": false,
+          "why": "It changes the required engine and adds database-host administration."
+        },
+        {
+          "id": "D",
+          "text": "Deploy RDS for PostgreSQL in the VPC and use its point-in-time restore capability.",
+          "correct": true,
+          "why": "RDS for PostgreSQL supports pgAdmin access, VPC deployment, point-in-time restores, and managed instances without direct host access."
+        }
+      ],
+      "explanation": "The existing PostgreSQL application and pgAdmin workflow favor keeping PostgreSQL. RDS for PostgreSQL supports standard SQL clients including pgAdmin, VPC deployment, and point-in-time restores. It also avoids direct host administration because RDS does not provide host access. RDS for MySQL changes the engine, while the EC2 choices add the host-management work the publisher wants to avoid.",
+      "keywordCues": [
+        "migrating a PostgreSQL application",
+        "use pgAdmin",
+        "inside a VPC",
+        "point-in-time restores",
+        "no direct host administration"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html"
+      ],
+      "es": {
+        "stem": "Una editorial migrará una aplicación PostgreSQL cuyo equipo de soporte utiliza pgAdmin para ejecutar comandos SQL. La base de datos debe ejecutarse dentro de una VPC, admitir point-in-time restores y no requerir administración directa del host. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar PostgreSQL en Amazon EC2 dentro de la VPC y administrar sus respaldos.",
+            "why": "Conserva PostgreSQL, pero añade la administración del host y los respaldos que el equipo quiere evitar."
+          },
+          {
+            "id": "B",
+            "text": "Implementar RDS for MySQL en la VPC y usar su capacidad de point-in-time restore.",
+            "why": "Cumple los requisitos de VPC y restauración, pero cambia el motor PostgreSQL de la aplicación existente."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar MySQL en Amazon EC2 dentro de la VPC y administrar sus respaldos.",
+            "why": "Cambia el motor requerido y añade administración del host de base de datos."
+          },
+          {
+            "id": "D",
+            "text": "Implementar RDS for PostgreSQL en la VPC y usar su capacidad de point-in-time restore.",
+            "why": "RDS for PostgreSQL admite acceso con pgAdmin, implementación en VPC, point-in-time restores e instancias administradas sin acceso directo al host."
+          }
+        ],
+        "explanation": "La aplicación PostgreSQL existente y el uso de pgAdmin favorecen conservar PostgreSQL. RDS for PostgreSQL admite clientes SQL estándar, incluido pgAdmin, implementación en VPC y point-in-time restores. También evita la administración directa del host porque RDS no proporciona acceso a él. RDS for MySQL cambia el motor, mientras que las opciones en EC2 añaden la administración del host que la editorial quiere evitar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "mysql-vs-postgresql-engine--r0",
+      "conceptId": "mysql-vs-postgresql-engine",
+      "kind": "recall",
+      "prompt": "An application requires a verified supported PostgreSQL extension and managed read capacity. Which RDS engine and feature would you choose, and why?",
+      "promptEs": "Una aplicación requiere una extensión PostgreSQL compatible ya verificada y capacidad de lectura administrada. ¿Qué motor y función de RDS elegirías y por qué?",
+      "idealAnswer": "Choose RDS for PostgreSQL to retain compatibility with the verified supported extension. Add a read replica for the separate read capacity while keeping the database managed.",
+      "rubric": [
+        "Names RDS for PostgreSQL.",
+        "Connects the engine choice to the verified supported PostgreSQL extension.",
+        "Selects a read replica for separate read capacity."
+      ]
+    }
+  ]
+}

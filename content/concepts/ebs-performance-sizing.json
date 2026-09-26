@@ -1,0 +1,223 @@
+{
+  "conceptId": "ebs-performance-sizing",
+  "card": {
+    "en": {
+      "tldr": "Size EBS performance at both ends of the connection: provision the volume for the workload’s IOPS and throughput, then check that the EC2 instance can sustain them. Elastic Volumes lets supported instances change volume size, type, or performance without detaching the volume or restarting the instance.",
+      "whenToUse": [
+        "A workload needs more IOPS or throughput without a corresponding increase in storage capacity.",
+        "An application must remain running while its EBS volume is resized or reconfigured.",
+        "Provisioned EBS performance is higher than the throughput or IOPS observed by the instance."
+      ],
+      "keyFacts": [
+        "Elastic Volumes can increase size, change type, or adjust performance on supported instances without detaching or restarting.",
+        "After increasing volume size, extend the file system to use the additional space.",
+        "Changing gp2 to gp3 without specifying performance provisions the higher of the source volume’s equivalent performance and the gp3 baseline.",
+        "Effective EBS performance is bounded by the lower of the instance’s EBS limits and the aggregate performance of its attached volumes.",
+        "Consider both IOPS and throughput: depending on I/O size, either limit can be reached first."
+      ],
+      "gotchas": [
+        "Provisioning more volume throughput cannot overcome an EC2 instance’s EBS throughput limit.",
+        "A larger EBS volume does not automatically make its file system larger.",
+        "Omitting performance settings during a gp2-to-gp3 change does not necessarily produce the throughput the new workload requires.",
+        "Elastic Volumes can increase volume size, but cannot decrease it."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "more throughput without more storage capacity",
+        "keep the application running during a volume change",
+        "provisioned IOPS exceed observed IOPS",
+        "check the instance EBS bandwidth"
+      ]
+    },
+    "es": {
+      "tldr": "Dimensiona el rendimiento de EBS en ambos extremos: configura los IOPS y el throughput del volumen y verifica que la instancia EC2 pueda sostenerlos. Elastic Volumes permite cambiar el tamaño, el tipo o el rendimiento del volumen sin desconectarlo ni reiniciar una instancia compatible.",
+      "whenToUse": [
+        "Necesitas más IOPS o throughput sin aumentar proporcionalmente la capacidad almacenada.",
+        "Debes mantener la aplicación en ejecución mientras ajustas un volumen EBS.",
+        "El rendimiento observado es menor que el configurado en los volúmenes."
+      ],
+      "keyFacts": [
+        "Elastic Volumes puede aumentar el tamaño, cambiar el tipo o ajustar el rendimiento sin desconectar el volumen ni reiniciar una instancia compatible.",
+        "Después de aumentar el tamaño del volumen, debes extender el sistema de archivos para aprovechar el espacio adicional.",
+        "Si cambias de gp2 a gp3 sin especificar el rendimiento, se configura el mayor entre el rendimiento equivalente del volumen anterior y el rendimiento base de gp3.",
+        "El rendimiento efectivo de EBS está limitado por el menor valor entre la capacidad de EBS de la instancia y el rendimiento agregado de sus volúmenes.",
+        "Debes evaluar tanto IOPS como throughput: según el tamaño de las operaciones de E/S, puedes alcanzar primero cualquiera de los dos límites."
+      ],
+      "gotchas": [
+        "Aumentar el throughput de los volúmenes no supera el límite de EBS de la instancia EC2.",
+        "Aumentar el volumen EBS no extiende automáticamente su sistema de archivos.",
+        "Omitir la configuración de rendimiento al pasar de gp2 a gp3 no garantiza el throughput que requiere una nueva carga.",
+        "Elastic Volumes permite aumentar el tamaño de un volumen, pero no reducirlo."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "more throughput without more storage capacity",
+        "keep the application running during a volume change",
+        "provisioned IOPS exceed observed IOPS",
+        "check the instance EBS bandwidth"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html",
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ebs-performance-sizing--d4cc5fb5",
+      "conceptId": "ebs-performance-sizing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media analytics company processes video metadata on an m5.4xlarge EC2 instance. Its attached EBS volumes already provide an aggregate 700 MB/s of throughput, but processing peaks require the instance to sustain 700 MB/s; the m5.4xlarge EBS throughput limit is 593.75 MB/s. An m5.8xlarge has an 850 MB/s EBS throughput limit, and the application does not need more volume capacity. Which change meets the peak-throughput requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the m5.4xlarge and attach another EBS volume to increase aggregate provisioned throughput.",
+          "correct": false,
+          "why": "Additional volume throughput cannot raise the instance above its 593.75 MB/s EBS limit."
+        },
+        {
+          "id": "B",
+          "text": "Move the workload and its existing EBS volumes to an m5.8xlarge instance.",
+          "correct": true,
+          "why": "Its stated EBS throughput limit exceeds the required 700 MB/s, which the volumes already provide."
+        },
+        {
+          "id": "C",
+          "text": "Keep the m5.4xlarge and increase the provisioned IOPS on its existing EBS volumes.",
+          "correct": false,
+          "why": "More provisioned IOPS does not remove the instance’s lower throughput limit."
+        },
+        {
+          "id": "D",
+          "text": "Keep the m5.4xlarge and increase the size of its existing EBS volumes.",
+          "correct": false,
+          "why": "Increasing volume capacity does not remove the instance’s EBS throughput bottleneck."
+        }
+      ],
+      "explanation": "The attached volumes already provide the required aggregate throughput, so the m5.4xlarge instance is the limiting side of the connection. Moving the workload to the stated m5.8xlarge provides an EBS throughput limit above the 700 MB/s peak requirement. Adding or reconfiguring volumes on the m5.4xlarge cannot overcome that instance’s 593.75 MB/s limit.",
+      "keywordCues": [
+        "aggregate 700 MB/s",
+        "sustain 700 MB/s",
+        "m5.4xlarge EBS throughput limit is 593.75 MB/s",
+        "m5.8xlarge has an 850 MB/s EBS throughput limit"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html"
+      ],
+      "es": {
+        "stem": "Una empresa de análisis de medios procesa metadatos de video en una instancia EC2 m5.4xlarge. Sus volúmenes EBS conectados ya proporcionan un throughput agregado de 700 MB/s, pero los picos de procesamiento requieren que la instancia sostenga 700 MB/s; el límite de throughput de EBS de m5.4xlarge es 593.75 MB/s. Una m5.8xlarge tiene un límite de throughput de EBS de 850 MB/s y la aplicación no necesita más capacidad de almacenamiento. ¿Qué cambio cumple el requisito de throughput durante los picos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener la m5.4xlarge y conectar otro volumen EBS para aumentar el throughput agregado configurado.",
+            "why": "El throughput adicional de los volúmenes no puede elevar el rendimiento por encima del límite de EBS de 593.75 MB/s de la instancia."
+          },
+          {
+            "id": "B",
+            "text": "Mover la carga de trabajo y sus volúmenes EBS existentes a una instancia m5.8xlarge.",
+            "why": "Su límite indicado de throughput de EBS supera los 700 MB/s requeridos, que los volúmenes ya proporcionan."
+          },
+          {
+            "id": "C",
+            "text": "Mantener la m5.4xlarge y aumentar los IOPS configurados en sus volúmenes EBS existentes.",
+            "why": "Más IOPS configurados no eliminan el límite inferior de throughput de la instancia."
+          },
+          {
+            "id": "D",
+            "text": "Mantener la m5.4xlarge y aumentar el tamaño de sus volúmenes EBS existentes.",
+            "why": "Aumentar la capacidad de los volúmenes no elimina el cuello de botella de throughput de EBS de la instancia."
+          }
+        ],
+        "explanation": "Los volúmenes conectados ya proporcionan el throughput agregado requerido, así que la instancia m5.4xlarge es el factor limitante. Si mueves la carga de trabajo a la m5.8xlarge indicada, obtienes un límite de throughput de EBS superior al requisito de 700 MB/s. Agregar o reconfigurar volúmenes en la m5.4xlarge no puede superar su límite de 593.75 MB/s."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-performance-sizing--4d839e41",
+      "conceptId": "ebs-performance-sizing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A clinic’s appointment application writes to an EBS data volume attached to an EC2 instance that supports Elastic Volumes. The volume is nearly full, and the application must remain running while the clinic adds usable storage space. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase the EBS volume size with Elastic Volumes and leave the file system unchanged.",
+          "correct": false,
+          "why": "The application cannot use the added capacity until the file system is extended."
+        },
+        {
+          "id": "B",
+          "text": "Detach the EBS volume, increase its size, extend the file system, and reattach it.",
+          "correct": false,
+          "why": "Detaching the application’s data volume interrupts access unnecessarily."
+        },
+        {
+          "id": "C",
+          "text": "Stop the instance, increase the EBS volume size, extend the file system, and restart the instance.",
+          "correct": false,
+          "why": "Stopping the instance violates the requirement to keep the application running."
+        },
+        {
+          "id": "D",
+          "text": "Increase the EBS volume size with Elastic Volumes while it remains attached, then extend the file system.",
+          "correct": true,
+          "why": "This adds usable capacity without detaching the volume or restarting the supported instance."
+        }
+      ],
+      "explanation": "The clinic needs usable file-system space without stopping its application. On an instance that supports Elastic Volumes, the EBS volume can be enlarged without detaching it or restarting the instance; the file system must then be extended. Increasing only the volume leaves the additional space unavailable to the file system, while stopping or detaching causes avoidable disruption.",
+      "keywordCues": [
+        "supports Elastic Volumes",
+        "application must remain running",
+        "usable storage space"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html"
+      ],
+      "es": {
+        "stem": "La aplicación de citas de una clínica escribe en un volumen de datos EBS conectado a una instancia EC2 compatible con Elastic Volumes. El volumen está casi lleno y la aplicación debe seguir en ejecución mientras la clínica agrega espacio de almacenamiento utilizable. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Aumentar el tamaño del volumen EBS con Elastic Volumes y dejar el sistema de archivos sin cambios.",
+            "why": "La aplicación no podrá usar la capacidad adicional hasta que extiendas el sistema de archivos."
+          },
+          {
+            "id": "B",
+            "text": "Desconectar el volumen EBS, aumentar su tamaño, extender el sistema de archivos y volver a conectarlo.",
+            "why": "Desconectar el volumen de datos interrumpe innecesariamente el acceso de la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Detener la instancia, aumentar el tamaño del volumen EBS, extender el sistema de archivos y reiniciar la instancia.",
+            "why": "Detener la instancia incumple el requisito de mantener la aplicación en ejecución."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar el tamaño del volumen EBS con Elastic Volumes mientras permanece conectado y después extender el sistema de archivos.",
+            "why": "Así agregas capacidad utilizable sin desconectar el volumen ni reiniciar la instancia compatible."
+          }
+        ],
+        "explanation": "La clínica necesita espacio utilizable en el sistema de archivos sin detener la aplicación. En una instancia compatible con Elastic Volumes, puedes ampliar el volumen EBS sin desconectarlo ni reiniciar la instancia; después debes extender el sistema de archivos. Si solo amplías el volumen, el sistema de archivos no podrá usar el espacio adicional, mientras que detener o desconectar recursos causa una interrupción evitable."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": []
+}

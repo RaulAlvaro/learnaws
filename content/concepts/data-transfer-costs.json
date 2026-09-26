@@ -1,0 +1,419 @@
+{
+  "conceptId": "data-transfer-costs",
+  "card": {
+    "en": {
+      "tldr": "Data transfer cost depends on where traffic flows: between Availability Zones, between Regions, or out to the internet. In an exam scenario, identify the traffic path first, then remove unnecessary transfers without violating availability or placement requirements.",
+      "whenToUse": [
+        "A workload sends substantial traffic between Availability Zones or AWS Regions.",
+        "An application can process data closer to where it is produced.",
+        "A team needs to identify network charges in its AWS Cost and Usage Report (CUR)."
+      ],
+      "keyFacts": [
+        "Inter-AZ transfer within a Region appears as Region-DataTransfer-Regional-Bytes in AWS CUR. For each metered resource, both inbound and outbound traffic are charged; check service pricing because some in-Region traffic has no cost.",
+        "Inter-Region transfer has incoming and outgoing CUR line items. The incoming transfer to the destination Region has no charge; the charge is associated with transfer out of the source Region.",
+        "Internet egress typically appears as Region-DataTransfer-Out-Bytes (US East (N. Virginia) can omit the Region prefix, and CloudFront and some services use their own usage types). Transfer from the internet into AWS has no data transfer charge.",
+        "CloudFront egress can have a similar usage type to other internet egress. Use lineItem/ProductCode to distinguish AmazonCloudFront charges.",
+        "Data transfer charges vary by service and source Region, so confirm prices on the relevant service pricing page."
+      ],
+      "gotchas": [
+        "Two CUR line items for one inter-Region transfer do not mean both directions are charged.",
+        "A Regional-Bytes usage type does not prove that every in-Region transfer is billable; service-specific exceptions exist.",
+        "Do not identify CloudFront traffic from an Out-Bytes usage type alone."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Inter-AZ transfer vs. inter-Region transfer",
+          "difference": "Inter-AZ traffic uses Regional-Bytes; inter-Region traffic has AWS-In-Bytes and AWS-Out-Bytes line items."
+        },
+        {
+          "concept": "CloudFront egress vs. other internet egress",
+          "difference": "Their usage types can look similar; the product code identifies CloudFront."
+        }
+      ],
+      "examCues": [
+        "large transfers between Availability Zones",
+        "daily copies to another AWS Region",
+        "AWS CUR shows AWS-In-Bytes and AWS-Out-Bytes",
+        "separate CloudFront egress from other internet egress"
+      ]
+    },
+    "es": {
+      "tldr": "El costo de transferencia de datos depende de la ruta: entre Availability Zones, entre Regions o hacia internet. En un escenario de examen, identifica primero esa ruta y luego elimina transferencias innecesarias sin incumplir los requisitos de disponibilidad o ubicación.",
+      "whenToUse": [
+        "Una carga de trabajo envía mucho tráfico entre Availability Zones o AWS Regions.",
+        "Una aplicación puede procesar los datos más cerca de donde se producen.",
+        "Un equipo necesita identificar cargos de red en su AWS Cost and Usage Report (CUR)."
+      ],
+      "keyFacts": [
+        "La transferencia entre Availability Zones de una misma Region aparece como Region-DataTransfer-Regional-Bytes en AWS CUR. Para cada recurso medido se cobra el tráfico entrante y saliente; consulta los precios del servicio porque parte del tráfico dentro de una Region puede no tener costo.",
+        "La transferencia entre Regions genera registros de entrada y salida en CUR. La entrada a la Region de destino no tiene cargo; el cargo corresponde a la salida desde la Region de origen.",
+        "La salida hacia internet suele aparecer como Region-DataTransfer-Out-Bytes (en US East (N. Virginia) puede omitirse el prefijo de Region, y CloudFront y algunos servicios usan sus propios tipos de uso). La transferencia desde internet hacia AWS no tiene cargo por transferencia de datos.",
+        "La salida de CloudFront puede tener un tipo de uso parecido al de otras salidas hacia internet. Usa lineItem/ProductCode para distinguir los cargos de AmazonCloudFront.",
+        "Los cargos varían según el servicio y la Region de origen; confirma los precios en la página del servicio correspondiente."
+      ],
+      "gotchas": [
+        "Dos registros de CUR para una transferencia entre Regions no significan que se cobren ambas direcciones.",
+        "El tipo de uso Regional-Bytes no demuestra que toda transferencia dentro de una Region tenga cargo; existen excepciones según el servicio.",
+        "No identifiques tráfico de CloudFront solo por un tipo de uso Out-Bytes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Transferencia entre Availability Zones vs. entre Regions",
+          "difference": "El tráfico entre Availability Zones usa Regional-Bytes; entre Regions aparecen registros AWS-In-Bytes y AWS-Out-Bytes."
+        },
+        {
+          "concept": "Salida de CloudFront vs. otras salidas hacia internet",
+          "difference": "Sus tipos de uso pueden parecerse; el código de producto identifica a CloudFront."
+        }
+      ],
+      "examCues": [
+        "large transfers between Availability Zones",
+        "daily copies to another AWS Region",
+        "AWS CUR shows AWS-In-Bytes and AWS-Out-Bytes",
+        "separate CloudFront egress from other internet egress"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html",
+      "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "data-transfer-costs--d9404f9c",
+      "conceptId": "data-transfer-costs",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A video-production company runs a batch renderer in one Availability Zone and keeps its temporary source files on a processing server in another Availability Zone of the same Region. The files are transferred repeatedly during rendering, and the company can move the renderer without changing its availability requirements. Which change should the company make to reduce data transfer costs?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the placement and budget only for transfers from AWS to the internet.",
+          "correct": false,
+          "why": "The stated transfer is between Availability Zones, not from AWS to the internet."
+        },
+        {
+          "id": "B",
+          "text": "Move the renderer to a different AWS Region while keeping the processing server in place.",
+          "correct": false,
+          "why": "This replaces the inter-AZ path with an inter-Region path rather than removing the repeated transfer."
+        },
+        {
+          "id": "C",
+          "text": "Keep the placement because transfers within a Region never incur data transfer charges.",
+          "correct": false,
+          "why": "Inter-AZ transfers can incur regional data transfer charges."
+        },
+        {
+          "id": "D",
+          "text": "Run the renderer in the processing server's Availability Zone.",
+          "correct": true,
+          "why": "This removes the repeated inter-AZ transfer described in the scenario."
+        }
+      ],
+      "explanation": "The deciding requirement is to reduce repeated transfers without changing availability requirements. Placing the renderer with its temporary source files removes the stated inter-AZ transfer path. Moving it to another Region does not solve the placement problem, and assuming all in-Region traffic is free contradicts the documented inter-AZ charging behavior. Service-specific pricing should still be checked before estimating savings.",
+      "keywordCues": [
+        "different Availability Zone of the same Region",
+        "transferred repeatedly",
+        "can move the renderer without changing its availability requirements"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html",
+        "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
+      ],
+      "es": {
+        "stem": "Una productora de video ejecuta un renderizador por lotes en una Availability Zone y mantiene sus archivos fuente temporales en un servidor de procesamiento de otra Availability Zone de la misma Region. Los archivos se transfieren repetidamente durante el renderizado, y la empresa puede mover el renderizador sin cambiar sus requisitos de disponibilidad. ¿Qué cambio debe hacer para reducir los costos de transferencia de datos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener la ubicación actual y presupuestar solo las transferencias desde AWS hacia internet.",
+            "why": "La transferencia descrita ocurre entre Availability Zones, no desde AWS hacia internet."
+          },
+          {
+            "id": "B",
+            "text": "Mover el renderizador a otra AWS Region y mantener el servidor de procesamiento donde está.",
+            "why": "Esto sustituye la ruta entre Availability Zones por una ruta entre Regions, en lugar de eliminar la transferencia repetida."
+          },
+          {
+            "id": "C",
+            "text": "Mantener la ubicación actual porque las transferencias dentro de una Region nunca tienen cargos.",
+            "why": "Las transferencias entre Availability Zones pueden generar cargos de transferencia regional."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar el renderizador en la misma Availability Zone que el servidor de procesamiento.",
+            "why": "Esto elimina la transferencia repetida entre Availability Zones descrita en el escenario."
+          }
+        ],
+        "explanation": "El requisito decisivo es reducir las transferencias repetidas sin cambiar los requisitos de disponibilidad. Ubicar el renderizador junto a sus archivos fuente temporales elimina la ruta de transferencia entre Availability Zones indicada. Moverlo a otra Region no resuelve el problema de ubicación, y suponer que todo el tráfico dentro de una Region es gratuito contradice el comportamiento de cobro documentado. Consulta los precios del servicio antes de estimar el ahorro."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-transfer-costs--07694a65",
+      "conceptId": "data-transfer-costs",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization copies a dataset nightly from an application in one AWS Region to an analysis job in another. The analysis job can run in the application's Region, and no other process needs the remote copy. AWS CUR shows both an AWS-In-Bytes and an AWS-Out-Bytes line item for each copy. Which change MOST directly reduces the charged inter-Region transfer?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the nightly copy and move the analysis job to a different Availability Zone in its current Region.",
+          "correct": false,
+          "why": "Changing Availability Zones in the destination Region does not remove the inter-Region copy."
+        },
+        {
+          "id": "B",
+          "text": "Keep both jobs in their current Regions and exclude the AWS-In-Bytes item from cost reports.",
+          "correct": false,
+          "why": "The incoming item has no charge, but the outgoing copy remains charged."
+        },
+        {
+          "id": "C",
+          "text": "Reverse the direction of the nightly copy so the analysis Region becomes the source.",
+          "correct": false,
+          "why": "The source Region's outgoing transfer would still determine the charge."
+        },
+        {
+          "id": "D",
+          "text": "Run the analysis job in the application's Region and stop making the remote copy.",
+          "correct": true,
+          "why": "This removes the unnecessary inter-Region transfer out of the source Region."
+        }
+      ],
+      "explanation": "The remote copy is unnecessary because the analysis job may run alongside the application. Stopping it removes the outgoing inter-Region transfer that determines the charge. The AWS-In-Bytes record does not carry the transfer charge, so excluding that record from a report does not reduce spending. Changing only the destination Availability Zone also leaves the cross-Region path intact.",
+      "keywordCues": [
+        "can run in the application's Region",
+        "no other process needs the remote copy",
+        "AWS-In-Bytes and an AWS-Out-Bytes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html",
+        "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación copia cada noche un conjunto de datos desde una aplicación en una AWS Region hacia un trabajo de análisis en otra. El trabajo de análisis puede ejecutarse en la Region de la aplicación y ningún otro proceso necesita la copia remota. AWS CUR muestra un registro AWS-In-Bytes y otro AWS-Out-Bytes por cada copia. ¿Qué cambio reduce MÁS directamente la transferencia entre Regions que genera el cargo?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener la copia nocturna y mover el trabajo de análisis a otra Availability Zone de su Region actual.",
+            "why": "Cambiar de Availability Zone en la Region de destino no elimina la copia entre Regions."
+          },
+          {
+            "id": "B",
+            "text": "Mantener ambos trabajos en sus Regions actuales y excluir el registro AWS-In-Bytes de los informes de costos.",
+            "why": "El registro de entrada no tiene cargo, pero la copia saliente sigue generándolo."
+          },
+          {
+            "id": "C",
+            "text": "Invertir la dirección de la copia nocturna para que la Region del análisis sea el origen.",
+            "why": "La transferencia saliente desde la Region de origen seguiría determinando el cargo."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar el trabajo de análisis en la Region de la aplicación y dejar de hacer la copia remota.",
+            "why": "Esto elimina la transferencia innecesaria entre Regions que sale de la Region de origen."
+          }
+        ],
+        "explanation": "La copia remota es innecesaria porque el trabajo de análisis puede ejecutarse junto a la aplicación. Al dejar de hacerla, se elimina la transferencia saliente entre Regions que determina el cargo. El registro AWS-In-Bytes no tiene el cargo de transferencia, por lo que excluirlo de un informe no reduce el gasto. Cambiar solo la Availability Zone de destino tampoco elimina la ruta entre Regions."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-transfer-costs--9726314c",
+      "conceptId": "data-transfer-costs",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An online publisher serves content through CloudFront and also operates an application that sends files directly to internet users. Its finance team sees DataTransfer-Out-Bytes usage in AWS CUR and must separate the two sources before proposing cost changes. Which report field should the team use to distinguish CloudFront egress from other internet egress MOST reliably?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The presence of AWS-In-Bytes, because that identifies CloudFront responses.",
+          "correct": false,
+          "why": "AWS-In-Bytes is described for inter-Region transfer, not as a CloudFront identifier."
+        },
+        {
+          "id": "B",
+          "text": "lineItem/ProductCode, to identify records for AmazonCloudFront.",
+          "correct": true,
+          "why": "The product code distinguishes CloudFront traffic when egress usage types look similar."
+        },
+        {
+          "id": "C",
+          "text": "Only the Out-Bytes suffix, because it uniquely identifies CloudFront traffic.",
+          "correct": false,
+          "why": "CloudFront and other internet egress can have similar Out-Bytes usage types."
+        },
+        {
+          "id": "D",
+          "text": "Only the Region prefix, because CloudFront usage types never include one.",
+          "correct": false,
+          "why": "CloudFront egress usage types can have a prefix representing the edge location."
+        }
+      ],
+      "explanation": "The team must distinguish two types of outbound traffic before making a cost decision. CloudFront and other internet egress can have similar usage types, so lineItem/ProductCode is the reliable discriminator in AWS CUR. An Out-Bytes suffix alone cannot establish which product generated the traffic. The Region prefix alone does not resolve the ambiguity either.",
+      "keywordCues": [
+        "through CloudFront",
+        "directly to internet users",
+        "separate the two sources"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html",
+        "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
+      ],
+      "es": {
+        "stem": "Una editorial digital entrega contenido mediante CloudFront y también opera una aplicación que envía archivos directamente a usuarios de internet. Su equipo financiero observa uso DataTransfer-Out-Bytes en AWS CUR y debe separar ambos orígenes antes de proponer cambios de costos. ¿Qué campo del informe debe usar el equipo para distinguir la salida de CloudFront de otras salidas hacia internet de la forma MÁS confiable?",
+        "options": [
+          {
+            "id": "A",
+            "text": "La presencia de AWS-In-Bytes, porque identifica las respuestas de CloudFront.",
+            "why": "AWS-In-Bytes se describe para transferencias entre Regions, no como identificador de CloudFront."
+          },
+          {
+            "id": "B",
+            "text": "lineItem/ProductCode, para identificar los registros de AmazonCloudFront.",
+            "why": "El código de producto distingue el tráfico de CloudFront cuando los tipos de uso de salida se parecen."
+          },
+          {
+            "id": "C",
+            "text": "Solo el sufijo Out-Bytes, porque identifica de forma exclusiva el tráfico de CloudFront.",
+            "why": "CloudFront y otras salidas hacia internet pueden tener tipos de uso Out-Bytes similares."
+          },
+          {
+            "id": "D",
+            "text": "Solo el prefijo Region, porque los tipos de uso de CloudFront nunca incluyen uno.",
+            "why": "Los tipos de uso de salida de CloudFront pueden tener un prefijo que representa la ubicación de borde."
+          }
+        ],
+        "explanation": "El equipo debe distinguir dos tipos de tráfico saliente antes de tomar una decisión de costos. CloudFront y otras salidas hacia internet pueden tener tipos de uso similares, así que lineItem/ProductCode es el campo que los distingue en AWS CUR. El sufijo Out-Bytes por sí solo no establece qué producto generó el tráfico. El prefijo Region tampoco resuelve esa ambigüedad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-transfer-costs--d32d3ae7",
+      "conceptId": "data-transfer-costs",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company processes independent nightly jobs in AWS. One job repeatedly reads temporary data from an EC2 worker in another Availability Zone; another copies an entire dataset to a second Region solely for an analysis job that is permitted to run in the source Region. The company must keep its customer-facing deployment across Availability Zones but may change the placement of these independent jobs. Which TWO changes target unnecessary data transfer without changing the customer-facing deployment? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move all customer-facing resources into one Availability Zone.",
+          "correct": false,
+          "why": "This violates the requirement to keep the customer-facing deployment across Availability Zones."
+        },
+        {
+          "id": "B",
+          "text": "Place the first job in a different Region while leaving its data source in place.",
+          "correct": false,
+          "why": "This introduces an inter-Region path instead of eliminating the transfer."
+        },
+        {
+          "id": "C",
+          "text": "Keep the remote copy and disregard its AWS-In-Bytes line item.",
+          "correct": false,
+          "why": "The copy's AWS-Out-Bytes transfer remains even though the incoming item has no charge."
+        },
+        {
+          "id": "D",
+          "text": "Run the analysis job in the dataset's source Region and stop the remote copy.",
+          "correct": true,
+          "why": "This removes the unnecessary inter-Region transfer out of the source Region."
+        },
+        {
+          "id": "E",
+          "text": "Place the first nightly job with its EC2 data source in the same Availability Zone.",
+          "correct": true,
+          "why": "This removes the job's repeated inter-AZ transfer without changing the customer-facing deployment."
+        }
+      ],
+      "explanation": "Both jobs can be moved without changing the required customer-facing deployment. Placing the first job with its data source removes its repeated inter-AZ path; running analysis in the source Region removes the unnecessary inter-Region copy. Consolidating customer-facing resources would break the availability constraint. Ignoring the incoming CUR record does not remove the charged outgoing inter-Region transfer.",
+      "keywordCues": [
+        "independent nightly jobs",
+        "another Availability Zone",
+        "solely for an analysis job",
+        "permitted to run in the source Region",
+        "keep its customer-facing deployment across Availability Zones"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html",
+        "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística procesa trabajos nocturnos independientes en AWS. Un trabajo lee repetidamente datos temporales de un worker EC2 en otra Availability Zone; otro copia un conjunto de datos completo a una segunda Region solo para un trabajo de análisis que puede ejecutarse en la Region de origen. La empresa debe mantener su implementación de atención al cliente distribuida entre Availability Zones, pero puede cambiar la ubicación de estos trabajos independientes. ¿Qué DOS cambios reducen las transferencias innecesarias sin modificar la implementación de atención al cliente? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mover todos los recursos de atención al cliente a una sola Availability Zone.",
+            "why": "Esto incumple el requisito de mantener la implementación de atención al cliente distribuida entre Availability Zones."
+          },
+          {
+            "id": "B",
+            "text": "Ubicar el primer trabajo en otra Region y mantener su fuente de datos donde está.",
+            "why": "Esto introduce una ruta entre Regions en lugar de eliminar la transferencia."
+          },
+          {
+            "id": "C",
+            "text": "Mantener la copia remota e ignorar su registro AWS-In-Bytes.",
+            "why": "La transferencia AWS-Out-Bytes de la copia permanece aunque el registro de entrada no tenga cargo."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar el trabajo de análisis en la Region de origen del conjunto de datos y dejar de hacer la copia remota.",
+            "why": "Esto elimina la transferencia innecesaria entre Regions que sale de la Region de origen."
+          },
+          {
+            "id": "E",
+            "text": "Ubicar el primer trabajo nocturno en la misma Availability Zone que su fuente de datos EC2.",
+            "why": "Esto elimina la transferencia repetida entre Availability Zones del trabajo sin modificar la implementación de atención al cliente."
+          }
+        ],
+        "explanation": "Ambos trabajos pueden moverse sin modificar la implementación de atención al cliente requerida. Ubicar el primer trabajo junto a su fuente de datos elimina su ruta repetida entre Availability Zones; ejecutar el análisis en la Region de origen elimina la copia innecesaria entre Regions. Consolidar los recursos de atención al cliente incumpliría el requisito de disponibilidad. Ignorar el registro entrante de CUR no elimina la transferencia saliente entre Regions que genera el cargo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "data-transfer-costs--r0",
+      "conceptId": "data-transfer-costs",
+      "kind": "recall",
+      "prompt": "An independent batch job repeatedly reads data in another Availability Zone. What placement change could reduce transfer costs, and what must you check first?",
+      "promptEs": "Un trabajo por lotes independiente lee repetidamente datos en otra Availability Zone. ¿Qué cambio de ubicación podría reducir los costos de transferencia y qué debes comprobar primero?",
+      "idealAnswer": "Place the batch job with its data source in the same Availability Zone to remove the repeated inter-AZ transfer. First confirm that the placement still meets availability requirements, and check the relevant service pricing before estimating savings.",
+      "rubric": [
+        "Places the job and data source in the same Availability Zone.",
+        "Explains that this removes the repeated inter-AZ transfer.",
+        "Checks availability requirements and service-specific pricing."
+      ]
+    }
+  ]
+}

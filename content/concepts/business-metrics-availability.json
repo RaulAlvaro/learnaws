@@ -1,0 +1,238 @@
+{
+  "conceptId": "business-metrics-availability",
+  "card": {
+    "en": {
+      "tldr": "Turn a business availability target into a measurement of whether the workload performs its agreed function when needed, over the specified period. If traffic may be absent, use CloudWatch Synthetics canaries to measure the customer journey rather than relying only on observed requests.",
+      "whenToUse": [
+        "The SLA specifies an availability percentage and measurement period.",
+        "A customer-facing endpoint must be checked even when no customers visit.",
+        "A workload has hard dependencies whose failures affect its availability."
+      ],
+      "keyFacts": [
+        "Availability is the percentage of time a workload successfully performs its agreed function when required.",
+        "Under a strict availability measure, both scheduled and unscheduled interruptions reduce availability.",
+        "A 99.95% annual availability goal permits up to 4 hours 22 minutes of unavailability.",
+        "A request-based measurement can count a period with no requests as 100% available.",
+        "CloudWatch Synthetics canaries run scheduled customer-like checks and measure endpoint availability and latency.",
+        "Theoretical availability across independent hard dependencies is the product of their availabilities."
+      ],
+      "gotchas": [
+        "Healthy infrastructure does not prove that the agreed customer function works.",
+        "Excluding planned maintenance can overstate availability from a user's perspective.",
+        "Request-only measurements can miss an outage during a period with no traffic."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "available even when no customers visit",
+        "customer journey must succeed",
+        "planned maintenance counts toward the SLA",
+        "hard dependency on two services"
+      ]
+    },
+    "es": {
+      "tldr": "Convierte el objetivo de disponibilidad del negocio en una medición de si la carga de trabajo cumple su función acordada cuando se necesita, durante el período indicado. Si puede no haber tráfico, usa canaries de CloudWatch Synthetics para medir la experiencia del cliente en vez de depender solo de las solicitudes observadas.",
+      "whenToUse": [
+        "El SLA indica un porcentaje de disponibilidad y un período de medición.",
+        "Debes comprobar un endpoint para clientes incluso cuando nadie lo visita.",
+        "La carga de trabajo tiene dependencias obligatorias cuyas fallas afectan su disponibilidad."
+      ],
+      "keyFacts": [
+        "La disponibilidad es el porcentaje de tiempo en que una carga de trabajo cumple correctamente su función acordada cuando se requiere.",
+        "Con una medición estricta, tanto las interrupciones programadas como las no programadas reducen la disponibilidad.",
+        "Un objetivo anual de disponibilidad del 99.95% permite hasta 4 horas y 22 minutos de indisponibilidad.",
+        "Una medición basada en solicitudes puede contar un período sin solicitudes como 100% disponible.",
+        "Los canaries de CloudWatch Synthetics ejecutan comprobaciones programadas similares a las acciones de un cliente y miden la disponibilidad y latencia de los endpoints.",
+        "La disponibilidad teórica de un sistema con dependencias obligatorias independientes es el producto de sus disponibilidades."
+      ],
+      "gotchas": [
+        "Una infraestructura saludable no demuestra que la función acordada para el cliente opere correctamente.",
+        "Excluir el mantenimiento planificado puede sobrestimar la disponibilidad desde la perspectiva del usuario.",
+        "Medir solo las solicitudes puede ocultar una interrupción durante un período sin tráfico."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "available even when no customers visit",
+        "customer journey must succeed",
+        "planned maintenance counts toward the SLA",
+        "hard dependency on two services"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/availability.html",
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "business-metrics-availability--b9ed8330",
+      "conceptId": "business-metrics-availability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company promises that its shipment portal will successfully return tracking results. The portal has two independent hard dependencies: a shipment-index service and an authorization service; a failure of either prevents a result. Each dependency and the portal itself has a 99.99% availability design goal. Which assessment should the architect use when setting a realistic end-to-end availability goal?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use 99.9999%, because the two dependencies provide redundant availability.",
+          "correct": false,
+          "why": "The dependencies are both required, not interchangeable redundant components."
+        },
+        {
+          "id": "B",
+          "text": "Use approximately 99.97%, accounting for the portal and both hard dependencies.",
+          "correct": true,
+          "why": "The product of the three 99.99% availability goals is approximately 99.97%."
+        },
+        {
+          "id": "C",
+          "text": "Use 99.99%, because the portal's own design goal determines the customer-facing goal.",
+          "correct": false,
+          "why": "This ignores failures in either hard dependency."
+        },
+        {
+          "id": "D",
+          "text": "Use 99.98%, because only the two dependency goals affect customer availability.",
+          "correct": false,
+          "why": "The portal's own availability must also be included in the hard-dependency calculation."
+        }
+      ],
+      "explanation": "A tracking result succeeds only if the portal and both hard dependencies work. For independent hard dependencies, the theoretical workload availability is the product of the component availabilities: 99.99% × 99.99% × 99.99%, or approximately 99.97%. Using the portal's goal alone misses dependency failures. The redundant-component calculation does not apply because neither dependency can substitute for the other.",
+      "keywordCues": [
+        "two independent hard dependencies",
+        "a failure of either prevents a result",
+        "Each dependency and the portal itself has a 99.99% availability design goal",
+        "end-to-end availability goal"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/availability.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística promete que su portal de envíos devolverá correctamente los resultados de seguimiento. El portal tiene dos dependencias obligatorias independientes: un servicio de índice de envíos y un servicio de autorización; si cualquiera falla, no puede devolver un resultado. Cada dependencia y el propio portal tienen un objetivo de diseño de disponibilidad del 99.99%. ¿Qué evaluación debe usar el arquitecto para establecer un objetivo realista de disponibilidad de extremo a extremo?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa 99.9999%, porque las dos dependencias aportan disponibilidad redundante.",
+            "why": "Ambas dependencias son necesarias; no son componentes redundantes intercambiables."
+          },
+          {
+            "id": "B",
+            "text": "Usa aproximadamente 99.97%, considerando el portal y ambas dependencias obligatorias.",
+            "why": "El producto de los tres objetivos de disponibilidad del 99.99% es aproximadamente 99.97%."
+          },
+          {
+            "id": "C",
+            "text": "Usa 99.99%, porque el objetivo de diseño del portal determina el objetivo para los clientes.",
+            "why": "Esto ignora las fallas de cualquiera de las dependencias obligatorias."
+          },
+          {
+            "id": "D",
+            "text": "Usa 99.98%, porque solo los objetivos de las dos dependencias afectan la disponibilidad para los clientes.",
+            "why": "La disponibilidad del propio portal también debe incluirse en el cálculo."
+          }
+        ],
+        "explanation": "Un resultado de seguimiento solo se entrega si funcionan el portal y las dos dependencias obligatorias. Para dependencias obligatorias independientes, la disponibilidad teórica de la carga de trabajo es el producto de las disponibilidades: 99.99% × 99.99% × 99.99%, o aproximadamente 99.97%. Usar solo el objetivo del portal omite las fallas de las dependencias. El cálculo para componentes redundantes no aplica porque ninguna dependencia puede reemplazar a la otra."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "business-metrics-availability--b261d6db",
+      "conceptId": "business-metrics-availability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional museum sells tickets through a website that receives almost no traffic overnight. Its SLA requires the ticket-search and checkout journey to remain available during those hours, and operators need a measurement that can reveal failures before visitors encounter them. Which approach meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Measure only the response time of visitor requests to the website's home page.",
+          "correct": false,
+          "why": "Home-page requests do not verify the required ticket journey and may not occur overnight."
+        },
+        {
+          "id": "B",
+          "text": "Schedule a CloudWatch Synthetics canary to perform the ticket journey and use its availability metrics.",
+          "correct": true,
+          "why": "A scheduled canary checks customer-like actions and publishes metrics even without visitor traffic."
+        },
+        {
+          "id": "C",
+          "text": "Calculate availability only from successful and failed visitor requests.",
+          "correct": false,
+          "why": "Periods without requests can be counted as fully available despite a broken ticket journey."
+        },
+        {
+          "id": "D",
+          "text": "Calculate availability from the uptime of the servers hosting the ticket website.",
+          "correct": false,
+          "why": "Server uptime does not establish that ticket search and checkout succeed."
+        }
+      ],
+      "explanation": "The SLA concerns whether visitors can complete a particular journey, including when nobody is visiting. A scheduled CloudWatch Synthetics canary can follow customer-like actions and produce availability metrics without customer traffic. Request-only availability can treat periods with no requests as 100% available, so it could conceal an overnight failure. Server uptime and home-page latency do not measure successful ticket search and checkout.",
+      "keywordCues": [
+        "almost no traffic overnight",
+        "ticket-search and checkout journey",
+        "before visitors encounter them",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/availability.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html"
+      ],
+      "es": {
+        "stem": "Un museo regional vende entradas mediante un sitio web que casi no recibe tráfico durante la noche. Su SLA exige que la búsqueda y compra de entradas sigan disponibles en esas horas, y los operadores necesitan una medición que revele fallas antes de que las encuentren los visitantes. ¿Qué enfoque cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mide únicamente el tiempo de respuesta de las solicitudes de visitantes a la página de inicio.",
+            "why": "Las solicitudes a la página de inicio no verifican el proceso de compra requerido y quizá no ocurran durante la noche."
+          },
+          {
+            "id": "B",
+            "text": "Programa un canary de CloudWatch Synthetics para realizar el proceso de compra y usa sus métricas de disponibilidad.",
+            "why": "Un canary programado comprueba acciones similares a las de un cliente y publica métricas incluso sin tráfico de visitantes."
+          },
+          {
+            "id": "C",
+            "text": "Calcula la disponibilidad solo a partir de las solicitudes exitosas y fallidas de los visitantes.",
+            "why": "Los períodos sin solicitudes pueden contarse como totalmente disponibles aunque el proceso de compra no funcione."
+          },
+          {
+            "id": "D",
+            "text": "Calcula la disponibilidad a partir del tiempo de funcionamiento de los servidores que alojan el sitio de venta.",
+            "why": "El funcionamiento de los servidores no demuestra que la búsqueda y la compra de entradas se completen."
+          }
+        ],
+        "explanation": "El SLA se refiere a si los visitantes pueden completar un proceso específico, incluso cuando nadie visita el sitio. Un canary programado de CloudWatch Synthetics puede seguir acciones similares a las de un cliente y producir métricas de disponibilidad sin tráfico real. Una medición basada solo en solicitudes puede considerar 100% disponible un período sin solicitudes y ocultar una falla nocturna. El funcionamiento de los servidores y la latencia de la página de inicio no miden si la búsqueda y la compra se completan."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "business-metrics-availability--r0",
+      "conceptId": "business-metrics-availability",
+      "kind": "recall",
+      "prompt": "A checkout API has long periods without traffic. What AWS feature would you use to measure customer-facing availability, and why?",
+      "promptEs": "Una API de compra pasa largos períodos sin tráfico. ¿Qué feature de AWS usarías para medir la disponibilidad para los clientes y por qué?",
+      "idealAnswer": "Use a scheduled CloudWatch Synthetics canary to exercise the checkout API as a customer would and use its availability metrics. It keeps checking when no real requests arrive, whereas a request-based measure can count an empty period as 100% available.",
+      "rubric": [
+        "Names CloudWatch Synthetics canaries.",
+        "Describes scheduled checks of the customer-facing function.",
+        "Explains why request-only measurement can miss failures without traffic."
+      ]
+    }
+  ]
+}

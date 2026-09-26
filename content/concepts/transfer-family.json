@@ -1,0 +1,357 @@
+{
+  "conceptId": "transfer-family",
+  "card": {
+    "en": {
+      "tldr": "AWS Transfer Family provides managed SFTP, FTPS, FTP, and AS2 file-transfer endpoints backed by Amazon S3 or Amazon EFS. Choose it when partners must keep using their existing file-transfer clients without your team running protocol servers.",
+      "whenToUse": [
+        "Partners must upload to or download from Amazon S3 using existing SFTP or FTPS clients.",
+        "A file-transfer workflow must use Amazon EFS as its storage destination.",
+        "A B2B exchange requires AS2 without operating file-transfer server infrastructure."
+      ],
+      "keyFacts": [
+        "Transfer Family supports SFTP, FTPS, FTP, AS2, and browser-based transfers.",
+        "Supported storage services are Amazon S3 and Amazon EFS.",
+        "Transfer Family supplies a fully managed protocol-enabled server endpoint; you configure the endpoint, users, and access.",
+        "Managed File Transfer Workflows can automate processing of files uploaded through Transfer Family."
+      ],
+      "gotchas": [
+        "An automated storage sync is not a replacement for an endpoint used by partners' existing SFTP or FTPS clients.",
+        "FTP and FTPS are distinct protocols; an FTP endpoint does not satisfy an FTPS requirement.",
+        "Choosing Amazon S3 as the destination misses a requirement for files to reside in Amazon EFS."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DataSync",
+          "difference": "Use DataSync for automated online data migration or synchronization, not to provide partners with their existing file-transfer protocol endpoint."
+        },
+        {
+          "concept": "AWS Snow Family",
+          "difference": "Use Snow Family for offline transfer or disconnected-site needs, not as a live SFTP, FTPS, or AS2 endpoint."
+        }
+      ],
+      "examCues": [
+        "partners must keep their SFTP clients",
+        "managed FTPS endpoint backed by Amazon EFS",
+        "AS2 exchange without running servers",
+        "upload vendor files directly to Amazon S3"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Transfer Family ofrece endpoints administrados de SFTP, FTPS, FTP y AS2 respaldados por Amazon S3 o Amazon EFS. Elígelo cuando tus socios deban conservar sus clientes de transferencia de archivos sin que tu equipo opere servidores de protocolo.",
+      "whenToUse": [
+        "Tus socios deben cargar o descargar archivos de Amazon S3 con sus clientes SFTP o FTPS actuales.",
+        "Un flujo de transferencia de archivos debe usar Amazon EFS como destino de almacenamiento.",
+        "Un intercambio B2B requiere AS2 sin operar infraestructura de servidores de transferencia."
+      ],
+      "keyFacts": [
+        "Transfer Family admite SFTP, FTPS, FTP, AS2 y transferencias desde un navegador.",
+        "Los servicios de almacenamiento admitidos son Amazon S3 y Amazon EFS.",
+        "Transfer Family proporciona un endpoint de servidor de protocolo completamente administrado; tú configuras el endpoint, los usuarios y el acceso.",
+        "Managed File Transfer Workflows puede automatizar el procesamiento de archivos cargados mediante Transfer Family."
+      ],
+      "gotchas": [
+        "Una sincronización automatizada de almacenamiento no reemplaza un endpoint para los clientes SFTP o FTPS actuales de tus socios.",
+        "FTP y FTPS son protocolos distintos; un endpoint FTP no cumple un requisito de FTPS.",
+        "Elegir Amazon S3 como destino no cumple un requisito de almacenar los archivos en Amazon EFS."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DataSync",
+          "difference": "Usa DataSync para migración o sincronización automatizada de datos en línea, no para proporcionar a tus socios un endpoint de su protocolo de transferencia actual."
+        },
+        {
+          "concept": "AWS Snow Family",
+          "difference": "Usa Snow Family para transferencias sin conexión o necesidades de sitios desconectados, no como endpoint SFTP, FTPS o AS2 activo."
+        }
+      ],
+      "examCues": [
+        "partners must keep their SFTP clients",
+        "managed FTPS endpoint backed by Amazon EFS",
+        "AS2 exchange without running servers",
+        "upload vendor files directly to Amazon S3"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-family.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "transfer-family--60a0415e",
+      "conceptId": "transfer-family",
+      "secondaryConcepts": [
+        "datasync",
+        "snow-family"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A grocery chain receives nightly inventory files from hundreds of suppliers. Each supplier already uses an SFTP client, and the chain wants the files in Amazon S3 for downstream analysis. The operations team does not want to maintain file-transfer servers. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Ship AWS Snow Family devices to suppliers for delivery of files into Amazon S3.",
+          "correct": false,
+          "why": "An offline device workflow does not let suppliers keep submitting nightly files through their SFTP clients."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS DataSync to schedule transfers from supplier file systems into Amazon S3.",
+          "correct": false,
+          "why": "DataSync is suited to automated storage transfers but does not provide the SFTP endpoint the suppliers need."
+        },
+        {
+          "id": "C",
+          "text": "Deploy an SFTP server on Amazon EC2 and write incoming files to Amazon S3.",
+          "correct": false,
+          "why": "This can retain SFTP clients but requires the team to operate the file-transfer server."
+        },
+        {
+          "id": "D",
+          "text": "Configure an AWS Transfer Family SFTP server endpoint backed by Amazon S3.",
+          "correct": true,
+          "why": "Transfer Family accepts the suppliers' existing SFTP clients and stores their files in S3 without customer-managed protocol servers."
+        }
+      ],
+      "explanation": "The decisive requirements are continued use of supplier SFTP clients, storage in S3, and no customer-managed transfer servers. An AWS Transfer Family SFTP endpoint meets all three. DataSync addresses automated data transfers rather than providing an SFTP endpoint to those clients; an EC2-based SFTP server adds the operational work the chain wants to avoid.",
+      "keywordCues": [
+        "Each supplier already uses an SFTP client",
+        "files in Amazon S3",
+        "does not want to maintain file-transfer servers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-family.html"
+      ],
+      "es": {
+        "stem": "Una cadena de supermercados recibe cada noche archivos de inventario de cientos de proveedores. Cada proveedor ya usa un cliente SFTP, y la cadena quiere guardar los archivos en Amazon S3 para analizarlos después. El equipo de operaciones no quiere mantener servidores de transferencia de archivos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Enviar dispositivos de AWS Snow Family a los proveedores para entregar los archivos en Amazon S3.",
+            "why": "Un flujo con dispositivos sin conexión no permite que los proveedores sigan enviando archivos cada noche con sus clientes SFTP."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS DataSync para programar transferencias desde los sistemas de archivos de los proveedores hacia Amazon S3.",
+            "why": "DataSync sirve para transferencias automatizadas de almacenamiento, pero no proporciona el endpoint SFTP que necesitan los proveedores."
+          },
+          {
+            "id": "C",
+            "text": "Implementar un servidor SFTP en Amazon EC2 y escribir los archivos recibidos en Amazon S3.",
+            "why": "Esto permite conservar los clientes SFTP, pero exige que el equipo opere el servidor de transferencia."
+          },
+          {
+            "id": "D",
+            "text": "Configurar un endpoint de servidor SFTP de AWS Transfer Family respaldado por Amazon S3.",
+            "why": "Transfer Family acepta los clientes SFTP actuales de los proveedores y almacena los archivos en S3 sin servidores de protocolo administrados por tu equipo."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son conservar los clientes SFTP de los proveedores, almacenar en S3 y evitar servidores de transferencia administrados por tu equipo. Un endpoint SFTP de AWS Transfer Family cumple los tres. DataSync automatiza transferencias de datos, pero no proporciona un endpoint SFTP para esos clientes; un servidor SFTP en EC2 agrega la operación que la cadena quiere evitar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "transfer-family--7963c7b2",
+      "conceptId": "transfer-family",
+      "secondaryConcepts": [
+        "datasync"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A payments company is replacing a self-managed file-transfer service used for B2B settlement documents. Its partners' integrations require AS2, and the company wants incoming documents stored in Amazon S3 without operating protocol servers. The partners cannot change their transfer protocol. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure an AWS Transfer Family SFTP endpoint backed by Amazon S3.",
+          "correct": false,
+          "why": "This provides managed transfers to S3 but requires partners to switch from AS2 to SFTP."
+        },
+        {
+          "id": "B",
+          "text": "Configure AWS DataSync to transfer settlement documents into Amazon S3.",
+          "correct": false,
+          "why": "DataSync does not provide the required AS2 exchange for the partners' existing integrations."
+        },
+        {
+          "id": "C",
+          "text": "Configure AWS Transfer Family for AS2 transfers into Amazon S3.",
+          "correct": true,
+          "why": "Transfer Family supports managed AS2 transfers with S3 storage, preserving the required partner protocol."
+        },
+        {
+          "id": "D",
+          "text": "Host an AS2 service on Amazon EC2 and store received documents in Amazon S3.",
+          "correct": false,
+          "why": "This retains AS2 but requires the company to operate the protocol servers it wants to replace."
+        }
+      ],
+      "explanation": "The nonnegotiable requirement is AS2 for existing B2B integrations, with S3 storage and no self-managed protocol servers. AWS Transfer Family supports managed AS2 transfers into S3. A Transfer Family SFTP endpoint is still the wrong protocol, while an EC2-hosted AS2 service retains the server-operations burden.",
+      "keywordCues": [
+        "partners' integrations require AS2",
+        "stored in Amazon S3",
+        "without operating protocol servers",
+        "cannot change their transfer protocol"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-family.html"
+      ],
+      "es": {
+        "stem": "Una empresa de pagos va a reemplazar un servicio de transferencia de archivos que administra para documentos de liquidación B2B. Las integraciones de sus socios requieren AS2, y la empresa quiere almacenar los documentos entrantes en Amazon S3 sin operar servidores de protocolo. Los socios no pueden cambiar su protocolo de transferencia. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar un endpoint SFTP de AWS Transfer Family respaldado por Amazon S3.",
+            "why": "Proporciona transferencias administradas hacia S3, pero obliga a los socios a cambiar de AS2 a SFTP."
+          },
+          {
+            "id": "B",
+            "text": "Configurar AWS DataSync para transferir los documentos de liquidación a Amazon S3.",
+            "why": "DataSync no proporciona el intercambio AS2 que necesitan las integraciones actuales de los socios."
+          },
+          {
+            "id": "C",
+            "text": "Configurar AWS Transfer Family para transferencias AS2 hacia Amazon S3.",
+            "why": "Transfer Family admite transferencias AS2 administradas con almacenamiento en S3 y conserva el protocolo que requieren los socios."
+          },
+          {
+            "id": "D",
+            "text": "Alojar un servicio AS2 en Amazon EC2 y almacenar los documentos recibidos en Amazon S3.",
+            "why": "Conserva AS2, pero exige que la empresa opere los servidores de protocolo que quiere reemplazar."
+          }
+        ],
+        "explanation": "El requisito innegociable es usar AS2 con las integraciones B2B actuales, almacenar en S3 y evitar servidores de protocolo administrados por la empresa. AWS Transfer Family admite transferencias AS2 administradas hacia S3. Un endpoint SFTP de Transfer Family usa el protocolo equivocado, mientras que un servicio AS2 alojado en EC2 mantiene la carga operativa de los servidores."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "transfer-family--1ece67aa",
+      "conceptId": "transfer-family",
+      "secondaryConcepts": [
+        "datasync",
+        "snow-family"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A publishing company is moving two partner workflows to AWS. Printers must continue uploading production files with SFTP clients into Amazon S3, while distributors must continue downloading catalog files with FTPS clients from Amazon EFS. The company will not operate file-transfer servers, and both workflows need managed endpoints. Which two configurations meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Schedule AWS DataSync transfers of printer files into Amazon S3.",
+          "correct": false,
+          "why": "A scheduled storage transfer does not provide the SFTP endpoint required by the printers."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Snow Family devices to deliver printer files into Amazon S3.",
+          "correct": false,
+          "why": "Offline device delivery does not let printers continue uploading through their SFTP clients."
+        },
+        {
+          "id": "C",
+          "text": "Configure an AWS Transfer Family SFTP endpoint backed by Amazon S3 for printers.",
+          "correct": true,
+          "why": "This provides managed SFTP access for printer uploads to the required S3 storage."
+        },
+        {
+          "id": "D",
+          "text": "Configure an AWS Transfer Family FTP endpoint backed by Amazon EFS for distributors.",
+          "correct": false,
+          "why": "It uses the required storage service but offers FTP rather than the distributors' required FTPS protocol."
+        },
+        {
+          "id": "E",
+          "text": "Configure an AWS Transfer Family FTPS endpoint backed by Amazon EFS for distributors.",
+          "correct": true,
+          "why": "This provides managed FTPS access to the distributors' files in the required EFS file system."
+        }
+      ],
+      "explanation": "Each workflow requires its existing client protocol, its specified storage service, and a managed endpoint. Transfer Family with SFTP and S3 satisfies the printers; Transfer Family with FTPS and EFS satisfies the distributors. DataSync and Snow Family do not give printers a live SFTP endpoint, and choosing FTP for distributors misses their FTPS requirement.",
+      "keywordCues": [
+        "SFTP clients into Amazon S3",
+        "FTPS clients from Amazon EFS",
+        "will not operate file-transfer servers",
+        "managed endpoints"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-family.html"
+      ],
+      "es": {
+        "stem": "Una editorial está trasladando a AWS dos flujos de trabajo con socios. Las imprentas deben seguir cargando archivos de producción con clientes SFTP en Amazon S3, mientras que los distribuidores deben seguir descargando archivos de catálogo con clientes FTPS desde Amazon EFS. La empresa no operará servidores de transferencia de archivos y ambos flujos necesitan endpoints administrados. ¿Qué dos configuraciones cumplen estos requisitos con el LEAST operational overhead? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Programar transferencias de AWS DataSync de los archivos de las imprentas hacia Amazon S3.",
+            "why": "Una transferencia programada de almacenamiento no proporciona el endpoint SFTP que requieren las imprentas."
+          },
+          {
+            "id": "B",
+            "text": "Usar dispositivos de AWS Snow Family para entregar los archivos de las imprentas en Amazon S3.",
+            "why": "La entrega sin conexión mediante dispositivos no permite que las imprentas sigan cargando archivos con sus clientes SFTP."
+          },
+          {
+            "id": "C",
+            "text": "Configurar un endpoint SFTP de AWS Transfer Family respaldado por Amazon S3 para las imprentas.",
+            "why": "Proporciona acceso SFTP administrado para las cargas de las imprentas al almacenamiento S3 requerido."
+          },
+          {
+            "id": "D",
+            "text": "Configurar un endpoint FTP de AWS Transfer Family respaldado por Amazon EFS para los distribuidores.",
+            "why": "Usa el servicio de almacenamiento requerido, pero ofrece FTP en lugar del protocolo FTPS que necesitan los distribuidores."
+          },
+          {
+            "id": "E",
+            "text": "Configurar un endpoint FTPS de AWS Transfer Family respaldado por Amazon EFS para los distribuidores.",
+            "why": "Proporciona acceso FTPS administrado a los archivos de los distribuidores en el sistema de archivos EFS requerido."
+          }
+        ],
+        "explanation": "Cada flujo requiere su protocolo de cliente actual, el servicio de almacenamiento indicado y un endpoint administrado. Transfer Family con SFTP y S3 satisface a las imprentas; Transfer Family con FTPS y EFS satisface a los distribuidores. DataSync y Snow Family no proporcionan a las imprentas un endpoint SFTP activo, y elegir FTP para los distribuidores incumple su requisito de FTPS."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "transfer-family--r0",
+      "conceptId": "transfer-family",
+      "kind": "recall",
+      "prompt": "Partners must keep using FTPS clients to access files in Amazon EFS. Which service would you choose, and why?",
+      "promptEs": "Tus socios deben seguir usando clientes FTPS para acceder a archivos en Amazon EFS. ¿Qué servicio elegirías y por qué?",
+      "idealAnswer": "Choose AWS Transfer Family with an FTPS endpoint backed by Amazon EFS. It provides the required client protocol and storage without running a file-transfer server.",
+      "rubric": [
+        "Names AWS Transfer Family.",
+        "Specifies FTPS with Amazon EFS.",
+        "Explains that it preserves client access without customer-managed protocol servers."
+      ]
+    },
+    {
+      "id": "transfer-family--r1",
+      "conceptId": "transfer-family",
+      "kind": "why-not",
+      "prompt": "Why would AWS DataSync not replace a managed SFTP endpoint for partners uploading files to Amazon S3?",
+      "promptEs": "¿Por qué AWS DataSync no reemplazaría un endpoint SFTP administrado para socios que cargan archivos en Amazon S3?",
+      "idealAnswer": "DataSync is for automated online migration or synchronization, not for serving partners' existing SFTP clients. AWS Transfer Family provides the managed SFTP endpoint backed by S3.",
+      "rubric": [
+        "Identifies DataSync as an automated transfer or synchronization service.",
+        "Explains that partners need a client-facing SFTP endpoint.",
+        "Identifies AWS Transfer Family as the managed SFTP-to-S3 choice."
+      ]
+    }
+  ]
+}

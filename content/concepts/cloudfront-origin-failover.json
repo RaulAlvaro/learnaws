@@ -1,0 +1,232 @@
+{
+  "conceptId": "cloudfront-origin-failover",
+  "card": {
+    "en": {
+      "tldr": "A CloudFront origin group pairs a primary origin with a secondary origin for a cache behavior. On a cache miss, CloudFront can retry an eligible request against the secondary when the primary returns a configured failure code or encounters a qualifying connection or timeout failure.",
+      "whenToUse": [
+        "Cached content must remain available when its primary origin fails.",
+        "A distribution has two origins, and requests should normally go to one primary origin.",
+        "Specific primary-origin errors should trigger a fallback without changing the viewer URL."
+      ],
+      "keyFacts": [
+        "The distribution needs at least two origins; create an origin group and assign it to the relevant cache behavior.",
+        "Failover occurs only for GET, HEAD, and OPTIONS; OPTIONS must also be configured as a cached HTTP method.",
+        "Selectable failover codes are 400, 403, 404, 416, 429, 500, 502, 503, and 504.",
+        "A connection failure can trigger failover when 503 is selected; a primary-origin timeout can trigger it when 504 is selected.",
+        "Cache hits are served without contacting either origin; for each eligible request that reaches the origin, CloudFront tries the primary first, even after an earlier request failed over."
+      ],
+      "gotchas": [
+        "Adding a second origin alone does not enable failover; the cache behavior must use the origin group.",
+        "POST and PUT requests do not fail over through CloudFront origin failover.",
+        "CloudFront does not permanently switch to the secondary after one failed request."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "primary origin returns a configured error",
+        "secondary origin for cached content",
+        "fail over on a cache miss",
+        "OPTIONS requests need origin failover"
+      ]
+    },
+    "es": {
+      "tldr": "Un origin group de CloudFront vincula un origen primario y uno secundario a un cache behavior. Ante un cache miss, CloudFront puede enviar una solicitud elegible al origen secundario si el primario devuelve un código de error configurado o presenta una falla de conexión o timeout que cumpla las condiciones.",
+      "whenToUse": [
+        "El contenido en caché debe seguir disponible si falla su origen primario.",
+        "La distribución tiene dos orígenes y normalmente debe usar uno como primario.",
+        "Ciertos errores del origen primario deben activar una alternativa sin cambiar la URL del usuario."
+      ],
+      "keyFacts": [
+        "La distribución necesita al menos dos orígenes; crea un origin group y asígnalo al cache behavior correspondiente.",
+        "El failover solo aplica a GET, HEAD y OPTIONS; además, OPTIONS debe estar configurado como cached HTTP method.",
+        "Los códigos de failover disponibles son 400, 403, 404, 416, 429, 500, 502, 503 y 504.",
+        "Una falla de conexión puede activar failover si seleccionas 503; un timeout del origen primario puede activarlo si seleccionas 504.",
+        "Los cache hits se sirven sin contactar a ningún origen; para cada solicitud elegible que llega al origen, CloudFront intenta primero con el primario, aunque una solicitud anterior haya usado el secundario."
+      ],
+      "gotchas": [
+        "Agregar un segundo origen no basta: el cache behavior debe usar el origin group.",
+        "Las solicitudes POST y PUT no usan CloudFront origin failover.",
+        "CloudFront no cambia permanentemente al secundario después de una falla."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "primary origin returns a configured error",
+        "secondary origin for cached content",
+        "fail over on a cache miss",
+        "OPTIONS requests need origin failover"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudfront-origin-failover--ef8c0b5e",
+      "conceptId": "cloudfront-origin-failover",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retailer uses CloudFront to serve a catalog from a primary origin and has placed a copy at a secondary origin. Its application makes OPTIONS requests for catalog paths, and the team wants an uncached OPTIONS request to reach the secondary if the primary returns HTTP 502. Both origins are already members of an origin group assigned to the catalog cache behavior. Which configuration meets the failover requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Include OPTIONS in cached HTTP methods and select 504, but not 502, as a failover code.",
+          "correct": false,
+          "why": "The stated primary response is 502, which will not trigger failover unless 502 is selected."
+        },
+        {
+          "id": "B",
+          "text": "Select 502 as a failover code and include OPTIONS in the cache behavior's cached HTTP methods.",
+          "correct": true,
+          "why": "CloudFront can fail over an OPTIONS request on a configured 502 only when OPTIONS is a cached HTTP method."
+        },
+        {
+          "id": "C",
+          "text": "Select 502 as a failover code and allow OPTIONS as a viewer method without adding it to cached HTTP methods.",
+          "correct": false,
+          "why": "CloudFront will not fail over OPTIONS unless OPTIONS is configured as a cached HTTP method."
+        },
+        {
+          "id": "D",
+          "text": "Select 502 as a failover code and configure a custom error page for the primary origin instead of caching OPTIONS.",
+          "correct": false,
+          "why": "A custom error page does not replace the cached-HTTP-method requirement for OPTIONS failover."
+        }
+      ],
+      "explanation": "Two details decide this case: the primary returns 502, and the viewer request uses OPTIONS. Select 502 among the origin group's failover codes and configure OPTIONS as a cached HTTP method for the cache behavior. Allowing OPTIONS without caching it is insufficient for CloudFront origin failover, even though the origin group is already assigned.",
+      "keywordCues": [
+        "uncached OPTIONS request",
+        "primary returns HTTP 502",
+        "origin group assigned to the catalog cache behavior"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista usa CloudFront para entregar un catálogo desde un origen primario y mantiene una copia en un origen secundario. Su aplicación hace solicitudes OPTIONS a rutas del catálogo, y el equipo quiere que una solicitud OPTIONS no almacenada en caché llegue al secundario si el primario devuelve HTTP 502. Ambos orígenes ya pertenecen a un origin group asignado al cache behavior del catálogo. ¿Qué configuración cumple el requisito de failover?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Incluye OPTIONS en cached HTTP methods y selecciona 504, pero no 502, como código de failover.",
+            "why": "El primario devuelve 502, que no activará failover si no seleccionas ese código."
+          },
+          {
+            "id": "B",
+            "text": "Selecciona 502 como código de failover e incluye OPTIONS en los cached HTTP methods del cache behavior.",
+            "why": "CloudFront puede realizar failover para OPTIONS ante un 502 configurado solo si OPTIONS es un cached HTTP method."
+          },
+          {
+            "id": "C",
+            "text": "Selecciona 502 como código de failover y permite OPTIONS como método del usuario sin agregarlo a cached HTTP methods.",
+            "why": "CloudFront no realiza failover para OPTIONS si no lo configuras como cached HTTP method."
+          },
+          {
+            "id": "D",
+            "text": "Selecciona 502 como código de failover y configura una custom error page para el origen primario en lugar de almacenar OPTIONS en caché.",
+            "why": "Una custom error page no sustituye el requisito de configurar OPTIONS como cached HTTP method para failover."
+          }
+        ],
+        "explanation": "Hay dos detalles decisivos: el primario devuelve 502 y la solicitud utiliza OPTIONS. Selecciona 502 entre los códigos de failover del origin group y configura OPTIONS como cached HTTP method del cache behavior. Permitir OPTIONS sin incluirlo entre los métodos almacenados en caché no basta para CloudFront origin failover, aunque el grupo ya esté asignado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-origin-failover--791fb73a",
+      "conceptId": "cloudfront-origin-failover",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum serves exhibit images through a CloudFront distribution backed by an S3 bucket. It has prepared a second origin containing the same images, and wants uncached requests to use that origin if the primary returns HTTP 503. The museum wants viewers to keep using the same distribution. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add the second origin to the distribution and leave the image cache behavior pointed at the primary origin.",
+          "correct": false,
+          "why": "CloudFront will not use the second origin for this cache behavior merely because it exists."
+        },
+        {
+          "id": "B",
+          "text": "Create an origin group with the image bucket as primary and the second origin as secondary, select 503 for failover, and assign the group to the image cache behavior.",
+          "correct": true,
+          "why": "The cache behavior will use the origin group to retry eligible requests against the secondary when the primary returns 503."
+        },
+        {
+          "id": "C",
+          "text": "Create the origin group and select 503 for failover, but keep the image cache behavior pointed directly at the primary origin.",
+          "correct": false,
+          "why": "The origin group cannot perform failover for requests routed by a cache behavior that does not use it."
+        },
+        {
+          "id": "D",
+          "text": "Point the image cache behavior directly at the second origin and retain the original bucket as another origin.",
+          "correct": false,
+          "why": "This makes the second origin the normal destination rather than using it only when the primary returns 503."
+        }
+      ],
+      "explanation": "The deciding requirements are fallback on HTTP 503 and continued use of the existing CloudFront distribution. Configure both origins in an origin group, select 503, and assign that group to the image cache behavior. Simply adding an origin—or creating a group without assigning it to the behavior—does not make requests use failover.",
+      "keywordCues": [
+        "uncached requests",
+        "if the primary returns HTTP 503",
+        "same distribution",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html"
+      ],
+      "es": {
+        "stem": "Un museo entrega imágenes de exhibiciones mediante una distribución de CloudFront respaldada por un bucket de S3. Ya preparó un segundo origen con las mismas imágenes y quiere que las solicitudes no almacenadas en caché lo usen si el primario devuelve HTTP 503. Los visitantes deben seguir usando la misma distribución. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega el segundo origen a la distribución y deja el cache behavior de las imágenes apuntando al primario.",
+            "why": "CloudFront no usará el segundo origen para ese cache behavior solo porque exista."
+          },
+          {
+            "id": "B",
+            "text": "Crea un origin group con el bucket de imágenes como primario y el segundo origen como secundario, selecciona 503 para failover y asigna el grupo al cache behavior de las imágenes.",
+            "why": "El cache behavior usará el origin group para reintentar solicitudes elegibles en el secundario cuando el primario devuelva 503."
+          },
+          {
+            "id": "C",
+            "text": "Crea el origin group y selecciona 503 para failover, pero deja el cache behavior de las imágenes apuntando directamente al primario.",
+            "why": "El origin group no puede realizar failover para solicitudes de un cache behavior que no lo utiliza."
+          },
+          {
+            "id": "D",
+            "text": "Apunta el cache behavior de las imágenes directamente al segundo origen y conserva el bucket original como otro origen.",
+            "why": "Así, el segundo origen recibe las solicitudes normalmente en lugar de usarse solo cuando el primario devuelve 503."
+          }
+        ],
+        "explanation": "Lo decisivo es usar el origen alternativo cuando se reciba HTTP 503 y conservar la distribución de CloudFront. Configura ambos orígenes en un origin group, selecciona 503 y asigna el grupo al cache behavior de las imágenes. Agregar un origen, o crear el grupo sin asignarlo al comportamiento, no activa failover para esas solicitudes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudfront-origin-failover--r0",
+      "conceptId": "cloudfront-origin-failover",
+      "kind": "recall",
+      "prompt": "How would you keep CloudFront-served images available when the primary origin returns HTTP 503 on a cache miss?",
+      "promptEs": "¿Cómo mantendrías disponibles imágenes entregadas por CloudFront si el origen primario devuelve HTTP 503 ante un cache miss?",
+      "idealAnswer": "Create an origin group with the image origins as primary and secondary, select 503 as a failover code, and assign the group to the image cache behavior. For an eligible request on a cache miss, CloudFront tries the primary first and uses the secondary if the primary returns that code.",
+      "rubric": [
+        "Names a CloudFront origin group with primary and secondary origins.",
+        "Selects 503 as a failover code.",
+        "Assigns the group to the relevant cache behavior and explains primary-first fallback on a cache miss."
+      ]
+    }
+  ]
+}

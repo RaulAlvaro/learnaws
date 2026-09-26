@@ -1,0 +1,399 @@
+{
+  "conceptId": "event-driven-architecture",
+  "card": {
+    "en": {
+      "tldr": "Event-driven architectures let producers emit events that independent consumers process asynchronously. Choose this pattern when components must scale at different rates or new consumers must be added without changing the producer; reconsider it when consistent, very low latency is essential.",
+      "whenToUse": [
+        "Incoming work is unpredictable, and downstream processing is slower than event production.",
+        "New consumers should react to events without the producer knowing about them.",
+        "An S3 upload or another service event should start a narrow Lambda task."
+      ],
+      "keyFacts": [
+        "Amazon S3 can invoke Lambda directly when an object is uploaded.",
+        "With an Amazon SQS event source mapping, Lambda polls the queue and invokes the function.",
+        "Amazon SQS can buffer messages between components that process at different rates.",
+        "Amazon EventBridge rules can filter and route events based on their content.",
+        "Asynchronous workflows commonly involve variable latency and eventual consistency."
+      ],
+      "gotchas": [
+        "A chain of synchronous Lambda-to-Lambda calls adds cost and complexity instead of providing loose coupling.",
+        "A function that writes to the same S3 resource whose events invoke it can create a recursive loop.",
+        "Event-driven processing is not a good default for workloads requiring consistent, extremely low latency."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "producers must not know their consumers",
+        "incoming orders arrive faster than payment processing",
+        "route events based on event content",
+        "process each uploaded object asynchronously"
+      ]
+    },
+    "es": {
+      "tldr": "Las arquitecturas event-driven permiten que los productores emitan eventos que consumidores independientes procesan de forma asíncrona. Elige este patrón cuando los componentes deban escalar a ritmos distintos o cuando necesites agregar consumidores sin cambiar al productor; reconsidera su uso si es indispensable una latencia muy baja y constante.",
+      "whenToUse": [
+        "La cantidad de trabajo entrante es impredecible y el procesamiento posterior es más lento que la producción de eventos.",
+        "Necesitas agregar consumidores sin que el productor conozca sus implementaciones.",
+        "Una carga en S3 u otro evento de servicio debe iniciar una tarea específica en Lambda."
+      ],
+      "keyFacts": [
+        "Amazon S3 puede invocar Lambda directamente cuando se carga un objeto.",
+        "Con un event source mapping de Amazon SQS, Lambda consulta la cola e invoca la función.",
+        "Amazon SQS puede almacenar mensajes temporalmente entre componentes que procesan a diferentes ritmos.",
+        "Las reglas de Amazon EventBridge pueden filtrar y dirigir eventos según su contenido.",
+        "Los flujos asíncronos suelen presentar latencia variable y consistencia eventual."
+      ],
+      "gotchas": [
+        "Una cadena de llamadas síncronas entre funciones Lambda agrega costo y complejidad en lugar de facilitar el loose coupling.",
+        "Si una función escribe en el mismo recurso de S3 cuyos eventos la invocan, puede crear un ciclo recursivo.",
+        "El procesamiento event-driven no es la opción predeterminada adecuada si se requiere latencia extremadamente baja y constante."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "producers must not know their consumers",
+        "incoming orders arrive faster than payment processing",
+        "route events based on event content",
+        "process each uploaded object asynchronously"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/lambda/latest/operatorguide/event-driven-architectures.html",
+      "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/introduction.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "event-driven-architecture--0706ddcb",
+      "conceptId": "event-driven-architecture",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics platform publishes shipment status changes for internal applications. Different applications need different event types, and additional teams expect to subscribe later without requiring changes to the shipment producer. Which solution meets these requirements with the LEAST coupling?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Combine the producer and current consumers into one Lambda function with separate code paths.",
+          "correct": false,
+          "why": "A single function ties consumer changes to the producer and makes future extensions harder."
+        },
+        {
+          "id": "B",
+          "text": "Have the producer invoke each current consumer's Lambda function directly when a shipment changes.",
+          "correct": false,
+          "why": "The producer must know and be updated for each consumer, including future ones."
+        },
+        {
+          "id": "C",
+          "text": "Publish shipment events to Amazon EventBridge and use rules to route them by event content.",
+          "correct": true,
+          "why": "EventBridge rules route relevant events without requiring the producer to know its consumers."
+        },
+        {
+          "id": "D",
+          "text": "Have every consumer poll the shipment application for changes it needs.",
+          "correct": false,
+          "why": "Consumer polling adds integration work and does not use events to route relevant changes."
+        }
+      ],
+      "explanation": "The producer must remain unaware of both current and future consumers, while consumers need events selected by content. Amazon EventBridge rules provide content-based filtering and routing for this arrangement. Direct Lambda invocation can process an event, but it requires the producer to know each destination.",
+      "keywordCues": [
+        "Different applications need different event types",
+        "additional teams expect to subscribe later",
+        "without requiring changes to the shipment producer"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/operatorguide/event-driven-architectures.html",
+        "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/introduction.html"
+      ],
+      "es": {
+        "stem": "Una plataforma logística publica cambios en el estado de los envíos para aplicaciones internas. Cada aplicación necesita distintos tipos de eventos, y otros equipos esperan suscribirse más adelante sin pedir cambios al productor de envíos. ¿Qué solución cumple estos requisitos con el LEAST coupling?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Combina el productor y los consumidores actuales en una función Lambda con distintas rutas de código.",
+            "why": "Una sola función vincula los cambios de los consumidores con el productor y dificulta las futuras ampliaciones."
+          },
+          {
+            "id": "B",
+            "text": "Haz que el productor invoque directamente la función Lambda de cada consumidor actual cuando cambie un envío.",
+            "why": "El productor debe conocer a cada consumidor y modificarse cuando se agreguen otros."
+          },
+          {
+            "id": "C",
+            "text": "Publica los eventos de envío en Amazon EventBridge y usa reglas para dirigirlos según el contenido del evento.",
+            "why": "Las reglas de EventBridge dirigen los eventos relevantes sin que el productor conozca a los consumidores."
+          },
+          {
+            "id": "D",
+            "text": "Haz que cada consumidor consulte periódicamente la aplicación de envíos para encontrar los cambios que necesita.",
+            "why": "Las consultas periódicas agregan trabajo de integración y no aprovechan el enrutamiento por eventos."
+          }
+        ],
+        "explanation": "El productor no debe conocer a los consumidores actuales ni futuros, y cada consumidor necesita eventos seleccionados por contenido. Las reglas de Amazon EventBridge permiten filtrar y dirigir eventos según su contenido. La invocación directa de Lambda puede procesar un evento, pero exige que el productor conozca cada destino."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "event-driven-architecture--aa4812ea",
+      "conceptId": "event-driven-architecture",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A nonprofit receives donation records in bursts, but its validation task processes records at a steadier pace. Records are already being placed in an Amazon SQS queue. The team wants Lambda to run the validation task as messages become available without writing a queue-polling application. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the SQS queue with direct Amazon S3 upload events that invoke the validator.",
+          "correct": false,
+          "why": "S3 events do not consume the records already buffered in the required SQS queue."
+        },
+        {
+          "id": "B",
+          "text": "Have the donation producer invoke the validator Lambda function synchronously before placing each record in SQS.",
+          "correct": false,
+          "why": "Synchronous validation makes the producer wait and bypasses the queue's buffering role."
+        },
+        {
+          "id": "C",
+          "text": "Schedule a Lambda function to inspect the SQS queue and invoke the validator for messages it finds.",
+          "correct": false,
+          "why": "Custom scheduled inspection adds polling logic that Lambda event source mapping already handles."
+        },
+        {
+          "id": "D",
+          "text": "Configure an Amazon SQS event source mapping for the validator Lambda function.",
+          "correct": true,
+          "why": "Lambda handles polling SQS and invoking the validator as queued messages are retrieved."
+        }
+      ],
+      "explanation": "The records are already in SQS, and the team specifically wants to avoid maintaining polling code. An SQS event source mapping lets Lambda retrieve messages and invoke the validation function. A scheduled function could inspect the queue, but it adds application-managed polling rather than using Lambda's supported integration.",
+      "keywordCues": [
+        "Records are already being placed in an Amazon SQS queue",
+        "without writing a queue-polling application"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/operatorguide/event-driven-architectures.html",
+        "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/introduction.html"
+      ],
+      "es": {
+        "stem": "Una organización sin fines de lucro recibe registros de donaciones en ráfagas, pero su tarea de validación los procesa a un ritmo más constante. Los registros ya se colocan en una cola de Amazon SQS. El equipo quiere que Lambda ejecute la validación cuando haya mensajes disponibles, sin escribir una aplicación que consulte la cola. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplaza la cola de SQS por eventos directos de carga en Amazon S3 que invoquen al validador.",
+            "why": "Los eventos de S3 no consumen los registros que ya están en la cola de SQS requerida."
+          },
+          {
+            "id": "B",
+            "text": "Haz que el productor de donaciones invoque sincrónicamente la función Lambda de validación antes de colocar cada registro en SQS.",
+            "why": "La validación síncrona hace esperar al productor y evita aprovechar la cola como almacenamiento temporal."
+          },
+          {
+            "id": "C",
+            "text": "Programa una función Lambda para que inspeccione la cola de SQS e invoque al validador con los mensajes que encuentre.",
+            "why": "La inspección programada agrega lógica de consulta que un event source mapping de Lambda ya gestiona."
+          },
+          {
+            "id": "D",
+            "text": "Configura un event source mapping de Amazon SQS para la función Lambda de validación.",
+            "why": "Lambda se encarga de consultar SQS e invocar al validador al recuperar los mensajes."
+          }
+        ],
+        "explanation": "Los registros ya están en SQS y el equipo quiere evitar mantener código de consulta. Un event source mapping de SQS permite que Lambda recupere mensajes e invoque la función de validación. Una función programada podría inspeccionar la cola, pero agregaría lógica propia en lugar de usar la integración admitida por Lambda."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "event-driven-architecture--100f4a60",
+      "conceptId": "event-driven-architecture",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company receives unpredictable bursts of image uploads in an Amazon S3 bucket. Each new image needs a short metadata-extraction task, after which a slower cataloging service can process the metadata asynchronously. The team wants managed event integrations and must avoid a design in which the extraction function triggers itself. Which TWO design choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have the extraction function invoke the cataloging Lambda function synchronously for every upload.",
+          "correct": false,
+          "why": "Synchronous invocation makes extraction wait for the slower cataloging task."
+        },
+        {
+          "id": "B",
+          "text": "Send extracted metadata to Amazon SQS and use an event source mapping for the cataloging Lambda function.",
+          "correct": true,
+          "why": "SQS buffers work for the slower consumer, and Lambda manages polling through the event source mapping."
+        },
+        {
+          "id": "C",
+          "text": "Configure S3 upload events to invoke a focused metadata-extraction Lambda function.",
+          "correct": true,
+          "why": "S3 can directly invoke Lambda for each upload without a custom upload poller."
+        },
+        {
+          "id": "D",
+          "text": "Have the extraction function write its output to the same S3 location that triggers it.",
+          "correct": false,
+          "why": "Writing to its own triggering S3 resource risks recursive invocations."
+        },
+        {
+          "id": "E",
+          "text": "Run a scheduled Lambda function that repeatedly lists the bucket to discover new uploads.",
+          "correct": false,
+          "why": "Custom discovery polling adds work when S3 can emit upload events directly."
+        }
+      ],
+      "explanation": "The design needs an event when an image arrives and a buffer between fast extraction and slower cataloging. S3 can directly invoke a focused Lambda function, and an SQS event source mapping lets Lambda consume buffered metadata for cataloging. Writing extraction output to the triggering S3 resource risks a recursive loop; synchronous cataloging would instead make extraction wait.",
+      "keywordCues": [
+        "unpredictable bursts of image uploads",
+        "slower cataloging service",
+        "process the metadata asynchronously",
+        "avoid a design in which the extraction function triggers itself"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/operatorguide/event-driven-architectures.html",
+        "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/introduction.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios recibe ráfagas impredecibles de imágenes en un bucket de Amazon S3. Cada imagen nueva necesita una tarea breve de extracción de metadatos; después, un servicio de catalogación más lento puede procesarlos de forma asíncrona. El equipo quiere integraciones de eventos administradas y debe evitar que la función de extracción se active a sí misma. ¿Qué DOS decisiones de diseño cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Haz que la función de extracción invoque sincrónicamente la función Lambda de catalogación por cada carga.",
+            "why": "La invocación síncrona obliga a la extracción a esperar la tarea de catalogación más lenta."
+          },
+          {
+            "id": "B",
+            "text": "Envía los metadatos extraídos a Amazon SQS y usa un event source mapping para la función Lambda de catalogación.",
+            "why": "SQS almacena temporalmente el trabajo del consumidor más lento, y Lambda gestiona la consulta mediante el event source mapping."
+          },
+          {
+            "id": "C",
+            "text": "Configura los eventos de carga de S3 para que invoquen una función Lambda específica de extracción de metadatos.",
+            "why": "S3 puede invocar directamente a Lambda por cada carga sin que tengas que crear un proceso de consulta."
+          },
+          {
+            "id": "D",
+            "text": "Haz que la función de extracción escriba el resultado en la misma ubicación de S3 que la activa.",
+            "why": "Escribir en el recurso de S3 que la activa puede causar invocaciones recursivas."
+          },
+          {
+            "id": "E",
+            "text": "Ejecuta una función Lambda programada que enumere repetidamente el bucket para descubrir cargas nuevas.",
+            "why": "Las consultas periódicas agregan trabajo cuando S3 puede emitir eventos de carga directamente."
+          }
+        ],
+        "explanation": "El diseño necesita un evento cuando llega una imagen y un almacenamiento temporal entre la extracción rápida y la catalogación más lenta. S3 puede invocar directamente una función Lambda específica, y un event source mapping de SQS permite que Lambda consuma los metadatos almacenados para catalogarlos. Escribir el resultado en el recurso de S3 que activa la extracción puede crear un ciclo recursivo; la catalogación síncrona haría que la extracción esperara."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "event-driven-architecture--b1669a6c",
+      "conceptId": "event-driven-architecture",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company has one Lambda function that handles order acceptance, payment requests, and notifications. Order submissions spike when sales open, while payment processing proceeds more slowly. The company wants teams to update these tasks independently without making order acceptance wait for payment. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Separate the tasks into focused Lambda functions and place accepted orders in an Amazon SQS queue for the payment consumer.",
+          "correct": true,
+          "why": "Focused functions can change independently, and SQS buffers orders for the slower payment consumer."
+        },
+        {
+          "id": "B",
+          "text": "Separate the tasks into Lambda functions and have the acceptance function invoke the payment function synchronously.",
+          "correct": false,
+          "why": "A synchronous invocation still makes acceptance wait for payment and adds Lambda-to-Lambda coupling."
+        },
+        {
+          "id": "C",
+          "text": "Run the acceptance and payment tasks in one application process that scales vertically during sales.",
+          "correct": false,
+          "why": "A shared process does not give the tasks independent scaling or independent updates."
+        },
+        {
+          "id": "D",
+          "text": "Keep the single Lambda function and increase its resources to process order acceptance and payment together.",
+          "correct": false,
+          "why": "Increasing resources does not separate the tasks or stop order acceptance from waiting on payment."
+        }
+      ],
+      "explanation": "The deciding requirements are independent updates and an acceptance path that does not wait for slower payment work. Focused Lambda functions separate responsibilities, while Amazon SQS buffers orders until the payment consumer processes them. Synchronous Lambda-to-Lambda calls retain the wait and introduce the cost and complexity of a pattern AWS advises against.",
+      "keywordCues": [
+        "payment processing proceeds more slowly",
+        "update these tasks independently",
+        "without making order acceptance wait for payment"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/operatorguide/event-driven-architectures.html",
+        "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/introduction.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas tiene una sola función Lambda que acepta pedidos, solicita pagos y envía notificaciones. Los pedidos aumentan bruscamente cuando comienza una venta, mientras que los pagos se procesan más despacio. La empresa quiere que los equipos actualicen estas tareas de forma independiente, sin que la aceptación de pedidos espere al pago. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Separa las tareas en funciones Lambda específicas y coloca los pedidos aceptados en una cola de Amazon SQS para el consumidor de pagos.",
+            "why": "Las funciones específicas pueden cambiar por separado, y SQS almacena los pedidos temporalmente para el consumidor más lento."
+          },
+          {
+            "id": "B",
+            "text": "Separa las tareas en funciones Lambda y haz que la función de aceptación invoque sincrónicamente a la de pagos.",
+            "why": "La invocación síncrona hace que la aceptación siga esperando y acopla las funciones."
+          },
+          {
+            "id": "C",
+            "text": "Ejecuta la aceptación y los pagos en un solo proceso de aplicación que escale verticalmente durante las ventas.",
+            "why": "Un proceso compartido no permite escalar ni actualizar las tareas de forma independiente."
+          },
+          {
+            "id": "D",
+            "text": "Mantén una sola función Lambda y aumenta sus recursos para que procese juntos la aceptación y el pago.",
+            "why": "Aumentar los recursos no separa las tareas ni evita que la aceptación espere al pago."
+          }
+        ],
+        "explanation": "Lo decisivo es poder actualizar las tareas por separado y evitar que la aceptación espere al procesamiento de pagos. Las funciones Lambda específicas separan responsabilidades, y Amazon SQS almacena los pedidos hasta que el consumidor de pagos los procese. Las llamadas síncronas entre funciones Lambda conservan la espera y añaden el costo y la complejidad de un patrón que AWS recomienda evitar."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "event-driven-architecture--r0",
+      "conceptId": "event-driven-architecture",
+      "kind": "recall",
+      "prompt": "Uploads arrive in bursts, and downstream processing is slower. How would you connect S3, Lambda, and SQS, and why?",
+      "promptEs": "Las cargas llegan en ráfagas y el procesamiento posterior es más lento. ¿Cómo conectarías S3, Lambda y SQS, y por qué?",
+      "idealAnswer": "Let S3 upload events invoke a focused Lambda function, then send work to an SQS queue. Lambda can consume that queue through an event source mapping, while SQS buffers work for the slower downstream task.",
+      "rubric": [
+        "S3 upload events directly invoke a focused Lambda function.",
+        "The function sends downstream work to SQS to buffer bursts.",
+        "An SQS event source mapping lets Lambda retrieve queued messages for the consumer."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,357 @@
+{
+  "conceptId": "fsx-windows-file-server",
+  "card": {
+    "en": {
+      "tldr": "Amazon FSx for Windows File Server provides fully managed Windows file shares over SMB, with Microsoft Active Directory authentication and Windows file and folder ACLs. Choose it when Windows applications must retain these behaviors; choose Multi-AZ when the share must remain available through an Availability Zone failure.",
+      "whenToUse": [
+        "Windows applications need shared SMB file access without managing file servers.",
+        "Users must authenticate through Microsoft Active Directory and retain file- and folder-level Windows ACLs.",
+        "A Windows file share needs failover across Availability Zones."
+      ],
+      "keyFacts": [
+        "Clients access shares over SMB; a file system includes a default share named \\share.",
+        "Users are authenticated with Microsoft Active Directory, and Windows ACLs control access to files and folders.",
+        "Multi-AZ maintains a standby file server in a separate Availability Zone; Single-AZ addresses component failures within one Availability Zone.",
+        "FSx manages Windows software updates, hardware failure detection and remediation, and backups.",
+        "HDD suits workloads such as home directories and departmental shares; SSD suits more latency-sensitive workloads."
+      ],
+      "gotchas": [
+        "A shared file service is not automatically a Windows-compatible SMB file service.",
+        "Single-AZ component protection does not provide failover across Availability Zones.",
+        "IAM policies control FSx API access; Windows ACLs control access to files and folders."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS is a shared NFS file system; FSx for Windows supplies native Windows SMB shares and Windows ACLs."
+        },
+        {
+          "concept": "Amazon S3",
+          "difference": "S3 stores objects, whereas FSx for Windows presents network file shares over SMB."
+        },
+        {
+          "concept": "Amazon EBS",
+          "difference": "EBS provides block volumes, not managed SMB shares with Active Directory authentication."
+        }
+      ],
+      "examCues": [
+        "existing Windows applications require SMB shares",
+        "preserve Windows file and folder ACLs",
+        "authenticate share users with Microsoft Active Directory",
+        "Windows share must survive an Availability Zone failure"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon FSx for Windows File Server ofrece recursos compartidos de Windows totalmente administrados mediante SMB, con autenticación de Microsoft Active Directory y Windows ACLs para archivos y carpetas. Elígelo cuando las aplicaciones de Windows deban conservar estas funciones; elige Multi-AZ cuando el recurso deba seguir disponible ante una falla de una Availability Zone.",
+      "whenToUse": [
+        "Tus aplicaciones de Windows necesitan acceso compartido a archivos mediante SMB sin que administres servidores de archivos.",
+        "Los usuarios deben autenticarse con Microsoft Active Directory y conservar Windows ACLs para archivos y carpetas.",
+        "Un recurso compartido de Windows necesita conmutación por error entre Availability Zones."
+      ],
+      "keyFacts": [
+        "Los clientes acceden a los recursos compartidos mediante SMB; cada sistema de archivos incluye uno predeterminado llamado \\share.",
+        "Microsoft Active Directory autentica a los usuarios y Windows ACLs controla el acceso a archivos y carpetas.",
+        "Multi-AZ mantiene un servidor de archivos en espera en otra Availability Zone; Single-AZ atiende fallas de componentes dentro de una sola Availability Zone.",
+        "FSx administra las actualizaciones de Windows, la detección y resolución de fallas de hardware y los respaldos.",
+        "HDD es adecuado para directorios personales y recursos departamentales; SSD es adecuado para cargas más sensibles a la latencia."
+      ],
+      "gotchas": [
+        "Un servicio de archivos compartidos no necesariamente ofrece compatibilidad con SMB de Windows.",
+        "La protección de componentes de Single-AZ no proporciona conmutación por error entre Availability Zones.",
+        "Las políticas de IAM controlan el acceso a la API de FSx; Windows ACLs controlan el acceso a archivos y carpetas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS es un sistema de archivos compartido mediante NFS; FSx for Windows ofrece recursos SMB nativos de Windows y Windows ACLs."
+        },
+        {
+          "concept": "Amazon S3",
+          "difference": "S3 almacena objetos; FSx for Windows presenta recursos compartidos de archivos por SMB."
+        },
+        {
+          "concept": "Amazon EBS",
+          "difference": "EBS proporciona volúmenes de bloques, no recursos SMB administrados con autenticación de Microsoft Active Directory."
+        }
+      ],
+      "examCues": [
+        "existing Windows applications require SMB shares",
+        "preserve Windows file and folder ACLs",
+        "authenticate share users with Microsoft Active Directory",
+        "Windows share must survive an Availability Zone failure"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "fsx-windows-file-server--b8cb0a88",
+      "conceptId": "fsx-windows-file-server",
+      "secondaryConcepts": [
+        "s3-fundamentals",
+        "efs-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A legal services firm is moving a document application to Windows EC2 instances. Its staff must keep using shared SMB paths, and existing permissions must remain enforceable at the file and folder level through Microsoft Active Directory. Which storage solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the documents in Amazon S3 and grant users access with bucket policies.",
+          "correct": false,
+          "why": "S3 bucket policies do not provide the required SMB shares and Windows file and folder ACLs."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon FSx for Windows File Server joined to Microsoft Active Directory.",
+          "correct": true,
+          "why": "FSx for Windows provides managed SMB shares, Active Directory authentication, and Windows file and folder ACLs."
+        },
+        {
+          "id": "C",
+          "text": "Attach an Amazon EBS volume to an application instance and store the documents there.",
+          "correct": false,
+          "why": "An EBS block volume does not itself provide a managed SMB share with Active Directory authentication."
+        },
+        {
+          "id": "D",
+          "text": "Create an Amazon EFS file system and mount it on the application instances.",
+          "correct": false,
+          "why": "EFS uses NFS rather than the required native Windows SMB shares and ACLs."
+        }
+      ],
+      "explanation": "The deciding requirements are shared SMB paths and Windows file and folder permissions authenticated through Microsoft Active Directory. FSx for Windows File Server supplies those features as a fully managed service. EFS is also managed shared file storage, but its NFS interface does not meet this application's Windows compatibility requirements.",
+      "keywordCues": [
+        "shared SMB paths",
+        "file and folder level",
+        "Microsoft Active Directory",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html"
+      ],
+      "es": {
+        "stem": "Un despacho jurídico está trasladando una aplicación documental a instancias EC2 con Windows. El personal debe seguir usando rutas SMB compartidas, y los permisos existentes deben seguir aplicándose a archivos y carpetas mediante Microsoft Active Directory. ¿Qué solución de almacenamiento cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Almacenar los documentos en Amazon S3 y dar acceso a los usuarios mediante políticas de bucket.",
+            "why": "Las políticas de bucket de S3 no proporcionan los recursos SMB ni Windows ACLs para archivos y carpetas que se requieren."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon FSx for Windows File Server unido a Microsoft Active Directory.",
+            "why": "FSx for Windows ofrece recursos SMB administrados, autenticación con Microsoft Active Directory y Windows ACLs para archivos y carpetas."
+          },
+          {
+            "id": "C",
+            "text": "Adjuntar un volumen Amazon EBS a una instancia de la aplicación y guardar allí los documentos.",
+            "why": "Un volumen de bloques EBS no proporciona por sí mismo un recurso SMB administrado con autenticación de Microsoft Active Directory."
+          },
+          {
+            "id": "D",
+            "text": "Crear un sistema de archivos Amazon EFS y montarlo en las instancias de la aplicación.",
+            "why": "EFS usa NFS en lugar de los recursos SMB nativos de Windows y Windows ACLs requeridos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son las rutas SMB compartidas y los permisos de Windows para archivos y carpetas con autenticación de Microsoft Active Directory. FSx for Windows File Server ofrece estas funciones como servicio totalmente administrado. EFS también ofrece archivos compartidos administrados, pero su interfaz NFS no cumple los requisitos de compatibilidad con Windows de esta aplicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fsx-windows-file-server--633a1621",
+      "conceptId": "fsx-windows-file-server",
+      "secondaryConcepts": [
+        "efs-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A regional clinic uses a Windows application that writes patient forms to an SMB share. The application must continue using Windows ACLs, and the share must remain available if an Availability Zone fails. The clinic does not want to operate its own standby file server. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Single-AZ Amazon FSx for Windows File Server file system.",
+          "correct": false,
+          "why": "Single-AZ addresses component failures within one Availability Zone but does not provide cross-AZ failover."
+        },
+        {
+          "id": "B",
+          "text": "Use a Multi-AZ Amazon FSx for Windows File Server file system.",
+          "correct": true,
+          "why": "Multi-AZ FSx for Windows provides the Windows share features and maintains a standby file server in another Availability Zone."
+        },
+        {
+          "id": "C",
+          "text": "Store the forms on an Amazon EBS volume attached to the primary application instance.",
+          "correct": false,
+          "why": "An attached block volume is not a managed, cross-AZ SMB file share."
+        },
+        {
+          "id": "D",
+          "text": "Use an Amazon EFS file system shared by the application instances across Availability Zones.",
+          "correct": false,
+          "why": "EFS offers shared NFS storage but not the required native Windows SMB share with Windows ACLs."
+        }
+      ],
+      "explanation": "The application needs native Windows file-sharing behavior as well as failover across Availability Zones. A Multi-AZ FSx for Windows file system meets both needs and maintains the standby file server. Single-AZ FSx has the right file interface, but its component protection does not satisfy the cross-AZ failure requirement.",
+      "keywordCues": [
+        "SMB share",
+        "Windows ACLs",
+        "if an Availability Zone fails",
+        "does not want to operate its own standby file server"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html"
+      ],
+      "es": {
+        "stem": "Una clínica regional usa una aplicación de Windows que escribe formularios de pacientes en un recurso SMB. La aplicación debe seguir usando Windows ACLs, y el recurso debe permanecer disponible si falla una Availability Zone. La clínica no quiere operar su propio servidor de archivos en espera. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un sistema de archivos Single-AZ de Amazon FSx for Windows File Server.",
+            "why": "Single-AZ atiende fallas de componentes dentro de una Availability Zone, pero no proporciona conmutación por error entre Availability Zones."
+          },
+          {
+            "id": "B",
+            "text": "Usar un sistema de archivos Multi-AZ de Amazon FSx for Windows File Server.",
+            "why": "Multi-AZ FSx for Windows ofrece las funciones del recurso compartido de Windows y mantiene un servidor de archivos en espera en otra Availability Zone."
+          },
+          {
+            "id": "C",
+            "text": "Guardar los formularios en un volumen Amazon EBS adjunto a la instancia principal de la aplicación.",
+            "why": "Un volumen de bloques adjunto no es un recurso de archivos SMB administrado con conmutación por error entre Availability Zones."
+          },
+          {
+            "id": "D",
+            "text": "Usar un sistema de archivos Amazon EFS compartido por las instancias de la aplicación entre Availability Zones.",
+            "why": "EFS ofrece almacenamiento NFS compartido, pero no el recurso SMB nativo de Windows con Windows ACLs requerido."
+          }
+        ],
+        "explanation": "La aplicación necesita tanto el comportamiento nativo de archivos compartidos de Windows como conmutación por error entre Availability Zones. Un sistema de archivos Multi-AZ de FSx for Windows satisface ambas necesidades y mantiene el servidor de archivos en espera. Single-AZ FSx ofrece la interfaz de archivos adecuada, pero su protección de componentes no cumple el requisito de una falla entre Availability Zones."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fsx-windows-file-server--ac4bb1f3",
+      "conceptId": "fsx-windows-file-server",
+      "secondaryConcepts": [
+        "efs-fundamentals",
+        "s3-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media agency is replacing a departmental Windows file server used for home directories and shared project folders. Users will continue to access the folders over SMB, but the workload is not latency-sensitive and the agency wants to avoid paying for performance it does not need. Which managed storage choice is MOST cost-effective for these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon FSx for Windows File Server with HDD storage.",
+          "correct": true,
+          "why": "FSx for Windows supplies the required SMB shares, and HDD is designed for home directories and departmental shares."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon EFS and organize the files into home-directory folders.",
+          "correct": false,
+          "why": "EFS does not provide the Windows SMB interface the users must keep using."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon FSx for Windows File Server with SSD storage.",
+          "correct": false,
+          "why": "SSD supports the SMB requirement but targets higher-performance, latency-sensitive workloads that this agency does not have."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon S3 with a prefix for each department.",
+          "correct": false,
+          "why": "S3 object prefixes do not provide the existing SMB file-share interface."
+        }
+      ],
+      "explanation": "The agency needs to preserve SMB access, so FSx for Windows is the relevant managed file service. The excerpt identifies HDD storage as suited to home directories and departmental shares, while SSD targets more performance-sensitive workloads. SSD would retain compatibility but would provision a performance-oriented storage type without a stated need for it.",
+      "keywordCues": [
+        "home directories and shared project folders",
+        "over SMB",
+        "not latency-sensitive",
+        "avoid paying for performance it does not need"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html"
+      ],
+      "es": {
+        "stem": "Una agencia de medios está reemplazando un servidor de archivos departamental de Windows que se usa para directorios personales y carpetas compartidas de proyectos. Los usuarios seguirán accediendo a las carpetas mediante SMB, pero la carga no es sensible a la latencia y la agencia quiere evitar pagar por rendimiento que no necesita. ¿Qué opción de almacenamiento administrado es la MOST cost-effective para estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon FSx for Windows File Server con almacenamiento HDD.",
+            "why": "FSx for Windows ofrece los recursos SMB requeridos, y HDD está diseñado para directorios personales y recursos departamentales."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon EFS y organizar los archivos en carpetas de directorios personales.",
+            "why": "EFS no proporciona la interfaz SMB de Windows que los usuarios deben conservar."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon FSx for Windows File Server con almacenamiento SSD.",
+            "why": "SSD cumple el requisito de SMB, pero está orientado a cargas de mayor rendimiento y sensibles a la latencia que esta agencia no tiene."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon S3 con un prefijo para cada departamento.",
+            "why": "Los prefijos de objetos de S3 no proporcionan la interfaz actual de recursos compartidos SMB."
+          }
+        ],
+        "explanation": "La agencia debe conservar el acceso SMB, por lo que FSx for Windows es el servicio administrado de archivos pertinente. La documentación indica que HDD es adecuado para directorios personales y recursos departamentales, mientras que SSD se orienta a cargas más sensibles al rendimiento. SSD conservaría la compatibilidad, pero aprovisionaría un tipo de almacenamiento orientado al rendimiento sin una necesidad indicada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "fsx-windows-file-server--r0",
+      "conceptId": "fsx-windows-file-server",
+      "kind": "recall",
+      "prompt": "A Windows application needs managed SMB shares, Active Directory authentication, and cross-AZ failover. What would you choose, and why?",
+      "promptEs": "Una aplicación de Windows necesita recursos SMB administrados, autenticación de Microsoft Active Directory y conmutación por error entre Availability Zones. ¿Qué elegirías y por qué?",
+      "idealAnswer": "Choose a Multi-AZ Amazon FSx for Windows File Server file system joined to Microsoft Active Directory. It provides managed Windows SMB shares and maintains a standby file server in a separate Availability Zone.",
+      "rubric": [
+        "Names Amazon FSx for Windows File Server.",
+        "Specifies Multi-AZ for cross-AZ failover.",
+        "Connects SMB access and Microsoft Active Directory authentication to the requirements."
+      ]
+    },
+    {
+      "id": "fsx-windows-file-server--r1",
+      "conceptId": "fsx-windows-file-server",
+      "kind": "why-not",
+      "prompt": "Why wouldn't Amazon EFS replace a Windows file share when an unchanged application requires SMB and Windows file ACLs?",
+      "promptEs": "¿Por qué Amazon EFS no reemplazaría un recurso compartido de Windows si una aplicación sin cambios requiere SMB y Windows ACLs?",
+      "idealAnswer": "EFS is shared file storage, but it uses NFS rather than the native Windows SMB interface required by the application. FSx for Windows File Server provides SMB shares and Windows file and folder ACLs.",
+      "rubric": [
+        "Identifies EFS as NFS-based shared file storage.",
+        "Explains that the application requires SMB and Windows ACLs.",
+        "Names FSx for Windows File Server as the fit."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,395 @@
+{
+  "conceptId": "multi-az-high-availability",
+  "card": {
+    "en": {
+      "tldr": "An AZ outage should not remove every healthy component of a workload. For a multi-tier application, place each required tier across at least two AZs and configure recovery or failover so traffic can use the remaining location.",
+      "whenToUse": [
+        "The application must remain available if an AZ fails.",
+        "A scenario asks you to remove single-location dependencies from a multi-tier workload.",
+        "Recovery must occur without waiting for an operator to rebuild components."
+      ],
+      "keyFacts": [
+        "Fault isolation limits a failure’s impact to a defined boundary.",
+        "Running a workload across multiple fault isolation boundaries can improve resilience.",
+        "The AWS reliability guidance recommends deploying workloads to multiple locations.",
+        "For components constrained to one location, the guidance recommends automating recovery.",
+        "Bulkhead architectures limit the scope of impact, but do not by themselves place a workload in multiple locations."
+      ],
+      "gotchas": [
+        "Spreading web servers across AZs is insufficient if the required database remains in one AZ.",
+        "A second AZ does not help traffic if the design cannot stop sending requests to unhealthy targets.",
+        "Automated recovery in one location does not meet a requirement to survive the loss of that location."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "survive the loss of an Availability Zone",
+        "no single-location dependency",
+        "route requests only to healthy targets",
+        "every application tier must remain available"
+      ]
+    },
+    "es": {
+      "tldr": "Una interrupción de una AZ no debería eliminar todos los componentes sanos de una carga de trabajo. Para una aplicación de varias capas, coloca cada capa necesaria en al menos dos AZ y configura la recuperación o la conmutación por error para usar la ubicación restante.",
+      "whenToUse": [
+        "La aplicación debe seguir disponible si falla una AZ.",
+        "El escenario te pide eliminar dependencias de una sola ubicación en una carga de trabajo de varias capas.",
+        "La recuperación debe ocurrir sin esperar a que una persona reconstruya componentes."
+      ],
+      "keyFacts": [
+        "El aislamiento de fallas limita el impacto de una falla a un límite definido.",
+        "Ejecutar una carga de trabajo en varios límites de aislamiento puede mejorar su resiliencia.",
+        "La guía de confiabilidad de AWS recomienda implementar las cargas de trabajo en varias ubicaciones.",
+        "Para componentes restringidos a una sola ubicación, la guía recomienda automatizar la recuperación.",
+        "Una arquitectura bulkhead limita el alcance del impacto, pero por sí sola no distribuye la carga de trabajo entre varias ubicaciones."
+      ],
+      "gotchas": [
+        "Distribuir servidores web entre AZ no basta si la base de datos necesaria permanece en una sola AZ.",
+        "Una segunda AZ no ayuda al tráfico si el diseño sigue enviando solicitudes a destinos no sanos.",
+        "La recuperación automatizada en una ubicación no cumple un requisito de sobrevivir a la pérdida de esa ubicación."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "survive the loss of an Availability Zone",
+        "no single-location dependency",
+        "route requests only to healthy targets",
+        "every application tier must remain available"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "multi-az-high-availability--5144e929",
+      "conceptId": "multi-az-high-availability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A small manufacturer is redesigning an order portal that uses EC2 application instances and an Amazon RDS database. It must accept orders during the loss of either AZ, and the team cannot perform a manual recovery during the outage. Which TWO actions together meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep RDS in one AZ and prepare a documented procedure to restore service in the other AZ.",
+          "correct": false,
+          "why": "The database still depends on one AZ and recovery requires manual action."
+        },
+        {
+          "id": "B",
+          "text": "Run application instances in an Auto Scaling group across both AZs behind a load balancer that selects healthy targets.",
+          "correct": true,
+          "why": "The application tier retains capacity and health-aware traffic routing across the two AZs."
+        },
+        {
+          "id": "C",
+          "text": "Run all application instances in one AZ with an Auto Scaling group configured to replace unhealthy instances there.",
+          "correct": false,
+          "why": "Instance replacement in one AZ does not keep the application tier available if that AZ is lost."
+        },
+        {
+          "id": "D",
+          "text": "Use an RDS Multi-AZ deployment so the database tier has a failover location in the other AZ.",
+          "correct": true,
+          "why": "The database tier no longer relies solely on one AZ for availability."
+        },
+        {
+          "id": "E",
+          "text": "Divide order requests into isolated processing groups while leaving the application and database in one AZ.",
+          "correct": false,
+          "why": "Processing isolation does not remove either tier’s dependency on that AZ."
+        }
+      ],
+      "explanation": "Accepting orders requires both the application and database tiers, so protecting only one tier is insufficient. The application instances need healthy capacity and traffic routing across AZs, while the database needs a failover location. Single-AZ replacement, a manual procedure, and processing isolation each leave a stated AZ-outage or hands-off recovery requirement unmet.",
+      "keywordCues": [
+        "EC2 application instances and an Amazon RDS database",
+        "loss of either AZ",
+        "cannot perform a manual recovery"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html"
+      ],
+      "es": {
+        "stem": "Un pequeño fabricante rediseña un portal de pedidos que usa instancias de aplicación EC2 y una base de datos Amazon RDS. Debe aceptar pedidos durante la pérdida de cualquiera de las AZ y el equipo no puede realizar una recuperación manual durante la interrupción. ¿Qué DOS acciones, en conjunto, cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantén RDS en una AZ y prepara un procedimiento documentado para restaurar el servicio en la otra AZ.",
+            "why": "La base de datos aún depende de una AZ y la recuperación requiere una acción manual."
+          },
+          {
+            "id": "B",
+            "text": "Ejecuta instancias de la aplicación en un grupo de Auto Scaling distribuido entre ambas AZ, detrás de un balanceador de carga que seleccione destinos sanos.",
+            "why": "La capa de aplicación conserva capacidad y enrutamiento según el estado de salud entre las dos AZ."
+          },
+          {
+            "id": "C",
+            "text": "Ejecuta todas las instancias de la aplicación en una AZ con un grupo de Auto Scaling configurado para reemplazar allí las instancias no sanas.",
+            "why": "Reemplazar instancias en una sola AZ no mantiene disponible la capa de aplicación si se pierde esa AZ."
+          },
+          {
+            "id": "D",
+            "text": "Usa una implementación RDS Multi-AZ para que la capa de base de datos tenga una ubicación de conmutación por error en la otra AZ.",
+            "why": "La capa de base de datos ya no depende exclusivamente de una AZ para su disponibilidad."
+          },
+          {
+            "id": "E",
+            "text": "Divide las solicitudes de pedidos en grupos de procesamiento aislados y deja la aplicación y la base de datos en una AZ.",
+            "why": "El aislamiento del procesamiento no elimina la dependencia de ninguna de las capas respecto de esa AZ."
+          }
+        ],
+        "explanation": "Aceptar pedidos requiere tanto la capa de aplicación como la de base de datos, por lo que proteger una sola capa no basta. Las instancias de aplicación necesitan capacidad sana y enrutamiento de tráfico entre AZ, mientras que la base de datos necesita una ubicación de conmutación por error. El reemplazo en una sola AZ, un procedimiento manual y el aislamiento del procesamiento incumplen el requisito de sobrevivir a la pérdida de una AZ o recuperarse sin intervención."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "multi-az-high-availability--2e78a11e",
+      "conceptId": "multi-az-high-availability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs a web tier on EC2 and stores bookings in Amazon RDS. Its current deployment places both tiers in one AZ. The company needs bookings to continue if that AZ becomes unavailable, without an operator moving the application. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep both tiers in one AZ and have an operator launch replacement instances and restore the database in another AZ after an outage.",
+          "correct": false,
+          "why": "The proposed move depends on manual intervention and does not keep both tiers ready across locations."
+        },
+        {
+          "id": "B",
+          "text": "Use an Application Load Balancer with healthy web targets in two AZs, an Auto Scaling group spanning those AZs, and an RDS Multi-AZ deployment.",
+          "correct": true,
+          "why": "The design places both required tiers across AZs and configures traffic routing and database failover."
+        },
+        {
+          "id": "C",
+          "text": "Place the web tier in an Auto Scaling group spanning two AZs, but keep the RDS database in its current single-AZ deployment.",
+          "correct": false,
+          "why": "The database remains a single-location dependency for bookings."
+        },
+        {
+          "id": "D",
+          "text": "Place both tiers in one AZ and configure automated replacement of failed web instances.",
+          "correct": false,
+          "why": "Replacing instances in the affected AZ does not provide a working location during an AZ outage."
+        }
+      ],
+      "explanation": "The deciding requirements are continued booking during an AZ outage and no operator-led move. The load-balanced web tier and Multi-AZ database avoid leaving either required tier solely in the failed AZ. Spreading only the web tier is not enough because bookings still depend on the single-AZ database.",
+      "keywordCues": [
+        "both tiers in one AZ",
+        "bookings to continue if that AZ becomes unavailable",
+        "without an operator moving the application"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas ejecuta su capa web en EC2 y almacena las reservas en Amazon RDS. Su implementación actual coloca ambas capas en una sola AZ. La empresa necesita que las reservas continúen si esa AZ deja de estar disponible, sin que una persona tenga que trasladar la aplicación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantén ambas capas en una AZ y pide a una persona que lance instancias de reemplazo y restaure la base de datos en otra AZ después de una interrupción.",
+            "why": "El traslado propuesto depende de una intervención manual y no mantiene ambas capas preparadas en distintas ubicaciones."
+          },
+          {
+            "id": "B",
+            "text": "Usa un Application Load Balancer con destinos web sanos en dos AZ, un grupo de Auto Scaling que abarque esas AZ y una implementación RDS Multi-AZ.",
+            "why": "El diseño distribuye ambas capas necesarias entre AZ y configura el enrutamiento del tráfico y la conmutación por error de la base de datos."
+          },
+          {
+            "id": "C",
+            "text": "Coloca la capa web en un grupo de Auto Scaling que abarque dos AZ, pero conserva la base de datos RDS en su implementación actual de una sola AZ.",
+            "why": "La base de datos sigue siendo una dependencia de una sola ubicación para las reservas."
+          },
+          {
+            "id": "D",
+            "text": "Coloca ambas capas en una AZ y configura el reemplazo automatizado de las instancias web que fallen.",
+            "why": "Reemplazar instancias en la AZ afectada no proporciona una ubicación operativa durante una interrupción de esa AZ."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son mantener las reservas durante una interrupción de una AZ y evitar un traslado manual. La capa web con balanceo de carga y la base de datos Multi-AZ evitan que una capa necesaria dependa exclusivamente de la AZ afectada. Distribuir solo la capa web no basta porque las reservas aún dependen de la base de datos en una sola AZ."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "multi-az-high-availability--4ce2608b",
+      "conceptId": "multi-az-high-availability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A museum runs a stateless visitor-information service on EC2 instances in two AZs. An Application Load Balancer fronts the service, but the proposed configuration continues sending requests to registered instances even when they cannot serve pages. Visitors must receive responses from the surviving AZ during an AZ outage. Which change BEST meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase EC2 capacity in the primary AZ and keep the second AZ for manually launched replacements.",
+          "correct": false,
+          "why": "More capacity in the failed AZ cannot serve visitors, and launching replacements is manual."
+        },
+        {
+          "id": "B",
+          "text": "Configure the load balancer to send requests only to healthy targets, and maintain service capacity in both AZs.",
+          "correct": true,
+          "why": "Traffic can avoid failed targets while the other AZ retains service capacity."
+        },
+        {
+          "id": "C",
+          "text": "Keep instances in both AZs, but require an operator to remove failed targets from the load balancer.",
+          "correct": false,
+          "why": "Visitors can continue to be sent to failed targets until an operator intervenes."
+        },
+        {
+          "id": "D",
+          "text": "Separate visitor requests into independent processing groups while keeping the current target-routing behavior.",
+          "correct": false,
+          "why": "Limiting the scope of a processing failure does not correct routing to unhealthy targets."
+        }
+      ],
+      "explanation": "The service already spans two AZs; the gap is directing requests away from targets that cannot respond. Health-aware routing, together with capacity in both locations, lets the surviving AZ serve visitors. Merely adding primary-AZ capacity or isolating processing groups does not fix the stated routing problem.",
+      "keywordCues": [
+        "instances in two AZs",
+        "continues sending requests to registered instances even when they cannot serve pages",
+        "responses from the surviving AZ"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html"
+      ],
+      "es": {
+        "stem": "Un museo ejecuta un servicio de información para visitantes, sin estado, en instancias EC2 de dos AZ. Un Application Load Balancer recibe las solicitudes, pero la configuración propuesta sigue enviándolas a instancias registradas incluso cuando no pueden servir páginas. Los visitantes deben recibir respuestas desde la AZ que siga operativa durante una interrupción. ¿Qué cambio cumple MEJOR este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Aumenta la capacidad de EC2 en la AZ principal y reserva la segunda AZ para lanzar reemplazos manualmente.",
+            "why": "Más capacidad en la AZ afectada no puede atender a los visitantes, y lanzar reemplazos es una tarea manual."
+          },
+          {
+            "id": "B",
+            "text": "Configura el balanceador de carga para enviar solicitudes solo a destinos sanos y mantén capacidad del servicio en ambas AZ.",
+            "why": "El tráfico puede evitar los destinos que fallaron mientras la otra AZ conserva capacidad para prestar el servicio."
+          },
+          {
+            "id": "C",
+            "text": "Mantén instancias en ambas AZ, pero pide a una persona que retire los destinos fallidos del balanceador de carga.",
+            "why": "Las solicitudes pueden seguir llegando a destinos fallidos hasta que alguien intervenga."
+          },
+          {
+            "id": "D",
+            "text": "Separa las solicitudes de los visitantes en grupos de procesamiento independientes y conserva el comportamiento actual de enrutamiento a destinos.",
+            "why": "Limitar el alcance de una falla de procesamiento no corrige el envío de solicitudes a destinos no sanos."
+          }
+        ],
+        "explanation": "El servicio ya abarca dos AZ; lo que falta es dejar de dirigir solicitudes a destinos que no pueden responder. El enrutamiento según el estado de salud, junto con capacidad en ambas ubicaciones, permite que la AZ operativa atienda a los visitantes. Agregar capacidad en la AZ principal o aislar grupos de procesamiento no resuelve el problema de enrutamiento indicado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": "Minor: the premise that an ALB 'continues sending requests to registered instances even when they cannot serve pages' is contrived, since ALB target-group health checks cannot be disabled for instance targets (realistically a misconfigured health check path). Does not change the key."
+      }
+    },
+    {
+      "id": "multi-az-high-availability--fcac95f8",
+      "conceptId": "multi-az-high-availability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A regional courier service has an EC2-based dispatch API behind a load balancer and an Amazon RDS database. A proposal spreads the API instances across two AZs but keeps RDS in one AZ, relying on automated instance replacement for recovery. Dispatch must remain usable if either AZ is lost. Which revision BEST meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the current placement and divide dispatch jobs into groups that cannot affect one another.",
+          "correct": false,
+          "why": "Job isolation does not make the single-AZ database available after that AZ is lost."
+        },
+        {
+          "id": "B",
+          "text": "Move all API instances into the database AZ and automate replacement of failed API instances there.",
+          "correct": false,
+          "why": "Both tiers would then depend on the same AZ remaining available."
+        },
+        {
+          "id": "C",
+          "text": "Move RDS to a Multi-AZ deployment and retain healthy API capacity and health-aware load balancing across both AZs.",
+          "correct": true,
+          "why": "This addresses the database dependency while preserving service and routing in either AZ."
+        },
+        {
+          "id": "D",
+          "text": "Keep RDS in one AZ and add more API instances in the other AZ.",
+          "correct": false,
+          "why": "Extra API instances cannot remove the database’s single-AZ dependency."
+        }
+      ],
+      "explanation": "Dispatch depends on both the API and the database, so each required tier must remain available when an AZ is lost. The proposed API distribution solves only part of that problem; the revision also removes the database’s single-AZ placement. Automated replacement of API instances and isolation between jobs do not compensate for an unavailable database AZ.",
+      "keywordCues": [
+        "spreads the API instances across two AZs but keeps RDS in one AZ",
+        "relying on automated instance replacement",
+        "if either AZ is lost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html"
+      ],
+      "es": {
+        "stem": "Una empresa regional de mensajería tiene una API de asignación de entregas en EC2, detrás de un balanceador de carga, y una base de datos Amazon RDS. Una propuesta distribuye las instancias de la API entre dos AZ, pero mantiene RDS en una sola AZ y depende del reemplazo automatizado de instancias para recuperarse. La asignación de entregas debe seguir funcionando si se pierde cualquiera de las AZ. ¿Qué modificación cumple MEJOR el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conserva la distribución actual y divide los trabajos de asignación en grupos que no puedan afectarse entre sí.",
+            "why": "Aislar los trabajos no mantiene disponible la base de datos de una sola AZ si se pierde esa AZ."
+          },
+          {
+            "id": "B",
+            "text": "Traslada todas las instancias de la API a la AZ de la base de datos y automatiza allí el reemplazo de las instancias de la API que fallen.",
+            "why": "Ambas capas dependerían entonces de que la misma AZ siguiera disponible."
+          },
+          {
+            "id": "C",
+            "text": "Cambia RDS a una implementación Multi-AZ y conserva capacidad sana de la API y balanceo de carga según el estado de salud en ambas AZ.",
+            "why": "Esto resuelve la dependencia de la base de datos y conserva el servicio y el enrutamiento en cualquiera de las AZ."
+          },
+          {
+            "id": "D",
+            "text": "Mantén RDS en una AZ y agrega más instancias de la API en la otra AZ.",
+            "why": "Las instancias adicionales de la API no eliminan la dependencia de la base de datos respecto de una sola AZ."
+          }
+        ],
+        "explanation": "La asignación de entregas depende de la API y de la base de datos, por lo que cada capa necesaria debe permanecer disponible cuando se pierde una AZ. La distribución propuesta de la API resuelve solo una parte del problema; la modificación también elimina la ubicación de la base de datos en una sola AZ. Reemplazar automáticamente instancias de la API y aislar trabajos no compensa la pérdida de la AZ de la base de datos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "multi-az-high-availability--r0",
+      "conceptId": "multi-az-high-availability",
+      "kind": "recall",
+      "prompt": "An EC2 web tier and RDS database must keep serving during an AZ outage. What would you configure, and why?",
+      "promptEs": "Una capa web en EC2 y una base de datos RDS deben seguir operativas durante una interrupción de una AZ. ¿Qué configurarías y por qué?",
+      "idealAnswer": "Run healthy web capacity across at least two AZs, with load balancing that routes to healthy targets, and use an RDS Multi-AZ deployment for database failover. Both required tiers need a working location outside the failed AZ; protecting only the web tier leaves a database single point of failure.",
+      "rubric": [
+        "Places web capacity in at least two AZs.",
+        "Uses health-aware routing to serving web targets.",
+        "Provides database failover in another AZ, such as RDS Multi-AZ.",
+        "Explains why both required tiers must survive the AZ outage."
+      ]
+    }
+  ]
+}

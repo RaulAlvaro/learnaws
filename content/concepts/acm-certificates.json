@@ -1,0 +1,325 @@
+{
+  "conceptId": "acm-certificates",
+  "card": {
+    "en": {
+      "tldr": "AWS Certificate Manager (ACM) provides public and private TLS certificates for integrated AWS services and manages renewal of eligible Amazon-issued certificates. Choose an ACM-issued certificate when managed renewal matters; if a required certificate is imported, plan to monitor its expiration and replace it yourself.",
+      "whenToUse": [
+        "An application needs a TLS certificate for an integrated service such as Elastic Load Balancing or CloudFront.",
+        "A team wants eligible Amazon-issued certificates renewed automatically through DNS validation.",
+        "A third-party certificate must be imported, so the team needs an expiration and replacement process."
+      ],
+      "keyFacts": [
+        "ACM-issued public and private certificates can receive managed renewal; with DNS validation, ACM renews eligible certificates automatically.",
+        "Imported certificates are not eligible for ACM managed renewal, even when associated with an AWS service.",
+        "ACM certificates are regional. An Elastic Load Balancing deployment in multiple Regions needs a certificate in each Region, with domain validation in each Region for ACM-issued certificates.",
+        "A certificate used with CloudFront must be requested or imported in US East (N. Virginia).",
+        "When ACM renews a certificate, its ARN remains the same."
+      ],
+      "gotchas": [
+        "Importing a third-party certificate into ACM does not make it eligible for managed renewal.",
+        "An ACM certificate in another Region cannot be copied to serve a second regional load balancer.",
+        "A private certificate issued directly through the AWS Private CA IssueCertificate API is not eligible for ACM managed renewal.",
+        "ACME-issued certificates are renewed by the ACME client, not by ACM managed renewal."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "third-party certificate must remain in use",
+        "automatic renewal with DNS validation",
+        "CloudFront distribution needs a certificate",
+        "same domain on load balancers in two Regions"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Certificate Manager (ACM) proporciona certificados TLS públicos y privados para servicios de AWS integrados y gestiona la renovación de certificados elegibles emitidos por Amazon. Si necesitas managed renewal, elige un certificado emitido mediante ACM; si debes importar uno, planifica cómo supervisar su vencimiento y reemplazarlo.",
+      "whenToUse": [
+        "Una aplicación necesita un certificado TLS para un servicio integrado como Elastic Load Balancing o CloudFront.",
+        "Un equipo quiere que los certificados elegibles emitidos por Amazon se renueven automáticamente mediante DNS validation.",
+        "Debes importar un certificado de un tercero y establecer un proceso para su vencimiento y reemplazo."
+      ],
+      "keyFacts": [
+        "Los certificados públicos y privados emitidos mediante ACM pueden recibir managed renewal; con DNS validation, ACM renueva automáticamente los certificados elegibles.",
+        "Los certificados importados no son elegibles para ACM managed renewal, aunque estén asociados con un servicio de AWS.",
+        "Los certificados de ACM son recursos regionales. Si usas Elastic Load Balancing en varias regiones, necesitas un certificado en cada una y debes validar los dominios en cada región para certificados emitidos mediante ACM.",
+        "Un certificado para CloudFront debe solicitarse o importarse en US East (N. Virginia).",
+        "Cuando ACM renueva un certificado, su ARN no cambia."
+      ],
+      "gotchas": [
+        "Importar un certificado de un tercero a ACM no lo vuelve elegible para managed renewal.",
+        "No puedes copiar un certificado de ACM a otra región para usarlo con otro balanceador de carga regional.",
+        "Un certificado privado emitido directamente mediante AWS Private CA IssueCertificate API no es elegible para ACM managed renewal.",
+        "Los certificados emitidos mediante ACME los renueva el cliente ACME, no ACM managed renewal."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "third-party certificate must remain in use",
+        "automatic renewal with DNS validation",
+        "CloudFront distribution needs a certificate",
+        "same domain on load balancers in two Regions"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html",
+      "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "acm-certificates--29f4d381",
+      "conceptId": "acm-certificates",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A travel publisher is launching a public website through a CloudFront distribution. The team controls the domain's DNS records and wants an eligible certificate to renew automatically without tracking expiration dates. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Request a DNS-validated ACM public certificate in US East (N. Virginia), and associate it with CloudFront.",
+          "correct": true,
+          "why": "The certificate is in CloudFront's required Region, and DNS validation supports automatic renewal when the ACM-issued certificate is eligible."
+        },
+        {
+          "id": "B",
+          "text": "Import a third-party certificate into ACM in US East (N. Virginia), and rely on ACM to renew it.",
+          "correct": false,
+          "why": "The Region is correct, but imported certificates are not eligible for ACM managed renewal."
+        },
+        {
+          "id": "C",
+          "text": "Request a DNS-validated ACM public certificate in the Region where the website's origin runs, and associate it with CloudFront.",
+          "correct": false,
+          "why": "A CloudFront certificate must be requested or imported in US East (N. Virginia), regardless of the origin's Region."
+        },
+        {
+          "id": "D",
+          "text": "Use an ACME client to obtain a public certificate for the origin server, and rely on ACM to renew it for CloudFront.",
+          "correct": false,
+          "why": "ACME client-managed renewal is not ACM managed renewal and does not provide the requested ACM certificate for CloudFront."
+        }
+      ],
+      "explanation": "The deciding requirements are CloudFront use and automatic renewal with minimal certificate maintenance. CloudFront requires its ACM certificate in US East (N. Virginia), and ACM automatically renews eligible Amazon-issued certificates that use DNS validation. Putting an ACM certificate in the origin's Region misses CloudFront's certificate Region requirement. Importing a third-party certificate also misses the renewal requirement because imported certificates are not eligible for ACM managed renewal.",
+      "keywordCues": [
+        "CloudFront distribution",
+        "controls the domain's DNS records",
+        "renew automatically without tracking expiration dates"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html",
+        "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html"
+      ],
+      "es": {
+        "stem": "Una editorial de viajes lanzará un sitio web público mediante una distribución de CloudFront. El equipo controla los registros DNS del dominio y quiere que un certificado elegible se renueve automáticamente, sin llevar un registro de las fechas de vencimiento. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Solicitar un certificado público de ACM con DNS validation en US East (N. Virginia) y asociarlo con CloudFront.",
+            "why": "El certificado está en la región requerida por CloudFront y DNS validation permite la renovación automática cuando el certificado emitido mediante ACM es elegible."
+          },
+          {
+            "id": "B",
+            "text": "Importar un certificado de un tercero a ACM en US East (N. Virginia) y confiar en que ACM lo renueve.",
+            "why": "La región es correcta, pero los certificados importados no son elegibles para ACM managed renewal."
+          },
+          {
+            "id": "C",
+            "text": "Solicitar un certificado público de ACM con DNS validation en la región donde se ejecuta el origen del sitio y asociarlo con CloudFront.",
+            "why": "Un certificado para CloudFront debe solicitarse o importarse en US East (N. Virginia), sin importar la región del origen."
+          },
+          {
+            "id": "D",
+            "text": "Usar un cliente ACME para obtener un certificado público para el servidor de origen y confiar en que ACM lo renueve para CloudFront.",
+            "why": "La renovación gestionada por un cliente ACME no es ACM managed renewal y no proporciona el certificado de ACM solicitado para CloudFront."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el uso con CloudFront y la renovación automática con poco mantenimiento. CloudFront requiere que su certificado de ACM esté en US East (N. Virginia), y ACM renueva automáticamente los certificados elegibles emitidos por Amazon que usan DNS validation. Un certificado de ACM en la región del origen no cumple el requisito de región de CloudFront. Un certificado importado tampoco cumple el requisito de renovación porque no es elegible para ACM managed renewal."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "acm-certificates--0b1369d2",
+      "conceptId": "acm-certificates",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer uses a private PKI for an internal application and needs to export its TLS certificate for use outside integrated AWS services. Its certificate team can request a private certificate through ACM or issue one directly through AWS Private CA. It also wants the certificate to remain eligible for ACM managed renewal. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Request the private certificate through ACM and export it for the application.",
+          "correct": true,
+          "why": "A private certificate requested through ACM is eligible for managed renewal when exported, and ACM supports exporting private certificates."
+        },
+        {
+          "id": "B",
+          "text": "Issue the private certificate with the AWS Private CA IssueCertificate API and export it for the application.",
+          "correct": false,
+          "why": "Private certificates issued directly through that API are not eligible for ACM managed renewal."
+        },
+        {
+          "id": "C",
+          "text": "Obtain the certificate through ACME automation and export it from ACM for the application.",
+          "correct": false,
+          "why": "Certificates issued through ACME automation are renewed by the ACME client rather than ACM managed renewal."
+        },
+        {
+          "id": "D",
+          "text": "Issue a private certificate directly through AWS Private CA, import it into ACM, and export it for the application.",
+          "correct": false,
+          "why": "Importing a certificate does not make it eligible for ACM managed renewal."
+        }
+      ],
+      "explanation": "The deciding detail is how the private certificate is issued, not just whether it is used in a private PKI. A private certificate requested through ACM and exported is eligible for ACM managed renewal. A certificate issued directly with the AWS Private CA IssueCertificate API is not eligible, even though it is a private certificate. Importing a certificate or using ACME automation does not meet the requested ACM managed-renewal model.",
+      "keywordCues": [
+        "private PKI",
+        "export its TLS certificate",
+        "eligible for ACM managed renewal"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html",
+        "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html"
+      ],
+      "es": {
+        "stem": "Un fabricante usa una PKI privada para una aplicación interna y necesita exportar su certificado TLS para usarlo fuera de los servicios integrados de AWS. Su equipo puede solicitar un certificado privado mediante ACM o emitirlo directamente mediante AWS Private CA. También quiere que el certificado siga siendo elegible para ACM managed renewal. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Solicitar el certificado privado mediante ACM y exportarlo para la aplicación.",
+            "why": "Un certificado privado solicitado mediante ACM es elegible para managed renewal cuando se exporta, y ACM permite exportar certificados privados."
+          },
+          {
+            "id": "B",
+            "text": "Emitir el certificado privado mediante AWS Private CA IssueCertificate API y exportarlo para la aplicación.",
+            "why": "Los certificados privados emitidos directamente mediante esa API no son elegibles para ACM managed renewal."
+          },
+          {
+            "id": "C",
+            "text": "Obtener el certificado mediante ACME automation y exportarlo desde ACM para la aplicación.",
+            "why": "Los certificados emitidos mediante ACME automation los renueva el cliente ACME, no ACM managed renewal."
+          },
+          {
+            "id": "D",
+            "text": "Emitir un certificado privado directamente mediante AWS Private CA, importarlo a ACM y exportarlo para la aplicación.",
+            "why": "Importar un certificado no lo vuelve elegible para ACM managed renewal."
+          }
+        ],
+        "explanation": "Lo decisivo es cómo se emite el certificado privado, no solo su uso en una PKI privada. Un certificado privado solicitado mediante ACM y exportado es elegible para ACM managed renewal. En cambio, uno emitido directamente mediante AWS Private CA IssueCertificate API no es elegible, aunque también sea privado. Importar un certificado o usar ACME automation tampoco cumple el modelo solicitado de ACM managed renewal."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "acm-certificates--41f47068",
+      "conceptId": "acm-certificates",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A ticketing company is deploying regional load balancers for the same public domain in two AWS Regions. It controls DNS for the domain and wants eligible certificates to renew automatically, while keeping certificate administration as simple as possible. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use DNS validation for both ACM-issued certificates so eligible certificates renew automatically.",
+          "correct": true,
+          "why": "ACM automatically renews eligible Amazon-issued certificates that use DNS validation."
+        },
+        {
+          "id": "B",
+          "text": "Request one ACM public certificate and copy it into the second load balancer's Region.",
+          "correct": false,
+          "why": "ACM certificates cannot be copied between Regions."
+        },
+        {
+          "id": "C",
+          "text": "Request one ACM public certificate in US East (N. Virginia) and use it with both regional load balancers.",
+          "correct": false,
+          "why": "The US East (N. Virginia) requirement applies to CloudFront; regional load balancers need certificates in their respective Regions."
+        },
+        {
+          "id": "D",
+          "text": "Import a third-party certificate into each Region and rely on ACM managed renewal for both copies.",
+          "correct": false,
+          "why": "Regional imports would address placement, but imported certificates are not eligible for ACM managed renewal."
+        },
+        {
+          "id": "E",
+          "text": "Request an ACM public certificate in each load balancer's Region and validate the domain for each certificate.",
+          "correct": true,
+          "why": "Each regional load balancer needs a certificate in its own Region, and ACM-issued certificates require validation in each Region."
+        }
+      ],
+      "explanation": "The company must satisfy both regional certificate placement and automatic renewal. ACM certificates are regional, so it must request and validate an ACM public certificate in each load balancer's Region. DNS validation allows eligible Amazon-issued certificates to renew automatically. A single certificate cannot be copied between Regions, and importing certificates would not provide ACM managed renewal.",
+      "keywordCues": [
+        "regional load balancers",
+        "same public domain in two AWS Regions",
+        "controls DNS",
+        "renew automatically"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html",
+        "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas implementará balanceadores de carga regionales para el mismo dominio público en dos regiones de AWS. Controla el DNS del dominio y quiere que los certificados elegibles se renueven automáticamente, con una administración lo más sencilla posible. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar DNS validation para ambos certificados emitidos mediante ACM, de modo que los certificados elegibles se renueven automáticamente.",
+            "why": "ACM renueva automáticamente los certificados elegibles emitidos por Amazon que usan DNS validation."
+          },
+          {
+            "id": "B",
+            "text": "Solicitar un certificado público de ACM y copiarlo a la región del segundo balanceador de carga.",
+            "why": "Los certificados de ACM no se pueden copiar entre regiones."
+          },
+          {
+            "id": "C",
+            "text": "Solicitar un certificado público de ACM en US East (N. Virginia) y usarlo con ambos balanceadores de carga regionales.",
+            "why": "El requisito de US East (N. Virginia) corresponde a CloudFront; los balanceadores regionales necesitan certificados en sus respectivas regiones."
+          },
+          {
+            "id": "D",
+            "text": "Importar un certificado de un tercero en cada región y confiar en ACM managed renewal para ambas copias.",
+            "why": "Las importaciones en cada región resuelven la ubicación, pero los certificados importados no son elegibles para ACM managed renewal."
+          },
+          {
+            "id": "E",
+            "text": "Solicitar un certificado público de ACM en la región de cada balanceador de carga y validar el dominio para cada certificado.",
+            "why": "Cada balanceador regional necesita un certificado en su propia región, y los certificados emitidos mediante ACM requieren validación en cada región."
+          }
+        ],
+        "explanation": "La empresa debe cumplir tanto la ubicación regional de los certificados como la renovación automática. Los certificados de ACM son regionales, por lo que debe solicitar y validar un certificado público de ACM en la región de cada balanceador de carga. DNS validation permite que los certificados elegibles emitidos por Amazon se renueven automáticamente. No puede copiar un único certificado entre regiones, y los certificados importados no recibirían ACM managed renewal."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "acm-certificates--r0",
+      "conceptId": "acm-certificates",
+      "kind": "recall",
+      "prompt": "A CloudFront site needs a public TLS certificate with automatic renewal. Where and how would you obtain the certificate, and why?",
+      "promptEs": "Un sitio de CloudFront necesita un certificado TLS público con renovación automática. ¿Dónde y cómo obtendrías el certificado, y por qué?",
+      "idealAnswer": "Request an ACM public certificate in US East (N. Virginia) and use DNS validation. CloudFront requires its ACM certificate in that Region, and ACM automatically renews eligible Amazon-issued certificates that use DNS validation.",
+      "rubric": [
+        "Names ACM as the certificate source.",
+        "Specifies US East (N. Virginia) for CloudFront.",
+        "Connects DNS validation and eligibility to automatic renewal."
+      ]
+    }
+  ]
+}

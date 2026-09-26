@@ -1,0 +1,275 @@
+{
+  "conceptId": "snow-family",
+  "card": {
+    "en": {
+      "tldr": "AWS Snowball Edge is a shipped device for moving large datasets when an online transfer is impractical, or for running storage and compute workloads at disconnected sites. In an exam scenario, choose it for physical transport or local processing—not routine online synchronization—and check whether the customer is eligible to order it.",
+      "whenToUse": [
+        "An existing customer must move tens of TB to PB, but available network bandwidth makes online transfer impractical.",
+        "A remote site must collect or process data locally while disconnected.",
+        "An existing customer needs to import local data into Amazon S3 or export S3 data using a shipped device."
+      ],
+      "keyFacts": [
+        "Snowball Edge Storage Optimized is intended for large transfers; Compute Optimized is suited to demanding local processing.",
+        "A single Storage Optimized device can transfer approximately 210 TB; larger datasets can use multiple devices.",
+        "Snowball Edge supports local data transfer through an S3-compatible endpoint or NFS file interface and can import data into Amazon S3.",
+        "Device provisioning and preparation may take up to four weeks, separate from loading, shipping, and unloading time.",
+        "Snowball Edge is available only to existing customers, not new customers."
+      ],
+      "gotchas": [
+        "Do not select Snowball Edge for a new customer merely because physical transfer sounds attractive; the supplied documentation says new customers cannot order it.",
+        "Shipping a device is not a substitute for recurring online synchronization.",
+        "Do not assume a shipped device provides immediate delivery; account for provisioning and shipping.",
+        "Do not delete the source data immediately after returning an import device; confirm successful ingestion into S3 first."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DataSync",
+          "difference": "Use DataSync for online migration or scheduled synchronization when usable network connectivity is available; Snowball Edge physically transports data."
+        },
+        {
+          "concept": "AWS Transfer Family",
+          "difference": "Transfer Family preserves partners' SFTP, FTPS, FTP, or AS2 client workflows; it is not an offline bulk-transport device."
+        }
+      ],
+      "examCues": [
+        "existing Snowball Edge customer with limited bandwidth",
+        "ship a large dataset to AWS",
+        "disconnected site needs local processing",
+        "online transfer cannot meet the migration window"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Snowball Edge es un dispositivo que se envía físicamente para mover grandes conjuntos de datos cuando la transferencia en línea no es viable, o para ejecutar almacenamiento y cómputo en sitios desconectados. En un escenario de examen, elígelo para transporte físico o procesamiento local, no para sincronización en línea habitual, y verifica si el cliente puede solicitarlo.",
+      "whenToUse": [
+        "Un cliente existente debe mover decenas de TB a PB, pero el ancho de banda disponible hace inviable la transferencia en línea.",
+        "Un sitio remoto debe recopilar o procesar datos localmente mientras está desconectado.",
+        "Un cliente existente necesita importar datos locales a Amazon S3 o exportar datos de S3 mediante un dispositivo enviado físicamente."
+      ],
+      "keyFacts": [
+        "Snowball Edge Storage Optimized está orientado a transferencias grandes; Compute Optimized es apropiado para procesamiento local exigente.",
+        "Un dispositivo Storage Optimized puede transferir aproximadamente 210 TB; para conjuntos mayores puedes usar varios dispositivos.",
+        "Snowball Edge permite copiar datos localmente mediante un endpoint compatible con S3 o una interfaz NFS, e importar datos a Amazon S3.",
+        "El aprovisionamiento y la preparación pueden tardar hasta cuatro semanas, sin contar la carga, el envío y la descarga.",
+        "Snowball Edge solo está disponible para clientes existentes, no para clientes nuevos."
+      ],
+      "gotchas": [
+        "No elijas Snowball Edge para un cliente nuevo solo porque convenga el transporte físico; la documentación proporcionada indica que no puede solicitarlo.",
+        "Enviar un dispositivo no reemplaza la sincronización periódica en línea.",
+        "No supongas que el dispositivo llegará de inmediato; considera el aprovisionamiento y el envío.",
+        "No borres los datos de origen apenas devuelvas un dispositivo de importación; primero confirma que llegaron correctamente a S3."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS DataSync",
+          "difference": "Usa DataSync para migración en línea o sincronización programada cuando hay conectividad utilizable; Snowball Edge transporta los datos físicamente."
+        },
+        {
+          "concept": "AWS Transfer Family",
+          "difference": "Transfer Family conserva los flujos de trabajo de clientes SFTP, FTPS, FTP o AS2 de los socios; no es un dispositivo de transporte masivo sin conexión."
+        }
+      ],
+      "examCues": [
+        "existing Snowball Edge customer with limited bandwidth",
+        "ship a large dataset to AWS",
+        "disconnected site needs local processing",
+        "online transfer cannot meet the migration window"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html",
+      "https://aws.amazon.com/snowball/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "snow-family--22a39cf3",
+      "conceptId": "snow-family",
+      "secondaryConcepts": [
+        "datasync",
+        "transfer-family"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retail chain must copy updates from its store file shares to Amazon S3 every night. The stores have reliable network connections, and the team wants scheduled online transfers rather than arranging device shipments for each update. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure AWS Transfer Family endpoints and have each store upload updates with an SFTP client.",
+          "correct": false,
+          "why": "An SFTP endpoint does not itself provide the requested scheduled synchronization of file shares."
+        },
+        {
+          "id": "B",
+          "text": "Send Snowball Edge Storage Optimized devices to the stores for each nightly update.",
+          "correct": false,
+          "why": "Repeated physical shipments do not meet the requested scheduled online workflow."
+        },
+        {
+          "id": "C",
+          "text": "Deploy Snowball Edge Compute Optimized devices and process each update at the stores.",
+          "correct": false,
+          "why": "Local edge processing does not address the requested scheduled online transfer."
+        },
+        {
+          "id": "D",
+          "text": "Configure AWS DataSync to transfer the file-share updates to Amazon S3 on a schedule.",
+          "correct": true,
+          "why": "DataSync supports scheduled online transfers to S3 over the stores' reliable connections."
+        }
+      ],
+      "explanation": "The requirement is recurring, scheduled transfer over reliable connections. AWS DataSync matches that online synchronization pattern. Snowball Edge addresses physical transport or edge processing, neither of which is needed for nightly updates. Transfer Family is appropriate when retaining a file-transfer client protocol is the deciding requirement, not when scheduling file-share synchronization is the goal.",
+      "keywordCues": [
+        "every night",
+        "reliable network connections",
+        "scheduled online transfers",
+        "rather than arranging device shipments"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html",
+        "https://aws.amazon.com/snowball/faqs/"
+      ],
+      "es": {
+        "stem": "Una cadena minorista debe copiar cada noche las actualizaciones de los recursos compartidos de archivos de sus tiendas a Amazon S3. Las tiendas tienen conexiones de red confiables y el equipo quiere transferencias en línea programadas, en lugar de coordinar envíos de dispositivos para cada actualización. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar endpoints de AWS Transfer Family y hacer que cada tienda suba las actualizaciones con un cliente SFTP.",
+            "why": "Un endpoint SFTP no proporciona por sí mismo la sincronización programada de recursos compartidos de archivos solicitada."
+          },
+          {
+            "id": "B",
+            "text": "Enviar dispositivos Snowball Edge Storage Optimized a las tiendas para cada actualización nocturna.",
+            "why": "Los envíos físicos repetidos no cumplen el flujo de trabajo en línea programado que se solicita."
+          },
+          {
+            "id": "C",
+            "text": "Implementar dispositivos Snowball Edge Compute Optimized y procesar cada actualización en las tiendas.",
+            "why": "El procesamiento local no resuelve la transferencia en línea programada que se solicita."
+          },
+          {
+            "id": "D",
+            "text": "Configurar AWS DataSync para transferir las actualizaciones de los recursos compartidos de archivos a Amazon S3 según una programación.",
+            "why": "DataSync admite transferencias en línea programadas a S3 mediante las conexiones confiables de las tiendas."
+          }
+        ],
+        "explanation": "El requisito es transferir datos de forma periódica y programada mediante conexiones confiables. AWS DataSync se ajusta a ese patrón de sincronización en línea. Snowball Edge responde al transporte físico o al procesamiento en el borde, ninguno de los cuales es necesario para las actualizaciones nocturnas. Transfer Family es apropiado cuando conservar un protocolo de cliente de transferencia es el requisito decisivo, no cuando el objetivo es programar la sincronización de recursos compartidos de archivos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "snow-family--9e837bf2",
+      "conceptId": "snow-family",
+      "secondaryConcepts": [
+        "datasync",
+        "transfer-family"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A shipping company that already uses Snowball Edge collects high-resolution sensor data aboard vessels with intermittent connectivity. Crews must run substantial analytics locally during voyages and later transfer the collected data to AWS. Which solution best meets the local processing requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Schedule AWS DataSync transfers from each vessel and run the analytics after the data reaches AWS.",
+          "correct": false,
+          "why": "Processing after an online transfer does not satisfy the requirement to analyze data locally during voyages."
+        },
+        {
+          "id": "B",
+          "text": "Use Snowball Edge Compute Optimized devices to process data aboard the vessels before transferring it to AWS.",
+          "correct": true,
+          "why": "Compute Optimized supports substantial local processing in intermittently connected environments."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Transfer Family to receive uploads from the vessels, then process the data in AWS.",
+          "correct": false,
+          "why": "A managed transfer endpoint does not provide disconnected local analytics aboard the vessels."
+        },
+        {
+          "id": "D",
+          "text": "Use Snowball Edge Storage Optimized devices primarily to transport the raw data for later processing.",
+          "correct": false,
+          "why": "Transporting raw data for later processing misses the stated need for substantial processing during voyages."
+        }
+      ],
+      "explanation": "The crews need analytics during voyages, not only after data reaches AWS. Snowball Edge Compute Optimized is intended for demanding processing in locations with limited connectivity. Storage Optimized is the more natural choice when the primary task is bulk transport. Online transfers through DataSync or Transfer Family do not supply the required local processing.",
+      "keywordCues": [
+        "already uses Snowball Edge",
+        "intermittent connectivity",
+        "run substantial analytics locally during voyages",
+        "later transfer the collected data"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html",
+        "https://aws.amazon.com/snowball/faqs/"
+      ],
+      "es": {
+        "stem": "Una naviera que ya usa Snowball Edge recopila datos de sensores de alta resolución a bordo de embarcaciones con conectividad intermitente. Las tripulaciones deben ejecutar análisis exigentes localmente durante los viajes y después transferir los datos recopilados a AWS. ¿Qué solución satisface mejor el requisito de procesamiento local?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Programar transferencias con AWS DataSync desde cada embarcación y ejecutar los análisis después de que los datos lleguen a AWS.",
+            "why": "Procesar los datos después de transferirlos en línea no cumple el requisito de analizarlos localmente durante los viajes."
+          },
+          {
+            "id": "B",
+            "text": "Usar dispositivos Snowball Edge Compute Optimized para procesar los datos a bordo antes de transferirlos a AWS.",
+            "why": "Compute Optimized permite procesamiento local exigente en entornos con conectividad intermitente."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS Transfer Family para recibir cargas de las embarcaciones y luego procesar los datos en AWS.",
+            "why": "Un endpoint de transferencia administrado no proporciona análisis locales sin conexión a bordo."
+          },
+          {
+            "id": "D",
+            "text": "Usar dispositivos Snowball Edge Storage Optimized principalmente para transportar los datos sin procesar y analizarlos después.",
+            "why": "Transportar los datos para procesarlos después no satisface la necesidad indicada de procesamiento exigente durante los viajes."
+          }
+        ],
+        "explanation": "Las tripulaciones necesitan análisis durante los viajes, no solo después de que los datos lleguen a AWS. Snowball Edge Compute Optimized está orientado al procesamiento exigente en ubicaciones con conectividad limitada. Storage Optimized es la opción más natural cuando la tarea principal es el transporte masivo. Las transferencias en línea mediante DataSync o Transfer Family no aportan el procesamiento local necesario."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "snow-family--r0",
+      "conceptId": "snow-family",
+      "kind": "recall",
+      "prompt": "An existing Snowball Edge customer needs substantial analytics at a disconnected site. Which device configuration fits, and why?",
+      "promptEs": "Un cliente existente de Snowball Edge necesita análisis exigentes en un sitio desconectado. ¿Qué configuración de dispositivo corresponde y por qué?",
+      "idealAnswer": "Choose Snowball Edge Compute Optimized. It is suited to demanding local processing in environments with limited or no connectivity; Storage Optimized is the better fit when bulk transfer is the primary need.",
+      "rubric": [
+        "Names Snowball Edge Compute Optimized.",
+        "Explains that analytics must run locally despite limited connectivity.",
+        "Distinguishes compute needs from bulk transport."
+      ]
+    },
+    {
+      "id": "snow-family--r1",
+      "conceptId": "snow-family",
+      "kind": "why-not",
+      "prompt": "Why is AWS DataSync not the fit for an existing customer's large offline import when its network cannot meet the migration window?",
+      "promptEs": "¿Por qué AWS DataSync no es adecuado para la gran importación sin conexión de un cliente existente si su red no permite cumplir el plazo de migración?",
+      "idealAnswer": "DataSync is an online transfer service, so it still depends on the insufficient network connection. Snowball Edge Storage Optimized can physically transport the data for import into Amazon S3, provided the customer can obtain the device and its provisioning and shipping time fit the plan.",
+      "rubric": [
+        "Identifies DataSync as an online transfer approach.",
+        "Connects the inadequate network to the missed migration window.",
+        "Identifies physical Snowball Edge transport as the alternative for an eligible customer."
+      ]
+    }
+  ]
+}

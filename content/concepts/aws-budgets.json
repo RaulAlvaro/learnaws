@@ -1,0 +1,369 @@
+{
+  "conceptId": "aws-budgets",
+  "card": {
+    "en": {
+      "tldr": "AWS Budgets tracks cost, usage, and RI or Savings Plans utilization and coverage against thresholds. Choose it when a scenario requires a threshold notification or a configured action, rather than analysis of spending trends.",
+      "whenToUse": [
+        "Notify a team when actual or forecasted cost or usage approaches a budget.",
+        "Alert when RI or Savings Plans utilization or coverage falls below a target.",
+        "Apply an IAM policy or SCP after a cost or usage threshold is reached."
+      ],
+      "keyFacts": [
+        "Cost and usage budgets can notify on actual or forecasted amounts; RI and Savings Plans budgets can notify when utilization or coverage falls below a target.",
+        "Notifications can go to email, an Amazon SNS topic, or both.",
+        "Budget actions can run automatically or require manual approval. Available actions include applying an IAM policy or SCP and targeting specific EC2 or RDS instances.",
+        "A management account can apply an SCP to another account, but cannot target EC2 or RDS instances in another account.",
+        "AWS Budgets information is updated up to three times a day, typically 8–12 hours after the previous update."
+      ],
+      "gotchas": [
+        "A budget threshold is not a real-time spending cap: billing and notification delays can allow additional costs to accrue.",
+        "RI or Savings Plans utilization measures use of a commitment; coverage measures how much eligible usage the commitment covers.",
+        "A budget created in the management account is not automatically visible to users in the member account it tracks."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Cost Explorer",
+          "difference": "Use Cost Explorer to visualize or forecast spend; use AWS Budgets when a threshold must send an alert or trigger an action."
+        },
+        {
+          "concept": "AWS Cost and Usage Report",
+          "difference": "Use the report for granular billing data and custom analysis, not a budget-threshold action."
+        },
+        {
+          "concept": "Cost allocation tags",
+          "difference": "Tags attribute costs to teams or projects; they do not themselves issue budget alerts."
+        }
+      ],
+      "examCues": [
+        "alert when forecasted spend approaches a limit",
+        "notify when RI coverage falls below a target",
+        "apply an SCP after a budget threshold",
+        "automatically restrict new provisioning when costs rise"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Budgets compara costos, uso y utilización o cobertura de RI y Savings Plans con umbrales. Elígelo cuando necesitas una notificación por umbral o una acción configurada, en lugar de analizar tendencias de gasto.",
+      "whenToUse": [
+        "Notificar a un equipo cuando el costo o uso real o pronosticado se acerca a un presupuesto.",
+        "Avisar cuando la utilización o cobertura de RI o Savings Plans cae por debajo de un objetivo.",
+        "Aplicar una política de IAM o un SCP al alcanzarse un umbral de costo o uso."
+      ],
+      "keyFacts": [
+        "Los presupuestos de costo y uso pueden notificar sobre valores reales o pronosticados; los de RI y Savings Plans pueden avisar cuando la utilización o cobertura cae por debajo de un objetivo.",
+        "Puedes enviar notificaciones por correo electrónico, a un tema de Amazon SNS o a ambos.",
+        "Las budget actions pueden ejecutarse automáticamente o requerir aprobación manual. Incluyen aplicar una política de IAM o un SCP y actuar sobre instancias EC2 o RDS específicas.",
+        "La cuenta de administración puede aplicar un SCP a otra cuenta, pero no puede actuar sobre instancias EC2 o RDS de otra cuenta.",
+        "La información de AWS Budgets se actualiza hasta tres veces al día, normalmente 8–12 horas después de la actualización anterior."
+      ],
+      "gotchas": [
+        "Un umbral no es un límite de gasto en tiempo real: las demoras de facturación y notificación pueden permitir costos adicionales.",
+        "La utilización de RI o Savings Plans mide el uso del compromiso; la cobertura mide cuánto uso elegible queda cubierto.",
+        "Un presupuesto creado en la cuenta de administración no es visible automáticamente para los usuarios de la cuenta miembro cuyos costos sigue."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Cost Explorer",
+          "difference": "Usa Cost Explorer para visualizar o pronosticar gastos; usa AWS Budgets si un umbral debe enviar una alerta o activar una acción."
+        },
+        {
+          "concept": "AWS Cost and Usage Report",
+          "difference": "Usa el informe para datos de facturación detallados y análisis personalizados, no para una acción por umbral."
+        },
+        {
+          "concept": "Cost allocation tags",
+          "difference": "Las etiquetas atribuyen costos a equipos o proyectos; por sí solas no generan alertas de presupuesto."
+        }
+      ],
+      "examCues": [
+        "alert when forecasted spend approaches a limit",
+        "notify when RI coverage falls below a target",
+        "apply an SCP after a budget threshold",
+        "automatically restrict new provisioning when costs rise"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html",
+      "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-controls.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aws-budgets--9dc215bb",
+      "conceptId": "aws-budgets",
+      "secondaryConcepts": [
+        "cost-explorer"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics company has purchased Reserved Instances (RIs) for a steady fleet of servers. Its architect wants an Amazon SNS notification if the percentage of instance hours covered by RIs falls below a target, even if the existing reservations are being fully used. Which solution meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an AWS Budgets RI utilization budget with an Amazon SNS notification.",
+          "correct": false,
+          "why": "Utilization tracks use of existing RIs, not the percentage of instance hours they cover."
+        },
+        {
+          "id": "B",
+          "text": "Create an AWS Budgets RI coverage budget with an Amazon SNS notification.",
+          "correct": true,
+          "why": "RI coverage measures the percentage of instance hours covered by RIs and can notify when it falls below a target."
+        },
+        {
+          "id": "C",
+          "text": "Review RI purchase recommendations in AWS Cost Explorer.",
+          "correct": false,
+          "why": "Recommendations do not provide the requested SNS notification when RI coverage drops."
+        },
+        {
+          "id": "D",
+          "text": "Create an AWS Budgets Savings Plans coverage budget with an Amazon SNS notification.",
+          "correct": false,
+          "why": "Savings Plans coverage does not measure the requested RI-covered instance hours."
+        }
+      ],
+      "explanation": "The metric in the request is the percentage of instance hours covered by RIs. An RI coverage budget tracks that percentage and can notify an Amazon SNS topic when it falls below a threshold. RI utilization instead concerns whether existing reservations are being used. Fully utilized RIs can therefore coexist with insufficient RI coverage.",
+      "keywordCues": [
+        "percentage of instance hours covered by RIs falls below a target",
+        "even if the existing reservations are being fully used",
+        "Amazon SNS notification"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html",
+        "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-controls.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística compró Reserved Instances (RI) para una flota estable de servidores. Su arquitecto quiere una notificación de Amazon SNS si el porcentaje de horas de instancia cubiertas por RI cae por debajo de un objetivo, aunque las reservas existentes se estén usando por completo. ¿Qué solución cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un presupuesto de utilización de RI en AWS Budgets con una notificación de Amazon SNS.",
+            "why": "La utilización mide el uso de las RI existentes, no el porcentaje de horas de instancia que cubren."
+          },
+          {
+            "id": "B",
+            "text": "Crear un presupuesto de cobertura de RI en AWS Budgets con una notificación de Amazon SNS.",
+            "why": "La cobertura de RI mide el porcentaje de horas de instancia cubiertas por RI y puede notificar cuando cae por debajo de un objetivo."
+          },
+          {
+            "id": "C",
+            "text": "Revisar recomendaciones de compra de RI en AWS Cost Explorer.",
+            "why": "Las recomendaciones no proporcionan la notificación de SNS solicitada cuando cae la cobertura de RI."
+          },
+          {
+            "id": "D",
+            "text": "Crear un presupuesto de cobertura de Savings Plans en AWS Budgets con una notificación de Amazon SNS.",
+            "why": "La cobertura de Savings Plans no mide las horas de instancia cubiertas por RI que se solicitan."
+          }
+        ],
+        "explanation": "La métrica solicitada es el porcentaje de horas de instancia cubiertas por RI. Un presupuesto de cobertura de RI sigue ese porcentaje y puede notificar a un tema de Amazon SNS si cae por debajo de un umbral. La utilización de RI, en cambio, indica si se usan las reservas existentes. Por eso, las RI pueden estar completamente utilizadas y aun así ofrecer una cobertura insuficiente."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-budgets--1441541d",
+      "conceptId": "aws-budgets",
+      "secondaryConcepts": [
+        "cost-explorer",
+        "cost-allocation-tags"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A nonprofit uses an AWS Organizations management account to oversee a member account dedicated to a grant-funded project. It wants a forecasted monthly cost warning and, when the project's cost threshold is reached, an automatic restriction on provisioning new resources in the member account. The finance team will manage the controls from the management account rather than target individual instances. Which two configurations meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure an automatic AWS Budgets action in the management account to apply an SCP to the member account at the cost threshold.",
+          "correct": true,
+          "why": "A management account can apply an SCP to another account as a budget action to restrict new provisioning."
+        },
+        {
+          "id": "B",
+          "text": "Create an AWS Budgets usage budget for the member account and notify on forecasted service usage.",
+          "correct": false,
+          "why": "A usage threshold does not meet the stated requirement for a forecasted monthly cost warning."
+        },
+        {
+          "id": "C",
+          "text": "From the management account, configure a budget action to target EC2 instances in the member account.",
+          "correct": false,
+          "why": "A management account cannot target EC2 instances in another account with a budget action."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Cost Explorer forecasts for the warning and cost allocation tags to restrict member-account provisioning.",
+          "correct": false,
+          "why": "Tags attribute costs but do not restrict provisioning, and this combination does not provide a budget-threshold action."
+        },
+        {
+          "id": "E",
+          "text": "In the management account, create an AWS Budgets cost budget that tracks the member account and sends a forecasted-cost notification.",
+          "correct": true,
+          "why": "A management-account budget can track a member account's cost and notify on forecasted spending."
+        }
+      ],
+      "explanation": "This scenario requires both a forecasted cost warning and an automatic cross-account restriction. A management-account budget can track a member account's costs and send a forecasted notification; its action can apply an SCP to another account. Targeting EC2 instances from the management account fails because budget actions cannot target EC2 instances in another account. The SCP action is threshold-driven, not a guarantee that spending stops immediately.",
+      "keywordCues": [
+        "forecasted monthly cost warning",
+        "automatic restriction on provisioning new resources in the member account",
+        "manage the controls from the management account rather than target individual instances"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html",
+        "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-controls.html"
+      ],
+      "es": {
+        "stem": "Una organización sin fines de lucro usa una cuenta de administración de AWS Organizations para supervisar una cuenta miembro dedicada a un proyecto financiado con una subvención. Quiere una advertencia de costos mensuales pronosticados y, cuando se alcance el umbral de costos del proyecto, una restricción automática para aprovisionar nuevos recursos en la cuenta miembro. El equipo de finanzas administrará los controles desde la cuenta de administración en vez de actuar sobre instancias individuales. ¿Qué dos configuraciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar una budget action automática de AWS Budgets en la cuenta de administración para aplicar un SCP a la cuenta miembro al alcanzar el umbral de costos.",
+            "why": "La cuenta de administración puede aplicar un SCP a otra cuenta mediante una budget action para restringir el aprovisionamiento nuevo."
+          },
+          {
+            "id": "B",
+            "text": "Crear un presupuesto de uso de AWS Budgets para la cuenta miembro y notificar sobre el uso pronosticado del servicio.",
+            "why": "Un umbral de uso no cumple el requisito de advertir sobre costos mensuales pronosticados."
+          },
+          {
+            "id": "C",
+            "text": "Desde la cuenta de administración, configurar una budget action que actúe sobre instancias EC2 de la cuenta miembro.",
+            "why": "La cuenta de administración no puede usar una budget action para actuar sobre instancias EC2 de otra cuenta."
+          },
+          {
+            "id": "D",
+            "text": "Usar pronósticos de AWS Cost Explorer para la advertencia y cost allocation tags para restringir el aprovisionamiento en la cuenta miembro.",
+            "why": "Las etiquetas atribuyen costos, pero no restringen el aprovisionamiento; esta combinación tampoco ofrece una acción por umbral de presupuesto."
+          },
+          {
+            "id": "E",
+            "text": "En la cuenta de administración, crear un presupuesto de costos de AWS Budgets que siga los costos de la cuenta miembro y envíe una notificación de costos pronosticados.",
+            "why": "Un presupuesto de la cuenta de administración puede seguir los costos de una cuenta miembro y notificar sobre gastos pronosticados."
+          }
+        ],
+        "explanation": "Se necesitan tanto una advertencia de costos pronosticados como una restricción automática entre cuentas. Un presupuesto de la cuenta de administración puede seguir los costos de una cuenta miembro y enviar la notificación; su acción puede aplicar un SCP a otra cuenta. La opción de actuar sobre instancias EC2 desde la cuenta de administración falla porque las budget actions no pueden hacerlo en otra cuenta. La acción del SCP depende del umbral y no garantiza que el gasto se detenga de inmediato."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-budgets--f59e97bb",
+      "conceptId": "aws-budgets",
+      "secondaryConcepts": [
+        "cost-explorer",
+        "cost-and-usage-report",
+        "cost-allocation-tags"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small publisher expects its AWS costs to rise during a seasonal launch. The finance team wants an email before the month's forecasted spending exceeds a fixed target; it does not need a custom billing-data analysis. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Export the AWS Cost and Usage Report to Amazon S3 for the finance team to query.",
+          "correct": false,
+          "why": "Granular billing data supports analysis but does not by itself send the requested threshold notification."
+        },
+        {
+          "id": "B",
+          "text": "Activate cost allocation tags for the publisher's launch resources.",
+          "correct": false,
+          "why": "Tags help attribute costs but do not by themselves alert on forecasted spending."
+        },
+        {
+          "id": "C",
+          "text": "Create an AWS Budgets monthly cost budget with a forecasted threshold and an email notification.",
+          "correct": true,
+          "why": "A forecasted cost-budget notification sends the requested email before the forecasted amount crosses the target."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Cost Explorer to review its spending forecast each morning.",
+          "correct": false,
+          "why": "Cost Explorer can show a forecast, but manual review does not provide the requested budget-threshold email."
+        }
+      ],
+      "explanation": "The deciding requirement is an email tied to a forecasted monthly spending threshold. AWS Budgets supports forecasted cost notifications and can send them to an email address. Cost Explorer helps visualize forecasts, but reviewing one each morning misses the requested automatic alert. Neither a billing-data export nor cost allocation tags provides that alert on its own.",
+      "keywordCues": [
+        "email before the month's forecasted spending exceeds a fixed target",
+        "does not need a custom billing-data analysis"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html",
+        "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-controls.html"
+      ],
+      "es": {
+        "stem": "Una editorial pequeña espera que sus costos de AWS aumenten durante un lanzamiento estacional. El equipo de finanzas quiere recibir un correo antes de que el gasto pronosticado del mes supere un objetivo fijo; no necesita un análisis personalizado de datos de facturación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Exportar AWS Cost and Usage Report a Amazon S3 para que el equipo de finanzas lo consulte.",
+            "why": "Los datos detallados permiten hacer análisis, pero por sí solos no envían la notificación solicitada."
+          },
+          {
+            "id": "B",
+            "text": "Activar cost allocation tags para los recursos del lanzamiento.",
+            "why": "Las etiquetas ayudan a atribuir costos, pero por sí solas no alertan sobre gastos pronosticados."
+          },
+          {
+            "id": "C",
+            "text": "Crear un presupuesto mensual de costos en AWS Budgets con un umbral pronosticado y una notificación por correo.",
+            "why": "La notificación de un presupuesto de costos pronosticados envía el correo solicitado antes de que el monto pronosticado supere el objetivo."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS Cost Explorer para revisar cada mañana su pronóstico de gastos.",
+            "why": "Cost Explorer puede mostrar un pronóstico, pero la revisión manual no proporciona el correo solicitado al alcanzar un umbral."
+          }
+        ],
+        "explanation": "El requisito decisivo es un correo asociado a un umbral de gasto mensual pronosticado. AWS Budgets admite notificaciones de costos pronosticados y puede enviarlas por correo. Cost Explorer permite visualizar pronósticos, pero revisarlos cada mañana no cumple la necesidad de una alerta automática. Ni la exportación de datos ni cost allocation tags proporcionan esa alerta por sí solas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aws-budgets--r0",
+      "conceptId": "aws-budgets",
+      "kind": "recall",
+      "prompt": "A team wants an email before forecasted monthly AWS costs exceed its target. What should it configure, and why?",
+      "promptEs": "Un equipo quiere un correo antes de que los costos mensuales pronosticados de AWS superen su objetivo. ¿Qué debe configurar y por qué?",
+      "idealAnswer": "Configure an AWS Budgets cost budget with a forecasted threshold and an email notification. AWS Budgets can notify the team based on forecasted spending before that amount is incurred.",
+      "rubric": [
+        "Names AWS Budgets and a cost budget.",
+        "Specifies a forecasted threshold.",
+        "Specifies an email notification."
+      ]
+    },
+    {
+      "id": "aws-budgets--r1",
+      "conceptId": "aws-budgets",
+      "kind": "why-not",
+      "prompt": "Why doesn't Cost Explorer alone satisfy a requirement to automatically restrict provisioning when a monthly cost threshold is reached?",
+      "promptEs": "¿Por qué Cost Explorer por sí solo no cumple el requisito de restringir automáticamente el aprovisionamiento al alcanzarse un umbral de costos mensuales?",
+      "idealAnswer": "Cost Explorer is for viewing and forecasting spending, not applying a restriction when a budget threshold is reached. AWS Budgets supports threshold-based actions, such as applying an IAM policy or SCP.",
+      "rubric": [
+        "Distinguishes spending analysis from a threshold-triggered action.",
+        "Names AWS Budgets as the tool for the action.",
+        "Identifies an IAM policy or SCP as a supported action."
+      ]
+    }
+  ]
+}

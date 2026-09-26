@@ -1,0 +1,337 @@
+{
+  "conceptId": "lake-formation",
+  "card": {
+    "en": {
+      "tldr": "AWS Lake Formation centrally governs access to data lake data in Amazon S3 and its metadata in AWS Glue Data Catalog. Choose it when analytics users need fine-grained permissions or when governed datasets must be shared across AWS accounts.",
+      "whenToUse": [
+        "Different users may see different tables, columns, rows, or cells in a data lake.",
+        "Teams need centrally managed access to cataloged data across AWS accounts.",
+        "An existing data lake must adopt Lake Formation permissions incrementally."
+      ],
+      "keyFacts": [
+        "Lake Formation permissions augment the IAM permissions model.",
+        "Data filters can restrict access to combinations of columns and rows.",
+        "Lake Formation can share fine-grained access to Data Catalog metadata and underlying data across accounts.",
+        "LF-Tags can simplify permission management across many databases, tables, and columns.",
+        "Hybrid access mode lets selected users adopt Lake Formation permissions while other users retain existing IAM-based access.",
+        "Lake Formation provides audit logs through AWS CloudTrail for access through Lake Formation."
+      ],
+      "gotchas": [
+        "Cataloging data with an AWS Glue crawler does not, by itself, establish fine-grained access policies.",
+        "An Amazon S3 bucket policy alone does not provide Lake Formation's centralized row- and column-level controls.",
+        "Hybrid access mode is an incremental migration option, not a requirement for every Lake Formation deployment."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Glue Data Catalog",
+          "difference": "The catalog stores discoverable metadata; Lake Formation centrally governs fine-grained access to cataloged data."
+        },
+        {
+          "concept": "IAM and Amazon S3 bucket policies",
+          "difference": "These can control AWS and S3 access, but Lake Formation adds centrally managed, granular data lake permissions."
+        }
+      ],
+      "examCues": [
+        "different rows for different analysts",
+        "hide sensitive columns in Athena",
+        "share governed datasets across accounts",
+        "adopt permissions without interrupting existing workloads"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Lake Formation administra de forma centralizada el acceso a los datos de un data lake en Amazon S3 y a sus metadatos en AWS Glue Data Catalog. Elígelo cuando los usuarios de análisis necesiten permisos detallados o cuando debas compartir conjuntos de datos gobernados entre cuentas de AWS.",
+      "whenToUse": [
+        "Distintos usuarios deben ver diferentes tablas, columnas, filas o celdas de un data lake.",
+        "Los equipos necesitan acceso administrado de forma centralizada a datos catalogados entre cuentas de AWS.",
+        "Un data lake existente debe adoptar permisos de Lake Formation de forma gradual."
+      ],
+      "keyFacts": [
+        "Los permisos de Lake Formation complementan el modelo de permisos de IAM.",
+        "Los data filters pueden restringir el acceso a combinaciones de columnas y filas.",
+        "Lake Formation puede compartir acceso detallado a los metadatos de Data Catalog y a los datos subyacentes entre cuentas.",
+        "Los LF-Tags pueden simplificar la administración de permisos en muchas bases de datos, tablas y columnas.",
+        "Hybrid access mode permite que usuarios seleccionados adopten permisos de Lake Formation mientras otros conservan el acceso existente basado en IAM.",
+        "Lake Formation proporciona registros de auditoría mediante AWS CloudTrail para el acceso a través de Lake Formation."
+      ],
+      "gotchas": [
+        "Catalogar datos con un crawler de AWS Glue no establece, por sí solo, políticas de acceso detalladas.",
+        "Una política de bucket de Amazon S3 por sí sola no proporciona los controles centralizados de Lake Formation a nivel de filas y columnas.",
+        "Hybrid access mode es una opción de adopción gradual, no un requisito para todas las implementaciones de Lake Formation."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Glue Data Catalog",
+          "difference": "El catálogo almacena metadatos para descubrir datos; Lake Formation administra de forma centralizada el acceso detallado a los datos catalogados."
+        },
+        {
+          "concept": "IAM y políticas de bucket de Amazon S3",
+          "difference": "Pueden controlar el acceso a AWS y Amazon S3, pero Lake Formation agrega permisos detallados para data lakes administrados de forma centralizada."
+        }
+      ],
+      "examCues": [
+        "different rows for different analysts",
+        "hide sensitive columns in Athena",
+        "share governed datasets across accounts",
+        "adopt permissions without interrupting existing workloads"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "lake-formation--93042d4e",
+      "conceptId": "lake-formation",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A healthcare network stores appointment data in Amazon S3 and catalogs it in AWS Glue Data Catalog. Analysts query it with Amazon Athena, but each regional team must see only its own patients' rows and must not see a sensitive column. Which solution meets these access requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Lake Formation data filters to grant each team access to the permitted rows and columns.",
+          "correct": true,
+          "why": "Lake Formation data filters restrict combinations of rows and columns for governed analytics access."
+        },
+        {
+          "id": "B",
+          "text": "Create separate AWS Glue crawlers for each regional team and grant access to their catalog tables.",
+          "correct": false,
+          "why": "Crawlers extract and catalog schemas; they do not enforce the required row and column restrictions."
+        },
+        {
+          "id": "C",
+          "text": "Enable AWS CloudTrail logging for the data lake and review regional teams' Athena access.",
+          "correct": false,
+          "why": "Audit logs help review access but do not restrict which rows and columns a team can query."
+        },
+        {
+          "id": "D",
+          "text": "Grant each team IAM access to the shared Amazon S3 location and the Data Catalog tables.",
+          "correct": false,
+          "why": "Access to the shared location and catalog tables does not establish the required per-team row and column filters."
+        }
+      ],
+      "explanation": "The deciding requirement is that teams querying the same cataloged data must see different rows while a sensitive column stays hidden. Lake Formation data filters support restrictions on combinations of rows and columns, including for access through Athena. AWS Glue crawlers help catalog data but do not enforce those restrictions. CloudTrail records access activity rather than granting filtered access.",
+      "keywordCues": [
+        "each regional team must see only its own patients' rows",
+        "must not see a sensitive column",
+        "Amazon Athena"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html"
+      ],
+      "es": {
+        "stem": "Una red de salud almacena datos de citas en Amazon S3 y los cataloga en AWS Glue Data Catalog. Los analistas los consultan con Amazon Athena, pero cada equipo regional solo debe ver las filas de sus propios pacientes y no debe ver una columna sensible. ¿Qué solución cumple estos requisitos de acceso con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa data filters de AWS Lake Formation para conceder a cada equipo acceso a las filas y columnas permitidas.",
+            "why": "Los data filters de Lake Formation restringen combinaciones de filas y columnas para el acceso gobernado de análisis."
+          },
+          {
+            "id": "B",
+            "text": "Crea crawlers de AWS Glue separados para cada equipo regional y concédeles acceso a sus tablas del catálogo.",
+            "why": "Los crawlers extraen y catalogan esquemas; no aplican las restricciones requeridas de filas y columnas."
+          },
+          {
+            "id": "C",
+            "text": "Habilita el registro de AWS CloudTrail para el data lake y revisa el acceso de los equipos regionales mediante Athena.",
+            "why": "Los registros de auditoría ayudan a revisar el acceso, pero no restringen las filas y columnas que un equipo puede consultar."
+          },
+          {
+            "id": "D",
+            "text": "Concede a cada equipo acceso mediante IAM a la ubicación compartida de Amazon S3 y a las tablas de Data Catalog.",
+            "why": "El acceso a la ubicación compartida y a las tablas del catálogo no establece los filtros de filas y columnas requeridos para cada equipo."
+          }
+        ],
+        "explanation": "El requisito decisivo es que los equipos que consultan los mismos datos catalogados deben ver filas diferentes, mientras una columna sensible permanece oculta. Los data filters de Lake Formation permiten restringir combinaciones de filas y columnas, incluso para el acceso mediante Athena. Los crawlers de AWS Glue ayudan a catalogar los datos, pero no aplican esas restricciones. CloudTrail registra la actividad de acceso en lugar de conceder acceso filtrado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lake-formation--4213a7ea",
+      "conceptId": "lake-formation",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company keeps shipment data in an Amazon S3 data lake with metadata in AWS Glue Data Catalog. A partner in another AWS account needs governed access to selected datasets, and compliance staff must review which identities attempted to access the data through Lake Formation and when. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run AWS Glue crawlers in the partner account to replace access grants on the source datasets.",
+          "correct": false,
+          "why": "Crawlers discover schemas but do not grant the partner access to the source datasets."
+        },
+        {
+          "id": "B",
+          "text": "Enable Lake Formation hybrid access mode as the mechanism for recording the partner's access attempts.",
+          "correct": false,
+          "why": "Hybrid access mode supports incremental permissions adoption, not the requested audit history."
+        },
+        {
+          "id": "C",
+          "text": "Give the partner access to the Amazon S3 location with a bucket policy instead of sharing governed catalog data.",
+          "correct": false,
+          "why": "S3 location access alone does not provide the requested Lake Formation governance of catalog metadata and underlying data."
+        },
+        {
+          "id": "D",
+          "text": "Use Lake Formation cross-account sharing to grant the partner fine-grained access to catalog metadata and underlying data.",
+          "correct": true,
+          "why": "Lake Formation supports governed cross-account sharing of Data Catalog metadata and the underlying data."
+        },
+        {
+          "id": "E",
+          "text": "Use Lake Formation audit logs in AWS CloudTrail to review access attempts through Lake Formation.",
+          "correct": true,
+          "why": "These logs can show which identities attempted to access data, with which services, and when."
+        }
+      ],
+      "explanation": "The company has two distinct requirements: governed cross-account access and a reviewable access history. Lake Formation cross-account sharing addresses fine-grained access to the catalog metadata and underlying data. Lake Formation audit logs in CloudTrail provide information about access attempts through Lake Formation. A bucket policy alone misses the specified governance, and hybrid access mode is for incremental authorization adoption rather than auditing.",
+      "keywordCues": [
+        "partner in another AWS account",
+        "governed access to selected datasets",
+        "which identities attempted to access the data through Lake Formation and when"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística conserva datos de envíos en un data lake de Amazon S3, con metadatos en AWS Glue Data Catalog. Un socio en otra cuenta de AWS necesita acceso gobernado a conjuntos de datos seleccionados, y el personal de cumplimiento debe revisar qué identidades intentaron acceder a los datos mediante Lake Formation y cuándo. ¿Qué DOS acciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta crawlers de AWS Glue en la cuenta del socio para reemplazar los permisos de acceso a los conjuntos de datos de origen.",
+            "why": "Los crawlers descubren esquemas, pero no conceden al socio acceso a los conjuntos de datos de origen."
+          },
+          {
+            "id": "B",
+            "text": "Habilita Lake Formation hybrid access mode como mecanismo para registrar los intentos de acceso del socio.",
+            "why": "Hybrid access mode permite adoptar permisos gradualmente; no proporciona el historial de auditoría solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Da al socio acceso a la ubicación de Amazon S3 mediante una política de bucket en lugar de compartir los datos catalogados y gobernados.",
+            "why": "El acceso solo a la ubicación de S3 no proporciona la gobernanza solicitada mediante Lake Formation para los metadatos del catálogo y los datos subyacentes."
+          },
+          {
+            "id": "D",
+            "text": "Usa el uso compartido entre cuentas de Lake Formation para conceder al socio acceso detallado a los metadatos del catálogo y a los datos subyacentes.",
+            "why": "Lake Formation permite compartir entre cuentas los metadatos de Data Catalog y los datos subyacentes bajo una gobernanza de acceso."
+          },
+          {
+            "id": "E",
+            "text": "Usa los registros de auditoría de Lake Formation en AWS CloudTrail para revisar los intentos de acceso mediante Lake Formation.",
+            "why": "Estos registros pueden mostrar qué identidades intentaron acceder a los datos, con qué servicios y cuándo."
+          }
+        ],
+        "explanation": "La empresa tiene dos requisitos distintos: acceso gobernado entre cuentas y un historial de acceso que pueda revisar. El uso compartido entre cuentas de Lake Formation proporciona acceso detallado a los metadatos del catálogo y a los datos subyacentes. Los registros de auditoría de Lake Formation en CloudTrail ofrecen información sobre los intentos de acceso mediante Lake Formation. Una política de bucket por sí sola no cumple la gobernanza especificada, y hybrid access mode sirve para adoptar permisos gradualmente, no para auditar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lake-formation--bba7d260",
+      "conceptId": "lake-formation",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company already uses IAM policies for access to its Amazon S3 data lake and AWS Glue Data Catalog. It wants to introduce Lake Formation permissions for one research team first, without interrupting the policies used by other teams' workloads. Which approach meets these requirements with the LEAST disruption?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable CloudTrail auditing for the research team's datasets and leave authorization unchanged.",
+          "correct": false,
+          "why": "Auditing access does not onboard the research team to Lake Formation permissions."
+        },
+        {
+          "id": "B",
+          "text": "Use Lake Formation hybrid access mode and selectively onboard the research team to Lake Formation permissions.",
+          "correct": true,
+          "why": "Hybrid access mode supports incremental Lake Formation adoption without interrupting other users' existing IAM-based access."
+        },
+        {
+          "id": "C",
+          "text": "Replace every team's IAM access with Lake Formation grants before onboarding the research team.",
+          "correct": false,
+          "why": "Replacing all existing access at once conflicts with the requirement to preserve other teams' workloads."
+        },
+        {
+          "id": "D",
+          "text": "Add AWS Glue crawlers for the research team's datasets and retain IAM-only access for all teams.",
+          "correct": false,
+          "why": "Crawlers catalog datasets but do not introduce Lake Formation permissions for the research team."
+        }
+      ],
+      "explanation": "The company needs an incremental permissions change, not an immediate migration for every workload. Lake Formation hybrid access mode lets administrators enable Lake Formation permissions for selected users while other existing users continue using IAM permissions. Replacing all IAM access at once misses the no-interruption constraint. Crawlers and CloudTrail serve cataloging and auditing purposes, respectively, rather than this authorization transition.",
+      "keywordCues": [
+        "introduce Lake Formation permissions for one research team first",
+        "without interrupting the policies used by other teams' workloads"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ya usa políticas de IAM para acceder a su data lake en Amazon S3 y a AWS Glue Data Catalog. Quiere introducir permisos de Lake Formation primero para un equipo de investigación, sin interrumpir las políticas que usan las cargas de trabajo de otros equipos. ¿Qué enfoque cumple estos requisitos con la LEAST disruption?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita la auditoría de CloudTrail para los conjuntos de datos del equipo de investigación y deja la autorización sin cambios.",
+            "why": "Auditar el acceso no incorpora al equipo de investigación a los permisos de Lake Formation."
+          },
+          {
+            "id": "B",
+            "text": "Usa Lake Formation hybrid access mode e incorpora de forma selectiva al equipo de investigación a los permisos de Lake Formation.",
+            "why": "Hybrid access mode permite adoptar Lake Formation gradualmente sin interrumpir el acceso existente basado en IAM de otros usuarios."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza el acceso mediante IAM de todos los equipos por permisos de Lake Formation antes de incorporar al equipo de investigación.",
+            "why": "Reemplazar todo el acceso existente de una vez contradice el requisito de preservar las cargas de trabajo de otros equipos."
+          },
+          {
+            "id": "D",
+            "text": "Agrega crawlers de AWS Glue para los conjuntos de datos del equipo de investigación y mantén el acceso solo mediante IAM para todos los equipos.",
+            "why": "Los crawlers catalogan conjuntos de datos, pero no introducen permisos de Lake Formation para el equipo de investigación."
+          }
+        ],
+        "explanation": "La empresa necesita cambiar los permisos gradualmente, no migrar de inmediato todas las cargas de trabajo. Lake Formation hybrid access mode permite habilitar permisos de Lake Formation para usuarios seleccionados mientras otros usuarios conservan sus permisos de IAM. Reemplazar todo el acceso mediante IAM a la vez incumple la condición de no interrumpir los servicios. Los crawlers y CloudTrail sirven para catalogar y auditar, respectivamente, no para esta transición de autorización."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "lake-formation--r0",
+      "conceptId": "lake-formation",
+      "kind": "recall",
+      "prompt": "Teams query one S3 data lake but need different rows and columns. Which service and feature would you choose, and why?",
+      "promptEs": "Varios equipos consultan un mismo data lake en S3, pero necesitan filas y columnas diferentes. ¿Qué servicio y feature elegirías, y por qué?",
+      "idealAnswer": "Use AWS Lake Formation data filters. They centrally restrict access to combinations of rows and columns in governed data lake datasets.",
+      "rubric": [
+        "Names AWS Lake Formation.",
+        "Names data filters or equivalent row-and-column filtering.",
+        "Explains that the controls restrict what each team can access in the shared data."
+      ]
+    }
+  ]
+}

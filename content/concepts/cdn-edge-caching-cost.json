@@ -1,0 +1,343 @@
+{
+  "conceptId": "cdn-edge-caching-cost",
+  "card": {
+    "en": {
+      "tldr": "Amazon CloudFront serves cached content from edge locations, improving viewer performance and reducing requests to the origin. For cost-focused scenarios, choose CloudFront for frequently requested content and tune the cache key and cache duration so identical responses can share a cached copy.",
+      "whenToUse": [
+        "Viewers in multiple locations repeatedly request the same files, and the origin is handling too many requests.",
+        "A CloudFront distribution has a low cache hit ratio because requests include cookies, headers, or query parameters that do not change the response.",
+        "Requests from multiple CloudFront caching layers still place substantial load on one origin."
+      ],
+      "keyFacts": [
+        "CloudFront serves cached copies from edge locations and regional edge caches; an edge cache miss can be served from a regional edge cache or Origin Shield instead of the origin.",
+        "A longer practical Cache-Control max-age reduces how often CloudFront must check the origin for changed objects.",
+        "Forwarding unnecessary cookie, header, or query-string values can create separate cached copies of identical content.",
+        "Origin Shield adds a caching layer and consolidates requests to the origin through a single location.",
+        "AWS does not charge for data transfer out from an AWS origin to CloudFront; CloudFront usage still has its own pricing."
+      ],
+      "gotchas": [
+        "A long max-age is not appropriate merely to raise cache hits if objects must change sooner.",
+        "Forwarding every viewer cookie for static files can fragment the cache even when cookies do not affect those files.",
+        "Different query-parameter casing or ordering can cause CloudFront to cache identical responses separately."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Direct delivery from Amazon S3",
+          "difference": "S3 can hold the definitive files; CloudFront adds edge caching and delivery close to viewers."
+        },
+        {
+          "concept": "Origin Shield",
+          "difference": "Origin Shield is an additional CloudFront caching layer, not a replacement for choosing an appropriate cache key and duration."
+        }
+      ],
+      "examCues": [
+        "frequently requested files across geographic regions",
+        "reduce requests reaching the origin",
+        "identical responses cached under different cookie values",
+        "query parameters do not change the returned object"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon CloudFront entrega contenido en caché desde edge locations para mejorar el rendimiento de los usuarios y reducir las solicitudes al origen. En escenarios enfocados en costos, elige CloudFront para contenido solicitado con frecuencia y ajusta la cache key y la duración de caché para que las respuestas idénticas compartan una copia.",
+      "whenToUse": [
+        "Usuarios de distintas ubicaciones solicitan repetidamente los mismos archivos y el origen recibe demasiadas solicitudes.",
+        "Una distribución de CloudFront tiene un cache hit ratio bajo porque las solicitudes incluyen cookies, headers o query parameters que no cambian la respuesta.",
+        "Las solicitudes de varias capas de caché de CloudFront siguen generando una carga considerable sobre un solo origen."
+      ],
+      "keyFacts": [
+        "CloudFront entrega copias en caché desde edge locations y regional edge caches; si no hay una copia en el edge, un regional edge cache u Origin Shield puede atender la solicitud sin consultar al origen.",
+        "Un Cache-Control max-age con el valor práctico más largo reduce la frecuencia con que CloudFront consulta al origen para detectar cambios.",
+        "Reenviar valores innecesarios de cookies, headers o query strings puede crear copias en caché separadas de contenido idéntico.",
+        "Origin Shield agrega una capa de caché y concentra las solicitudes al origen en una sola ubicación.",
+        "AWS no cobra la transferencia de datos de salida desde un origen de AWS hacia CloudFront; el uso de CloudFront sigue sujeto a sus propios precios."
+      ],
+      "gotchas": [
+        "No aumentes max-age solo para mejorar los cache hits si los objetos deben actualizarse antes.",
+        "Reenviar todas las cookies para archivos estáticos puede fragmentar la caché aunque las cookies no afecten esos archivos.",
+        "Diferencias en mayúsculas, minúsculas u orden de los query parameters pueden hacer que CloudFront almacene por separado respuestas idénticas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Entrega directa desde Amazon S3",
+          "difference": "S3 puede guardar los archivos definitivos; CloudFront agrega caché en el edge y entrega cercana a los usuarios."
+        },
+        {
+          "concept": "Origin Shield",
+          "difference": "Origin Shield es una capa adicional de caché de CloudFront, no un sustituto de elegir una cache key y una duración adecuadas."
+        }
+      ],
+      "examCues": [
+        "frequently requested files across geographic regions",
+        "reduce requests reaching the origin",
+        "identical responses cached under different cookie values",
+        "query parameters do not change the returned object"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cache-hit-ratio.html",
+      "https://aws.amazon.com/cloudfront/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cdn-edge-caching-cost--b9e8c4d6",
+      "conceptId": "cdn-edge-caching-cost",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A software publisher delivers popular installer files through CloudFront to viewers worldwide. Each published file remains unchanged for weeks, but repeated requests from multiple caching layers still place heavy load on its origin. The publisher wants to reduce origin requests without changing the files delivered to viewers. Which TWO changes meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Shorten the installer files' cache duration to check the origin more often.",
+          "correct": false,
+          "why": "A shorter duration increases the frequency of origin checks."
+        },
+        {
+          "id": "B",
+          "text": "Cache installer files separately for every viewer cookie value.",
+          "correct": false,
+          "why": "Per-cookie caching creates extra variants of installer files that do not change by viewer."
+        },
+        {
+          "id": "C",
+          "text": "Set a longer practical Cache-Control max-age for the published installer files.",
+          "correct": true,
+          "why": "Because the files remain unchanged, a longer practical cache duration reduces checks and fetches from the origin."
+        },
+        {
+          "id": "D",
+          "text": "Enable CloudFront Origin Shield for the distribution's origin.",
+          "correct": true,
+          "why": "Origin Shield provides an additional caching layer that consolidates requests from CloudFront caching layers toward the origin."
+        },
+        {
+          "id": "E",
+          "text": "Forward every query parameter when caching the installer files, including parameters ignored by the origin.",
+          "correct": false,
+          "why": "Parameters that do not change the file can needlessly split identical responses into separate cached copies."
+        }
+      ],
+      "explanation": "The files stay unchanged for weeks, so a longer practical max-age can increase cache hits without changing what viewers receive. Origin Shield adds another caching layer and channels requests from CloudFront caching layers through one location, reducing repeated origin fetches. Shortening the duration or creating unnecessary cookie and query variants works against the origin-load requirement.",
+      "keywordCues": [
+        "remains unchanged for weeks",
+        "multiple caching layers",
+        "reduce origin requests",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cache-hit-ratio.html",
+        "https://aws.amazon.com/cloudfront/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de software entrega archivos de instalación populares mediante CloudFront a usuarios de todo el mundo. Cada archivo publicado permanece sin cambios durante semanas, pero las solicitudes repetidas desde varias capas de caché todavía generan mucha carga en el origen. La empresa quiere reducir las solicitudes al origen sin cambiar los archivos entregados. ¿Qué DOS cambios cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Acorta la duración de caché de los archivos para consultar el origen con más frecuencia.",
+            "why": "Una duración menor aumenta la frecuencia de las consultas al origen."
+          },
+          {
+            "id": "B",
+            "text": "Almacena los archivos de instalación por separado para cada valor de cookie del usuario.",
+            "why": "La caché por cookie crea variantes adicionales de archivos que no cambian según el usuario."
+          },
+          {
+            "id": "C",
+            "text": "Configura un Cache-Control max-age práctico más largo para los archivos de instalación publicados.",
+            "why": "Como los archivos no cambian, una duración práctica más larga reduce las consultas y obtenciones desde el origen."
+          },
+          {
+            "id": "D",
+            "text": "Activa CloudFront Origin Shield para el origen de la distribución.",
+            "why": "Origin Shield agrega una capa de caché que concentra las solicitudes de las capas de CloudFront hacia el origen."
+          },
+          {
+            "id": "E",
+            "text": "Reenvía todos los query parameters al almacenar los archivos de instalación, incluso los que el origen ignora.",
+            "why": "Los parámetros que no cambian el archivo pueden separar innecesariamente respuestas idénticas en distintas copias."
+          }
+        ],
+        "explanation": "Los archivos permanecen sin cambios durante semanas, así que un max-age práctico más largo puede aumentar los cache hits sin modificar lo que reciben los usuarios. Origin Shield agrega una capa de caché y dirige las solicitudes de las capas de CloudFront a través de una ubicación, lo que reduce las consultas repetidas al origen. Acortar la duración o crear variantes innecesarias por cookies y query parameters va en contra del objetivo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cdn-edge-caching-cost--f00d6165",
+      "conceptId": "cdn-edge-caching-cost",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum stores its definitive image files in Amazon S3. Visitors on several continents repeatedly download the same exhibit images, and the museum wants faster delivery with fewer requests reaching its storage origin. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a CloudFront distribution but cache each image separately for every viewer cookie value.",
+          "correct": false,
+          "why": "Cookie-based variants needlessly reduce cache sharing when every visitor receives the same image."
+        },
+        {
+          "id": "B",
+          "text": "Deploy cache servers in each visitor region and populate them from the S3 origin.",
+          "correct": false,
+          "why": "Self-managed cache servers add operational overhead that CloudFront avoids."
+        },
+        {
+          "id": "C",
+          "text": "Serve the images directly from the S3 origin and increase the Cache-Control max-age.",
+          "correct": false,
+          "why": "This does not add CloudFront edge caching to serve distant viewers or reduce their requests to S3."
+        },
+        {
+          "id": "D",
+          "text": "Use a CloudFront distribution with the S3 origin and a practical Cache-Control max-age for the images.",
+          "correct": true,
+          "why": "CloudFront can serve repeated requests from edge caches while an appropriate max-age limits origin checks."
+        }
+      ],
+      "explanation": "The images are requested repeatedly by geographically dispersed visitors, so edge caching addresses both delivery performance and origin load. CloudFront uses edge locations to serve cached copies, and a practical max-age reduces subsequent origin requests. Caching separately by viewer cookie would create unnecessary copies of the same image.",
+      "keywordCues": [
+        "Visitors on several continents",
+        "repeatedly download the same exhibit images",
+        "fewer requests reaching its storage origin",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cache-hit-ratio.html",
+        "https://aws.amazon.com/cloudfront/faqs/"
+      ],
+      "es": {
+        "stem": "Un museo guarda sus archivos de imágenes definitivos en Amazon S3. Visitantes de varios continentes descargan repetidamente las mismas imágenes y el museo quiere entregarlas más rápido con menos solicitudes a su origen de almacenamiento. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa una distribución de CloudFront, pero almacena cada imagen por separado para cada valor de cookie del usuario.",
+            "why": "Las variantes por cookie reducen innecesariamente el uso compartido de la caché cuando todos reciben la misma imagen."
+          },
+          {
+            "id": "B",
+            "text": "Implementa servidores de caché en cada región de visitantes y llénalos desde el origen S3.",
+            "why": "Administrar servidores de caché agrega trabajo operativo que CloudFront evita."
+          },
+          {
+            "id": "C",
+            "text": "Entrega las imágenes directamente desde el origen S3 y aumenta Cache-Control max-age.",
+            "why": "Esto no agrega la caché en el edge de CloudFront para atender a usuarios lejanos ni reducir sus solicitudes a S3."
+          },
+          {
+            "id": "D",
+            "text": "Usa una distribución de CloudFront con el origen S3 y un Cache-Control max-age práctico para las imágenes.",
+            "why": "CloudFront puede atender solicitudes repetidas desde la caché en el edge, mientras un max-age adecuado limita las consultas al origen."
+          }
+        ],
+        "explanation": "Las imágenes se solicitan repetidamente desde distintas ubicaciones, por lo que la caché en el edge mejora la entrega y reduce la carga del origen. CloudFront entrega copias desde edge locations, y un max-age práctico reduce las solicitudes posteriores al origen. Crear una copia distinta por cookie generaría variantes innecesarias de la misma imagen."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cdn-edge-caching-cost--c9f9e254",
+      "conceptId": "cdn-edge-caching-cost",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing site uses one CloudFront distribution for personalized pages and shared CSS files. Every request carries a session cookie, but the CSS is identical for all customers; logs show frequent origin fetches for the CSS under different cookie values. Which change reduces origin requests while preserving personalized pages MOST effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Stop forwarding cookies for every path in the distribution.",
+          "correct": false,
+          "why": "The personalized pages still need their session cookie."
+        },
+        {
+          "id": "B",
+          "text": "Increase the CSS max-age while continuing to cache each cookie value separately.",
+          "correct": false,
+          "why": "A longer duration does not prevent different session cookie values from fragmenting the CSS cache."
+        },
+        {
+          "id": "C",
+          "text": "Enable Origin Shield while keeping the same cookie-based cache key for CSS and personalized pages.",
+          "correct": false,
+          "why": "Origin Shield adds caching but does not remove unnecessary per-cookie CSS variants."
+        },
+        {
+          "id": "D",
+          "text": "Add a separate cache behavior for CSS that does not cache based on cookie values, while retaining appropriate cookie handling for personalized pages.",
+          "correct": true,
+          "why": "The shared CSS can reuse cached copies without changing cookie handling for personalized content."
+        }
+      ],
+      "explanation": "The deciding constraint is that CSS does not vary by session, while the pages do. A separate CSS cache behavior lets CloudFront share cached CSS across cookie values without changing how personalized pages are handled. Increasing max-age or adding Origin Shield without fixing the CSS cache key leaves its unnecessary variants in place.",
+      "keywordCues": [
+        "personalized pages and shared CSS files",
+        "CSS is identical for all customers",
+        "different cookie values",
+        "preserving personalized pages"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cache-hit-ratio.html",
+        "https://aws.amazon.com/cloudfront/faqs/"
+      ],
+      "es": {
+        "stem": "Un sitio de venta de entradas usa una distribución de CloudFront para páginas personalizadas y archivos CSS compartidos. Cada solicitud lleva una cookie de sesión, pero el CSS es idéntico para todos los clientes; los logs muestran consultas frecuentes al origen para el CSS con distintos valores de cookie. ¿Qué cambio reduce las solicitudes al origen y conserva las páginas personalizadas MOST effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Deja de reenviar cookies para todas las rutas de la distribución.",
+            "why": "Las páginas personalizadas todavía necesitan su cookie de sesión."
+          },
+          {
+            "id": "B",
+            "text": "Aumenta max-age para CSS, pero sigue almacenando una copia separada por cada valor de cookie.",
+            "why": "Una duración mayor no evita que las distintas cookies de sesión fragmenten la caché de CSS."
+          },
+          {
+            "id": "C",
+            "text": "Activa Origin Shield sin cambiar la cache key basada en cookies para CSS y páginas personalizadas.",
+            "why": "Origin Shield agrega caché, pero no elimina las variantes innecesarias de CSS por cookie."
+          },
+          {
+            "id": "D",
+            "text": "Agrega un cache behavior separado para CSS que no almacene contenido según los valores de cookie y conserva el manejo adecuado de cookies para las páginas personalizadas.",
+            "why": "El CSS compartido puede reutilizar copias en caché sin cambiar el manejo de cookies del contenido personalizado."
+          }
+        ],
+        "explanation": "La condición decisiva es que el CSS no cambia según la sesión, mientras que las páginas sí. Un cache behavior separado permite compartir el CSS en caché entre distintos valores de cookie sin modificar el manejo de las páginas personalizadas. Aumentar max-age o agregar Origin Shield sin corregir la cache key deja las variantes innecesarias de CSS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cdn-edge-caching-cost--r0",
+      "conceptId": "cdn-edge-caching-cost",
+      "kind": "recall",
+      "prompt": "A global audience repeatedly downloads unchanged files. What AWS service and cache setting would reduce origin requests, and why?",
+      "promptEs": "Usuarios de todo el mundo descargan repetidamente archivos sin cambios. ¿Qué servicio de AWS y qué ajuste de caché reducirían las solicitudes al origen, y por qué?",
+      "idealAnswer": "Use Amazon CloudFront to serve cached files from edge locations. Set a practical Cache-Control max-age so repeated requests can use cached copies instead of checking the origin as often.",
+      "rubric": [
+        "Names Amazon CloudFront for edge delivery.",
+        "Recommends a practical Cache-Control max-age for unchanged files.",
+        "Explains that cache hits reduce requests to the origin."
+      ]
+    }
+  ]
+}

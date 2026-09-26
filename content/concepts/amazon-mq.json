@@ -1,0 +1,367 @@
+{
+  "conceptId": "amazon-mq",
+  "card": {
+    "en": {
+      "tldr": "Amazon MQ is a managed broker service for Apache ActiveMQ Classic and RabbitMQ. Choose it when an application must keep its existing broker-based messaging code while AWS handles broker setup, operation, and maintenance.",
+      "whenToUse": [
+        "An existing ActiveMQ Classic or RabbitMQ application is moving to AWS without rewriting messaging code.",
+        "Applications must continue communicating through a message broker that uses established messaging protocols."
+      ],
+      "keyFacts": [
+        "Amazon MQ supports managed Apache ActiveMQ Classic and RabbitMQ brokers.",
+        "Existing message brokers can be migrated to Amazon MQ without rewriting messaging code.",
+        "Amazon MQ performs broker maintenance and version upgrades during a scheduled maintenance window.",
+        "Broker and queue metrics are automatically collected and pushed to Amazon CloudWatch every minute.",
+        "Amazon MQ encrypts messages at rest and in transit; broker connections use SSL and can be restricted to a private endpoint in an Amazon VPC."
+      ],
+      "gotchas": [
+        "A managed queue is not necessarily a replacement for an application that must retain its existing broker messaging code.",
+        "Choosing a service for fan-out or event routing does not, by itself, meet a broker-compatibility requirement."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS",
+          "difference": "Choose Amazon MQ when preserving existing broker messaging code is required; SQS is a managed queue, not a migrated ActiveMQ Classic or RabbitMQ broker."
+        },
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS distributes notifications to subscribers; Amazon MQ provides a managed broker for existing broker-based applications."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "EventBridge routes events with rules; Amazon MQ addresses a requirement to retain broker-based messaging code."
+        }
+      ],
+      "examCues": [
+        "migrate an existing ActiveMQ Classic broker",
+        "keep RabbitMQ messaging code unchanged",
+        "managed broker with least operational overhead",
+        "retain existing broker-based messaging"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon MQ es un servicio de brokers administrados para Apache ActiveMQ Classic y RabbitMQ. Elígelo cuando una aplicación deba conservar su código de mensajería existente mientras AWS se encarga de la configuración, operación y mantenimiento del broker.",
+      "whenToUse": [
+        "Una aplicación existente de ActiveMQ Classic o RabbitMQ se traslada a AWS sin reescribir su código de mensajería.",
+        "Las aplicaciones deben seguir comunicándose mediante un broker que utiliza protocolos de mensajería establecidos."
+      ],
+      "keyFacts": [
+        "Amazon MQ ofrece brokers administrados de Apache ActiveMQ Classic y RabbitMQ.",
+        "Puedes migrar brokers existentes a Amazon MQ sin reescribir el código de mensajería.",
+        "Amazon MQ realiza el mantenimiento y las actualizaciones de versión del broker durante una ventana de mantenimiento programada.",
+        "Las métricas del broker y de las colas se recopilan y envían automáticamente a Amazon CloudWatch cada minuto.",
+        "Amazon MQ cifra los mensajes en reposo y en tránsito; las conexiones al broker usan SSL y pueden restringirse a un endpoint privado en una Amazon VPC."
+      ],
+      "gotchas": [
+        "Una cola administrada no necesariamente reemplaza una aplicación que debe conservar su código de mensajería para un broker existente.",
+        "Elegir un servicio para fan-out o enrutamiento de eventos no satisface por sí solo un requisito de compatibilidad con un broker."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS",
+          "difference": "Elige Amazon MQ si debes conservar el código de mensajería existente; SQS es una cola administrada, no un broker de ActiveMQ Classic o RabbitMQ migrado."
+        },
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS distribuye notificaciones a suscriptores; Amazon MQ proporciona un broker administrado para aplicaciones existentes basadas en brokers."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "EventBridge enruta eventos mediante reglas; Amazon MQ responde al requisito de conservar el código de mensajería basado en brokers."
+        }
+      ],
+      "examCues": [
+        "migrate an existing ActiveMQ Classic broker",
+        "keep RabbitMQ messaging code unchanged",
+        "managed broker with least operational overhead",
+        "retain existing broker-based messaging"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/welcome.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "amazon-mq--2605b314",
+      "conceptId": "amazon-mq",
+      "secondaryConcepts": [
+        "sqs-standard-vs-fifo",
+        "sns-pub-sub-fanout"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company runs an order-processing application with an Apache ActiveMQ Classic broker in its data center. The company is moving the application to AWS and will not change its messaging code during the migration. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run an ActiveMQ Classic broker on Amazon EC2 and maintain it internally.",
+          "correct": false,
+          "why": "This could retain the broker, but the company would still operate and maintain it."
+        },
+        {
+          "id": "B",
+          "text": "Move messaging to Amazon SQS and update the application to use queues.",
+          "correct": false,
+          "why": "SQS would require changing the application's existing broker messaging code."
+        },
+        {
+          "id": "C",
+          "text": "Publish order events to Amazon SNS and subscribe the processing application.",
+          "correct": false,
+          "why": "Moving to SNS would replace the existing broker messaging approach and require application changes."
+        },
+        {
+          "id": "D",
+          "text": "Migrate the ActiveMQ Classic broker to Amazon MQ.",
+          "correct": true,
+          "why": "Amazon MQ provides a managed ActiveMQ Classic broker without requiring a messaging-code rewrite."
+        }
+      ],
+      "explanation": "The deciding constraints are the existing ActiveMQ Classic broker and the prohibition on changing messaging code. Amazon MQ supports migration of existing brokers without rewriting that code and manages broker setup, operation, and maintenance. Running ActiveMQ Classic on EC2 could preserve the application behavior but leaves broker maintenance with the company. SQS and SNS would require a messaging redesign.",
+      "keywordCues": [
+        "Apache ActiveMQ Classic broker",
+        "will not change its messaging code",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/welcome.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta una aplicación de procesamiento de pedidos con un broker Apache ActiveMQ Classic en su centro de datos. La empresa trasladará la aplicación a AWS y no cambiará su código de mensajería durante la migración. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar un broker ActiveMQ Classic en Amazon EC2 y encargarse de su mantenimiento.",
+            "why": "Esto podría conservar el broker, pero la empresa seguiría encargándose de operarlo y mantenerlo."
+          },
+          {
+            "id": "B",
+            "text": "Trasladar la mensajería a Amazon SQS y actualizar la aplicación para que use colas.",
+            "why": "SQS exigiría cambiar el código de mensajería que la aplicación usa con el broker existente."
+          },
+          {
+            "id": "C",
+            "text": "Publicar los eventos de pedidos en Amazon SNS y suscribir la aplicación de procesamiento.",
+            "why": "Pasar a SNS reemplazaría el enfoque de mensajería existente y exigiría cambios en la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Migrar el broker ActiveMQ Classic a Amazon MQ.",
+            "why": "Amazon MQ proporciona un broker ActiveMQ Classic administrado sin exigir que se reescriba el código de mensajería."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el broker ActiveMQ Classic existente y la prohibición de cambiar el código de mensajería. Amazon MQ permite migrar brokers existentes sin reescribir ese código y administra su configuración, operación y mantenimiento. Ejecutar ActiveMQ Classic en EC2 podría conservar el comportamiento de la aplicación, pero dejaría el mantenimiento a cargo de la empresa. SQS y SNS exigirían rediseñar la mensajería."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "amazon-mq--1fcf9107",
+      "conceptId": "amazon-mq",
+      "secondaryConcepts": [
+        "eventbridge",
+        "sqs-standard-vs-fifo"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A healthcare software provider is moving a RabbitMQ-based application to AWS. Its integration team must retain the application's broker messaging code, and the security team requires encrypted broker connections and access through a private endpoint in an Amazon VPC. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a RabbitMQ broker on Amazon MQ with SSL connections and a private endpoint.",
+          "correct": true,
+          "why": "Amazon MQ retains the managed RabbitMQ broker model and supports SSL and private VPC access."
+        },
+        {
+          "id": "B",
+          "text": "Replace RabbitMQ with Amazon EventBridge rules and restrict event publishers to the VPC.",
+          "correct": false,
+          "why": "EventBridge rules do not preserve the application's RabbitMQ broker messaging code."
+        },
+        {
+          "id": "C",
+          "text": "Replace RabbitMQ with Amazon SQS queues and place consumers in private subnets.",
+          "correct": false,
+          "why": "Using SQS would require changing the existing broker messaging code."
+        },
+        {
+          "id": "D",
+          "text": "Install RabbitMQ on Amazon EC2 instances in private subnets and enable SSL.",
+          "correct": false,
+          "why": "This can address connectivity requirements but leaves broker operation and maintenance to the provider."
+        }
+      ],
+      "explanation": "The application must keep its RabbitMQ messaging code while using encrypted, private broker connectivity. Amazon MQ manages RabbitMQ brokers, uses SSL for broker connections, and can restrict access to a private endpoint within a VPC. A self-managed EC2 broker could satisfy the connectivity needs but adds operational work. EventBridge and SQS do not satisfy the code-retention requirement.",
+      "keywordCues": [
+        "RabbitMQ-based application",
+        "retain the application's broker messaging code",
+        "encrypted broker connections",
+        "private endpoint in an Amazon VPC",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/welcome.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de software de salud traslada a AWS una aplicación basada en RabbitMQ. Su equipo de integración debe conservar el código de mensajería de la aplicación, y el equipo de seguridad exige conexiones cifradas al broker y acceso mediante un endpoint privado en una Amazon VPC. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un broker RabbitMQ en Amazon MQ con conexiones SSL y un endpoint privado.",
+            "why": "Amazon MQ conserva el modelo de broker RabbitMQ administrado y admite SSL y acceso privado desde la VPC."
+          },
+          {
+            "id": "B",
+            "text": "Reemplazar RabbitMQ por reglas de Amazon EventBridge y restringir a la VPC los publicadores de eventos.",
+            "why": "Las reglas de EventBridge no conservan el código de mensajería que la aplicación usa con RabbitMQ."
+          },
+          {
+            "id": "C",
+            "text": "Reemplazar RabbitMQ por colas de Amazon SQS y ubicar a los consumidores en subredes privadas.",
+            "why": "Usar SQS exigiría cambiar el código de mensajería existente para el broker."
+          },
+          {
+            "id": "D",
+            "text": "Instalar RabbitMQ en instancias Amazon EC2 en subredes privadas y habilitar SSL.",
+            "why": "Esto puede cumplir los requisitos de conectividad, pero deja la operación y el mantenimiento del broker a cargo del proveedor."
+          }
+        ],
+        "explanation": "La aplicación debe conservar su código de mensajería para RabbitMQ y usar conectividad cifrada y privada con el broker. Amazon MQ administra brokers RabbitMQ, utiliza SSL para las conexiones y puede restringir el acceso a un endpoint privado dentro de una VPC. Un broker autoadministrado en EC2 podría satisfacer los requisitos de conectividad, pero añade trabajo operativo. EventBridge y SQS no cumplen el requisito de conservar el código."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "amazon-mq--efd525fa",
+      "conceptId": "amazon-mq",
+      "secondaryConcepts": [
+        "sqs-standard-vs-fifo",
+        "sns-pub-sub-fanout",
+        "eventbridge"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company is consolidating two independent applications on AWS. One uses an existing Apache ActiveMQ Classic broker; the other uses an existing RabbitMQ broker. Neither application can have its messaging code rewritten, and the company wants AWS to manage broker maintenance. Which two migration proposals meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the ActiveMQ Classic application's messages to Amazon SQS queues.",
+          "correct": false,
+          "why": "Replacing the existing broker with SQS would require changing that application's messaging code."
+        },
+        {
+          "id": "B",
+          "text": "Publish the RabbitMQ application's messages to Amazon SNS topics.",
+          "correct": false,
+          "why": "SNS does not retain the application's existing RabbitMQ broker messaging integration."
+        },
+        {
+          "id": "C",
+          "text": "Migrate the RabbitMQ application to a RabbitMQ broker on Amazon MQ.",
+          "correct": true,
+          "why": "Amazon MQ manages RabbitMQ brokers and supports migration without rewriting messaging code."
+        },
+        {
+          "id": "D",
+          "text": "Route both applications' messages through Amazon EventBridge rules.",
+          "correct": false,
+          "why": "Routing messages with EventBridge would replace both existing broker integrations."
+        },
+        {
+          "id": "E",
+          "text": "Migrate the ActiveMQ Classic application to an ActiveMQ Classic broker on Amazon MQ.",
+          "correct": true,
+          "why": "Amazon MQ manages ActiveMQ Classic brokers and supports migration without rewriting messaging code."
+        }
+      ],
+      "explanation": "Each application must retain its current broker-based messaging code, and broker maintenance must be managed by AWS. Amazon MQ offers managed brokers for both Apache ActiveMQ Classic and RabbitMQ and supports migration without rewriting messaging code. SQS, SNS, and EventBridge can serve other messaging or event-routing needs, but substituting them here would change the existing broker integrations.",
+      "keywordCues": [
+        "existing Apache ActiveMQ Classic broker",
+        "existing RabbitMQ broker",
+        "Neither application can have its messaging code rewritten",
+        "AWS to manage broker maintenance",
+        "Choose two"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios está consolidando dos aplicaciones independientes en AWS. Una utiliza un broker Apache ActiveMQ Classic existente y la otra, un broker RabbitMQ existente. No se puede reescribir el código de mensajería de ninguna aplicación, y la empresa quiere que AWS administre el mantenimiento de los brokers. ¿Qué dos propuestas de migración cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Trasladar los mensajes de la aplicación de ActiveMQ Classic a colas de Amazon SQS.",
+            "why": "Reemplazar el broker existente por SQS exigiría cambiar el código de mensajería de esa aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Publicar los mensajes de la aplicación de RabbitMQ en temas de Amazon SNS.",
+            "why": "SNS no conserva la integración de mensajería que la aplicación ya tiene con RabbitMQ."
+          },
+          {
+            "id": "C",
+            "text": "Migrar la aplicación de RabbitMQ a un broker RabbitMQ en Amazon MQ.",
+            "why": "Amazon MQ administra brokers RabbitMQ y permite migrar sin reescribir el código de mensajería."
+          },
+          {
+            "id": "D",
+            "text": "Enrutar los mensajes de ambas aplicaciones mediante reglas de Amazon EventBridge.",
+            "why": "Enrutar los mensajes con EventBridge reemplazaría las dos integraciones existentes con brokers."
+          },
+          {
+            "id": "E",
+            "text": "Migrar la aplicación de ActiveMQ Classic a un broker ActiveMQ Classic en Amazon MQ.",
+            "why": "Amazon MQ administra brokers ActiveMQ Classic y permite migrar sin reescribir el código de mensajería."
+          }
+        ],
+        "explanation": "Cada aplicación debe conservar su código de mensajería basado en su broker actual, y AWS debe administrar el mantenimiento. Amazon MQ ofrece brokers administrados tanto para Apache ActiveMQ Classic como para RabbitMQ y permite migrar sin reescribir el código de mensajería. SQS, SNS y EventBridge pueden cubrir otras necesidades de mensajería o enrutamiento de eventos, pero sustituir los brokers por esos servicios cambiaría las integraciones existentes."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "amazon-mq--r0",
+      "conceptId": "amazon-mq",
+      "kind": "recall",
+      "prompt": "An existing RabbitMQ application must move to AWS without rewriting messaging code. What service fits, and what work does it manage?",
+      "promptEs": "Una aplicación RabbitMQ debe trasladarse a AWS sin reescribir su código de mensajería. ¿Qué servicio elegirías y qué trabajo administra?",
+      "idealAnswer": "Choose Amazon MQ for RabbitMQ because it supports migration of an existing broker without rewriting messaging code. Amazon MQ manages broker setup, operation, and maintenance.",
+      "rubric": [
+        "Names Amazon MQ for RabbitMQ.",
+        "Explains that existing messaging code can be retained.",
+        "Mentions managed broker setup, operation, or maintenance."
+      ]
+    },
+    {
+      "id": "amazon-mq--r1",
+      "conceptId": "amazon-mq",
+      "kind": "why-not",
+      "prompt": "Why is Amazon SQS not a drop-in choice when an ActiveMQ Classic application must retain its messaging code?",
+      "promptEs": "¿Por qué Amazon SQS no es un reemplazo directo si una aplicación ActiveMQ Classic debe conservar su código de mensajería?",
+      "idealAnswer": "The requirement is to preserve the application's existing broker messaging code, not merely to provide a queue. Amazon MQ offers a managed ActiveMQ Classic broker that can be migrated to without rewriting that code; replacing it with SQS would require changing the integration.",
+      "rubric": [
+        "Identifies preservation of existing broker messaging code as the deciding constraint.",
+        "Explains why substituting SQS would require an integration change.",
+        "Names Amazon MQ for ActiveMQ Classic as the managed-broker fit."
+      ]
+    }
+  ]
+}

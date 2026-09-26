@@ -1,0 +1,446 @@
+{
+  "conceptId": "rds-read-replicas",
+  "card": {
+    "en": {
+      "tldr": "Amazon RDS read replicas are read-only DB instances updated asynchronously from a source instance. Choose them to offload read-heavy queries or reporting; a cross-Region replica can support disaster recovery if you promote it, but it is not an automatic-failover solution.",
+      "whenToUse": [
+        "Reporting queries are slowing down a production RDS DB instance.",
+        "An existing RDS workload needs more read capacity without moving its writes.",
+        "A disaster recovery plan can include promoting a cross-Region replica to a standalone DB instance."
+      ],
+      "keyFacts": [
+        "Applications send writes to the primary DB instance and can send reads to a read replica.",
+        "Replication to a read replica is asynchronous, so replica data might be stale.",
+        "Read replicas can be in the source Region or a different Region.",
+        "RDS does not automatically add or remove read replicas as read demand changes.",
+        "A read replica can be promoted to a standalone DB instance."
+      ],
+      "gotchas": [
+        "A read replica does not replace a Multi-AZ standby when the requirement is high availability with automatic failover.",
+        "A classic Multi-AZ standby cannot serve reporting reads.",
+        "Do not assume the replica always has the latest committed data.",
+        "Do not assume RDS automatically scales the number of read replicas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "rds-multi-az",
+          "difference": "A Multi-AZ standby is synchronously replicated for high availability but cannot serve reads; a read replica serves reads through asynchronous replication."
+        },
+        {
+          "concept": "aurora-global-database",
+          "difference": "Aurora Global Database is a different global relational database design; an existing RDS instance can instead use a cross-Region read replica when asynchronous replication and promotion are acceptable."
+        },
+        {
+          "concept": "dynamodb-global-tables",
+          "difference": "DynamoDB global tables address multi-Region writes for a NoSQL workload, not read offloading for an existing RDS instance."
+        }
+      ],
+      "examCues": [
+        "offload reporting queries from the primary",
+        "read-heavy workload on an existing RDS instance",
+        "cross-Region replica with manual promotion",
+        "replica data may lag the primary"
+      ]
+    },
+    "es": {
+      "tldr": "Las read replicas de Amazon RDS son instancias de solo lectura que reciben actualizaciones de forma asíncrona desde una instancia de origen. Elígelas para descargar consultas intensivas o de reportes; una réplica cross-Region puede apoyar la recuperación ante desastres si la promueves, pero no proporciona failover automático.",
+      "whenToUse": [
+        "Las consultas de reportes están ralentizando una instancia de producción de RDS.",
+        "Una carga de trabajo existente en RDS necesita más capacidad de lectura sin mover las escrituras.",
+        "Un plan de recuperación ante desastres puede incluir la promoción de una réplica cross-Region a instancia independiente."
+      ],
+      "keyFacts": [
+        "Las aplicaciones envían las escrituras a la instancia principal y pueden enviar las lecturas a una read replica.",
+        "La replicación hacia una read replica es asíncrona, por lo que sus datos pueden estar desactualizados.",
+        "Las read replicas pueden estar en la misma Region que el origen o en otra.",
+        "RDS no agrega ni elimina automáticamente read replicas cuando cambia la demanda de lectura.",
+        "Una read replica se puede promover a una instancia independiente."
+      ],
+      "gotchas": [
+        "Una read replica no sustituye a un standby de Multi-AZ cuando necesitas alta disponibilidad con failover automático.",
+        "Un standby clásico de Multi-AZ no puede atender lecturas de reportes.",
+        "No supongas que la réplica siempre contiene los datos confirmados más recientes.",
+        "No supongas que RDS ajusta automáticamente la cantidad de read replicas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "rds-multi-az",
+          "difference": "Un standby de Multi-AZ usa replicación síncrona para alta disponibilidad, pero no atiende lecturas; una read replica atiende lecturas mediante replicación asíncrona."
+        },
+        {
+          "concept": "aurora-global-database",
+          "difference": "Aurora Global Database es otro diseño de base de datos relacional global; una instancia de RDS existente puede usar una read replica cross-Region si la replicación asíncrona y la promoción son aceptables."
+        },
+        {
+          "concept": "dynamodb-global-tables",
+          "difference": "DynamoDB global tables cubre escrituras multi-Region de una carga NoSQL, no la descarga de lecturas de una instancia de RDS existente."
+        }
+      ],
+      "examCues": [
+        "offload reporting queries from the primary",
+        "read-heavy workload on an existing RDS instance",
+        "cross-Region replica with manual promotion",
+        "replica data may lag the primary"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rds-read-replicas--49dfedbf",
+      "conceptId": "rds-read-replicas",
+      "secondaryConcepts": [
+        "rds-multi-az",
+        "dynamodb-global-tables"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retailer runs its order database on an Amazon RDS DB instance. Analysts run long read-only sales reports that compete with checkout queries, and the reports can tolerate slightly stale data. Which solution reduces the load on the primary database with the LEAST change to the application’s database platform?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an RDS read replica and route the reporting queries to it.",
+          "correct": true,
+          "why": "A read replica serves read-only reports and receives asynchronous updates, which the reports can tolerate."
+        },
+        {
+          "id": "B",
+          "text": "Increase the primary RDS instance size and keep all reporting queries on the primary.",
+          "correct": false,
+          "why": "This leaves the reports competing with checkout queries on the same instance rather than offloading them."
+        },
+        {
+          "id": "C",
+          "text": "Move the order data to DynamoDB global tables and run the reports from another Region.",
+          "correct": false,
+          "why": "Changing database platforms does not meet the requirement for minimal change to the existing RDS workload."
+        },
+        {
+          "id": "D",
+          "text": "Enable an RDS Multi-AZ DB instance deployment and route the reporting queries to its standby.",
+          "correct": false,
+          "why": "The Multi-AZ standby for a DB instance deployment cannot serve reporting reads."
+        }
+      ],
+      "explanation": "The deciding requirements are read-only reports, tolerance for slightly stale data, and minimal change to the RDS platform. An RDS read replica accepts reporting reads while asynchronous replication keeps it updated from the primary. A classic Multi-AZ standby cannot serve those queries, and resizing the primary does not separate reporting from checkout traffic.",
+      "keywordCues": [
+        "long read-only sales reports",
+        "can tolerate slightly stale data",
+        "reduces the load on the primary database",
+        "LEAST change to the application’s database platform"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista ejecuta su base de datos de pedidos en una instancia de Amazon RDS. Los analistas ejecutan reportes de ventas largos y de solo lectura que compiten con las consultas de pago, y los reportes pueden tolerar datos ligeramente desactualizados. ¿Qué solución reduce la carga de la base de datos principal con el LEAST cambio en la plataforma de base de datos de la aplicación?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una read replica de RDS y dirige allí las consultas de reportes.",
+            "why": "Una read replica atiende reportes de solo lectura y recibe actualizaciones asíncronas, algo que los reportes pueden tolerar."
+          },
+          {
+            "id": "B",
+            "text": "Aumenta el tamaño de la instancia principal de RDS y mantén todas las consultas de reportes en ella.",
+            "why": "Esto mantiene los reportes compitiendo con las consultas de pago en la misma instancia, en vez de descargarlos."
+          },
+          {
+            "id": "C",
+            "text": "Mueve los datos de pedidos a DynamoDB global tables y ejecuta los reportes desde otra Region.",
+            "why": "Cambiar de plataforma de base de datos no cumple el requisito de modificar lo menos posible la carga existente en RDS."
+          },
+          {
+            "id": "D",
+            "text": "Habilita un despliegue de instancia de RDS Multi-AZ y dirige las consultas de reportes a su standby.",
+            "why": "El standby de un despliegue de instancia Multi-AZ no puede atender lecturas de reportes."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son los reportes de solo lectura, la tolerancia a datos ligeramente desactualizados y el cambio mínimo en RDS. Una read replica de RDS atiende las lecturas de reportes mientras recibe actualizaciones asíncronas de la instancia principal. Un standby clásico de Multi-AZ no puede atender esas consultas, y aumentar el tamaño de la instancia principal no separa los reportes del tráfico de pago."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-read-replicas--9fb41531",
+      "conceptId": "rds-read-replicas",
+      "secondaryConcepts": [
+        "rds-multi-az",
+        "dynamodb-global-tables"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company keeps its shipment database on an RDS DB instance in one AWS Region. Its disaster recovery runbook permits an operator to activate a database in another Region after an outage, and the business accepts that asynchronous replication might leave some recent changes unavailable there. Which solution meets these requirements while retaining the existing RDS database?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable an RDS Multi-AZ standby and promote that standby in the recovery Region.",
+          "correct": false,
+          "why": "A Multi-AZ standby is for a deployment within a Region, not a cross-Region replica to promote."
+        },
+        {
+          "id": "B",
+          "text": "Create a cross-Region RDS read replica and promote it to a standalone DB instance during recovery.",
+          "correct": true,
+          "why": "A cross-Region read replica provides asynchronously replicated data that can be promoted for disaster recovery."
+        },
+        {
+          "id": "C",
+          "text": "Replace the shipment database with DynamoDB global tables in both Regions.",
+          "correct": false,
+          "why": "Replacing the existing RDS database violates the requirement to retain it."
+        },
+        {
+          "id": "D",
+          "text": "Create an RDS read replica in another Availability Zone of the source Region and promote it during recovery.",
+          "correct": false,
+          "why": "A replica in the source Region does not provide the required database in another Region."
+        }
+      ],
+      "explanation": "The recovery database must be in another Region, and operator-driven activation with possible replication lag is acceptable. An RDS cross-Region read replica fits those constraints and can be promoted to a standalone instance. Multi-AZ does not place its standby in another Region, while a same-Region read replica misses the location requirement.",
+      "keywordCues": [
+        "database in another Region",
+        "permits an operator to activate",
+        "asynchronous replication",
+        "retaining the existing RDS database"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística mantiene su base de datos de envíos en una instancia de RDS en una AWS Region. Su procedimiento de recuperación ante desastres permite que una persona active una base de datos en otra Region después de una interrupción, y la empresa acepta que la replicación asíncrona podría dejar algunos cambios recientes sin estar disponibles allí. ¿Qué solución cumple estos requisitos y conserva la base de datos de RDS existente?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita un standby de RDS Multi-AZ y promuévelo en la Region de recuperación.",
+            "why": "Un standby de Multi-AZ corresponde a un despliegue dentro de una Region, no a una réplica cross-Region que se pueda promover."
+          },
+          {
+            "id": "B",
+            "text": "Crea una read replica cross-Region de RDS y promuévela a instancia independiente durante la recuperación.",
+            "why": "Una read replica cross-Region proporciona datos replicados de forma asíncrona y se puede promover para recuperación ante desastres."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza la base de datos de envíos por DynamoDB global tables en ambas Regions.",
+            "why": "Reemplazar la base de datos de RDS existente incumple el requisito de conservarla."
+          },
+          {
+            "id": "D",
+            "text": "Crea una read replica de RDS en otra Availability Zone de la Region de origen y promuévela durante la recuperación.",
+            "why": "Una réplica en la Region de origen no proporciona la base de datos requerida en otra Region."
+          }
+        ],
+        "explanation": "La base de datos de recuperación debe estar en otra Region, y se aceptan tanto la activación por una persona como un posible retraso de replicación. Una read replica cross-Region de RDS cumple estas condiciones y se puede promover a una instancia independiente. Multi-AZ no coloca su standby en otra Region, mientras que una read replica en la misma Region no cumple el requisito de ubicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-read-replicas--af31338c",
+      "conceptId": "rds-read-replicas",
+      "secondaryConcepts": [
+        "rds-multi-az"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research organization runs a relational database on an RDS DB instance. It plans to keep the primary for updates while routing read-only analysis to replicas, including one in another Region; analysts accept replication lag. The team is documenting what it must account for before adopting this design. Which TWO statements should it include? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "The cross-Region replica will accept updates from analysts while it remains a read replica.",
+          "correct": false,
+          "why": "A read replica is read-only rather than a second destination for application writes."
+        },
+        {
+          "id": "B",
+          "text": "The application must direct analysis queries to the read replicas instead of assuming RDS moves those queries automatically.",
+          "correct": true,
+          "why": "Read offloading requires routing application queries to a read replica."
+        },
+        {
+          "id": "C",
+          "text": "RDS will automatically add and remove read replicas as analysis demand changes.",
+          "correct": false,
+          "why": "RDS does not support automatic scaling of the number of read replicas."
+        },
+        {
+          "id": "D",
+          "text": "A Multi-AZ standby can serve the analysis queries in place of a read replica.",
+          "correct": false,
+          "why": "A classic Multi-AZ standby cannot serve read traffic."
+        },
+        {
+          "id": "E",
+          "text": "The cross-Region replica may need promotion to become a standalone DB instance for disaster recovery.",
+          "correct": true,
+          "why": "Promotion is the documented way to make a read replica a standalone instance for disaster recovery."
+        }
+      ],
+      "explanation": "The design depends on read-only replicas, with the primary remaining the destination for updates. Applications must route analysis reads to replicas, and a replica intended for disaster recovery can be promoted to a standalone instance. RDS does not automatically scale replica count; neither a read replica nor a classic Multi-AZ standby supplies the write or reporting behavior claimed by the other options.",
+      "keywordCues": [
+        "keep the primary for updates",
+        "routing read-only analysis to replicas",
+        "one in another Region",
+        "accept replication lag"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación ejecuta una base de datos relacional en una instancia de RDS. Planea mantener las actualizaciones en la instancia principal y dirigir el análisis de solo lectura a réplicas, incluida una en otra Region; los analistas aceptan retrasos de replicación. El equipo está documentando qué debe considerar antes de adoptar este diseño. ¿Qué DOS afirmaciones debe incluir? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "La réplica cross-Region aceptará actualizaciones de los analistas mientras siga siendo una read replica.",
+            "why": "Una read replica es de solo lectura, no un segundo destino para escrituras de la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "La aplicación debe dirigir las consultas de análisis a las read replicas en vez de suponer que RDS las traslada automáticamente.",
+            "why": "Para descargar las lecturas, es necesario dirigir las consultas de la aplicación a una read replica."
+          },
+          {
+            "id": "C",
+            "text": "RDS agregará y eliminará automáticamente read replicas conforme cambie la demanda de análisis.",
+            "why": "RDS no ajusta automáticamente la cantidad de read replicas."
+          },
+          {
+            "id": "D",
+            "text": "Un standby de Multi-AZ puede atender las consultas de análisis en lugar de una read replica.",
+            "why": "Un standby clásico de Multi-AZ no puede atender tráfico de lectura."
+          },
+          {
+            "id": "E",
+            "text": "La réplica cross-Region podría necesitar una promoción para convertirse en instancia independiente durante la recuperación ante desastres.",
+            "why": "La promoción permite convertir una read replica en una instancia independiente para recuperación ante desastres."
+          }
+        ],
+        "explanation": "El diseño depende de réplicas de solo lectura, mientras la instancia principal sigue recibiendo las actualizaciones. La aplicación debe dirigir las lecturas de análisis a las réplicas, y una réplica destinada a recuperación ante desastres se puede promover a instancia independiente. RDS no ajusta automáticamente la cantidad de réplicas; las otras opciones también atribuyen capacidades incorrectas a una read replica o a un standby clásico de Multi-AZ."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-read-replicas--1b9aa99d",
+      "conceptId": "rds-read-replicas",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher uses an RDS DB instance for a subscription application. The team wants to add read capacity for an archive search feature, but search results must reflect every newly committed subscription change immediately. Which assessment of an RDS read replica is MOST accurate for this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "It guarantees current search results because replica updates are synchronous.",
+          "correct": false,
+          "why": "RDS read replicas receive updates asynchronously and cannot guarantee immediate visibility."
+        },
+        {
+          "id": "B",
+          "text": "It can offload searches, but searches that require the latest committed changes should use the primary.",
+          "correct": true,
+          "why": "A replica can serve reads, but its asynchronous updates mean it might lag the primary."
+        },
+        {
+          "id": "C",
+          "text": "It can provide current results by sending subscription writes to the replica first.",
+          "correct": false,
+          "why": "A read replica accepts read-only connections, not application writes."
+        },
+        {
+          "id": "D",
+          "text": "It guarantees current search results if the replica is in the same Availability Zone.",
+          "correct": false,
+          "why": "Placing the replica in the same Availability Zone does not change asynchronous replication into a freshness guarantee."
+        }
+      ],
+      "explanation": "The deciding constraint is immediate visibility of every newly committed change. Read replicas can offload search reads, but asynchronous replication means their data might lag the primary. Neither same-AZ placement nor writing to the read-only replica removes that limitation.",
+      "keywordCues": [
+        "add read capacity",
+        "reflect every newly committed subscription change immediately",
+        "MOST accurate"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+      ],
+      "es": {
+        "stem": "Una editorial usa una instancia de RDS para una aplicación de suscripciones. El equipo quiere agregar capacidad de lectura para una función de búsqueda en el archivo, pero los resultados deben reflejar de inmediato cada cambio de suscripción recién confirmado. ¿Qué evaluación de una read replica de RDS es la MOST precisa para este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Garantiza resultados actuales porque las actualizaciones de la réplica son síncronas.",
+            "why": "Las read replicas de RDS reciben actualizaciones de forma asíncrona y no pueden garantizar visibilidad inmediata."
+          },
+          {
+            "id": "B",
+            "text": "Puede descargar las búsquedas, pero las que exigen los cambios confirmados más recientes deben usar la instancia principal.",
+            "why": "Una réplica puede atender lecturas, pero sus actualizaciones asíncronas implican que puede ir detrás de la instancia principal."
+          },
+          {
+            "id": "C",
+            "text": "Puede proporcionar resultados actuales si las escrituras de suscripciones se envían primero a la réplica.",
+            "why": "Una read replica acepta conexiones de solo lectura, no escrituras de la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Garantiza resultados actuales si la réplica está en la misma Availability Zone.",
+            "why": "Ubicar la réplica en la misma Availability Zone no convierte la replicación asíncrona en una garantía de datos actuales."
+          }
+        ],
+        "explanation": "La condición decisiva es la visibilidad inmediata de cada cambio recién confirmado. Las read replicas pueden descargar lecturas de búsqueda, pero la replicación asíncrona significa que sus datos pueden ir detrás de la instancia principal. Ni ubicar la réplica en la misma AZ ni intentar escribir en ella elimina esa limitación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rds-read-replicas--r0",
+      "conceptId": "rds-read-replicas",
+      "kind": "recall",
+      "prompt": "An existing RDS primary is slowed by read-only reports that tolerate lag. What would you add, and why?",
+      "promptEs": "Una instancia principal de RDS se ralentiza por reportes de solo lectura que toleran retrasos. ¿Qué agregarías y por qué?",
+      "idealAnswer": "Add an RDS read replica and route the reporting queries to it. The replica offloads reads from the primary and receives updates asynchronously, so the reports must tolerate potentially stale data.",
+      "rubric": [
+        "Names an RDS read replica.",
+        "Routes reporting reads away from the primary.",
+        "Mentions asynchronous replication or possible lag."
+      ]
+    },
+    {
+      "id": "rds-read-replicas--r1",
+      "conceptId": "rds-read-replicas",
+      "kind": "why-not",
+      "prompt": "Why not use a classic RDS Multi-AZ standby as the target for read-only reporting queries?",
+      "promptEs": "¿Por qué no usarías un standby clásico de RDS Multi-AZ como destino de consultas de reportes de solo lectura?",
+      "idealAnswer": "A classic Multi-AZ standby cannot serve read traffic; its role is high availability. Use a separate read replica to offload reporting queries, even if the primary also has a Multi-AZ standby.",
+      "rubric": [
+        "States that the classic Multi-AZ standby cannot serve reads.",
+        "Distinguishes high availability from read scaling.",
+        "Identifies a separate read replica as the reporting target."
+      ]
+    }
+  ]
+}

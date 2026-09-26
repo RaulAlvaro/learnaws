@@ -1,0 +1,444 @@
+{
+  "conceptId": "sns-pub-sub-fanout",
+  "card": {
+    "en": {
+      "tldr": "Amazon SNS publishes a message to a topic and pushes it to multiple subscribers. Choose SNS-to-SQS fan-out when independent applications must each receive the event and keep their own queue for later processing.",
+      "whenToUse": [
+        "One event must reach multiple independent subscribers.",
+        "Different applications need their own queued copy of an event for asynchronous processing.",
+        "A notification must reach endpoints such as Lambda, HTTP(S), email, or SMS."
+      ],
+      "keyFacts": [
+        "SNS publishers send messages to a topic; SNS delivers them to subscribed endpoints.",
+        "Fan-out replicates and pushes a published message to multiple endpoints.",
+        "SQS subscribers retain messages for applications to process later.",
+        "SNS uses push delivery; SQS consumers use a polling model."
+      ],
+      "gotchas": [
+        "A single shared SQS queue does not give every independent application its own copy of each event.",
+        "SNS delivery to a subscriber is not the same as retaining an event in that subscriber's SQS queue.",
+        "Do not choose workflow orchestration when the requirement is simply to notify independent subscribers."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS buffers messages for polling consumers; SNS fans one publication out to multiple subscribers."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "Choose EventBridge for requirements centered on AWS or SaaS events, routing rules, or schedules; choose SNS for the stated publish/subscribe fan-out."
+        },
+        {
+          "concept": "AWS Step Functions",
+          "difference": "Step Functions coordinates steps in a workflow; SNS distributes a notification to independent subscribers."
+        }
+      ],
+      "examCues": [
+        "one event, multiple independent consumers",
+        "each application needs its own queue",
+        "push to email and application endpoints",
+        "process the same event later"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon SNS publica un mensaje en un tema y lo envía mediante push a varios suscriptores. Elige fan-out de SNS a SQS cuando varias aplicaciones independientes deban recibir el evento y conservarlo en sus propias colas para procesarlo después.",
+      "whenToUse": [
+        "Un evento debe llegar a varios suscriptores independientes.",
+        "Cada aplicación necesita su propia copia en una cola para procesamiento asíncrono.",
+        "Una notificación debe llegar a endpoints como Lambda, HTTP(S), correo electrónico o SMS."
+      ],
+      "keyFacts": [
+        "Los publicadores envían mensajes a un tema de SNS, que los entrega a los endpoints suscritos.",
+        "Fan-out replica y envía mediante push un mensaje publicado a varios endpoints.",
+        "Los suscriptores de SQS conservan mensajes para que las aplicaciones los procesen después.",
+        "SNS usa entrega push; los consumidores de SQS consultan la cola mediante polling."
+      ],
+      "gotchas": [
+        "Una sola cola de SQS compartida no proporciona a cada aplicación independiente su propia copia de cada evento.",
+        "Entregar un mensaje a un suscriptor de SNS no equivale a conservarlo en la cola SQS de ese suscriptor.",
+        "No elijas orquestación de workflows si solo necesitas notificar a suscriptores independientes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS almacena mensajes para consumidores que hacen polling; SNS distribuye una publicación a varios suscriptores."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "Elige EventBridge para eventos de AWS o SaaS, reglas de enrutamiento o programaciones; elige SNS para este fan-out de publicación y suscripción."
+        },
+        {
+          "concept": "AWS Step Functions",
+          "difference": "Step Functions coordina pasos de un workflow; SNS distribuye una notificación a suscriptores independientes."
+        }
+      ],
+      "examCues": [
+        "one event, multiple independent consumers",
+        "each application needs its own queue",
+        "push to email and application endpoints",
+        "process the same event later"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
+      "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "sns-pub-sub-fanout--ec594c46",
+      "conceptId": "sns-pub-sub-fanout",
+      "secondaryConcepts": [
+        "step-functions"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A building-monitoring service publishes a notice when a sensor detects flooding. The same notice must immediately reach an HTTPS incident endpoint and an operations email address; the publisher should make only one publication. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the notice in an SQS queue and have the HTTPS service and an email worker poll it.",
+          "correct": false,
+          "why": "Polling one shared queue does not push the notice to both specified recipients."
+        },
+        {
+          "id": "B",
+          "text": "Create a Step Functions workflow that calls the HTTPS endpoint and then sends an email.",
+          "correct": false,
+          "why": "A workflow adds coordination when the requirement is one publication to independent recipients."
+        },
+        {
+          "id": "C",
+          "text": "Have the publisher call the HTTPS endpoint and send the email separately.",
+          "correct": false,
+          "why": "The publisher would make separate deliveries rather than one publication."
+        },
+        {
+          "id": "D",
+          "text": "Publish the notice to an SNS topic with HTTPS and email subscriptions.",
+          "correct": true,
+          "why": "SNS pushes a published message to multiple subscribed endpoint types."
+        }
+      ],
+      "explanation": "The notice must be pushed to two different endpoint types from a single publication. SNS topics support both HTTPS and email subscribers and deliver a published message to multiple subscribers. An SQS queue serves polling consumers and does not itself push the same notice to both recipients.",
+      "keywordCues": [
+        "immediately reach an HTTPS incident endpoint and an operations email address",
+        "only one publication"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html"
+      ],
+      "es": {
+        "stem": "Un servicio de monitoreo de edificios publica un aviso cuando un sensor detecta una inundación. El mismo aviso debe llegar de inmediato a un endpoint HTTPS de incidentes y a una dirección de correo electrónico de operaciones; el publicador debe realizar una sola publicación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar el aviso en una cola SQS para que la consulten el servicio HTTPS y un proceso de correo electrónico.",
+            "why": "Consultar una cola compartida no envía mediante push el aviso a ambos destinatarios."
+          },
+          {
+            "id": "B",
+            "text": "Crear un workflow de Step Functions que llame al endpoint HTTPS y después envíe un correo electrónico.",
+            "why": "Un workflow agrega coordinación cuando lo requerido es una publicación para destinatarios independientes."
+          },
+          {
+            "id": "C",
+            "text": "Hacer que el publicador llame al endpoint HTTPS y envíe el correo electrónico por separado.",
+            "why": "El publicador realizaría entregas separadas en lugar de una sola publicación."
+          },
+          {
+            "id": "D",
+            "text": "Publicar el aviso en un tema de SNS con suscripciones HTTPS y de correo electrónico.",
+            "why": "SNS envía mediante push un mensaje publicado a varios tipos de endpoints suscritos."
+          }
+        ],
+        "explanation": "El aviso debe enviarse mediante push a dos tipos de endpoints desde una sola publicación. Los temas de SNS admiten suscriptores HTTPS y de correo electrónico, y entregan un mensaje publicado a varios suscriptores. Una cola SQS sirve a consumidores que hacen polling y no envía por sí misma el mismo aviso a ambos destinatarios."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sns-pub-sub-fanout--7a9a374b",
+      "conceptId": "sns-pub-sub-fanout",
+      "secondaryConcepts": [
+        "step-functions"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company already publishes each uploaded-video notification to an SNS topic. It is adding a review application that may be unavailable during maintenance, but must later process every notification without delaying existing subscribers. Which change meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the topic with a Step Functions workflow that runs review before other subscribers.",
+          "correct": false,
+          "why": "Running review first could delay others and does not provide review its own queue."
+        },
+        {
+          "id": "B",
+          "text": "Have an existing subscriber forward notifications to review after it completes processing.",
+          "correct": false,
+          "why": "Review would depend on that subscriber rather than receive notifications independently."
+        },
+        {
+          "id": "C",
+          "text": "Subscribe a dedicated SQS queue for review to the existing SNS topic.",
+          "correct": true,
+          "why": "The topic continues delivering to existing subscribers while review's queue retains its notifications."
+        },
+        {
+          "id": "D",
+          "text": "Replace the SNS topic with a single SQS queue shared by review and the existing subscribers.",
+          "correct": false,
+          "why": "A shared queue would not give every subscriber its own copy of each notification."
+        }
+      ],
+      "explanation": "The new application needs its own retained notifications while existing subscribers continue independently. Subscribing a dedicated SQS queue to the SNS topic adds an asynchronous processing path without replacing the publisher's fan-out. A shared queue fails because it does not supply a separate copy to each subscriber.",
+      "keywordCues": [
+        "already publishes each uploaded-video notification to an SNS topic",
+        "unavailable during maintenance",
+        "without delaying existing subscribers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ya publica cada notificación de video cargado en un tema de SNS. Va a agregar una aplicación de revisión que podría estar fuera de servicio durante el mantenimiento, pero que después debe procesar todas las notificaciones sin retrasar a los suscriptores existentes. ¿Qué cambio cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplazar el tema por un workflow de Step Functions que ejecute revisión antes que los demás suscriptores.",
+            "why": "Ejecutar revisión primero podría retrasar a los demás y no le proporcionaría su propia cola."
+          },
+          {
+            "id": "B",
+            "text": "Hacer que un suscriptor existente reenvíe las notificaciones a revisión después de procesarlas.",
+            "why": "Revisión dependería de ese suscriptor en lugar de recibir notificaciones de forma independiente."
+          },
+          {
+            "id": "C",
+            "text": "Suscribir una cola SQS exclusiva para revisión al tema de SNS existente.",
+            "why": "El tema sigue entregando mensajes a los suscriptores existentes mientras la cola conserva las notificaciones de revisión."
+          },
+          {
+            "id": "D",
+            "text": "Reemplazar el tema de SNS por una sola cola SQS compartida entre revisión y los suscriptores existentes.",
+            "why": "Una cola compartida no daría a cada suscriptor su propia copia de cada notificación."
+          }
+        ],
+        "explanation": "La nueva aplicación necesita conservar sus propias notificaciones mientras los suscriptores existentes continúan de forma independiente. Suscribir una cola SQS exclusiva al tema de SNS agrega una vía de procesamiento asíncrono sin reemplazar el fan-out del publicador. Una cola compartida falla porque no proporciona una copia separada a cada suscriptor."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sns-pub-sub-fanout--e319694e",
+      "conceptId": "sns-pub-sub-fanout",
+      "secondaryConcepts": [
+        "step-functions"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A research lab publishes a new-sample event once. Its cataloging and quality-control teams run separate applications, and each must eventually process every event even if its application pauses. The lab wants managed messaging rather than application-to-application forwarding. Which two design elements meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Subscribe a separate SQS queue for each application to the topic.",
+          "correct": true,
+          "why": "Each queue receives the published event and holds it for its application to process later."
+        },
+        {
+          "id": "B",
+          "text": "Make cataloging forward processed events directly to quality control.",
+          "correct": false,
+          "why": "This makes quality control dependent on cataloging and uses the forwarding the lab wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Use one SQS queue shared by both applications as their only event destination.",
+          "correct": false,
+          "why": "One shared queue does not give both applications their own copy of every event."
+        },
+        {
+          "id": "D",
+          "text": "Publish each new-sample event to an SNS topic.",
+          "correct": true,
+          "why": "The topic provides one publication point for fan-out to multiple subscribers."
+        },
+        {
+          "id": "E",
+          "text": "Run the applications as sequential steps of a Step Functions workflow.",
+          "correct": false,
+          "why": "Sequential steps do not meet the requirement for independent processing from each application's own retained events."
+        }
+      ],
+      "explanation": "One publication must reach both applications, and each needs events available after a pause. Publish to an SNS topic and subscribe a separate SQS queue for each application. A single shared queue buffers events but does not give both applications an independent copy.",
+      "keywordCues": [
+        "publishes a new-sample event once",
+        "each must eventually process every event",
+        "even if its application pauses",
+        "managed messaging rather than application-to-application forwarding"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación publica una sola vez cada evento de nueva muestra. Sus equipos de catalogación y control de calidad ejecutan aplicaciones distintas, y cada una debe procesar todos los eventos aunque se detenga temporalmente. El laboratorio quiere mensajería administrada en lugar de reenvío entre aplicaciones. ¿Qué dos elementos de diseño cumplen estos requisitos con el LEAST operational overhead? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Suscribir al tema una cola SQS distinta para cada aplicación.",
+            "why": "Cada cola recibe el evento publicado y lo conserva para que su aplicación lo procese después."
+          },
+          {
+            "id": "B",
+            "text": "Hacer que catalogación reenvíe los eventos procesados directamente a control de calidad.",
+            "why": "Esto hace que control de calidad dependa de catalogación y usa el reenvío que el laboratorio quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Usar una sola cola SQS compartida entre ambas aplicaciones como único destino de eventos.",
+            "why": "Una cola compartida no da a ambas aplicaciones su propia copia de cada evento."
+          },
+          {
+            "id": "D",
+            "text": "Publicar cada evento de nueva muestra en un tema de SNS.",
+            "why": "El tema proporciona un punto único de publicación para fan-out a varios suscriptores."
+          },
+          {
+            "id": "E",
+            "text": "Ejecutar las aplicaciones como pasos secuenciales de un workflow de Step Functions.",
+            "why": "Los pasos secuenciales no cumplen el requisito de procesamiento independiente a partir de eventos conservados para cada aplicación."
+          }
+        ],
+        "explanation": "Una publicación debe llegar a ambas aplicaciones, y cada una necesita tener disponibles los eventos después de una pausa. Publica en un tema de SNS y suscribe una cola SQS distinta para cada aplicación. Una sola cola compartida almacena eventos, pero no da a ambas aplicaciones una copia independiente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sns-pub-sub-fanout--2f614534",
+      "conceptId": "sns-pub-sub-fanout",
+      "secondaryConcepts": [
+        "step-functions"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company records each new reservation as one event. Its billing and analytics applications both need every event, but either application may be offline while the other continues processing. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Start a Step Functions workflow that runs billing before analytics.",
+          "correct": false,
+          "why": "A sequential workflow couples the two applications instead of giving each an independently retained event."
+        },
+        {
+          "id": "B",
+          "text": "Publish each event to an SNS topic subscribed to separate SQS queues for billing and analytics.",
+          "correct": true,
+          "why": "SNS sends a copy to each subscribed queue, where each application can process it later."
+        },
+        {
+          "id": "C",
+          "text": "Invoke billing from the publisher, then have billing invoke analytics.",
+          "correct": false,
+          "why": "Analytics depends on billing being available and completing its work."
+        },
+        {
+          "id": "D",
+          "text": "Send each event to one SQS queue polled by both billing and analytics.",
+          "correct": false,
+          "why": "A shared queue does not provide each application with its own copy of every event."
+        }
+      ],
+      "explanation": "The deciding requirement is that both applications receive every reservation and can process it independently after downtime. An SNS topic with a separate SQS subscription for each application provides fan-out plus queued messages for later processing. A single SQS queue buffers events but does not give each application its own copy.",
+      "keywordCues": [
+        "both need every event",
+        "either application may be offline",
+        "other continues processing"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas registra cada nueva reserva como un evento. Las aplicaciones de facturación y analítica necesitan recibir todos los eventos, pero cualquiera de ellas podría estar fuera de servicio mientras la otra sigue procesando. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Iniciar un workflow de Step Functions que ejecute facturación antes que analítica.",
+            "why": "Un workflow secuencial vincula las aplicaciones en lugar de dar a cada una un evento conservado de forma independiente."
+          },
+          {
+            "id": "B",
+            "text": "Publicar cada evento en un tema de SNS con colas SQS independientes suscritas para facturación y analítica.",
+            "why": "SNS envía una copia a cada cola suscrita, donde cada aplicación puede procesarla después."
+          },
+          {
+            "id": "C",
+            "text": "Hacer que el publicador invoque facturación y que luego facturación invoque analítica.",
+            "why": "Analítica dependería de que facturación esté disponible y termine su trabajo."
+          },
+          {
+            "id": "D",
+            "text": "Enviar cada evento a una sola cola SQS que consulten facturación y analítica.",
+            "why": "Una cola compartida no proporciona a cada aplicación su propia copia de todos los eventos."
+          }
+        ],
+        "explanation": "La condición decisiva es que ambas aplicaciones reciban cada reserva y puedan procesarla de forma independiente después de una interrupción. Un tema de SNS con una suscripción SQS distinta para cada aplicación proporciona fan-out y mensajes en cola para procesar después. Una sola cola SQS almacena los eventos, pero no da a cada aplicación su propia copia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "sns-pub-sub-fanout--r0",
+      "conceptId": "sns-pub-sub-fanout",
+      "kind": "recall",
+      "prompt": "Two independent services need every event, but either may pause. What messaging pattern would you choose and why?",
+      "promptEs": "Dos servicios independientes necesitan todos los eventos, pero cualquiera puede detenerse temporalmente. ¿Qué patrón de mensajería elegirías y por qué?",
+      "idealAnswer": "Publish each event to an SNS topic and subscribe a separate SQS queue for each service. SNS fans out the event, and each queue retains its copy for later processing.",
+      "rubric": [
+        "Names an SNS topic as the publication point.",
+        "Specifies one subscribed SQS queue per independent service.",
+        "Explains that each service can process its queued events later."
+      ]
+    },
+    {
+      "id": "sns-pub-sub-fanout--r1",
+      "conceptId": "sns-pub-sub-fanout",
+      "kind": "why-not",
+      "prompt": "Why not use Step Functions sequential steps when independent applications must each receive and later process the same event?",
+      "promptEs": "¿Por qué no usarías pasos secuenciales de Step Functions si aplicaciones independientes deben recibir y procesar después el mismo evento?",
+      "idealAnswer": "Sequential workflow steps coordinate dependent work, rather than giving each application its own retained copy of an event. SNS fan-out to separate SQS queues lets the applications process the same published event independently.",
+      "rubric": [
+        "Identifies sequential steps as coordination rather than independent fan-out.",
+        "Explains the need for a separate retained event for each application.",
+        "Proposes SNS with separate subscribed SQS queues."
+      ]
+    }
+  ]
+}

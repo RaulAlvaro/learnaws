@@ -1,0 +1,424 @@
+{
+  "conceptId": "nat-cost-vpc-endpoints",
+  "card": {
+    "en": {
+      "tldr": "Gateway VPC endpoints route traffic to Amazon S3 and DynamoDB without a NAT device and have no additional charge. When private-subnet traffic to these services drives NAT processing charges, associate the relevant route tables with gateway endpoints while keeping NAT routes for destinations that still need them.",
+      "whenToUse": [
+        "Private-subnet workloads send substantial traffic to S3 or DynamoDB in the same Region.",
+        "The goal is to reduce NAT data-processing charges without adding a charge for the endpoint.",
+        "Workloads must keep using NAT for destinations other than S3 and DynamoDB."
+      ],
+      "keyFacts": [
+        "A NAT gateway incurs charges for each hour it is available and each gigabyte it processes.",
+        "Gateway endpoints for S3 and DynamoDB have no additional charge.",
+        "Creating a gateway endpoint adds a service-prefix-list route to each selected route table; subnets using unassociated route tables do not use that endpoint.",
+        "The endpoint route takes precedence over a 0.0.0.0/0 route for the service in the current Region, but the default route still serves other destinations.",
+        "A gateway endpoint's prefix list is Region-specific; a route specifying the service's exact IP address range can take precedence over the endpoint route."
+      ],
+      "gotchas": [
+        "Creating an endpoint is not enough if the workload's subnet route table is not associated with it.",
+        "Replacing the default route with an endpoint route would not preserve access to unrelated destinations.",
+        "A gateway endpoint does not capture traffic to the service in a different Region.",
+        "A more-specific route for the service can override the gateway endpoint route."
+      ],
+      "confusedWith": [
+        {
+          "concept": "NAT gateway",
+          "difference": "It can serve other outbound destinations, but it incurs hourly and per-gigabyte processing charges."
+        },
+        {
+          "concept": "Interface VPC endpoint",
+          "difference": "S3 and DynamoDB support both types; the gateway endpoint is the option documented here as having no additional charge."
+        }
+      ],
+      "examCues": [
+        "private-subnet S3 uploads drive NAT processing charges",
+        "DynamoDB traffic should avoid the NAT gateway",
+        "retain outbound access to an external API",
+        "endpoint exists but one subnet still uses NAT"
+      ]
+    },
+    "es": {
+      "tldr": "Los gateway VPC endpoints enrutan tráfico hacia Amazon S3 y DynamoDB sin un dispositivo NAT y no tienen un cargo adicional. Si el tráfico de subredes privadas hacia esos servicios eleva los cargos de procesamiento de NAT, asocia las tablas de rutas pertinentes con gateway endpoints y conserva las rutas NAT para los demás destinos.",
+      "whenToUse": [
+        "Las cargas de trabajo en subredes privadas envían mucho tráfico a S3 o DynamoDB en la misma Región.",
+        "Necesitas reducir los cargos de procesamiento de NAT sin agregar un cargo por el endpoint.",
+        "Las cargas de trabajo deben seguir usando NAT para destinos distintos de S3 y DynamoDB."
+      ],
+      "keyFacts": [
+        "Un NAT gateway genera cargos por cada hora que está disponible y por cada gigabyte que procesa.",
+        "Los gateway endpoints para S3 y DynamoDB no tienen un cargo adicional.",
+        "Al crear un gateway endpoint, se agrega una ruta con la lista de prefijos del servicio a cada tabla de rutas seleccionada; las subredes cuyas tablas no están asociadas no usan ese endpoint.",
+        "La ruta del endpoint prevalece sobre una ruta 0.0.0.0/0 para el servicio en la Región actual, pero la ruta predeterminada sigue sirviendo a otros destinos.",
+        "La lista de prefijos de un gateway endpoint es específica de una Región; una ruta que indique el rango exacto de direcciones IP del servicio puede prevalecer sobre la ruta del endpoint."
+      ],
+      "gotchas": [
+        "Crear el endpoint no basta si no asocias la tabla de rutas de la subred de la carga de trabajo.",
+        "Reemplazar la ruta predeterminada por una ruta al endpoint no conservaría el acceso a destinos no relacionados.",
+        "Un gateway endpoint no capta el tráfico hacia el servicio en otra Región.",
+        "Una ruta más específica hacia el servicio puede prevalecer sobre la ruta del gateway endpoint."
+      ],
+      "confusedWith": [
+        {
+          "concept": "NAT gateway",
+          "difference": "Puede servir a otros destinos de salida, pero genera cargos por hora y por gigabyte procesado."
+        },
+        {
+          "concept": "Interface VPC endpoint",
+          "difference": "S3 y DynamoDB admiten ambos tipos; gateway endpoint es la opción que la documentación citada identifica como libre de cargos adicionales."
+        }
+      ],
+      "examCues": [
+        "private-subnet S3 uploads drive NAT processing charges",
+        "DynamoDB traffic should avoid the NAT gateway",
+        "retain outbound access to an external API",
+        "endpoint exists but one subnet still uses NAT"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "nat-cost-vpc-endpoints--900e1ab1",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retail application reads a DynamoDB table in its own Region from private subnets. A DynamoDB gateway endpoint is already associated with the route table used by one group of application servers, but servers in another subnet still send DynamoDB traffic through a NAT gateway. Both groups must keep their NAT routes for other outbound traffic. Which change reduces the remaining NAT processing charges with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the affected subnet's NAT default route with a route to the existing DynamoDB gateway endpoint.",
+          "correct": false,
+          "why": "This does not preserve the required NAT path for the subnet's other outbound destinations."
+        },
+        {
+          "id": "B",
+          "text": "Move the affected servers to the subnet whose route table is already associated with the endpoint.",
+          "correct": false,
+          "why": "Relocating servers is unnecessary when their current subnet's route table can be associated with the endpoint."
+        },
+        {
+          "id": "C",
+          "text": "Add a second DynamoDB gateway endpoint route manually to the route table already associated with the endpoint.",
+          "correct": false,
+          "why": "That route table already has the endpoint route, and it is not the route table used by the affected servers."
+        },
+        {
+          "id": "D",
+          "text": "Associate the affected subnet's route table with the existing DynamoDB gateway endpoint.",
+          "correct": true,
+          "why": "Association automatically adds the DynamoDB endpoint route to that route table without changing its NAT default route."
+        }
+      ],
+      "explanation": "A gateway endpoint applies to subnets through their associated route tables. Associating the second subnet's route table with the existing endpoint automatically adds the DynamoDB prefix-list route, so same-Region DynamoDB requests use the endpoint. The NAT default route can stay for other destinations; changing the first group's route table would not fix the second group's traffic.",
+      "keywordCues": [
+        "gateway endpoint is already associated",
+        "another subnet still send DynamoDB traffic through a NAT gateway",
+        "keep their NAT routes",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+      ],
+      "es": {
+        "stem": "Una aplicación minorista lee una tabla de DynamoDB en su propia Región desde subredes privadas. Un DynamoDB gateway endpoint ya está asociado con la tabla de rutas que usa un grupo de servidores de la aplicación, pero los servidores de otra subred todavía envían el tráfico hacia DynamoDB por un NAT gateway. Ambos grupos deben conservar sus rutas NAT para otro tráfico de salida. ¿Qué cambio reduce los cargos restantes de procesamiento de NAT con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplaza la ruta NAT predeterminada de la subred afectada por una ruta al DynamoDB gateway endpoint existente.",
+            "why": "Esto no conserva la ruta NAT necesaria para los demás destinos de salida de la subred."
+          },
+          {
+            "id": "B",
+            "text": "Traslada los servidores afectados a la subred cuya tabla de rutas ya está asociada con el endpoint.",
+            "why": "No hace falta trasladar servidores cuando puedes asociar su tabla de rutas actual con el endpoint."
+          },
+          {
+            "id": "C",
+            "text": "Agrega manualmente una segunda ruta al DynamoDB gateway endpoint en la tabla de rutas que ya está asociada con el endpoint.",
+            "why": "Esa tabla ya tiene la ruta del endpoint y no es la que usan los servidores afectados."
+          },
+          {
+            "id": "D",
+            "text": "Asocia la tabla de rutas de la subred afectada con el DynamoDB gateway endpoint existente.",
+            "why": "La asociación agrega automáticamente la ruta del endpoint de DynamoDB a esa tabla sin modificar su ruta NAT predeterminada."
+          }
+        ],
+        "explanation": "Un gateway endpoint se aplica a las subredes mediante sus tablas de rutas asociadas. Asociar la tabla de rutas de la segunda subred con el endpoint existente agrega automáticamente la ruta con la lista de prefijos de DynamoDB, por lo que las solicitudes a DynamoDB en la misma Región usan el endpoint. La ruta NAT predeterminada puede permanecer para otros destinos; modificar la tabla del primer grupo no corregiría el tráfico del segundo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-cost-vpc-endpoints--c64fd74a",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A subscription service runs application servers in private subnets. The servers make frequent requests to S3 and DynamoDB in the same Region through a NAT gateway, but they also call a third-party payment API. The architecture team wants to reduce NAT processing charges for both AWS services, use endpoints with no additional charge, and preserve payment API access. Which two actions should the team take? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create S3 and DynamoDB interface endpoints instead of gateway endpoints.",
+          "correct": false,
+          "why": "The gateway endpoint type is the documented no-additional-charge choice for these services."
+        },
+        {
+          "id": "B",
+          "text": "Create S3 and DynamoDB gateway endpoints and associate both with the application route tables.",
+          "correct": true,
+          "why": "Both same-Region service routes are added to the selected tables, and gateway endpoints have no additional charge."
+        },
+        {
+          "id": "C",
+          "text": "Create only an S3 gateway endpoint and associate it with the application route tables.",
+          "correct": false,
+          "why": "DynamoDB traffic would still use the NAT gateway, failing the requirement to reduce processing for both services."
+        },
+        {
+          "id": "D",
+          "text": "Keep the NAT default route for destinations other than same-Region S3 and DynamoDB.",
+          "correct": true,
+          "why": "The more-specific gateway endpoint routes handle the two AWS services while the NAT route preserves payment API access."
+        },
+        {
+          "id": "E",
+          "text": "Remove the application route tables' NAT default route after creating the endpoints.",
+          "correct": false,
+          "why": "The servers still need their NAT route to reach the third-party payment API."
+        }
+      ],
+      "explanation": "The servers need separate gateway endpoint routes for S3 and DynamoDB, which can coexist in their route tables and carry same-Region service traffic without an additional endpoint charge. The endpoint routes take precedence over the NAT default route for matching traffic. The NAT default route must remain for the payment API; an S3-only endpoint would leave DynamoDB traffic on NAT.",
+      "keywordCues": [
+        "S3 and DynamoDB in the same Region",
+        "third-party payment API",
+        "both AWS services",
+        "endpoints with no additional charge",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+      ],
+      "es": {
+        "stem": "Un servicio de suscripciones ejecuta servidores de aplicaciones en subredes privadas. Los servidores hacen solicitudes frecuentes a S3 y DynamoDB en la misma Región a través de un NAT gateway, pero también llaman a una API de pagos de un tercero. El equipo de arquitectura quiere reducir los cargos de procesamiento de NAT para ambos servicios de AWS, usar endpoints sin cargo adicional y conservar el acceso a la API de pagos. ¿Qué dos acciones debe tomar el equipo? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea S3 y DynamoDB interface endpoints en lugar de gateway endpoints.",
+            "why": "El tipo gateway endpoint es la opción documentada sin cargo adicional para estos servicios."
+          },
+          {
+            "id": "B",
+            "text": "Crea S3 y DynamoDB gateway endpoints y asocia ambos con las tablas de rutas de la aplicación.",
+            "why": "Las rutas hacia ambos servicios en la misma Región se agregan a las tablas seleccionadas y los gateway endpoints no tienen un cargo adicional."
+          },
+          {
+            "id": "C",
+            "text": "Crea solo un S3 gateway endpoint y asócialo con las tablas de rutas de la aplicación.",
+            "why": "El tráfico hacia DynamoDB seguiría usando el NAT gateway, lo que incumple el requisito de reducir el procesamiento para ambos servicios."
+          },
+          {
+            "id": "D",
+            "text": "Conserva la ruta NAT predeterminada para destinos distintos de S3 y DynamoDB en la misma Región.",
+            "why": "Las rutas más específicas de los gateway endpoints atienden a los dos servicios de AWS, mientras la ruta NAT conserva el acceso a la API de pagos."
+          },
+          {
+            "id": "E",
+            "text": "Elimina la ruta NAT predeterminada de las tablas de rutas de la aplicación después de crear los endpoints.",
+            "why": "Los servidores todavía necesitan su ruta NAT para llegar a la API de pagos del tercero."
+          }
+        ],
+        "explanation": "Los servidores necesitan rutas de gateway endpoint para S3 y DynamoDB; ambas pueden coexistir en sus tablas de rutas y transportar el tráfico hacia esos servicios en la misma Región sin un cargo adicional por los endpoints. Las rutas de los endpoints prevalecen sobre la ruta NAT predeterminada para el tráfico coincidente. La ruta NAT predeterminada debe permanecer para la API de pagos; un endpoint solo para S3 dejaría el tráfico hacia DynamoDB en NAT."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-cost-vpc-endpoints--882fb2c4",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs upload workers in private subnets. They send large files to an S3 bucket in the same Region through a NAT gateway, and they also call an external licensing API through that gateway. The company wants to lower NAT processing charges without losing access to the API. Which solution meets these requirements with the LEAST additional endpoint cost?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an S3 gateway endpoint, associate the workers' route tables, and retain the NAT default route.",
+          "correct": true,
+          "why": "The endpoint carries same-Region S3 traffic without an additional endpoint charge while the NAT route remains available for the licensing API."
+        },
+        {
+          "id": "B",
+          "text": "Create an S3 gateway endpoint, associate the workers' route tables, and remove the NAT default route.",
+          "correct": false,
+          "why": "The workers would lose their existing route to the external licensing API."
+        },
+        {
+          "id": "C",
+          "text": "Create an S3 interface endpoint and leave the workers' existing NAT default route in place.",
+          "correct": false,
+          "why": "Although S3 supports interface endpoints, the documented no-additional-charge endpoint choice for this requirement is a gateway endpoint."
+        },
+        {
+          "id": "D",
+          "text": "Place the workers in the NAT gateway's Availability Zone and leave their S3 traffic on the NAT route.",
+          "correct": false,
+          "why": "This does not remove S3 traffic from the NAT gateway's per-gigabyte processing charges."
+        }
+      ],
+      "explanation": "The deciding requirements are to move same-Region S3 traffic off the NAT gateway while retaining outbound access to an external API. An S3 gateway endpoint has no additional charge, and its route takes precedence over the NAT default route for matching S3 traffic. Removing the NAT route would break the API path; merely changing the workers' Availability Zone would not eliminate NAT processing of S3 traffic.",
+      "keywordCues": [
+        "S3 bucket in the same Region",
+        "external licensing API",
+        "lower NAT processing charges",
+        "LEAST additional endpoint cost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta procesos de carga en subredes privadas. Envían archivos grandes a un bucket de S3 en la misma Región mediante un NAT gateway y también llaman a una API externa de licencias a través de ese gateway. La empresa quiere reducir los cargos de procesamiento de NAT sin perder acceso a la API. ¿Qué solución cumple estos requisitos con el LEAST additional endpoint cost?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un S3 gateway endpoint, asocia las tablas de rutas de los procesos y conserva la ruta NAT predeterminada.",
+            "why": "El endpoint transporta el tráfico hacia S3 en la misma Región sin un cargo adicional por el endpoint, mientras la ruta NAT sigue disponible para la API de licencias."
+          },
+          {
+            "id": "B",
+            "text": "Crea un S3 gateway endpoint, asocia las tablas de rutas de los procesos y elimina la ruta NAT predeterminada.",
+            "why": "Los procesos perderían su ruta actual hacia la API externa de licencias."
+          },
+          {
+            "id": "C",
+            "text": "Crea un S3 interface endpoint y conserva la ruta NAT predeterminada de los procesos.",
+            "why": "Aunque S3 admite interface endpoints, la opción de endpoint documentada sin cargo adicional para este requisito es gateway endpoint."
+          },
+          {
+            "id": "D",
+            "text": "Ubica los procesos en la Availability Zone del NAT gateway y deja que el tráfico hacia S3 siga la ruta NAT.",
+            "why": "Esto no evita los cargos por gigabyte procesado en el NAT gateway para el tráfico hacia S3."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son sacar del NAT gateway el tráfico hacia S3 en la misma Región y conservar el acceso de salida a una API externa. Un S3 gateway endpoint no tiene un cargo adicional y su ruta prevalece sobre la ruta NAT predeterminada para el tráfico coincidente hacia S3. Eliminar la ruta NAT interrumpiría el acceso a la API; cambiar solo la Availability Zone de los procesos no evitaría que NAT procese el tráfico hacia S3."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-cost-vpc-endpoints--c1f3120f",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research team runs jobs in private subnets in one AWS Region. The jobs write frequent checkpoints to an S3 bucket in that Region, occasionally fetch archived data from an S3 bucket in another Region, and use a NAT gateway for outbound access. The team wants to eliminate NAT processing of local checkpoint traffic while preserving access to the other-Region bucket. Which design meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Associate the jobs' route tables with an S3 gateway endpoint and remove the NAT default route.",
+          "correct": false,
+          "why": "The endpoint's Region-specific route would not preserve access to the other-Region bucket."
+        },
+        {
+          "id": "B",
+          "text": "Associate the jobs' route tables with an S3 gateway endpoint in their VPC and keep the NAT default route.",
+          "correct": true,
+          "why": "Same-Region S3 traffic uses the no-additional-charge gateway endpoint, while the other-Region S3 traffic can continue using the NAT route."
+        },
+        {
+          "id": "C",
+          "text": "Keep the current routes and place a NAT gateway in each Availability Zone used by the jobs.",
+          "correct": false,
+          "why": "The checkpoint traffic would still be processed by NAT gateways and incur their per-gigabyte processing charges."
+        },
+        {
+          "id": "D",
+          "text": "Create an S3 gateway endpoint in the bucket's other Region and associate it with the jobs' route tables.",
+          "correct": false,
+          "why": "A gateway endpoint in another Region does not provide the jobs' VPC route tables with a route for their local S3 traffic."
+        }
+      ],
+      "explanation": "Gateway endpoint prefix lists are Region-specific, so an S3 gateway endpoint routes the jobs' same-Region checkpoint traffic but not their requests to the other-Region bucket. Keeping the NAT default route preserves the latter path. Adding NAT gateways does not remove local S3 traffic from NAT processing, and removing NAT would fail the other-Region access requirement.",
+      "keywordCues": [
+        "S3 bucket in that Region",
+        "S3 bucket in another Region",
+        "eliminate NAT processing of local checkpoint traffic",
+        "preserving access to the other-Region bucket"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación ejecuta trabajos en subredes privadas de una Región de AWS. Los trabajos escriben puntos de control frecuentes en un bucket de S3 de esa Región, ocasionalmente recuperan datos archivados de un bucket de S3 en otra Región y usan un NAT gateway para el acceso de salida. El equipo quiere evitar que NAT procese el tráfico local de puntos de control y conservar el acceso al bucket de la otra Región. ¿Qué diseño cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asocia las tablas de rutas de los trabajos con un S3 gateway endpoint y elimina la ruta NAT predeterminada.",
+            "why": "La ruta del endpoint, específica de una Región, no conservaría el acceso al bucket de la otra Región."
+          },
+          {
+            "id": "B",
+            "text": "Asocia las tablas de rutas de los trabajos con un S3 gateway endpoint en su VPC y conserva la ruta NAT predeterminada.",
+            "why": "El tráfico hacia S3 en la misma Región usa el gateway endpoint sin cargo adicional, mientras que el tráfico hacia S3 en la otra Región puede seguir usando la ruta NAT."
+          },
+          {
+            "id": "C",
+            "text": "Conserva las rutas actuales y coloca un NAT gateway en cada Availability Zone utilizada por los trabajos.",
+            "why": "Los NAT gateways seguirían procesando el tráfico de puntos de control y generarían cargos por gigabyte procesado."
+          },
+          {
+            "id": "D",
+            "text": "Crea un S3 gateway endpoint en la otra Región del bucket y asócialo con las tablas de rutas de los trabajos.",
+            "why": "Un gateway endpoint en otra Región no proporciona a las tablas de rutas del VPC de los trabajos una ruta para su tráfico local hacia S3."
+          }
+        ],
+        "explanation": "Las listas de prefijos de los gateway endpoints son específicas de una Región: un S3 gateway endpoint enruta el tráfico de puntos de control hacia S3 en la misma Región, pero no las solicitudes al bucket de la otra Región. Conservar la ruta NAT predeterminada mantiene esta última vía. Agregar NAT gateways no evita que NAT procese el tráfico local hacia S3, y quitar NAT incumpliría el requisito de acceso a la otra Región."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "nat-cost-vpc-endpoints--r0",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "kind": "recall",
+      "prompt": "Private-subnet servers send heavy same-Region S3 traffic through NAT but still need an external API. What would you change, and why?",
+      "promptEs": "Unos servidores en subredes privadas envían mucho tráfico a S3 en la misma Región por NAT y aún necesitan una API externa. ¿Qué cambiarías y por qué?",
+      "idealAnswer": "Create an S3 gateway endpoint and associate the servers' subnet route tables with it. Its route carries same-Region S3 traffic without an additional endpoint charge, while the NAT default route stays for the external API.",
+      "rubric": [
+        "Selects an S3 gateway endpoint.",
+        "Associates the relevant subnet route tables.",
+        "Explains that S3 traffic avoids NAT processing while the NAT default route remains for the external API."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,337 @@
+{
+  "conceptId": "database-cost-optimization",
+  "card": {
+    "en": {
+      "tldr": "Amazon RDS reserved DB instances discount eligible instance usage in exchange for a one- or three-year commitment; they are a billing discount, not separate physical databases. Choose them for predictable usage, but evaluate storage and backup costs separately because the reservation does not discount those charges.",
+      "whenToUse": [
+        "An RDS database will run steadily for a one- or three-year period.",
+        "A team wants to reduce instance charges without changing its DB deployment.",
+        "A cost review shows substantial storage or backup charges that instance discounts alone will not address."
+      ],
+      "keyFacts": [
+        "A reserved DB instance discounts matching on-demand instance usage; matching includes AWS Region, DB engine, and instance type, with additional specifications for some engines.",
+        "Reservations have one- or three-year terms and cannot be canceled.",
+        "The discount applies to instance usage, not storage, backups, or I/O.",
+        "For supported engines, size flexibility applies within the same instance class type, AWS Region, and DB engine.",
+        "A Multi-AZ DB cluster can be only partially covered by reservations; uncovered instance usage remains on-demand."
+      ],
+      "gotchas": [
+        "Buying a reservation does not create a DB instance.",
+        "Deleting the DB instance does not cancel its reservation commitment.",
+        "A reservation for one instance class type does not provide size-flexible coverage for a different class type.",
+        "A lower instance bill does not necessarily resolve a backup-storage cost problem."
+      ],
+      "confusedWith": [
+        {
+          "concept": "On-demand RDS instance usage",
+          "difference": "On-demand usage avoids a reservation commitment; matching reserved usage receives a discounted instance rate during the term."
+        }
+      ],
+      "examCues": [
+        "predictable database usage for the next year",
+        "backup charges dominate the database bill",
+        "reservation coverage after changing instance size",
+        "three-instance Multi-AZ DB cluster"
+      ]
+    },
+    "es": {
+      "tldr": "Las reserved DB instances de Amazon RDS descuentan el uso elegible de instancias a cambio de un compromiso de uno o tres años; son un descuento de facturación, no bases de datos físicas separadas. Elígelas para un uso predecible, pero evalúa por separado el almacenamiento y los respaldos porque la reserva no descuenta esos cargos.",
+      "whenToUse": [
+        "Una base de datos RDS tendrá un uso constante durante uno o tres años.",
+        "Un equipo quiere reducir los cargos de instancias sin cambiar su implementación de base de datos.",
+        "Una revisión de costos muestra cargos importantes de almacenamiento o respaldos que un descuento de instancias no resolverá."
+      ],
+      "keyFacts": [
+        "Una reserved DB instance descuenta el uso on-demand que coincide con la reserva; la coincidencia incluye AWS Region, DB engine e instance type, además de otras especificaciones para algunos motores.",
+        "Las reservas tienen plazos de uno o tres años y no se pueden cancelar.",
+        "El descuento se aplica al uso de instancias, no al almacenamiento, los respaldos ni las operaciones de I/O.",
+        "Para los motores compatibles, la flexibilidad de tamaño se aplica dentro del mismo instance class type, AWS Region y DB engine.",
+        "Un Multi-AZ DB cluster puede tener cobertura parcial de reservas; el uso de instancias no cubierto sigue siendo on-demand."
+      ],
+      "gotchas": [
+        "Comprar una reserva no crea una DB instance.",
+        "Eliminar la DB instance no cancela el compromiso de la reserva.",
+        "Una reserva para un instance class type no ofrece cobertura flexible de tamaño para otro class type.",
+        "Reducir el cargo de instancias no necesariamente resuelve un problema de costos de almacenamiento de respaldos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Uso on-demand de instancias RDS",
+          "difference": "El uso on-demand evita un compromiso de reserva; el uso que coincide con una reserva recibe una tarifa de instancia con descuento durante el plazo."
+        }
+      ],
+      "examCues": [
+        "predictable database usage for the next year",
+        "backup charges dominate the database bill",
+        "reservation coverage after changing instance size",
+        "three-instance Multi-AZ DB cluster"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html",
+      "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "database-cost-optimization--6b9e67c7",
+      "conceptId": "database-cost-optimization",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional ticketing company runs an RDS for PostgreSQL database continuously. Its finance team expects the same DB engine, instance type, and AWS Region to remain in use for at least the next year. The company wants to reduce instance charges without changing how the application connects to the database. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Purchase a matching reserved DB instance and create a replacement DB instance solely to activate the discount.",
+          "correct": false,
+          "why": "A matching existing DB instance can receive the billing discount without creating a replacement."
+        },
+        {
+          "id": "B",
+          "text": "Purchase an RDS reserved DB instance for the same engine and instance type in a different AWS Region.",
+          "correct": false,
+          "why": "A reservation in another AWS Region does not match this DB instance's usage."
+        },
+        {
+          "id": "C",
+          "text": "Continue paying on-demand rates and shorten the database backup retention period.",
+          "correct": false,
+          "why": "Changing backup retention does not provide the requested discount on instance usage."
+        },
+        {
+          "id": "D",
+          "text": "Purchase a matching one-year RDS reserved DB instance and continue using the existing DB instance.",
+          "correct": true,
+          "why": "The predictable, matching instance usage can receive the reservation's discounted rate without a deployment change."
+        }
+      ],
+      "explanation": "Continuous, predictable usage over the next year supports a one-year reservation. A matching RDS reserved DB instance is a billing discount applied to eligible instance usage, so the company can keep its current deployment. A reservation in a different AWS Region will not match. Changing backup retention addresses a different cost category and does not discount instance hours.",
+      "keywordCues": [
+        "runs an RDS for PostgreSQL database continuously",
+        "same DB engine, instance type, and AWS Region",
+        "at least the next year",
+        "without changing how the application connects"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa regional de boletos ejecuta continuamente una base de datos RDS for PostgreSQL. Su equipo de finanzas espera mantener el mismo DB engine, instance type y AWS Region durante al menos el próximo año. La empresa quiere reducir los cargos de instancias sin cambiar cómo se conecta la aplicación a la base de datos. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Compra una reserved DB instance que coincida y crea otra DB instance solo para activar el descuento.",
+            "why": "La DB instance actual puede recibir el descuento de facturación si coincide; no necesitas reemplazarla."
+          },
+          {
+            "id": "B",
+            "text": "Compra una reserved DB instance de RDS para el mismo motor y tipo de instancia en otra AWS Region.",
+            "why": "Una reserva en otra AWS Region no coincide con el uso de esta DB instance."
+          },
+          {
+            "id": "C",
+            "text": "Continúa pagando tarifas on-demand y acorta el período de retención de respaldos de la base de datos.",
+            "why": "Cambiar la retención de respaldos no proporciona el descuento solicitado para el uso de instancias."
+          },
+          {
+            "id": "D",
+            "text": "Compra una reserved DB instance de RDS de un año que coincida y continúa usando la DB instance actual.",
+            "why": "El uso predecible de la instancia que coincide puede recibir la tarifa con descuento sin cambiar la implementación."
+          }
+        ],
+        "explanation": "El uso continuo y predecible durante el próximo año justifica una reserva de un año. Una reserved DB instance de RDS que coincida es un descuento de facturación sobre el uso elegible, por lo que la empresa puede conservar su implementación actual. Una reserva en otra AWS Region no coincidirá. Cambiar la retención de respaldos aborda otra categoría de costos y no descuenta las horas de instancia."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "database-cost-optimization--f1b04a84",
+      "conceptId": "database-cost-optimization",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research publisher has a steady RDS for MySQL workload and an existing reserved DB instance for db.r6i.large. Capacity testing shows that the database must move to db.r6i.xlarge in the same AWS Region, without changing its engine. The publisher wants to retain as much of its existing reservation benefit as possible. Which approach meets this requirement MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move to db.r6id.xlarge and rely on the existing reservation's size flexibility.",
+          "correct": false,
+          "why": "db.r6id is a different instance class type from db.r6i."
+        },
+        {
+          "id": "B",
+          "text": "Move to db.r6i.xlarge and assume the existing reservation discounts storage and backup charges instead.",
+          "correct": false,
+          "why": "The reservation can discount eligible instance usage, not storage or backup charges."
+        },
+        {
+          "id": "C",
+          "text": "Move to db.r6i.xlarge and apply the existing reservation to the eligible portion of its usage.",
+          "correct": true,
+          "why": "RDS for MySQL supports size flexibility within the same class type, engine, and AWS Region."
+        },
+        {
+          "id": "D",
+          "text": "Move to db.r7g.xlarge and rely on the existing reservation's size flexibility.",
+          "correct": false,
+          "why": "db.r7g is a different instance class type, so that size-flexible reservation does not apply."
+        }
+      ],
+      "explanation": "The required move stays within the db.r6i instance class type, the same engine, and the same AWS Region. RDS for MySQL supports size-flexible reservations under those conditions, though the existing reservation might cover only part of the larger instance's usage. Moving to db.r6id or db.r7g changes the class type and loses that size-flexible match. Reservation discounts also do not transfer to storage or backup charges.",
+      "keywordCues": [
+        "existing reserved DB instance for db.r6i.large",
+        "move to db.r6i.xlarge",
+        "same AWS Region",
+        "without changing its engine"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una editorial de investigación tiene una carga constante en RDS for MySQL y una reserved DB instance existente para db.r6i.large. Las pruebas de capacidad muestran que la base de datos debe pasar a db.r6i.xlarge en la misma AWS Region, sin cambiar el motor. La editorial quiere conservar la mayor parte posible del beneficio de su reserva actual. ¿Qué enfoque cumple este requisito de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Pasa a db.r6id.xlarge y aprovecha la flexibilidad de tamaño de la reserva actual.",
+            "why": "db.r6id es un instance class type distinto de db.r6i."
+          },
+          {
+            "id": "B",
+            "text": "Pasa a db.r6i.xlarge y supone que la reserva actual descuenta los cargos de almacenamiento y respaldos.",
+            "why": "La reserva puede descontar el uso elegible de instancias, pero no el almacenamiento ni los respaldos."
+          },
+          {
+            "id": "C",
+            "text": "Pasa a db.r6i.xlarge y aplica la reserva actual a la parte elegible de su uso.",
+            "why": "RDS for MySQL admite flexibilidad de tamaño dentro del mismo class type, motor y AWS Region."
+          },
+          {
+            "id": "D",
+            "text": "Pasa a db.r7g.xlarge y aprovecha la flexibilidad de tamaño de la reserva actual.",
+            "why": "db.r7g es otro instance class type, por lo que esa reserva flexible en tamaño no aplica."
+          }
+        ],
+        "explanation": "El cambio requerido permanece dentro del instance class type db.r6i, el mismo motor y la misma AWS Region. RDS for MySQL admite reservas flexibles en tamaño bajo esas condiciones, aunque la reserva actual podría cubrir solo una parte del uso de la instancia más grande. Pasar a db.r6id o db.r7g cambia el class type y pierde esa coincidencia. Los descuentos de la reserva tampoco se transfieren a los cargos de almacenamiento o respaldos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "database-cost-optimization--dfe381cb",
+      "conceptId": "database-cost-optimization",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company operates an RDS Multi-AZ DB cluster with three db.m6gd.large DB instances. It expects the cluster to run continuously for the next year in the same AWS Region and wants reservation discounts to cover all three instances. Which TWO purchase plans meet this coverage requirement MOST cost-effectively? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Purchase three db.m6gd.large Single-AZ reserved DB instances.",
+          "correct": true,
+          "why": "Together these reservations cover all three DB instances in the cluster."
+        },
+        {
+          "id": "B",
+          "text": "Purchase one db.m6gd.large Multi-AZ reserved DB instance.",
+          "correct": false,
+          "why": "This covers only two of the cluster's three DB instances."
+        },
+        {
+          "id": "C",
+          "text": "Purchase one db.m6gd.large Multi-AZ and one db.m6gd.large Single-AZ reserved DB instance.",
+          "correct": true,
+          "why": "The Multi-AZ reservation covers two instances and the Single-AZ reservation covers the third."
+        },
+        {
+          "id": "D",
+          "text": "Purchase one db.m6gd.large Single-AZ reserved DB instance and leave the other instances on-demand.",
+          "correct": false,
+          "why": "This deliberately leaves two DB instances without the requested reservation coverage."
+        },
+        {
+          "id": "E",
+          "text": "Purchase two db.m6gd.large Single-AZ reserved DB instances.",
+          "correct": false,
+          "why": "One DB instance would remain without reservation coverage."
+        }
+      ],
+      "explanation": "The cluster contains three DB instances, and the requirement is to cover all three with reservation discounts. AWS documents two equivalent purchase patterns: three matching Single-AZ reservations, or one matching Multi-AZ reservation plus one Single-AZ reservation. A single Multi-AZ reservation covers only two of the three instances. Plans that reserve fewer instances leave the remaining usage billed on-demand.",
+      "keywordCues": [
+        "Multi-AZ DB cluster with three db.m6gd.large DB instances",
+        "continuously for the next year",
+        "cover all three instances",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística opera un RDS Multi-AZ DB cluster con tres DB instances db.m6gd.large. Espera que el clúster funcione continuamente durante el próximo año en la misma AWS Region y quiere que los descuentos de las reservas cubran las tres instancias. ¿Qué DOS planes de compra cumplen este requisito de cobertura de la forma MOST cost-effective? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Compra tres reserved DB instances Single-AZ db.m6gd.large.",
+            "why": "En conjunto, estas reservas cubren las tres DB instances del clúster."
+          },
+          {
+            "id": "B",
+            "text": "Compra una reserved DB instance Multi-AZ db.m6gd.large.",
+            "why": "Esto cubre solo dos de las tres DB instances del clúster."
+          },
+          {
+            "id": "C",
+            "text": "Compra una reserved DB instance Multi-AZ db.m6gd.large y una Single-AZ db.m6gd.large.",
+            "why": "La reserva Multi-AZ cubre dos instancias y la reserva Single-AZ cubre la tercera."
+          },
+          {
+            "id": "D",
+            "text": "Compra una reserved DB instance Single-AZ db.m6gd.large y deja las otras instancias en on-demand.",
+            "why": "Esto deja intencionalmente dos DB instances sin la cobertura de reserva solicitada."
+          },
+          {
+            "id": "E",
+            "text": "Compra dos reserved DB instances Single-AZ db.m6gd.large.",
+            "why": "Una DB instance quedaría sin cobertura de reserva."
+          }
+        ],
+        "explanation": "El clúster contiene tres DB instances y el requisito es cubrir las tres con descuentos de reserva. AWS documenta dos patrones de compra equivalentes: tres reservas Single-AZ que coincidan, o una reserva Multi-AZ y una Single-AZ que coincidan. Una sola reserva Multi-AZ cubre únicamente dos de las tres instancias. Los planes que reservan menos instancias dejan el uso restante con facturación on-demand."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "database-cost-optimization--r0",
+      "conceptId": "database-cost-optimization",
+      "kind": "recall",
+      "prompt": "A matching RDS database will run steadily for a year. What purchase can reduce its instance charges, and which charges remain unaffected?",
+      "promptEs": "Una base de datos RDS que coincide con la reserva funcionará de forma constante durante un año. ¿Qué compra puede reducir los cargos de instancia y qué cargos no cambia?",
+      "idealAnswer": "Purchase a matching one-year RDS reserved DB instance to discount eligible instance usage. The reservation does not discount storage, backups, or I/O.",
+      "rubric": [
+        "Names a matching one-year RDS reserved DB instance.",
+        "Identifies the discount as applying to instance usage.",
+        "States that storage, backups, and I/O are not discounted."
+      ]
+    }
+  ]
+}

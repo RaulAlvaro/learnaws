@@ -1,0 +1,307 @@
+{
+  "conceptId": "s3-event-notifications",
+  "card": {
+    "en": {
+      "tldr": "S3 Event Notifications publish selected bucket events to Lambda, SQS, SNS, or EventBridge. For object-created processing, choose the destination that fits the workflow; use EventBridge when an S3 event must reach an SQS FIFO queue.",
+      "whenToUse": [
+        "An object upload should trigger processing, such as thumbnail creation.",
+        "An application needs notifications for selected S3 events, such as object creation or removal.",
+        "An S3 event must reach an SQS FIFO queue."
+      ],
+      "keyFacts": [
+        "A bucket notification configuration specifies the events to publish and their destinations.",
+        "Supported destinations include SNS topics, SQS queues, Lambda functions, and EventBridge.",
+        "S3 event notifications are delivered at least once; they typically arrive in seconds but can take a minute or longer.",
+        "An SQS FIFO queue is not supported as a direct S3 event notification destination; EventBridge can be used to send the event to one.",
+        "A function that writes to its triggering bucket can create an execution loop."
+      ],
+      "gotchas": [
+        "Do not assume one notification means one delivery; processing must tolerate duplicate notifications.",
+        "Do not select a direct S3-to-SQS FIFO notification configuration.",
+        "Writing generated files to the same bucket can retrigger processing; limit the trigger to an incoming prefix and write output outside it, or use a separate output bucket."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "create a thumbnail when an object is uploaded",
+        "send S3 events to an SQS FIFO queue",
+        "processed files retrigger the function",
+        "notifications may arrive more than once"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Event Notifications publica eventos seleccionados de un bucket en Lambda, SQS, SNS o EventBridge. Para procesar objetos creados, elige el destino según el flujo de trabajo; usa EventBridge si un evento de S3 debe llegar a una cola SQS FIFO.",
+      "whenToUse": [
+        "Necesitas iniciar un proceso, como crear miniaturas, cuando se carga un objeto.",
+        "Una aplicación necesita notificaciones de eventos específicos de S3, como la creación o eliminación de objetos.",
+        "Un evento de S3 debe llegar a una cola SQS FIFO."
+      ],
+      "keyFacts": [
+        "La configuración de notificaciones del bucket especifica qué eventos se publican y a qué destinos.",
+        "Los destinos admitidos incluyen temas SNS, colas SQS, funciones Lambda y EventBridge.",
+        "Las notificaciones de eventos de S3 se entregan al menos una vez; normalmente llegan en segundos, pero pueden tardar un minuto o más.",
+        "S3 no admite una cola SQS FIFO como destino directo de notificaciones; puedes usar EventBridge para enviarle el evento.",
+        "Una función que escribe en el bucket que la activa puede generar un ciclo de ejecuciones."
+      ],
+      "gotchas": [
+        "No supongas que cada evento genera una sola entrega; el procesamiento debe tolerar notificaciones duplicadas.",
+        "No elijas una configuración de notificaciones directas de S3 a SQS FIFO.",
+        "Si guardas los archivos generados en el mismo bucket, puedes volver a activar el proceso; limita el disparador a un prefijo de entrada y escribe la salida fuera de él, o usa otro bucket para la salida."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "create a thumbnail when an object is uploaded",
+        "send S3 events to an SQS FIFO queue",
+        "processed files retrigger the function",
+        "notifications may arrive more than once"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-event-notifications--79f30aec",
+      "conceptId": "s3-event-notifications",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small real estate site uploads listing photos to an S3 bucket. Each new photo needs a thumbnail created by an existing Lambda function, and the team does not need to retain an intermediate notification for another application. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure an S3 object-created notification with the Lambda function as its destination.",
+          "correct": true,
+          "why": "S3 can send object-created notifications directly to Lambda, so no intermediate destination is needed."
+        },
+        {
+          "id": "B",
+          "text": "Configure an S3 object-created notification to an SNS topic, then send the notifications to the Lambda function.",
+          "correct": false,
+          "why": "The topic adds an intermediate destination without meeting an additional stated requirement."
+        },
+        {
+          "id": "C",
+          "text": "Send S3 events to EventBridge, then route object-created events to the Lambda function.",
+          "correct": false,
+          "why": "EventBridge adds an intermediate step when S3 can notify the function directly."
+        },
+        {
+          "id": "D",
+          "text": "Configure an S3 object-created notification to an SQS queue, then have the Lambda function process queued notifications.",
+          "correct": false,
+          "why": "An intermediate queue adds a component when the scenario does not require one."
+        }
+      ],
+      "explanation": "The deciding requirement is to invoke an existing function for new photos with the least operational overhead. S3 supports object-created notifications with a Lambda function as the destination. SQS, SNS, and EventBridge are possible notification paths, but each introduces an intermediate component that this scenario does not call for.",
+      "keywordCues": [
+        "Each new photo needs a thumbnail created by an existing Lambda function",
+        "does not need to retain an intermediate notification",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html"
+      ],
+      "es": {
+        "stem": "Un sitio inmobiliario pequeño carga fotos de propiedades en un bucket de S3. Cada foto nueva necesita una miniatura creada por una función Lambda existente, y el equipo no necesita conservar una notificación intermedia para otra aplicación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura una notificación de creación de objetos de S3 cuyo destino sea la función Lambda.",
+            "why": "S3 puede enviar notificaciones de creación de objetos directamente a Lambda, sin un destino intermedio."
+          },
+          {
+            "id": "B",
+            "text": "Configura una notificación de creación de objetos de S3 hacia un tema SNS y envía las notificaciones a la función Lambda.",
+            "why": "El tema agrega un destino intermedio sin satisfacer ningún requisito adicional indicado."
+          },
+          {
+            "id": "C",
+            "text": "Envía los eventos de S3 a EventBridge y luego dirige los eventos de creación de objetos a la función Lambda.",
+            "why": "EventBridge agrega un paso intermedio cuando S3 puede notificar directamente a la función."
+          },
+          {
+            "id": "D",
+            "text": "Configura una notificación de creación de objetos de S3 hacia una cola SQS y haz que Lambda procese las notificaciones de la cola.",
+            "why": "La cola agrega un componente intermedio que el escenario no necesita."
+          }
+        ],
+        "explanation": "El requisito decisivo es invocar una función existente para las fotos nuevas con el LEAST operational overhead. S3 admite notificaciones de creación de objetos cuyo destino es una función Lambda. SQS, SNS y EventBridge son rutas posibles, pero cada una agrega un componente intermedio que este escenario no requiere."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-event-notifications--c3356e91",
+      "conceptId": "s3-event-notifications",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publishing company stores incoming manuscripts in S3. Its processing application already reads from an SQS FIFO queue, and the company wants notifications when manuscripts are uploaded without changing that destination. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set the SQS FIFO queue as the direct destination of an S3 object-created notification.",
+          "correct": false,
+          "why": "S3 does not support an SQS FIFO queue as a direct event notification destination."
+        },
+        {
+          "id": "B",
+          "text": "Set a Lambda function as the S3 notification destination and have the application receive the Lambda invocation.",
+          "correct": false,
+          "why": "A Lambda invocation does not preserve the application's specified SQS FIFO destination."
+        },
+        {
+          "id": "C",
+          "text": "Set an SNS topic as the S3 notification destination and have the application read notifications from the topic.",
+          "correct": false,
+          "why": "This changes the application's required SQS FIFO destination."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 events in EventBridge and send the object-created events to the SQS FIFO queue.",
+          "correct": true,
+          "why": "EventBridge provides the documented path for sending an S3 event notification to an SQS FIFO queue."
+        }
+      ],
+      "explanation": "The existing SQS FIFO queue is the constraint that decides the answer. Although S3 can notify SQS queues directly, SQS FIFO queues are not supported as direct S3 event notification destinations. The S3 documentation identifies EventBridge as the way to send an S3 event notification to an SQS FIFO queue. Switching to SNS or Lambda would not retain the required destination.",
+      "keywordCues": [
+        "already reads from an SQS FIFO queue",
+        "without changing that destination",
+        "when manuscripts are uploaded"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html"
+      ],
+      "es": {
+        "stem": "Una editorial guarda los manuscritos entrantes en S3. Su aplicación de procesamiento ya lee de una cola SQS FIFO y la empresa quiere recibir notificaciones cuando se cargan manuscritos, sin cambiar ese destino. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Establece la cola SQS FIFO como destino directo de una notificación de creación de objetos de S3.",
+            "why": "S3 no admite una cola SQS FIFO como destino directo de notificaciones de eventos."
+          },
+          {
+            "id": "B",
+            "text": "Establece una función Lambda como destino de las notificaciones de S3 y haz que la aplicación reciba la invocación de Lambda.",
+            "why": "Una invocación de Lambda no conserva el destino SQS FIFO especificado para la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Establece un tema SNS como destino de las notificaciones de S3 y haz que la aplicación lea las notificaciones del tema.",
+            "why": "Esto cambia el destino SQS FIFO requerido por la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Habilita los eventos de S3 en EventBridge y envía los eventos de creación de objetos a la cola SQS FIFO.",
+            "why": "EventBridge proporciona la ruta documentada para enviar una notificación de evento de S3 a una cola SQS FIFO."
+          }
+        ],
+        "explanation": "La cola SQS FIFO existente es la restricción decisiva. Aunque S3 puede notificar directamente a colas SQS, no admite las colas SQS FIFO como destinos directos de notificaciones. La documentación de S3 indica que puedes usar EventBridge para enviar una notificación de evento de S3 a una cola SQS FIFO. Cambiar a SNS o Lambda no conservaría el destino requerido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-event-notifications--6cc623d6",
+      "conceptId": "s3-event-notifications",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab receives large batches of instrument files in an S3 bucket. A worker application reads upload notifications from a queue and records each file's metadata; duplicate records would be costly to reconcile. The lab wants the existing queue-based workflow and needs the design to handle the notification delivery behavior of S3. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send object-created notifications to EventBridge and assume it makes each S3 notification arrive exactly once.",
+          "correct": false,
+          "why": "Changing the destination does not justify an exactly-once assumption about S3 notifications."
+        },
+        {
+          "id": "B",
+          "text": "Send object-created notifications to the queue and make metadata recording tolerate duplicate notifications.",
+          "correct": true,
+          "why": "It preserves the queue-based workflow and accounts for S3's at-least-once notification delivery."
+        },
+        {
+          "id": "C",
+          "text": "Send object-created notifications to the queue and assume each notification is delivered exactly once.",
+          "correct": false,
+          "why": "S3 event notifications are delivered at least once, so duplicates cannot be ruled out."
+        },
+        {
+          "id": "D",
+          "text": "Send object-created notifications directly to Lambda and assume direct invocation prevents duplicate notifications.",
+          "correct": false,
+          "why": "It replaces the required queue workflow and does not remove S3's at-least-once delivery behavior."
+        }
+      ],
+      "explanation": "The lab must keep its queue-based workflow while avoiding duplicate metadata records. S3 supports SQS as a notification destination, but S3 event notifications are designed for at-least-once delivery. The worker therefore needs to tolerate duplicate notifications. Neither a direct Lambda destination nor EventBridge makes an exactly-once assumption safe.",
+      "keywordCues": [
+        "reads upload notifications from a queue",
+        "duplicate records would be costly to reconcile",
+        "handle the notification delivery behavior of S3"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación recibe grandes lotes de archivos de instrumentos en un bucket de S3. Una aplicación de procesamiento lee las notificaciones de carga desde una cola y registra los metadatos de cada archivo; conciliar registros duplicados sería costoso. El laboratorio quiere conservar el flujo basado en la cola y necesita que el diseño tenga en cuenta cómo S3 entrega las notificaciones. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Envía las notificaciones de creación de objetos a EventBridge y supone que cada notificación de S3 llegará exactamente una vez.",
+            "why": "Cambiar el destino no justifica suponer que las notificaciones de S3 se entregan exactamente una vez."
+          },
+          {
+            "id": "B",
+            "text": "Envía las notificaciones de creación de objetos a la cola y haz que el registro de metadatos tolere notificaciones duplicadas.",
+            "why": "Conserva el flujo basado en la cola y tiene en cuenta la entrega al menos una vez de las notificaciones de S3."
+          },
+          {
+            "id": "C",
+            "text": "Envía las notificaciones de creación de objetos a la cola y supone que cada notificación se entrega exactamente una vez.",
+            "why": "Las notificaciones de eventos de S3 se entregan al menos una vez, por lo que puede haber duplicados."
+          },
+          {
+            "id": "D",
+            "text": "Envía las notificaciones de creación de objetos directamente a Lambda y supone que la invocación directa evita las notificaciones duplicadas.",
+            "why": "Reemplaza el flujo requerido con la cola y no elimina la posibilidad de entregas duplicadas de S3."
+          }
+        ],
+        "explanation": "El laboratorio debe conservar su flujo basado en la cola sin crear registros de metadatos duplicados. S3 admite SQS como destino de notificaciones, pero las notificaciones de eventos de S3 están diseñadas para entregarse al menos una vez. Por eso, la aplicación debe tolerar notificaciones duplicadas. Ni el destino directo de Lambda ni EventBridge permiten suponer una entrega exactamente una vez."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-event-notifications--r0",
+      "conceptId": "s3-event-notifications",
+      "kind": "recall",
+      "prompt": "An S3 upload must trigger a thumbnail Lambda function. Which notification setup would you choose, and what delivery behavior must the function handle?",
+      "promptEs": "Una carga en S3 debe activar una función Lambda para crear miniaturas. ¿Qué configuración de notificaciones elegirías y qué comportamiento de entrega debe manejar la función?",
+      "idealAnswer": "Configure an S3 object-created event notification with the Lambda function as its destination. S3 notifications are delivered at least once, so the processing should tolerate duplicate notifications.",
+      "rubric": [
+        "Selects an S3 object-created event notification.",
+        "Names Lambda as the notification destination.",
+        "Notes at-least-once delivery and the need to tolerate duplicates."
+      ]
+    }
+  ]
+}

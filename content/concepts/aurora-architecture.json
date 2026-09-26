@@ -1,0 +1,452 @@
+{
+  "conceptId": "aurora-architecture",
+  "card": {
+    "en": {
+      "tldr": "Amazon Aurora is a managed, MySQL- or PostgreSQL-compatible relational database whose compute instances share a cluster storage volume spanning multiple Availability Zones. Choose it when an application needs familiar relational interfaces, distributed storage, and the option to fail over to a reader instance.",
+      "whenToUse": [
+        "An existing MySQL or PostgreSQL application needs a managed relational database with little or no driver changes.",
+        "A workload needs readers that share the writer's cluster volume and can offload read traffic.",
+        "The database needs automatic failover to an Aurora Replica when the writer becomes unavailable."
+      ],
+      "keyFacts": [
+        "An Aurora cluster has one primary writer and can have up to 15 Aurora Replicas.",
+        "The writer and readers connect to the same cluster volume, which spans multiple Availability Zones.",
+        "Aurora Replicas are read-only; Aurora can fail over to a replica if the primary becomes unavailable.",
+        "Place Aurora Replicas in separate Availability Zones to maintain high availability.",
+        "Aurora storage scales automatically; the provided AWS FAQ states a maximum of 256 TiB per database instance."
+      ],
+      "gotchas": [
+        "A single-instance Aurora cluster has storage distributed across Availability Zones, but it has no Aurora Replica to take over its writer's compute role.",
+        "A read-only Aurora Replica cannot accept application writes until it becomes the primary through failover.",
+        "Do not treat distributed storage and a cross-AZ reader instance as the same high-availability feature."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon RDS",
+          "difference": "Choose Aurora when the requirement specifically calls for its shared cluster volume and Aurora Replicas; RDS also supports managed relational engines."
+        },
+        {
+          "concept": "Amazon DynamoDB",
+          "difference": "DynamoDB is a NoSQL choice, not a replacement for an application that must keep MySQL or PostgreSQL compatibility."
+        },
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB targets MongoDB-compatible document workloads, not MySQL- or PostgreSQL-compatible relational applications."
+        }
+      ],
+      "examCues": [
+        "existing PostgreSQL drivers",
+        "shared storage across Availability Zones",
+        "reader in another Availability Zone",
+        "automatic failover to a reader",
+        "offload read-only queries"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Aurora es una base de datos relacional administrada, compatible con MySQL o PostgreSQL, cuyas instancias de cómputo comparten un volumen de almacenamiento que abarca varias Availability Zones. Elígela cuando necesites interfaces relacionales conocidas, almacenamiento distribuido y la posibilidad de hacer failover a una instancia lectora.",
+      "whenToUse": [
+        "Tienes una aplicación MySQL o PostgreSQL que necesita una base de datos relacional administrada con pocos cambios, o ninguno, en los drivers.",
+        "Necesitas lectores que compartan el volumen del clúster con el escritor y descarguen tráfico de lectura.",
+        "Necesitas failover automático a una Aurora Replica si el escritor deja de estar disponible."
+      ],
+      "keyFacts": [
+        "Un clúster Aurora tiene un escritor principal y puede tener hasta 15 Aurora Replicas.",
+        "El escritor y los lectores se conectan al mismo volumen del clúster, que abarca varias Availability Zones.",
+        "Las Aurora Replicas son de solo lectura; Aurora puede hacer failover a una réplica si el principal deja de estar disponible.",
+        "Ubica Aurora Replicas en distintas Availability Zones para mantener alta disponibilidad.",
+        "El almacenamiento de Aurora crece automáticamente; la FAQ de AWS proporcionada indica un máximo de 256 TiB por instancia de base de datos."
+      ],
+      "gotchas": [
+        "Un clúster Aurora de una sola instancia tiene almacenamiento distribuido entre Availability Zones, pero no tiene una Aurora Replica que asuma el rol de cómputo del escritor.",
+        "Una Aurora Replica de solo lectura no acepta escrituras de la aplicación hasta convertirse en principal mediante failover.",
+        "No confundas el almacenamiento distribuido con tener una instancia lectora en otra Availability Zone."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon RDS",
+          "difference": "Elige Aurora cuando el requisito mencione específicamente su volumen compartido y sus Aurora Replicas; RDS también ofrece motores relacionales administrados."
+        },
+        {
+          "concept": "Amazon DynamoDB",
+          "difference": "DynamoDB es una opción NoSQL, no un reemplazo para una aplicación que debe conservar compatibilidad con MySQL o PostgreSQL."
+        },
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB está orientado a cargas de documentos compatibles con MongoDB, no a aplicaciones relacionales compatibles con MySQL o PostgreSQL."
+        }
+      ],
+      "examCues": [
+        "existing PostgreSQL drivers",
+        "shared storage across Availability Zones",
+        "reader in another Availability Zone",
+        "automatic failover to a reader",
+        "offload read-only queries"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html",
+      "https://aws.amazon.com/rds/aurora/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aurora-architecture--4a0c256f",
+      "conceptId": "aurora-architecture",
+      "secondaryConcepts": [
+        "rds-fundamentals",
+        "documentdb"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer already runs an Aurora PostgreSQL cluster with only a writer instance. The team notes that its cluster volume spans multiple Availability Zones, but it also needs an instance in another Availability Zone that Aurora can use if the writer becomes unavailable. Which change meets the availability requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an Aurora Replica to the cluster in another Availability Zone.",
+          "correct": true,
+          "why": "Aurora can automatically fail over to an Aurora Replica when the primary becomes unavailable."
+        },
+        {
+          "id": "B",
+          "text": "Add an Amazon DocumentDB reader in another Availability Zone.",
+          "correct": false,
+          "why": "A DocumentDB reader is not an Aurora Replica in the PostgreSQL cluster."
+        },
+        {
+          "id": "C",
+          "text": "Keep the single writer because its cluster volume already spans Availability Zones.",
+          "correct": false,
+          "why": "Distributed storage alone does not provide another DB instance for Aurora to promote."
+        },
+        {
+          "id": "D",
+          "text": "Add an Amazon RDS for PostgreSQL read replica in another Availability Zone.",
+          "correct": false,
+          "why": "An RDS read replica is not an Aurora Replica attached to this Aurora cluster."
+        }
+      ],
+      "explanation": "The requirement is for replacement DB compute in another Availability Zone, not merely durable storage. An Aurora cluster with only a writer still has a multi-AZ cluster volume, but adding an Aurora Replica supplies a reader instance that Aurora can use for failover. A separate RDS or DocumentDB reader cannot serve as an Aurora Replica for this cluster.",
+      "keywordCues": [
+        "only a writer instance",
+        "cluster volume spans multiple Availability Zones",
+        "an instance in another Availability Zone"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html",
+        "https://aws.amazon.com/rds/aurora/faqs/"
+      ],
+      "es": {
+        "stem": "Un fabricante ya ejecuta un clúster Aurora PostgreSQL con solo una instancia escritora. El equipo observa que el volumen del clúster abarca varias Availability Zones, pero también necesita una instancia en otra Availability Zone que Aurora pueda usar si el escritor deja de estar disponible. ¿Qué cambio cumple el requisito de disponibilidad?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega una Aurora Replica al clúster en otra Availability Zone.",
+            "why": "Aurora puede hacer failover automático a una Aurora Replica cuando el principal deja de estar disponible."
+          },
+          {
+            "id": "B",
+            "text": "Agrega un lector de Amazon DocumentDB en otra Availability Zone.",
+            "why": "Un lector de DocumentDB no es una Aurora Replica del clúster PostgreSQL."
+          },
+          {
+            "id": "C",
+            "text": "Conserva el único escritor porque el volumen del clúster ya abarca varias Availability Zones.",
+            "why": "El almacenamiento distribuido por sí solo no proporciona otra instancia de base de datos que Aurora pueda promover."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una read replica de Amazon RDS for PostgreSQL en otra Availability Zone.",
+            "why": "Una read replica de RDS no es una Aurora Replica conectada a este clúster Aurora."
+          }
+        ],
+        "explanation": "El requisito es contar con cómputo de base de datos de reemplazo en otra Availability Zone, no solo con almacenamiento duradero. Un clúster Aurora que solo tiene un escritor mantiene un volumen que abarca varias AZ, pero agregar una Aurora Replica proporciona una instancia lectora que Aurora puede usar para failover. Un lector independiente de RDS o DocumentDB no puede actuar como Aurora Replica de este clúster."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-architecture--a2fba7ac",
+      "conceptId": "aurora-architecture",
+      "secondaryConcepts": [
+        "rds-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare analytics team has selected Aurora PostgreSQL for an existing relational application. It needs a cross-AZ failover target if the writer fails and wants to move read-only analysis queries away from that writer without maintaining a separate copy of the database for its readers. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Direct read-only analysis queries to Aurora Replicas in the cluster.",
+          "correct": true,
+          "why": "Aurora Replicas share the cluster volume and can offload reads from the primary."
+        },
+        {
+          "id": "B",
+          "text": "Add an Aurora Replica in a different Availability Zone from the writer.",
+          "correct": true,
+          "why": "A cross-AZ Aurora Replica shares the cluster volume and can serve as a failover target."
+        },
+        {
+          "id": "C",
+          "text": "Place an RDS for PostgreSQL read replica outside the Aurora cluster for analysis.",
+          "correct": false,
+          "why": "It would not be an Aurora reader sharing the selected cluster volume."
+        },
+        {
+          "id": "D",
+          "text": "Direct analysis queries and application writes to Aurora Replicas.",
+          "correct": false,
+          "why": "Aurora Replicas cannot perform application writes while they are readers."
+        },
+        {
+          "id": "E",
+          "text": "Keep only the writer because the Aurora cluster volume spans multiple Availability Zones.",
+          "correct": false,
+          "why": "The multi-AZ volume does not create a reader instance to take over the writer's role."
+        }
+      ],
+      "explanation": "This design needs both a reader instance in another Availability Zone and a way to offload read-only analysis. An Aurora Replica provides a failover target, and Aurora Replicas can handle read queries while sharing the writer's cluster volume. Multi-AZ storage alone does not supply replacement writer compute, and reader instances cannot accept writes.",
+      "keywordCues": [
+        "cross-AZ failover target",
+        "read-only analysis queries away from that writer",
+        "without maintaining a separate copy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html",
+        "https://aws.amazon.com/rds/aurora/faqs/"
+      ],
+      "es": {
+        "stem": "Un equipo de análisis de salud eligió Aurora PostgreSQL para una aplicación relacional existente. Necesita un destino de failover en otra AZ si falla el escritor y quiere alejar de él las consultas de análisis de solo lectura, sin mantener una copia separada de la base de datos para los lectores. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Dirige las consultas de análisis de solo lectura a Aurora Replicas del clúster.",
+            "why": "Las Aurora Replicas comparten el volumen del clúster y pueden descargar lecturas del principal."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una Aurora Replica en una Availability Zone distinta de la del escritor.",
+            "why": "Una Aurora Replica en otra AZ comparte el volumen del clúster y puede servir como destino de failover."
+          },
+          {
+            "id": "C",
+            "text": "Coloca una read replica de RDS for PostgreSQL fuera del clúster Aurora para el análisis.",
+            "why": "No sería un lector Aurora que comparta el volumen del clúster elegido."
+          },
+          {
+            "id": "D",
+            "text": "Dirige tanto las consultas de análisis como las escrituras de la aplicación a Aurora Replicas.",
+            "why": "Las Aurora Replicas no pueden realizar escrituras de la aplicación mientras sean lectores."
+          },
+          {
+            "id": "E",
+            "text": "Conserva solo el escritor porque el volumen del clúster Aurora abarca varias Availability Zones.",
+            "why": "El volumen en varias AZ no crea una instancia lectora que pueda asumir el rol del escritor."
+          }
+        ],
+        "explanation": "Este diseño necesita tanto una instancia lectora en otra Availability Zone como una forma de descargar las consultas de análisis de solo lectura. Una Aurora Replica proporciona un destino de failover, y las Aurora Replicas pueden atender lecturas mientras comparten el volumen del escritor. El almacenamiento en varias AZ por sí solo no proporciona cómputo de reemplazo para el escritor, y las instancias lectoras no pueden aceptar escrituras."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-architecture--ae946c57",
+      "conceptId": "aurora-architecture",
+      "secondaryConcepts": [
+        "dynamodb-fundamentals",
+        "documentdb"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs a MySQL application and wants to keep its existing drivers. Its database design calls for a writer and a read-only instance in another Availability Zone that share a storage volume; the reader must be available for automatic failover if the writer fails. Which solution meets these requirements with the LEAST application change?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy a single-instance Aurora MySQL cluster and send all queries to its writer.",
+          "correct": false,
+          "why": "Its storage spans Availability Zones, but it has no reader instance for the required failover."
+        },
+        {
+          "id": "B",
+          "text": "Move the application to Amazon DocumentDB and place a reader in another Availability Zone.",
+          "correct": false,
+          "why": "DocumentDB targets MongoDB-compatible document applications rather than the required MySQL application."
+        },
+        {
+          "id": "C",
+          "text": "Deploy an Aurora MySQL cluster with a writer and an Aurora Replica in another Availability Zone.",
+          "correct": true,
+          "why": "Aurora retains MySQL compatibility, shares cluster storage, and can fail over to the cross-AZ replica."
+        },
+        {
+          "id": "D",
+          "text": "Move the application to Amazon DynamoDB and store each ticket as an item.",
+          "correct": false,
+          "why": "DynamoDB would not preserve the application's MySQL interface or provide the requested shared Aurora cluster volume."
+        }
+      ],
+      "explanation": "The deciding requirements are MySQL compatibility, shared cluster storage, and a reader that can take over if the writer fails. An Aurora MySQL writer and an Aurora Replica use the same cluster volume, and Aurora can fail over to the replica. A single-instance Aurora cluster still has distributed storage, but it lacks the requested reader instance.",
+      "keywordCues": [
+        "keep its existing drivers",
+        "share a storage volume",
+        "automatic failover"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html",
+        "https://aws.amazon.com/rds/aurora/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas usa una aplicación MySQL y quiere conservar sus drivers actuales. Su diseño requiere un escritor y una instancia de solo lectura en otra Availability Zone que compartan un volumen de almacenamiento; el lector debe estar disponible para failover automático si falla el escritor. ¿Qué solución cumple estos requisitos con el LEAST application change?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementa un clúster Aurora MySQL de una sola instancia y envía todas las consultas a su escritor.",
+            "why": "Su almacenamiento abarca varias Availability Zones, pero no tiene la instancia lectora necesaria para el failover requerido."
+          },
+          {
+            "id": "B",
+            "text": "Migra la aplicación a Amazon DocumentDB y coloca un lector en otra Availability Zone.",
+            "why": "DocumentDB está orientado a aplicaciones de documentos compatibles con MongoDB, no a la aplicación MySQL requerida."
+          },
+          {
+            "id": "C",
+            "text": "Implementa un clúster Aurora MySQL con un escritor y una Aurora Replica en otra Availability Zone.",
+            "why": "Aurora conserva la compatibilidad con MySQL, comparte el almacenamiento del clúster y puede hacer failover a la réplica en otra AZ."
+          },
+          {
+            "id": "D",
+            "text": "Migra la aplicación a Amazon DynamoDB y almacena cada entrada como un elemento.",
+            "why": "DynamoDB no conservaría la interfaz MySQL de la aplicación ni proporcionaría el volumen compartido de un clúster Aurora."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la compatibilidad con MySQL, el almacenamiento compartido del clúster y un lector que pueda asumir el rol del escritor si este falla. Un escritor Aurora MySQL y una Aurora Replica usan el mismo volumen, y Aurora puede hacer failover a la réplica. Un clúster Aurora de una sola instancia también tiene almacenamiento distribuido, pero carece de la instancia lectora solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-architecture--c883bebd",
+      "conceptId": "aurora-architecture",
+      "secondaryConcepts": [
+        "rds-fundamentals",
+        "keyspaces",
+        "neptune"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research publisher uses PostgreSQL drivers for a relational catalog. It wants a managed database whose storage grows automatically and whose reporting queries can run on several read-only instances connected to the writer's storage volume. Which solution meets these requirements with the LEAST application change?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Keyspaces and issue the reporting queries through CQL.",
+          "correct": false,
+          "why": "Keyspaces uses a Cassandra-compatible interface rather than the required PostgreSQL drivers."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon RDS for PostgreSQL with read replicas for reporting.",
+          "correct": false,
+          "why": "Although it preserves PostgreSQL compatibility, this option does not provide the specified Aurora shared cluster volume."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon Neptune and model catalog entries as graph vertices.",
+          "correct": false,
+          "why": "A graph model does not preserve the application's PostgreSQL relational interface."
+        },
+        {
+          "id": "D",
+          "text": "Use Aurora PostgreSQL with a writer and Aurora Replicas for reporting.",
+          "correct": true,
+          "why": "Aurora supports PostgreSQL drivers, automatically growing storage, and readers attached to the writer's cluster volume."
+        }
+      ],
+      "explanation": "The existing PostgreSQL interface and the requirement that readers connect to the writer's storage volume identify Aurora PostgreSQL. Aurora separates DB instances from its shared cluster volume, and Aurora Replicas can offload reporting reads. RDS for PostgreSQL is a plausible relational choice, but it does not satisfy the specifically requested Aurora shared-volume design.",
+      "keywordCues": [
+        "PostgreSQL drivers",
+        "storage grows automatically",
+        "connected to the writer's storage volume"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html",
+        "https://aws.amazon.com/rds/aurora/faqs/"
+      ],
+      "es": {
+        "stem": "Una editorial de investigación usa drivers PostgreSQL para un catálogo relacional. Quiere una base de datos administrada cuyo almacenamiento crezca automáticamente y cuyas consultas de informes se ejecuten en varias instancias de solo lectura conectadas al volumen de almacenamiento del escritor. ¿Qué solución cumple estos requisitos con el LEAST application change?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Amazon Keyspaces y ejecuta las consultas de informes mediante CQL.",
+            "why": "Keyspaces usa una interfaz compatible con Cassandra, no los drivers PostgreSQL requeridos."
+          },
+          {
+            "id": "B",
+            "text": "Usa Amazon RDS for PostgreSQL con read replicas para los informes.",
+            "why": "Aunque conserva la compatibilidad con PostgreSQL, esta opción no proporciona el volumen compartido de clúster Aurora solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Usa Amazon Neptune y representa las entradas del catálogo como vértices de un grafo.",
+            "why": "Un modelo de grafo no conserva la interfaz relacional PostgreSQL de la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Usa Aurora PostgreSQL con un escritor y Aurora Replicas para los informes.",
+            "why": "Aurora admite drivers PostgreSQL, almacenamiento que crece automáticamente y lectores conectados al volumen del clúster del escritor."
+          }
+        ],
+        "explanation": "La interfaz PostgreSQL existente y el requisito de que los lectores se conecten al volumen de almacenamiento del escritor apuntan a Aurora PostgreSQL. Aurora separa las instancias de base de datos de su volumen compartido, y las Aurora Replicas pueden descargar las lecturas de informes. RDS for PostgreSQL es una alternativa relacional plausible, pero no cumple el diseño de volumen compartido de Aurora solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aurora-architecture--r0",
+      "conceptId": "aurora-architecture",
+      "kind": "recall",
+      "prompt": "A PostgreSQL application needs shared multi-AZ storage and a reader that can take over after writer failure. What would you deploy, and why?",
+      "promptEs": "Una aplicación PostgreSQL necesita almacenamiento compartido en varias AZ y un lector que pueda asumir el rol tras una falla del escritor. ¿Qué implementarías y por qué?",
+      "idealAnswer": "Deploy an Aurora PostgreSQL cluster with a writer and an Aurora Replica in another Availability Zone. They share the cluster volume, and Aurora can fail over to the replica if the writer becomes unavailable.",
+      "rubric": [
+        "Names Aurora PostgreSQL.",
+        "Includes an Aurora Replica in another Availability Zone.",
+        "Explains shared storage and failover to the replica."
+      ]
+    },
+    {
+      "id": "aurora-architecture--r1",
+      "conceptId": "aurora-architecture",
+      "kind": "why-not",
+      "prompt": "Why isn't DynamoDB a direct substitute when a team must retain PostgreSQL drivers and use reader instances sharing a cluster volume?",
+      "promptEs": "¿Por qué DynamoDB no es un sustituto directo si un equipo debe conservar drivers PostgreSQL y usar lectores que compartan el volumen de un clúster?",
+      "idealAnswer": "DynamoDB does not provide the PostgreSQL relational interface required by the application. Aurora PostgreSQL supports existing PostgreSQL drivers and Aurora Replicas that connect to the writer's cluster volume.",
+      "rubric": [
+        "Identifies the required PostgreSQL compatibility.",
+        "Explains why DynamoDB does not meet that interface requirement.",
+        "Connects Aurora Replicas to the shared cluster volume."
+      ]
+    }
+  ]
+}

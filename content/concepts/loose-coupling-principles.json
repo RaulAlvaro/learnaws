@@ -1,0 +1,414 @@
+{
+  "conceptId": "loose-coupling-principles",
+  "card": {
+    "en": {
+      "tldr": "Loose coupling puts an intermediate layer between components so a slow, failed, or changing component does not directly disrupt its producer. For exam scenarios, choose the interaction pattern that matches the requirement: an SQS queue for asynchronous work, an SNS topic for push-based fan-out, or EventBridge for event-driven producer–consumer separation.",
+      "whenToUse": [
+        "A producer can acknowledge a request without waiting for downstream processing.",
+        "A worker must process queued messages independently of the component that creates them.",
+        "One published message must reach multiple subscribers for parallel processing.",
+        "Event producers should not depend on direct integrations with event consumers."
+      ],
+      "keyFacts": [
+        "Amazon SQS queues decouple producers and consumers; consumers receive messages from the queue.",
+        "Amazon SNS topics support high-throughput, push-based, many-to-many messaging and fan-out.",
+        "Amazon EventBridge supports loosely coupled event-driven architectures by abstracting producers from consumers.",
+        "Asynchronous interaction is appropriate when an acknowledgment that work was registered is sufficient; it is not a blanket replacement for an immediate response.",
+        "Loose coupling allows components to scale or change independently and helps isolate component failures."
+      ],
+      "gotchas": [
+        "Direct API calls between tiers without failover or asynchronous processing can propagate a downstream failure.",
+        "Putting components behind separate services does not remove coupling if they still depend on shared data in a shared database.",
+        "A queue is not automatically appropriate for hard real-time requests: old requests may become stale before processing."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS vs. Amazon SNS",
+          "difference": "Choose SQS to hold work for a consumer to receive; choose SNS when a publisher must push messages to multiple subscribers."
+        },
+        {
+          "concept": "Amazon SNS vs. Amazon EventBridge",
+          "difference": "Choose SNS for push-based fan-out; choose EventBridge when the central requirement is an event-driven architecture that abstracts producers from consumers."
+        }
+      ],
+      "examCues": [
+        "acknowledge now, process later",
+        "worker slows down during traffic spikes",
+        "fan out to multiple subscribers",
+        "event producers must not integrate directly with consumers"
+      ]
+    },
+    "es": {
+      "tldr": "Loose coupling coloca una capa intermedia entre componentes para que uno lento, con fallas o en proceso de cambio no afecte directamente a quien produce las solicitudes. En un escenario de examen, elige el patrón que corresponda: una cola de Amazon SQS para trabajo asíncrono, un tema de Amazon SNS para fan-out basado en push o Amazon EventBridge para separar productores y consumidores de eventos.",
+      "whenToUse": [
+        "El productor puede confirmar que registró una solicitud sin esperar a que termine el procesamiento.",
+        "Un trabajador debe procesar mensajes de una cola sin depender directamente del componente que los crea.",
+        "Un mensaje publicado debe llegar a varios suscriptores para procesamiento en paralelo.",
+        "Los productores de eventos no deben depender de integraciones directas con los consumidores."
+      ],
+      "keyFacts": [
+        "Las colas de Amazon SQS desacoplan productores y consumidores; los consumidores reciben mensajes de la cola.",
+        "Los temas de Amazon SNS permiten mensajería many-to-many de alto rendimiento, basada en push, y fan-out.",
+        "Amazon EventBridge permite arquitecturas event-driven con loose coupling al abstraer a los productores de los consumidores.",
+        "La interacción asíncrona es adecuada cuando basta con confirmar que se registró el trabajo; no reemplaza siempre una respuesta inmediata.",
+        "Loose coupling permite escalar o cambiar componentes de forma independiente y ayuda a aislar sus fallas."
+      ],
+      "gotchas": [
+        "Las llamadas directas a API entre capas, sin failover ni procesamiento asíncrono, pueden propagar una falla de la capa de destino.",
+        "Separar componentes en servicios no elimina el acoplamiento si todavía dependen de datos compartidos en una base de datos común.",
+        "Una cola no es automáticamente adecuada para solicitudes hard real-time: las solicitudes antiguas pueden volverse obsoletas antes de procesarse."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS vs. Amazon SNS",
+          "difference": "Elige SQS para conservar trabajo que un consumidor recibe; elige SNS cuando un publicador debe enviar mensajes mediante push a varios suscriptores."
+        },
+        {
+          "concept": "Amazon SNS vs. Amazon EventBridge",
+          "difference": "Elige SNS para fan-out basado en push; elige EventBridge cuando el requisito central es una arquitectura event-driven que abstraiga productores y consumidores."
+        }
+      ],
+      "examCues": [
+        "acknowledge now, process later",
+        "worker slows down during traffic spikes",
+        "fan out to multiple subscribers",
+        "event producers must not integrate directly with consumers"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_prevent_interaction_failure_loosely_coupled_system.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "loose-coupling-principles--5f41e9f0",
+      "conceptId": "loose-coupling-principles",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company accepts uploaded-asset requests and immediately confirms that each request was registered. One component must process the registered work independently, while a separate publishing service must push a publication notice to several subscriber endpoints for parallel processing. Which TWO changes meet these requirements while keeping the components loosely coupled? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have the request component wait for the worker's synchronous API response before confirming registration.",
+          "correct": false,
+          "why": "Waiting for processing prevents immediate confirmation and retains a direct dependency."
+        },
+        {
+          "id": "B",
+          "text": "Use a shared database schema as the interface between the request component and worker.",
+          "correct": false,
+          "why": "Sharing data through one schema can reintroduce tight coupling between components."
+        },
+        {
+          "id": "C",
+          "text": "Have the publishing service publish notices to an Amazon SNS topic with the endpoints as subscribers.",
+          "correct": true,
+          "why": "SNS provides push-based fan-out to multiple subscriber endpoints."
+        },
+        {
+          "id": "D",
+          "text": "Have the publishing service call each subscriber endpoint's API when an asset is published.",
+          "correct": false,
+          "why": "Calling each endpoint directly keeps publishing integrated with every subscriber."
+        },
+        {
+          "id": "E",
+          "text": "Have the request component place processing jobs in an Amazon SQS queue for the worker to receive.",
+          "correct": true,
+          "why": "SQS separates request acceptance from the worker's processing rate."
+        }
+      ],
+      "explanation": "The two interactions have different requirements. An SQS queue decouples accepted work from the worker that receives it, allowing confirmation before processing. An SNS topic supplies the push-based fan-out needed for publication notices. Synchronous calls to the worker or directly to every subscriber retain the dependencies the company wants to avoid.",
+      "keywordCues": [
+        "immediately confirms that each request was registered",
+        "process the registered work independently",
+        "push a publication notice to several subscriber endpoints"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_prevent_interaction_failure_loosely_coupled_system.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios acepta solicitudes para cargar recursos y confirma de inmediato que cada solicitud se registró. Un componente debe procesar el trabajo registrado de forma independiente, mientras que un servicio de publicación separado debe enviar mediante push un aviso a varios endpoints suscritos para que procesen en paralelo. ¿Qué DOS cambios cumplen estos requisitos y mantienen loose coupling entre los componentes? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Haz que el componente de solicitudes espere la respuesta síncrona de la API del trabajador antes de confirmar el registro.",
+            "why": "Esperar al procesamiento impide la confirmación inmediata y conserva una dependencia directa."
+          },
+          {
+            "id": "B",
+            "text": "Usa un esquema de base de datos compartido como interfaz entre el componente de solicitudes y el trabajador.",
+            "why": "Compartir datos mediante un esquema común puede reintroducir acoplamiento estrecho entre componentes."
+          },
+          {
+            "id": "C",
+            "text": "Haz que el servicio de publicación envíe los avisos a un tema de Amazon SNS al que estén suscritos los endpoints.",
+            "why": "SNS proporciona fan-out basado en push hacia varios endpoints suscritos."
+          },
+          {
+            "id": "D",
+            "text": "Haz que el servicio de publicación llame a la API de cada endpoint suscrito cuando se publique un recurso.",
+            "why": "Llamar directamente a cada endpoint mantiene la integración entre publicación y cada suscriptor."
+          },
+          {
+            "id": "E",
+            "text": "Haz que el componente de solicitudes coloque los trabajos en una cola de Amazon SQS para que el trabajador los reciba.",
+            "why": "SQS separa la aceptación de solicitudes del ritmo de procesamiento del trabajador."
+          }
+        ],
+        "explanation": "Las dos interacciones tienen requisitos diferentes. Una cola de SQS separa el trabajo aceptado del trabajador que lo recibe, lo que permite confirmar antes de procesar. Un tema de SNS proporciona el fan-out basado en push necesario para los avisos de publicación. Las llamadas síncronas al trabajador o las llamadas directas a cada suscriptor conservan las dependencias que la empresa quiere evitar."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "loose-coupling-principles--0f818385",
+      "conceptId": "loose-coupling-principles",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company accepts booking requests faster than its fulfillment component can process them during event launches. Customers only need confirmation that their requests were registered; fulfillment can happen afterward. Which solution allows the two components to scale independently while minimizing the impact of fulfillment slowdowns?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have both components coordinate bookings through tables in a shared database.",
+          "correct": false,
+          "why": "Shared data can reintroduce tight coupling rather than isolating the components."
+        },
+        {
+          "id": "B",
+          "text": "Have the booking component call the fulfillment API synchronously and wait for completion.",
+          "correct": false,
+          "why": "A slow fulfillment API would delay booking confirmations and keep the components directly dependent."
+        },
+        {
+          "id": "C",
+          "text": "Publish every booking request to an Amazon SNS topic that pushes it to fulfillment.",
+          "correct": false,
+          "why": "Push-based messaging does not meet the stated need to hold work for fulfillment to receive as it becomes available."
+        },
+        {
+          "id": "D",
+          "text": "Place booking requests in an Amazon SQS queue for the fulfillment component to receive and process.",
+          "correct": true,
+          "why": "The queue separates request registration from fulfillment and lets the components operate independently."
+        }
+      ],
+      "explanation": "The deciding requirement is that booking can be acknowledged before fulfillment completes. An Amazon SQS queue provides an intermediate layer where requests can await a consumer, separating the booking and fulfillment components. A synchronous API call keeps confirmation dependent on fulfillment speed. An SNS topic addresses push-based delivery rather than the specified queue-based work pattern.",
+      "keywordCues": [
+        "faster than its fulfillment component can process them",
+        "confirmation that their requests were registered",
+        "scale independently"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_prevent_interaction_failure_loosely_coupled_system.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas recibe solicitudes de reserva más rápido de lo que su componente de gestión puede procesarlas durante el lanzamiento de eventos. Los clientes solo necesitan confirmación de que sus solicitudes se registraron; la gestión puede completarse después. ¿Qué solución permite que ambos componentes escalen de forma independiente y minimiza el impacto si la gestión se ralentiza?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Haz que ambos componentes coordinen las reservas mediante tablas en una base de datos compartida.",
+            "why": "Los datos compartidos pueden reintroducir acoplamiento estrecho en vez de aislar los componentes."
+          },
+          {
+            "id": "B",
+            "text": "Haz que el componente de reservas llame de forma síncrona a la API de gestión y espere a que termine.",
+            "why": "Una API de gestión lenta retrasaría las confirmaciones y mantendría una dependencia directa entre componentes."
+          },
+          {
+            "id": "C",
+            "text": "Publica cada solicitud de reserva en un tema de Amazon SNS que la envíe mediante push al componente de gestión.",
+            "why": "La mensajería basada en push no satisface la necesidad indicada de conservar trabajo para que gestión lo reciba cuando pueda procesarlo."
+          },
+          {
+            "id": "D",
+            "text": "Coloca las solicitudes de reserva en una cola de Amazon SQS para que el componente de gestión las reciba y procese.",
+            "why": "La cola separa el registro de la solicitud de su gestión y permite que los componentes operen de forma independiente."
+          }
+        ],
+        "explanation": "El requisito decisivo es que puedes confirmar la reserva antes de que termine su gestión. Una cola de Amazon SQS sirve como capa intermedia donde las solicitudes esperan a un consumidor, separando ambos componentes. Una llamada síncrona a la API hace que la confirmación dependa de la velocidad de gestión. Un tema de SNS ofrece entrega basada en push, no el patrón de trabajo en cola solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "loose-coupling-principles--83e0f032",
+      "conceptId": "loose-coupling-principles",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A news publisher generates a message whenever an editor releases an article. Several subscriber endpoints must receive each message through push-based delivery so they can begin separate processing in parallel. Which solution meets these requirements with the LEAST direct integration between the publisher and subscribers?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store each article message in one Amazon SQS queue for a subscriber to receive.",
+          "correct": false,
+          "why": "One queue for a consumer to receive work does not provide the requested push-based fan-out to several endpoints."
+        },
+        {
+          "id": "B",
+          "text": "Publish article messages to an Amazon SNS topic with the endpoints as subscribers.",
+          "correct": true,
+          "why": "SNS provides push-based fan-out from a publisher to multiple subscriber endpoints."
+        },
+        {
+          "id": "C",
+          "text": "Have the publisher invoke each subscriber's API when an article is released.",
+          "correct": false,
+          "why": "Separate direct calls keep the publisher integrated with every subscriber."
+        },
+        {
+          "id": "D",
+          "text": "Write article messages to a shared database that each subscriber reads.",
+          "correct": false,
+          "why": "Shared data can reintroduce coupling and does not provide the requested push-based delivery."
+        }
+      ],
+      "explanation": "The publisher needs to push the same message to multiple endpoints for parallel processing. An Amazon SNS topic provides that fan-out without a separate direct integration to every subscriber. One SQS queue addresses queued work rather than this specified many-subscriber push pattern. Direct API calls leave the publisher dependent on each subscriber.",
+      "keywordCues": [
+        "Several subscriber endpoints",
+        "push-based delivery",
+        "in parallel"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_prevent_interaction_failure_loosely_coupled_system.html"
+      ],
+      "es": {
+        "stem": "Una editorial de noticias genera un mensaje cada vez que un editor publica un artículo. Varios endpoints suscritos deben recibir cada mensaje mediante entrega basada en push para iniciar procesos separados en paralelo. ¿Qué solución cumple estos requisitos con la MENOR integración directa entre el publicador y los suscriptores?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guarda cada mensaje sobre el artículo en una sola cola de Amazon SQS para que un suscriptor lo reciba.",
+            "why": "Una sola cola de la que un consumidor recibe trabajo no proporciona el fan-out basado en push solicitado para varios endpoints."
+          },
+          {
+            "id": "B",
+            "text": "Publica los mensajes en un tema de Amazon SNS al que estén suscritos los endpoints.",
+            "why": "SNS ofrece fan-out basado en push desde un publicador hacia varios endpoints suscritos."
+          },
+          {
+            "id": "C",
+            "text": "Haz que el publicador invoque la API de cada suscriptor al publicarse un artículo.",
+            "why": "Las llamadas directas mantienen al publicador integrado con cada suscriptor."
+          },
+          {
+            "id": "D",
+            "text": "Escribe los mensajes en una base de datos compartida que lea cada suscriptor.",
+            "why": "Los datos compartidos pueden reintroducir acoplamiento y no ofrecen la entrega basada en push solicitada."
+          }
+        ],
+        "explanation": "El publicador necesita enviar el mismo mensaje mediante push a varios endpoints para que procesen en paralelo. Un tema de Amazon SNS proporciona ese fan-out sin integrar directamente al publicador con cada suscriptor. Una sola cola de SQS resuelve trabajo en cola, no este patrón de push a varios suscriptores. Las llamadas directas a API mantienen la dependencia con cada suscriptor."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "loose-coupling-principles--6e1e8d36",
+      "conceptId": "loose-coupling-principles",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics platform has services that generate shipment and delivery events. Independent teams add event consumers over time, and the platform team does not want producers to integrate directly with each new consumer. Which solution BEST supports this event-driven design?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon EventBridge to separate the services that generate events from the services that consume them.",
+          "correct": true,
+          "why": "EventBridge supports event-driven architectures that abstract producers from consumers."
+        },
+        {
+          "id": "B",
+          "text": "Have producers and consumers exchange events through a shared database schema.",
+          "correct": false,
+          "why": "A shared schema can reintroduce tight coupling as teams change their components."
+        },
+        {
+          "id": "C",
+          "text": "Have each producer call the API of every consumer that handles its events.",
+          "correct": false,
+          "why": "Each new consumer would require another direct producer-to-consumer integration."
+        },
+        {
+          "id": "D",
+          "text": "Use one Amazon SQS queue as the integration point for a single consumer service.",
+          "correct": false,
+          "why": "A queue for one consumer does not address the stated need to abstract producers from independently added event consumers."
+        }
+      ],
+      "explanation": "The key requirement is to add event consumers without building new direct integrations into producers. Amazon EventBridge is an event-driven option that abstracts event producers from the services consuming their events. Direct API calls would make producers aware of every new consumer. A shared database schema can also create coupling between teams.",
+      "keywordCues": [
+        "add event consumers over time",
+        "does not want producers to integrate directly",
+        "event-driven design"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_prevent_interaction_failure_loosely_coupled_system.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de logística tiene servicios que generan eventos de envío y entrega. Equipos independientes agregan consumidores de eventos con el tiempo, y el equipo de la plataforma no quiere que los productores se integren directamente con cada consumidor nuevo. ¿Qué solución respalda MEJOR este diseño event-driven?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Amazon EventBridge para separar los servicios que generan eventos de los que los consumen.",
+            "why": "EventBridge permite arquitecturas event-driven que abstraen a los productores de los consumidores."
+          },
+          {
+            "id": "B",
+            "text": "Haz que productores y consumidores intercambien eventos mediante un esquema de base de datos compartido.",
+            "why": "Un esquema compartido puede reintroducir acoplamiento estrecho cuando los equipos cambian sus componentes."
+          },
+          {
+            "id": "C",
+            "text": "Haz que cada productor llame a la API de todos los consumidores que procesan sus eventos.",
+            "why": "Cada consumidor nuevo exigiría otra integración directa entre productor y consumidor."
+          },
+          {
+            "id": "D",
+            "text": "Usa una sola cola de Amazon SQS como punto de integración para un único servicio consumidor.",
+            "why": "Una cola para un consumidor no resuelve la necesidad indicada de abstraer a los productores de los consumidores de eventos que se agreguen."
+          }
+        ],
+        "explanation": "El requisito clave es agregar consumidores sin crear nuevas integraciones directas en los productores. Amazon EventBridge es una opción event-driven que abstrae a los productores de los servicios que consumen sus eventos. Las llamadas directas a API obligarían a los productores a conocer a cada consumidor nuevo. Un esquema de base de datos compartido también puede generar acoplamiento entre equipos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "loose-coupling-principles--r0",
+      "conceptId": "loose-coupling-principles",
+      "kind": "recall",
+      "prompt": "An API can acknowledge a job before a slow worker processes it. Which AWS service would you put between them, and why?",
+      "promptEs": "Una API puede confirmar un trabajo antes de que un trabajador lento lo procese. ¿Qué servicio de AWS pondrías entre ambos y por qué?",
+      "idealAnswer": "Put an Amazon SQS queue between the API and the worker. The API can register the work and acknowledge it while the worker receives and processes messages separately, reducing the effect of worker slowdowns on request acceptance.",
+      "rubric": [
+        "Names Amazon SQS.",
+        "Explains that the API can acknowledge registration before processing finishes.",
+        "Explains that the queue separates the worker's processing from request acceptance."
+      ]
+    }
+  ]
+}

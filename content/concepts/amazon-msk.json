@@ -1,0 +1,357 @@
+{
+  "conceptId": "amazon-msk",
+  "card": {
+    "en": {
+      "tldr": "Amazon MSK runs Apache Kafka workloads as a managed service while retaining Kafka producer and consumer operations. Choose it when existing Kafka applications and tooling must keep working; choose MSK Serverless when managing and scaling cluster capacity is also undesirable.",
+      "whenToUse": [
+        "Existing Apache Kafka producers, consumers, tooling, or plugins must continue working without application-code changes.",
+        "A Kafka workload needs managed clusters but requires control over broker count or type: consider MSK Provisioned.",
+        "A Kafka workload should avoid managing and scaling cluster capacity: consider MSK Serverless."
+      ],
+      "keyFacts": [
+        "MSK runs open-source Apache Kafka and supports existing Kafka applications, tooling, and plugins without application-code changes.",
+        "MSK handles cluster control-plane operations; applications use Kafka data-plane operations to create topics and produce and consume data.",
+        "MSK Provisioned lets you specify broker nodes per Availability Zone and update broker number and type.",
+        "MSK Serverless manages broker nodes and removes the need to manage and scale cluster capacity.",
+        "MSK Connect streams data to and from a Kafka cluster; MSK Replicator replicates data across MSK Provisioned clusters in the same or different AWS Regions."
+      ],
+      "gotchas": [
+        "A managed streaming service is not necessarily Kafka-compatible: do not substitute Kinesis Data Streams when unchanged Kafka applications are required.",
+        "Data Firehose targets buffered delivery to destinations; that is a different requirement from retaining Kafka producers and consumers.",
+        "MSK Serverless is not the choice when the team must specify and update broker number and type."
+      ],
+      "confusedWith": [
+        {
+          "concept": "kinesis-data-streams",
+          "difference": "Use Kinesis Data Streams for its stream-consumer and replay pattern; use MSK when existing Kafka applications must remain compatible."
+        },
+        {
+          "concept": "data-firehose",
+          "difference": "Use Data Firehose for buffered delivery to destinations such as S3; use MSK to run Kafka producer and consumer workloads."
+        }
+      ],
+      "examCues": [
+        "existing Apache Kafka producers and consumers",
+        "keep Kafka tooling without code changes",
+        "avoid managing Kafka cluster capacity",
+        "specify Kafka broker count and type"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon MSK ejecuta cargas de Apache Kafka como servicio administrado y conserva las operaciones de productores y consumidores de Kafka. Elígelo cuando las aplicaciones y herramientas existentes de Kafka deban seguir funcionando; elige MSK Serverless si también necesitas evitar la administración y el escalamiento de la capacidad del clúster.",
+      "whenToUse": [
+        "Los productores, consumidores, herramientas o plugins existentes de Apache Kafka deben seguir funcionando sin cambios en el código de las aplicaciones.",
+        "La carga de Kafka necesita clústeres administrados y control sobre la cantidad o el tipo de brokers: considera MSK Provisioned.",
+        "La carga de Kafka debe evitar que administres y escales la capacidad del clúster: considera MSK Serverless."
+      ],
+      "keyFacts": [
+        "MSK ejecuta versiones de código abierto de Apache Kafka y admite aplicaciones, herramientas y plugins existentes sin cambios en el código de las aplicaciones.",
+        "MSK se encarga de las operaciones del plano de control del clúster; las aplicaciones usan operaciones del plano de datos de Kafka para crear temas, producir y consumir datos.",
+        "MSK Provisioned te permite especificar brokers por Availability Zone y actualizar su cantidad y tipo.",
+        "MSK Serverless administra los brokers y elimina la necesidad de administrar y escalar la capacidad del clúster.",
+        "MSK Connect transmite datos hacia y desde un clúster de Kafka; MSK Replicator replica datos entre clústeres de MSK Provisioned en la misma AWS Region o en distintas."
+      ],
+      "gotchas": [
+        "Un servicio de streaming administrado no necesariamente es compatible con Kafka: no sustituyas MSK por Kinesis Data Streams si las aplicaciones de Kafka deben permanecer sin cambios.",
+        "Data Firehose se orienta a la entrega con almacenamiento en búfer a destinos; es un requisito distinto de conservar productores y consumidores de Kafka.",
+        "MSK Serverless no es la opción si el equipo debe especificar y actualizar la cantidad y el tipo de brokers."
+      ],
+      "confusedWith": [
+        {
+          "concept": "kinesis-data-streams",
+          "difference": "Usa Kinesis Data Streams para su patrón de consumidores y reproducción del flujo; usa MSK cuando las aplicaciones existentes de Kafka deban conservar su compatibilidad."
+        },
+        {
+          "concept": "data-firehose",
+          "difference": "Usa Data Firehose para entrega con búfer a destinos como S3; usa MSK para ejecutar cargas de productores y consumidores de Kafka."
+        }
+      ],
+      "examCues": [
+        "existing Apache Kafka producers and consumers",
+        "keep Kafka tooling without code changes",
+        "avoid managing Kafka cluster capacity",
+        "specify Kafka broker count and type"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "amazon-msk--72155033",
+      "conceptId": "amazon-msk",
+      "secondaryConcepts": [
+        "kinesis-data-streams",
+        "data-firehose"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is moving a live event pipeline to AWS. Its applications already produce to and consume from Apache Kafka topics, and the team cannot change their application code. Traffic varies sharply between events, and the team does not want to manage or scale cluster capacity. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon MSK Serverless for the existing Kafka applications.",
+          "correct": true,
+          "why": "MSK supports existing Kafka applications without code changes, while MSK Serverless avoids managing and scaling cluster capacity."
+        },
+        {
+          "id": "B",
+          "text": "Move the producers and consumers to Kinesis Data Streams with on-demand capacity.",
+          "correct": false,
+          "why": "On-demand capacity does not meet the requirement to keep the existing Kafka applications unchanged."
+        },
+        {
+          "id": "C",
+          "text": "Send the events through Amazon Data Firehose to an S3 bucket.",
+          "correct": false,
+          "why": "Buffered delivery to S3 does not preserve the required Kafka producer-and-consumer workload."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon MSK Provisioned and adjust the broker configuration for each event.",
+          "correct": false,
+          "why": "MSK Provisioned retains Kafka compatibility but leaves the team responsible for broker-capacity choices."
+        }
+      ],
+      "explanation": "The deciding requirements are unchanged Kafka applications and no cluster-capacity management. MSK runs Apache Kafka workloads without requiring application-code changes, and MSK Serverless manages the broker nodes and cluster capacity. MSK Provisioned also fits the compatibility requirement, but choosing and adjusting brokers conflicts with the requested operational model. Kinesis Data Streams and Data Firehose address different ingestion patterns rather than preserving the existing Kafka workload.",
+      "keywordCues": [
+        "cannot change their application code",
+        "does not want to manage or scale cluster capacity",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas está trasladando a AWS un flujo de eventos en vivo. Sus aplicaciones ya producen y consumen datos de temas de Apache Kafka, y el equipo no puede cambiar el código de las aplicaciones. El tráfico varía mucho entre eventos y el equipo no quiere administrar ni escalar la capacidad del clúster. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon MSK Serverless para las aplicaciones existentes de Kafka.",
+            "why": "MSK admite las aplicaciones existentes de Kafka sin cambios de código, y MSK Serverless evita administrar y escalar la capacidad del clúster."
+          },
+          {
+            "id": "B",
+            "text": "Trasladar los productores y consumidores a Kinesis Data Streams con capacidad on-demand.",
+            "why": "La capacidad on-demand no cumple el requisito de mantener sin cambios las aplicaciones existentes de Kafka."
+          },
+          {
+            "id": "C",
+            "text": "Enviar los eventos mediante Amazon Data Firehose a un bucket de S3.",
+            "why": "La entrega con búfer a S3 no conserva la carga requerida de productores y consumidores de Kafka."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon MSK Provisioned y ajustar la configuración de brokers para cada evento.",
+            "why": "MSK Provisioned conserva la compatibilidad con Kafka, pero deja al equipo las decisiones de capacidad de los brokers."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son conservar las aplicaciones de Kafka sin cambios y no administrar la capacidad del clúster. MSK ejecuta cargas de Kafka sin exigir cambios en el código de las aplicaciones, y MSK Serverless administra los brokers y la capacidad del clúster. MSK Provisioned también cumple el requisito de compatibilidad, pero elegir y ajustar brokers contradice el modelo operativo solicitado. Kinesis Data Streams y Data Firehose atienden otros patrones de ingesta, en lugar de conservar la carga existente de Kafka."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "amazon-msk--6701abe3",
+      "conceptId": "amazon-msk",
+      "secondaryConcepts": [
+        "data-firehose",
+        "kinesis-data-streams"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company operates two MSK Provisioned clusters in different AWS Regions. Its Kafka applications will continue to use both clusters, and the company wants to replicate streaming data between them rather than deliver it to an analytics destination. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use MSK Connect to stream data to and from one cluster.",
+          "correct": false,
+          "why": "MSK Connect supports streaming data to and from a Kafka cluster, but MSK Replicator directly addresses replication between these clusters."
+        },
+        {
+          "id": "B",
+          "text": "Use Kinesis Data Streams as a replacement stream in the second Region.",
+          "correct": false,
+          "why": "A replacement stream does not replicate data between the existing Kafka clusters."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon Data Firehose to deliver the data to S3 in the second Region.",
+          "correct": false,
+          "why": "Delivery to S3 does not meet the requirement to replicate data between the two MSK Provisioned clusters."
+        },
+        {
+          "id": "D",
+          "text": "Use MSK Replicator between the two MSK Provisioned clusters.",
+          "correct": true,
+          "why": "MSK Replicator is intended to replicate data across MSK Provisioned clusters in different AWS Regions."
+        }
+      ],
+      "explanation": "The requirement is replication between MSK Provisioned clusters in different AWS Regions. MSK Replicator is the documented feature for reliably replicating data across such clusters. MSK Connect serves the broader task of streaming data to and from Kafka, but it is not the specifically identified cross-cluster replication feature. Sending data to S3 or replacing a Kafka cluster with another stream misses the stated destination.",
+      "keywordCues": [
+        "two MSK Provisioned clusters in different AWS Regions",
+        "replicate streaming data between them",
+        "rather than deliver it to an analytics destination"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios opera dos clústeres de MSK Provisioned en distintas AWS Regions. Sus aplicaciones de Kafka seguirán usando ambos clústeres y la empresa quiere replicar datos de streaming entre ellos, en vez de entregarlos a un destino de análisis. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar MSK Connect para transmitir datos hacia y desde un clúster.",
+            "why": "MSK Connect permite transmitir datos hacia y desde un clúster de Kafka, pero MSK Replicator atiende directamente la replicación entre estos clústeres."
+          },
+          {
+            "id": "B",
+            "text": "Usar Kinesis Data Streams como flujo de reemplazo en la segunda AWS Region.",
+            "why": "Un flujo de reemplazo no replica datos entre los clústeres existentes de Kafka."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon Data Firehose para entregar los datos a S3 en la segunda AWS Region.",
+            "why": "La entrega a S3 no cumple el requisito de replicar datos entre los dos clústeres de MSK Provisioned."
+          },
+          {
+            "id": "D",
+            "text": "Usar MSK Replicator entre los dos clústeres de MSK Provisioned.",
+            "why": "MSK Replicator está diseñado para replicar datos entre clústeres de MSK Provisioned en distintas AWS Regions."
+          }
+        ],
+        "explanation": "El requisito es replicar datos entre clústeres de MSK Provisioned ubicados en distintas AWS Regions. MSK Replicator es la característica documentada para replicar datos de forma confiable entre esos clústeres. MSK Connect sirve para la tarea más amplia de transmitir datos hacia y desde Kafka, pero no es la característica identificada específicamente para esta replicación entre clústeres. Enviar datos a S3 o sustituir un clúster de Kafka por otro flujo no cumple el destino solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "amazon-msk--cb7689ae",
+      "conceptId": "amazon-msk",
+      "secondaryConcepts": [
+        "data-firehose"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A research organization is moving its existing Kafka-based telemetry platform to AWS. It must keep its Kafka producer and consumer applications unchanged, avoid managing and scaling cluster capacity, and use a managed feature to stream data to and from its Kafka cluster. Which two selections together meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use MSK Connect to stream data to and from the Kafka cluster.",
+          "correct": true,
+          "why": "MSK Connect is the managed MSK feature for streaming data to and from a Kafka cluster."
+        },
+        {
+          "id": "B",
+          "text": "Use MSK Serverless for the Kafka cluster.",
+          "correct": true,
+          "why": "MSK Serverless retains Kafka compatibility while removing the need to manage and scale cluster capacity."
+        },
+        {
+          "id": "C",
+          "text": "Use MSK Replicator to stream data to and from the Kafka cluster.",
+          "correct": false,
+          "why": "MSK Replicator addresses replication across MSK Provisioned clusters, not the stated general to-and-from streaming requirement."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon Data Firehose for the Kafka cluster.",
+          "correct": false,
+          "why": "Data Firehose delivery does not provide the required Kafka cluster for unchanged producers and consumers."
+        },
+        {
+          "id": "E",
+          "text": "Use MSK Provisioned for the Kafka cluster.",
+          "correct": false,
+          "why": "MSK Provisioned supports the Kafka applications but does not remove the need to make cluster-capacity decisions."
+        }
+      ],
+      "explanation": "This scenario calls for two distinct capabilities: a Kafka-compatible cluster without cluster-capacity management, and a feature for streaming data to and from that cluster. MSK Serverless provides the first, and MSK Connect provides the second. MSK Provisioned retains Kafka compatibility but requires broker-capacity choices. MSK Replicator instead targets replication across MSK Provisioned clusters, while Data Firehose does not supply the requested Kafka cluster.",
+      "keywordCues": [
+        "Kafka producer and consumer applications unchanged",
+        "avoid managing and scaling cluster capacity",
+        "stream data to and from its Kafka cluster"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación está trasladando a AWS su plataforma de telemetría basada en Kafka. Debe mantener sin cambios sus aplicaciones de productores y consumidores de Kafka, evitar administrar y escalar la capacidad del clúster, y usar una característica administrada para transmitir datos hacia y desde su clúster de Kafka. ¿Qué dos selecciones, en conjunto, cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar MSK Connect para transmitir datos hacia y desde el clúster de Kafka.",
+            "why": "MSK Connect es la característica administrada de MSK para transmitir datos hacia y desde un clúster de Kafka."
+          },
+          {
+            "id": "B",
+            "text": "Usar MSK Serverless para el clúster de Kafka.",
+            "why": "MSK Serverless conserva la compatibilidad con Kafka y elimina la necesidad de administrar y escalar la capacidad del clúster."
+          },
+          {
+            "id": "C",
+            "text": "Usar MSK Replicator para transmitir datos hacia y desde el clúster de Kafka.",
+            "why": "MSK Replicator se orienta a la replicación entre clústeres de MSK Provisioned, no al requisito general de transmitir datos hacia y desde el clúster."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon Data Firehose para el clúster de Kafka.",
+            "why": "La entrega de Data Firehose no proporciona el clúster de Kafka que requieren los productores y consumidores sin cambios."
+          },
+          {
+            "id": "E",
+            "text": "Usar MSK Provisioned para el clúster de Kafka.",
+            "why": "MSK Provisioned admite las aplicaciones de Kafka, pero no elimina la necesidad de tomar decisiones sobre la capacidad del clúster."
+          }
+        ],
+        "explanation": "Este escenario requiere dos capacidades distintas: un clúster compatible con Kafka sin administración de la capacidad y una característica para transmitir datos hacia y desde ese clúster. MSK Serverless proporciona la primera y MSK Connect proporciona la segunda. MSK Provisioned conserva la compatibilidad con Kafka, pero requiere decisiones sobre la capacidad de los brokers. MSK Replicator se orienta a la replicación entre clústeres de MSK Provisioned, mientras que Data Firehose no proporciona el clúster de Kafka solicitado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "amazon-msk--r0",
+      "conceptId": "amazon-msk",
+      "kind": "recall",
+      "prompt": "An existing Kafka pipeline must move to AWS unchanged, without managing cluster capacity. What would you choose, and why?",
+      "promptEs": "Una plataforma existente de Kafka debe trasladarse a AWS sin cambios y sin administrar la capacidad del clúster. ¿Qué elegirías y por qué?",
+      "idealAnswer": "Choose MSK Serverless. MSK supports existing Kafka applications without application-code changes, and its Serverless option manages broker nodes without requiring the team to manage or scale cluster capacity.",
+      "rubric": [
+        "Names MSK Serverless.",
+        "Explains compatibility with existing Kafka applications without code changes.",
+        "Explains that Serverless removes cluster-capacity management."
+      ]
+    },
+    {
+      "id": "amazon-msk--r1",
+      "conceptId": "amazon-msk",
+      "kind": "why-not",
+      "prompt": "Why isn't Data Firehose a substitute for MSK when existing Kafka producers and consumers must keep working unchanged?",
+      "promptEs": "¿Por qué Data Firehose no sustituye a MSK si los productores y consumidores existentes de Kafka deben seguir funcionando sin cambios?",
+      "idealAnswer": "Data Firehose is suited to buffered delivery to destinations, not to running the existing Kafka producer-and-consumer workload. MSK runs Apache Kafka and supports existing applications without requiring application-code changes.",
+      "rubric": [
+        "Identifies Data Firehose as a delivery-oriented service.",
+        "States that the requirement is to retain existing Kafka producers and consumers.",
+        "Explains that MSK supports those Kafka applications without code changes."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "conceptId": "immutable-infrastructure-deployments",
+  "card": {
+    "en": {
+      "tldr": "Blue/green deployment runs two otherwise identical environments with different application versions and shifts traffic between them. Choose it when a release must avoid replacing the running version in place and preserve a path to send traffic back if the new version fails.",
+      "whenToUse": [
+        "A release must minimize downtime and support a fast traffic rollback.",
+        "The team can prepare a separate environment before directing production traffic to it.",
+        "A server-based application needs a replacement deployment instead of patches applied to running servers."
+      ],
+      "keyFacts": [
+        "The blue and green environments run different application versions.",
+        "A release occurs by shifting traffic between the environments.",
+        "The approach can mitigate deployment downtime and improve rollback capability.",
+        "The data tier needs separate consideration; switching application traffic does not, by itself, reverse data changes."
+      ],
+      "gotchas": [
+        "Changing every live server in place does not preserve the previous environment for a traffic rollback.",
+        "Removing the old environment immediately weakens the rollback plan.",
+        "Do not assume an application traffic switch also restores the previous state of a database."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "keep the previous version available",
+        "redirect traffic if validation fails",
+        "replace servers rather than patch them",
+        "minimize release downtime"
+      ]
+    },
+    "es": {
+      "tldr": "Un despliegue blue/green ejecuta dos entornos por lo demás idénticos con distintas versiones de la aplicación y cambia el tráfico entre ellos. Elígelo cuando debas evitar modificar la versión en ejecución y conservar la opción de devolverle el tráfico si falla la nueva versión.",
+      "whenToUse": [
+        "Debes minimizar la interrupción durante un lanzamiento y poder revertir el tráfico rápidamente.",
+        "Puedes preparar un entorno separado antes de dirigirle el tráfico de producción.",
+        "Una aplicación en servidores necesita reemplazos en lugar de parches aplicados a servidores en ejecución."
+      ],
+      "keyFacts": [
+        "Los entornos blue y green ejecutan distintas versiones de la aplicación.",
+        "El lanzamiento se realiza al cambiar el tráfico entre los entornos.",
+        "Este enfoque puede reducir el riesgo de interrupciones y facilitar la reversión.",
+        "Debes considerar el nivel de datos por separado; cambiar el tráfico de la aplicación no revierte por sí solo los cambios en los datos."
+      ],
+      "gotchas": [
+        "Modificar todos los servidores en ejecución no conserva el entorno anterior para revertir el tráfico.",
+        "Eliminar de inmediato el entorno anterior debilita el plan de reversión.",
+        "No supongas que cambiar el tráfico de la aplicación también restaura el estado anterior de la base de datos."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "keep the previous version available",
+        "redirect traffic if validation fails",
+        "replace servers rather than patch them",
+        "minimize release downtime"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/blue-green-deployments/welcome.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "immutable-infrastructure-deployments--83258b89",
+      "conceptId": "immutable-infrastructure-deployments",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A regional news publisher has shifted reader traffic from its old application environment to a new one. Monitoring now shows errors in the new version, and the previous environment is still running. The publisher needs to restore service without first repairing or redeploying the new version. Which action best meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Remove the previous environment and redeploy its version onto the new environment.",
+          "correct": false,
+          "why": "Redeployment adds a prerequisite even though the previous environment is already running."
+        },
+        {
+          "id": "B",
+          "text": "Shift reader traffic back to the previous environment and investigate the new version separately.",
+          "correct": true,
+          "why": "The retained environment provides a traffic rollback without requiring an immediate repair."
+        },
+        {
+          "id": "C",
+          "text": "Replace the instances in the previous environment with the new version, then redirect traffic there.",
+          "correct": false,
+          "why": "This removes the working previous version before readers can use it."
+        },
+        {
+          "id": "D",
+          "text": "Patch the new environment until errors stop, leaving reader traffic routed to it.",
+          "correct": false,
+          "why": "This makes restoration depend on first repairing the failing version."
+        }
+      ],
+      "explanation": "The previous environment is still running, so the publisher can use the rollback capability of blue/green deployment: shift traffic back. This satisfies the requirement to restore service without first fixing or redeploying the new version. Patching the failing environment makes recovery depend on a successful repair.",
+      "keywordCues": [
+        "errors in the new version",
+        "previous environment is still running",
+        "without first repairing or redeploying"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/blue-green-deployments/welcome.html"
+      ],
+      "es": {
+        "stem": "Una editorial regional de noticias cambió el tráfico de sus lectores del entorno anterior de la aplicación al nuevo. El monitoreo ahora muestra errores en la nueva versión y el entorno anterior sigue en ejecución. La editorial necesita restablecer el servicio sin reparar ni volver a desplegar primero la nueva versión. ¿Qué acción cumple mejor este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Elimina el entorno anterior y vuelve a desplegar su versión en el entorno nuevo.",
+            "why": "Volver a desplegar agrega un paso previo aunque el entorno anterior ya está en ejecución."
+          },
+          {
+            "id": "B",
+            "text": "Devuelve el tráfico de lectores al entorno anterior e investiga la nueva versión por separado.",
+            "why": "El entorno conservado permite revertir el tráfico sin exigir una reparación inmediata."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza las instancias del entorno anterior con la nueva versión y luego redirige allí el tráfico.",
+            "why": "Esto elimina la versión anterior que funcionaba antes de que los lectores puedan usarla."
+          },
+          {
+            "id": "D",
+            "text": "Aplica parches al nuevo entorno hasta que cesen los errores y mantén dirigido hacia él el tráfico de lectores.",
+            "why": "Esto hace que el restablecimiento dependa de reparar primero la versión que falla."
+          }
+        ],
+        "explanation": "El entorno anterior sigue en ejecución, por lo que la editorial puede aprovechar la reversión de blue/green: devolverle el tráfico. Esto restablece el servicio sin arreglar ni volver a desplegar primero la nueva versión. Aplicar parches al entorno que falla condiciona la recuperación a que la reparación funcione."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "immutable-infrastructure-deployments--a251aeae",
+      "conceptId": "immutable-infrastructure-deployments",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A logistics startup is preparing a new version of its parcel-tracking site. The team wants to check it before production use, then release it with a way to return visitors to the current version if errors appear. Which TWO steps support this blue/green release plan? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep a copy of the old deployment package instead of the running old environment.",
+          "correct": false,
+          "why": "A package alone cannot receive redirected visitors if the new version fails."
+        },
+        {
+          "id": "B",
+          "text": "Prepare and check a separate environment running the new version.",
+          "correct": true,
+          "why": "A separate new-version environment can be assessed before production traffic moves."
+        },
+        {
+          "id": "C",
+          "text": "Shift visitor traffic to the new environment while retaining the current one for a possible return.",
+          "correct": true,
+          "why": "This releases the new version through a traffic shift and preserves the old destination."
+        },
+        {
+          "id": "D",
+          "text": "Install the new version over the running site before performing release checks.",
+          "correct": false,
+          "why": "An in-place installation removes the separate previous environment required for this rollback plan."
+        },
+        {
+          "id": "E",
+          "text": "Shut down the current environment before directing visitors to the new one.",
+          "correct": false,
+          "why": "Shutting it down removes the ready destination for a traffic rollback."
+        }
+      ],
+      "explanation": "The startup needs both pre-release checks and a way to return traffic to the current version. Preparing a separate new-version environment supports the checks; shifting traffic while retaining the old environment supports rollback. Installing over the running site or shutting it down defeats the requested return path.",
+      "keywordCues": [
+        "check it before production use",
+        "return visitors to the current version",
+        "if errors appear"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/blue-green-deployments/welcome.html"
+      ],
+      "es": {
+        "stem": "Una startup de logística prepara una nueva versión de su sitio de seguimiento de paquetes. El equipo quiere comprobarla antes de su uso en producción y luego lanzarla con una forma de devolver a los visitantes a la versión actual si aparecen errores. ¿Qué DOS pasos respaldan este plan de lanzamiento blue/green? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guarda una copia del paquete de despliegue anterior en lugar de mantener en ejecución el entorno anterior.",
+            "why": "Un paquete por sí solo no puede recibir a los visitantes redirigidos si falla la nueva versión."
+          },
+          {
+            "id": "B",
+            "text": "Prepara y comprueba un entorno separado que ejecute la nueva versión.",
+            "why": "Puedes evaluar el entorno separado con la nueva versión antes de mover el tráfico de producción."
+          },
+          {
+            "id": "C",
+            "text": "Cambia el tráfico de visitantes al nuevo entorno mientras conservas el actual para un posible retorno.",
+            "why": "Esto lanza la nueva versión mediante un cambio de tráfico y conserva el destino anterior."
+          },
+          {
+            "id": "D",
+            "text": "Instala la nueva versión sobre el sitio en ejecución antes de realizar las comprobaciones del lanzamiento.",
+            "why": "Instalarla en el entorno actual elimina el entorno anterior separado que necesita este plan de reversión."
+          },
+          {
+            "id": "E",
+            "text": "Apaga el entorno actual antes de dirigir a los visitantes hacia el nuevo.",
+            "why": "Apagarlo elimina el destino listo para recibir el tráfico si debes revertir."
+          }
+        ],
+        "explanation": "La startup necesita tanto comprobaciones previas como una forma de devolver el tráfico a la versión actual. Preparar un entorno separado con la nueva versión permite comprobarla; cambiar el tráfico y conservar el entorno anterior permite revertir. Instalar la versión sobre el sitio en ejecución o apagarlo elimina la ruta de retorno solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "immutable-infrastructure-deployments--1e3bbf60",
+      "conceptId": "immutable-infrastructure-deployments",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs its website on EC2 instances behind a load balancer. For a major release, the team wants to test replacement instances before they receive production traffic and retain the current version in case validation fails. Which deployment approach meets these requirements while minimizing release downtime?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a separate environment with the new version, validate it, then shift load balancer traffic to it while retaining the old environment.",
+          "correct": true,
+          "why": "This uses a traffic shift between versions while keeping the previous environment available."
+        },
+        {
+          "id": "B",
+          "text": "Replace all current instances with the new version before testing the production route.",
+          "correct": false,
+          "why": "Replacing the entire running environment first removes the previous version needed for the requested rollback."
+        },
+        {
+          "id": "C",
+          "text": "Patch the application on the current instances in batches, then remove the old application files.",
+          "correct": false,
+          "why": "Batching changes does not retain a separate, ready-to-use environment running the previous version."
+        },
+        {
+          "id": "D",
+          "text": "Deploy the new version to the current instances and keep a copy of the prior installation package.",
+          "correct": false,
+          "why": "A saved package is not a separate running environment to which traffic can be redirected."
+        }
+      ],
+      "explanation": "The deciding requirements are validation before production traffic and retention of the current version. A blue/green approach prepares the new version separately, then shifts traffic between the environments. Patching or replacing the running instances first does not preserve an environment ready for a traffic rollback.",
+      "keywordCues": [
+        "test replacement instances before they receive production traffic",
+        "retain the current version in case validation fails",
+        "minimizing release downtime"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/blue-green-deployments/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta su sitio web en instancias EC2 detrás de un balanceador de carga. Para un lanzamiento importante, el equipo quiere probar las instancias de reemplazo antes de que reciban tráfico de producción y conservar la versión actual por si falla la validación. ¿Qué enfoque de despliegue cumple estos requisitos y minimiza la interrupción durante el lanzamiento?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un entorno separado con la nueva versión, valídalo y luego cambia hacia él el tráfico del balanceador de carga, conservando el entorno anterior.",
+            "why": "Así cambias el tráfico entre versiones y mantienes disponible el entorno anterior."
+          },
+          {
+            "id": "B",
+            "text": "Reemplaza todas las instancias actuales por la nueva versión antes de probar la ruta de producción.",
+            "why": "Reemplazar primero todo el entorno en ejecución elimina la versión anterior necesaria para la reversión solicitada."
+          },
+          {
+            "id": "C",
+            "text": "Aplica parches a la aplicación en las instancias actuales por grupos y luego elimina los archivos de la versión anterior.",
+            "why": "Cambiar las instancias por grupos no conserva un entorno separado y listo para usar con la versión anterior."
+          },
+          {
+            "id": "D",
+            "text": "Despliega la nueva versión en las instancias actuales y guarda una copia del paquete de instalación anterior.",
+            "why": "Un paquete guardado no es un entorno en ejecución al que puedas redirigir el tráfico."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son validar antes de recibir tráfico de producción y conservar la versión actual. Un enfoque blue/green prepara la nueva versión por separado y luego cambia el tráfico entre los entornos. Aplicar parches o reemplazar primero las instancias en ejecución no conserva un entorno listo para revertir el tráfico."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "immutable-infrastructure-deployments--r0",
+      "conceptId": "immutable-infrastructure-deployments",
+      "kind": "recall",
+      "prompt": "A release needs pre-production validation and a fast return to the previous version. Which deployment approach fits, and why?",
+      "promptEs": "Un lanzamiento necesita validación antes de producción y un regreso rápido a la versión anterior. ¿Qué enfoque de despliegue usarías y por qué?",
+      "idealAnswer": "Use blue/green deployment: prepare and validate a separate environment running the new version, then shift traffic to it. Retain the previous environment so traffic can be shifted back if the release fails.",
+      "rubric": [
+        "Names blue/green deployment.",
+        "Describes separate environments and a traffic shift.",
+        "Explains that retaining the previous environment enables a traffic rollback."
+      ]
+    }
+  ]
+}

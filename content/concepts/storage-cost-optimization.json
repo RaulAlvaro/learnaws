@@ -1,0 +1,333 @@
+{
+  "conceptId": "storage-cost-optimization",
+  "card": {
+    "en": {
+      "tldr": "Optimize storage for the required access pattern, not just the lowest advertised price. For EBS snapshots, archive rarely accessed, long-term recovery points; keep snapshots that need fast retrieval in the standard tier.",
+      "whenToUse": [
+        "A snapshot must be retained long term but is rarely accessed.",
+        "A recovery plan distinguishes fast restores from infrequent historical recovery.",
+        "A proposed archive saving depends on whether snapshots remain incremental."
+      ],
+      "keyFacts": [
+        "New EBS snapshots are stored in the standard tier by default, where snapshots are incremental.",
+        "Archiving converts an incremental snapshot to a full snapshot.",
+        "An archived snapshot must be restored to the standard tier before it can be used.",
+        "EBS Snapshots Archive offers up to 75% lower snapshot storage costs for snapshots retained for 90 days or longer and rarely accessed."
+      ],
+      "gotchas": [
+        "Do not archive a snapshot needed for frequent or fast retrieval.",
+        "Do not assume an archived snapshot retains incremental storage characteristics.",
+        "Do not plan to use an archived snapshot directly without first restoring it to the standard tier."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EBS Snapshot Standard tier",
+          "difference": "Standard snapshots are incremental and suit recovery points that need faster access; Archive is for rarely accessed, long-term snapshots."
+        }
+      ],
+      "examCues": [
+        "year-end snapshot retained for several years",
+        "rarely accessed compliance recovery point",
+        "restore an archived EBS snapshot",
+        "rapid recovery from a recent snapshot"
+      ]
+    },
+    "es": {
+      "tldr": "Optimiza el almacenamiento según el patrón de acceso requerido, no solo por el precio anunciado más bajo. Para snapshots de EBS, usa Archive para puntos de recuperación de largo plazo que rara vez se consultan; conserva en Standard los que necesitan recuperación rápida.",
+      "whenToUse": [
+        "Debes conservar un snapshot a largo plazo, pero rara vez necesitas acceder a él.",
+        "El plan distingue entre recuperación rápida y recuperación histórica ocasional.",
+        "Una propuesta de ahorro depende de si los snapshots siguen siendo incrementales."
+      ],
+      "keyFacts": [
+        "Los snapshots nuevos de EBS se guardan de forma predeterminada en Standard, donde son incrementales.",
+        "Al archivar un snapshot incremental, este se convierte en un snapshot completo.",
+        "Debes restaurar un snapshot archivado a Standard antes de poder usarlo.",
+        "EBS Snapshots Archive ofrece costos de almacenamiento hasta un 75 % menores para snapshots que se conservan por 90 días o más y rara vez se consultan."
+      ],
+      "gotchas": [
+        "No archives un snapshot si necesitas recuperarlo con frecuencia o rapidez.",
+        "No supongas que un snapshot archivado mantiene el almacenamiento incremental.",
+        "No planifiques usar un snapshot archivado directamente sin restaurarlo primero a Standard."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EBS Snapshot Standard tier",
+          "difference": "Los snapshots en Standard son incrementales y sirven para puntos que requieren acceso más rápido; Archive es para snapshots de largo plazo y acceso poco frecuente."
+        }
+      ],
+      "examCues": [
+        "year-end snapshot retained for several years",
+        "rarely accessed compliance recovery point",
+        "restore an archived EBS snapshot",
+        "rapid recovery from a recent snapshot"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html",
+      "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "storage-cost-optimization--df437449",
+      "conceptId": "storage-cost-optimization",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio closes projects after delivery and retains one final EBS snapshot for each project for two years. Staff almost never request these snapshots, and a delayed retrieval is acceptable when they do. Which storage choice meets the retention requirement MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep each final snapshot in the EBS Snapshot Standard tier.",
+          "correct": false,
+          "why": "Standard retains the snapshot but does not take advantage of the archive tier intended for rarely accessed, long-term snapshots."
+        },
+        {
+          "id": "B",
+          "text": "Move each final snapshot to the EBS Snapshots Archive tier.",
+          "correct": true,
+          "why": "Archive is intended for snapshots retained long term that do not need frequent or fast retrieval."
+        },
+        {
+          "id": "C",
+          "text": "Delete each final snapshot when its project closes.",
+          "correct": false,
+          "why": "Deletion fails the requirement to retain a recovery point for two years."
+        },
+        {
+          "id": "D",
+          "text": "Keep each final snapshot in Standard and create an additional archived copy.",
+          "correct": false,
+          "why": "Retaining the Standard copy adds storage for fast access that the scenario does not require."
+        }
+      ],
+      "explanation": "The deciding requirements are long retention, rare access, and tolerance for delayed retrieval. EBS Snapshots Archive is designed for this pattern and offers lower snapshot storage costs for qualifying long-term snapshots. Keeping a Standard copy as well provides faster access, but that capability is unnecessary here.",
+      "keywordCues": [
+        "one final EBS snapshot",
+        "for two years",
+        "almost never request",
+        "delayed retrieval is acceptable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño cierra sus proyectos después de entregarlos y conserva un snapshot final de EBS por proyecto durante dos años. El personal casi nunca solicita esos snapshots y, cuando lo hace, puede esperar a recuperarlos. ¿Qué opción de almacenamiento cumple el requisito de conservación de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener cada snapshot final en EBS Snapshot Standard tier.",
+            "why": "Standard conserva el snapshot, pero no aprovecha Archive, diseñado para snapshots de largo plazo y acceso poco frecuente."
+          },
+          {
+            "id": "B",
+            "text": "Mover cada snapshot final a EBS Snapshots Archive tier.",
+            "why": "Archive está diseñado para snapshots de largo plazo que no necesitan recuperación frecuente ni rápida."
+          },
+          {
+            "id": "C",
+            "text": "Eliminar cada snapshot final cuando cierre su proyecto.",
+            "why": "Eliminarlo incumple el requisito de conservar un punto de recuperación durante dos años."
+          },
+          {
+            "id": "D",
+            "text": "Mantener cada snapshot final en Standard y crear además una copia archivada.",
+            "why": "Conservar la copia en Standard añade almacenamiento para un acceso rápido que el escenario no requiere."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la conservación prolongada, el acceso poco frecuente y la posibilidad de esperar para recuperar el snapshot. EBS Snapshots Archive está diseñado para este patrón y ofrece menores costos de almacenamiento para snapshots de largo plazo que cumplen sus condiciones. Conservar además una copia en Standard facilita un acceso más rápido, pero aquí no se necesita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-cost-optimization--ef7032ee",
+      "conceptId": "storage-cost-optimization",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab archived a year-end EBS snapshot that it rarely expects to need. Months later, an auditor asks the lab to use that exact recovery point to examine historical data. The lab has no requirement for immediate access, but it must preserve the ability to use the snapshot. Which procedure meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Leave the year-end snapshot archived and use it directly from Archive.",
+          "correct": false,
+          "why": "An archived snapshot must be restored to Standard before use."
+        },
+        {
+          "id": "B",
+          "text": "Restore the year-end snapshot to the Standard tier, then use it.",
+          "correct": true,
+          "why": "Restoration to Standard is the documented step required before an archived snapshot can be used."
+        },
+        {
+          "id": "C",
+          "text": "Delete the archived snapshot and rely on the lab's current snapshots.",
+          "correct": false,
+          "why": "Current snapshots do not preserve the requested year-end recovery point."
+        },
+        {
+          "id": "D",
+          "text": "Create a new Standard snapshot and use it instead of the year-end snapshot.",
+          "correct": false,
+          "why": "A new snapshot does not represent the exact historical recovery point requested."
+        }
+      ],
+      "explanation": "The auditor needs the exact archived recovery point, not a new or current snapshot. EBS requires an archived snapshot to be restored to the Standard tier before it can be used. Leaving it in Archive is suitable for retention, but not for direct use.",
+      "keywordCues": [
+        "archived a year-end EBS snapshot",
+        "that exact recovery point",
+        "no requirement for immediate access",
+        "ability to use the snapshot"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación archivó un snapshot de EBS de fin de año que casi nunca espera necesitar. Meses después, un auditor solicita usar exactamente ese punto de recuperación para examinar datos históricos. El laboratorio no necesita acceso inmediato, pero debe poder usar el snapshot. ¿Qué procedimiento cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Dejar archivado el snapshot de fin de año y usarlo directamente desde Archive.",
+            "why": "Debes restaurar un snapshot archivado a Standard antes de usarlo."
+          },
+          {
+            "id": "B",
+            "text": "Restaurar el snapshot de fin de año a Standard y luego usarlo.",
+            "why": "Restaurarlo a Standard es el paso documentado necesario antes de usar un snapshot archivado."
+          },
+          {
+            "id": "C",
+            "text": "Eliminar el snapshot archivado y depender de los snapshots actuales del laboratorio.",
+            "why": "Los snapshots actuales no conservan el punto de recuperación de fin de año solicitado."
+          },
+          {
+            "id": "D",
+            "text": "Crear un snapshot nuevo en Standard y usarlo en lugar del snapshot de fin de año.",
+            "why": "Un snapshot nuevo no representa el punto de recuperación histórico exacto que se solicitó."
+          }
+        ],
+        "explanation": "El auditor necesita el punto de recuperación archivado exacto, no un snapshot nuevo ni uno actual. EBS exige restaurar un snapshot archivado a Standard antes de usarlo. Mantenerlo en Archive sirve para conservarlo, pero no para usarlo directamente."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-cost-optimization--7528a0d1",
+      "conceptId": "storage-cost-optimization",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A publisher keeps recent EBS snapshots for an operations team that needs fast recovery during releases. It also retains one year-end snapshot for several years to satisfy a historical-records policy; requests for that snapshot are rare and can wait. The publisher wants to reduce storage costs without weakening either recovery requirement. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Retain the year-end snapshot in Standard solely to avoid a future restore step.",
+          "correct": false,
+          "why": "The publisher permits delayed access, so paying to keep this rarely accessed snapshot in Standard is unnecessary."
+        },
+        {
+          "id": "B",
+          "text": "Keep the recent release-recovery snapshots in the Standard tier.",
+          "correct": true,
+          "why": "Recent snapshots needed for fast recovery should not be moved to a tier intended for slow, infrequent retrieval."
+        },
+        {
+          "id": "C",
+          "text": "Archive the recent release-recovery snapshots as soon as they are created.",
+          "correct": false,
+          "why": "Archiving them conflicts with the operations team's fast-recovery requirement."
+        },
+        {
+          "id": "D",
+          "text": "Move the year-end snapshot to the EBS Snapshots Archive tier.",
+          "correct": true,
+          "why": "The year-end snapshot is retained long term, rarely accessed, and does not require fast retrieval."
+        },
+        {
+          "id": "E",
+          "text": "Delete the year-end snapshot after the next set of release snapshots is created.",
+          "correct": false,
+          "why": "Recent release snapshots do not remove the policy requirement to retain the year-end recovery point."
+        }
+      ],
+      "explanation": "The two snapshot groups have different retrieval requirements, so they should not be placed in the same tier automatically. Keep fast-recovery snapshots in Standard and move the rarely accessed, long-retained year-end snapshot to Archive. Archiving the release snapshots misses the fast-recovery requirement, while deleting the year-end snapshot misses the retention policy.",
+      "keywordCues": [
+        "needs fast recovery during releases",
+        "one year-end snapshot for several years",
+        "requests for that snapshot are rare and can wait",
+        "without weakening either recovery requirement"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html"
+      ],
+      "es": {
+        "stem": "Una editorial conserva snapshots recientes de EBS para un equipo de operaciones que necesita recuperación rápida durante los lanzamientos. También conserva un snapshot de fin de año durante varios años para cumplir una política de registros históricos; las solicitudes de ese snapshot son poco frecuentes y pueden esperar. La editorial quiere reducir los costos de almacenamiento sin debilitar ninguno de los requisitos de recuperación. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener el snapshot de fin de año en Standard solo para evitar una restauración futura.",
+            "why": "La editorial permite esperar, por lo que no es necesario mantener en Standard este snapshot de acceso poco frecuente."
+          },
+          {
+            "id": "B",
+            "text": "Mantener los snapshots recientes para recuperación de lanzamientos en Standard.",
+            "why": "Los snapshots recientes necesarios para recuperación rápida no deben trasladarse a un nivel diseñado para recuperación lenta y poco frecuente."
+          },
+          {
+            "id": "C",
+            "text": "Archivar los snapshots recientes para recuperación de lanzamientos tan pronto como se creen.",
+            "why": "Archivarlos entra en conflicto con el requisito de recuperación rápida del equipo de operaciones."
+          },
+          {
+            "id": "D",
+            "text": "Mover el snapshot de fin de año a EBS Snapshots Archive tier.",
+            "why": "El snapshot de fin de año se conserva a largo plazo, rara vez se consulta y no requiere recuperación rápida."
+          },
+          {
+            "id": "E",
+            "text": "Eliminar el snapshot de fin de año después de crear los siguientes snapshots de lanzamiento.",
+            "why": "Los snapshots recientes de lanzamiento no eliminan el requisito de conservar el punto de recuperación de fin de año."
+          }
+        ],
+        "explanation": "Los dos grupos de snapshots tienen requisitos de recuperación distintos, así que no debes colocarlos automáticamente en el mismo nivel. Mantén en Standard los snapshots para recuperación rápida y mueve a Archive el snapshot de fin de año, que se conserva por largo tiempo y rara vez se consulta. Archivar los snapshots de lanzamiento incumple el requisito de recuperación rápida; eliminar el de fin de año incumple la política de conservación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "storage-cost-optimization--r0",
+      "conceptId": "storage-cost-optimization",
+      "kind": "recall",
+      "prompt": "Where should you keep a rarely accessed EBS snapshot retained for years, and what must happen before you use it?",
+      "promptEs": "¿Dónde debes conservar un snapshot de EBS que rara vez se consulta durante años y qué debes hacer antes de usarlo?",
+      "idealAnswer": "Move it to EBS Snapshots Archive if it does not need frequent or fast retrieval. Restore it to the Standard tier before using it.",
+      "rubric": [
+        "Identifies EBS Snapshots Archive for long-term, rarely accessed snapshots.",
+        "Conditions the choice on not needing frequent or fast retrieval.",
+        "States that the snapshot must be restored to Standard before use."
+      ]
+    }
+  ]
+}

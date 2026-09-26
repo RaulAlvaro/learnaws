@@ -1,0 +1,460 @@
+{
+  "conceptId": "athena",
+  "card": {
+    "en": {
+      "tldr": "Amazon Athena runs ad-hoc SQL directly against data in Amazon S3 without loading it into a database or managing query infrastructure. Choose it for occasional exploration of an S3 data lake; consider partitioning and columnar formats when scanned data and query cost matter.",
+      "whenToUse": [
+        "Analysts need interactive SQL over logs or other existing S3 data.",
+        "Queries are occasional, and the team wants no query infrastructure to manage.",
+        "A query must combine S3 data with data in another supported source through Athena data source connectors."
+      ],
+      "keyFacts": [
+        "Athena for SQL is serverless; you pay for the queries you run.",
+        "Athena queries S3 data directly, without first loading it into Athena.",
+        "Athena supports formats including CSV, JSON, Parquet, and ORC.",
+        "Partitioning, compression, and columnar formats can reduce data scanned, improve performance, and lower cost.",
+        "Athena uses schema-on-read: table definitions do not change the underlying S3 objects."
+      ],
+      "gotchas": [
+        "Creating an Athena table does not convert or move the S3 data.",
+        "Athena can query data outside S3 through data source connectors; federation does not require copying every source into S3.",
+        "AWS Glue crawlers discover schemas, while Glue ETL jobs transform data; neither is required merely to run SQL on existing S3 files."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Glue",
+          "difference": "Choose Glue for schema discovery or ETL transformations; choose Athena to run interactive SQL over the data."
+        },
+        {
+          "concept": "Amazon Redshift",
+          "difference": "Redshift is a data warehouse; Athena is a direct, serverless option for ad-hoc SQL on S3."
+        },
+        {
+          "concept": "Amazon QuickSight",
+          "difference": "QuickSight creates BI visualizations; Athena runs SQL queries and can supply data to QuickSight."
+        }
+      ],
+      "examCues": [
+        "ad-hoc SQL on existing S3 logs",
+        "no data loading or query infrastructure",
+        "reduce data scanned by occasional queries",
+        "query S3 alongside another data source"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Athena ejecuta SQL ad-hoc directamente sobre datos de Amazon S3, sin cargarlos en una base de datos ni administrar infraestructura de consultas. Elígelo para explorar ocasionalmente un data lake en S3; considera particiones y formatos columnares cuando importen los datos escaneados y el costo.",
+      "whenToUse": [
+        "Los analistas necesitan SQL interactivo sobre logs u otros datos existentes en S3.",
+        "Las consultas son ocasionales y el equipo no quiere administrar infraestructura de consultas.",
+        "Una consulta debe combinar datos de S3 con datos de otra fuente compatible mediante conectores de Athena."
+      ],
+      "keyFacts": [
+        "Athena for SQL es serverless; pagas por las consultas que ejecutas.",
+        "Athena consulta datos de S3 directamente, sin cargarlos primero en Athena.",
+        "Athena admite formatos como CSV, JSON, Parquet y ORC.",
+        "Las particiones, la compresión y los formatos columnares pueden reducir los datos escaneados, mejorar el rendimiento y bajar el costo.",
+        "Athena aplica schema-on-read: las definiciones de tablas no cambian los objetos subyacentes de S3."
+      ],
+      "gotchas": [
+        "Crear una tabla en Athena no convierte ni mueve los datos de S3.",
+        "Athena puede consultar datos fuera de S3 mediante conectores; las consultas federadas no exigen copiar todas las fuentes a S3.",
+        "Los crawlers de AWS Glue descubren esquemas y los trabajos de Glue ETL transforman datos; ninguno es obligatorio solo para ejecutar SQL sobre archivos existentes en S3."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Glue",
+          "difference": "Elige Glue para descubrir esquemas o realizar transformaciones ETL; elige Athena para ejecutar SQL interactivo sobre los datos."
+        },
+        {
+          "concept": "Amazon Redshift",
+          "difference": "Redshift es un data warehouse; Athena ofrece SQL ad-hoc directamente sobre S3 y es serverless."
+        },
+        {
+          "concept": "Amazon QuickSight",
+          "difference": "QuickSight crea visualizaciones de BI; Athena ejecuta consultas SQL y puede proporcionar datos a QuickSight."
+        }
+      ],
+      "examCues": [
+        "ad-hoc SQL on existing S3 logs",
+        "no data loading or query infrastructure",
+        "reduce data scanned by occasional queries",
+        "query S3 alongside another data source"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/athena/latest/ug/what-is.html",
+      "https://aws.amazon.com/athena/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "athena--6e06a3a2",
+      "conceptId": "athena",
+      "secondaryConcepts": [
+        "redshift",
+        "glue-etl-data-catalog",
+        "emr"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional retailer keeps several years of checkout application logs as JSON files in Amazon S3. Investigators run SQL only when a discrepancy is reported, and the retailer does not want to load the files into a warehouse or maintain a query cluster. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run AWS Glue ETL jobs to process each log file when an investigation begins.",
+          "correct": false,
+          "why": "Glue ETL processes and transforms data rather than providing the requested ad-hoc SQL query service."
+        },
+        {
+          "id": "B",
+          "text": "Define a table over the S3 files and run the investigators' SQL with Amazon Athena.",
+          "correct": true,
+          "why": "Athena runs ad-hoc SQL directly on S3 data without query infrastructure to manage."
+        },
+        {
+          "id": "C",
+          "text": "Create an Amazon EMR cluster and use its SQL processing framework for investigations.",
+          "correct": false,
+          "why": "A query cluster introduces infrastructure management that the retailer wants to avoid."
+        },
+        {
+          "id": "D",
+          "text": "Load the logs into Amazon Redshift and run SQL against warehouse tables.",
+          "correct": false,
+          "why": "Loading the logs into a warehouse conflicts with the requirement to query the existing S3 files without loading them."
+        }
+      ],
+      "explanation": "The deciding requirements are occasional SQL against existing S3 files, with neither a warehouse load nor a managed query cluster. Athena queries S3 directly and is serverless. Redshift would require the proposed data load, while the EMR design introduces a cluster to manage. Glue ETL addresses processing rather than the investigators' interactive SQL access.",
+      "keywordCues": [
+        "SQL only when a discrepancy is reported",
+        "does not want to load the files into a warehouse",
+        "maintain a query cluster",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/athena/latest/ug/what-is.html",
+        "https://aws.amazon.com/athena/faqs/"
+      ],
+      "es": {
+        "stem": "Una cadena regional de tiendas conserva varios años de logs de su aplicación de pagos como archivos JSON en Amazon S3. Los investigadores ejecutan SQL solo cuando se reporta una discrepancia, y la empresa no quiere cargar los archivos en un data warehouse ni mantener un clúster de consultas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar trabajos de AWS Glue ETL para procesar cada archivo de logs cuando comience una investigación.",
+            "why": "Glue ETL procesa y transforma datos, pero no proporciona el servicio de consultas SQL ad-hoc solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Definir una tabla sobre los archivos de S3 y ejecutar el SQL de los investigadores con Amazon Athena.",
+            "why": "Athena ejecuta SQL ad-hoc directamente sobre datos de S3 sin infraestructura de consultas que administrar."
+          },
+          {
+            "id": "C",
+            "text": "Crear un clúster de Amazon EMR y usar su framework de SQL para las investigaciones.",
+            "why": "Un clúster de consultas añade administración de infraestructura que la empresa quiere evitar."
+          },
+          {
+            "id": "D",
+            "text": "Cargar los logs en Amazon Redshift y ejecutar SQL sobre las tablas del data warehouse.",
+            "why": "Cargar los logs en un data warehouse contradice el requisito de consultar los archivos existentes de S3 sin cargarlos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son SQL ocasional sobre archivos existentes en S3, sin cargarlos en un data warehouse ni administrar un clúster. Athena consulta S3 directamente y es serverless. La propuesta de Redshift requiere cargar los datos y la de EMR introduce un clúster que administrar. Glue ETL se orienta al procesamiento, no al acceso interactivo por SQL que necesitan los investigadores."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "athena--3524e941",
+      "conceptId": "athena",
+      "secondaryConcepts": [
+        "glue-etl-data-catalog",
+        "redshift",
+        "quick-visualization"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research team already queries compressed Parquet measurements in Amazon S3 with Athena. Files are organized into date partitions, but a monthly report still scans measurements from every date because its SQL does not restrict the date partition. The team must keep its current query service and reduce the amount of data scanned. Which change meets the requirement MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an AWS Glue crawler to infer the Parquet schema before every report.",
+          "correct": false,
+          "why": "Schema inference does not address a query that scans dates outside the requested month."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon QuickSight to display the report without changing its Athena SQL.",
+          "correct": false,
+          "why": "Changing the visualization does not restrict which S3 partitions Athena scans."
+        },
+        {
+          "id": "C",
+          "text": "Copy the measurements into Amazon Redshift for the monthly report.",
+          "correct": false,
+          "why": "Moving the report to Redshift does not keep the team's current query service."
+        },
+        {
+          "id": "D",
+          "text": "Add a filter on the date partition to the Athena report query.",
+          "correct": true,
+          "why": "Restricting the query to the needed partitions limits the S3 data scanned."
+        }
+      ],
+      "explanation": "The files are already partitioned, but the report does not use the partition to limit its scan. Filtering on the date partition lets Athena scan less data and can lower query cost without changing services. A Glue crawler addresses metadata, not the missing query filter. Moving to Redshift would also violate the requirement to keep the current query service.",
+      "keywordCues": [
+        "already queries compressed Parquet measurements",
+        "organized into date partitions",
+        "SQL does not restrict the date partition",
+        "keep its current query service",
+        "reduce the amount of data scanned"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/athena/latest/ug/what-is.html",
+        "https://aws.amazon.com/athena/faqs/"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación ya consulta mediciones en Parquet comprimido dentro de Amazon S3 con Athena. Los archivos están organizados en particiones por fecha, pero un informe mensual todavía escanea mediciones de todas las fechas porque su SQL no restringe la partición por fecha. El equipo debe conservar su servicio actual de consultas y reducir los datos escaneados. ¿Qué cambio cumple el requisito de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un crawler de AWS Glue para inferir el esquema de Parquet antes de cada informe.",
+            "why": "Inferir el esquema no resuelve que la consulta escanee fechas fuera del mes solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon QuickSight para mostrar el informe sin cambiar su SQL de Athena.",
+            "why": "Cambiar la visualización no restringe las particiones de S3 que Athena escanea."
+          },
+          {
+            "id": "C",
+            "text": "Copiar las mediciones a Amazon Redshift para el informe mensual.",
+            "why": "Trasladar el informe a Redshift no conserva el servicio de consultas actual del equipo."
+          },
+          {
+            "id": "D",
+            "text": "Agregar un filtro sobre la partición por fecha a la consulta del informe en Athena.",
+            "why": "Restringir la consulta a las particiones necesarias limita los datos de S3 escaneados."
+          }
+        ],
+        "explanation": "Los archivos ya tienen particiones, pero el informe no las utiliza para limitar el escaneo. Filtrar por la partición de fecha permite que Athena escanee menos datos y puede reducir el costo sin cambiar de servicio. Un crawler de Glue se ocupa de los metadatos, no del filtro ausente. Pasar a Redshift también incumpliría el requisito de conservar el servicio de consultas actual."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "athena--03ef9d4e",
+      "conceptId": "athena",
+      "secondaryConcepts": [
+        "glue-etl-data-catalog",
+        "redshift",
+        "emr"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small museum receives weekly CSV exports in an Amazon S3 prefix. Curators want to run occasional SQL to count records by exhibit; the files need no cleaning or format conversion, and the originals must remain unchanged. Which approach meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Define an Athena table for the S3 CSV files and query it as new files arrive.",
+          "correct": true,
+          "why": "Athena applies a schema when querying S3 and does not change the original CSV files."
+        },
+        {
+          "id": "B",
+          "text": "Load each export into Amazon Redshift and query the loaded tables.",
+          "correct": false,
+          "why": "Loading exports into a warehouse adds a data-loading step unnecessary for occasional SQL on S3."
+        },
+        {
+          "id": "C",
+          "text": "Run a scheduled AWS Glue ETL job to rewrite each CSV export before every query.",
+          "correct": false,
+          "why": "The files need no transformation, so the ETL job adds work without satisfying an unmet requirement."
+        },
+        {
+          "id": "D",
+          "text": "Create an Amazon EMR cluster and run a SQL framework against the S3 exports.",
+          "correct": false,
+          "why": "Maintaining a cluster adds overhead for occasional queries that Athena can run without query infrastructure."
+        }
+      ],
+      "explanation": "The curators need occasional SQL, not a transformation pipeline, and the original S3 files must stay unchanged. An Athena table applies its schema when queries run; defining it does not rewrite the CSV files. Glue ETL would introduce unnecessary processing, while loading into Redshift adds a step the scenario does not need. An EMR cluster adds infrastructure overhead.",
+      "keywordCues": [
+        "occasional SQL",
+        "need no cleaning or format conversion",
+        "originals must remain unchanged",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/athena/latest/ug/what-is.html",
+        "https://aws.amazon.com/athena/faqs/"
+      ],
+      "es": {
+        "stem": "Un museo pequeño recibe cada semana exportaciones CSV en un prefijo de Amazon S3. Los curadores quieren ejecutar SQL ocasional para contar registros por exhibición; los archivos no necesitan limpieza ni conversión de formato, y los originales deben permanecer sin cambios. ¿Qué enfoque cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Definir una tabla de Athena para los archivos CSV en S3 y consultarla a medida que lleguen archivos nuevos.",
+            "why": "Athena aplica el esquema al consultar S3 y no modifica los archivos CSV originales."
+          },
+          {
+            "id": "B",
+            "text": "Cargar cada exportación en Amazon Redshift y consultar las tablas cargadas.",
+            "why": "Cargar las exportaciones en un data warehouse añade un paso innecesario para ejecutar SQL ocasional sobre S3."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar un trabajo programado de AWS Glue ETL para reescribir cada exportación CSV antes de cada consulta.",
+            "why": "Los archivos no necesitan transformación, por lo que el trabajo ETL agrega tareas sin cubrir un requisito pendiente."
+          },
+          {
+            "id": "D",
+            "text": "Crear un clúster de Amazon EMR y ejecutar un framework de SQL sobre las exportaciones de S3.",
+            "why": "Mantener un clúster agrega carga operativa para consultas ocasionales que Athena puede ejecutar sin infraestructura de consultas."
+          }
+        ],
+        "explanation": "Los curadores necesitan SQL ocasional, no un proceso de transformación, y los archivos originales de S3 deben permanecer intactos. Una tabla de Athena aplica su esquema durante la consulta; definirla no reescribe los CSV. Glue ETL introduciría procesamiento innecesario, mientras que cargarlos en Redshift agrega un paso que el escenario no requiere. Un clúster de EMR añade carga operativa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "athena--dec31747",
+      "conceptId": "athena",
+      "secondaryConcepts": [
+        "redshift",
+        "emr",
+        "quick-visualization"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company stores daily audience-event files in Amazon S3. Analysts need ad-hoc SQL directly over those files, and the company wants to limit the data scanned when analysts query a specific day. The team prefers not to maintain a query cluster or load the events into a warehouse. Which TWO actions meet these requirements MOST cost-effectively? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Publish Amazon QuickSight dashboards in place of the analysts' ad-hoc SQL queries.",
+          "correct": false,
+          "why": "Dashboards do not replace the stated requirement for analysts to run ad-hoc SQL."
+        },
+        {
+          "id": "B",
+          "text": "Load the event files into Amazon Redshift before analysts run their SQL.",
+          "correct": false,
+          "why": "The proposed load conflicts with the requirement to query the files directly without loading a warehouse."
+        },
+        {
+          "id": "C",
+          "text": "Organize the S3 data into day partitions and filter Athena queries on the requested day.",
+          "correct": true,
+          "why": "Using day partitions in queries limits the data scanned for a specific-day request."
+        },
+        {
+          "id": "D",
+          "text": "Create an Amazon EMR cluster to run SQL against each day's files.",
+          "correct": false,
+          "why": "A cluster introduces query infrastructure that the team does not want to maintain."
+        },
+        {
+          "id": "E",
+          "text": "Define an Athena table over the event files and run the analysts' SQL in Athena.",
+          "correct": true,
+          "why": "Athena provides serverless, ad-hoc SQL directly over the S3 files without a warehouse load."
+        }
+      ],
+      "explanation": "Two decisions are needed: provide direct, serverless SQL on S3 and reduce scanning for day-specific queries. Athena supplies the SQL access, while partitioning by day and filtering on that partition limit the data scanned. Redshift requires the proposed warehouse load, and EMR introduces a cluster. QuickSight addresses visualization rather than replacing the analysts' ad-hoc SQL workflow.",
+      "keywordCues": [
+        "ad-hoc SQL directly over those files",
+        "limit the data scanned",
+        "query a specific day",
+        "not to maintain a query cluster or load the events into a warehouse",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/athena/latest/ug/what-is.html",
+        "https://aws.amazon.com/athena/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de medios guarda archivos diarios de eventos de audiencia en Amazon S3. Los analistas necesitan SQL ad-hoc directamente sobre esos archivos, y la empresa quiere limitar los datos escaneados cuando consulten un día específico. El equipo prefiere no mantener un clúster de consultas ni cargar los eventos en un data warehouse. ¿Qué DOS acciones cumplen estos requisitos de la forma MOST cost-effective? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Publicar dashboards de Amazon QuickSight en lugar de las consultas SQL ad-hoc de los analistas.",
+            "why": "Los dashboards no sustituyen el requisito de que los analistas ejecuten SQL ad-hoc."
+          },
+          {
+            "id": "B",
+            "text": "Cargar los archivos de eventos en Amazon Redshift antes de que los analistas ejecuten SQL.",
+            "why": "La carga propuesta contradice el requisito de consultar los archivos directamente sin cargarlos en un data warehouse."
+          },
+          {
+            "id": "C",
+            "text": "Organizar los datos de S3 en particiones por día y filtrar las consultas de Athena por el día solicitado.",
+            "why": "Usar las particiones por día en las consultas limita los datos escaneados al solicitar un día específico."
+          },
+          {
+            "id": "D",
+            "text": "Crear un clúster de Amazon EMR para ejecutar SQL sobre los archivos de cada día.",
+            "why": "Un clúster introduce infraestructura de consultas que el equipo no quiere mantener."
+          },
+          {
+            "id": "E",
+            "text": "Definir una tabla de Athena sobre los archivos de eventos y ejecutar el SQL de los analistas en Athena.",
+            "why": "Athena proporciona SQL ad-hoc y serverless directamente sobre los archivos de S3, sin cargarlos en un data warehouse."
+          }
+        ],
+        "explanation": "Se necesitan dos decisiones: proporcionar SQL directo y serverless sobre S3, y reducir el escaneo en consultas de días específicos. Athena proporciona el acceso SQL; particionar por día y filtrar por esa partición limita los datos escaneados. Redshift requiere la carga propuesta en un data warehouse, y EMR introduce un clúster. QuickSight sirve para visualizar, no para sustituir el flujo de SQL ad-hoc de los analistas."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "athena--r0",
+      "conceptId": "athena",
+      "kind": "recall",
+      "prompt": "Analysts occasionally need SQL over existing S3 logs without loading them or managing servers. What would you choose, and why?",
+      "promptEs": "Los analistas necesitan SQL ocasional sobre logs existentes en S3, sin cargarlos ni administrar servidores. ¿Qué elegirías y por qué?",
+      "idealAnswer": "Choose Amazon Athena. It runs ad-hoc SQL directly on S3 data and is serverless, so the team does not need to load the logs or manage query infrastructure.",
+      "rubric": [
+        "Names Amazon Athena.",
+        "States that it queries S3 data directly with SQL.",
+        "Connects its serverless model to the no-infrastructure requirement."
+      ]
+    },
+    {
+      "id": "athena--r1",
+      "conceptId": "athena",
+      "kind": "why-not",
+      "prompt": "Why not use an AWS Glue ETL job instead of Athena for occasional SQL on S3 files that need no transformation?",
+      "promptEs": "¿Por qué no usarías un trabajo de AWS Glue ETL en vez de Athena para SQL ocasional sobre archivos de S3 que no necesitan transformación?",
+      "idealAnswer": "Glue ETL is for transforming and moving data, which this scenario does not require. Athena runs the requested interactive SQL directly on the existing S3 files without an ETL job.",
+      "rubric": [
+        "Identifies Glue ETL as a transformation or data-movement tool.",
+        "Notes that the files need no transformation.",
+        "Explains why Athena fits the interactive SQL requirement."
+      ]
+    }
+  ]
+}

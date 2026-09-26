@@ -1,0 +1,330 @@
+{
+  "conceptId": "aurora-replicas-endpoints",
+  "card": {
+    "en": {
+      "tldr": "Aurora Replicas serve read-only queries and can be promoted if the primary instance fails. Use the reader endpoint for reads across replicas, a custom endpoint to route a workload to a selected subset, and Aurora Auto Scaling when reader demand changes.",
+      "whenToUse": [
+        "Read traffic needs to use multiple Aurora Replicas without hardcoded instance addresses.",
+        "Analytics queries must connect to a different subset of instances than ordinary reads.",
+        "Reader capacity should increase and decrease with workload."
+      ],
+      "keyFacts": [
+        "An Aurora cluster can have up to 15 Aurora Replicas handling read-only queries.",
+        "The reader endpoint balances connections among Aurora Replicas; the cluster endpoint connects to the primary instance.",
+        "Custom endpoints connect to subsets of DB instances in a cluster.",
+        "Aurora Auto Scaling adds or removes reader instances according to a scaling policy; it does not scale the writer's workload.",
+        "Auto Scaling's target metric averages all readers, including manually added readers and readers associated with custom endpoints."
+      ],
+      "gotchas": [
+        "An instance endpoint stays tied to a specific instance; cluster and reader endpoints handle instance failover better.",
+        "A custom endpoint changes connection routing, not which readers contribute to an Auto Scaling target metric.",
+        "If a cluster has no reader, the Auto Scaling target metric is not calculated and its policy alarms remain inactive."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Reader endpoint",
+          "difference": "It balances connections among all Aurora Replicas, rather than selecting a subset for a particular workload."
+        },
+        {
+          "concept": "Instance endpoint",
+          "difference": "It connects to one specific instance and does not automatically redirect connections when that instance becomes unavailable."
+        }
+      ],
+      "examCues": [
+        "read-only traffic grows unpredictably",
+        "keep analytics on a separate subset of readers",
+        "avoid hardcoded replica hostnames",
+        "writer fails while application connections must recover"
+      ]
+    },
+    "es": {
+      "tldr": "Aurora Replicas atienden consultas de solo lectura y pueden promoverse si falla la instancia primaria. Usa el reader endpoint para lecturas entre réplicas, un custom endpoint para dirigir una carga a un subconjunto y Aurora Auto Scaling cuando cambia la demanda de lectura.",
+      "whenToUse": [
+        "El tráfico de lectura debe usar varias Aurora Replicas sin direcciones de instancia fijas.",
+        "Las consultas analíticas deben conectarse a un subconjunto distinto del que usa el tráfico de lectura habitual.",
+        "La capacidad de lectura debe aumentar y disminuir según la carga."
+      ],
+      "keyFacts": [
+        "Un clúster de Aurora puede tener hasta 15 Aurora Replicas que atienden consultas de solo lectura.",
+        "El reader endpoint distribuye conexiones entre Aurora Replicas; el cluster endpoint conecta con la instancia primaria.",
+        "Los custom endpoints conectan con subconjuntos de instancias de un clúster.",
+        "Aurora Auto Scaling agrega o elimina instancias lectoras según una política; no escala la carga del writer.",
+        "La métrica objetivo de Auto Scaling promedia todos los readers, incluidos los agregados manualmente y los asociados con custom endpoints."
+      ],
+      "gotchas": [
+        "Un instance endpoint permanece asociado con una instancia específica; los cluster endpoints y reader endpoints manejan mejor los cambios de instancia durante un failover.",
+        "Un custom endpoint cambia el enrutamiento de conexiones, no cuáles readers contribuyen a la métrica objetivo de Auto Scaling.",
+        "Si el clúster no tiene readers, no se calcula la métrica objetivo de Auto Scaling y las alarmas de la política permanecen inactivas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Reader endpoint",
+          "difference": "Distribuye conexiones entre todas las Aurora Replicas, en lugar de seleccionar un subconjunto para una carga específica."
+        },
+        {
+          "concept": "Instance endpoint",
+          "difference": "Conecta con una instancia específica y no redirige automáticamente las conexiones si esa instancia deja de estar disponible."
+        }
+      ],
+      "examCues": [
+        "read-only traffic grows unpredictably",
+        "keep analytics on a separate subset of readers",
+        "avoid hardcoded replica hostnames",
+        "writer fails while application connections must recover"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Integrating.AutoScaling.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aurora-replicas-endpoints--22ebf197",
+      "conceptId": "aurora-replicas-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs an Aurora cluster with a primary instance and a reader. Read-only searches spike when tickets go on sale, but traffic is low between events. The application can use one stable connection address for searches. Which solution handles the spikes MOST cost-effectively with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add several permanent Aurora Replicas and connect searches to each replica's instance endpoint.",
+          "correct": false,
+          "why": "Permanent replicas remain provisioned between events, and instance endpoints require connection-management logic."
+        },
+        {
+          "id": "B",
+          "text": "Configure Aurora Auto Scaling for replicas and connect searches through the reader endpoint.",
+          "correct": true,
+          "why": "Auto Scaling adjusts reader capacity with demand, while the reader endpoint accepts connections to the available replicas."
+        },
+        {
+          "id": "C",
+          "text": "Configure Aurora Auto Scaling and send searches to the cluster endpoint.",
+          "correct": false,
+          "why": "The cluster endpoint connects to the primary instance, so searches would not use the added readers."
+        },
+        {
+          "id": "D",
+          "text": "Create a custom endpoint for the current reader and continue using only that reader for searches.",
+          "correct": false,
+          "why": "Restricting searches to the current reader does not adjust reader capacity during spikes."
+        }
+      ],
+      "explanation": "The deciding requirements are variable read demand, lower cost between events, and a stable connection address. Aurora Auto Scaling adds and removes replicas in response to workload, and the reader endpoint lets the application connect to the readers without managing their individual addresses. Permanent replicas do not shrink when demand falls; the cluster endpoint instead connects to the primary instance.",
+      "keywordCues": [
+        "Read-only searches spike",
+        "traffic is low between events",
+        "one stable connection address",
+        "MOST cost-effectively with the LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Integrating.AutoScaling.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos usa un clúster de Aurora con una instancia primaria y un reader. Las búsquedas de solo lectura aumentan bruscamente cuando comienza una venta, pero el tráfico es bajo entre eventos. La aplicación puede usar una sola dirección de conexión estable para las búsquedas. ¿Qué solución atiende los picos MOST cost-effectively y con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega varias Aurora Replicas permanentes y conecta las búsquedas al instance endpoint de cada réplica.",
+            "why": "Las réplicas permanentes siguen aprovisionadas entre eventos y los instance endpoints requieren lógica para administrar las conexiones."
+          },
+          {
+            "id": "B",
+            "text": "Configura Aurora Auto Scaling para las réplicas y conecta las búsquedas mediante el reader endpoint.",
+            "why": "Auto Scaling ajusta la capacidad de lectura según la demanda, mientras que el reader endpoint permite conectarse a las réplicas disponibles."
+          },
+          {
+            "id": "C",
+            "text": "Configura Aurora Auto Scaling y envía las búsquedas al cluster endpoint.",
+            "why": "El cluster endpoint conecta con la instancia primaria, por lo que las búsquedas no usarían los readers agregados."
+          },
+          {
+            "id": "D",
+            "text": "Crea un custom endpoint para el reader actual y sigue usando solo ese reader para las búsquedas.",
+            "why": "Limitar las búsquedas al reader actual no ajusta la capacidad de lectura durante los picos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la demanda variable de lectura, el menor costo entre eventos y una dirección de conexión estable. Aurora Auto Scaling agrega y elimina réplicas según la carga, y el reader endpoint permite conectar la aplicación a los readers sin administrar sus direcciones individuales. Las réplicas permanentes no se reducen cuando baja la demanda; el cluster endpoint conecta con la instancia primaria."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-replicas-endpoints--f6f5dc7a",
+      "conceptId": "aurora-replicas-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs ordinary product queries and long-running analytics queries against the same Aurora cluster. It has provisioned readers with different capacities and wants analytics connections to use only a designated subset, without listing instance hostnames in the application. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send analytics to the instance endpoints of the designated readers and update the application when readers change.",
+          "correct": false,
+          "why": "Instance endpoints require the application to manage specific reader addresses."
+        },
+        {
+          "id": "B",
+          "text": "Send analytics to the reader endpoint and ordinary queries to the cluster endpoint.",
+          "correct": false,
+          "why": "The reader endpoint balances connections among all replicas rather than isolating analytics on the designated subset."
+        },
+        {
+          "id": "C",
+          "text": "Create a custom endpoint for the designated readers and connect analytics through it.",
+          "correct": true,
+          "why": "A custom endpoint connects the analytics application to the selected subset without hardcoded instance addresses."
+        },
+        {
+          "id": "D",
+          "text": "Send analytics to the cluster endpoint and ordinary queries to the reader endpoint.",
+          "correct": false,
+          "why": "The cluster endpoint connects analytics to the primary instance, not the designated readers."
+        }
+      ],
+      "explanation": "The requirement is to select a subset of differently configured readers without maintaining their hostnames in application code. A custom endpoint provides a connection address for that subset. The reader endpoint instead balances among all Aurora Replicas, while instance endpoints identify individual instances and shift connection management to the application.",
+      "keywordCues": [
+        "readers with different capacities",
+        "only a designated subset",
+        "without listing instance hostnames"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Integrating.AutoScaling.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta consultas habituales de productos y consultas analíticas prolongadas en el mismo clúster de Aurora. Ha aprovisionado readers de distintas capacidades y quiere que las conexiones analíticas usen solo un subconjunto designado, sin enumerar nombres de host de las instancias en la aplicación. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Envía analytics a los instance endpoints de los readers designados y actualiza la aplicación cuando cambien los readers.",
+            "why": "Los instance endpoints obligan a la aplicación a administrar las direcciones de readers específicos."
+          },
+          {
+            "id": "B",
+            "text": "Envía analytics al reader endpoint y las consultas habituales al cluster endpoint.",
+            "why": "El reader endpoint distribuye conexiones entre todas las réplicas en lugar de limitar analytics al subconjunto designado."
+          },
+          {
+            "id": "C",
+            "text": "Crea un custom endpoint para los readers designados y conecta analytics mediante él.",
+            "why": "Un custom endpoint conecta la aplicación analítica con el subconjunto seleccionado sin direcciones de instancia fijas."
+          },
+          {
+            "id": "D",
+            "text": "Envía analytics al cluster endpoint y las consultas habituales al reader endpoint.",
+            "why": "El cluster endpoint conecta analytics con la instancia primaria, no con los readers designados."
+          }
+        ],
+        "explanation": "El requisito es seleccionar un subconjunto de readers con distintas configuraciones sin mantener sus nombres de host en el código. Un custom endpoint proporciona una dirección de conexión para ese subconjunto. En cambio, el reader endpoint distribuye conexiones entre todas las Aurora Replicas, mientras que los instance endpoints identifican instancias individuales y dejan la administración de conexiones a la aplicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-replicas-endpoints--4cfccd73",
+      "conceptId": "aurora-replicas-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics application uses an Aurora cluster with a primary instance and multiple Aurora Replicas. It sends updates and read-only tracking queries through separate connection pools. After an instance failure, both pools must reconnect to suitable available instances without discovering individual instance addresses. Which endpoint configuration is MOST appropriate?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the cluster endpoint for updates and the reader endpoint for tracking queries.",
+          "correct": true,
+          "why": "These endpoints connect to the primary and the reader group respectively and can redirect connections after instance failure."
+        },
+        {
+          "id": "B",
+          "text": "Use the primary instance endpoint for updates and each replica's instance endpoint for tracking queries.",
+          "correct": false,
+          "why": "Instance endpoints remain tied to particular instances and do not provide the requested automatic redirection."
+        },
+        {
+          "id": "C",
+          "text": "Use the cluster endpoint for both pools and add replicas when tracking demand grows.",
+          "correct": false,
+          "why": "The cluster endpoint routes tracking queries to the primary rather than distributing them among the replicas."
+        },
+        {
+          "id": "D",
+          "text": "Use the reader endpoint for updates and the cluster endpoint for tracking queries.",
+          "correct": false,
+          "why": "Updates need the primary instance, whereas the reader endpoint is intended for read-only queries."
+        }
+      ],
+      "explanation": "Updates must reach the primary instance, and tracking queries should use the replicas. The cluster endpoint serves the primary and can reconnect to a new primary after failover; the reader endpoint serves read-only connections and can reconnect to available replicas. Instance endpoints do not automatically change which DB instance they connect to when one becomes unavailable.",
+      "keywordCues": [
+        "updates and read-only tracking queries",
+        "After an instance failure",
+        "without discovering individual instance addresses"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Integrating.AutoScaling.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de logística usa un clúster de Aurora con una instancia primaria y varias Aurora Replicas. Envía actualizaciones y consultas de seguimiento de solo lectura mediante grupos de conexiones separados. Después de que falle una instancia, ambos grupos deben reconectarse a instancias disponibles adecuadas sin descubrir direcciones de instancias individuales. ¿Qué configuración de endpoints es la MOST appropriate?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa el cluster endpoint para las actualizaciones y el reader endpoint para las consultas de seguimiento.",
+            "why": "Estos endpoints conectan con la instancia primaria y el grupo de readers, respectivamente, y pueden redirigir conexiones después de una falla."
+          },
+          {
+            "id": "B",
+            "text": "Usa el instance endpoint de la instancia primaria para las actualizaciones y el instance endpoint de cada réplica para las consultas de seguimiento.",
+            "why": "Los instance endpoints permanecen asociados con instancias específicas y no proporcionan la redirección automática solicitada."
+          },
+          {
+            "id": "C",
+            "text": "Usa el cluster endpoint para ambos grupos y agrega réplicas cuando aumente la demanda de seguimiento.",
+            "why": "El cluster endpoint dirige las consultas de seguimiento a la instancia primaria en lugar de distribuirlas entre las réplicas."
+          },
+          {
+            "id": "D",
+            "text": "Usa el reader endpoint para las actualizaciones y el cluster endpoint para las consultas de seguimiento.",
+            "why": "Las actualizaciones necesitan la instancia primaria, mientras que el reader endpoint está destinado a consultas de solo lectura."
+          }
+        ],
+        "explanation": "Las actualizaciones deben llegar a la instancia primaria y las consultas de seguimiento deben usar las réplicas. El cluster endpoint sirve a la instancia primaria y puede reconectarse a una nueva instancia primaria después de un failover; el reader endpoint sirve a las conexiones de solo lectura y puede reconectarse a réplicas disponibles. Los instance endpoints no cambian automáticamente la instancia de base de datos a la que conectan cuando una deja de estar disponible."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aurora-replicas-endpoints--r0",
+      "conceptId": "aurora-replicas-endpoints",
+      "kind": "recall",
+      "prompt": "Which Aurora features would you use for fluctuating read traffic and a separate analytics reader group, and why?",
+      "promptEs": "¿Qué features de Aurora usarías para tráfico de lectura variable y un grupo separado de readers para analytics, y por qué?",
+      "idealAnswer": "Use Aurora Auto Scaling to adjust the number of readers as demand changes, and the reader endpoint for application reads across replicas. Use a custom endpoint to connect analytics to its designated subset of instances.",
+      "rubric": [
+        "Identifies Aurora Auto Scaling for changing reader capacity.",
+        "Identifies the reader endpoint for connections across replicas.",
+        "Identifies a custom endpoint for the designated analytics subset."
+      ]
+    }
+  ]
+}

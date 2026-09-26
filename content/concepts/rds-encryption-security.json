@@ -1,0 +1,324 @@
+{
+  "conceptId": "rds-encryption-security",
+  "card": {
+    "en": {
+      "tldr": "Amazon RDS encryption at rest uses an AWS KMS key and is selected when the DB instance is created. For an existing unencrypted instance, use an encrypted snapshot copy to create an encrypted replacement; use SSL/TLS for client connections and IAM database authentication when applications should connect without stored database passwords.",
+      "whenToUse": [
+        "A new RDS database must encrypt storage, logs, backups, snapshots, and read replicas.",
+        "An existing unencrypted RDS database must be replaced with an encrypted one.",
+        "Applications must avoid storing database passwords and use IAM authentication tokens."
+      ],
+      "keyFacts": [
+        "RDS encryption at rest uses an AWS KMS key; an encrypted DB instance also has encrypted logs, automated backups, and snapshots.",
+        "If no customer managed key is specified for a new encrypted instance, RDS uses its AWS managed key.",
+        "The KMS key of an encrypted DB instance cannot be changed in place; an encrypted snapshot copy can use a different key.",
+        "IAM database authentication supports MariaDB, MySQL, and PostgreSQL, subject to engine-version and Region availability.",
+        "IAM authentication tokens last 15 minutes; expiration does not affect an established session."
+      ],
+      "gotchas": [
+        "Encrypting traffic to a database does not encrypt its storage at rest.",
+        "Selecting a new KMS key does not change the key of an existing encrypted DB instance in place.",
+        "An IAM authentication token must be generated for the DB instance endpoint, not a custom Route 53 DNS name."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing unencrypted RDS database",
+        "encrypt backups and snapshots",
+        "no database passwords in application code",
+        "15-minute authentication token",
+        "change the KMS key"
+      ]
+    },
+    "es": {
+      "tldr": "El cifrado en reposo de Amazon RDS usa una clave de AWS KMS y se selecciona al crear la instancia de base de datos. Para una instancia existente sin cifrar, usa una copia cifrada de un snapshot para crear un reemplazo cifrado; usa SSL/TLS para las conexiones de clientes e IAM database authentication cuando las aplicaciones deban conectarse sin guardar contraseñas de base de datos.",
+      "whenToUse": [
+        "Una base de datos RDS nueva debe cifrar el almacenamiento, los registros, los backups, los snapshots y las read replicas.",
+        "Debes reemplazar una base de datos RDS existente sin cifrar por una cifrada.",
+        "Las aplicaciones deben evitar guardar contraseñas de base de datos y usar tokens de IAM authentication."
+      ],
+      "keyFacts": [
+        "El cifrado en reposo de RDS usa una clave de AWS KMS; una instancia cifrada también tiene cifrados sus registros, backups automatizados y snapshots.",
+        "Si no especificas una customer managed key para una instancia cifrada nueva, RDS usa su AWS managed key.",
+        "No puedes cambiar la clave de AWS KMS de una instancia cifrada en el mismo lugar; una copia cifrada de un snapshot puede usar otra clave.",
+        "IAM database authentication admite MariaDB, MySQL y PostgreSQL, según la disponibilidad de la versión del motor y la Región.",
+        "Los tokens de IAM authentication duran 15 minutos; su vencimiento no afecta una sesión ya establecida."
+      ],
+      "gotchas": [
+        "Cifrar el tráfico hacia una base de datos no cifra su almacenamiento en reposo.",
+        "Seleccionar otra clave de AWS KMS no cambia en el mismo lugar la clave de una instancia cifrada existente.",
+        "Debes generar el token de IAM authentication para el endpoint de la instancia de base de datos, no para un nombre DNS personalizado de Route 53."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing unencrypted RDS database",
+        "encrypt backups and snapshots",
+        "no database passwords in application code",
+        "15-minute authentication token",
+        "change the KMS key"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rds-encryption-security--661697b9",
+      "conceptId": "rds-encryption-security",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publishing platform uses an Amazon RDS for PostgreSQL instance and wants its application to connect without storing a database password. The application currently uses a custom Route 53 DNS name for the database. Which approach meets the passwordless requirement while allowing authentication tokens to work?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Generate IAM authentication tokens for the custom Route 53 name and use them for SSL/TLS connections.",
+          "correct": false,
+          "why": "A custom Route 53 DNS name cannot be used instead of the DB instance endpoint to generate IAM authentication tokens."
+        },
+        {
+          "id": "B",
+          "text": "Keep password authentication and require SSL/TLS when connecting through the custom Route 53 name.",
+          "correct": false,
+          "why": "SSL/TLS protects traffic but does not remove the need to manage a database password."
+        },
+        {
+          "id": "C",
+          "text": "Enable RDS encryption at rest and generate authentication tokens for the custom Route 53 name.",
+          "correct": false,
+          "why": "Encryption at rest does not change authentication, and the custom DNS name is not valid for token generation."
+        },
+        {
+          "id": "D",
+          "text": "Enable IAM database authentication and generate tokens using the DB instance endpoint.",
+          "correct": true,
+          "why": "IAM database authentication replaces the connection password with a token generated for the supported endpoint."
+        }
+      ],
+      "explanation": "The application needs authentication without a stored database password, which is the use case for IAM database authentication. For PostgreSQL, it uses a generated token rather than a password, subject to feature availability for the engine version and Region. The custom Route 53 name is the trap: tokens must be generated using the DB instance endpoint.",
+      "keywordCues": [
+        "Amazon RDS for PostgreSQL",
+        "without storing a database password",
+        "custom Route 53 DNS name"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html"
+      ],
+      "es": {
+        "stem": "Una plataforma editorial usa una instancia de Amazon RDS for PostgreSQL y quiere que su aplicación se conecte sin guardar una contraseña de base de datos. Actualmente, la aplicación usa un nombre DNS personalizado de Route 53 para la base de datos. ¿Qué enfoque cumple el requisito de no guardar contraseñas y permite que funcionen los tokens de autenticación?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Genera tokens de IAM authentication para el nombre personalizado de Route 53 y úsalos en conexiones SSL/TLS.",
+            "why": "No puedes usar un nombre DNS personalizado de Route 53 en lugar del endpoint de la instancia para generar tokens de IAM authentication."
+          },
+          {
+            "id": "B",
+            "text": "Mantén la autenticación con contraseña y exige SSL/TLS al conectarte mediante el nombre personalizado de Route 53.",
+            "why": "SSL/TLS protege el tráfico, pero no elimina la necesidad de administrar una contraseña de base de datos."
+          },
+          {
+            "id": "C",
+            "text": "Habilita el cifrado en reposo de RDS y genera tokens de autenticación para el nombre personalizado de Route 53.",
+            "why": "El cifrado en reposo no cambia la autenticación y el nombre DNS personalizado no sirve para generar tokens."
+          },
+          {
+            "id": "D",
+            "text": "Habilita IAM database authentication y genera los tokens usando el endpoint de la instancia de base de datos.",
+            "why": "IAM database authentication sustituye la contraseña de conexión por un token generado para el endpoint admitido."
+          }
+        ],
+        "explanation": "La aplicación necesita autenticarse sin guardar una contraseña de base de datos; para eso sirve IAM database authentication. En PostgreSQL, usa un token generado en vez de una contraseña, según la disponibilidad de la característica para la versión del motor y la Región. La trampa es el nombre personalizado de Route 53: debes generar los tokens usando el endpoint de la instancia."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-encryption-security--820b27bc",
+      "conceptId": "rds-encryption-security",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A clinic is creating a new Amazon RDS for MySQL DB instance for an application. Its policy requires encryption at rest for the database and its backups, and the application must authenticate without a stored database password. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable RDS encryption when creating the DB instance.",
+          "correct": true,
+          "why": "An encrypted RDS instance also has encrypted automated backups."
+        },
+        {
+          "id": "B",
+          "text": "Enable IAM database authentication instead of RDS encryption at rest.",
+          "correct": false,
+          "why": "IAM database authentication addresses passwords but does not encrypt database storage or backups at rest."
+        },
+        {
+          "id": "C",
+          "text": "Use standard database authentication and rotate the application password.",
+          "correct": false,
+          "why": "Standard password authentication still requires the application to use a database password."
+        },
+        {
+          "id": "D",
+          "text": "Enable IAM database authentication and have the application connect using authentication tokens.",
+          "correct": true,
+          "why": "For a supported MySQL configuration, IAM tokens allow connections without a stored database password."
+        },
+        {
+          "id": "E",
+          "text": "Require SSL/TLS for client connections instead of enabling RDS encryption at rest.",
+          "correct": false,
+          "why": "SSL/TLS protects data in transit but does not satisfy the at-rest encryption requirement."
+        }
+      ],
+      "explanation": "The clinic has two separate requirements: encryption at rest and passwordless application authentication. Enable RDS encryption at creation to protect the instance and its automated backups, and use IAM database authentication tokens instead of a stored password, subject to engine-version and Region support. SSL/TLS is valuable for connections but cannot replace encryption at rest; IAM authentication alone cannot either.",
+      "keywordCues": [
+        "creating a new Amazon RDS for MySQL DB instance",
+        "encryption at rest for the database and its backups",
+        "without a stored database password"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html"
+      ],
+      "es": {
+        "stem": "Una clínica está creando una nueva instancia de Amazon RDS for MySQL para una aplicación. Su política exige cifrado en reposo para la base de datos y sus backups, y la aplicación debe autenticarse sin guardar una contraseña de base de datos. ¿Qué dos acciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita el cifrado de RDS al crear la instancia de base de datos.",
+            "why": "Una instancia cifrada de RDS también tiene cifrados sus backups automatizados."
+          },
+          {
+            "id": "B",
+            "text": "Habilita IAM database authentication en lugar del cifrado en reposo de RDS.",
+            "why": "IAM database authentication resuelve el requisito de contraseñas, pero no cifra el almacenamiento ni los backups en reposo."
+          },
+          {
+            "id": "C",
+            "text": "Usa autenticación estándar de base de datos y rota la contraseña de la aplicación.",
+            "why": "La autenticación estándar con contraseña todavía exige que la aplicación use una contraseña de base de datos."
+          },
+          {
+            "id": "D",
+            "text": "Habilita IAM database authentication y haz que la aplicación se conecte usando tokens de autenticación.",
+            "why": "Para una configuración de MySQL admitida, los tokens de IAM permiten conectarse sin guardar una contraseña de base de datos."
+          },
+          {
+            "id": "E",
+            "text": "Exige SSL/TLS para las conexiones de clientes en lugar de habilitar el cifrado en reposo de RDS.",
+            "why": "SSL/TLS protege los datos en tránsito, pero no cumple el requisito de cifrado en reposo."
+          }
+        ],
+        "explanation": "La clínica tiene dos requisitos distintos: cifrado en reposo y autenticación de la aplicación sin contraseña guardada. Habilita el cifrado de RDS al crear la instancia para protegerla junto con sus backups automatizados, y usa tokens de IAM database authentication en vez de una contraseña guardada, según la compatibilidad de la versión del motor y la Región. SSL/TLS es útil para las conexiones, pero no reemplaza el cifrado en reposo; IAM authentication por sí sola tampoco."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rds-encryption-security--aa23ba95",
+      "conceptId": "rds-encryption-security",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company has an existing unencrypted Amazon RDS DB instance. A new policy requires the replacement database and its snapshots to be encrypted at rest, while retaining the existing data. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a new encrypted DB instance and point clients to it without restoring a snapshot.",
+          "correct": false,
+          "why": "The new instance would not retain the data from the existing database."
+        },
+        {
+          "id": "B",
+          "text": "Require SSL/TLS for client connections to the existing instance and continue using its current snapshots.",
+          "correct": false,
+          "why": "SSL/TLS protects connections, not the existing instance or its snapshots at rest."
+        },
+        {
+          "id": "C",
+          "text": "Enable IAM database authentication on the existing instance and create a new manual snapshot.",
+          "correct": false,
+          "why": "IAM database authentication changes how clients authenticate, not whether storage and snapshots are encrypted."
+        },
+        {
+          "id": "D",
+          "text": "Create a manual snapshot, copy it with encryption enabled, and restore a new DB instance from the encrypted copy.",
+          "correct": true,
+          "why": "An encrypted snapshot copy provides a path to an encrypted replacement containing the existing data."
+        }
+      ],
+      "explanation": "The deciding requirements are to preserve the existing data and encrypt the replacement at rest. Copying a manual snapshot with encryption enabled lets the company restore an encrypted DB instance; snapshots of an encrypted instance are also encrypted. Requiring SSL/TLS is useful for data in transit but does not encrypt the existing storage.",
+      "keywordCues": [
+        "existing unencrypted Amazon RDS DB instance",
+        "replacement database and its snapshots to be encrypted at rest",
+        "retaining the existing data"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas tiene una instancia de base de datos de Amazon RDS existente sin cifrar. Una nueva política exige que la base de datos de reemplazo y sus snapshots estén cifrados en reposo, sin perder los datos actuales. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una nueva instancia de base de datos cifrada y dirige los clientes a ella sin restaurar un snapshot.",
+            "why": "La nueva instancia no conservaría los datos de la base de datos existente."
+          },
+          {
+            "id": "B",
+            "text": "Exige SSL/TLS para las conexiones de clientes a la instancia existente y sigue usando sus snapshots actuales.",
+            "why": "SSL/TLS protege las conexiones, no la instancia existente ni sus snapshots en reposo."
+          },
+          {
+            "id": "C",
+            "text": "Habilita IAM database authentication en la instancia existente y crea un nuevo snapshot manual.",
+            "why": "IAM database authentication cambia la forma en que los clientes se autentican, no si el almacenamiento y los snapshots están cifrados."
+          },
+          {
+            "id": "D",
+            "text": "Crea un snapshot manual, cópialo con el cifrado habilitado y restaura una nueva instancia de base de datos desde la copia cifrada.",
+            "why": "La copia cifrada del snapshot permite crear un reemplazo cifrado que conserva los datos existentes."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son conservar los datos actuales y cifrar el reemplazo en reposo. Al copiar un snapshot manual con el cifrado habilitado, puedes restaurar una instancia cifrada; los snapshots de una instancia cifrada también están cifrados. Exigir SSL/TLS sirve para los datos en tránsito, pero no cifra el almacenamiento existente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rds-encryption-security--r0",
+      "conceptId": "rds-encryption-security",
+      "kind": "recall",
+      "prompt": "An application must access RDS for MySQL without storing a database password. What authentication method fits, and what endpoint must token generation use?",
+      "promptEs": "Una aplicación debe acceder a RDS for MySQL sin guardar una contraseña de base de datos. ¿Qué método de autenticación usarías y con qué endpoint generarías el token?",
+      "idealAnswer": "Use IAM database authentication so the application connects with a generated token instead of a stored database password. Generate the token using the DB instance endpoint, not a custom Route 53 DNS name.",
+      "rubric": [
+        "Names IAM database authentication.",
+        "Explains that a generated token replaces the stored database password.",
+        "Specifies the DB instance endpoint rather than a custom Route 53 DNS name."
+      ]
+    }
+  ]
+}

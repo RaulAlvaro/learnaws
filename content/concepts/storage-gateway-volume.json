@@ -1,0 +1,359 @@
+{
+  "conceptId": "storage-gateway-volume",
+  "card": {
+    "en": {
+      "tldr": "Volume Gateway presents cloud-backed block volumes to on-premises servers as iSCSI devices. Choose cached volumes when the primary dataset can reside in AWS and only frequently accessed data needs to remain local; choose stored volumes when the entire dataset must remain local with asynchronous offsite snapshots.",
+      "whenToUse": [
+        "An on-premises application requires iSCSI block volumes, not NFS or SMB file shares.",
+        "Local capacity is limited, but frequently accessed data needs low-latency access: choose cached volumes.",
+        "The entire dataset needs low-latency local access and offsite backups: choose stored volumes."
+      ],
+      "keyFacts": [
+        "Cached volumes store data in Amazon S3 and retain frequently accessed subsets locally.",
+        "Cached volumes reduce the need to scale on-premises primary storage.",
+        "Stored volumes keep all data on the on-premises gateway and asynchronously back up point-in-time snapshots to Amazon S3.",
+        "Stored-volume backups can be recovered to a local data center or Amazon EC2."
+      ],
+      "gotchas": [
+        "A local cache is not the same as keeping the complete dataset on-premises.",
+        "Stored volumes provide offsite snapshots, but their primary data remains local.",
+        "An application requiring iSCSI volumes is not asking for an NFS/SMB file share or a virtual tape library."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 File Gateway",
+          "difference": "Provides on-premises NFS/SMB file shares backed by S3 objects, rather than iSCSI block volumes."
+        },
+        {
+          "concept": "Tape Gateway",
+          "difference": "Provides virtual tapes for existing backup workflows, rather than mounted application volumes."
+        }
+      ],
+      "examCues": [
+        "on-premises iSCSI volumes",
+        "primary data in AWS, hot data locally",
+        "low-latency access to the entire dataset",
+        "asynchronous offsite point-in-time backups"
+      ]
+    },
+    "es": {
+      "tldr": "Volume Gateway presenta volúmenes de bloques respaldados por la nube como dispositivos iSCSI para servidores locales. Elige cached volumes si los datos principales pueden estar en AWS y solo los datos de uso frecuente necesitan permanecer locales; elige stored volumes si todo el conjunto de datos debe permanecer local con snapshots externos asíncronos.",
+      "whenToUse": [
+        "Una aplicación local necesita volúmenes de bloques iSCSI, no recursos compartidos NFS o SMB.",
+        "La capacidad local es limitada, pero los datos de uso frecuente requieren baja latencia: elige cached volumes.",
+        "Todo el conjunto de datos requiere acceso local de baja latencia y respaldos externos: elige stored volumes."
+      ],
+      "keyFacts": [
+        "Cached volumes almacena los datos en Amazon S3 y conserva localmente los subconjuntos de uso frecuente.",
+        "Cached volumes reduce la necesidad de ampliar el almacenamiento principal local.",
+        "Stored volumes mantiene todos los datos en el gateway local y respalda de forma asíncrona snapshots de momentos específicos en Amazon S3.",
+        "Los respaldos de stored volumes pueden recuperarse en un centro de datos local o en Amazon EC2."
+      ],
+      "gotchas": [
+        "Una caché local no equivale a mantener todo el conjunto de datos en las instalaciones.",
+        "Stored volumes ofrece snapshots externos, pero sus datos principales permanecen locales.",
+        "Si la aplicación necesita volúmenes iSCSI, no está pidiendo un recurso compartido NFS/SMB ni una biblioteca de cintas virtual."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 File Gateway",
+          "difference": "Ofrece recursos compartidos NFS/SMB respaldados por objetos de S3, no volúmenes de bloques iSCSI."
+        },
+        {
+          "concept": "Tape Gateway",
+          "difference": "Ofrece cintas virtuales para flujos de respaldo existentes, no volúmenes montados por aplicaciones."
+        }
+      ],
+      "examCues": [
+        "on-premises iSCSI volumes",
+        "primary data in AWS, hot data locally",
+        "low-latency access to the entire dataset",
+        "asynchronous offsite point-in-time backups"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/storagegateway/latest/vgw/WhatIsStorageGateway.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "storage-gateway-volume--ae517a5a",
+      "conceptId": "storage-gateway-volume",
+      "secondaryConcepts": [
+        "storage-gateway-file",
+        "storage-gateway-tape"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturing plant has enough local storage for its production dataset. Its on-premises servers mount iSCSI volumes, and operators need low-latency access to every record, including rarely used records. The company also wants asynchronous offsite point-in-time backups that it could recover to Amazon EC2 after a site outage. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Volume Gateway stored volumes with asynchronous point-in-time snapshots.",
+          "correct": true,
+          "why": "Stored volumes keep the entire dataset local and back up point-in-time snapshots to Amazon S3 for recovery."
+        },
+        {
+          "id": "B",
+          "text": "Use Tape Gateway to create offsite virtual-tape backups.",
+          "correct": false,
+          "why": "Virtual tapes do not provide the live iSCSI volumes needed for production access."
+        },
+        {
+          "id": "C",
+          "text": "Use Volume Gateway cached volumes with frequently accessed records held locally.",
+          "correct": false,
+          "why": "Cached volumes keep only frequently accessed subsets local, not the entire dataset required by operators."
+        },
+        {
+          "id": "D",
+          "text": "Use S3 File Gateway with an on-premises file-share cache.",
+          "correct": false,
+          "why": "A file share does not satisfy the servers' iSCSI-volume requirement."
+        }
+      ],
+      "explanation": "Operators need low-latency access to the entire dataset through iSCSI volumes, not merely to frequently used records. Volume Gateway stored volumes keep all data on the on-premises gateway and asynchronously back up point-in-time snapshots to Amazon S3. Those backups can be recovered to Amazon EC2. Cached volumes miss the full-dataset-local requirement.",
+      "keywordCues": [
+        "mount iSCSI volumes",
+        "every record, including rarely used records",
+        "asynchronous offsite point-in-time backups",
+        "recover to Amazon EC2"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/storagegateway/latest/vgw/WhatIsStorageGateway.html"
+      ],
+      "es": {
+        "stem": "Una planta de manufactura tiene suficiente almacenamiento local para sus datos de producción. Sus servidores locales montan volúmenes iSCSI y los operadores necesitan acceso de baja latencia a todos los registros, incluso a los de uso poco frecuente. La empresa también quiere respaldos externos asíncronos de momentos específicos que pueda recuperar en Amazon EC2 después de una interrupción del sitio. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Volume Gateway stored volumes con snapshots asíncronos de momentos específicos.",
+            "why": "Stored volumes mantiene todo el conjunto de datos local y respalda snapshots en Amazon S3 para su recuperación."
+          },
+          {
+            "id": "B",
+            "text": "Usa Tape Gateway para crear respaldos externos en cintas virtuales.",
+            "why": "Las cintas virtuales no proporcionan los volúmenes iSCSI activos que necesita la producción."
+          },
+          {
+            "id": "C",
+            "text": "Usa Volume Gateway cached volumes y conserva localmente los registros de uso frecuente.",
+            "why": "Cached volumes solo mantiene localmente los subconjuntos de uso frecuente, no todo el conjunto de datos que necesitan los operadores."
+          },
+          {
+            "id": "D",
+            "text": "Usa S3 File Gateway con una caché local de recursos compartidos de archivos.",
+            "why": "Un recurso compartido de archivos no cumple el requisito de volúmenes iSCSI de los servidores."
+          }
+        ],
+        "explanation": "Los operadores necesitan acceso de baja latencia a todo el conjunto de datos mediante volúmenes iSCSI, no solo a los registros de uso frecuente. Volume Gateway stored volumes mantiene todos los datos en el gateway local y respalda de forma asíncrona snapshots de momentos específicos en Amazon S3. Esos respaldos pueden recuperarse en Amazon EC2. Cached volumes no cumple el requisito de mantener todo el conjunto de datos local."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-gateway-volume--3dc4b8da",
+      "conceptId": "storage-gateway-volume",
+      "secondaryConcepts": [
+        "storage-gateway-file",
+        "storage-gateway-tape"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab runs an on-premises analysis service that expects a mounted iSCSI volume. Most of its expanding archive is accessed infrequently, but a changing set of current experiments needs low-latency access. The lab wants its primary data in AWS rather than allocating local capacity for the complete archive. Which solution meets these requirements MOST cost-effectively for on-premises primary storage?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Volume Gateway cached volumes for the analysis service.",
+          "correct": true,
+          "why": "Cached volumes store the data in Amazon S3 while retaining frequently accessed subsets locally through iSCSI volumes."
+        },
+        {
+          "id": "B",
+          "text": "Use S3 File Gateway to expose the archive through an SMB share.",
+          "correct": false,
+          "why": "An SMB share does not supply the mounted iSCSI volume the analysis service expects."
+        },
+        {
+          "id": "C",
+          "text": "Use Tape Gateway to expose the archive as virtual tapes.",
+          "correct": false,
+          "why": "Virtual tapes do not serve as the mounted iSCSI volume required for analysis."
+        },
+        {
+          "id": "D",
+          "text": "Use Volume Gateway stored volumes for the analysis service.",
+          "correct": false,
+          "why": "Stored volumes keep the complete dataset locally, conflicting with the lab's primary-data placement and capacity goals."
+        }
+      ],
+      "explanation": "The lab needs an iSCSI volume but does not want to provision local storage for its entire growing archive. Cached volumes place data in Amazon S3 while keeping frequently accessed subsets local for low-latency access. Stored volumes would provide iSCSI access, but their complete local dataset conflicts with the stated storage goal.",
+      "keywordCues": [
+        "mounted iSCSI volume",
+        "changing set of current experiments",
+        "primary data in AWS",
+        "rather than allocating local capacity for the complete archive"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/storagegateway/latest/vgw/WhatIsStorageGateway.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ejecuta un servicio de análisis local que requiere un volumen iSCSI montado. La mayor parte de su archivo en crecimiento se consulta con poca frecuencia, pero un conjunto cambiante de experimentos actuales necesita acceso de baja latencia. El laboratorio quiere que sus datos principales estén en AWS en vez de reservar capacidad local para todo el archivo. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective para el almacenamiento principal local?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Volume Gateway cached volumes para el servicio de análisis.",
+            "why": "Cached volumes almacena los datos en Amazon S3 y conserva localmente los subconjuntos de uso frecuente mediante volúmenes iSCSI."
+          },
+          {
+            "id": "B",
+            "text": "Usa S3 File Gateway para exponer el archivo mediante un recurso compartido SMB.",
+            "why": "Un recurso compartido SMB no proporciona el volumen iSCSI montado que requiere el servicio de análisis."
+          },
+          {
+            "id": "C",
+            "text": "Usa Tape Gateway para exponer el archivo como cintas virtuales.",
+            "why": "Las cintas virtuales no funcionan como el volumen iSCSI montado que se necesita para el análisis."
+          },
+          {
+            "id": "D",
+            "text": "Usa Volume Gateway stored volumes para el servicio de análisis.",
+            "why": "Stored volumes mantiene todo el conjunto de datos local, en contra de los objetivos de ubicación de datos y capacidad del laboratorio."
+          }
+        ],
+        "explanation": "El laboratorio necesita un volumen iSCSI, pero no quiere reservar almacenamiento local para todo su archivo en crecimiento. Cached volumes coloca los datos en Amazon S3 y mantiene localmente los subconjuntos de uso frecuente para darles acceso de baja latencia. Stored volumes también ofrecería acceso iSCSI, pero mantener todo el conjunto de datos local contradice el objetivo de almacenamiento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-gateway-volume--e3e58c29",
+      "conceptId": "storage-gateway-volume",
+      "secondaryConcepts": [
+        "storage-gateway-file"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company is planning storage for two on-premises applications that both mount iSCSI volumes. Site 1 has little room to expand storage and needs fast access only to active projects; its primary data can reside in AWS. Site 2 needs fast access to its entire dataset locally and wants asynchronous offsite point-in-time backups. Which TWO configurations meet the respective site requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Volume Gateway cached volumes at Site 2.",
+          "correct": false,
+          "why": "Cached volumes do not keep Site 2's entire dataset locally."
+        },
+        {
+          "id": "B",
+          "text": "Use Volume Gateway cached volumes at Site 1.",
+          "correct": true,
+          "why": "Cached volumes put Site 1's data in Amazon S3 and retain frequently accessed projects locally."
+        },
+        {
+          "id": "C",
+          "text": "Use S3 File Gateway with NFS shares at Site 2.",
+          "correct": false,
+          "why": "NFS shares do not meet Site 2's iSCSI-volume requirement."
+        },
+        {
+          "id": "D",
+          "text": "Use Volume Gateway stored volumes at Site 1.",
+          "correct": false,
+          "why": "Stored volumes would require Site 1 to keep its complete dataset locally despite limited expansion capacity."
+        },
+        {
+          "id": "E",
+          "text": "Use Volume Gateway stored volumes at Site 2.",
+          "correct": true,
+          "why": "Stored volumes keep Site 2's complete dataset local and provide asynchronous offsite point-in-time snapshots."
+        }
+      ],
+      "explanation": "Both sites require iSCSI, but their data-placement needs differ. Site 1 needs cached volumes because primary data can reside in AWS while active projects remain locally cached. Site 2 needs stored volumes because every record must be local and point-in-time snapshots must be backed up offsite. Reversing the configurations fails each site's distinct local-capacity or full-dataset requirement.",
+      "keywordCues": [
+        "both mount iSCSI volumes",
+        "Site 1 has little room to expand storage",
+        "primary data can reside in AWS",
+        "Site 2 needs fast access to its entire dataset locally",
+        "asynchronous offsite point-in-time backups"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/storagegateway/latest/vgw/WhatIsStorageGateway.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios planifica el almacenamiento para dos aplicaciones locales que montan volúmenes iSCSI. El sitio 1 tiene poco espacio para ampliar el almacenamiento y solo necesita acceso rápido a proyectos activos; sus datos principales pueden estar en AWS. El sitio 2 necesita acceso rápido a todo su conjunto de datos de forma local y quiere respaldos externos asíncronos de momentos específicos. ¿Qué DOS configuraciones cumplen los requisitos de cada sitio? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Volume Gateway cached volumes en el sitio 2.",
+            "why": "Cached volumes no mantiene localmente todo el conjunto de datos del sitio 2."
+          },
+          {
+            "id": "B",
+            "text": "Usa Volume Gateway cached volumes en el sitio 1.",
+            "why": "Cached volumes coloca los datos del sitio 1 en Amazon S3 y conserva localmente los proyectos de uso frecuente."
+          },
+          {
+            "id": "C",
+            "text": "Usa S3 File Gateway con recursos compartidos NFS en el sitio 2.",
+            "why": "Los recursos compartidos NFS no cumplen el requisito de volúmenes iSCSI del sitio 2."
+          },
+          {
+            "id": "D",
+            "text": "Usa Volume Gateway stored volumes en el sitio 1.",
+            "why": "Stored volumes obligaría al sitio 1 a mantener todo el conjunto de datos localmente pese a su limitada capacidad de expansión."
+          },
+          {
+            "id": "E",
+            "text": "Usa Volume Gateway stored volumes en el sitio 2.",
+            "why": "Stored volumes mantiene localmente todo el conjunto de datos del sitio 2 y proporciona snapshots externos asíncronos de momentos específicos."
+          }
+        ],
+        "explanation": "Ambos sitios requieren iSCSI, pero tienen distintas necesidades de ubicación de datos. El sitio 1 necesita cached volumes porque los datos principales pueden estar en AWS mientras los proyectos activos permanecen en la caché local. El sitio 2 necesita stored volumes porque todos los registros deben estar disponibles localmente y se requieren snapshots externos. Invertir las configuraciones incumple la restricción de capacidad local o el requisito de mantener todo el conjunto de datos local."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "storage-gateway-volume--r0",
+      "conceptId": "storage-gateway-volume",
+      "kind": "recall",
+      "prompt": "An on-premises application needs iSCSI, local access to hot data, and primary data in AWS. Which configuration fits, and why?",
+      "promptEs": "Una aplicación local necesita iSCSI, acceso local a los datos de uso frecuente y datos principales en AWS. ¿Qué configuración eliges y por qué?",
+      "idealAnswer": "Choose Volume Gateway cached volumes. They present iSCSI volumes, store data in Amazon S3, and retain frequently accessed subsets locally.",
+      "rubric": [
+        "Names Volume Gateway cached volumes.",
+        "States that data is stored in Amazon S3.",
+        "Explains that frequently accessed subsets remain local for low-latency access."
+      ]
+    },
+    {
+      "id": "storage-gateway-volume--r1",
+      "conceptId": "storage-gateway-volume",
+      "kind": "why-not",
+      "prompt": "Why doesn't S3 File Gateway fit an application requiring iSCSI and local access to its entire dataset with offsite snapshots?",
+      "promptEs": "¿Por qué S3 File Gateway no sirve para una aplicación que requiere iSCSI, acceso local a todo el conjunto de datos y snapshots externos?",
+      "idealAnswer": "S3 File Gateway provides NFS/SMB file shares, not iSCSI block volumes. Volume Gateway stored volumes fit because they keep the entire dataset local and asynchronously back up point-in-time snapshots to Amazon S3.",
+      "rubric": [
+        "Distinguishes NFS/SMB file shares from iSCSI volumes.",
+        "Names Volume Gateway stored volumes as the fit.",
+        "Mentions the full local dataset and asynchronous offsite point-in-time snapshots."
+      ]
+    }
+  ]
+}

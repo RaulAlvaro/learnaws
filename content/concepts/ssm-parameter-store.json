@@ -1,0 +1,360 @@
+{
+  "conceptId": "ssm-parameter-store",
+  "card": {
+    "en": {
+      "tldr": "AWS Systems Manager Parameter Store centrally stores application configuration as named parameters, including KMS-encrypted SecureString values. Choose standard parameters for low-scale, static configuration when automatic rotation and managed deployment safeguards are not required.",
+      "whenToUse": [
+        "Applications need centrally managed endpoint URLs, resource IDs, or approved AMI IDs.",
+        "Configuration should be organized by application and environment in hierarchical paths.",
+        "A value needs encryption, but automatic rotation is not required.",
+        "Standard-tier limits meet the need and minimizing storage cost matters."
+      ],
+      "keyFacts": [
+        "Parameter types are String, StringList, and SecureString; SecureString uses AWS KMS encryption.",
+        "The standard tier has no additional charge; advanced parameters and higher throughput incur charges.",
+        "Standard parameters support values up to 4 KB and up to 10,000 parameters per account and Region.",
+        "IAM policies can restrict parameter access by path and grant permission to decrypt encrypted values.",
+        "A parameter update takes effect on the next read; Parameter Store does not validate changes, gradually roll them out, or automatically revert them."
+      ],
+      "gotchas": [
+        "Parameter Store has no built-in credential rotation; AWS recommends Secrets Manager for database credentials, API keys, and other secrets.",
+        "A changed Parameter Store value injected into an ECS task environment variable is not picked up by an already-running task.",
+        "Standard parameters cannot be shared across AWS accounts; that capability requires advanced parameters.",
+        "The standard tier being free does not mean higher-throughput mode is free."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Secrets Manager",
+          "difference": "Prefer Secrets Manager for credentials and other secrets, especially when automatic rotation is required; use Parameter Store for static configuration without rotation."
+        },
+        {
+          "concept": "AWS AppConfig",
+          "difference": "AppConfig adds validation, gradual rollout, and alarm-based rollback; a Parameter Store update simply applies on the next read."
+        }
+      ],
+      "examCues": [
+        "centralized endpoint URLs across environments",
+        "encrypted configuration value, no rotation",
+        "hierarchical application settings",
+        "standard tier and low-scale workload"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Systems Manager Parameter Store almacena de forma centralizada la configuración de aplicaciones como parámetros con nombre, incluidos valores SecureString cifrados con AWS KMS. Elige parámetros standard para configuración estática de baja escala cuando no necesitas rotación automática ni controles administrados para el despliegue de cambios.",
+      "whenToUse": [
+        "Tus aplicaciones necesitan URL de endpoints, identificadores de recursos o IDs de AMI aprobadas administrados centralmente.",
+        "Necesitas organizar la configuración por aplicación y entorno mediante rutas jerárquicas.",
+        "Un valor necesita cifrado, pero no rotación automática.",
+        "Los límites del nivel standard son suficientes y quieres minimizar el costo de almacenamiento."
+      ],
+      "keyFacts": [
+        "Los tipos de parámetros son String, StringList y SecureString; SecureString usa cifrado de AWS KMS.",
+        "El nivel standard no tiene cargo adicional; los parámetros advanced y el mayor throughput generan cargos.",
+        "Los parámetros standard admiten valores de hasta 4 KB y hasta 10 000 parámetros por cuenta y Región.",
+        "Las políticas de IAM pueden limitar el acceso por ruta y conceder permiso para descifrar valores cifrados.",
+        "Una actualización se aplica en la siguiente lectura; Parameter Store no valida los cambios, no los despliega gradualmente ni los revierte automáticamente."
+      ],
+      "gotchas": [
+        "Parameter Store no tiene rotación integrada de credenciales; AWS recomienda Secrets Manager para credenciales de bases de datos, API keys y otros secretos.",
+        "Una tarea de ECS que ya está en ejecución no recibe los cambios de un valor de Parameter Store inyectado como variable de entorno.",
+        "No puedes compartir parámetros standard entre cuentas de AWS; para ello necesitas parámetros advanced.",
+        "Que el nivel standard sea gratuito no significa que el modo de mayor throughput sea gratuito."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Secrets Manager",
+          "difference": "Prefiere Secrets Manager para credenciales y otros secretos, especialmente si necesitas rotación automática; usa Parameter Store para configuración estática sin rotación."
+        },
+        {
+          "concept": "AWS AppConfig",
+          "difference": "AppConfig agrega validación, despliegue gradual y reversión basada en alarmas; una actualización de Parameter Store se aplica en la siguiente lectura."
+        }
+      ],
+      "examCues": [
+        "centralized endpoint URLs across environments",
+        "encrypted configuration value, no rotation",
+        "hierarchical application settings",
+        "standard tier and low-scale workload"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ssm-parameter-store--6697b1d5",
+      "conceptId": "ssm-parameter-store",
+      "secondaryConcepts": [
+        "secrets-manager"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturer keeps a static internal service identifier in application configuration. Its security policy requires the stored value to be encrypted with AWS KMS, but the value is not a credential and does not need rotation. The application has a low request rate, and the team wants to avoid paying for capabilities it does not use. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the identifier as a standard String parameter in Systems Manager Parameter Store.",
+          "correct": false,
+          "why": "A String parameter is plain text and does not satisfy the encryption requirement."
+        },
+        {
+          "id": "B",
+          "text": "Store the identifier as an advanced SecureString parameter in Systems Manager Parameter Store.",
+          "correct": false,
+          "why": "SecureString provides encryption, but the advanced tier adds charges without a stated need for advanced capabilities."
+        },
+        {
+          "id": "C",
+          "text": "Store the identifier as a standard SecureString parameter in Systems Manager Parameter Store.",
+          "correct": true,
+          "why": "A standard SecureString uses AWS KMS encryption without requiring paid advanced-parameter capabilities."
+        },
+        {
+          "id": "D",
+          "text": "Store the identifier in AWS Secrets Manager and enable automatic rotation.",
+          "correct": false,
+          "why": "Secrets Manager adds charges and rotation is unnecessary for this static, noncredential value."
+        }
+      ],
+      "explanation": "This is an encrypted configuration value, not a credential requiring rotation. Parameter Store SecureString provides AWS KMS encryption, and the standard tier is appropriate for the stated low-scale need. A plain String misses encryption; an advanced parameter or Secrets Manager adds cost without meeting an additional requirement.",
+      "keywordCues": [
+        "encrypted with AWS KMS",
+        "not a credential and does not need rotation",
+        "low request rate"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html"
+      ],
+      "es": {
+        "stem": "Un fabricante guarda un identificador estático de un servicio interno en la configuración de una aplicación. Su política de seguridad exige que el valor almacenado esté cifrado con AWS KMS, pero no es una credencial y no necesita rotación. La aplicación tiene una tasa baja de solicitudes y el equipo quiere evitar pagar por capacidades que no usa. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Almacenar el identificador como parámetro String standard en Systems Manager Parameter Store.",
+            "why": "Un parámetro String es texto sin cifrar y no cumple el requisito de cifrado."
+          },
+          {
+            "id": "B",
+            "text": "Almacenar el identificador como parámetro SecureString advanced en Systems Manager Parameter Store.",
+            "why": "SecureString proporciona cifrado, pero el nivel advanced agrega cargos sin que se requieran sus capacidades."
+          },
+          {
+            "id": "C",
+            "text": "Almacenar el identificador como parámetro SecureString standard en Systems Manager Parameter Store.",
+            "why": "Un SecureString standard usa cifrado de AWS KMS sin requerir las capacidades de pago de los parámetros advanced."
+          },
+          {
+            "id": "D",
+            "text": "Almacenar el identificador en AWS Secrets Manager y habilitar la rotación automática.",
+            "why": "Secrets Manager agrega cargos y la rotación no es necesaria para este valor estático que no es una credencial."
+          }
+        ],
+        "explanation": "Se trata de un valor de configuración cifrado, no de una credencial que necesite rotación. SecureString de Parameter Store proporciona cifrado con AWS KMS y el nivel standard es adecuado para la carga de baja escala descrita. String no cumple el requisito de cifrado; un parámetro advanced o Secrets Manager agrega costo sin satisfacer un requisito adicional."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ssm-parameter-store--6a526a28",
+      "conceptId": "ssm-parameter-store",
+      "secondaryConcepts": [
+        "secrets-manager"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare analytics team stores production and development application settings in one AWS account. Some settings are noncredential identifiers that must be encrypted, while others are plain-text endpoint URLs. Applications need IAM access limited to their own environment, and the team does not need rotation or cross-account sharing. Which two design choices meet these requirements while retaining standard-tier parameters? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use standard String parameters for the identifiers to keep every setting in one parameter type.",
+          "correct": false,
+          "why": "String parameters are plain text and do not satisfy the requirement to encrypt the identifiers."
+        },
+        {
+          "id": "B",
+          "text": "Use distinct hierarchical paths for each environment and restrict application access to the relevant path with IAM.",
+          "correct": true,
+          "why": "Parameter hierarchies and IAM path restrictions support the required separation between environments."
+        },
+        {
+          "id": "C",
+          "text": "Place every setting in AWS Secrets Manager to separate development from production.",
+          "correct": false,
+          "why": "Secrets Manager is unnecessary for these configuration values and incurs charges when standard parameters meet the requirements."
+        },
+        {
+          "id": "D",
+          "text": "Use advanced parameters for all settings to enable sharing between AWS accounts.",
+          "correct": false,
+          "why": "Cross-account sharing is not required, and advanced parameters would not retain the requested standard-tier design."
+        },
+        {
+          "id": "E",
+          "text": "Store identifiers as standard SecureString parameters and endpoint URLs as standard String parameters.",
+          "correct": true,
+          "why": "SecureString encrypts the identifiers with AWS KMS while String fits the plain-text URLs, without requiring advanced parameters."
+        }
+      ],
+      "explanation": "The two decisions are how to separate access by environment and how to encrypt only the values that require it. Hierarchical paths with IAM restrictions address environment-specific access; standard SecureString and String parameters address the two value types. Plain String identifiers fail the encryption requirement, while advanced parameters solve an unneeded cross-account-sharing problem at additional cost.",
+      "keywordCues": [
+        "noncredential identifiers that must be encrypted",
+        "plain-text endpoint URLs",
+        "IAM access limited to their own environment",
+        "retaining standard-tier parameters"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html"
+      ],
+      "es": {
+        "stem": "Un equipo de análisis de salud almacena la configuración de producción y desarrollo de sus aplicaciones en una cuenta de AWS. Algunos valores son identificadores que no son credenciales y deben estar cifrados; otros son URL de endpoints en texto sin cifrar. Las aplicaciones necesitan acceso de IAM limitado a su propio entorno, y el equipo no necesita rotación ni uso compartido entre cuentas. ¿Qué dos decisiones de diseño cumplen estos requisitos y mantienen los parámetros en el nivel standard? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar parámetros String standard para los identificadores y mantener toda la configuración en un solo tipo de parámetro.",
+            "why": "Los parámetros String son texto sin cifrar y no cumplen el requisito de cifrar los identificadores."
+          },
+          {
+            "id": "B",
+            "text": "Usar rutas jerárquicas distintas para cada entorno y restringir con IAM el acceso de cada aplicación a su ruta correspondiente.",
+            "why": "Las jerarquías de parámetros y las restricciones de IAM por ruta permiten separar el acceso entre entornos."
+          },
+          {
+            "id": "C",
+            "text": "Colocar toda la configuración en AWS Secrets Manager para separar desarrollo de producción.",
+            "why": "Secrets Manager no es necesario para estos valores de configuración y genera cargos cuando los parámetros standard cumplen los requisitos."
+          },
+          {
+            "id": "D",
+            "text": "Usar parámetros advanced para toda la configuración y habilitar el uso compartido entre cuentas de AWS.",
+            "why": "No se necesita compartir entre cuentas, y los parámetros advanced no mantendrían el diseño solicitado en el nivel standard."
+          },
+          {
+            "id": "E",
+            "text": "Almacenar los identificadores como parámetros SecureString standard y las URL de endpoints como parámetros String standard.",
+            "why": "SecureString cifra los identificadores con AWS KMS, mientras que String es adecuado para las URL en texto sin cifrar, sin requerir parámetros advanced."
+          }
+        ],
+        "explanation": "Las dos decisiones son cómo separar el acceso por entorno y cómo cifrar solo los valores que lo necesitan. Las rutas jerárquicas con restricciones de IAM resuelven el acceso por entorno; los parámetros SecureString y String standard cubren ambos tipos de valor. Usar String para los identificadores no cumple el requisito de cifrado, mientras que los parámetros advanced resuelven una necesidad inexistente de compartir entre cuentas y agregan costo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ssm-parameter-store--af23a2b5",
+      "conceptId": "ssm-parameter-store",
+      "secondaryConcepts": [
+        "secrets-manager"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional library runs several small applications that use different service endpoint URLs in development and production. The team wants to group the URLs by application and environment, update them without changing application code, and avoid charges for storing configuration within standard-tier limits. No deployment validation or automatic rollback is required. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the URLs as standard String parameters in hierarchical Systems Manager Parameter Store paths.",
+          "correct": true,
+          "why": "Standard String parameters provide centrally updated, hierarchical configuration without an additional standard-tier storage charge."
+        },
+        {
+          "id": "B",
+          "text": "Store the URLs in AWS AppConfig configuration profiles and retrieve them with each application.",
+          "correct": false,
+          "why": "AppConfig supports application configuration but bills per configuration request and adds deployment capabilities the team does not need."
+        },
+        {
+          "id": "C",
+          "text": "Store the URLs in AWS Secrets Manager as separate secrets for each application and environment.",
+          "correct": false,
+          "why": "Secrets Manager can centralize values, but its per-secret and API-call charges do not meet the stated storage-cost preference."
+        },
+        {
+          "id": "D",
+          "text": "Store the URLs as advanced String parameters in hierarchical Systems Manager Parameter Store paths.",
+          "correct": false,
+          "why": "Advanced parameters offer the desired organization but incur charges when standard-tier capabilities are sufficient."
+        }
+      ],
+      "explanation": "The deciding requirements are hierarchical, centrally updated configuration and minimal cost within standard-tier limits. Standard String parameters meet those needs without an additional standard-tier charge. Advanced parameters add cost without providing a needed capability, while Secrets Manager and AppConfig have their own billing models.",
+      "keywordCues": [
+        "group the URLs by application and environment",
+        "avoid charges for storing configuration within standard-tier limits",
+        "No deployment validation or automatic rollback is required"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html"
+      ],
+      "es": {
+        "stem": "Una biblioteca regional ejecuta varias aplicaciones pequeñas que usan distintas URL de endpoints en desarrollo y producción. El equipo quiere agrupar las URL por aplicación y entorno, actualizarlas sin cambiar el código y evitar cargos por almacenar configuración dentro de los límites del nivel standard. No necesita validación del despliegue ni reversión automática. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Almacenar las URL como parámetros String standard en rutas jerárquicas de Systems Manager Parameter Store.",
+            "why": "Los parámetros String standard ofrecen configuración centralizada y jerárquica sin un cargo adicional de almacenamiento en el nivel standard."
+          },
+          {
+            "id": "B",
+            "text": "Almacenar las URL en perfiles de configuración de AWS AppConfig y recuperarlas desde cada aplicación.",
+            "why": "AppConfig admite configuración de aplicaciones, pero cobra por solicitud de configuración y agrega capacidades de despliegue que el equipo no necesita."
+          },
+          {
+            "id": "C",
+            "text": "Almacenar las URL en AWS Secrets Manager como secretos separados para cada aplicación y entorno.",
+            "why": "Secrets Manager puede centralizar los valores, pero sus cargos por secreto y llamada a la API no satisfacen la preferencia de costo."
+          },
+          {
+            "id": "D",
+            "text": "Almacenar las URL como parámetros String advanced en rutas jerárquicas de Systems Manager Parameter Store.",
+            "why": "Los parámetros advanced permiten la organización deseada, pero generan cargos cuando las capacidades del nivel standard son suficientes."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la configuración jerárquica, las actualizaciones centralizadas y el costo mínimo dentro de los límites del nivel standard. Los parámetros String standard cumplen esos requisitos sin cargo adicional del nivel standard. Los parámetros advanced agregan costo sin aportar una capacidad necesaria, mientras que Secrets Manager y AppConfig tienen sus propios modelos de cobro."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ssm-parameter-store--r0",
+      "conceptId": "ssm-parameter-store",
+      "kind": "recall",
+      "prompt": "Which service and parameter type fit a static application identifier that needs AWS KMS encryption but no automatic rotation, and why?",
+      "promptEs": "¿Qué servicio y tipo de parámetro usarías para un identificador estático que necesita cifrado con AWS KMS, pero no rotación automática, y por qué?",
+      "idealAnswer": "Use a standard SecureString parameter in Systems Manager Parameter Store. SecureString encrypts the value with AWS KMS, and standard parameters avoid advanced-tier charges when their capabilities are sufficient.",
+      "rubric": [
+        "Names Systems Manager Parameter Store.",
+        "Selects SecureString and explains AWS KMS encryption.",
+        "Notes that standard-tier capabilities suffice without rotation."
+      ]
+    },
+    {
+      "id": "ssm-parameter-store--r1",
+      "conceptId": "ssm-parameter-store",
+      "kind": "why-not",
+      "prompt": "Why choose Parameter Store rather than Secrets Manager for low-scale endpoint URLs when no rotation is required?",
+      "promptEs": "¿Por qué elegirías Parameter Store en vez de Secrets Manager para URL de endpoints de baja escala cuando no necesitas rotación?",
+      "idealAnswer": "Endpoint URLs are typical static configuration values for Parameter Store, and standard parameters have no additional charge. Secrets Manager is recommended for credentials and other secrets and has per-secret and API-call charges, so its secret-management capabilities do not address this requirement.",
+      "rubric": [
+        "Identifies endpoint URLs as static configuration suited to Parameter Store.",
+        "Contrasts Secrets Manager's credential and secret use case.",
+        "Mentions the standard-tier versus Secrets Manager cost distinction."
+      ]
+    }
+  ]
+}

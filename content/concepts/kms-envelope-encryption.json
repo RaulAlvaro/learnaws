@@ -1,0 +1,321 @@
+{
+  "conceptId": "kms-envelope-encryption",
+  "card": {
+    "en": {
+      "tldr": "Envelope encryption encrypts data with a data key, then protects that data key with a KMS key. For large objects, choose a data key used outside AWS KMS rather than sending each object to AWS KMS for encryption.",
+      "whenToUse": [
+        "An application must encrypt large amounts of data while protecting the encryption keys.",
+        "Encrypted data and the key needed to decrypt it must be stored together.",
+        "Data encrypted under one key must also be protected under another key without re-encrypting the large object."
+      ],
+      "keyFacts": [
+        "GenerateDataKey returns a plaintext data key and a copy encrypted under a specified symmetric encryption KMS key.",
+        "The application uses the plaintext data key outside AWS KMS to encrypt data, then removes it from memory as soon as possible.",
+        "The encrypted data key can be stored alongside the encrypted data.",
+        "To decrypt the data, call AWS KMS Decrypt on the encrypted data key, then use the returned plaintext data key outside AWS KMS.",
+        "AWS KMS does not store, manage, or track data keys; its cryptographic operations have per-second request quotas."
+      ],
+      "gotchas": [
+        "GenerateDataKeyWithoutPlaintext returns only an encrypted data key; it does not provide a plaintext key for immediate encryption.",
+        "AWS KMS does not use a generated data key to encrypt your application data.",
+        "Do not retain a plaintext data key alongside encrypted data; store its encrypted copy instead."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "encrypt large objects",
+        "store the protected key beside the ciphertext",
+        "avoid re-encrypting large data",
+        "limit cryptographic calls to AWS KMS"
+      ]
+    },
+    "es": {
+      "tldr": "Envelope encryption cifra los datos con una data key y protege esa data key con una KMS key. Para objetos grandes, elige una data key que se use fuera de AWS KMS en lugar de enviar cada objeto a AWS KMS para cifrarlo.",
+      "whenToUse": [
+        "Una aplicación debe cifrar grandes cantidades de datos y proteger las claves de cifrado.",
+        "Los datos cifrados y la clave necesaria para descifrarlos deben almacenarse juntos.",
+        "Los datos cifrados bajo una clave también deben protegerse bajo otra sin volver a cifrar el objeto grande."
+      ],
+      "keyFacts": [
+        "GenerateDataKey devuelve una data key en texto sin cifrar y una copia cifrada bajo una KMS key simétrica de cifrado especificada.",
+        "La aplicación usa la data key en texto sin cifrar fuera de AWS KMS para cifrar los datos y después la elimina de la memoria lo antes posible.",
+        "La data key cifrada puede almacenarse junto a los datos cifrados.",
+        "Para descifrar los datos, llama a AWS KMS Decrypt con la data key cifrada y luego usa la data key en texto sin cifrar fuera de AWS KMS.",
+        "AWS KMS no almacena, administra ni rastrea las data keys; sus operaciones criptográficas tienen cuotas de solicitudes por segundo."
+      ],
+      "gotchas": [
+        "GenerateDataKeyWithoutPlaintext devuelve solo una data key cifrada; no proporciona una clave en texto sin cifrar para cifrar de inmediato.",
+        "AWS KMS no usa una data key generada para cifrar los datos de tu aplicación.",
+        "No conserves una data key en texto sin cifrar junto a los datos cifrados; almacena su copia cifrada."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "encrypt large objects",
+        "store the protected key beside the ciphertext",
+        "avoid re-encrypting large data",
+        "limit cryptographic calls to AWS KMS"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/kms/latest/developerguide/kms-cryptography.html#enveloping",
+      "https://docs.aws.amazon.com/kms/latest/developerguide/data-keys.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "kms-envelope-encryption--cc90579d",
+      "conceptId": "kms-envelope-encryption",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher has encrypted a large catalog with data keys protected by one KMS key. It now needs to protect that catalog's data keys under another key while avoiding the work of encrypting every large document again. Which approach meets this requirement MOST efficiently?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Protect the existing data keys under the other key without re-encrypting the documents.",
+          "correct": true,
+          "why": "Envelope encryption allows the keys protecting large data to be re-encrypted instead of the data itself."
+        },
+        {
+          "id": "B",
+          "text": "Send every encrypted document to AWS KMS Decrypt and then encrypt the returned documents under the other key.",
+          "correct": false,
+          "why": "AWS KMS Decrypt can decrypt the encrypted data key, not use that data key to decrypt an entire document."
+        },
+        {
+          "id": "C",
+          "text": "Store a plaintext copy of every data key with its document for future changes.",
+          "correct": false,
+          "why": "Plaintext copies do not provide the required protection under the other key."
+        },
+        {
+          "id": "D",
+          "text": "Decrypt every document and encrypt it again using a newly generated data key.",
+          "correct": false,
+          "why": "This repeats encryption of the large documents, which the publisher wants to avoid."
+        }
+      ],
+      "explanation": "The publisher needs a change in key protection, not a change to the encrypted documents. With envelope encryption, it can re-encrypt the data keys that protect large data instead of re-encrypting that data. Decrypting and encrypting every document repeats the expensive work the scenario explicitly excludes. Storing plaintext keys would not protect them under the new key.",
+      "keywordCues": [
+        "data keys protected by one KMS key",
+        "under another key",
+        "avoiding the work of encrypting every large document again"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/kms-cryptography.html#enveloping",
+        "https://docs.aws.amazon.com/kms/latest/developerguide/data-keys.html"
+      ],
+      "es": {
+        "stem": "Una editorial cifró un catálogo grande con data keys protegidas por una KMS key. Ahora necesita proteger las data keys del catálogo bajo otra clave sin volver a cifrar cada documento grande. ¿Qué enfoque cumple este requisito MOST efficiently?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Protege las data keys existentes bajo la otra clave sin volver a cifrar los documentos.",
+            "why": "Envelope encryption permite volver a cifrar las claves que protegen datos grandes en lugar de volver a cifrar los datos."
+          },
+          {
+            "id": "B",
+            "text": "Envía cada documento cifrado a AWS KMS Decrypt y después cifra los documentos devueltos bajo la otra clave.",
+            "why": "AWS KMS Decrypt puede descifrar la data key cifrada, pero no usar esa data key para descifrar un documento completo."
+          },
+          {
+            "id": "C",
+            "text": "Almacena una copia en texto sin cifrar de cada data key junto a su documento para futuros cambios.",
+            "why": "Las copias en texto sin cifrar no proporcionan la protección requerida bajo la otra clave."
+          },
+          {
+            "id": "D",
+            "text": "Descifra cada documento y vuelve a cifrarlo con una data key recién generada.",
+            "why": "Esto repite el cifrado de los documentos grandes, precisamente lo que la editorial quiere evitar."
+          }
+        ],
+        "explanation": "La editorial necesita cambiar la protección de las claves, no modificar los documentos cifrados. Con envelope encryption, puede volver a cifrar las data keys que protegen los datos grandes en lugar de volver a cifrar los datos. Descifrar y volver a cifrar cada documento repite el trabajo que el escenario busca evitar. Almacenar claves en texto sin cifrar tampoco las protegería bajo la nueva clave."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-envelope-encryption--5dabba50",
+      "conceptId": "kms-envelope-encryption",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company encrypts large batches of shipment records in its application. Its architects want to keep the key that protects each batch's data key in AWS KMS and avoid making an AWS KMS cryptographic request for every record. Which TWO design choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Call GenerateDataKey with a symmetric encryption KMS key to obtain plaintext and encrypted copies of a data key.",
+          "correct": true,
+          "why": "This supplies a data key for use outside AWS KMS and a copy protected by the KMS key."
+        },
+        {
+          "id": "B",
+          "text": "Ask AWS KMS to store and track each plaintext data key until the batch is decrypted.",
+          "correct": false,
+          "why": "AWS KMS does not store, manage, or track generated data keys."
+        },
+        {
+          "id": "C",
+          "text": "Encrypt batch records outside AWS KMS with the plaintext data key and store its encrypted copy with the batch.",
+          "correct": true,
+          "why": "This keeps data encryption outside AWS KMS while preserving the protected key needed for later decryption."
+        },
+        {
+          "id": "D",
+          "text": "Call AWS KMS Encrypt separately for each shipment record.",
+          "correct": false,
+          "why": "This makes an AWS KMS cryptographic request for every record."
+        },
+        {
+          "id": "E",
+          "text": "Call GenerateDataKeyWithoutPlaintext and use the returned encrypted key directly for batch encryption.",
+          "correct": false,
+          "why": "An encrypted data key cannot serve as the plaintext key needed for immediate batch encryption."
+        }
+      ],
+      "explanation": "The requirements call for a KMS-protected data key and encryption that does not invoke AWS KMS for every record. GenerateDataKey returns both a plaintext data key for use outside AWS KMS and an encrypted copy protected by the specified symmetric KMS key. The application can encrypt the batch records with the plaintext key and store the encrypted key with the batch. Calling AWS KMS Encrypt for each record would conflict with the request pattern the architects want to avoid; AWS KMS cryptographic operations also have per-second quotas.",
+      "keywordCues": [
+        "large batches of shipment records",
+        "keep the key that protects each batch's data key in AWS KMS",
+        "avoid making an AWS KMS cryptographic request for every record"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/kms-cryptography.html#enveloping",
+        "https://docs.aws.amazon.com/kms/latest/developerguide/data-keys.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística cifra grandes lotes de registros de envíos en su aplicación. Sus arquitectos quieren mantener en AWS KMS la clave que protege la data key de cada lote y evitar una solicitud criptográfica a AWS KMS por cada registro. ¿Qué DOS decisiones de diseño cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Llama a GenerateDataKey con una KMS key simétrica de cifrado para obtener copias de una data key en texto sin cifrar y cifrada.",
+            "why": "Así obtienes una data key para usar fuera de AWS KMS y una copia protegida por la KMS key."
+          },
+          {
+            "id": "B",
+            "text": "Pide a AWS KMS que almacene y rastree cada data key en texto sin cifrar hasta que se descifre el lote.",
+            "why": "AWS KMS no almacena, administra ni rastrea las data keys generadas."
+          },
+          {
+            "id": "C",
+            "text": "Cifra los registros del lote fuera de AWS KMS con la data key en texto sin cifrar y almacena su copia cifrada con el lote.",
+            "why": "Esto mantiene el cifrado de los datos fuera de AWS KMS y conserva la clave protegida para descifrarlos después."
+          },
+          {
+            "id": "D",
+            "text": "Llama a AWS KMS Encrypt por separado para cada registro de envío.",
+            "why": "Esto genera una solicitud criptográfica a AWS KMS por cada registro."
+          },
+          {
+            "id": "E",
+            "text": "Llama a GenerateDataKeyWithoutPlaintext y usa directamente la clave cifrada devuelta para cifrar el lote.",
+            "why": "Una data key cifrada no sustituye a la clave en texto sin cifrar necesaria para cifrar el lote de inmediato."
+          }
+        ],
+        "explanation": "Los requisitos piden una data key protegida por AWS KMS y un cifrado que no invoque AWS KMS por cada registro. GenerateDataKey devuelve tanto una data key en texto sin cifrar para usar fuera de AWS KMS como una copia cifrada protegida por la KMS key simétrica especificada. La aplicación puede cifrar los registros del lote con la clave en texto sin cifrar y guardar la clave cifrada con el lote. Llamar a AWS KMS Encrypt por cada registro contradice el patrón de solicitudes que los arquitectos quieren evitar; además, las operaciones criptográficas de AWS KMS tienen cuotas por segundo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-envelope-encryption--36e93b50",
+      "conceptId": "kms-envelope-encryption",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research team exports large imaging files that its application must encrypt before storage. The team wants each file's decryption material to be recoverable without keeping a plaintext key on disk. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Call GenerateDataKey, encrypt each file with the plaintext data key, and store that plaintext key beside the file.",
+          "correct": false,
+          "why": "Keeping the plaintext data key on disk fails the requirement to protect the decryption material."
+        },
+        {
+          "id": "B",
+          "text": "Call GenerateDataKey, encrypt each file outside AWS KMS with the plaintext data key, and store the encrypted data key with the file.",
+          "correct": true,
+          "why": "This encrypts the large file outside AWS KMS and stores only the protected copy of its data key."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS KMS Encrypt to encrypt each complete file and store the resulting ciphertext.",
+          "correct": false,
+          "why": "Envelope encryption, rather than sending large files to AWS KMS for encryption, is the documented approach for large data."
+        },
+        {
+          "id": "D",
+          "text": "Call GenerateDataKeyWithoutPlaintext and use its returned encrypted data key directly to encrypt each file.",
+          "correct": false,
+          "why": "The returned key is encrypted and cannot be used directly as the plaintext data key."
+        }
+      ],
+      "explanation": "The deciding requirements are large files and recoverable decryption material without a plaintext key on disk. GenerateDataKey supplies a plaintext data key for encryption outside AWS KMS and an encrypted copy that can be stored with the ciphertext. GenerateDataKeyWithoutPlaintext does not supply a plaintext key for immediate use. Storing the plaintext key beside a file would leave that key unprotected.",
+      "keywordCues": [
+        "large imaging files",
+        "without keeping a plaintext key on disk"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/kms-cryptography.html#enveloping",
+        "https://docs.aws.amazon.com/kms/latest/developerguide/data-keys.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación exporta archivos grandes de imágenes que su aplicación debe cifrar antes de almacenarlos. El equipo quiere poder recuperar el material necesario para descifrar cada archivo sin conservar una clave en texto sin cifrar en disco. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Llama a GenerateDataKey, cifra cada archivo con la data key en texto sin cifrar y almacena esa clave junto al archivo.",
+            "why": "Guardar la data key en texto sin cifrar en disco incumple el requisito de proteger el material de descifrado."
+          },
+          {
+            "id": "B",
+            "text": "Llama a GenerateDataKey, cifra cada archivo fuera de AWS KMS con la data key en texto sin cifrar y almacena la data key cifrada con el archivo.",
+            "why": "Así cifras el archivo grande fuera de AWS KMS y almacenas solo la copia protegida de su data key."
+          },
+          {
+            "id": "C",
+            "text": "Usa AWS KMS Encrypt para cifrar cada archivo completo y almacena el texto cifrado resultante.",
+            "why": "Envelope encryption, y no enviar archivos grandes a AWS KMS para cifrarlos, es el enfoque documentado para datos grandes."
+          },
+          {
+            "id": "D",
+            "text": "Llama a GenerateDataKeyWithoutPlaintext y usa directamente la data key cifrada que devuelve para cifrar cada archivo.",
+            "why": "La clave devuelta está cifrada y no puede usarse directamente como data key en texto sin cifrar."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son los archivos grandes y la posibilidad de recuperar el material de descifrado sin guardar una clave en texto sin cifrar en disco. GenerateDataKey proporciona una data key en texto sin cifrar para cifrar fuera de AWS KMS y una copia cifrada que puedes almacenar con los datos cifrados. GenerateDataKeyWithoutPlaintext no proporciona una clave en texto sin cifrar para uso inmediato. Guardar esa clave junto al archivo la dejaría sin protección."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "kms-envelope-encryption--r0",
+      "conceptId": "kms-envelope-encryption",
+      "kind": "recall",
+      "prompt": "How would you encrypt a large application file while keeping its decryption key protected and available later?",
+      "promptEs": "¿Cómo cifrarías un archivo grande de una aplicación y mantendrías protegida y disponible su clave de descifrado?",
+      "idealAnswer": "Call GenerateDataKey to obtain a plaintext data key and a copy encrypted under a symmetric KMS key. Encrypt the file outside AWS KMS, store the encrypted data key with it, and remove the plaintext key from memory as soon as possible.",
+      "rubric": [
+        "Names GenerateDataKey and its plaintext and encrypted outputs.",
+        "Uses the plaintext data key to encrypt the file outside AWS KMS.",
+        "Stores the encrypted copy and promptly removes the plaintext key from memory."
+      ]
+    }
+  ]
+}

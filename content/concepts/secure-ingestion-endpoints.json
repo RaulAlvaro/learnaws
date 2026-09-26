@@ -1,0 +1,230 @@
+{
+  "conceptId": "secure-ingestion-endpoints",
+  "card": {
+    "en": {
+      "tldr": "Secure ingestion by matching each control to the risk: an interface VPC endpoint keeps VPC-to-Kinesis traffic on the Amazon network, IAM and endpoint policies constrain access, and KMS server-side encryption protects Kinesis data at rest. For an S3 data lake, include bucket policies in the access-control design.",
+      "whenToUse": [
+        "VPC-based producers must send records to Kinesis without traffic leaving the Amazon network.",
+        "Producers must access only an approved stream, or only through a specified VPC endpoint.",
+        "Ingested Kinesis records require encryption at rest."
+      ],
+      "keyFacts": [
+        "Kinesis Data Streams supports interface VPC endpoints powered by AWS PrivateLink.",
+        "A Kinesis interface endpoint does not require an internet gateway or NAT device for VPC-to-Kinesis traffic.",
+        "Endpoint policies can restrict which streams are accessible through an endpoint; IAM policies can restrict access to a stream to a specified endpoint.",
+        "Kinesis server-side encryption uses AWS KMS keys to encrypt data at rest."
+      ],
+      "gotchas": [
+        "A private network path does not, by itself, restrict a producer to one stream.",
+        "KMS encryption at rest does not replace controls on who can access a stream.",
+        "An endpoint policy alone is not the same as requiring every request to use that endpoint; the documented IAM policy pattern can impose that requirement."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "VPC producers without internet or NAT access",
+        "only the approved Kinesis stream",
+        "requests must use the specified VPC endpoint",
+        "encrypt streaming records at rest"
+      ]
+    },
+    "es": {
+      "tldr": "Protege la ingesta según el riesgo: un interface VPC endpoint mantiene el tráfico entre la VPC y Kinesis dentro de la red de Amazon; IAM y endpoint policies limitan el acceso; y el cifrado del lado del servidor con AWS KMS protege los datos de Kinesis en reposo. Para un data lake en S3, incluye bucket policies en el diseño de control de acceso.",
+      "whenToUse": [
+        "Los productores en una VPC deben enviar registros a Kinesis sin que el tráfico salga de la red de Amazon.",
+        "Los productores solo deben acceder a un stream aprobado o hacerlo mediante un VPC endpoint específico.",
+        "Los registros ingeridos en Kinesis requieren cifrado en reposo."
+      ],
+      "keyFacts": [
+        "Kinesis Data Streams admite interface VPC endpoints mediante AWS PrivateLink.",
+        "Un interface endpoint de Kinesis no requiere internet gateway ni NAT device para el tráfico entre la VPC y Kinesis.",
+        "Las endpoint policies pueden limitar los streams accesibles mediante un endpoint; las IAM policies pueden exigir que el acceso a un stream ocurra mediante un endpoint específico.",
+        "El cifrado del lado del servidor de Kinesis usa claves de AWS KMS para cifrar los datos en reposo."
+      ],
+      "gotchas": [
+        "Una ruta de red privada no limita por sí sola al productor a un único stream.",
+        "El cifrado en reposo con KMS no sustituye los controles de acceso al stream.",
+        "Una endpoint policy por sí sola no equivale a exigir que todas las solicitudes usen ese endpoint; el patrón documentado de IAM policy puede imponer ese requisito."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "VPC producers without internet or NAT access",
+        "only the approved Kinesis stream",
+        "requests must use the specified VPC endpoint",
+        "encrypt streaming records at rest"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/streams/latest/dev/server-side-encryption.html",
+      "https://docs.aws.amazon.com/streams/latest/dev/vpc.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "secure-ingestion-endpoints--254fba69",
+      "conceptId": "secure-ingestion-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A food distributor runs telemetry producers in a VPC and sends their records to a Kinesis data stream. The network team will not provide an internet gateway or NAT device, and traffic to Kinesis must not leave the Amazon network. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a Kinesis Data Streams interface VPC endpoint for the producers' VPC.",
+          "correct": true,
+          "why": "The interface endpoint provides VPC-to-Kinesis communication without an internet gateway or NAT device and keeps the traffic on the Amazon network."
+        },
+        {
+          "id": "B",
+          "text": "Configure a restrictive VPC endpoint policy but do not create a Kinesis interface endpoint.",
+          "correct": false,
+          "why": "An endpoint policy cannot supply the required private path when there is no interface endpoint."
+        },
+        {
+          "id": "C",
+          "text": "Enable KMS server-side encryption on the stream and leave the producers' network configuration unchanged.",
+          "correct": false,
+          "why": "KMS server-side encryption protects records at rest but does not provide the required network path."
+        },
+        {
+          "id": "D",
+          "text": "Attach an IAM policy that allows the producers to write only to the destination stream.",
+          "correct": false,
+          "why": "Limiting stream permissions does not provide a network path without internet or NAT access."
+        }
+      ],
+      "explanation": "The deciding constraint is network access from a VPC without an internet gateway or NAT device. A Kinesis Data Streams interface VPC endpoint provides a private path that keeps this traffic on the Amazon network. KMS encryption and IAM permissions address different security requirements and do not create that path.",
+      "keywordCues": [
+        "will not provide an internet gateway or NAT device",
+        "traffic to Kinesis must not leave the Amazon network"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/streams/latest/dev/server-side-encryption.html",
+        "https://docs.aws.amazon.com/streams/latest/dev/vpc.html"
+      ],
+      "es": {
+        "stem": "Una distribuidora de alimentos ejecuta productores de telemetría en una VPC y envía sus registros a un Kinesis data stream. El equipo de redes no proporcionará internet gateway ni NAT device, y el tráfico hacia Kinesis no debe salir de la red de Amazon. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un interface VPC endpoint de Kinesis Data Streams para la VPC de los productores.",
+            "why": "El interface endpoint permite la comunicación entre la VPC y Kinesis sin internet gateway ni NAT device y mantiene el tráfico en la red de Amazon."
+          },
+          {
+            "id": "B",
+            "text": "Configurar una VPC endpoint policy restrictiva, pero no crear un interface endpoint de Kinesis.",
+            "why": "Una endpoint policy no puede proporcionar la ruta privada requerida si no existe un interface endpoint."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar el cifrado del lado del servidor con KMS en el stream y dejar sin cambios la configuración de red de los productores.",
+            "why": "El cifrado del lado del servidor con KMS protege los registros en reposo, pero no proporciona la ruta de red requerida."
+          },
+          {
+            "id": "D",
+            "text": "Adjuntar una IAM policy que permita a los productores escribir solo en el stream de destino.",
+            "why": "Limitar los permisos sobre el stream no proporciona una ruta de red sin acceso por internet o NAT."
+          }
+        ],
+        "explanation": "La restricción decisiva es el acceso de red desde una VPC sin internet gateway ni NAT device. Un interface VPC endpoint de Kinesis Data Streams proporciona una ruta privada que mantiene ese tráfico en la red de Amazon. El cifrado con KMS y los permisos de IAM cubren otros requisitos de seguridad, pero no crean esa ruta."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "secure-ingestion-endpoints--aa3184b0",
+      "conceptId": "secure-ingestion-endpoints",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab ingests instrument readings into Kinesis Data Streams before storing curated files in an S3 data lake. Its producers already use a Kinesis interface VPC endpoint, but a new policy requires encryption of streaming records at rest and access controls for the lake bucket. Which design meets both requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Kinesis server-side encryption with AWS KMS keys and apply an S3 bucket policy for lake access.",
+          "correct": true,
+          "why": "KMS server-side encryption covers Kinesis records at rest, while the bucket policy addresses access to the S3 lake."
+        },
+        {
+          "id": "B",
+          "text": "Restrict the Kinesis endpoint policy to the stream and apply an S3 bucket policy for lake access.",
+          "correct": false,
+          "why": "These policies constrain access but do not provide the required Kinesis encryption at rest."
+        },
+        {
+          "id": "C",
+          "text": "Require producers to use the Kinesis interface endpoint and rely on that endpoint for both controls.",
+          "correct": false,
+          "why": "The interface endpoint addresses the VPC-to-Kinesis network path, not stream encryption at rest or bucket access."
+        },
+        {
+          "id": "D",
+          "text": "Enable Kinesis server-side encryption with AWS KMS keys and rely on the Kinesis endpoint policy for lake access.",
+          "correct": false,
+          "why": "Kinesis encryption covers the stream, but a Kinesis endpoint policy is not an access policy for the S3 bucket."
+        }
+      ],
+      "explanation": "The scenario names two distinct resources and controls: streaming records need encryption at rest, and the S3 lake needs bucket access control. Kinesis server-side encryption with AWS KMS keys addresses the first; an S3 bucket policy addresses the second. Endpoint restrictions are useful for Kinesis access but do not replace either requested control.",
+      "keywordCues": [
+        "encryption of streaming records at rest",
+        "access controls for the lake bucket"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/streams/latest/dev/server-side-encryption.html",
+        "https://docs.aws.amazon.com/streams/latest/dev/vpc.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ingiere lecturas de instrumentos en Kinesis Data Streams antes de almacenar archivos preparados en un data lake de S3. Sus productores ya usan un interface VPC endpoint de Kinesis, pero una nueva política exige cifrar los registros del stream en reposo y controlar el acceso al bucket del data lake. ¿Qué diseño cumple ambos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar el cifrado del lado del servidor de Kinesis con claves de AWS KMS y aplicar una S3 bucket policy para el acceso al data lake.",
+            "why": "El cifrado del lado del servidor con KMS protege los registros de Kinesis en reposo, mientras que la bucket policy controla el acceso al data lake de S3."
+          },
+          {
+            "id": "B",
+            "text": "Restringir la Kinesis endpoint policy al stream y aplicar una S3 bucket policy para el acceso al data lake.",
+            "why": "Estas policies limitan el acceso, pero no proporcionan el cifrado en reposo requerido para Kinesis."
+          },
+          {
+            "id": "C",
+            "text": "Exigir que los productores usen el interface endpoint de Kinesis y depender de ese endpoint para ambos controles.",
+            "why": "El interface endpoint cubre la ruta de red entre la VPC y Kinesis, no el cifrado del stream en reposo ni el acceso al bucket."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar el cifrado del lado del servidor de Kinesis con claves de AWS KMS y usar la Kinesis endpoint policy para controlar el acceso al data lake.",
+            "why": "El cifrado de Kinesis cubre el stream, pero una Kinesis endpoint policy no controla el acceso al bucket de S3."
+          }
+        ],
+        "explanation": "El escenario identifica dos recursos y controles distintos: los registros del stream necesitan cifrado en reposo y el data lake de S3 necesita control de acceso al bucket. El cifrado del lado del servidor de Kinesis con claves de AWS KMS cubre el primer requisito; una S3 bucket policy cubre el segundo. Las restricciones del endpoint ayudan a controlar el acceso a Kinesis, pero no sustituyen ninguno de esos controles."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "secure-ingestion-endpoints--r0",
+      "conceptId": "secure-ingestion-endpoints",
+      "kind": "recall",
+      "prompt": "VPC producers must reach Kinesis privately, use only one stream, and encrypt records at rest. Which controls would you choose and why?",
+      "promptEs": "Los productores en una VPC deben acceder a Kinesis de forma privada, usar un solo stream y cifrar los registros en reposo. ¿Qué controles elegirías y por qué?",
+      "idealAnswer": "Use a Kinesis interface VPC endpoint for the private network path and IAM or endpoint policies to scope access to the approved stream. Enable Kinesis server-side encryption with AWS KMS keys to protect the records at rest.",
+      "rubric": [
+        "Names a Kinesis interface VPC endpoint for the private path.",
+        "Uses IAM or endpoint policies to restrict access to the approved stream.",
+        "Names Kinesis server-side encryption with AWS KMS keys for data at rest."
+      ]
+    }
+  ]
+}

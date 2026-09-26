@@ -1,0 +1,402 @@
+{
+  "conceptId": "rpo-rto",
+  "card": {
+    "en": {
+      "tldr": "RPO limits how much recent data can be lost; RTO limits how long service can remain unavailable after an interruption. In a disaster recovery scenario, choose a design that meets both limits, then compare the cost or operational overhead of the qualifying designs.",
+      "whenToUse": [
+        "The business specifies a maximum period of lost data after a disaster.",
+        "The business specifies a maximum delay before service is restored.",
+        "Several recovery plans offer different tested recovery points and restoration times."
+      ],
+      "keyFacts": [
+        "RPO is the maximum acceptable time since the last data recovery point.",
+        "RTO is the maximum acceptable delay from service interruption to restoration.",
+        "DR objectives address recovery from events such as large-scale technical failures, attacks, or human error.",
+        "RTO is a maximum target for an event; MTTR is a mean measured across multiple availability-impacting events."
+      ],
+      "gotchas": [
+        "A short RTO does not compensate for an RPO that allows too much data loss.",
+        "A recent recovery point does not prove that service can be restored within the RTO.",
+        "A low average MTTR does not establish that a disaster recovery plan meets its RTO."
+      ],
+      "confusedWith": [
+        {
+          "concept": "MTTR",
+          "difference": "MTTR averages recovery times across events; RTO is the maximum acceptable recovery delay for an event."
+        },
+        {
+          "concept": "Availability objective",
+          "difference": "Availability measures resiliency over time; DR objectives set recovery targets for a disaster event."
+        }
+      ],
+      "examCues": [
+        "maximum acceptable data loss",
+        "service restored within",
+        "last recovery point",
+        "regional disaster recovery drill"
+      ]
+    },
+    "es": {
+      "tldr": "RPO limita cuántos datos recientes se pueden perder; RTO limita cuánto tiempo puede permanecer indisponible el servicio tras una interrupción. En un escenario de disaster recovery, elige un diseño que cumpla ambos límites y luego compara el costo o la carga operativa de los diseños que califican.",
+      "whenToUse": [
+        "El negocio especifica el período máximo de datos que se pueden perder después de un desastre.",
+        "El negocio especifica el tiempo máximo para restaurar el servicio.",
+        "Varios planes presentan distintos puntos de recuperación y tiempos de restauración comprobados."
+      ],
+      "keyFacts": [
+        "RPO es el tiempo máximo aceptable desde el último punto de recuperación de datos.",
+        "RTO es el retraso máximo aceptable entre la interrupción y la restauración del servicio.",
+        "Los objetivos de DR cubren la recuperación ante eventos como fallas técnicas a gran escala, ataques o errores humanos.",
+        "RTO es un objetivo máximo para un evento; MTTR es un promedio de varios eventos que afectan la disponibilidad."
+      ],
+      "gotchas": [
+        "Un RTO corto no compensa un RPO que permite perder demasiados datos.",
+        "Un punto de recuperación reciente no demuestra que el servicio pueda restaurarse dentro del RTO.",
+        "Un MTTR promedio bajo no demuestra que un plan de disaster recovery cumpla su RTO."
+      ],
+      "confusedWith": [
+        {
+          "concept": "MTTR",
+          "difference": "MTTR promedia los tiempos de recuperación de varios eventos; RTO es el retraso máximo aceptable para un evento."
+        },
+        {
+          "concept": "Objetivo de disponibilidad",
+          "difference": "La disponibilidad mide la resiliencia a lo largo del tiempo; los objetivos de DR fijan metas de recuperación para un desastre."
+        }
+      ],
+      "examCues": [
+        "maximum acceptable data loss",
+        "service restored within",
+        "last recovery point",
+        "regional disaster recovery drill"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/disaster-recovery-dr-objectives.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "rpo-rto--e5a265ba",
+      "conceptId": "rpo-rto",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum keeps an online catalog that can tolerate losing up to 12 hours of updates and being unavailable for up to 24 hours after a disaster. Its team has tested four recovery plans and recorded the worst results from its drills, along with their relative monthly costs. Which plan meets the requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Warm standby: recovery point 6 hours old, restoration in 28 hours; relative cost 3.",
+          "correct": false,
+          "why": "Its tested restoration time exceeds the 24-hour RTO."
+        },
+        {
+          "id": "B",
+          "text": "Pilot light: recovery point 4 hours old, restoration in 18 hours; relative cost 2.",
+          "correct": false,
+          "why": "It meets both recovery targets but costs more than another qualifying plan."
+        },
+        {
+          "id": "C",
+          "text": "Backup and restore with more frequent snapshots: recovery point 2 hours old, restoration in 20 hours; relative cost 2.",
+          "correct": false,
+          "why": "It meets both targets but costs more than option D."
+        },
+        {
+          "id": "D",
+          "text": "Backup and restore: recovery point 8 hours old, restoration in 12 hours; relative cost 1.",
+          "correct": true,
+          "why": "It meets both limits and has the lowest stated cost among qualifying plans."
+        }
+      ],
+      "explanation": "The catalog's 12-hour data-loss tolerance is its RPO, and its 24-hour downtime tolerance is its RTO. Option D's tested recovery point and restoration time both fall within those limits at relative cost 1. Option B also qualifies, but its better recovery point is unnecessary for this stated requirement and costs more. Option A fails despite its recent recovery point because restoration takes too long.",
+      "keywordCues": [
+        "losing up to 12 hours of updates",
+        "unavailable for up to 24 hours",
+        "relative monthly costs",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/disaster-recovery-dr-objectives.html"
+      ],
+      "es": {
+        "stem": "Un museo mantiene un catálogo en línea que puede tolerar la pérdida de hasta 12 horas de actualizaciones y una indisponibilidad de hasta 24 horas después de un desastre. Su equipo probó cuatro planes de recuperación y registró los peores resultados de las pruebas, junto con sus costos mensuales relativos. ¿Qué plan cumple los requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Warm standby: punto de recuperación de hace 6 horas, restauración en 28 horas; costo relativo 3.",
+            "why": "Su tiempo de restauración probado supera el RTO de 24 horas."
+          },
+          {
+            "id": "B",
+            "text": "Pilot light: punto de recuperación de hace 4 horas, restauración en 18 horas; costo relativo 2.",
+            "why": "Cumple ambos objetivos, pero cuesta más que otro plan que también los cumple."
+          },
+          {
+            "id": "C",
+            "text": "Backup and restore con snapshots más frecuentes: punto de recuperación de hace 2 horas, restauración en 20 horas; costo relativo 2.",
+            "why": "Cumple ambos objetivos, pero cuesta más que la opción D."
+          },
+          {
+            "id": "D",
+            "text": "Backup and restore: punto de recuperación de hace 8 horas, restauración en 12 horas; costo relativo 1.",
+            "why": "Cumple ambos límites y tiene el menor costo indicado entre los planes que califican."
+          }
+        ],
+        "explanation": "La tolerancia de 12 horas de pérdida de datos es el RPO; la tolerancia de 24 horas de indisponibilidad es el RTO. La opción D queda dentro de ambos límites y tiene un costo relativo de 1. La opción B también califica, pero su punto de recuperación más reciente no es necesario para este requisito y cuesta más. La opción A falla porque la restauración tarda demasiado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rpo-rto--33da4c42",
+      "conceptId": "rpo-rto",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A hospital's appointment portal must resume within 2 hours of a disaster, with no more than 15 minutes of appointment changes lost. The hospital has measured the following recovery results in regional disaster drills and wants the lowest-cost plan that meets both targets. Which plan should it select?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Active-active: 1-minute-old recovery point, 30-minute restoration; cost tier 5.",
+          "correct": false,
+          "why": "It meets both targets but costs more than option D."
+        },
+        {
+          "id": "B",
+          "text": "Pilot light: 10-minute-old recovery point, 3-hour restoration; cost tier 2.",
+          "correct": false,
+          "why": "It meets the RPO but exceeds the 2-hour RTO."
+        },
+        {
+          "id": "C",
+          "text": "Backup and restore: 12-hour-old recovery point, 90-minute restoration; cost tier 1.",
+          "correct": false,
+          "why": "It meets the RTO but loses more data than the 15-minute RPO permits."
+        },
+        {
+          "id": "D",
+          "text": "Warm standby: 5-minute-old recovery point, 45-minute restoration; cost tier 3.",
+          "correct": true,
+          "why": "It meets both targets at a lower stated cost than the other qualifying plan."
+        }
+      ],
+      "explanation": "The hospital must meet both the 15-minute RPO and the 2-hour RTO. The tested warm standby plan meets both and has the lowest cost tier of the qualifying choices. The backup plan restores quickly enough but loses too many changes; the pilot light plan preserves enough data but restores too slowly. Active-active also meets the targets, but the stated cost is higher.",
+      "keywordCues": [
+        "resume within 2 hours",
+        "no more than 15 minutes of appointment changes lost",
+        "lowest-cost plan"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/disaster-recovery-dr-objectives.html"
+      ],
+      "es": {
+        "stem": "El portal de citas de un hospital debe reanudar el servicio dentro de 2 horas después de un desastre, sin perder más de 15 minutos de cambios en las citas. El hospital midió los siguientes resultados en pruebas de disaster recovery regional y quiere el plan de menor costo que cumpla ambos objetivos. ¿Qué plan debe elegir?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Active-active: punto de recuperación de hace 1 minuto, restauración en 30 minutos; nivel de costo 5.",
+            "why": "Cumple ambos objetivos, pero cuesta más que la opción D."
+          },
+          {
+            "id": "B",
+            "text": "Pilot light: punto de recuperación de hace 10 minutos, restauración en 3 horas; nivel de costo 2.",
+            "why": "Cumple el RPO, pero supera el RTO de 2 horas."
+          },
+          {
+            "id": "C",
+            "text": "Backup and restore: punto de recuperación de hace 12 horas, restauración en 90 minutos; nivel de costo 1.",
+            "why": "Cumple el RTO, pero pierde más datos de los que permite el RPO de 15 minutos."
+          },
+          {
+            "id": "D",
+            "text": "Warm standby: punto de recuperación de hace 5 minutos, restauración en 45 minutos; nivel de costo 3.",
+            "why": "Cumple ambos objetivos con un costo indicado menor que el del otro plan que califica."
+          }
+        ],
+        "explanation": "El hospital debe cumplir tanto el RPO de 15 minutos como el RTO de 2 horas. El plan warm standby probado cumple ambos y tiene el menor nivel de costo entre las opciones que califican. El plan de backup restaura a tiempo, pero pierde demasiados cambios; pilot light conserva suficientes datos, pero restaura demasiado lento. Active-active también cumple, pero su costo indicado es mayor."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rpo-rto--dce7a42b",
+      "conceptId": "rpo-rto",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing company reports an MTTR of 25 minutes across routine service incidents. However, a regional disaster drill took 5 hours to restore sales, and the business now sets a 90-minute RTO and a 1-hour RPO for such a disaster. The team has tested the alternative plans below under the same disaster scenario. Which plan meets both DR objectives?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a plan that restored service in 70 minutes but recovered from a point 2 hours old.",
+          "correct": false,
+          "why": "Its restoration time meets the RTO, but its recovery point exceeds the 1-hour RPO."
+        },
+        {
+          "id": "B",
+          "text": "Use a plan that recovered from a point 45 minutes old but restored service in 2 hours.",
+          "correct": false,
+          "why": "Its recovery point meets the RPO, but its restoration time exceeds the 90-minute RTO."
+        },
+        {
+          "id": "C",
+          "text": "Use a plan that recovered from a point 40 minutes old and restored service in 65 minutes.",
+          "correct": true,
+          "why": "Its tested recovery point and restoration time both meet the stated DR objectives."
+        },
+        {
+          "id": "D",
+          "text": "Keep the current plan because routine incidents have a 25-minute MTTR; its disaster drill restored service in 5 hours with a 20-minute-old recovery point.",
+          "correct": false,
+          "why": "Average recovery from routine incidents does not overcome the disaster drill's 5-hour restoration time."
+        }
+      ],
+      "explanation": "RTO is a maximum acceptable restoration delay for an event, not an average over routine incidents. The 25-minute MTTR therefore does not establish that the current plan meets the 90-minute disaster RTO. Option C's disaster test meets both the 1-hour RPO and the 90-minute RTO. Options A and C each meet only one of those limits.",
+      "keywordCues": [
+        "MTTR of 25 minutes across routine service incidents",
+        "regional disaster drill took 5 hours",
+        "90-minute RTO",
+        "1-hour RPO"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/disaster-recovery-dr-objectives.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos informa un MTTR de 25 minutos en incidentes habituales del servicio. Sin embargo, una prueba de desastre regional tardó 5 horas en restaurar las ventas, y el negocio ahora fija un RTO de 90 minutos y un RPO de 1 hora para ese tipo de desastre. El equipo probó los siguientes planes alternativos bajo el mismo escenario de desastre. ¿Qué plan cumple ambos objetivos de DR?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un plan que restauró el servicio en 70 minutos, pero recuperó desde un punto de hace 2 horas.",
+            "why": "Su tiempo de restauración cumple el RTO, pero su punto de recuperación supera el RPO de 1 hora."
+          },
+          {
+            "id": "B",
+            "text": "Usar un plan que recuperó desde un punto de hace 45 minutos, pero restauró el servicio en 2 horas.",
+            "why": "Su punto de recuperación cumple el RPO, pero su tiempo de restauración supera el RTO de 90 minutos."
+          },
+          {
+            "id": "C",
+            "text": "Usar un plan que recuperó desde un punto de hace 40 minutos y restauró el servicio en 65 minutos.",
+            "why": "Su punto de recuperación y su tiempo de restauración probados cumplen ambos objetivos de DR."
+          },
+          {
+            "id": "D",
+            "text": "Mantener el plan actual porque los incidentes habituales tienen un MTTR de 25 minutos; en la prueba de desastre restauró el servicio en 5 horas con un punto de recuperación de hace 20 minutos.",
+            "why": "El promedio de recuperación de incidentes habituales no compensa las 5 horas de restauración en la prueba de desastre."
+          }
+        ],
+        "explanation": "RTO es un retraso máximo aceptable para restaurar el servicio tras un evento, no un promedio de incidentes habituales. Por eso, el MTTR de 25 minutos no demuestra que el plan actual cumpla el RTO de 90 minutos para un desastre. La prueba de la opción C cumple tanto el RPO de 1 hora como el RTO de 90 minutos. Las opciones A y C cumplen solo uno de los dos límites."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "rpo-rto--005307d7",
+      "conceptId": "rpo-rto",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics firm operates a shipment-tracking application in one AWS Region. It already recovers from an Availability Zone interruption within 10 minutes, but the new requirement concerns loss of the entire Region: at most 30 minutes of tracking updates may be lost, and service must return within 90 minutes. The firm tested the following proposals against a regional-loss scenario. Which proposal meets the new requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Prepare recovery in another Region; its regional-loss test restores service in 80 minutes from a point 25 minutes old.",
+          "correct": true,
+          "why": "Its regional-loss test meets both the 30-minute RPO and the 90-minute RTO."
+        },
+        {
+          "id": "B",
+          "text": "Expand the existing in-Region failover; its Zone test restores service in 5 minutes with a 1-minute-old recovery point, but it has no recovery location outside the Region.",
+          "correct": false,
+          "why": "Strong results for a Zone interruption do not provide recovery when the entire Region is lost."
+        },
+        {
+          "id": "C",
+          "text": "Prepare recovery in another Region; its regional-loss test restores service in 70 minutes from a point 50 minutes old.",
+          "correct": false,
+          "why": "Its recovery point exceeds the permitted 30 minutes of lost updates."
+        },
+        {
+          "id": "D",
+          "text": "Prepare recovery in another Region; its regional-loss test restores service in 2 hours from a point 10 minutes old.",
+          "correct": false,
+          "why": "Its restoration time exceeds the 90-minute RTO."
+        }
+      ],
+      "explanation": "The requirement is recovery from loss of the entire Region, not merely an Availability Zone interruption. Option A is tested for that event and falls within both the 30-minute RPO and 90-minute RTO. Option B's Zone test does not address the stated disaster because it has no recovery location outside the Region. Options C and D address regional loss but miss the data-loss and restoration limits, respectively.",
+      "keywordCues": [
+        "loss of the entire Region",
+        "at most 30 minutes of tracking updates may be lost",
+        "service must return within 90 minutes",
+        "regional-loss scenario"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/disaster-recovery-dr-objectives.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística opera una aplicación de seguimiento de envíos en una AWS Region. Ya se recupera de una interrupción de Availability Zone en 10 minutos, pero el nuevo requisito contempla la pérdida de toda la Region: se pueden perder como máximo 30 minutos de actualizaciones y el servicio debe regresar en 90 minutos. La empresa probó las siguientes propuestas ante un escenario de pérdida regional. ¿Qué propuesta cumple el nuevo requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Preparar la recuperación en otra Region; su prueba de pérdida regional restaura el servicio en 80 minutos desde un punto de hace 25 minutos.",
+            "why": "Su prueba de pérdida regional cumple tanto el RPO de 30 minutos como el RTO de 90 minutos."
+          },
+          {
+            "id": "B",
+            "text": "Ampliar el failover existente dentro de la Region; su prueba de interrupción de Zone restaura el servicio en 5 minutos con un punto de recuperación de hace 1 minuto, pero no tiene una ubicación de recuperación fuera de la Region.",
+            "why": "Los buenos resultados ante una interrupción de Zone no proporcionan recuperación si se pierde toda la Region."
+          },
+          {
+            "id": "C",
+            "text": "Preparar la recuperación en otra Region; su prueba de pérdida regional restaura el servicio en 70 minutos desde un punto de hace 50 minutos.",
+            "why": "Su punto de recuperación supera los 30 minutos permitidos de actualizaciones perdidas."
+          },
+          {
+            "id": "D",
+            "text": "Preparar la recuperación en otra Region; su prueba de pérdida regional restaura el servicio en 2 horas desde un punto de hace 10 minutos.",
+            "why": "Su tiempo de restauración supera el RTO de 90 minutos."
+          }
+        ],
+        "explanation": "El requisito es recuperarse de la pérdida de toda la Region, no solo de una interrupción de Availability Zone. La opción A fue probada para ese evento y cumple tanto el RPO de 30 minutos como el RTO de 90 minutos. La prueba de Zone de la opción B no cubre el desastre indicado porque no hay una ubicación de recuperación fuera de la Region. Las opciones C y D cubren la pérdida regional, pero incumplen el límite de pérdida de datos y el de restauración, respectivamente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "rpo-rto--r0",
+      "conceptId": "rpo-rto",
+      "kind": "recall",
+      "prompt": "A service can lose one hour of data but be unavailable for only three hours after a disaster. How do you select a recovery plan?",
+      "promptEs": "Un servicio puede perder una hora de datos, pero estar indisponible solo tres horas tras un desastre. ¿Cómo eliges un plan de recuperación?",
+      "idealAnswer": "Treat one hour as the RPO and three hours as the RTO. Select a plan whose recovery point is no more than one hour old and whose restoration time is no more than three hours; then compare qualifying plans against any cost or operational requirements.",
+      "rubric": [
+        "Identifies the one-hour data-loss tolerance as RPO.",
+        "Identifies the three-hour downtime tolerance as RTO.",
+        "Requires the selected plan to meet both limits before considering other trade-offs."
+      ]
+    }
+  ]
+}

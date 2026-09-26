@@ -1,0 +1,360 @@
+{
+  "conceptId": "elastic-disaster-recovery",
+  "card": {
+    "en": {
+      "tldr": "AWS Elastic Disaster Recovery (DRS) replicates supported on-premises or cloud-based servers to a low-cost staging area in a selected AWS Region. Choose it when the goal is to recover applications on AWS within minutes, rather than permanently migrate servers or migrate a database.",
+      "whenToUse": [
+        "An existing server application needs disaster recovery on AWS without a permanent move.",
+        "The business needs recovery from the latest server state or an earlier point in time.",
+        "The team needs low-cost readiness and non-disruptive recovery drills."
+      ],
+      "keyFacts": [
+        "Replication goes to a staging area subnet in the selected AWS Region.",
+        "The staging area uses affordable storage and minimal compute during ongoing replication.",
+        "DRS converts servers to boot and run natively on AWS when instances are launched for a drill or recovery.",
+        "Recovery instances can launch within minutes from the latest server state or a previous point in time.",
+        "Teams can monitor replication, run non-disruptive drills, and replicate data back to the primary site for failback."
+      ],
+      "gotchas": [
+        "A requirement for ongoing disaster recovery is not the same as a one-time server migration.",
+        "Database migration alone does not recover an entire server application.",
+        "Keeping full-size recovery servers running continuously misses a requirement for minimal standby compute."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Application Migration Service (MGN)",
+          "difference": "MGN is for rehosting servers on EC2; DRS is for ongoing disaster recovery with recovery drills and failback."
+        },
+        {
+          "concept": "AWS Database Migration Service (DMS)",
+          "difference": "DMS migrates databases; DRS recovers server-based applications."
+        }
+      ],
+      "examCues": [
+        "recover existing servers within minutes",
+        "low-cost staging during normal operation",
+        "non-disruptive recovery drills",
+        "recover from a previous point in time",
+        "fail back to the primary site"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Elastic Disaster Recovery (DRS) replica servidores compatibles, locales o en la nube, hacia un área de preparación de bajo costo en una AWS Region seleccionada. Elígelo cuando el objetivo sea recuperar aplicaciones en AWS en cuestión de minutos, no migrar servidores de forma permanente ni migrar una base de datos.",
+      "whenToUse": [
+        "Necesitas recuperación ante desastres en AWS para una aplicación existente en servidores, sin trasladarla permanentemente.",
+        "Debes recuperar el estado más reciente del servidor o un punto anterior en el tiempo.",
+        "Necesitas preparación de bajo costo y simulacros de recuperación sin interrumpir la operación."
+      ],
+      "keyFacts": [
+        "La replicación llega a una subred de preparación en la AWS Region seleccionada.",
+        "Durante la replicación continua, el área de preparación usa almacenamiento asequible y recursos de cómputo mínimos.",
+        "DRS convierte los servidores para que arranquen y funcionen de forma nativa en AWS al lanzar instancias para simulacros o recuperación.",
+        "Puedes lanzar instancias de recuperación en cuestión de minutos desde el estado más reciente o desde un punto anterior en el tiempo.",
+        "Puedes supervisar la replicación, realizar simulacros sin interrupción y replicar datos de vuelta al sitio principal para el retorno."
+      ],
+      "gotchas": [
+        "La recuperación ante desastres continua no equivale a una migración única de servidores.",
+        "Migrar solo la base de datos no recupera toda la aplicación basada en servidores.",
+        "Mantener servidores de recuperación de tamaño completo encendidos continuamente no cumple un requisito de cómputo mínimo en espera."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Application Migration Service (MGN)",
+          "difference": "MGN sirve para trasladar servidores a EC2; DRS sirve para recuperación ante desastres continua, con simulacros y retorno al sitio principal."
+        },
+        {
+          "concept": "AWS Database Migration Service (DMS)",
+          "difference": "DMS migra bases de datos; DRS recupera aplicaciones basadas en servidores."
+        }
+      ],
+      "examCues": [
+        "recover existing servers within minutes",
+        "low-cost staging during normal operation",
+        "non-disruptive recovery drills",
+        "recover from a previous point in time",
+        "fail back to the primary site"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/drs/latest/userguide/what-is-drs.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "elastic-disaster-recovery--11d59c6c",
+      "conceptId": "elastic-disaster-recovery",
+      "secondaryConcepts": [
+        "application-migration-service",
+        "database-migration-dms-sct"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research institute keeps its primary application on supported servers outside AWS. It needs an AWS disaster recovery plan with low compute use during normal operation and regular recovery tests that do not interrupt researchers. The team wants to recover the application on AWS if the primary site becomes unavailable. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS DMS to migrate the application's database and treat the database migration as the server recovery plan.",
+          "correct": false,
+          "why": "Migrating a database does not recover the application servers."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Application Migration Service to make EC2 the permanent production environment for the application.",
+          "correct": false,
+          "why": "A permanent migration conflicts with keeping the primary application outside AWS."
+        },
+        {
+          "id": "C",
+          "text": "Run full-size copies of all application servers continuously on EC2 to keep the recovery environment ready.",
+          "correct": false,
+          "why": "Continuously running full-size servers conflicts with low compute use during normal operation."
+        },
+        {
+          "id": "D",
+          "text": "Monitor DRS replication and periodically launch recovery instances for non-disruptive drills.",
+          "correct": true,
+          "why": "DRS supports replication monitoring and non-disruptive recovery drills."
+        },
+        {
+          "id": "E",
+          "text": "Configure AWS Elastic Disaster Recovery to replicate the servers to a staging area subnet in the selected AWS Region.",
+          "correct": true,
+          "why": "The DRS staging area provides ongoing replication using minimal compute."
+        }
+      ],
+      "explanation": "The institute needs both low-cost readiness and tests that do not interrupt its primary application. Configuring DRS replication to a staging subnet addresses readiness with minimal compute, while monitoring and non-disruptive drills validate recovery. Permanently migrating production misses the location constraint, and always-on full-size copies miss the compute constraint.",
+      "keywordCues": [
+        "keeps its primary application on supported servers outside AWS",
+        "low compute use during normal operation",
+        "regular recovery tests that do not interrupt researchers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/drs/latest/userguide/what-is-drs.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación mantiene su aplicación principal en servidores compatibles fuera de AWS. Necesita un plan de recuperación ante desastres en AWS que use poco cómputo durante la operación normal y permita pruebas periódicas sin interrumpir a los investigadores. El equipo quiere recuperar la aplicación en AWS si el sitio principal deja de estar disponible. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS DMS para migrar la base de datos de la aplicación y considerar esa migración como el plan de recuperación de los servidores.",
+            "why": "Migrar una base de datos no recupera los servidores de aplicaciones."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS Application Migration Service para convertir EC2 en el entorno permanente de producción de la aplicación.",
+            "why": "Una migración permanente contradice el requisito de mantener la aplicación principal fuera de AWS."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar continuamente en EC2 copias de tamaño completo de todos los servidores de aplicaciones para mantener listo el entorno de recuperación.",
+            "why": "Ejecutar continuamente servidores de tamaño completo contradice el requisito de usar poco cómputo durante la operación normal."
+          },
+          {
+            "id": "D",
+            "text": "Supervisar la replicación de DRS y lanzar periódicamente instancias de recuperación para simulacros sin interrupción.",
+            "why": "DRS permite supervisar la replicación y realizar simulacros de recuperación sin interrumpir la operación."
+          },
+          {
+            "id": "E",
+            "text": "Configurar AWS Elastic Disaster Recovery para replicar los servidores a una subred de preparación en la AWS Region seleccionada.",
+            "why": "El área de preparación de DRS proporciona replicación continua con cómputo mínimo."
+          }
+        ],
+        "explanation": "El instituto necesita preparación de bajo costo y pruebas que no interrumpan su aplicación principal. Configurar la replicación de DRS hacia una subred de preparación permite mantener esa preparación con cómputo mínimo; supervisar y realizar simulacros sin interrupción permite validar la recuperación. Migrar producción permanentemente incumple la restricción de ubicación, y mantener copias de tamaño completo encendidas incumple la de cómputo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elastic-disaster-recovery--6f66369d",
+      "conceptId": "elastic-disaster-recovery",
+      "secondaryConcepts": [
+        "application-migration-service",
+        "database-migration-dms-sct"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs its editing application on servers in its own data center. It wants to keep production on premises but recover the application on AWS within minutes if the site fails. During normal operation, the AWS recovery environment must use minimal compute. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Application Migration Service to rehost the servers on EC2 as the company's new production environment.",
+          "correct": false,
+          "why": "Rehosting production on EC2 does not satisfy the requirement to keep production on premises."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS DMS to migrate the application's database to AWS and retain the application servers on premises.",
+          "correct": false,
+          "why": "Migrating the database does not provide recovery of the application servers on AWS."
+        },
+        {
+          "id": "C",
+          "text": "Maintain full-size copies of all application servers running on EC2 and switch to them after a site failure.",
+          "correct": false,
+          "why": "Continuously running full-size copies conflicts with the minimal-compute requirement."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Elastic Disaster Recovery to replicate the servers to a staging area in AWS and launch recovery instances when needed.",
+          "correct": true,
+          "why": "DRS maintains a minimal-compute staging area and can launch recovery instances within minutes."
+        }
+      ],
+      "explanation": "The deciding requirements are recovery of existing servers within minutes and minimal compute during normal operation. DRS uses a low-cost staging area during replication and launches recovery instances when needed. MGN targets rehosting, while continuously running full-size copies misses the standby-compute constraint.",
+      "keywordCues": [
+        "keep production on premises",
+        "recover the application on AWS within minutes",
+        "minimal compute"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/drs/latest/userguide/what-is-drs.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta su aplicación de edición en servidores de su propio centro de datos. Quiere mantener producción en sus instalaciones, pero recuperar la aplicación en AWS en cuestión de minutos si falla el sitio. Durante la operación normal, el entorno de recuperación en AWS debe usar recursos de cómputo mínimos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Application Migration Service para trasladar los servidores a EC2 como nuevo entorno de producción de la empresa.",
+            "why": "Trasladar producción a EC2 no cumple el requisito de mantenerla en las instalaciones."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS DMS para migrar la base de datos de la aplicación a AWS y conservar los servidores de aplicaciones en las instalaciones.",
+            "why": "Migrar la base de datos no permite recuperar los servidores de aplicaciones en AWS."
+          },
+          {
+            "id": "C",
+            "text": "Mantener copias de tamaño completo de todos los servidores de aplicaciones en ejecución en EC2 y cambiar a ellas si falla el sitio.",
+            "why": "Ejecutar continuamente copias de tamaño completo contradice el requisito de cómputo mínimo."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS Elastic Disaster Recovery para replicar los servidores a un área de preparación en AWS y lanzar instancias de recuperación cuando se necesiten.",
+            "why": "DRS mantiene un área de preparación con cómputo mínimo y puede lanzar instancias de recuperación en cuestión de minutos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son recuperar los servidores existentes en cuestión de minutos y usar cómputo mínimo durante la operación normal. DRS usa un área de preparación de bajo costo durante la replicación y lanza instancias de recuperación cuando se necesitan. MGN se orienta al traslado de servidores, mientras que mantener copias de tamaño completo encendidas incumple la restricción de cómputo en espera."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elastic-disaster-recovery--0e67142c",
+      "conceptId": "elastic-disaster-recovery",
+      "secondaryConcepts": [
+        "application-migration-service",
+        "database-migration-dms-sct"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A city agency runs a supported server-based application in its primary data center. It wants to conduct recovery drills without disrupting production and, after an outage, run the application on AWS before eventually returning it to the primary site. The agency does not intend to move production permanently. Which solution BEST meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rehost the application on EC2 now and test recovery by taking the new production servers offline during each drill.",
+          "correct": false,
+          "why": "This moves production permanently and makes the proposed drills disruptive."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Application Migration Service to rehost the application servers on EC2 and make EC2 the permanent production location.",
+          "correct": false,
+          "why": "A permanent rehost conflicts with the requirement to return production to the primary site."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS DMS to move the application's database to AWS and test database connectivity without launching application servers.",
+          "correct": false,
+          "why": "Database migration and connectivity tests do not provide recovery drills for the server-based application."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Elastic Disaster Recovery to replicate the servers, run non-disruptive recovery drills, and fail back after the outage.",
+          "correct": true,
+          "why": "DRS supports non-disruptive drills, recovery on AWS, and replication back for failback."
+        }
+      ],
+      "explanation": "The agency needs temporary recovery on AWS, non-disruptive drills, and a path back to its primary site. DRS supports recovery drills and can replicate data back after applications are running on AWS. A permanent MGN rehost misses the return-to-site requirement, and taking production offline fails the drill requirement.",
+      "keywordCues": [
+        "recovery drills without disrupting production",
+        "returning it to the primary site",
+        "does not intend to move production permanently"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/drs/latest/userguide/what-is-drs.html"
+      ],
+      "es": {
+        "stem": "Una agencia municipal ejecuta una aplicación basada en servidores compatibles en su centro de datos principal. Quiere realizar simulacros de recuperación sin interrumpir producción y, después de una interrupción, ejecutar la aplicación en AWS antes de devolverla al sitio principal. La agencia no pretende trasladar producción de forma permanente. ¿Qué solución cumple MEJOR estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Trasladar ahora la aplicación a EC2 y probar la recuperación desconectando los nuevos servidores de producción durante cada simulacro.",
+            "why": "Esta opción traslada producción permanentemente y hace que los simulacros interrumpan el servicio."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS Application Migration Service para trasladar los servidores de la aplicación a EC2 y convertir EC2 en la ubicación permanente de producción.",
+            "why": "Un traslado permanente contradice el requisito de devolver producción al sitio principal."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS DMS para trasladar la base de datos de la aplicación a AWS y probar su conectividad sin lanzar servidores de aplicaciones.",
+            "why": "La migración y las pruebas de conectividad de la base de datos no constituyen simulacros de recuperación de toda la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS Elastic Disaster Recovery para replicar los servidores, realizar simulacros de recuperación sin interrupción y volver al sitio principal después de la falla.",
+            "why": "DRS permite simulacros sin interrupción, recuperación en AWS y replicación de regreso para el retorno."
+          }
+        ],
+        "explanation": "La agencia necesita recuperación temporal en AWS, simulacros sin interrupción y una forma de regresar al sitio principal. DRS permite realizar simulacros y replicar los datos de vuelta después de ejecutar las aplicaciones en AWS. Un traslado permanente mediante MGN incumple el requisito de retorno, y desconectar producción incumple el requisito de los simulacros."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "elastic-disaster-recovery--r0",
+      "conceptId": "elastic-disaster-recovery",
+      "kind": "recall",
+      "prompt": "An on-premises server application needs low-compute standby and recovery on AWS within minutes. Which service fits, and why?",
+      "promptEs": "Una aplicación en servidores locales necesita preparación con poco cómputo y recuperación en AWS en minutos. ¿Qué servicio elegirías y por qué?",
+      "idealAnswer": "Use AWS Elastic Disaster Recovery. It replicates servers to a staging area that uses minimal compute during normal operation and can launch recovery instances on AWS within minutes.",
+      "rubric": [
+        "Names AWS Elastic Disaster Recovery.",
+        "Mentions server replication to a low-compute staging area.",
+        "Connects the choice to launching recovery instances within minutes."
+      ]
+    },
+    {
+      "id": "elastic-disaster-recovery--r1",
+      "conceptId": "elastic-disaster-recovery",
+      "kind": "why-not",
+      "prompt": "Why isn't a permanent MGN rehost the right choice when servers must stay on premises but recover temporarily on AWS?",
+      "promptEs": "¿Por qué un traslado permanente con MGN no es adecuado si los servidores deben permanecer en las instalaciones, pero recuperarse temporalmente en AWS?",
+      "idealAnswer": "AWS Application Migration Service is for rehosting servers on EC2, which changes where production runs. AWS Elastic Disaster Recovery supports recovery on AWS while the primary application remains on premises and provides a path to fail back.",
+      "rubric": [
+        "Identifies MGN as a server rehosting choice.",
+        "Explains that a permanent rehost conflicts with keeping production on premises.",
+        "Identifies DRS as the recovery choice and mentions failback."
+      ]
+    }
+  ]
+}

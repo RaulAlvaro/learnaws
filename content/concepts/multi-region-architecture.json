@@ -1,0 +1,317 @@
+{
+  "conceptId": "multi-region-architecture",
+  "card": {
+    "en": {
+      "tldr": "Use a multi-Region architecture when the business must continue serving users after its primary Region becomes unavailable, or when serving users from multiple Regions is a stated latency requirement. The decision is whether the requirement justifies placing application compute and data in more than one Region and planning how users reach the appropriate regional endpoint.",
+      "whenToUse": [
+        "The workload must remain available if its primary Region cannot serve it.",
+        "A disaster recovery plan must meet stated recovery time objective (RTO) and recovery point objective (RPO) requirements.",
+        "Users in distant locations must be served by regional deployments rather than one central deployment."
+      ],
+      "keyFacts": [
+        "A disaster is an event that prevents a workload from meeting its business objectives in its primary deployed location.",
+        "RTO and RPO are business requirements that guide the disaster recovery approach.",
+        "A regional recovery design must account for application compute, usable data, and a way to direct users to the regional endpoint.",
+        "Resources placed only in one Region do not provide an application deployment in another Region."
+      ],
+      "gotchas": [
+        "Changing DNS cannot restore service if the destination Region has no application deployment or usable data.",
+        "A second copy of data alone does not provide application compute in the second Region.",
+        "Do not add a second Region solely for a requirement that concerns disruption within one Region."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "primary Region becomes unavailable",
+        "users must reach a regional endpoint",
+        "RTO and RPO after a regional disaster",
+        "serve users from multiple geographic regions"
+      ]
+    },
+    "es": {
+      "tldr": "Usa una arquitectura multi-Region cuando el negocio deba seguir atendiendo usuarios si la Region principal deja de estar disponible, o cuando atenderlos desde varias Regions sea un requisito de latencia. La decisión es si ese requisito justifica ubicar cómputo y datos en más de una Region y planificar cómo llegarán los usuarios al endpoint adecuado.",
+      "whenToUse": [
+        "La carga de trabajo debe seguir disponible si su Region principal no puede atenderla.",
+        "El plan de recuperación ante desastres debe cumplir objetivos de tiempo de recuperación (RTO) y punto de recuperación (RPO).",
+        "Los usuarios de lugares distantes deben recibir servicio desde implementaciones regionales en vez de una sola implementación central."
+      ],
+      "keyFacts": [
+        "Un desastre es un evento que impide que una carga de trabajo cumpla sus objetivos de negocio en su ubicación principal.",
+        "RTO y RPO son requisitos de negocio que orientan el enfoque de recuperación ante desastres.",
+        "Un diseño de recuperación regional debe contemplar cómputo, datos utilizables y una forma de dirigir a los usuarios al endpoint regional.",
+        "Los recursos ubicados solo en una Region no constituyen una implementación de la aplicación en otra Region."
+      ],
+      "gotchas": [
+        "Cambiar DNS no restablece el servicio si la Region de destino no tiene una implementación de la aplicación ni datos utilizables.",
+        "Una segunda copia de los datos, por sí sola, no proporciona cómputo en la segunda Region.",
+        "No agregues otra Region únicamente por un requisito relacionado con interrupciones dentro de una sola Region."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "primary Region becomes unavailable",
+        "users must reach a regional endpoint",
+        "RTO and RPO after a regional disaster",
+        "serve users from multiple geographic regions"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "multi-region-architecture--2920b395",
+      "conceptId": "multi-region-architecture",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional ticketing company runs an application in one AWS Region. Its continuity requirement covers an interruption in one Availability Zone; it does not require service during an outage of the entire Region. Which architecture meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the application in one Availability Zone and add a second Route 53 DNS record.",
+          "correct": false,
+          "why": "Another DNS record does not provide an application deployment outside the interrupted Availability Zone."
+        },
+        {
+          "id": "B",
+          "text": "Keep the application in one Availability Zone and copy its data to another Region.",
+          "correct": false,
+          "why": "A remote data copy does not keep application compute available when its only Availability Zone is interrupted."
+        },
+        {
+          "id": "C",
+          "text": "Run the application across multiple Availability Zones in its current Region.",
+          "correct": true,
+          "why": "This places application resources beyond the affected Availability Zone without adding a Region that the requirement does not call for."
+        },
+        {
+          "id": "D",
+          "text": "Run the application in a second Region and direct all users there with Route 53.",
+          "correct": false,
+          "why": "A second regional deployment adds scope when the stated requirement concerns one Availability Zone."
+        }
+      ],
+      "explanation": "The deciding boundary is one Availability Zone, not the entire Region. Placing the application across Availability Zones addresses that requirement without taking on a second regional deployment. A remote data copy or another DNS record cannot replace application compute when the only deployed Availability Zone is unavailable.",
+      "keywordCues": [
+        "interruption in one Availability Zone",
+        "does not require service during an outage of the entire Region",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html"
+      ],
+      "es": {
+        "stem": "Una empresa regional de venta de boletos ejecuta una aplicación en una AWS Region. Su requisito de continuidad cubre una interrupción en una Availability Zone; no exige mantener el servicio durante una caída de toda la Region. ¿Qué arquitectura cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener la aplicación en una Availability Zone y agregar un segundo registro DNS de Route 53.",
+            "why": "Otro registro DNS no proporciona una implementación de la aplicación fuera de la Availability Zone interrumpida."
+          },
+          {
+            "id": "B",
+            "text": "Mantener la aplicación en una Availability Zone y copiar sus datos a otra Region.",
+            "why": "Una copia remota de datos no mantiene disponible el cómputo cuando se interrumpe la única Availability Zone donde está la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar la aplicación en varias Availability Zones de su Region actual.",
+            "why": "Así ubicas recursos de la aplicación fuera de la Availability Zone afectada sin agregar una Region que el requisito no exige."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar la aplicación en una segunda Region y dirigir allí a todos los usuarios con Route 53.",
+            "why": "Una segunda implementación regional agrega alcance cuando el requisito se limita a una Availability Zone."
+          }
+        ],
+        "explanation": "El límite decisivo es una Availability Zone, no toda la Region. Distribuir la aplicación entre Availability Zones atiende ese requisito sin mantener una segunda implementación regional. Una copia remota de datos u otro registro DNS no reemplazan el cómputo si la única Availability Zone utilizada deja de estar disponible."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "multi-region-architecture--0c067b5c",
+      "conceptId": "multi-region-architecture",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher serves its website from application compute in one AWS Region and stores its content in Amazon S3 there. Its disaster recovery requirement is to resume serving the site from another Region if the primary Region cannot serve it, using content available at the recovery location. Which design meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep compute and content in the primary Region, and add another Route 53 record for that Region.",
+          "correct": false,
+          "why": "Both the application and its content remain in the Region that may be unable to serve the site."
+        },
+        {
+          "id": "B",
+          "text": "Prepare compute in a second Region, keep content only in the primary Region, and direct users to the new endpoint.",
+          "correct": false,
+          "why": "The recovery deployment lacks the content it must serve if the primary Region cannot provide it."
+        },
+        {
+          "id": "C",
+          "text": "Keep compute in the primary Region, copy content to a second Region, and update DNS after a disaster.",
+          "correct": false,
+          "why": "The second Region would have content but no application compute to serve the website."
+        },
+        {
+          "id": "D",
+          "text": "Prepare compute and a copy of the S3 content in a second Region, with a plan to direct users to its endpoint.",
+          "correct": true,
+          "why": "The recovery Region has the application resources, content, and user-routing plan needed to serve the site."
+        }
+      ],
+      "explanation": "The publisher needs to resume service outside its primary Region and use content available at that location. A second regional deployment therefore needs both application compute and a copy of the content, plus a way for users to reach it. Copying only the content leaves no application to serve it; deploying only compute leaves no local content for the stated recovery requirement.",
+      "keywordCues": [
+        "resume serving the site from another Region",
+        "primary Region cannot serve it",
+        "content available at the recovery location"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html"
+      ],
+      "es": {
+        "stem": "Una editorial ofrece su sitio web mediante cómputo de aplicación en una AWS Region y almacena allí su contenido en Amazon S3. Su requisito de recuperación ante desastres es reanudar el servicio desde otra Region si la principal no puede atenderlo, usando contenido disponible en la ubicación de recuperación. ¿Qué diseño cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener el cómputo y el contenido en la Region principal y agregar otro registro de Route 53 para esa Region.",
+            "why": "Tanto la aplicación como el contenido permanecen en la Region que podría dejar de atender el sitio."
+          },
+          {
+            "id": "B",
+            "text": "Preparar cómputo en una segunda Region, mantener el contenido solo en la Region principal y dirigir a los usuarios al nuevo endpoint.",
+            "why": "La implementación de recuperación carece del contenido que debe ofrecer si la Region principal no puede proporcionarlo."
+          },
+          {
+            "id": "C",
+            "text": "Mantener el cómputo en la Region principal, copiar el contenido a una segunda Region y actualizar DNS después de un desastre.",
+            "why": "La segunda Region tendría contenido, pero no cómputo de aplicación para ofrecer el sitio web."
+          },
+          {
+            "id": "D",
+            "text": "Preparar cómputo y una copia del contenido de S3 en una segunda Region, con un plan para dirigir a los usuarios a su endpoint.",
+            "why": "La Region de recuperación cuenta con recursos de aplicación, contenido y un plan para dirigir a los usuarios."
+          }
+        ],
+        "explanation": "La editorial necesita reanudar el servicio fuera de la Region principal y usar contenido disponible en esa ubicación. Por ello, la segunda implementación regional necesita tanto cómputo como una copia del contenido, además de una forma de dirigir a los usuarios. Copiar solo el contenido deja a la segunda Region sin aplicación; implementar solo cómputo la deja sin el contenido requerido."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "multi-region-architecture--793c4f53",
+      "conceptId": "multi-region-architecture",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare scheduling team is planning disaster recovery for an application deployed in one AWS Region. The business requires the application to serve users from another Region if the primary Region becomes unavailable, using application data available in that recovery Region. Which TWO additions together address the regional recovery requirement? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep backups for restoring the application only within the primary Region.",
+          "correct": false,
+          "why": "A recovery plan confined to the primary Region does not establish service from another Region."
+        },
+        {
+          "id": "B",
+          "text": "Prepare application compute in a second Region to serve requests there.",
+          "correct": true,
+          "why": "This supplies the application deployment needed at the regional recovery location."
+        },
+        {
+          "id": "C",
+          "text": "Make application data available in the second Region and plan to direct users to its endpoint.",
+          "correct": true,
+          "why": "This supplies regional data and a user-routing plan to complement the second Region's compute."
+        },
+        {
+          "id": "D",
+          "text": "Add another Route 53 record that points to the existing application endpoint in the primary Region.",
+          "correct": false,
+          "why": "The new record still points to an endpoint in the Region that may be unavailable."
+        },
+        {
+          "id": "E",
+          "text": "Add application compute in another Availability Zone of the primary Region.",
+          "correct": false,
+          "why": "Another Availability Zone in the primary Region is not a deployment in the required recovery Region."
+        }
+      ],
+      "explanation": "The stated disaster recovery location is a different Region, so the plan needs an application deployment there. It also needs usable data in that Region and a way to direct users to the recovery endpoint. Options B and E provide those complementary parts. Another Availability Zone, primary-Region-only backups, or a DNS record pointing at the original endpoint does not complete regional recovery.",
+      "keywordCues": [
+        "serve users from another Region",
+        "primary Region becomes unavailable",
+        "application data available in that recovery Region"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html"
+      ],
+      "es": {
+        "stem": "Un equipo de programación de citas médicas planifica la recuperación ante desastres de una aplicación implementada en una AWS Region. El negocio exige que la aplicación atienda a los usuarios desde otra Region si la principal deja de estar disponible, con datos de la aplicación disponibles en la Region de recuperación. ¿Qué DOS incorporaciones, en conjunto, cumplen el requisito de recuperación regional? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conservar copias de seguridad para restaurar la aplicación solo dentro de la Region principal.",
+            "why": "Un plan de recuperación limitado a la Region principal no establece servicio desde otra Region."
+          },
+          {
+            "id": "B",
+            "text": "Preparar cómputo de aplicación en una segunda Region para atender solicitudes allí.",
+            "why": "Esto proporciona la implementación de la aplicación necesaria en la ubicación de recuperación regional."
+          },
+          {
+            "id": "C",
+            "text": "Hacer que los datos de la aplicación estén disponibles en la segunda Region y planificar cómo dirigir a los usuarios a su endpoint.",
+            "why": "Esto aporta datos regionales y un plan para dirigir a los usuarios, que complementan el cómputo en la segunda Region."
+          },
+          {
+            "id": "D",
+            "text": "Agregar otro registro de Route 53 que apunte al endpoint actual de la aplicación en la Region principal.",
+            "why": "El registro nuevo sigue apuntando a un endpoint en la Region que podría dejar de estar disponible."
+          },
+          {
+            "id": "E",
+            "text": "Agregar cómputo de aplicación en otra Availability Zone de la Region principal.",
+            "why": "Otra Availability Zone de la Region principal no constituye una implementación en la Region de recuperación requerida."
+          }
+        ],
+        "explanation": "La ubicación de recuperación exigida está en otra Region, por lo que necesitas una implementación de la aplicación allí. También necesitas datos utilizables en esa Region y una forma de dirigir a los usuarios al endpoint de recuperación. Las opciones B y E aportan esas partes complementarias. Otra Availability Zone, las copias de seguridad limitadas a la Region principal o un registro DNS que apunte al endpoint original no completan la recuperación regional."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "multi-region-architecture--r0",
+      "conceptId": "multi-region-architecture",
+      "kind": "recall",
+      "prompt": "A workload must serve users after its primary AWS Region becomes unavailable. What must its regional recovery architecture account for, and why?",
+      "promptEs": "Una carga de trabajo debe atender a los usuarios si su AWS Region principal deja de estar disponible. ¿Qué debe contemplar su arquitectura de recuperación regional y por qué?",
+      "idealAnswer": "Prepare application compute and usable data in another Region, along with a plan to direct users to its endpoint. DNS alone cannot serve users if the recovery Region lacks the application or its data; choose the recovery approach against the business's RTO and RPO.",
+      "rubric": [
+        "Identifies application compute in another Region.",
+        "Identifies usable application data in that Region.",
+        "Includes a way to direct users to the recovery endpoint.",
+        "Connects the recovery approach to RTO and RPO."
+      ]
+    }
+  ]
+}

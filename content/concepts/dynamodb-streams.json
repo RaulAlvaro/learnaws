@@ -1,0 +1,317 @@
+{
+  "conceptId": "dynamodb-streams",
+  "card": {
+    "en": {
+      "tldr": "DynamoDB Streams records item-level changes so applications can react to table writes in near-real time. For an event-driven design with little shard-management work, enable the stream with the required record images and consume it through a Lambda event source mapping.",
+      "whenToUse": [
+        "React to creates, updates, or deletes in a DynamoDB table.",
+        "Process changes in order for each individual item.",
+        "Trigger Lambda without writing a custom stream reader."
+      ],
+      "keyFacts": [
+        "Stream records are available for up to 24 hours.",
+        "StreamViewType can capture keys only, the new image, the old image, or both images.",
+        "Changes to the same item appear in modification order; there is no table-wide ordering guarantee.",
+        "A Lambda event source mapping reads shard records in sequence-number order and handles parent-before-child shard processing."
+      ],
+      "gotchas": [
+        "A record appearing once in the stream does not mean downstream processing happens exactly once.",
+        "You cannot edit StreamViewType on an existing stream; disable it and create a new stream to change the view.",
+        "A no-op PutItem or UpdateItem does not produce a stream record."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "react to DynamoDB item changes",
+        "before and after images",
+        "ordered changes for each item",
+        "process changes within 24 hours",
+        "avoid managing stream shards"
+      ]
+    },
+    "es": {
+      "tldr": "DynamoDB Streams registra cambios a nivel de elemento para que las aplicaciones reaccionen a las escrituras en una tabla casi en tiempo real. Para un diseño basado en eventos sin administrar shards por tu cuenta, habilita el stream con las imágenes necesarias y consúmelo mediante un event source mapping de Lambda.",
+      "whenToUse": [
+        "Necesitas reaccionar a creaciones, actualizaciones o eliminaciones en una tabla de DynamoDB.",
+        "Necesitas procesar los cambios en orden para cada elemento.",
+        "Quieres activar Lambda sin escribir un lector de stream personalizado."
+      ],
+      "keyFacts": [
+        "Los registros del stream están disponibles hasta por 24 horas.",
+        "StreamViewType puede capturar solo las claves, la imagen nueva, la imagen anterior o ambas.",
+        "Los cambios de un mismo elemento aparecen en orden; no hay garantía de orden para toda la tabla.",
+        "Un event source mapping de Lambda lee los registros de cada shard en orden de secuencia y procesa el shard padre antes que sus hijos."
+      ],
+      "gotchas": [
+        "Que un registro aparezca una sola vez en el stream no significa que el procesamiento posterior ocurra exactamente una vez.",
+        "No puedes editar StreamViewType de un stream existente; para cambiarlo, debes deshabilitarlo y crear uno nuevo.",
+        "Un PutItem o UpdateItem que no modifica los datos no genera un registro en el stream."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "react to DynamoDB item changes",
+        "before and after images",
+        "ordered changes for each item",
+        "process changes within 24 hours",
+        "avoid managing stream shards"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-streams--2b0a665a",
+      "conceptId": "dynamodb-streams",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A clinic already has a DynamoDB stream configured with KEYS_ONLY for patient-appointment notifications. A new processor must compare appointment values before and after each change. The team wants the stream records themselves to contain both versions. What should the architect recommend?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable a second stream on the same table with NEW_AND_OLD_IMAGES.",
+          "correct": false,
+          "why": "Enabling a stream on a table that already has one produces a ValidationException."
+        },
+        {
+          "id": "B",
+          "text": "Disable the existing stream and create a new one with NEW_AND_OLD_IMAGES.",
+          "correct": true,
+          "why": "Changing the stream view requires replacing the existing stream, and the new view captures both images."
+        },
+        {
+          "id": "C",
+          "text": "Keep KEYS_ONLY and have the processor read each appointment from the table after a change.",
+          "correct": false,
+          "why": "A later table read does not put the previous and current versions into the stream record."
+        },
+        {
+          "id": "D",
+          "text": "Edit StreamViewType on the existing stream to NEW_AND_OLD_IMAGES.",
+          "correct": false,
+          "why": "StreamViewType cannot be edited after the stream has been set up."
+        }
+      ],
+      "explanation": "The deciding requirement is that the records themselves contain both versions of an appointment. DynamoDB does not allow StreamViewType to be edited on an existing stream, so the team must disable it and create a new stream configured with NEW_AND_OLD_IMAGES. Enabling another stream while the current one remains enabled is not an alternative.",
+      "keywordCues": [
+        "already has a DynamoDB stream configured with KEYS_ONLY",
+        "stream records themselves to contain both versions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html"
+      ],
+      "es": {
+        "stem": "Una clínica ya tiene un stream de DynamoDB configurado con KEYS_ONLY para notificaciones sobre citas. Un nuevo procesador debe comparar los valores de cada cita antes y después de un cambio. El equipo quiere que los propios registros del stream contengan ambas versiones. ¿Qué debería recomendar el arquitecto?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar un segundo stream en la misma tabla con NEW_AND_OLD_IMAGES.",
+            "why": "Habilitar un stream en una tabla que ya tiene uno produce una ValidationException."
+          },
+          {
+            "id": "B",
+            "text": "Deshabilitar el stream existente y crear uno nuevo con NEW_AND_OLD_IMAGES.",
+            "why": "Para cambiar la vista debes reemplazar el stream existente, y la nueva configuración captura ambas imágenes."
+          },
+          {
+            "id": "C",
+            "text": "Mantener KEYS_ONLY y hacer que el procesador lea cada cita desde la tabla después de un cambio.",
+            "why": "Una lectura posterior de la tabla no incorpora ambas versiones al registro del stream."
+          },
+          {
+            "id": "D",
+            "text": "Editar StreamViewType del stream existente a NEW_AND_OLD_IMAGES.",
+            "why": "StreamViewType no se puede editar después de configurar el stream."
+          }
+        ],
+        "explanation": "El requisito decisivo es que los propios registros contengan ambas versiones de una cita. DynamoDB no permite editar StreamViewType de un stream existente, por lo que debes deshabilitarlo y crear uno nuevo con NEW_AND_OLD_IMAGES. Tampoco puedes habilitar otro stream mientras el actual siga habilitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-streams--61a3c257",
+      "conceptId": "dynamodb-streams",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics platform writes shipment-status updates to DynamoDB. It needs to publish updates in modification order for each shipment, even as stream shards split, and its team does not want to maintain shard-discovery code. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Build a stream reader that discovers child shards and processes each parent before its children.",
+          "correct": false,
+          "why": "This can preserve the required ordering but requires the shard-discovery code the team wants to avoid."
+        },
+        {
+          "id": "B",
+          "text": "Assign three custom reader processes to every stream shard to handle shard splits.",
+          "correct": false,
+          "why": "More than two simultaneous readers on a shard can cause throttling and does not remove shard-management work."
+        },
+        {
+          "id": "C",
+          "text": "Enable DynamoDB Streams and consume it using a Lambda event source mapping.",
+          "correct": true,
+          "why": "Lambda processes shard records in sequence order and follows parent-child shard lineage for the team."
+        },
+        {
+          "id": "D",
+          "text": "Build a stream reader that starts child shards as soon as they appear, before finishing their parents.",
+          "correct": false,
+          "why": "Processing a child before its parent conflicts with the required shard processing order."
+        }
+      ],
+      "explanation": "The requirement is ordering for each shipment, not global ordering across the table. DynamoDB Streams preserves modification order for an individual item, while a Lambda event source mapping handles shard sequence and parent-before-child processing. A custom reader could also follow shard lineage, but it fails the stated goal of avoiding shard-discovery code.",
+      "keywordCues": [
+        "modification order for each shipment",
+        "even as stream shards split",
+        "does not want to maintain shard-discovery code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html"
+      ],
+      "es": {
+        "stem": "Una plataforma logística escribe actualizaciones del estado de los envíos en DynamoDB. Necesita publicar los cambios en orden de modificación para cada envío, incluso cuando se dividen los shards del stream, y el equipo no quiere mantener código para descubrir shards. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un lector del stream que descubra los shards hijos y procese cada padre antes que sus hijos.",
+            "why": "Puede conservar el orden necesario, pero exige el código para descubrir shards que el equipo quiere evitar."
+          },
+          {
+            "id": "B",
+            "text": "Asignar tres procesos lectores personalizados a cada shard del stream para manejar las divisiones.",
+            "why": "Más de dos lectores simultáneos por shard pueden causar throttling y no eliminan la administración de shards."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar DynamoDB Streams y consumirlo mediante un event source mapping de Lambda.",
+            "why": "Lambda procesa los registros de cada shard en orden de secuencia y sigue la relación entre shards padres e hijos."
+          },
+          {
+            "id": "D",
+            "text": "Crear un lector del stream que comience a procesar los shards hijos en cuanto aparezcan, antes de terminar sus padres.",
+            "why": "Procesar un hijo antes que su padre contradice el orden de procesamiento requerido para los shards."
+          }
+        ],
+        "explanation": "Se requiere orden para cada envío, no un orden global de toda la tabla. DynamoDB Streams conserva el orden de modificación de un elemento, mientras que un event source mapping de Lambda administra el orden de secuencia de cada shard y procesa los padres antes que sus hijos. Un lector personalizado también podría seguir esa relación, pero no cumple el objetivo de evitar código para descubrir shards."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-streams--70ec21ab",
+      "conceptId": "dynamodb-streams",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A retailer stores inventory items in DynamoDB and wants near-real-time notifications for item creates, updates, and deletes. Each change record must contain only the item's primary key attributes; a Lambda function will format the notifications, and the team will not maintain a custom shard reader. Which two configuration choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set the stream view to OLD_IMAGE.",
+          "correct": false,
+          "why": "OLD_IMAGE captures the previous item rather than only its primary key attributes."
+        },
+        {
+          "id": "B",
+          "text": "Enable DynamoDB Streams with KEYS_ONLY.",
+          "correct": true,
+          "why": "KEYS_ONLY records the primary key attributes for item modifications."
+        },
+        {
+          "id": "C",
+          "text": "Write a consumer that calls the Streams API and discovers shards.",
+          "correct": false,
+          "why": "A custom consumer requires the shard-reader maintenance the team ruled out."
+        },
+        {
+          "id": "D",
+          "text": "Connect the Lambda function to the stream with an event source mapping.",
+          "correct": true,
+          "why": "The event source mapping lets Lambda process stream records without a custom shard reader."
+        },
+        {
+          "id": "E",
+          "text": "Set the stream view to NEW_IMAGE.",
+          "correct": false,
+          "why": "NEW_IMAGE captures the entire item after a modification rather than only its keys."
+        }
+      ],
+      "explanation": "The record-content requirement selects KEYS_ONLY, which captures primary key attributes for item modifications. The operational requirement selects a Lambda event source mapping rather than a custom shard reader. NEW_IMAGE is a tempting alternative for notifications, but it includes the entire new item and fails the keys-only requirement.",
+      "keywordCues": [
+        "near-real-time notifications for item creates, updates, and deletes",
+        "only the item's primary key attributes",
+        "will not maintain a custom shard reader"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html"
+      ],
+      "es": {
+        "stem": "Un comercio minorista guarda elementos de inventario en DynamoDB y quiere notificaciones casi en tiempo real cuando se crean, actualizan o eliminan. Cada registro de cambio debe contener solo los atributos de la clave primaria del elemento; una función de Lambda dará formato a las notificaciones y el equipo no mantendrá un lector de shards personalizado. ¿Qué dos opciones de configuración cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Establecer la vista del stream en OLD_IMAGE.",
+            "why": "OLD_IMAGE captura el elemento anterior en vez de limitarse a sus atributos de clave primaria."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar DynamoDB Streams con KEYS_ONLY.",
+            "why": "KEYS_ONLY registra los atributos de la clave primaria cuando se modifica un elemento."
+          },
+          {
+            "id": "C",
+            "text": "Escribir un consumidor que llame a la API de Streams y descubra los shards.",
+            "why": "Un consumidor personalizado exige mantener el lector de shards que el equipo descartó."
+          },
+          {
+            "id": "D",
+            "text": "Conectar la función de Lambda al stream mediante un event source mapping.",
+            "why": "El event source mapping permite que Lambda procese los registros sin un lector de shards personalizado."
+          },
+          {
+            "id": "E",
+            "text": "Establecer la vista del stream en NEW_IMAGE.",
+            "why": "NEW_IMAGE captura el elemento completo después de la modificación, no solo sus claves."
+          }
+        ],
+        "explanation": "El requisito sobre el contenido de los registros apunta a KEYS_ONLY, que captura los atributos de la clave primaria cuando se modifica un elemento. El requisito operativo apunta a un event source mapping de Lambda en lugar de un lector de shards personalizado. NEW_IMAGE puede parecer útil para las notificaciones, pero incluye el elemento nuevo completo y no cumple la condición de registrar solo las claves."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-streams--r0",
+      "conceptId": "dynamodb-streams",
+      "kind": "recall",
+      "prompt": "How would you trigger processing of DynamoDB item changes with both before and after values, without managing stream shards?",
+      "promptEs": "¿Cómo activarías el procesamiento de cambios en elementos de DynamoDB con valores anteriores y nuevos, sin administrar los shards del stream?",
+      "idealAnswer": "Enable DynamoDB Streams with NEW_AND_OLD_IMAGES and connect a Lambda function through an event source mapping. The stream provides both images, and Lambda handles reading the shards.",
+      "rubric": [
+        "Names DynamoDB Streams as the source of item changes.",
+        "Selects NEW_AND_OLD_IMAGES for both values.",
+        "Uses a Lambda event source mapping to avoid custom shard management."
+      ]
+    }
+  ]
+}

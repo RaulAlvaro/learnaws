@@ -1,0 +1,255 @@
+{
+  "conceptId": "aurora-cloning-backtrack",
+  "card": {
+    "en": {
+      "tldr": "Aurora cloning creates a separate cluster quickly using copy-on-write storage, making it useful for testing with production data. Aurora MySQL Backtrack rewinds an existing cluster after a bad change; choose it when recovery must happen in place and Backtrack was enabled when the cluster was created.",
+      "whenToUse": [
+        "Create an independent test or development cluster from production data quickly, with minimal initial storage.",
+        "Rewind a Backtrack-enabled Aurora MySQL cluster after an accidental data change without restoring a new cluster."
+      ],
+      "keyFacts": [
+        "A clone initially shares data pages with its source; additional storage is used as their data changes.",
+        "The source and clone are separate clusters, so testing on the clone does not change the source.",
+        "Copy-on-write applies to up to 15 clones; the next clone is a full copy.",
+        "Backtrack must be enabled when an Aurora MySQL cluster is created or when a snapshot is restored; it cannot be enabled later on an existing cluster.",
+        "Backtrack affects the entire cluster, causes a brief disruption, and has a maximum target window of 72 hours. The actual window can be shorter."
+      ],
+      "gotchas": [
+        "A clone is not an in-place rewind of its source.",
+        "Backtrack is not available for Aurora PostgreSQL and cannot rewind only one table.",
+        "Aurora cannot create a clone in a different AWS Region from its source.",
+        "Backtrack does not replace backups."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Snapshot restore",
+          "difference": "A snapshot restore creates a new cluster; cloning is faster and more space-efficient for an initial test copy."
+        },
+        {
+          "concept": "Point-in-time restore",
+          "difference": "Point-in-time restore creates a new cluster, while Backtrack rewinds an eligible Aurora MySQL cluster in place."
+        }
+      ],
+      "examCues": [
+        "production-like test cluster with minimal initial storage",
+        "independent copy for schema experiments",
+        "undo an accidental DELETE in place",
+        "Backtrack enabled at cluster creation",
+        "clone in another VPC with matching Availability Zones"
+      ]
+    },
+    "es": {
+      "tldr": "Aurora cloning crea rápidamente un clúster independiente con almacenamiento copy-on-write, útil para probar con datos de producción. Aurora MySQL Backtrack retrocede un clúster existente después de un cambio erróneo; elígelo si necesitas recuperar el clúster en el mismo lugar y Backtrack se habilitó al crearlo.",
+      "whenToUse": [
+        "Necesitas crear rápidamente un clúster independiente de pruebas o desarrollo con datos de producción y poco almacenamiento inicial.",
+        "Necesitas retroceder un clúster Aurora MySQL con Backtrack habilitado después de un cambio accidental, sin restaurar un clúster nuevo."
+      ],
+      "keyFacts": [
+        "Un clon comparte inicialmente las páginas de datos con el origen; se usa almacenamiento adicional a medida que cambian los datos.",
+        "El origen y el clon son clústeres independientes, por lo que las pruebas en el clon no modifican el origen.",
+        "Copy-on-write se aplica hasta a 15 clones; el siguiente clon es una copia completa.",
+        "Backtrack debe habilitarse al crear un clúster Aurora MySQL o al restaurar un snapshot; no puedes habilitarlo después en un clúster existente.",
+        "Backtrack afecta a todo el clúster, causa una breve interrupción y admite una ventana objetivo máxima de 72 horas. La ventana real puede ser menor."
+      ],
+      "gotchas": [
+        "Un clon no retrocede el clúster de origen en el mismo lugar.",
+        "Backtrack no está disponible para Aurora PostgreSQL y no puede retroceder solo una tabla.",
+        "Aurora no puede crear un clon en una AWS Region distinta de la del origen.",
+        "Backtrack no sustituye a los backups."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Snapshot restore",
+          "difference": "Snapshot restore crea un clúster nuevo; cloning es más rápido y usa menos espacio para una copia inicial de pruebas."
+        },
+        {
+          "concept": "Point-in-time restore",
+          "difference": "Point-in-time restore crea un clúster nuevo, mientras que Backtrack retrocede un clúster Aurora MySQL elegible en el mismo lugar."
+        }
+      ],
+      "examCues": [
+        "production-like test cluster with minimal initial storage",
+        "independent copy for schema experiments",
+        "undo an accidental DELETE in place",
+        "Backtrack enabled at cluster creation",
+        "clone in another VPC with matching Availability Zones"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Clone.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Backtrack.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aurora-cloning-backtrack--27f9f8b3",
+      "conceptId": "aurora-cloning-backtrack",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A medical research company runs an Aurora production cluster and needs a separate cluster for testing a schema change against current production data. The test must not modify production, and the team wants to avoid initially storing a full physical copy of the data. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an Aurora clone of the production cluster and run the test on the clone.",
+          "correct": true,
+          "why": "The clone is independent and initially shares data pages with production through copy-on-write."
+        },
+        {
+          "id": "B",
+          "text": "Enable Backtrack on the production cluster and run the test there, then rewind it.",
+          "correct": false,
+          "why": "Backtrack does not isolate the schema test from production."
+        },
+        {
+          "id": "C",
+          "text": "Create a point-in-time restored Aurora cluster and run the test there.",
+          "correct": false,
+          "why": "Point-in-time restore creates a separate cluster but does not provide the requested copy-on-write initial storage efficiency."
+        },
+        {
+          "id": "D",
+          "text": "Restore a production snapshot into a new Aurora cluster for the test.",
+          "correct": false,
+          "why": "Snapshot restore provides a separate cluster but is less space-efficient initially than cloning."
+        }
+      ],
+      "explanation": "The deciding requirements are an independent test cluster and minimal initial storage. Aurora cloning creates a separate cluster that initially shares the source's data pages, allocating more storage as data changes. Snapshot and point-in-time restores can produce new clusters but do not offer the same copy-on-write advantage for this test. Backtracking production would not isolate the experiment.",
+      "keywordCues": [
+        "separate cluster for testing a schema change",
+        "must not modify production",
+        "avoid initially storing a full physical copy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Clone.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Backtrack.html"
+      ],
+      "es": {
+        "stem": "Una empresa de investigación médica ejecuta un clúster Aurora de producción y necesita otro clúster para probar un cambio de esquema con datos actuales de producción. La prueba no debe modificar producción y el equipo quiere evitar almacenar inicialmente una copia física completa de los datos. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un clon Aurora del clúster de producción y ejecutar la prueba en el clon.",
+            "why": "El clon es independiente y al principio comparte páginas de datos con producción mediante copy-on-write."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar Backtrack en el clúster de producción, ejecutar allí la prueba y después retrocederlo.",
+            "why": "Backtrack no aísla la prueba del esquema de producción."
+          },
+          {
+            "id": "C",
+            "text": "Crear un clúster Aurora mediante point-in-time restore y ejecutar allí la prueba.",
+            "why": "Point-in-time restore crea un clúster independiente, pero no ofrece la eficiencia de almacenamiento inicial copy-on-write solicitada."
+          },
+          {
+            "id": "D",
+            "text": "Restaurar un snapshot de producción en un clúster Aurora nuevo para la prueba.",
+            "why": "Snapshot restore proporciona un clúster independiente, pero inicialmente usa más espacio que cloning."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son un clúster de pruebas independiente y poco almacenamiento inicial. Aurora cloning crea un clúster separado que al principio comparte las páginas de datos del origen y usa más almacenamiento a medida que cambian los datos. Snapshot restore y point-in-time restore pueden crear clústeres nuevos, pero no ofrecen la misma ventaja copy-on-write para esta prueba. Backtrack en producción no aislaría el experimento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-cloning-backtrack--d00ad976",
+      "conceptId": "aurora-cloning-backtrack",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A game studio keeps an Aurora production cluster in one VPC and wants an independent cluster for load testing in another VPC in the same AWS Region. The subnets in the two VPCs map to the same Availability Zones. The studio wants the test cluster ready quickly with minimal additional storage at creation, while keeping production running. Which approach meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Backtrack the production cluster before each test and run the load test on production.",
+          "correct": false,
+          "why": "Backtrack affects production and does not provide an independent cluster in the test VPC."
+        },
+        {
+          "id": "B",
+          "text": "Restore production to a point in time into the test VPC using the matching Availability Zones.",
+          "correct": false,
+          "why": "Point-in-time restore creates a separate cluster but does not meet the requested copy-on-write efficiency."
+        },
+        {
+          "id": "C",
+          "text": "Restore a production snapshot into the test VPC using the matching Availability Zones.",
+          "correct": false,
+          "why": "A snapshot restore can provide a separate test cluster but is less space-efficient at creation than cloning."
+        },
+        {
+          "id": "D",
+          "text": "Create an Aurora clone in the test VPC using subnets mapped to the same Availability Zones.",
+          "correct": true,
+          "why": "Aurora supports cross-VPC cloning with matching Availability Zone mappings, and the clone initially uses copy-on-write storage."
+        }
+      ],
+      "explanation": "Different VPCs do not rule out Aurora cloning when their subnets map to the same Availability Zones. Because the clusters are in the same Region, a cross-VPC clone can give the studio an independent test cluster with minimal initial storage. Snapshot and point-in-time restores miss the copy-on-write storage requirement. Running tests on production, even with Backtrack, fails the isolation requirement.",
+      "keywordCues": [
+        "another VPC in the same AWS Region",
+        "subnets in the two VPCs map to the same Availability Zones",
+        "independent cluster for load testing",
+        "minimal additional storage at creation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Clone.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Backtrack.html"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos mantiene un clúster Aurora de producción en una VPC y quiere un clúster independiente para pruebas de carga en otra VPC de la misma AWS Region. Las subredes de ambas VPC corresponden a las mismas Availability Zones. El estudio quiere que el clúster de pruebas esté listo rápidamente, con poco almacenamiento adicional al crearlo y sin detener producción. ¿Qué enfoque cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Aplicar Backtrack al clúster de producción antes de cada prueba y ejecutar allí las pruebas de carga.",
+            "why": "Backtrack afecta a producción y no proporciona un clúster independiente en la VPC de pruebas."
+          },
+          {
+            "id": "B",
+            "text": "Restaurar producción a un momento específico en la VPC de pruebas usando las Availability Zones correspondientes.",
+            "why": "Point-in-time restore crea un clúster independiente, pero no cumple el requisito de eficiencia copy-on-write."
+          },
+          {
+            "id": "C",
+            "text": "Restaurar un snapshot de producción en la VPC de pruebas usando las Availability Zones correspondientes.",
+            "why": "Snapshot restore puede proporcionar un clúster de pruebas independiente, pero al crearlo usa más espacio que cloning."
+          },
+          {
+            "id": "D",
+            "text": "Crear un clon Aurora en la VPC de pruebas usando subredes que correspondan a las mismas Availability Zones.",
+            "why": "Aurora permite cross-VPC cloning si las Availability Zones coinciden, y el clon usa inicialmente almacenamiento copy-on-write."
+          }
+        ],
+        "explanation": "Tener VPC distintas no impide Aurora cloning si sus subredes corresponden a las mismas Availability Zones. Como los clústeres están en la misma AWS Region, cross-VPC cloning puede proporcionar un clúster de pruebas independiente con poco almacenamiento inicial. Snapshot restore y point-in-time restore no cumplen el requisito de eficiencia copy-on-write. Ejecutar pruebas en producción, incluso con Backtrack, incumple el requisito de aislamiento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aurora-cloning-backtrack--r0",
+      "conceptId": "aurora-cloning-backtrack",
+      "kind": "recall",
+      "prompt": "You need a fast, independent Aurora test cluster using production data with minimal initial storage. What would you use, and why?",
+      "promptEs": "Necesitas un clúster Aurora de pruebas independiente y rápido, con datos de producción y poco almacenamiento inicial. ¿Qué usarías y por qué?",
+      "idealAnswer": "Use Aurora cloning. It creates an independent cluster that initially shares data pages with the source through copy-on-write, so additional storage grows as the data changes.",
+      "rubric": [
+        "Names Aurora cloning.",
+        "Identifies the clone as a separate cluster.",
+        "Explains initial page sharing and copy-on-write storage."
+      ]
+    }
+  ]
+}

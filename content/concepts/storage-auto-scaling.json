@@ -1,0 +1,252 @@
+{
+  "conceptId": "storage-auto-scaling",
+  "card": {
+    "en": {
+      "tldr": "Choose storage that matches the workload before deciding how it should grow: Amazon RDS storage autoscaling for an RDS DB instance, Amazon EFS for elastic file storage, and Amazon S3 for elastic object storage. Amazon EBS Elastic Volumes can be enlarged, but a volume modification and file-system extension are not the same as automatically growing file storage.",
+      "whenToUse": [
+        "An RDS DB instance has unpredictable storage growth and should increase allocated storage without manual intervention.",
+        "A growing file-storage workload should avoid preallocating an EBS volume.",
+        "An existing EBS volume needs more capacity while its application continues running."
+      ],
+      "keyFacts": [
+        "RDS storage autoscaling increases DB instance storage when free space is at most 10% of allocated storage for at least five minutes, subject to modification conditions.",
+        "The RDS maximum storage threshold must be at least 10% above currently allocated storage; AWS recommends at least 26% above it to avoid an approaching-threshold notification.",
+        "RDS storage autoscaling cannot reduce allocated storage and is not supported for additional storage volumes.",
+        "EBS Elastic Volumes can increase volume size without detaching or restarting when the instance supports the feature; extend the file system after resizing."
+      ],
+      "gotchas": [
+        "RDS autoscaling is not a guarantee against storage-full conditions during large data loads.",
+        "A low RDS maximum storage threshold can prevent the needed increase.",
+        "EBS volume modifications increase capacity but do not provide automatic storage growth or shrinkage."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EBS Elastic Volumes",
+          "difference": "Modify an existing EBS volume when needed; use RDS storage autoscaling when an RDS DB instance must increase storage automatically."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "Choose elastic file storage for a file workload, not RDS storage autoscaling, which applies to DB instance storage."
+        }
+      ],
+      "examCues": [
+        "unpredictable growth in an RDS DB instance",
+        "set an upper limit on automatic database storage increases",
+        "growing file storage without preallocating capacity",
+        "enlarge an attached EBS volume without restarting"
+      ]
+    },
+    "es": {
+      "tldr": "Elige primero el almacenamiento que corresponde a la carga de trabajo: Amazon RDS storage autoscaling para una instancia de base de datos RDS, Amazon EFS para almacenamiento de archivos elástico y Amazon S3 para almacenamiento de objetos elástico. Amazon EBS Elastic Volumes permite ampliar un volumen, pero modificarlo y extender su sistema de archivos no equivale a crecimiento automático del almacenamiento de archivos.",
+      "whenToUse": [
+        "Una instancia de base de datos RDS tiene crecimiento impredecible y debe aumentar su almacenamiento sin intervención manual.",
+        "Una carga de archivos en crecimiento debe evitar el aprovisionamiento anticipado de un volumen EBS.",
+        "Un volumen EBS existente necesita más capacidad mientras la aplicación sigue funcionando."
+      ],
+      "keyFacts": [
+        "RDS storage autoscaling aumenta el almacenamiento de la instancia cuando el espacio libre es como máximo el 10% del almacenamiento asignado durante al menos cinco minutos, sujeto a condiciones de modificación.",
+        "El umbral máximo de almacenamiento de RDS debe superar en al menos un 10% el almacenamiento asignado; AWS recomienda al menos un 26% para evitar una notificación de proximidad al umbral.",
+        "RDS storage autoscaling no puede reducir el almacenamiento asignado y no admite volúmenes de almacenamiento adicionales.",
+        "EBS Elastic Volumes permite aumentar el tamaño sin desconectar el volumen ni reiniciar la instancia si esta admite la función; después debes extender el sistema de archivos."
+      ],
+      "gotchas": [
+        "RDS storage autoscaling no garantiza que se evite la falta de espacio durante cargas grandes de datos.",
+        "Un umbral máximo de almacenamiento de RDS demasiado bajo puede impedir el aumento necesario.",
+        "Modificar un volumen EBS aumenta su capacidad, pero no proporciona crecimiento o reducción automáticos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EBS Elastic Volumes",
+          "difference": "Modifica un volumen EBS existente cuando sea necesario; usa RDS storage autoscaling si una instancia de base de datos RDS debe aumentar su almacenamiento automáticamente."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "Elige almacenamiento de archivos elástico para una carga de archivos, no RDS storage autoscaling, que se aplica al almacenamiento de instancias de base de datos."
+        }
+      ],
+      "examCues": [
+        "unpredictable growth in an RDS DB instance",
+        "set an upper limit on automatic database storage increases",
+        "growing file storage without preallocating capacity",
+        "enlarge an attached EBS volume without restarting"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+      "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "storage-auto-scaling--935b4991",
+      "conceptId": "storage-auto-scaling",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs its transactional database on an Amazon RDS DB instance. Ticket releases cause unpredictable but sustained increases in stored data, and the team wants to avoid sizing the database for the largest possible release. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use EBS Elastic Volumes to increase an application server's attached volume as releases occur.",
+          "correct": false,
+          "why": "Increasing the application server's EBS volume does not increase the RDS DB instance's storage."
+        },
+        {
+          "id": "B",
+          "text": "Provision the DB instance with enough storage for the largest projected release.",
+          "correct": false,
+          "why": "This avoids storage modifications but requires the advance overprovisioning the team wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Monitor database free space and manually increase allocated RDS storage after each release.",
+          "correct": false,
+          "why": "Manual modifications add operational work for the unpredictable growth the team wants handled automatically."
+        },
+        {
+          "id": "D",
+          "text": "Enable RDS storage autoscaling on the DB instance and set an appropriate maximum storage threshold.",
+          "correct": true,
+          "why": "RDS can increase the DB instance's allocated storage automatically as free space runs low, up to the configured threshold."
+        }
+      ],
+      "explanation": "The deciding requirements are unpredictable growth in the RDS database and minimal manual intervention. RDS storage autoscaling increases DB instance storage when its low-free-space conditions are met, subject to a configured maximum threshold. Preallocating for the largest release conflicts with the sizing goal, while manual RDS changes do not meet the operational-overhead goal.",
+      "keywordCues": [
+        "Amazon RDS DB instance",
+        "unpredictable but sustained increases",
+        "avoid sizing the database for the largest possible release",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta su base de datos transaccional en una instancia de base de datos Amazon RDS. Los lanzamientos de boletos provocan aumentos impredecibles, pero sostenidos, en los datos almacenados, y el equipo quiere evitar dimensionar la base de datos para el mayor lanzamiento posible. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar EBS Elastic Volumes para aumentar el volumen conectado a un servidor de aplicaciones durante los lanzamientos.",
+            "why": "Aumentar el volumen EBS del servidor de aplicaciones no aumenta el almacenamiento de la instancia de base de datos RDS."
+          },
+          {
+            "id": "B",
+            "text": "Aprovisionar la instancia de base de datos con almacenamiento suficiente para el mayor lanzamiento previsto.",
+            "why": "Evita modificar el almacenamiento, pero requiere el aprovisionamiento excesivo anticipado que el equipo quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Supervisar el espacio libre de la base de datos y aumentar manualmente el almacenamiento RDS asignado después de cada lanzamiento.",
+            "why": "Las modificaciones manuales agregan trabajo operativo para un crecimiento impredecible que el equipo quiere gestionar automáticamente."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar RDS storage autoscaling en la instancia de base de datos y configurar un umbral máximo de almacenamiento adecuado.",
+            "why": "RDS puede aumentar automáticamente el almacenamiento asignado a la instancia cuando queda poco espacio libre, hasta el umbral configurado."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el crecimiento impredecible de la base de datos RDS y la mínima intervención manual. RDS storage autoscaling aumenta el almacenamiento de la instancia cuando se cumplen sus condiciones de poco espacio libre, sujeto a un umbral máximo configurado. Aprovisionar para el mayor lanzamiento contradice el objetivo de dimensionamiento; los cambios manuales de RDS no cumplen el objetivo de LEAST operational overhead."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-auto-scaling--6b3f480d",
+      "conceptId": "storage-auto-scaling",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab keeps an application dataset on an EBS volume attached to an instance that supports Elastic Volumes. The dataset has outgrown the volume, but the application must remain running and continue using its existing block device. Which solution meets these requirements with the LEAST disruption?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the dataset to Amazon S3 and have the application use object storage.",
+          "correct": false,
+          "why": "S3 changes the storage model instead of preserving the application's existing block device."
+        },
+        {
+          "id": "B",
+          "text": "Increase the EBS volume size with Elastic Volumes, then extend its file system.",
+          "correct": true,
+          "why": "On a supporting instance, Elastic Volumes can enlarge the attached volume without detaching or restarting, followed by file-system extension."
+        },
+        {
+          "id": "C",
+          "text": "Enable RDS storage autoscaling for the instance that runs the application.",
+          "correct": false,
+          "why": "RDS storage autoscaling applies to an RDS DB instance, not this attached EBS volume."
+        },
+        {
+          "id": "D",
+          "text": "Move the dataset to Amazon EFS and have the application use file storage.",
+          "correct": false,
+          "why": "EFS changes the application's storage from its existing block device to file storage."
+        }
+      ],
+      "explanation": "The application must keep using its existing EBS block device while it remains running. Because the instance supports Elastic Volumes, the lab can increase the volume size without detaching it or restarting the instance, then extend the file system. EFS and S3 would change the storage model, and RDS storage autoscaling does not resize an application's attached EBS volume.",
+      "keywordCues": [
+        "EBS volume attached to an instance that supports Elastic Volumes",
+        "application must remain running",
+        "existing block device",
+        "LEAST disruption"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación mantiene los datos de una aplicación en un volumen EBS conectado a una instancia que admite Elastic Volumes. Los datos ya no caben en el volumen, pero la aplicación debe seguir funcionando y usando su dispositivo de bloques actual. ¿Qué solución cumple estos requisitos con la LEAST disruption?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Trasladar los datos a Amazon S3 y hacer que la aplicación use almacenamiento de objetos.",
+            "why": "S3 cambia el modelo de almacenamiento en lugar de conservar el dispositivo de bloques actual de la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Aumentar el tamaño del volumen EBS con Elastic Volumes y después extender su sistema de archivos.",
+            "why": "En una instancia compatible, Elastic Volumes permite ampliar el volumen conectado sin desconectarlo ni reiniciar, y después extender el sistema de archivos."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar RDS storage autoscaling para la instancia que ejecuta la aplicación.",
+            "why": "RDS storage autoscaling se aplica a una instancia de base de datos RDS, no a este volumen EBS conectado."
+          },
+          {
+            "id": "D",
+            "text": "Trasladar los datos a Amazon EFS y hacer que la aplicación use almacenamiento de archivos.",
+            "why": "EFS cambia el almacenamiento de la aplicación de su dispositivo de bloques actual a almacenamiento de archivos."
+          }
+        ],
+        "explanation": "La aplicación debe seguir usando su dispositivo de bloques EBS actual mientras permanece en ejecución. Como la instancia admite Elastic Volumes, el laboratorio puede aumentar el tamaño del volumen sin desconectarlo ni reiniciar la instancia, y después extender el sistema de archivos. EFS y S3 cambiarían el modelo de almacenamiento; RDS storage autoscaling no redimensiona un volumen EBS conectado a la aplicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "storage-auto-scaling--r0",
+      "conceptId": "storage-auto-scaling",
+      "kind": "recall",
+      "prompt": "An RDS database grows unpredictably. How can its storage increase without manual resizing, and what limit should you configure?",
+      "promptEs": "Una base de datos RDS crece de forma impredecible. ¿Cómo puede aumentar su almacenamiento sin cambios manuales de tamaño y qué límite debes configurar?",
+      "idealAnswer": "Enable RDS storage autoscaling on the DB instance and set an appropriate maximum storage threshold. RDS increases allocated storage when its low-free-space conditions are met, but it cannot scale storage back down.",
+      "rubric": [
+        "Names RDS storage autoscaling on the DB instance.",
+        "Mentions configuring a maximum storage threshold.",
+        "Explains automatic increases when storage runs low and that allocated storage does not automatically decrease."
+      ]
+    }
+  ]
+}

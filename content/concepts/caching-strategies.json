@@ -1,0 +1,328 @@
+{
+  "conceptId": "caching-strategies",
+  "card": {
+    "en": {
+      "tldr": "Use an application-side ElastiCache cache to reduce repeated database reads. Choose lazy loading when only requested data should occupy the cache, write-through when reads should find recently written data, and TTL when entries should expire and be refreshed.",
+      "whenToUse": [
+        "Choose lazy loading when many records are rarely read and a slower first request is acceptable.",
+        "Add write-through when the application updates the database and subsequent reads should usually find the updated value in the cache.",
+        "Add TTL when cached entries should eventually expire, especially if writes can bypass the cache or rarely read entries accumulate."
+      ],
+      "keyFacts": [
+        "With lazy loading, the application checks the cache first; on a miss, it reads the database and populates the cache.",
+        "Lazy loading caches only requested data, but a miss adds latency and cached values can become stale after a database update.",
+        "Write-through updates the cache when the database is updated. It adds work to writes and can cache data that is never read.",
+        "Write-through is commonly paired with lazy loading so reads can refill an empty cache node.",
+        "An expired TTL key is treated as a miss. TTL limits how long an entry remains cached, but does not guarantee it was never stale before expiry."
+      ],
+      "gotchas": [
+        "Write-through alone does not refill entries missing from a newly empty cache node until those entries are written again.",
+        "Lazy loading alone does not update an existing cache entry when its database record changes.",
+        "TTL is not immediate invalidation: an entry can be stale before it expires."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "only cache records users actually request",
+        "reads immediately after application writes",
+        "new cache nodes must refill on demand",
+        "database changes can bypass the application",
+        "expire cached values and refresh on the next read"
+      ]
+    },
+    "es": {
+      "tldr": "Usa una caché de ElastiCache del lado de la aplicación para reducir lecturas repetidas de la base de datos. Elige lazy loading si solo quieres almacenar datos solicitados, write-through si las lecturas deben encontrar datos recién escritos y TTL si las entradas deben vencer y actualizarse.",
+      "whenToUse": [
+        "Elige lazy loading cuando muchos registros casi nunca se consultan y se acepta una primera solicitud más lenta.",
+        "Agrega write-through cuando la aplicación actualiza la base de datos y las lecturas posteriores deberían encontrar normalmente el valor actualizado en la caché.",
+        "Agrega TTL cuando las entradas deben vencer, especialmente si algunas escrituras no pasan por la caché o se acumulan datos poco consultados."
+      ],
+      "keyFacts": [
+        "Con lazy loading, la aplicación consulta primero la caché; si no encuentra el dato, lee la base de datos y llena la caché.",
+        "Lazy loading almacena solo los datos solicitados, pero una ausencia agrega latencia y los valores pueden quedar desactualizados después de un cambio en la base de datos.",
+        "Write-through actualiza la caché cuando se actualiza la base de datos. Agrega trabajo a las escrituras y puede almacenar datos que nunca se leen.",
+        "Write-through suele combinarse con lazy loading para que las lecturas puedan volver a llenar un nodo de caché vacío.",
+        "Una clave cuyo TTL venció se trata como ausente. TTL limita cuánto permanece almacenada una entrada, pero no garantiza que nunca estuvo desactualizada antes de vencer."
+      ],
+      "gotchas": [
+        "Write-through por sí solo no repone las entradas faltantes de un nodo de caché nuevo y vacío hasta que esas entradas se vuelvan a escribir.",
+        "Lazy loading por sí solo no actualiza una entrada existente cuando cambia su registro en la base de datos.",
+        "TTL no invalida de inmediato: una entrada puede estar desactualizada antes de vencer."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "only cache records users actually request",
+        "reads immediately after application writes",
+        "new cache nodes must refill on demand",
+        "database changes can bypass the application",
+        "expire cached values and refresh on the next read"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html",
+      "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "caching-strategies--60e2feeb",
+      "conceptId": "caching-strategies",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher serves article metadata through an application backed by a database and ElastiCache. An independent editorial process sometimes updates the database without passing through the serving application; readers can tolerate an older value briefly, but cached values must eventually be refreshed. Which approach meets these requirements with the LEAST change to the editorial process?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use lazy loading without expiry so requested metadata remains cached.",
+          "correct": false,
+          "why": "An entry can remain stale after an editorial database update."
+        },
+        {
+          "id": "B",
+          "text": "Serve metadata from ElastiCache and refresh an entry only when the serving application writes it.",
+          "correct": false,
+          "why": "Editorial changes bypass that refresh path and can leave cached values stale."
+        },
+        {
+          "id": "C",
+          "text": "Use lazy loading with a TTL so an expired entry is fetched again from the database.",
+          "correct": true,
+          "why": "Expiry causes a later read to reload metadata even when the database change bypassed the application."
+        },
+        {
+          "id": "D",
+          "text": "Use write-through only in the serving application's write path.",
+          "correct": false,
+          "why": "It does not update the cache when the independent editorial process writes directly to the database."
+        }
+      ],
+      "explanation": "Editorial updates bypass the serving application's write path, so write-through implemented only there cannot refresh those entries. TTL makes an expired cache entry behave like a miss; lazy loading then retrieves the current database value on the next request. This meets the stated tolerance for briefly older values without changing the editorial writer. TTL does not guarantee that a cached value stays current before it expires.",
+      "keywordCues": [
+        "updates the database without passing through the serving application",
+        "tolerate an older value briefly",
+        "cached values must eventually be refreshed",
+        "LEAST change to the editorial process"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html",
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html"
+      ],
+      "es": {
+        "stem": "Una editorial entrega metadatos de artículos mediante una aplicación respaldada por una base de datos y ElastiCache. Un proceso editorial independiente a veces actualiza la base de datos sin pasar por la aplicación que atiende las lecturas; los lectores toleran un valor anterior por poco tiempo, pero los valores almacenados deben actualizarse eventualmente. ¿Qué enfoque cumple estos requisitos con el LEAST change to the editorial process?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa lazy loading sin vencimiento para que los metadatos solicitados permanezcan en la caché.",
+            "why": "Una entrada puede seguir desactualizada después de un cambio editorial en la base de datos."
+          },
+          {
+            "id": "B",
+            "text": "Entrega los metadatos desde ElastiCache y actualiza una entrada solo cuando la aplicación que atiende las lecturas la escribe.",
+            "why": "Los cambios editoriales no pasan por esa ruta de actualización y pueden dejar valores desactualizados."
+          },
+          {
+            "id": "C",
+            "text": "Usa lazy loading con TTL para volver a consultar una entrada vencida en la base de datos.",
+            "why": "El vencimiento permite que una lectura posterior recargue los metadatos aunque el cambio en la base de datos no haya pasado por la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Usa write-through solo en la ruta de escritura de la aplicación que atiende las lecturas.",
+            "why": "No actualiza la caché cuando el proceso editorial independiente escribe directamente en la base de datos."
+          }
+        ],
+        "explanation": "Las actualizaciones editoriales no pasan por la ruta de escritura de la aplicación que atiende las lecturas; por eso, write-through implementado solo allí no puede actualizar esas entradas. Con TTL, una entrada vencida se trata como ausente y lazy loading obtiene el valor de la base de datos en la siguiente solicitud. Esto admite valores anteriores durante un período breve sin cambiar el proceso editorial. TTL no garantiza que el valor almacenado esté actualizado antes de vencer."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "caching-strategies--4cf275de",
+      "conceptId": "caching-strategies",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A food-delivery application repeatedly reads restaurant details, updates them through its own write path, and stores them in ElastiCache. It needs cached details to reflect application writes, reads to recover when a new cache node is empty, and old or unused entries to expire. Which TWO application behaviors together meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "On a cache miss, read the database, return the details, and populate the cache with a TTL.",
+          "correct": true,
+          "why": "This restores entries missing from an empty node while allowing the new copies to expire."
+        },
+        {
+          "id": "B",
+          "text": "Update the cache on writes without expiry and return an error on a cache miss.",
+          "correct": false,
+          "why": "It neither expires unused entries nor recovers missing data on a new node."
+        },
+        {
+          "id": "C",
+          "text": "After each database write, update the corresponding cache entry and set a TTL.",
+          "correct": true,
+          "why": "This reflects application writes in the cache and lets entries expire."
+        },
+        {
+          "id": "D",
+          "text": "Populate the cache only when a read misses, leaving cached entries unchanged on writes.",
+          "correct": false,
+          "why": "An existing entry can serve old details after an application write."
+        },
+        {
+          "id": "E",
+          "text": "Query the database before every cache read to verify the cached details.",
+          "correct": false,
+          "why": "A database query on every read defeats the goal of reducing repeated database reads."
+        }
+      ],
+      "explanation": "The application controls writes, so it can use write-through to update cached restaurant details and attach a TTL. Lazy loading on a miss lets reads retrieve data from the database and refill an empty node. Together, those behaviors address updates, missing entries, and expiry. Populating only on read misses leaves existing entries unchanged after writes, while write-through without miss handling cannot recover absent entries.",
+      "keywordCues": [
+        "updates them through its own write path",
+        "reflect application writes",
+        "new cache node is empty",
+        "old or unused entries to expire",
+        "Choose two."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html",
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de entregas de comida consulta repetidamente los detalles de los restaurantes, los actualiza mediante su propia ruta de escritura y los almacena en ElastiCache. Necesita que los detalles en caché reflejen las escrituras de la aplicación, que las lecturas se recuperen cuando un nodo de caché nuevo esté vacío y que las entradas antiguas o sin uso venzan. ¿Qué DOS comportamientos de la aplicación cumplen juntos estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Si falta un dato en la caché, lee la base de datos, devuelve los detalles y llena la caché con un TTL.",
+            "why": "Esto repone las entradas faltantes de un nodo vacío y permite que las nuevas copias venzan."
+          },
+          {
+            "id": "B",
+            "text": "Actualiza la caché durante las escrituras sin vencimiento y devuelve un error cuando falta un dato en la caché.",
+            "why": "No permite que las entradas sin uso venzan ni recupera los datos faltantes de un nodo nuevo."
+          },
+          {
+            "id": "C",
+            "text": "Después de cada escritura en la base de datos, actualiza la entrada correspondiente en la caché y establece un TTL.",
+            "why": "Esto refleja las escrituras de la aplicación en la caché y permite que las entradas venzan."
+          },
+          {
+            "id": "D",
+            "text": "Llena la caché solo cuando falta un dato durante una lectura y no modifica las entradas almacenadas durante las escrituras.",
+            "why": "Una entrada existente puede entregar detalles anteriores después de una escritura de la aplicación."
+          },
+          {
+            "id": "E",
+            "text": "Consulta la base de datos antes de cada lectura de la caché para verificar los detalles almacenados.",
+            "why": "Una consulta a la base de datos en cada lectura contradice el objetivo de reducir las lecturas repetidas."
+          }
+        ],
+        "explanation": "La aplicación controla las escrituras, así que puede usar write-through para actualizar los detalles almacenados y asignarles un TTL. Con lazy loading, una lectura que no encuentra el dato lo obtiene de la base de datos y vuelve a llenar un nodo vacío. Juntos, estos comportamientos cubren actualizaciones, entradas faltantes y vencimiento. Llenar la caché solo cuando falta un dato deja intactas las entradas existentes después de una escritura, mientras que write-through sin manejo de ausencias no recupera las entradas faltantes."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "caching-strategies--3421dd97",
+      "conceptId": "caching-strategies",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum publishes a large archive of exhibit descriptions that do not change after publication. Visitors repeatedly open a small subset of the archive, and the museum accepts a slower first request for each description. Which ElastiCache population strategy reduces repeat database reads MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use lazy loading: check the cache first, then fetch and cache a description on a miss.",
+          "correct": true,
+          "why": "It caches only requested descriptions while serving repeat requests without another database read."
+        },
+        {
+          "id": "B",
+          "text": "Read the database for every request and place each result in ElastiCache afterward.",
+          "correct": false,
+          "why": "It continues to read the database even when a description is already cached."
+        },
+        {
+          "id": "C",
+          "text": "Use write-through to cache every description as it is published.",
+          "correct": false,
+          "why": "It stores descriptions that visitors may never request, increasing cache use."
+        },
+        {
+          "id": "D",
+          "text": "Use lazy loading and immediately expire each description after it is cached.",
+          "correct": false,
+          "why": "Immediate expiry prevents repeat requests from benefiting from the cached result."
+        }
+      ],
+      "explanation": "The archive is immutable, so the key decision is how to cache a small, frequently read subset without filling the cache with the rest. Lazy loading populates ElastiCache only after a requested description misses and serves later requests from the cache. The accepted first-request delay makes its miss penalty suitable. Write-through would also cache descriptions that may never be read.",
+      "keywordCues": [
+        "do not change after publication",
+        "a small subset of the archive",
+        "accepts a slower first request",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html",
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html"
+      ],
+      "es": {
+        "stem": "Un museo publica un archivo grande de descripciones de exhibiciones que no cambian después de su publicación. Los visitantes abren repetidamente una pequeña parte del archivo, y el museo acepta que la primera solicitud de cada descripción sea más lenta. ¿Qué estrategia para llenar ElastiCache reduce las lecturas repetidas de la base de datos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa lazy loading: consulta primero la caché y, si falta la descripción, búscala y agrégala a la caché.",
+            "why": "Almacena solo las descripciones solicitadas y atiende las solicitudes repetidas sin otra lectura de la base de datos."
+          },
+          {
+            "id": "B",
+            "text": "Lee la base de datos en cada solicitud y después coloca cada resultado en ElastiCache.",
+            "why": "Sigue leyendo la base de datos aunque la descripción ya esté en la caché."
+          },
+          {
+            "id": "C",
+            "text": "Usa write-through para almacenar cada descripción cuando se publica.",
+            "why": "Almacena descripciones que quizá nadie solicite y aumenta el uso de la caché."
+          },
+          {
+            "id": "D",
+            "text": "Usa lazy loading y haz que cada descripción venza inmediatamente después de almacenarla.",
+            "why": "El vencimiento inmediato impide que las solicitudes repetidas aprovechen el resultado almacenado."
+          }
+        ],
+        "explanation": "El archivo no cambia, así que la decisión es cómo almacenar la pequeña parte que se consulta con frecuencia sin llenar la caché con el resto. Lazy loading llena ElastiCache solo cuando falta una descripción solicitada y atiende las siguientes solicitudes desde la caché. Como se acepta una primera solicitud más lenta, su costo por ausencia es adecuado. Write-through también almacenaría descripciones que quizá nunca se lean."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "caching-strategies--r0",
+      "conceptId": "caching-strategies",
+      "kind": "recall",
+      "prompt": "Most records are rarely read, but popular records receive repeat requests. Which ElastiCache population pattern fits, and why?",
+      "promptEs": "Casi ningún registro se lee, pero los populares reciben solicitudes repetidas. ¿Qué patrón para llenar ElastiCache elegirías y por qué?",
+      "idealAnswer": "Use lazy loading: check ElastiCache first, then retrieve and cache a record after a miss. It stores only records that were requested and reduces database reads on later requests, at the cost of a slower miss.",
+      "rubric": [
+        "Names lazy loading or cache-aside.",
+        "Describes database retrieval and cache population on a miss.",
+        "Explains the tradeoff: only requested data is cached, but misses add latency."
+      ]
+    }
+  ]
+}

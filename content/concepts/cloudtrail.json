@@ -1,0 +1,449 @@
+{
+  "conceptId": "cloudtrail",
+  "card": {
+    "en": {
+      "tldr": "AWS CloudTrail records account activity so you can determine who or what made an API call and what resource it affected. For centralized auditing across AWS Organizations accounts, choose an organization trail that delivers logs to Amazon S3; configure data events when the requirement includes S3 object or Lambda function activity.",
+      "whenToUse": [
+        "Investigators need to identify the user, role, or service behind an AWS action.",
+        "A security team needs one trail for management and member accounts, including newly added accounts.",
+        "Auditors need S3 object or Lambda function activity in addition to management events."
+      ],
+      "keyFacts": [
+        "Event history provides the past 90 days of management events for the account and Region being viewed; it does not show member-account events from the management account.",
+        "An organization trail logs events for the management account and member accounts and can deliver them to the same S3 bucket.",
+        "Only the management account or a delegated administrator can create or manage an organization trail; member accounts cannot change it.",
+        "New member accounts automatically receive the organization trail and begin logging.",
+        "A multi-Region organization trail covers enabled Regions, but an opt-in home Region prevents member accounts that have not enabled that Region from sending activity to it.",
+        "An incorrect S3 bucket policy can cause a trail delivery validation failure."
+      ],
+      "gotchas": [
+        "Do not use management-account Event history as a consolidated view of member-account events.",
+        "Management events alone do not satisfy a requirement to log S3 or Lambda data events.",
+        "Creating an organization trail does not guarantee successful delivery if its S3 bucket policy is incorrect."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Config",
+          "difference": "Choose Config for configuration history and compliance; choose CloudTrail to identify the actor and API action."
+        },
+        {
+          "concept": "Amazon CloudWatch",
+          "difference": "CloudWatch monitors operational metrics and alarms; CloudTrail records account activity for auditing."
+        },
+        {
+          "concept": "VPC Flow Logs",
+          "difference": "Flow Logs capture IP traffic metadata, not the identity behind an AWS API call."
+        }
+      ],
+      "examCues": [
+        "who made the API call",
+        "audit activity across member accounts",
+        "new accounts must be covered automatically",
+        "S3 object and Lambda function activity",
+        "retain management events beyond Event history"
+      ]
+    },
+    "es": {
+      "tldr": "AWS CloudTrail registra la actividad de una cuenta para identificar quién o qué hizo una llamada a la API y qué recurso afectó. Para auditar de forma centralizada cuentas de AWS Organizations, elige un organization trail que entregue registros a Amazon S3; configura data events si necesitas actividad de objetos de S3 o funciones de Lambda.",
+      "whenToUse": [
+        "El equipo de investigación necesita identificar al usuario, rol o servicio responsable de una acción de AWS.",
+        "El equipo de seguridad necesita un solo trail para la cuenta de administración y las cuentas miembro, incluidas las que se agreguen después.",
+        "Los auditores necesitan actividad de objetos de S3 o funciones de Lambda además de management events."
+      ],
+      "keyFacts": [
+        "Event history muestra los últimos 90 días de management events de la cuenta y Region que consultas; desde la cuenta de administración no muestra eventos de las cuentas miembro.",
+        "Un organization trail registra eventos de la cuenta de administración y las cuentas miembro, y puede entregarlos al mismo bucket de S3.",
+        "Solo la cuenta de administración o un delegated administrator puede crear o administrar un organization trail; las cuentas miembro no pueden modificarlo.",
+        "Las cuentas miembro nuevas reciben automáticamente el organization trail y comienzan a registrar eventos.",
+        "Un multi-Region organization trail cubre las Regions habilitadas, pero si su home Region es una opt-in Region, las cuentas miembro que no la habilitaron no le envían actividad.",
+        "Una política incorrecta del bucket de S3 puede provocar un error de validación de entrega del trail."
+      ],
+      "gotchas": [
+        "No uses Event history de la cuenta de administración como vista consolidada de eventos de las cuentas miembro.",
+        "Registrar solo management events no cumple un requisito de registrar data events de S3 o Lambda.",
+        "Crear un organization trail no garantiza la entrega si la política del bucket de S3 es incorrecta."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Config",
+          "difference": "Elige Config para historial de configuración y cumplimiento; elige CloudTrail para identificar al actor y la acción de la API."
+        },
+        {
+          "concept": "Amazon CloudWatch",
+          "difference": "CloudWatch monitorea métricas operativas y alarmas; CloudTrail registra actividad de la cuenta para auditoría."
+        },
+        {
+          "concept": "VPC Flow Logs",
+          "difference": "Flow Logs captura metadatos del tráfico IP, no la identidad detrás de una llamada a la API de AWS."
+        }
+      ],
+      "examCues": [
+        "who made the API call",
+        "audit activity across member accounts",
+        "new accounts must be covered automatically",
+        "S3 object and Lambda function activity",
+        "retain management events beyond Event history"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html",
+      "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudtrail--3de4dce6",
+      "conceptId": "cloudtrail",
+      "secondaryConcepts": [
+        "aws-config"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A health-tech company uses AWS Organizations and adds member accounts as teams expand. Auditors require a central S3 record of API activity across the organization and activity involving specified S3 objects and Lambda functions in member accounts. The company wants coverage to extend to new accounts without separate trail setup. Which TWO actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an organization trail from the management or delegated administrator account and deliver its logs to S3.",
+          "correct": true,
+          "why": "The organization trail centralizes delivery and automatically covers newly added member accounts."
+        },
+        {
+          "id": "B",
+          "text": "Create an individual trail in each member account when the account is added.",
+          "correct": false,
+          "why": "Per-account setup fails the requirement to avoid separate trail configuration for new accounts."
+        },
+        {
+          "id": "C",
+          "text": "Create AWS Config rules for the specified buckets and functions instead of logging their API activity.",
+          "correct": false,
+          "why": "Configuration evaluation does not record the requested S3 and Lambda data events."
+        },
+        {
+          "id": "D",
+          "text": "Configure data events on the organization trail for the specified S3 and Lambda resources.",
+          "correct": true,
+          "why": "Data-event configuration adds the required activity for the specified member-account resources."
+        },
+        {
+          "id": "E",
+          "text": "Use Event history in the management account as the organization's central audit record.",
+          "correct": false,
+          "why": "It neither shows member-account events there nor delivers the requested central S3 record."
+        }
+      ],
+      "explanation": "Two distinct decisions matter: how to cover organization accounts and which activity to log. An organization trail delivers to a central S3 bucket and extends automatically to new member accounts. Configure data events for the specified S3 and Lambda resources to capture the activity the auditors requested. Event history is not a central member-account view, and individual trails add the per-account work the company wants to avoid.",
+      "keywordCues": [
+        "central S3 record of API activity across the organization",
+        "specified S3 objects and Lambda functions in member accounts",
+        "new accounts without separate trail setup"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html",
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html"
+      ],
+      "es": {
+        "stem": "Una empresa de tecnología para la salud usa AWS Organizations y agrega cuentas miembro a medida que crecen sus equipos. Los auditores requieren un registro central en S3 de la actividad de la API de la organización y de la actividad relacionada con objetos de S3 y funciones de Lambda específicos en cuentas miembro. La empresa quiere que la cobertura incluya cuentas nuevas sin configurar trails por separado. ¿Qué DOS acciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un organization trail desde la cuenta de administración o una cuenta de delegated administrator y entregar sus registros a S3.",
+            "why": "El organization trail centraliza la entrega y cubre automáticamente las cuentas miembro que se agreguen después."
+          },
+          {
+            "id": "B",
+            "text": "Crear un trail individual en cada cuenta miembro cuando se agregue.",
+            "why": "La configuración por cuenta incumple el requisito de evitar la configuración individual de trails para cuentas nuevas."
+          },
+          {
+            "id": "C",
+            "text": "Crear AWS Config rules para los buckets y funciones especificados en lugar de registrar su actividad de la API.",
+            "why": "La evaluación de configuración no registra los data events de S3 y Lambda solicitados."
+          },
+          {
+            "id": "D",
+            "text": "Configurar data events en el organization trail para los recursos de S3 y Lambda especificados.",
+            "why": "La configuración de data events agrega la actividad requerida para esos recursos de las cuentas miembro."
+          },
+          {
+            "id": "E",
+            "text": "Usar Event history en la cuenta de administración como registro central de auditoría de la organización.",
+            "why": "Ahí no muestra los eventos de las cuentas miembro ni entrega el registro central en S3 solicitado."
+          }
+        ],
+        "explanation": "Debes tomar dos decisiones: cómo cubrir las cuentas de la organización y qué actividad registrar. Un organization trail entrega los registros a un bucket central de S3 y se extiende automáticamente a cuentas miembro nuevas. Configura data events para los recursos de S3 y Lambda especificados a fin de capturar la actividad solicitada. Event history no es una vista central de las cuentas miembro, y los trails individuales agregan el trabajo por cuenta que la empresa quiere evitar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudtrail--2622f7a5",
+      "conceptId": "cloudtrail",
+      "secondaryConcepts": [
+        "aws-config"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company has several AWS Organizations accounts and adds accounts when it launches new imprints. Its security team needs a central S3 record of API activity from existing and newly added accounts, without configuring a trail in each account. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Config in each account to record resource configuration changes.",
+          "correct": false,
+          "why": "Configuration history does not provide the requested central record of API activity."
+        },
+        {
+          "id": "B",
+          "text": "Have the security team review CloudTrail Event history in the management account.",
+          "correct": false,
+          "why": "Management-account Event history does not show member-account events or provide the requested central S3 record."
+        },
+        {
+          "id": "C",
+          "text": "Create an AWS CloudTrail organization trail that delivers events to an S3 bucket.",
+          "correct": true,
+          "why": "An organization trail covers member accounts and automatically extends to accounts added later."
+        },
+        {
+          "id": "D",
+          "text": "Create a separate CloudTrail trail in each account and send each trail to S3.",
+          "correct": false,
+          "why": "Separate account trails require additional configuration as accounts are added."
+        }
+      ],
+      "explanation": "The deciding requirements are central S3 delivery and automatic coverage of new organization accounts. An organization trail logs activity for the management and member accounts, and logging begins automatically when an account joins. Individual account trails can deliver to S3, but maintaining them for each new account adds operational work. Event history in the management account is not a consolidated view of member-account events.",
+      "keywordCues": [
+        "central S3 record of API activity",
+        "existing and newly added accounts",
+        "without configuring a trail in each account"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html",
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html"
+      ],
+      "es": {
+        "stem": "Una editorial tiene varias cuentas en AWS Organizations y agrega cuentas cuando lanza nuevos sellos. Su equipo de seguridad necesita un registro central en S3 de la actividad de la API de las cuentas actuales y futuras, sin configurar un trail en cada cuenta. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Config en cada cuenta para registrar cambios en la configuración de los recursos.",
+            "why": "El historial de configuración no proporciona el registro central de actividad de la API solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Pedir al equipo de seguridad que revise CloudTrail Event history en la cuenta de administración.",
+            "why": "Event history de la cuenta de administración no muestra eventos de las cuentas miembro ni proporciona el registro central en S3 solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Crear un AWS CloudTrail organization trail que entregue eventos a un bucket de S3.",
+            "why": "Un organization trail cubre las cuentas miembro y se extiende automáticamente a las cuentas que se agreguen después."
+          },
+          {
+            "id": "D",
+            "text": "Crear un CloudTrail trail independiente en cada cuenta y enviar cada uno a S3.",
+            "why": "Los trails por cuenta requieren configuración adicional cada vez que se agrega una cuenta."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la entrega central en S3 y la cobertura automática de cuentas nuevas de la organización. Un organization trail registra la actividad de la cuenta de administración y las cuentas miembro, y comienza a registrar cuando se incorpora una cuenta. Los trails individuales también pueden entregar registros a S3, pero mantenerlos para cada cuenta nueva implica más trabajo. Event history de la cuenta de administración no consolida los eventos de las cuentas miembro."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudtrail--9e86cb8d",
+      "conceptId": "cloudtrail",
+      "secondaryConcepts": [
+        "aws-config",
+        "vpc-flow-logs"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media platform already sends CloudTrail management events to S3. After a licensing dispute, its auditors must identify API activity involving objects in a particular S3 bucket and functions in a Lambda application. Which change meets the audit requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add AWS Config rules for the S3 bucket and Lambda functions.",
+          "correct": false,
+          "why": "Config rules address resource configuration rather than the requested object and function API activity."
+        },
+        {
+          "id": "B",
+          "text": "Send the existing CloudTrail management events to CloudWatch Logs.",
+          "correct": false,
+          "why": "Changing the destination does not add the requested data events."
+        },
+        {
+          "id": "C",
+          "text": "Enable VPC Flow Logs for the application's subnets.",
+          "correct": false,
+          "why": "IP traffic metadata does not identify the requested S3 object and Lambda function API activity."
+        },
+        {
+          "id": "D",
+          "text": "Configure CloudTrail data events for the S3 bucket and Lambda functions.",
+          "correct": true,
+          "why": "CloudTrail data events are the trail setting for the specified S3 and Lambda activity."
+        }
+      ],
+      "explanation": "The auditors need activity involving S3 objects and Lambda functions, not merely management actions. Configure CloudTrail data events for those resources to include that activity in the trail. Forwarding the existing management events to CloudWatch Logs changes where those events are delivered, not which event types are captured. Config and Flow Logs answer different questions.",
+      "keywordCues": [
+        "already sends CloudTrail management events",
+        "objects in a particular S3 bucket",
+        "functions in a Lambda application"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html",
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de medios ya envía CloudTrail management events a S3. Después de una disputa por licencias, sus auditores deben identificar la actividad de la API relacionada con objetos de un bucket de S3 y funciones de una aplicación Lambda. ¿Qué cambio cumple el requisito de auditoría de la manera MOST directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar AWS Config rules para el bucket de S3 y las funciones de Lambda.",
+            "why": "Config rules se enfocan en la configuración de recursos, no en la actividad solicitada de objetos y funciones."
+          },
+          {
+            "id": "B",
+            "text": "Enviar los CloudTrail management events actuales a CloudWatch Logs.",
+            "why": "Cambiar el destino no agrega los data events solicitados."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar VPC Flow Logs para las subredes de la aplicación.",
+            "why": "Los metadatos del tráfico IP no identifican la actividad solicitada de la API para objetos de S3 y funciones de Lambda."
+          },
+          {
+            "id": "D",
+            "text": "Configurar CloudTrail data events para el bucket de S3 y las funciones de Lambda.",
+            "why": "CloudTrail data events es la configuración del trail para la actividad especificada de S3 y Lambda."
+          }
+        ],
+        "explanation": "Los auditores necesitan actividad relacionada con objetos de S3 y funciones de Lambda, no solo acciones de administración. Configura CloudTrail data events para esos recursos a fin de incluir esa actividad en el trail. Enviar los management events actuales a CloudWatch Logs cambia el destino de esos eventos, no los tipos de eventos capturados. Config y Flow Logs responden preguntas distintas."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudtrail--ecfaa154",
+      "conceptId": "cloudtrail",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research consortium uses AWS Organizations. Several member accounts have not enabled the opt-in Region proposed as the home Region for a new audit trail, but the consortium needs API activity from every member account's enabled Regions. Which trail design meets this requirement MOST reliably?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a multi-Region organization trail with its home Region in a Region enabled for the member accounts.",
+          "correct": true,
+          "why": "This avoids the opt-in home Region condition that would exclude some member accounts."
+        },
+        {
+          "id": "B",
+          "text": "Create a multi-Region organization trail with its home Region in the proposed opt-in Region.",
+          "correct": false,
+          "why": "Member accounts that have not enabled that home Region will not send activity to the trail."
+        },
+        {
+          "id": "C",
+          "text": "Use Event history in the management account to search all member accounts' enabled Regions.",
+          "correct": false,
+          "why": "Management-account Event history does not display member-account events."
+        },
+        {
+          "id": "D",
+          "text": "Create a single-Region organization trail in a Region enabled for the member accounts.",
+          "correct": false,
+          "why": "A single-Region trail does not cover activity in each account's other enabled Regions."
+        }
+      ],
+      "explanation": "The trail must cover multiple enabled Regions without depending on members opting in to its home Region. A multi-Region organization trail whose home Region is enabled for the member accounts satisfies those constraints. If its home Region is an opt-in Region, members that have not enabled it do not send activity to that trail, even though it is multi-Region. A single-Region trail captures activity only in its own Region.",
+      "keywordCues": [
+        "have not enabled the opt-in Region",
+        "home Region",
+        "every member account's enabled Regions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html",
+        "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html"
+      ],
+      "es": {
+        "stem": "Un consorcio de investigación usa AWS Organizations. Varias cuentas miembro no han habilitado la opt-in Region propuesta como home Region de un nuevo trail de auditoría, pero el consorcio necesita actividad de la API de las Regions habilitadas en cada cuenta miembro. ¿Qué diseño de trail cumple este requisito de la forma MOST confiable?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un multi-Region organization trail cuya home Region esté habilitada en las cuentas miembro.",
+            "why": "Esto evita la condición de la opt-in home Region que excluiría a algunas cuentas miembro."
+          },
+          {
+            "id": "B",
+            "text": "Crear un multi-Region organization trail cuya home Region sea la opt-in Region propuesta.",
+            "why": "Las cuentas miembro que no hayan habilitado esa home Region no enviarán actividad al trail."
+          },
+          {
+            "id": "C",
+            "text": "Usar Event history en la cuenta de administración para buscar en todas las Regions habilitadas de las cuentas miembro.",
+            "why": "Event history de la cuenta de administración no muestra los eventos de las cuentas miembro."
+          },
+          {
+            "id": "D",
+            "text": "Crear un single-Region organization trail en una Region habilitada para las cuentas miembro.",
+            "why": "Un single-Region trail no cubre la actividad de las otras Regions habilitadas en cada cuenta."
+          }
+        ],
+        "explanation": "El trail debe cubrir varias Regions habilitadas sin depender de que las cuentas miembro activen su home Region. Un multi-Region organization trail cuya home Region esté habilitada para las cuentas miembro cumple estas condiciones. Si la home Region es una opt-in Region, los miembros que no la habilitaron no envían actividad a ese trail, aunque sea multi-Region. Un single-Region trail solo captura actividad en su propia Region."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudtrail--r0",
+      "conceptId": "cloudtrail",
+      "kind": "recall",
+      "prompt": "New organization accounts need centralized S3 API audit logs, including selected S3 object activity. What do you configure, and why?",
+      "promptEs": "Las cuentas nuevas de la organización necesitan registros centrales en S3 de actividad de la API, incluidos objetos de S3 específicos. ¿Qué configuras y por qué?",
+      "idealAnswer": "Create a CloudTrail organization trail that delivers to S3; it covers member accounts and automatically starts logging newly added accounts. Configure S3 data events for the selected object activity.",
+      "rubric": [
+        "Names a CloudTrail organization trail with S3 delivery.",
+        "Explains automatic coverage of newly added member accounts.",
+        "Specifies S3 data events for object activity."
+      ]
+    },
+    {
+      "id": "cloudtrail--r1",
+      "conceptId": "cloudtrail",
+      "kind": "why-not",
+      "prompt": "Why doesn't AWS Config replace CloudTrail when investigators need to know who made an API change across organization accounts?",
+      "promptEs": "¿Por qué AWS Config no reemplaza a CloudTrail cuando los investigadores necesitan saber quién hizo un cambio mediante la API en cuentas de la organización?",
+      "idealAnswer": "AWS Config is for resource configuration history and compliance evaluation, not the audit record of who made an API call. CloudTrail records account actions by users, roles, and services; an organization trail covers organization accounts.",
+      "rubric": [
+        "Identifies Config's configuration-history or compliance purpose.",
+        "Identifies CloudTrail as the source for actor and API-action auditing.",
+        "Mentions an organization trail for cross-account coverage."
+      ]
+    }
+  ]
+}

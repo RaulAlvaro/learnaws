@@ -1,0 +1,402 @@
+{
+  "conceptId": "dynamodb-capacity-modes",
+  "card": {
+    "en": {
+      "tldr": "DynamoDB on-demand manages throughput automatically and charges per read and write request, making it a strong choice when traffic is unpredictable. Provisioned mode charges for configured read and write capacity and fits workloads whose demand can be forecast; auto scaling can adjust that capacity within configured limits.",
+      "whenToUse": [
+        "Choose on-demand when request rates are unpredictable or capacity planning and scaling policies would add unwanted work.",
+        "Choose provisioned when traffic is steady enough to forecast and controlling configured capacity is important.",
+        "Use provisioned auto scaling when a predictable workload changes over time and capacity should adjust within defined bounds."
+      ],
+      "keyFacts": [
+        "On-demand is the default throughput mode; it does not require specifying expected read or write throughput.",
+        "Provisioned mode is billed for hourly configured capacity, even when some of that capacity is unused.",
+        "For items up to 4 KB, one RCU supports one strongly consistent read or two eventually consistent reads per second.",
+        "One WCU supports one write per second for an item up to 1 KB; larger items require more capacity units.",
+        "Provisioned auto scaling uses minimum and maximum capacity settings and a target utilization percentage. Its alarms can take a few minutes to trigger scaling."
+      ],
+      "gotchas": [
+        "Auto scaling does not turn provisioned mode into pay-per-request billing.",
+        "Do not assume provisioned auto scaling reacts instantly to an unanticipated spike.",
+        "Capacity-unit calculations depend on item size and, for reads, consistency."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "unpredictable bursts of requests",
+        "no capacity planning or scaling policies",
+        "steady, forecastable traffic",
+        "pay only for read and write requests",
+        "configured read and write capacity"
+      ]
+    },
+    "es": {
+      "tldr": "DynamoDB on-demand administra el throughput automáticamente y cobra por solicitud de lectura y escritura, por lo que conviene cuando el tráfico es impredecible. Provisioned mode cobra por la capacidad de lectura y escritura configurada y se adapta a cargas que puedes prever; auto scaling puede ajustar esa capacidad dentro de los límites configurados.",
+      "whenToUse": [
+        "Elige on-demand cuando las tasas de solicitudes sean impredecibles o quieras evitar planificar capacidad y configurar políticas de escalado.",
+        "Elige provisioned cuando el tráfico sea suficientemente estable para preverlo y sea importante controlar la capacidad configurada.",
+        "Usa provisioned auto scaling cuando una carga previsible cambie con el tiempo y la capacidad deba ajustarse dentro de límites definidos."
+      ],
+      "keyFacts": [
+        "On-demand es el modo de throughput predeterminado; no exige especificar el throughput esperado de lectura o escritura.",
+        "Provisioned mode se cobra según la capacidad configurada por hora, aunque no se utilice por completo.",
+        "Para elementos de hasta 4 KB, una RCU permite una lectura strongly consistent o dos lecturas eventually consistent por segundo.",
+        "Una WCU permite una escritura por segundo de un elemento de hasta 1 KB; los elementos más grandes requieren más unidades de capacidad.",
+        "Provisioned auto scaling usa valores mínimos y máximos de capacidad y un porcentaje objetivo de utilización. Sus alarmas pueden tardar unos minutos en activar el escalado."
+      ],
+      "gotchas": [
+        "Auto scaling no convierte provisioned mode en cobro por solicitud.",
+        "No supongas que provisioned auto scaling responde de inmediato a un pico imprevisto.",
+        "El cálculo de unidades de capacidad depende del tamaño del elemento y, en las lecturas, de la consistencia."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "unpredictable bursts of requests",
+        "no capacity planning or scaling policies",
+        "steady, forecastable traffic",
+        "pay only for read and write requests",
+        "configured read and write capacity"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html",
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/provisioned-capacity-mode.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-capacity-modes--2e578f3a",
+      "conceptId": "dynamodb-capacity-modes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company stores reservation status in a DynamoDB table. Most days have few requests, but newly announced events cause unpredictable bursts, and the team does not want to plan throughput or maintain scaling policies. Which capacity mode meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use on-demand mode and let DynamoDB manage throughput.",
+          "correct": true,
+          "why": "On-demand removes throughput planning and scaling-policy configuration for variable request rates."
+        },
+        {
+          "id": "B",
+          "text": "Use provisioned mode with a fixed capacity based on a typical day.",
+          "correct": false,
+          "why": "Typical-day capacity does not address the unpredictable bursts."
+        },
+        {
+          "id": "C",
+          "text": "Use provisioned mode and manually increase capacity when an event is announced.",
+          "correct": false,
+          "why": "Manual changes add operational work and cannot reliably anticipate every burst."
+        },
+        {
+          "id": "D",
+          "text": "Use provisioned mode with auto scaling and a target utilization setting.",
+          "correct": false,
+          "why": "Auto scaling still requires a scaling policy and configured capacity bounds."
+        }
+      ],
+      "explanation": "The deciding requirements are unpredictable bursts and no capacity planning or scaling policies. On-demand manages throughput automatically without requiring the team to specify expected read and write rates. Provisioned auto scaling can adjust capacity, but it still requires configuration and its alarms can take time to trigger.",
+      "keywordCues": [
+        "unpredictable bursts",
+        "does not want to plan throughput or maintain scaling policies",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/provisioned-capacity-mode.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas guarda el estado de las reservas en una tabla de DynamoDB. La mayoría de los días hay pocas solicitudes, pero el anuncio de nuevos eventos provoca picos impredecibles, y el equipo no quiere planificar el throughput ni mantener políticas de escalado. ¿Qué modo de capacidad cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar on-demand mode y dejar que DynamoDB administre el throughput.",
+            "why": "On-demand evita planificar el throughput y configurar políticas de escalado para tasas de solicitudes variables."
+          },
+          {
+            "id": "B",
+            "text": "Usar provisioned mode con capacidad fija basada en un día típico.",
+            "why": "La capacidad para un día típico no resuelve los picos impredecibles."
+          },
+          {
+            "id": "C",
+            "text": "Usar provisioned mode y aumentar manualmente la capacidad cuando se anuncie un evento.",
+            "why": "Los cambios manuales agregan trabajo operativo y no permiten anticipar todos los picos de forma confiable."
+          },
+          {
+            "id": "D",
+            "text": "Usar provisioned mode con auto scaling y un valor objetivo de utilización.",
+            "why": "Auto scaling todavía exige una política de escalado y límites de capacidad configurados."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son los picos impredecibles y evitar la planificación de capacidad y las políticas de escalado. On-demand administra el throughput automáticamente sin que tengas que especificar las tasas esperadas de lectura y escritura. Provisioned auto scaling puede ajustar la capacidad, pero requiere configuración y sus alarmas pueden tardar en activar el escalado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-capacity-modes--541cad8a",
+      "conceptId": "dynamodb-capacity-modes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics company uses a DynamoDB table for package scans. Its request volume follows a well-understood daily schedule, with gradual increases during business hours, and the company can forecast its capacity needs. It wants to adjust configured throughput as traffic changes instead of keeping peak capacity configured all day. Which approach best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use provisioned mode and keep a fixed capacity sized for the daily peak.",
+          "correct": false,
+          "why": "Peak-sized fixed capacity remains configured during quieter hours."
+        },
+        {
+          "id": "B",
+          "text": "Use provisioned mode with auto scaling and configured capacity bounds.",
+          "correct": true,
+          "why": "Auto scaling adjusts provisioned capacity within defined bounds as the workload changes."
+        },
+        {
+          "id": "C",
+          "text": "Use on-demand mode and set minimum and maximum capacity units.",
+          "correct": false,
+          "why": "Minimum and maximum capacity-unit settings apply to provisioned auto scaling, not on-demand mode."
+        },
+        {
+          "id": "D",
+          "text": "Use provisioned mode and manually update capacity whenever traffic changes.",
+          "correct": false,
+          "why": "Manual updates do not meet the goal of adjusting throughput as traffic changes without repeated intervention."
+        }
+      ],
+      "explanation": "The company can forecast demand, making provisioned capacity suitable. Auto scaling adjusts configured throughput within minimum and maximum settings as traffic changes, avoiding a fixed peak setting throughout the day. On-demand does not use provisioned capacity bounds, while a fixed peak allocation leaves capacity configured during quieter periods.",
+      "keywordCues": [
+        "well-understood daily schedule",
+        "can forecast its capacity needs",
+        "instead of keeping peak capacity configured all day"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/provisioned-capacity-mode.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística usa una tabla de DynamoDB para registrar escaneos de paquetes. El volumen de solicitudes sigue un horario diario conocido, con aumentos graduales durante la jornada, y la empresa puede prever sus necesidades de capacidad. Quiere ajustar el throughput configurado conforme cambie el tráfico, en lugar de mantener configurada la capacidad máxima todo el día. ¿Qué enfoque cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar provisioned mode y mantener capacidad fija dimensionada para el pico diario.",
+            "why": "La capacidad fija dimensionada para el pico permanece configurada durante las horas de menor actividad."
+          },
+          {
+            "id": "B",
+            "text": "Usar provisioned mode con auto scaling y límites de capacidad configurados.",
+            "why": "Auto scaling ajusta la capacidad provisioned dentro de límites definidos conforme cambia la carga."
+          },
+          {
+            "id": "C",
+            "text": "Usar on-demand mode y establecer unidades de capacidad mínimas y máximas.",
+            "why": "Los valores mínimos y máximos de unidades de capacidad corresponden a provisioned auto scaling, no a on-demand mode."
+          },
+          {
+            "id": "D",
+            "text": "Usar provisioned mode y actualizar manualmente la capacidad cada vez que cambie el tráfico.",
+            "why": "Las actualizaciones manuales no cumplen el objetivo de ajustar el throughput conforme cambia el tráfico sin intervenciones repetidas."
+          }
+        ],
+        "explanation": "La empresa puede prever la demanda, por lo que provisioned capacity es adecuado. Auto scaling ajusta el throughput configurado entre valores mínimos y máximos conforme cambia el tráfico, sin mantener una configuración fija para el pico durante todo el día. On-demand no usa esos límites de capacidad provisioned, mientras que una asignación fija para el pico mantiene capacidad configurada en las horas tranquilas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": "Option A 'why' says min/max settings apply only to provisioned auto scaling; on-demand tables now support an optional maximum throughput setting (in request units per second). Option A remains wrong (no minimum), so minor."
+      }
+    },
+    {
+      "id": "dynamodb-capacity-modes--9db0ae31",
+      "conceptId": "dynamodb-capacity-modes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A laboratory is moving a stable sample catalog to a DynamoDB table in provisioned mode. It expects 120 eventually consistent reads per second of 2 KB items and 40 writes per second of 2 KB items; each request processes one item. Which initial table capacity supports this workload without allocating more units than the stated rates require?",
+      "options": [
+        {
+          "id": "A",
+          "text": "120 RCUs and 80 WCUs",
+          "correct": false,
+          "why": "The writes are covered, but 120 RCUs exceed the units required for the stated eventually consistent reads."
+        },
+        {
+          "id": "B",
+          "text": "60 RCUs and 40 WCUs",
+          "correct": false,
+          "why": "The read allocation is sufficient, but 40 WCUs do not cover 40 writes per second of 2 KB items."
+        },
+        {
+          "id": "C",
+          "text": "60 RCUs and 80 WCUs",
+          "correct": true,
+          "why": "One RCU covers two eventually consistent reads of these items per second, while each 2 KB write needs two WCUs."
+        },
+        {
+          "id": "D",
+          "text": "120 RCUs and 40 WCUs",
+          "correct": false,
+          "why": "This ignores the lower RCU requirement for eventually consistent reads and the extra WCU required for each 2 KB write."
+        }
+      ],
+      "explanation": "A 2 KB item fits within the 4 KB read-unit size, so one RCU supports two eventually consistent reads per second: 120 reads require 60 RCUs. A 2 KB write requires two WCUs, so 40 writes per second require 80 WCUs. Allocating one RCU per read overlooks read consistency; allocating one WCU per write overlooks item size.",
+      "keywordCues": [
+        "120 eventually consistent reads per second of 2 KB items",
+        "40 writes per second of 2 KB items",
+        "without allocating more units"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/provisioned-capacity-mode.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio está trasladando un catálogo de muestras con tráfico estable a una tabla de DynamoDB en provisioned mode. Espera 120 lecturas eventually consistent por segundo de elementos de 2 KB y 40 escrituras por segundo de elementos de 2 KB; cada solicitud procesa un elemento. ¿Qué capacidad inicial de la tabla admite esta carga sin asignar más unidades de las necesarias para las tasas indicadas?",
+        "options": [
+          {
+            "id": "A",
+            "text": "120 RCU y 80 WCU",
+            "why": "Las escrituras quedan cubiertas, pero 120 RCU superan las unidades necesarias para las lecturas eventually consistent indicadas."
+          },
+          {
+            "id": "B",
+            "text": "60 RCU y 40 WCU",
+            "why": "La asignación de lectura es suficiente, pero 40 WCU no cubren 40 escrituras por segundo de elementos de 2 KB."
+          },
+          {
+            "id": "C",
+            "text": "60 RCU y 80 WCU",
+            "why": "Una RCU cubre dos lecturas eventually consistent de estos elementos por segundo, mientras que cada escritura de 2 KB necesita dos WCU."
+          },
+          {
+            "id": "D",
+            "text": "120 RCU y 40 WCU",
+            "why": "Esta opción ignora que las lecturas eventually consistent requieren menos RCU y que cada escritura de 2 KB necesita una WCU adicional."
+          }
+        ],
+        "explanation": "Un elemento de 2 KB está dentro del tamaño de 4 KB por unidad de lectura, así que una RCU admite dos lecturas eventually consistent por segundo: 120 lecturas requieren 60 RCU. Una escritura de 2 KB requiere dos WCU, por lo que 40 escrituras por segundo requieren 80 WCU. Asignar una RCU por lectura pasa por alto la consistencia; asignar una WCU por escritura pasa por alto el tamaño del elemento."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-capacity-modes--e35bdb5a",
+      "conceptId": "dynamodb-capacity-modes",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company operates two independent DynamoDB tables. The campaign table receives unpredictable bursts after creators publish links, while the internal reporting table has stable, forecastable traffic with gradual growth. The team wants to avoid throughput planning for campaigns but manage configured capacity for reporting. Which TWO choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set the reporting table to on-demand mode and define an RCU target.",
+          "correct": false,
+          "why": "An RCU capacity target is not how on-demand throughput is configured."
+        },
+        {
+          "id": "B",
+          "text": "Set the campaign table to on-demand mode.",
+          "correct": true,
+          "why": "On-demand manages throughput without capacity planning for the bursty campaign table."
+        },
+        {
+          "id": "C",
+          "text": "Set the campaign table to provisioned mode at its usual request rate.",
+          "correct": false,
+          "why": "Usual-rate capacity does not account for unpredictable campaign bursts."
+        },
+        {
+          "id": "D",
+          "text": "Set the reporting table to provisioned mode with auto scaling.",
+          "correct": true,
+          "why": "Provisioned auto scaling manages configured capacity as the forecastable reporting workload grows."
+        },
+        {
+          "id": "E",
+          "text": "Set the reporting table to fixed provisioned capacity sized for its current traffic indefinitely.",
+          "correct": false,
+          "why": "An unchanged current-traffic setting does not accommodate the stated gradual growth."
+        }
+      ],
+      "explanation": "These tables have different access patterns, so they need not share a throughput mode. On-demand avoids planning capacity for unpredictable campaign bursts. Provisioned auto scaling lets the team manage configured capacity for the forecastable reporting workload while adjusting it as traffic changes. On-demand does not accept a provisioned RCU target, and leaving current provisioned capacity unchanged does not address growth.",
+      "keywordCues": [
+        "unpredictable bursts",
+        "stable, forecastable traffic with gradual growth",
+        "avoid throughput planning for campaigns",
+        "manage configured capacity for reporting"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/provisioned-capacity-mode.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios opera dos tablas de DynamoDB independientes. La tabla de campañas recibe picos impredecibles cuando los creadores publican enlaces, mientras que la tabla interna de reportes tiene tráfico estable y previsible, con crecimiento gradual. El equipo quiere evitar planificar el throughput de las campañas, pero administrar la capacidad configurada para los reportes. ¿Qué DOS opciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar la tabla de reportes en on-demand mode y definir un valor objetivo de RCU.",
+            "why": "Un valor objetivo de capacidad en RCU no es la forma de configurar el throughput de on-demand."
+          },
+          {
+            "id": "B",
+            "text": "Configurar la tabla de campañas en on-demand mode.",
+            "why": "On-demand administra el throughput sin planificar capacidad para la tabla de campañas con picos."
+          },
+          {
+            "id": "C",
+            "text": "Configurar la tabla de campañas en provisioned mode según su tasa habitual de solicitudes.",
+            "why": "La capacidad basada en la tasa habitual no contempla los picos impredecibles de las campañas."
+          },
+          {
+            "id": "D",
+            "text": "Configurar la tabla de reportes en provisioned mode con auto scaling.",
+            "why": "Provisioned auto scaling administra la capacidad configurada conforme crece la carga previsible de reportes."
+          },
+          {
+            "id": "E",
+            "text": "Configurar la tabla de reportes con capacidad provisioned fija, dimensionada indefinidamente para el tráfico actual.",
+            "why": "Una configuración que no cambia y solo cubre el tráfico actual no contempla el crecimiento gradual indicado."
+          }
+        ],
+        "explanation": "Las tablas tienen patrones de acceso distintos, así que no necesitan compartir un modo de throughput. On-demand evita planificar capacidad para los picos impredecibles de las campañas. Provisioned auto scaling permite al equipo administrar la capacidad configurada para la carga previsible de reportes y ajustarla cuando cambia el tráfico. On-demand no acepta un valor objetivo de RCU provisioned, y dejar intacta la capacidad provisioned actual no contempla el crecimiento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-capacity-modes--r0",
+      "conceptId": "dynamodb-capacity-modes",
+      "kind": "recall",
+      "prompt": "A DynamoDB table has unpredictable traffic spikes, and the team wants no throughput planning. Which capacity mode fits, and why?",
+      "promptEs": "Una tabla de DynamoDB tiene picos de tráfico impredecibles y el equipo no quiere planificar el throughput. ¿Qué modo de capacidad conviene y por qué?",
+      "idealAnswer": "Use DynamoDB on-demand mode. It manages throughput automatically without requiring expected read and write rates or scaling policies, and it charges per read and write request.",
+      "rubric": [
+        "Names on-demand mode.",
+        "Explains that it avoids throughput planning and scaling-policy configuration.",
+        "Mentions pay-per-request pricing."
+      ]
+    }
+  ]
+}

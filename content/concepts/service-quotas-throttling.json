@@ -1,0 +1,326 @@
+{
+  "conceptId": "service-quotas-throttling",
+  "card": {
+    "en": {
+      "tldr": "Service quotas cap resources or operations and are generally Region-specific unless a quota says otherwise. For disaster recovery, check the applied quotas in the standby account and Region before failover; for API-heavy workflows, design request volume around operation quotas rather than assuming an increase will be immediate.",
+      "whenToUse": [
+        "A standby environment must scale up during a regional failover.",
+        "A deployment or recovery workflow might exceed a resource or API-operation quota.",
+        "A new or lightly used account may have a lower applied quota than the published default."
+      ],
+      "keyFacts": [
+        "Service Quotas shows default and applied quota values and whether a quota is adjustable.",
+        "Unless otherwise noted, quotas are Region-specific; check each quota’s description to determine its scope.",
+        "Some quotas cannot be increased. AWS Support can approve, deny, or partially approve an increase, and processing can take time.",
+        "Service Quotas can be used to request increases for supported adjustable quotas; AWS SDKs include error-handling and retry functionality."
+      ],
+      "gotchas": [
+        "Capacity available under a quota in the primary Region does not establish the applied quota in the DR Region.",
+        "A published default is not proof of a particular account’s applied quota.",
+        "Submitting an increase request during failover does not make extra capacity immediately available.",
+        "Retries alone do not raise an operation quota."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "standby account in another Region",
+        "scale up only after failover",
+        "recently created DR account",
+        "bursty provisioning API calls",
+        "quota increase before a recovery exercise"
+      ]
+    },
+    "es": {
+      "tldr": "Las service quotas limitan recursos u operaciones y, salvo que se indique lo contrario, son específicas de cada Region. Para disaster recovery, verifica las cuotas aplicadas en la cuenta y Region de standby antes del failover; si un flujo hace muchas llamadas API, ajusta el volumen de solicitudes a las cuotas de operaciones sin suponer que un aumento será inmediato.",
+      "whenToUse": [
+        "Un entorno de standby debe escalar durante un failover regional.",
+        "Un despliegue o proceso de recuperación podría superar una cuota de recursos u operaciones API.",
+        "Una cuenta nueva o con poco uso podría tener una cuota aplicada menor que el valor predeterminado publicado."
+      ],
+      "keyFacts": [
+        "Service Quotas muestra los valores predeterminados y aplicados, e indica si una cuota es ajustable.",
+        "Salvo que se indique lo contrario, las cuotas son específicas de cada Region; revisa la descripción de cada cuota para confirmar su alcance.",
+        "Algunas cuotas no se pueden aumentar. AWS Support puede aprobar, rechazar o aprobar parcialmente una solicitud, y procesarla toma tiempo.",
+        "Puedes solicitar aumentos de cuotas ajustables compatibles mediante Service Quotas; los AWS SDK incluyen manejo de errores y reintentos."
+      ],
+      "gotchas": [
+        "La capacidad disponible bajo una cuota en la Region principal no demuestra cuál es la cuota aplicada en la Region de DR.",
+        "El valor predeterminado publicado no confirma la cuota aplicada a una cuenta específica.",
+        "Solicitar un aumento durante el failover no hace que la capacidad adicional esté disponible de inmediato.",
+        "Los reintentos por sí solos no aumentan una cuota de operaciones."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "standby account in another Region",
+        "scale up only after failover",
+        "recently created DR account",
+        "bursty provisioning API calls",
+        "quota increase before a recovery exercise"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html",
+      "https://docs.aws.amazon.com/servicequotas/latest/userguide/intro.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "service-quotas-throttling--b12e6f69",
+      "conceptId": "service-quotas-throttling",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company keeps a small standby deployment in a second AWS Region. During a regional outage, its recovery automation must create substantially more resources in that Region. The next recovery exercise is weeks away, and the company cannot wait for a quota review during an outage. Which preparation BEST supports a reliable failover?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Check applied quotas in the standby Region and request needed increases for adjustable quotas before the exercise.",
+          "correct": true,
+          "why": "This verifies the relevant Region’s capacity and allows time for increase requests to be reviewed."
+        },
+        {
+          "id": "B",
+          "text": "Have the recovery automation submit quota increase requests immediately before it creates the additional resources.",
+          "correct": false,
+          "why": "An increase request is not granted immediately and might not be approved."
+        },
+        {
+          "id": "C",
+          "text": "Use the published default quotas as the standby capacity targets and request increases only if recovery fails.",
+          "correct": false,
+          "why": "The account’s applied values can differ from defaults, and increase requests may take time."
+        },
+        {
+          "id": "D",
+          "text": "Check the primary Region’s applied quotas and use those values as the capacity targets for the standby Region.",
+          "correct": false,
+          "why": "Quotas are generally Region-specific, so the primary Region’s values do not establish the standby Region’s capacity."
+        }
+      ],
+      "explanation": "The deciding requirement is to have capacity available in the standby Region without waiting during an outage. Service quotas are generally Region-specific, so the company must inspect that Region’s applied values and request necessary adjustable increases ahead of time. Published defaults and primary-Region values are not substitutes for the standby Region’s applied quotas. A request made during failover may take time and is not guaranteed approval.",
+      "keywordCues": [
+        "small standby deployment in a second AWS Region",
+        "create substantially more resources in that Region",
+        "cannot wait for a quota review during an outage"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html",
+        "https://docs.aws.amazon.com/servicequotas/latest/userguide/intro.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos mantiene un despliegue pequeño de standby en una segunda AWS Region. Durante una interrupción regional, su automatización de recuperación debe crear muchos más recursos en esa Region. Faltan semanas para el próximo ejercicio de recuperación y la empresa no puede esperar una revisión de cuotas durante una interrupción. ¿Qué preparación permite un failover confiable?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Revisar las cuotas aplicadas en la Region de standby y solicitar con anticipación los aumentos necesarios para las cuotas ajustables.",
+            "why": "Así verificas la capacidad de la Region pertinente y das tiempo a que se revisen las solicitudes de aumento."
+          },
+          {
+            "id": "B",
+            "text": "Hacer que la automatización solicite aumentos de cuotas justo antes de crear los recursos adicionales.",
+            "why": "Un aumento no se concede de inmediato y podría no aprobarse."
+          },
+          {
+            "id": "C",
+            "text": "Usar las cuotas predeterminadas publicadas como objetivos de capacidad de standby y solicitar aumentos solo si falla la recuperación.",
+            "why": "Los valores aplicados a la cuenta pueden diferir de los predeterminados, y las solicitudes de aumento pueden tardar."
+          },
+          {
+            "id": "D",
+            "text": "Revisar las cuotas aplicadas en la Region principal y usar esos valores como objetivos de capacidad para la Region de standby.",
+            "why": "Las cuotas suelen ser específicas de cada Region, por lo que los valores de la Region principal no establecen la capacidad de standby."
+          }
+        ],
+        "explanation": "El requisito decisivo es disponer de capacidad en la Region de standby sin esperar durante una interrupción. Como las cuotas suelen ser específicas de cada Region, debes revisar los valores aplicados allí y solicitar con anticipación los aumentos ajustables necesarios. Ni los valores predeterminados publicados ni los de la Region principal sustituyen esta verificación. Una solicitud durante el failover puede tardar y no tiene aprobación garantizada."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": "Minor: ES stem drops the 'BEST' qualifier ('¿Qué preparación permite un failover confiable?'); meaning not materially changed."
+      }
+    },
+    {
+      "id": "service-quotas-throttling--b2ac4551",
+      "conceptId": "service-quotas-throttling",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A logistics firm is preparing a standby environment in a separate AWS account and Region. A failover would create more resources and run a burst of provisioning API calls, but recovery must not depend on quota increases being approved during the event. Which TWO actions should the firm take before its next failover test? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the primary account’s applied quota values as the standby account’s recovery capacity.",
+          "correct": false,
+          "why": "The standby account and Region need their own quota assessment."
+        },
+        {
+          "id": "B",
+          "text": "Defer quota checks until the failover test and request any increases when resource creation fails.",
+          "correct": false,
+          "why": "Increase requests are not immediate or guaranteed, so this makes recovery depend on approval during the event."
+        },
+        {
+          "id": "C",
+          "text": "Check the standby account’s applied resource quotas and request needed adjustable increases in advance.",
+          "correct": true,
+          "why": "This establishes whether the standby environment can support recovery and provides time for review."
+        },
+        {
+          "id": "D",
+          "text": "Pace provisioning calls against applicable operation quotas and handle failed API calls with SDK retries.",
+          "correct": true,
+          "why": "This addresses the API burst without assuming a quota increase will be approved."
+        },
+        {
+          "id": "E",
+          "text": "Treat all quotas as account-wide so a value checked in one Region also covers the standby Region.",
+          "correct": false,
+          "why": "Quotas are generally Region-specific unless a particular quota specifies otherwise."
+        }
+      ],
+      "explanation": "The firm faces two distinct constraints: resource capacity in the standby account and Region, and the rate of provisioning operations. Checking applied resource quotas and seeking necessary adjustable increases before the test addresses the first; pacing API calls and handling failures addresses the second. Values from the primary account or another Region do not establish standby capacity. Waiting until failover to request an increase risks a delayed, partial, or denied response.",
+      "keywordCues": [
+        "separate AWS account and Region",
+        "create more resources",
+        "burst of provisioning API calls",
+        "must not depend on quota increases being approved during the event"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html",
+        "https://docs.aws.amazon.com/servicequotas/latest/userguide/intro.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística prepara un entorno de standby en otra cuenta y AWS Region. Un failover crearía más recursos y produciría una ráfaga de llamadas API de aprovisionamiento, pero la recuperación no debe depender de que se aprueben aumentos de cuotas durante el evento. ¿Qué DOS acciones debe tomar la empresa antes de su próxima prueba de failover? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar los valores de cuotas aplicadas de la cuenta principal como capacidad de recuperación de la cuenta de standby.",
+            "why": "La cuenta y Region de standby requieren su propia evaluación de cuotas."
+          },
+          {
+            "id": "B",
+            "text": "Posponer la revisión de cuotas hasta la prueba de failover y solicitar aumentos cuando falle la creación de recursos.",
+            "why": "Los aumentos no son inmediatos ni están garantizados, así que esto hace depender la recuperación de su aprobación durante el evento."
+          },
+          {
+            "id": "C",
+            "text": "Revisar las cuotas de recursos aplicadas en la cuenta de standby y solicitar con anticipación los aumentos ajustables necesarios.",
+            "why": "Esto permite confirmar si el entorno de standby admite la recuperación y deja tiempo para revisar las solicitudes."
+          },
+          {
+            "id": "D",
+            "text": "Regular las llamadas de aprovisionamiento según las cuotas de operaciones aplicables y manejar las llamadas API fallidas con reintentos del SDK.",
+            "why": "Esto aborda la ráfaga de llamadas API sin suponer que se aprobará un aumento de cuota."
+          },
+          {
+            "id": "E",
+            "text": "Tratar todas las cuotas como aplicables a toda la cuenta, de modo que un valor revisado en una Region también cubra la Region de standby.",
+            "why": "Las cuotas suelen ser específicas de cada Region, salvo que una cuota particular indique lo contrario."
+          }
+        ],
+        "explanation": "La empresa enfrenta dos restricciones: la capacidad de recursos en la cuenta y Region de standby, y el ritmo de las operaciones de aprovisionamiento. Revisar las cuotas de recursos aplicadas y solicitar con anticipación los aumentos ajustables necesarios aborda la primera; regular las llamadas API y manejar las fallidas aborda la segunda. Los valores de la cuenta principal o de otra Region no establecen la capacidad de standby. Esperar hasta el failover expone la recuperación a una respuesta tardía, parcial o negativa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "service-quotas-throttling--03221878",
+      "conceptId": "service-quotas-throttling",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research laboratory uses a recently created AWS account for disaster recovery. Its deployment planner finds that the resource quota needed for full recovery is marked non-adjustable, and the planned deployment would exceed the account’s applied value. The laboratory must make the recovery plan executable before its next test. Which action meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the AWS default quota rather than the applied quota when sizing the recovery deployment.",
+          "correct": false,
+          "why": "The account’s applied value, not the published default, governs this deployment."
+        },
+        {
+          "id": "B",
+          "text": "Request an increase through Service Quotas and run the existing deployment after submitting the request.",
+          "correct": false,
+          "why": "The quota is non-adjustable, and submitting a request would not make the deployment executable."
+        },
+        {
+          "id": "C",
+          "text": "Revise the recovery deployment so its resource usage stays within the applied quota, then test the revised plan.",
+          "correct": true,
+          "why": "A plan within the non-adjustable applied quota can be executed without depending on an unavailable increase."
+        },
+        {
+          "id": "D",
+          "text": "Retain the deployment plan and add SDK retries to every resource-creation call.",
+          "correct": false,
+          "why": "Retries do not change a non-adjustable resource quota that the deployment would exceed."
+        }
+      ],
+      "explanation": "The applied quota is below the resources the recovery plan would create, and this quota cannot be increased. The laboratory must therefore change the plan to fit the quota and validate the revised deployment. A recently created account may have an applied value below the AWS default, so planning against the default is unsafe. API retries cannot provide permission to exceed a resource quota.",
+      "keywordCues": [
+        "recently created AWS account",
+        "marked non-adjustable",
+        "would exceed the account’s applied value",
+        "make the recovery plan executable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html",
+        "https://docs.aws.amazon.com/servicequotas/latest/userguide/intro.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación usa una cuenta de AWS creada recientemente para disaster recovery. Al planear el despliegue, descubre que la cuota de recursos necesaria para la recuperación completa figura como no ajustable y que el despliegue previsto superaría el valor aplicado a la cuenta. El laboratorio debe lograr que el plan de recuperación sea ejecutable antes de la próxima prueba. ¿Qué acción cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Dimensionar el despliegue de recuperación con la cuota predeterminada de AWS, en lugar de la cuota aplicada.",
+            "why": "El valor aplicado a la cuenta, y no el predeterminado publicado, determina la capacidad de este despliegue."
+          },
+          {
+            "id": "B",
+            "text": "Solicitar un aumento mediante Service Quotas y ejecutar el despliegue existente después de enviar la solicitud.",
+            "why": "La cuota no es ajustable y enviar una solicitud no haría ejecutable el despliegue."
+          },
+          {
+            "id": "C",
+            "text": "Modificar el despliegue de recuperación para que use recursos dentro de la cuota aplicada y probar el plan modificado.",
+            "why": "Un plan dentro de la cuota aplicada no ajustable puede ejecutarse sin depender de un aumento que no está disponible."
+          },
+          {
+            "id": "D",
+            "text": "Mantener el plan de despliegue y agregar reintentos del SDK a todas las llamadas de creación de recursos.",
+            "why": "Los reintentos no modifican una cuota de recursos no ajustable que el despliegue superaría."
+          }
+        ],
+        "explanation": "La cuota aplicada es inferior a los recursos que crearía el plan de recuperación y no se puede aumentar. Por ello, debes modificar el plan para que respete la cuota y validar el despliegue actualizado. Una cuenta recién creada puede tener un valor aplicado menor que el predeterminado de AWS, así que no conviene dimensionar con este último. Los reintentos de llamadas API no permiten superar una cuota de recursos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "service-quotas-throttling--r0",
+      "conceptId": "service-quotas-throttling",
+      "kind": "recall",
+      "prompt": "A standby Region must add resources during failover. What should you check and request before failover, and why?",
+      "promptEs": "Una Region de standby debe agregar recursos durante el failover. ¿Qué debes revisar y solicitar antes del failover, y por qué?",
+      "idealAnswer": "Check the standby account’s applied quotas for the relevant resources in the standby Region. Request needed increases for adjustable quotas ahead of time because quotas are generally Region-specific and increases take time and are not guaranteed.",
+      "rubric": [
+        "Checks applied quotas in the standby account and Region.",
+        "Requests needed increases only for adjustable quotas before failover.",
+        "Explains Region specificity and the uncertainty or delay of approval."
+      ]
+    }
+  ]
+}

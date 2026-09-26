@@ -1,0 +1,327 @@
+{
+  "conceptId": "api-gateway-authorization",
+  "card": {
+    "en": {
+      "tldr": "Choose API Gateway REST API authorization based on who calls the API and what evidence of access they provide. Use Cognito user pool authorizers for user-pool identities, IAM for AWS identities, Lambda authorizers for custom tokens or request attributes, and private REST APIs with resource policies for VPC-restricted access.",
+      "whenToUse": [
+        "Callers already authenticate with an Amazon Cognito user pool.",
+        "AWS roles or users need permission to invoke an API or individual methods.",
+        "Access decisions depend on a bearer token or request headers, paths, or query strings.",
+        "A REST API must be reachable only through private VPC connectivity."
+      ],
+      "keyFacts": [
+        "IAM policies can control who invokes an entire REST API or individual methods.",
+        "Lambda authorizers can use bearer tokens and request parameters to control method invocation.",
+        "A private API is a REST API callable only from within an Amazon VPC through an interface VPC endpoint.",
+        "A resource policy can restrict private API access with aws:SourceVpc or aws:SourceVpce conditions.",
+        "VPC endpoint policies provide additional control over access through interface VPC endpoints."
+      ],
+      "gotchas": [
+        "An API key and usage plan track and limit customer usage; they are not a substitute for choosing an authorization mechanism.",
+        "A source IP resource policy does not turn a public API into a private API.",
+        "A private API endpoint supports REST APIs, not other API Gateway API types."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing Cognito user pool",
+        "AWS roles invoke individual methods",
+        "third-party bearer token and request headers",
+        "only callable from within a VPC",
+        "restrict access to a specific VPC endpoint"
+      ]
+    },
+    "es": {
+      "tldr": "Elige la autorización de una REST API de API Gateway según quién llama y qué información presenta para obtener acceso. Usa Amazon Cognito user pool authorizers para identidades del user pool, IAM para identidades de AWS, Lambda authorizers para tokens o atributos personalizados, y private REST APIs con resource policies para restringir el acceso desde una VPC.",
+      "whenToUse": [
+        "Los clientes ya se autentican con un Amazon Cognito user pool.",
+        "Usuarios o roles de AWS necesitan permiso para invocar una API o métodos específicos.",
+        "La decisión de acceso depende de un bearer token o de headers, paths o query strings.",
+        "Una REST API debe ser accesible solo mediante conectividad privada desde una VPC."
+      ],
+      "keyFacts": [
+        "Las IAM policies pueden controlar quién invoca una REST API completa o métodos individuales.",
+        "Los Lambda authorizers pueden usar bearer tokens y parámetros de la solicitud para controlar la invocación de métodos.",
+        "Una private API es una REST API invocable solo desde una Amazon VPC mediante un interface VPC endpoint.",
+        "Una resource policy puede restringir el acceso a una private API con condiciones aws:SourceVpc o aws:SourceVpce.",
+        "Las VPC endpoint policies agregan control sobre el acceso que pasa por interface VPC endpoints."
+      ],
+      "gotchas": [
+        "Una API key con un usage plan permite registrar y limitar el uso por cliente; no reemplaza la elección de un mecanismo de autorización.",
+        "Una resource policy basada en la IP de origen no convierte una API pública en una private API.",
+        "El endpoint de una private API admite REST APIs, no otros tipos de API Gateway API."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing Cognito user pool",
+        "AWS roles invoke individual methods",
+        "third-party bearer token and request headers",
+        "only callable from within a VPC",
+        "restrict access to a specific VPC endpoint"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-to-api.html",
+      "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "api-gateway-authorization--d2da481a",
+      "conceptId": "api-gateway-authorization",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A fitness company is adding account-specific methods to a REST API. Its mobile customers already sign in through an Amazon Cognito user pool, and the team wants API access to use that existing identity system without writing authorization code. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Require IAM permissions to invoke the account-specific methods.",
+          "correct": false,
+          "why": "IAM controls access for AWS identities but does not use the customers' existing user pool as the authorizer."
+        },
+        {
+          "id": "B",
+          "text": "Add a resource policy that allows requests from customers' source IP addresses.",
+          "correct": false,
+          "why": "Source IP restrictions do not authorize customers through their existing user pool identities."
+        },
+        {
+          "id": "C",
+          "text": "Configure an Amazon Cognito user pool authorizer for the methods.",
+          "correct": true,
+          "why": "A Cognito user pool authorizer controls method invocation using the identity system customers already use."
+        },
+        {
+          "id": "D",
+          "text": "Create a Lambda authorizer that evaluates each customer's bearer token.",
+          "correct": false,
+          "why": "A Lambda authorizer can evaluate tokens but introduces authorization code the team does not want to maintain."
+        }
+      ],
+      "explanation": "The deciding constraint is that customers already authenticate with a Cognito user pool and the team wants to avoid custom authorization code. A Cognito user pool authorizer is designed to control who can invoke REST API methods using that identity system. A Lambda authorizer could evaluate a token, but it adds code and maintenance that this scenario does not require.",
+      "keywordCues": [
+        "already sign in through an Amazon Cognito user pool",
+        "without writing authorization code",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-to-api.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html"
+      ],
+      "es": {
+        "stem": "Una empresa de acondicionamiento físico agrega métodos específicos de cada cuenta a una REST API. Sus clientes móviles ya inician sesión mediante un Amazon Cognito user pool, y el equipo quiere usar ese sistema de identidad para acceder a la API sin escribir código de autorización. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Exigir IAM permissions para invocar los métodos específicos de cada cuenta.",
+            "why": "IAM controla el acceso de identidades de AWS, pero no usa el user pool existente de los clientes como authorizer."
+          },
+          {
+            "id": "B",
+            "text": "Agregar una resource policy que permita solicitudes desde las direcciones IP de origen de los clientes.",
+            "why": "Las restricciones por IP de origen no autorizan a los clientes mediante sus identidades del user pool."
+          },
+          {
+            "id": "C",
+            "text": "Configurar un Amazon Cognito user pool authorizer para los métodos.",
+            "why": "Un Cognito user pool authorizer controla la invocación de métodos con el sistema de identidad que ya usan los clientes."
+          },
+          {
+            "id": "D",
+            "text": "Crear un Lambda authorizer que evalúe el bearer token de cada cliente.",
+            "why": "Un Lambda authorizer puede evaluar tokens, pero agrega código de autorización que el equipo no quiere mantener."
+          }
+        ],
+        "explanation": "La condición decisiva es que los clientes ya se autentican con un Cognito user pool y el equipo no quiere mantener código de autorización. Un Cognito user pool authorizer controla quién puede invocar métodos de la REST API mediante ese sistema de identidad. Un Lambda authorizer podría evaluar un token, pero agregaría código y mantenimiento innecesarios."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "api-gateway-authorization--e857c572",
+      "conceptId": "api-gateway-authorization",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company has several internal applications whose AWS roles call a REST API. Each application should be allowed to invoke only the methods it needs, and the company wants to manage those permissions through its existing AWS identity controls. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a resource policy that allows the applications' shared source IP range.",
+          "correct": false,
+          "why": "A shared source IP range does not distinguish the roles' different method-level permissions."
+        },
+        {
+          "id": "B",
+          "text": "Use IAM roles and policies to control invocation of individual API methods.",
+          "correct": true,
+          "why": "IAM policies can grant AWS roles permission to invoke individual REST API methods."
+        },
+        {
+          "id": "C",
+          "text": "Use a Cognito user pool authorizer for the applications' API calls.",
+          "correct": false,
+          "why": "A user pool authorizer does not meet the requirement to manage permissions through the applications' existing AWS roles."
+        },
+        {
+          "id": "D",
+          "text": "Use a Lambda authorizer that maintains separate method rules for each application.",
+          "correct": false,
+          "why": "Custom Lambda rules duplicate the existing AWS identity controls the company wants to use."
+        }
+      ],
+      "explanation": "The callers are AWS roles, and permissions must vary by method. IAM roles and policies provide invocation controls for an entire REST API or individual methods, matching both constraints. A source IP policy would not distinguish the applications' role-based permissions, even if their requests came from a known range.",
+      "keywordCues": [
+        "AWS roles call a REST API",
+        "only the methods it needs",
+        "existing AWS identity controls"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-to-api.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene varias aplicaciones internas cuyos AWS roles llaman a una REST API. Cada aplicación debe poder invocar solo los métodos que necesita, y la empresa quiere administrar esos permisos con sus controles de identidad de AWS existentes. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar una resource policy que permita el rango de IP de origen compartido por las aplicaciones.",
+            "why": "Un rango compartido de IP de origen no distingue los permisos por método de cada rol."
+          },
+          {
+            "id": "B",
+            "text": "Usar IAM roles y policies para controlar la invocación de métodos individuales de la API.",
+            "why": "Las IAM policies pueden dar a los AWS roles permiso para invocar métodos individuales de una REST API."
+          },
+          {
+            "id": "C",
+            "text": "Usar un Cognito user pool authorizer para las llamadas de las aplicaciones a la API.",
+            "why": "Un user pool authorizer no cumple el requisito de administrar permisos mediante los AWS roles existentes de las aplicaciones."
+          },
+          {
+            "id": "D",
+            "text": "Usar un Lambda authorizer que mantenga reglas de métodos separadas para cada aplicación.",
+            "why": "Las reglas personalizadas en Lambda duplican los controles de identidad de AWS existentes que la empresa quiere usar."
+          }
+        ],
+        "explanation": "Los clientes de la API usan AWS roles y necesitan permisos distintos según el método. Los IAM roles y policies permiten controlar la invocación de una REST API completa o de métodos individuales, por lo que cumplen ambas condiciones. Una policy basada en IP de origen no distinguiría los permisos de cada aplicación según su rol, aunque las solicitudes provinieran de un rango conocido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "api-gateway-authorization--667f70f0",
+      "conceptId": "api-gateway-authorization",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research organization is deploying a REST API for workloads in an Amazon VPC. The API must be callable without traversing the public internet, and its access policy must reject calls that do not originate from one designated VPC endpoint. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an aws:SourceVpce condition for the designated endpoint to the API resource policy.",
+          "correct": true,
+          "why": "An aws:SourceVpce resource policy condition restricts private API access to the designated VPC endpoint."
+        },
+        {
+          "id": "B",
+          "text": "Attach a VPC endpoint policy that permits requests to the API.",
+          "correct": false,
+          "why": "An endpoint policy controls access through that endpoint but does not make the API's resource policy reject other sources."
+        },
+        {
+          "id": "C",
+          "text": "Deploy a Regional REST API and use AWS WAF to filter incoming requests.",
+          "correct": false,
+          "why": "AWS WAF addresses common web exploits, not the requirement for a private API endpoint."
+        },
+        {
+          "id": "D",
+          "text": "Deploy the API as a private REST API accessed through an interface VPC endpoint.",
+          "correct": true,
+          "why": "A private REST API is callable through an interface VPC endpoint without using the public internet."
+        },
+        {
+          "id": "E",
+          "text": "Require an API key through a usage plan for each VPC workload.",
+          "correct": false,
+          "why": "Usage plans track and limit API use but do not provide private connectivity or restrict requests to a VPC endpoint."
+        }
+      ],
+      "explanation": "The organization needs both private network access and an API-side restriction to one endpoint. A private REST API reached through an interface VPC endpoint meets the connectivity requirement; an aws:SourceVpce condition in its resource policy limits the allowed endpoint. A VPC endpoint policy can add control over traffic through an endpoint, but permitting traffic there does not replace the requested restriction in the API's access policy.",
+      "keywordCues": [
+        "REST API for workloads in an Amazon VPC",
+        "without traversing the public internet",
+        "access policy must reject calls",
+        "one designated VPC endpoint"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-to-api.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación implementa una REST API para cargas de trabajo en una Amazon VPC. La API debe poder invocarse sin atravesar la internet pública, y su access policy debe rechazar las llamadas que no provengan de un VPC endpoint designado. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar una condición aws:SourceVpce para el endpoint designado a la resource policy de la API.",
+            "why": "La condición aws:SourceVpce en una resource policy restringe el acceso a la private API al VPC endpoint designado."
+          },
+          {
+            "id": "B",
+            "text": "Adjuntar una VPC endpoint policy que permita solicitudes a la API.",
+            "why": "Una endpoint policy controla el acceso a través de ese endpoint, pero no hace que la resource policy de la API rechace otros orígenes."
+          },
+          {
+            "id": "C",
+            "text": "Implementar una Regional REST API y usar AWS WAF para filtrar las solicitudes entrantes.",
+            "why": "AWS WAF protege contra exploits web comunes, pero no cumple el requisito de un endpoint privado para la API."
+          },
+          {
+            "id": "D",
+            "text": "Implementar la API como una private REST API accesible mediante un interface VPC endpoint.",
+            "why": "Una private REST API puede invocarse mediante un interface VPC endpoint sin usar la internet pública."
+          },
+          {
+            "id": "E",
+            "text": "Exigir una API key mediante un usage plan para cada carga de trabajo en la VPC.",
+            "why": "Los usage plans registran y limitan el uso de la API, pero no proporcionan conectividad privada ni restringen las solicitudes a un VPC endpoint."
+          }
+        ],
+        "explanation": "La organización necesita conectividad privada y una restricción aplicada por la API a un solo endpoint. Una private REST API accesible mediante un interface VPC endpoint cumple el requisito de conectividad; una condición aws:SourceVpce en su resource policy limita el endpoint permitido. Una VPC endpoint policy puede agregar control sobre el tráfico que pasa por un endpoint, pero permitir tráfico allí no reemplaza la restricción solicitada en la access policy de la API."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "api-gateway-authorization--r0",
+      "conceptId": "api-gateway-authorization",
+      "kind": "recall",
+      "prompt": "A REST API must evaluate partner bearer tokens and request headers before invocation. Which authorization mechanism fits, and why?",
+      "promptEs": "Una REST API debe evaluar bearer tokens de empresas asociadas y headers de la solicitud antes de permitir la invocación. ¿Qué mecanismo de autorización usarías y por qué?",
+      "idealAnswer": "Use a Lambda authorizer. It can control access to REST API methods using bearer tokens and request information such as headers.",
+      "rubric": [
+        "Identifies a Lambda authorizer.",
+        "Explains that it can evaluate bearer tokens.",
+        "Connects the authorization decision to request headers."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+{
+  "conceptId": "appflow",
+  "card": {
+    "en": {
+      "tldr": "Amazon AppFlow is a fully managed service for moving data between SaaS applications and AWS services without writing integration code. Choose it when a scenario calls for a managed flow from a supported SaaS source to Amazon S3 or Amazon Redshift.",
+      "whenToUse": [
+        "Move Salesforce records to Amazon Redshift or Zendesk tickets to Amazon S3 without writing integration code.",
+        "Run SaaS data transfers on demand or on a schedule.",
+        "Transfer supported SaaS data privately over AWS infrastructure by using AppFlow with AWS PrivateLink."
+      ],
+      "keyFacts": [
+        "AppFlow flows can run on demand or on a schedule.",
+        "AppFlow encrypts transferred data at rest and in transit.",
+        "AppFlow integrates with AWS PrivateLink for private data transfer.",
+        "Data transferred to Amazon S3 can be cataloged in the AWS Glue Data Catalog.",
+        "AppFlow can ingest Salesforce Platform events and Change Data Capture events for publication to an Amazon EventBridge partner event bus."
+      ],
+      "gotchas": [
+        "AWS Glue Data Catalog helps users discover data; it is not the SaaS-to-S3 flow in this scenario.",
+        "AWS CloudTrail records AppFlow API activity, not the Salesforce or Zendesk records being transferred.",
+        "AWS CloudFormation can provision AppFlow resources, but provisioning alone does not move SaaS data."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Glue Data Catalog",
+          "difference": "Catalogs data for discovery; AppFlow performs the SaaS-to-AWS transfer."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "Routes matching events; AppFlow can ingest supported Salesforce events and publish them to an EventBridge partner event bus."
+        }
+      ],
+      "examCues": [
+        "Salesforce records into Amazon Redshift without integration code",
+        "scheduled Zendesk tickets to Amazon S3",
+        "private SaaS data transfer with AWS PrivateLink",
+        "Salesforce Change Data Capture events to a partner event bus"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon AppFlow es un servicio totalmente administrado que mueve datos entre aplicaciones SaaS y servicios de AWS sin que tengas que escribir código de integración. Elígelo cuando necesites un flujo administrado desde una fuente SaaS compatible hacia Amazon S3 o Amazon Redshift.",
+      "whenToUse": [
+        "Mover registros de Salesforce a Amazon Redshift o tickets de Zendesk a Amazon S3 sin escribir código de integración.",
+        "Ejecutar transferencias de datos SaaS bajo demanda o según una programación.",
+        "Transferir datos SaaS compatibles de forma privada por la infraestructura de AWS mediante AppFlow y AWS PrivateLink."
+      ],
+      "keyFacts": [
+        "Los flujos de AppFlow pueden ejecutarse bajo demanda o según una programación.",
+        "AppFlow cifra los datos transferidos en reposo y en tránsito.",
+        "AppFlow se integra con AWS PrivateLink para transferencias privadas.",
+        "Puedes catalogar en AWS Glue Data Catalog los datos transferidos a Amazon S3.",
+        "AppFlow puede ingerir eventos de Salesforce Platform y Change Data Capture para publicarlos en un bus de eventos de socios de Amazon EventBridge."
+      ],
+      "gotchas": [
+        "AWS Glue Data Catalog facilita descubrir los datos; no realiza el flujo de SaaS a S3 en este escenario.",
+        "AWS CloudTrail registra la actividad de la API de AppFlow, no los registros de Salesforce o Zendesk que se transfieren.",
+        "AWS CloudFormation puede aprovisionar recursos de AppFlow, pero el aprovisionamiento por sí solo no mueve datos SaaS."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Glue Data Catalog",
+          "difference": "Cataloga datos para facilitar su descubrimiento; AppFlow realiza la transferencia de SaaS a AWS."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "Enruta eventos que coinciden con reglas; AppFlow puede ingerir eventos compatibles de Salesforce y publicarlos en un bus de eventos de socios de EventBridge."
+        }
+      ],
+      "examCues": [
+        "Salesforce records into Amazon Redshift without integration code",
+        "scheduled Zendesk tickets to Amazon S3",
+        "private SaaS data transfer with AWS PrivateLink",
+        "Salesforce Change Data Capture events to a partner event bus"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/appflow/latest/userguide/what-is-appflow.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "appflow--29cbb312",
+      "conceptId": "appflow",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A healthcare support team needs to copy Zendesk tickets to Amazon S3 for analysis when an analyst requests a transfer. Its security policy requires the transfer to use AWS infrastructure instead of the public internet, and the team wants no custom connector code. Which solution meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run an on-demand Amazon AppFlow flow from Zendesk to Amazon S3 with private data transfer through AWS PrivateLink.",
+          "correct": true,
+          "why": "AppFlow supports on-demand Zendesk-to-S3 transfers and integrates with AWS PrivateLink for private transfer."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS CloudTrail to record AppFlow API calls and deliver those logs to Amazon S3.",
+          "correct": false,
+          "why": "API logs are not the requested Zendesk tickets."
+        },
+        {
+          "id": "C",
+          "text": "Create an AWS Glue Data Catalog entry for the Zendesk tickets in Amazon S3.",
+          "correct": false,
+          "why": "A catalog entry helps users discover data but does not copy tickets from Zendesk."
+        },
+        {
+          "id": "D",
+          "text": "Run an on-demand Amazon AppFlow flow from Zendesk to Amazon S3 without enabling private data transfer.",
+          "correct": false,
+          "why": "The flow addresses the source and destination but omits the required private data transfer option."
+        }
+      ],
+      "explanation": "The deciding constraints are an on-demand Zendesk-to-S3 transfer and a path over AWS infrastructure rather than the public internet. Amazon AppFlow supports on-demand flows, and its AWS PrivateLink integration provides private data transfer. An AppFlow flow without that option meets the transfer requirement but misses the security requirement. Cataloging or logging does not move the tickets.",
+      "keywordCues": [
+        "Zendesk tickets to Amazon S3",
+        "when an analyst requests a transfer",
+        "instead of the public internet",
+        "no custom connector code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/appflow/latest/userguide/what-is-appflow.html"
+      ],
+      "es": {
+        "stem": "Un equipo de soporte de salud necesita copiar tickets de Zendesk a Amazon S3 para analizarlos cuando un analista solicite una transferencia. Su política de seguridad exige que la transferencia use la infraestructura de AWS en lugar de la internet pública, y el equipo no quiere escribir código de conectores personalizados. ¿Qué solución cumple estos requisitos de la manera MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar un flujo bajo demanda de Amazon AppFlow desde Zendesk hacia Amazon S3 con transferencia privada de datos mediante AWS PrivateLink.",
+            "why": "AppFlow permite transferencias bajo demanda de Zendesk a S3 y se integra con AWS PrivateLink para la transferencia privada."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS CloudTrail para registrar las llamadas a la API de AppFlow y entregar esos registros a Amazon S3.",
+            "why": "Los registros de llamadas a la API no son los tickets de Zendesk solicitados."
+          },
+          {
+            "id": "C",
+            "text": "Crear una entrada en AWS Glue Data Catalog para los tickets de Zendesk en Amazon S3.",
+            "why": "Una entrada de catálogo facilita descubrir datos, pero no copia los tickets desde Zendesk."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar un flujo bajo demanda de Amazon AppFlow desde Zendesk hacia Amazon S3 sin habilitar la transferencia privada de datos.",
+            "why": "El flujo cubre el origen y el destino, pero omite la opción de transferencia privada requerida."
+          }
+        ],
+        "explanation": "Las restricciones decisivas son transferir datos de Zendesk a S3 bajo demanda y usar una ruta por la infraestructura de AWS en vez de la internet pública. Amazon AppFlow permite flujos bajo demanda y su integración con AWS PrivateLink proporciona transferencia privada. Un flujo de AppFlow sin esa opción cubre la transferencia, pero no el requisito de seguridad. Catalogar o registrar actividad no mueve los tickets."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "appflow--20248700",
+      "conceptId": "appflow",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A subscription company receives Salesforce Change Data Capture events and wants matching events routed to AWS Lambda for downstream processing. The company prefers a managed way to ingest the Salesforce events into an Amazon EventBridge partner event bus rather than building its own Salesforce ingestion code. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon AppFlow to ingest the Salesforce events into an EventBridge partner event bus, then configure an EventBridge rule that targets Lambda.",
+          "correct": true,
+          "why": "AppFlow supports Salesforce Change Data Capture ingestion to an EventBridge partner event bus, where rules can route matching events to Lambda."
+        },
+        {
+          "id": "B",
+          "text": "Write a Lambda function that ingests Salesforce events and publishes them to an EventBridge partner event bus.",
+          "correct": false,
+          "why": "Custom Salesforce ingestion code violates the company's stated preference."
+        },
+        {
+          "id": "C",
+          "text": "Record Amazon AppFlow API activity with AWS CloudTrail and create an EventBridge rule for the CloudTrail records.",
+          "correct": false,
+          "why": "AppFlow API activity is not the Salesforce Change Data Capture event stream the company needs."
+        },
+        {
+          "id": "D",
+          "text": "Create a scheduled Amazon AppFlow flow that transfers Salesforce records to Amazon S3, then catalog the files.",
+          "correct": false,
+          "why": "A scheduled S3 data flow does not deliver the requested events to an EventBridge partner event bus."
+        }
+      ],
+      "explanation": "The requirement is to ingest Salesforce Change Data Capture events into an EventBridge partner event bus without building Salesforce ingestion code. Amazon AppFlow supports that ingestion, and EventBridge rules can route matching events to Lambda. A scheduled flow to S3 is a valid data-transfer pattern, but it misses the required event-bus destination. CloudTrail records AppFlow API calls, not the Salesforce events requested here.",
+      "keywordCues": [
+        "Salesforce Change Data Capture events",
+        "Amazon EventBridge partner event bus",
+        "rather than building its own Salesforce ingestion code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/appflow/latest/userguide/what-is-appflow.html"
+      ],
+      "es": {
+        "stem": "Una empresa de suscripciones recibe eventos de Salesforce Change Data Capture y quiere enviar los eventos que coincidan con ciertas reglas a AWS Lambda para procesarlos. Prefiere una forma administrada de ingerir los eventos de Salesforce en un bus de eventos de socios de Amazon EventBridge en vez de desarrollar su propio código de ingestión. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon AppFlow para ingerir los eventos de Salesforce en un bus de eventos de socios de EventBridge y configurar una regla de EventBridge con Lambda como destino.",
+            "why": "AppFlow permite ingerir eventos de Salesforce Change Data Capture en un bus de eventos de socios de EventBridge, cuyas reglas pueden enviarlos a Lambda."
+          },
+          {
+            "id": "B",
+            "text": "Escribir una función de Lambda que ingiera los eventos de Salesforce y los publique en un bus de eventos de socios de EventBridge.",
+            "why": "El código personalizado para ingerir datos de Salesforce incumple la preferencia indicada por la empresa."
+          },
+          {
+            "id": "C",
+            "text": "Registrar la actividad de la API de Amazon AppFlow con AWS CloudTrail y crear una regla de EventBridge para esos registros.",
+            "why": "La actividad de la API de AppFlow no es el flujo de eventos de Salesforce Change Data Capture que necesita la empresa."
+          },
+          {
+            "id": "D",
+            "text": "Crear un flujo programado de Amazon AppFlow que transfiera registros de Salesforce a Amazon S3 y luego catalogar los archivos.",
+            "why": "Un flujo programado hacia S3 no entrega los eventos solicitados a un bus de eventos de socios de EventBridge."
+          }
+        ],
+        "explanation": "El requisito es ingerir eventos de Salesforce Change Data Capture en un bus de eventos de socios de EventBridge sin desarrollar código de ingestión para Salesforce. Amazon AppFlow permite esa ingestión, y las reglas de EventBridge pueden enviar los eventos que coincidan a Lambda. Un flujo programado hacia S3 es una forma válida de transferir datos, pero no cumple el destino de eventos requerido. CloudTrail registra llamadas a la API de AppFlow, no los eventos de Salesforce solicitados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "appflow--r0",
+      "conceptId": "appflow",
+      "kind": "recall",
+      "prompt": "Which service would you choose for scheduled Salesforce-to-Redshift transfers without integration code, and why?",
+      "promptEs": "¿Qué servicio elegirías para transferir datos de Salesforce a Redshift según una programación y sin código de integración, y por qué?",
+      "idealAnswer": "Choose Amazon AppFlow. It provides managed data flows between Salesforce and Amazon Redshift that can run on a schedule without writing integration code.",
+      "rubric": [
+        "Names Amazon AppFlow.",
+        "Identifies Salesforce-to-Redshift data transfer.",
+        "Mentions scheduled flows and no integration code."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "conceptId": "dynamodb-indexes",
+  "card": {
+    "en": {
+      "tldr": "DynamoDB secondary indexes support Query operations using keys other than the table’s primary key. Choose a GSI for a different partition key or an index added after table creation; choose an LSI at table creation when the partition key stays the same and a different sort key is needed.",
+      "whenToUse": [
+        "Query items by an attribute that is not the table’s partition key: use a GSI.",
+        "Add a new query pattern to an existing table: add a GSI.",
+        "At table creation, query within one partition key by another sort key, with optional strongly consistent reads: use an LSI."
+      ],
+      "keyFacts": [
+        "A GSI can have a different partition key and an optional sort key; it can be added to an existing table.",
+        "An LSI uses the table’s partition key and a different sort key; it must be created with the table.",
+        "GSI queries support eventual consistency only; LSI queries can use eventual or strong consistency.",
+        "GSI queries return only projected attributes. An LSI can fetch nonprojected attributes from the base table.",
+        "For an LSI, indexed items for each partition key value must total no more than 10 GB; a GSI has no corresponding per-partition-key size restriction."
+      ],
+      "gotchas": [
+        "An LSI cannot be added to an existing table, even if the desired partition key matches.",
+        "A GSI is not an option when the index query must be strongly consistent.",
+        "Creating a GSI does not make unprojected attributes available in its query results."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing table, new lookup by email",
+        "same partition key, different sort key",
+        "strongly consistent index queries",
+        "projected attributes in GSI results"
+      ]
+    },
+    "es": {
+      "tldr": "Los secondary indexes de DynamoDB permiten consultas Query con claves distintas de la clave primaria de la tabla. Elige un GSI si necesitas otra partition key o debes agregar el índice después de crear la tabla; elige un LSI al crear la tabla si conservas la partition key y necesitas otra sort key.",
+      "whenToUse": [
+        "Necesitas consultar por un atributo distinto de la partition key de la tabla: usa un GSI.",
+        "Debes agregar un patrón de consulta a una tabla existente: agrega un GSI.",
+        "Al crear la tabla, necesitas consultar dentro de una misma partition key con otra sort key y, si corresponde, lecturas strongly consistent: usa un LSI."
+      ],
+      "keyFacts": [
+        "Un GSI puede tener otra partition key y una sort key opcional; puedes agregarlo a una tabla existente.",
+        "Un LSI conserva la partition key de la tabla y usa otra sort key; debes crearlo junto con la tabla.",
+        "Las consultas a un GSI solo admiten eventual consistency; las consultas a un LSI pueden usar eventual o strong consistency.",
+        "Una consulta a un GSI solo devuelve atributos projected. Un LSI puede obtener de la tabla atributos que no estén projected.",
+        "En un LSI, los elementos indexados por cada valor de partition key no pueden superar 10 GB en total; un GSI no tiene ese límite por valor de partition key."
+      ],
+      "gotchas": [
+        "No puedes agregar un LSI a una tabla existente, aunque la partition key que necesitas coincida.",
+        "Un GSI no satisface una consulta de índice que exige strong consistency.",
+        "Crear un GSI no permite devolver atributos que no estén projected en el índice."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "existing table, new lookup by email",
+        "same partition key, different sort key",
+        "strongly consistent index queries",
+        "projected attributes in GSI results"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SecondaryIndexes.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-indexes--f940fc4f",
+      "conceptId": "dynamodb-indexes",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company stores reservations in an existing DynamoDB table with reservationId as its partition key. Its support application must now retrieve reservations by customerEmail, which is stored on each item. The team wants to keep the table and use Query rather than Scan. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an LSI with customerEmail as its partition key and query the index.",
+          "correct": false,
+          "why": "An LSI must share the table’s partition key and cannot be added after table creation."
+        },
+        {
+          "id": "B",
+          "text": "Scan the table with a filter on customerEmail.",
+          "correct": false,
+          "why": "A Scan does not meet the stated requirement to retrieve reservations using Query."
+        },
+        {
+          "id": "C",
+          "text": "Add a GSI with customerEmail as its partition key and query the index.",
+          "correct": true,
+          "why": "A GSI can be added to an existing table and queried using a different partition key."
+        },
+        {
+          "id": "D",
+          "text": "Create a new table keyed by customerEmail and query that table.",
+          "correct": false,
+          "why": "A second table does not meet the requirement to keep the existing table as the query solution."
+        }
+      ],
+      "explanation": "The deciding requirements are a new lookup by customerEmail and an existing table that the company wants to retain. A GSI can be added after table creation and can use customerEmail as its partition key for Query operations. An LSI cannot be added later and must retain the table’s partition key. Scanning fails the explicit Query requirement.",
+      "keywordCues": [
+        "existing DynamoDB table",
+        "retrieve reservations by customerEmail",
+        "keep the table and use Query rather than Scan"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SecondaryIndexes.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas guarda reservas en una tabla existente de DynamoDB cuya partition key es reservationId. Su aplicación de soporte ahora debe obtener reservas por customerEmail, un atributo almacenado en cada elemento. El equipo quiere conservar la tabla y usar Query en lugar de Scan. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega un LSI con customerEmail como partition key y consulta el índice.",
+            "why": "Un LSI debe compartir la partition key de la tabla y no puede agregarse después de crearla."
+          },
+          {
+            "id": "B",
+            "text": "Haz Scan de la tabla con un filtro por customerEmail.",
+            "why": "Scan no cumple el requisito explícito de obtener las reservas mediante Query."
+          },
+          {
+            "id": "C",
+            "text": "Agrega un GSI con customerEmail como partition key y consulta el índice.",
+            "why": "Puedes agregar un GSI a una tabla existente y consultarlo mediante una partition key distinta."
+          },
+          {
+            "id": "D",
+            "text": "Crea otra tabla con customerEmail como clave y consulta esa tabla.",
+            "why": "Una segunda tabla no cumple el requisito de conservar la tabla existente como solución para las consultas."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son consultar por customerEmail y conservar una tabla que ya existe. Puedes agregar un GSI después de crear la tabla y usar customerEmail como partition key para operaciones Query. No puedes agregar un LSI posteriormente y este debe conservar la partition key de la tabla. Scan no cumple el requisito explícito de usar Query."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-indexes--5c3e01ae",
+      "conceptId": "dynamodb-indexes",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company is designing a DynamoDB table keyed by channelId and clipId. Its application must query clips for one channel ordered by publishTime; the same channel might eventually have more than 10 GB of indexed items. Eventual consistency is acceptable for these queries. Which index design meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an LSI with channelId as its partition key and publishTime as its sort key.",
+          "correct": false,
+          "why": "An LSI limits indexed items for each channelId value to 10 GB."
+        },
+        {
+          "id": "B",
+          "text": "Create an LSI with clipId as its partition key and publishTime as its sort key.",
+          "correct": false,
+          "why": "An LSI must retain channelId as its partition key."
+        },
+        {
+          "id": "C",
+          "text": "Create a GSI with channelId as its partition key and publishTime as its sort key.",
+          "correct": true,
+          "why": "A GSI supports the requested keys without an LSI’s 10 GB indexed-item limit per partition key value."
+        },
+        {
+          "id": "D",
+          "text": "Create a GSI with publishTime as its partition key and channelId as its sort key.",
+          "correct": false,
+          "why": "This reverses the requested access pattern, which queries items for one channel ordered by publishTime."
+        }
+      ],
+      "explanation": "The application needs to query by channelId and order results by publishTime, but indexed items for one channel could exceed 10 GB. A GSI can use those keys and has no per-partition-key size restriction of the kind imposed on LSIs. An LSI otherwise matches the query pattern, but its indexed items for each channelId value must total no more than 10 GB. Eventual consistency is acceptable, so the GSI’s consistency limitation does not prevent its use.",
+      "keywordCues": [
+        "one channel ordered by publishTime",
+        "more than 10 GB of indexed items",
+        "Eventual consistency is acceptable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SecondaryIndexes.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios está diseñando una tabla de DynamoDB con channelId y clipId como claves. Su aplicación debe consultar los clips de un canal ordenados por publishTime; un mismo canal podría llegar a tener más de 10 GB de elementos indexados. Eventual consistency es aceptable para estas consultas. ¿Qué diseño de índice cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un LSI con channelId como partition key y publishTime como sort key.",
+            "why": "Un LSI limita a 10 GB los elementos indexados para cada valor de channelId."
+          },
+          {
+            "id": "B",
+            "text": "Crea un LSI con clipId como partition key y publishTime como sort key.",
+            "why": "Un LSI debe conservar channelId como partition key."
+          },
+          {
+            "id": "C",
+            "text": "Crea un GSI con channelId como partition key y publishTime como sort key.",
+            "why": "Un GSI admite las claves solicitadas sin el límite de 10 GB de elementos indexados por valor de partition key que tiene un LSI."
+          },
+          {
+            "id": "D",
+            "text": "Crea un GSI con publishTime como partition key y channelId como sort key.",
+            "why": "Estas claves invierten el patrón solicitado: consultar los elementos de un canal ordenados por publishTime."
+          }
+        ],
+        "explanation": "La aplicación necesita consultar por channelId y ordenar los resultados por publishTime, pero los elementos indexados de un canal podrían superar 10 GB. Un GSI puede usar esas claves y no tiene el límite por valor de partition key que se aplica a los LSI. Un LSI sí coincide con el patrón de consulta, pero sus elementos indexados para cada valor de channelId no pueden superar 10 GB en total. Eventual consistency es aceptable, así que la limitación de consistencia del GSI no impide usarlo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-indexes--r0",
+      "conceptId": "dynamodb-indexes",
+      "kind": "recall",
+      "prompt": "An existing DynamoDB table needs Query by a different partition key. Which index would you add, and why?",
+      "promptEs": "Una tabla existente de DynamoDB necesita Query con otra partition key. ¿Qué índice agregarías y por qué?",
+      "idealAnswer": "Add a GSI. It can use a partition key different from the table’s and can be added after the table is created.",
+      "rubric": [
+        "Identifies a GSI.",
+        "Explains that it can use a different partition key.",
+        "Notes that it can be added to an existing table."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,317 @@
+{
+  "conceptId": "kms-key-rotation",
+  "card": {
+    "en": {
+      "tldr": "For a customer managed symmetric KMS key with AWS_KMS-generated material, use automatic rotation when new key material is needed on a recurring schedule; you can configure the rotation period. For an immediate change, consider on-demand rotation, including for eligible keys with imported material. If the key type does not support either method, create a new KMS key and switch applications or aliases to it.",
+      "whenToUse": [
+        "A compliance rule calls for recurring rotation of an eligible customer managed key without scheduling it yourself.",
+        "New key material is needed immediately while retaining the same eligible KMS key.",
+        "An asymmetric key, HMAC key, or key in a custom key store must be rotated manually."
+      ],
+      "keyFacts": [
+        "Automatic rotation is supported for symmetric encryption customer managed keys with AWS_KMS-generated material; its default period is 365 days, and a custom period can be specified.",
+        "On-demand rotation is supported for symmetric encryption keys with AWS_KMS or EXTERNAL origin.",
+        "Rotation of an existing key changes its key material, not its logical KMS key; AWS KMS selects the appropriate older material when decrypting existing ciphertext.",
+        "For multi-Region keys with AWS_KMS origin, enable automatic rotation or initiate on-demand rotation on the primary key."
+      ],
+      "gotchas": [
+        "Automatic rotation is not supported for imported key material, although eligible symmetric keys with imported material support on-demand rotation.",
+        "Rotating a KMS key does not rotate data keys or re-encrypt protected data.",
+        "An on-demand rotation does not change an existing automatic rotation schedule."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "recurring rotation without a maintenance job",
+        "imported key material; rotate immediately",
+        "asymmetric KMS key; switch an alias",
+        "retain access to ciphertext encrypted before rotation"
+      ]
+    },
+    "es": {
+      "tldr": "Para una clave administrada por el cliente de tipo simétrico cuyo material genera AWS KMS, usa automatic rotation si necesitas material nuevo en un calendario recurrente; puedes configurar el período. Para un cambio inmediato, considera on-demand rotation, incluso para claves elegibles con material importado. Si el tipo de clave no admite ninguno de esos métodos, crea una clave KMS nueva y cambia las aplicaciones o los alias para que la usen.",
+      "whenToUse": [
+        "Una regla de cumplimiento exige rotación recurrente de una clave administrada por el cliente elegible, sin que tengas que programarla.",
+        "Necesitas material criptográfico nuevo de inmediato sin cambiar la clave KMS lógica elegible.",
+        "Debes rotar manualmente una clave asimétrica, una clave HMAC o una clave en un custom key store."
+      ],
+      "keyFacts": [
+        "Automatic rotation se admite para claves de cifrado simétricas administradas por el cliente con material generado por AWS KMS; el período predeterminado es de 365 días y puedes especificar uno personalizado.",
+        "On-demand rotation se admite para claves de cifrado simétricas con origen AWS_KMS o EXTERNAL.",
+        "La rotación de una clave existente cambia su material, no la clave KMS lógica; AWS KMS selecciona el material anterior adecuado para descifrar ciphertext existente.",
+        "Para claves multi-Region con origen AWS_KMS, habilita automatic rotation o inicia on-demand rotation en la clave primaria."
+      ],
+      "gotchas": [
+        "Automatic rotation no se admite para material importado, aunque las claves simétricas elegibles con ese material admiten on-demand rotation.",
+        "Rotar una clave KMS no rota las data keys ni vuelve a cifrar los datos protegidos.",
+        "Una on-demand rotation no cambia el calendario de automatic rotation existente."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "recurring rotation without a maintenance job",
+        "imported key material; rotate immediately",
+        "asymmetric KMS key; switch an alias",
+        "retain access to ciphertext encrypted before rotation"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "kms-key-rotation--23baf9fe",
+      "conceptId": "kms-key-rotation",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company encrypts its archive with a customer managed symmetric KMS key whose material AWS KMS generated. Its contract requires new KMS key material on a recurring, company-defined schedule. The archive must remain readable without changing the application's key reference. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Perform one on-demand rotation on the existing key when the contract begins.",
+          "correct": false,
+          "why": "One immediate rotation does not establish recurring rotation."
+        },
+        {
+          "id": "B",
+          "text": "Enable automatic rotation on the existing key without specifying a rotation period.",
+          "correct": false,
+          "why": "This uses the default period rather than the required company-defined schedule."
+        },
+        {
+          "id": "C",
+          "text": "Create a new KMS key for each scheduled change and update the application to reference it.",
+          "correct": false,
+          "why": "This requires recurring application changes instead of retaining the existing key reference."
+        },
+        {
+          "id": "D",
+          "text": "Enable automatic rotation on the existing key with a custom rotation period.",
+          "correct": true,
+          "why": "AWS KMS rotates eligible key material on the configured schedule without changing the logical key."
+        }
+      ],
+      "explanation": "The deciding requirements are recurring rotation on a company-defined schedule and an unchanged application key reference. Automatic rotation with a custom period rotates material within the existing logical KMS key. A one-time on-demand rotation does not create a recurring schedule. Omitting the period selects the default rather than the company's specified interval.",
+      "keywordCues": [
+        "customer managed symmetric KMS key whose material AWS KMS generated",
+        "recurring, company-defined schedule",
+        "without changing the application's key reference"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios cifra su archivo con una clave KMS simétrica administrada por el cliente cuyo material generó AWS KMS. Su contrato exige material nuevo para la clave KMS en un calendario recurrente definido por la empresa. El archivo debe seguir siendo legible sin cambiar la referencia a la clave en la aplicación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Realiza una on-demand rotation de la clave existente al inicio del contrato.",
+            "why": "Una sola rotación inmediata no establece una rotación recurrente."
+          },
+          {
+            "id": "B",
+            "text": "Habilita automatic rotation en la clave existente sin especificar un período de rotación.",
+            "why": "Esto utiliza el período predeterminado en lugar del calendario definido por la empresa."
+          },
+          {
+            "id": "C",
+            "text": "Crea una clave KMS nueva para cada cambio programado y actualiza la aplicación para que la use.",
+            "why": "Esto exige cambios recurrentes en la aplicación en lugar de conservar la referencia a la clave existente."
+          },
+          {
+            "id": "D",
+            "text": "Habilita automatic rotation en la clave existente con un período de rotación personalizado.",
+            "why": "AWS KMS rota el material elegible según el calendario configurado sin cambiar la clave lógica."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la rotación recurrente según un calendario definido por la empresa y una referencia a la clave sin cambios. Automatic rotation con un período personalizado rota el material dentro de la misma clave KMS lógica. Una única on-demand rotation no crea un calendario recurrente. Si omites el período, se usa el valor predeterminado y no el intervalo especificado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-key-rotation--224db5e0",
+      "conceptId": "kms-key-rotation",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics platform uses a customer managed, symmetric multi-Region KMS key with AWS_KMS-generated material. Its primary key and replicas protect records in different Regions. The platform wants scheduled key-material rotation and continued decryption of records encrypted before each rotation, without updating application key references. Which two statements should guide the design? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable automatic rotation with the required period on the primary key.",
+          "correct": true,
+          "why": "The primary controls automatic rotation for this eligible multi-Region key."
+        },
+        {
+          "id": "B",
+          "text": "Keep using the related keys; AWS KMS selects the appropriate retained material when decrypting older ciphertext.",
+          "correct": true,
+          "why": "Rotation preserves previous key material so related multi-Region keys can decrypt ciphertext from before rotation."
+        },
+        {
+          "id": "C",
+          "text": "Replace the primary key and every replica after each scheduled rotation.",
+          "correct": false,
+          "why": "Replacing the logical keys is unnecessary and conflicts with unchanged application key references."
+        },
+        {
+          "id": "D",
+          "text": "Re-encrypt all existing records after each rotation so the replicas can decrypt them.",
+          "correct": false,
+          "why": "KMS rotation does not re-encrypt data, and related multi-Region keys retain the material needed for older ciphertext."
+        },
+        {
+          "id": "E",
+          "text": "Enable automatic rotation independently on every replica to keep their schedules aligned.",
+          "correct": false,
+          "why": "Automatic rotation is enabled on the primary key, and its rotation setting is synchronized to replicas."
+        }
+      ],
+      "explanation": "The key has AWS_KMS-generated material, so it is eligible for automatic rotation; for a multi-Region key, configure that rotation on the primary. AWS KMS synchronizes the rotation setting and material with the related replicas. It retains prior material and selects the right version to decrypt older ciphertext, so application key references need not change. Independently configuring replicas or re-encrypting records does not meet a need created by KMS rotation.",
+      "keywordCues": [
+        "symmetric multi-Region KMS key with AWS_KMS-generated material",
+        "scheduled key-material rotation",
+        "decryption of records encrypted before each rotation",
+        "without updating application key references"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
+      ],
+      "es": {
+        "stem": "Una plataforma logística usa una clave KMS simétrica multi-Region administrada por el cliente, con material generado por AWS KMS. La clave primaria y sus réplicas protegen registros en distintas Regions. La plataforma necesita una rotación programada del material y poder seguir descifrando registros cifrados antes de cada rotación, sin actualizar las referencias a la clave en las aplicaciones. ¿Qué dos afirmaciones deben guiar el diseño? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita automatic rotation con el período requerido en la clave primaria.",
+            "why": "La clave primaria controla automatic rotation para esta clave multi-Region elegible."
+          },
+          {
+            "id": "B",
+            "text": "Sigue usando las claves relacionadas; AWS KMS selecciona el material anterior apropiado al descifrar ciphertext existente.",
+            "why": "La rotación conserva el material anterior para que las claves multi-Region relacionadas descifren ciphertext generado antes de la rotación."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza la clave primaria y todas las réplicas después de cada rotación programada.",
+            "why": "Reemplazar las claves lógicas no es necesario y contradice el requisito de mantener las referencias de las aplicaciones."
+          },
+          {
+            "id": "D",
+            "text": "Vuelve a cifrar todos los registros existentes después de cada rotación para que las réplicas puedan descifrarlos.",
+            "why": "La rotación de KMS no vuelve a cifrar los datos, y las claves multi-Region relacionadas conservan el material necesario para ciphertext anterior."
+          },
+          {
+            "id": "E",
+            "text": "Habilita automatic rotation por separado en cada réplica para mantener sus calendarios alineados.",
+            "why": "Automatic rotation se habilita en la clave primaria y su configuración se sincroniza con las réplicas."
+          }
+        ],
+        "explanation": "La clave tiene material generado por AWS KMS, por lo que admite automatic rotation; si es multi-Region, configuras esa rotación en la clave primaria. AWS KMS sincroniza la configuración y el material con las réplicas relacionadas. También conserva el material anterior y selecciona la versión correcta para descifrar ciphertext existente, sin cambiar las referencias de las aplicaciones. Configurar las réplicas por separado o volver a cifrar los registros no resuelve una necesidad creada por la rotación de KMS."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-key-rotation--98eaaa3a",
+      "conceptId": "kms-key-rotation",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab uses a customer managed symmetric encryption KMS key with imported key material. After a planned change to its imported material, the lab needs to initiate rotation immediately and keep the same logical KMS key for existing applications. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a new key and update every application to use its key ID.",
+          "correct": false,
+          "why": "A new key would not retain the existing logical KMS key required by the lab."
+        },
+        {
+          "id": "B",
+          "text": "Wait for AWS KMS to rotate the imported material on its annual schedule.",
+          "correct": false,
+          "why": "AWS KMS does not automatically rotate imported material."
+        },
+        {
+          "id": "C",
+          "text": "Enable automatic rotation with a custom period on the existing key.",
+          "correct": false,
+          "why": "Automatic rotation is not supported for keys with imported material."
+        },
+        {
+          "id": "D",
+          "text": "Import the new material into the existing key and initiate on-demand rotation.",
+          "correct": true,
+          "why": "An eligible symmetric key with EXTERNAL origin supports on-demand rotation while remaining the same logical key."
+        }
+      ],
+      "explanation": "The lab needs immediate rotation of imported material without replacing its logical KMS key. On-demand rotation supports symmetric encryption keys with EXTERNAL origin after the new material is imported. Automatic rotation is limited to eligible keys with AWS_KMS-generated material. Creating a replacement key would break the requirement to retain the existing logical key.",
+      "keywordCues": [
+        "symmetric encryption KMS key with imported key material",
+        "initiate rotation immediately",
+        "keep the same logical KMS key"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación usa una clave KMS de cifrado simétrica administrada por el cliente con material importado. Después de un cambio planificado de ese material, el laboratorio necesita iniciar la rotación de inmediato y conservar la misma clave KMS lógica para las aplicaciones existentes. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una clave nueva y actualiza todas las aplicaciones para que usen su ID.",
+            "why": "Una clave nueva no conservaría la clave KMS lógica existente que exige el laboratorio."
+          },
+          {
+            "id": "B",
+            "text": "Espera a que AWS KMS rote el material importado según su calendario anual.",
+            "why": "AWS KMS no rota automáticamente el material importado."
+          },
+          {
+            "id": "C",
+            "text": "Habilita automatic rotation con un período personalizado en la clave existente.",
+            "why": "Automatic rotation no se admite para claves con material importado."
+          },
+          {
+            "id": "D",
+            "text": "Importa el material nuevo en la clave existente e inicia on-demand rotation.",
+            "why": "Una clave simétrica elegible con origen EXTERNAL admite on-demand rotation y conserva la misma clave lógica."
+          }
+        ],
+        "explanation": "El laboratorio necesita rotar material importado de inmediato sin reemplazar su clave KMS lógica. On-demand rotation admite claves de cifrado simétricas con origen EXTERNAL después de importar el material nuevo. Automatic rotation se limita a claves elegibles con material generado por AWS KMS. Crear una clave de reemplazo incumpliría el requisito de conservar la clave lógica existente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "kms-key-rotation--r0",
+      "conceptId": "kms-key-rotation",
+      "kind": "recall",
+      "prompt": "A customer managed symmetric KMS key with imported material needs immediate rotation without changing its logical key. What do you use, and why?",
+      "promptEs": "Una clave KMS simétrica administrada por el cliente con material importado necesita rotación inmediata sin cambiar su clave lógica. ¿Qué usas y por qué?",
+      "idealAnswer": "Import the new material into the existing key and initiate on-demand rotation. Eligible symmetric keys with EXTERNAL origin support on-demand rotation, but not automatic rotation.",
+      "rubric": [
+        "Identifies on-demand rotation.",
+        "States that new imported material must be supplied to the existing key.",
+        "Distinguishes it from unsupported automatic rotation for imported material."
+      ]
+    }
+  ]
+}

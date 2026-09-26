@@ -1,0 +1,452 @@
+{
+  "conceptId": "dr-pilot-light",
+  "card": {
+    "en": {
+      "tldr": "Pilot light keeps replicated data and core recovery resources available in a second Region while leaving application-serving resources undeployed until failover. Choose it when the business needs a lower RPO than periodic backups offer, can allow time to provision compute, and wants to avoid running a functional standby application.",
+      "whenToUse": [
+        "A regional outage is in scope, and data should already be replicated to the recovery Region.",
+        "The application can wait for servers to be deployed and scaled before serving traffic after failover.",
+        "Ongoing cost matters more than having a reduced-capacity application ready to accept requests immediately."
+      ],
+      "keyFacts": [
+        "Resources that support replication and backup, such as databases, remain on; application servers can remain undeployed until testing or failover.",
+        "Amazon RDS read replicas provide continuous cross-Region asynchronous replication. A read replica must be promoted to serve a read/write workload after failover.",
+        "AWS CloudFormation can define recovery infrastructure for consistent deployment across Regions; AMIs can be copied to the recovery Region for EC2 launches.",
+        "Pilot light cannot process application requests without first turning on servers and potentially deploying other non-core resources.",
+        "Continuous replication alone might replicate corruption or deletion; point-in-time backups provide a separate recovery option."
+      ],
+      "gotchas": [
+        "A recovery copy that can already handle requests at reduced capacity is warm standby, not pilot light.",
+        "Keeping only restorable backups in the second Region is backup and restore, even if deployment templates are ready.",
+        "An RDS read replica does not become the read/write primary merely because application servers are launched."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Backup and restore",
+          "difference": "Recovery data remains in backups that must be restored; pilot light maintains replicated, live core data resources."
+        },
+        {
+          "concept": "Warm standby",
+          "difference": "Warm standby can handle requests immediately at reduced capacity; pilot light must first turn on application resources."
+        },
+        {
+          "concept": "Multi-site active/active",
+          "difference": "Active/active serves traffic from multiple Regions simultaneously; pilot light's recovery Region does not serve traffic before failover."
+        }
+      ],
+      "examCues": [
+        "replicate data continuously to a second Region",
+        "application servers provisioned only during failover",
+        "lower ongoing cost than an always-on standby application",
+        "regional recovery with time to turn on compute"
+      ]
+    },
+    "es": {
+      "tldr": "Pilot light mantiene datos replicados y recursos centrales de recuperación disponibles en otra Región, pero deja sin desplegar los recursos que atienden solicitudes hasta el failover. Elígelo cuando se necesita un RPO menor que el de los respaldos periódicos, hay tiempo para aprovisionar cómputo y no se quiere mantener una aplicación de reserva funcional.",
+      "whenToUse": [
+        "Una interrupción regional está contemplada y los datos deben estar replicados en la Región de recuperación.",
+        "La aplicación puede esperar a que despliegues y escales los servidores antes de atender tráfico después del failover.",
+        "El costo continuo importa más que tener una aplicación de capacidad reducida lista para recibir solicitudes de inmediato."
+      ],
+      "keyFacts": [
+        "Los recursos que respaldan la replicación y los respaldos, como las bases de datos, permanecen activos; los servidores de aplicación pueden quedar sin desplegar hasta una prueba o un failover.",
+        "Las réplicas de lectura de Amazon RDS proporcionan replicación asíncrona continua entre Regiones. Debes promover una réplica para atender una carga de lectura y escritura después del failover.",
+        "AWS CloudFormation permite definir la infraestructura de recuperación para desplegarla de forma consistente entre Regiones; puedes copiar las AMI a la Región de recuperación para lanzar EC2.",
+        "Pilot light no puede procesar solicitudes de la aplicación sin activar antes los servidores y, posiblemente, desplegar otros recursos no centrales.",
+        "La replicación continua por sí sola podría propagar corrupción o eliminaciones; los respaldos de un momento específico ofrecen otra opción de recuperación."
+      ],
+      "gotchas": [
+        "Una copia de recuperación que ya puede atender solicitudes con capacidad reducida es warm standby, no pilot light.",
+        "Mantener solo respaldos restaurables en la segunda Región es backup and restore, aunque las plantillas de despliegue estén listas.",
+        "Una réplica de lectura de RDS no se convierte en primaria de lectura y escritura solo porque lances los servidores de aplicación."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Backup and restore",
+          "difference": "Los datos de recuperación permanecen en respaldos que debes restaurar; pilot light mantiene recursos centrales de datos activos y replicados."
+        },
+        {
+          "concept": "Warm standby",
+          "difference": "Warm standby puede atender solicitudes de inmediato con capacidad reducida; en pilot light primero debes activar los recursos de aplicación."
+        },
+        {
+          "concept": "Multi-site active/active",
+          "difference": "Active/active atiende tráfico desde varias Regiones al mismo tiempo; la Región de recuperación de pilot light no atiende tráfico antes del failover."
+        }
+      ],
+      "examCues": [
+        "replicate data continuously to a second Region",
+        "application servers provisioned only during failover",
+        "lower ongoing cost than an always-on standby application",
+        "regional recovery with time to turn on compute"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dr-pilot-light--83194fa4",
+      "conceptId": "dr-pilot-light",
+      "secondaryConcepts": [
+        "dr-backup-restore",
+        "dr-warm-standby"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A medical scheduling company uses a pilot light in another Region: its RDS data is replicated continuously, and its EC2 application servers are launched only for recovery. The company also needs a way to recover an earlier, uncorrupted version of its records if an accidental change is replicated. Which addition meets this requirement while preserving its pilot-light approach?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a running EC2 application tier in the recovery Region so staff can inspect replicated records continuously.",
+          "correct": false,
+          "why": "Running an application tier changes the standby posture but does not provide an earlier version of corrupted records."
+        },
+        {
+          "id": "B",
+          "text": "Add another cross-Region RDS read replica that receives the same continuous changes.",
+          "correct": false,
+          "why": "A second continuously replicated copy does not by itself provide a point before the accidental change."
+        },
+        {
+          "id": "C",
+          "text": "Replace continuous replication with periodic RDS snapshot copies to the recovery Region.",
+          "correct": false,
+          "why": "Replacing the live replica abandons the stated pilot-light data arrangement rather than adding corruption protection to it."
+        },
+        {
+          "id": "D",
+          "text": "Add point-in-time backups of the replicated data in the recovery Region.",
+          "correct": true,
+          "why": "Point-in-time backups provide a restoration option for an earlier version while the pilot light keeps its live replicated data."
+        }
+      ],
+      "explanation": "The company needs both its existing live replication and a recovery point from before an accidental change. Continuous replication can carry corruption or deletion to the recovery Region, so add point-in-time backups of the replicated data there. Another replica has the same exposure, and switching to snapshot-only recovery would discard the pilot-light arrangement.",
+      "keywordCues": [
+        "pilot light in another Region",
+        "an accidental change is replicated",
+        "earlier, uncorrupted version",
+        "preserving its pilot-light approach"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una empresa de programación de citas médicas usa pilot light en otra Región: sus datos de RDS se replican continuamente y sus servidores de aplicación EC2 se lanzan solo para la recuperación. La empresa también necesita recuperar una versión anterior, sin corrupción, de sus registros si se replica un cambio accidental. ¿Qué complemento cumple este requisito y conserva el enfoque pilot light?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar una capa de aplicación EC2 en ejecución en la Región de recuperación para que el personal inspeccione continuamente los registros replicados.",
+            "why": "Ejecutar una capa de aplicación cambia el esquema de reserva, pero no proporciona una versión anterior de los registros dañados."
+          },
+          {
+            "id": "B",
+            "text": "Agregar otra réplica de lectura de RDS entre Regiones que reciba los mismos cambios continuos.",
+            "why": "Una segunda copia replicada continuamente no proporciona por sí sola un punto anterior al cambio accidental."
+          },
+          {
+            "id": "C",
+            "text": "Reemplazar la replicación continua con copias periódicas de snapshots de RDS hacia la Región de recuperación.",
+            "why": "Reemplazar la réplica activa abandona la configuración de datos pilot light indicada, en vez de agregarle protección frente a la corrupción."
+          },
+          {
+            "id": "D",
+            "text": "Agregar respaldos de un momento específico de los datos replicados en la Región de recuperación.",
+            "why": "Los respaldos de un momento específico permiten restaurar una versión anterior mientras pilot light conserva los datos replicados activos."
+          }
+        ],
+        "explanation": "La empresa necesita tanto la replicación activa existente como un punto de recuperación anterior al cambio accidental. La replicación continua puede llevar corrupción o eliminaciones a la Región de recuperación, así que debes agregar respaldos de un momento específico de los datos replicados allí. Otra réplica tiene la misma exposición, y pasar solo a snapshots descartaría la configuración pilot light."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-pilot-light--7dcea054",
+      "conceptId": "dr-pilot-light",
+      "secondaryConcepts": [
+        "dr-backup-restore",
+        "dr-warm-standby",
+        "dr-multi-site-active-active"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research cooperative runs an EC2 application backed by Amazon RDS. For regional DR, it wants database changes continuously available in a second Region, but it will pay for application compute there only when recovery is invoked. It also wants its EC2 configuration ready for repeatable deployment. Which TWO measures support this pilot-light design? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Define the EC2 recovery resources in AWS CloudFormation and keep the required application AMIs available in the second Region.",
+          "correct": true,
+          "why": "Templates and regional AMIs prepare the application for repeatable deployment without requiring its servers to run beforehand."
+        },
+        {
+          "id": "B",
+          "text": "Serve application requests from both Regions during normal operations.",
+          "correct": false,
+          "why": "Normal traffic in the recovery Region conflicts with using it only when recovery is invoked."
+        },
+        {
+          "id": "C",
+          "text": "Copy periodic RDS snapshots to the second Region as the only recovery data source.",
+          "correct": false,
+          "why": "Snapshot-only recovery does not keep database changes continuously available in a live recovery data resource."
+        },
+        {
+          "id": "D",
+          "text": "Run a reduced-capacity, request-serving EC2 application in the second Region.",
+          "correct": false,
+          "why": "A running application incurs the ongoing compute cost the cooperative explicitly wants to avoid."
+        },
+        {
+          "id": "E",
+          "text": "Maintain a cross-Region RDS read replica for the recovery database.",
+          "correct": true,
+          "why": "The replica provides continuous cross-Region data replication while remaining available for recovery."
+        }
+      ],
+      "explanation": "This pilot light needs a live replicated database and a way to launch its application only for recovery. A cross-Region RDS read replica addresses the data requirement; CloudFormation definitions and available AMIs prepare repeatable EC2 deployment. Snapshot-only recovery lacks the requested live replica, while running or serving traffic from a second application stack violates the compute constraint.",
+      "keywordCues": [
+        "database changes continuously available",
+        "pay for application compute there only when recovery is invoked",
+        "EC2 configuration ready for repeatable deployment",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una cooperativa de investigación ejecuta una aplicación EC2 respaldada por Amazon RDS. Para DR regional, quiere que los cambios de la base de datos estén disponibles continuamente en una segunda Región, pero pagará por cómputo de aplicación allí solo cuando se invoque la recuperación. También quiere tener lista la configuración de EC2 para un despliegue repetible. ¿Qué DOS medidas respaldan este diseño pilot light? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Definir los recursos EC2 de recuperación en AWS CloudFormation y mantener las AMI necesarias de la aplicación disponibles en la segunda Región.",
+            "why": "Las plantillas y AMI regionales preparan un despliegue repetible de la aplicación sin exigir que sus servidores se ejecuten previamente."
+          },
+          {
+            "id": "B",
+            "text": "Atender solicitudes de la aplicación desde ambas Regiones durante la operación normal.",
+            "why": "El tráfico normal en la Región de recuperación contradice su uso solo cuando se invoque la recuperación."
+          },
+          {
+            "id": "C",
+            "text": "Copiar snapshots periódicos de RDS a la segunda Región como única fuente de datos de recuperación.",
+            "why": "La recuperación basada solo en snapshots no mantiene los cambios disponibles continuamente en un recurso de datos de recuperación activo."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar una aplicación EC2 de capacidad reducida que atienda solicitudes en la segunda Región.",
+            "why": "Una aplicación en ejecución genera el costo continuo de cómputo que la cooperativa quiere evitar expresamente."
+          },
+          {
+            "id": "E",
+            "text": "Mantener una réplica de lectura de RDS entre Regiones para la base de datos de recuperación.",
+            "why": "La réplica proporciona replicación continua de datos entre Regiones y permanece disponible para la recuperación."
+          }
+        ],
+        "explanation": "Este pilot light necesita una base de datos activa y replicada, además de una forma de lanzar la aplicación solo para la recuperación. Una réplica de lectura de RDS entre Regiones cubre el requisito de datos; las definiciones de CloudFormation y las AMI disponibles preparan el despliegue repetible de EC2. La recuperación basada solo en snapshots carece de la réplica activa solicitada, mientras que ejecutar o atender tráfico desde una segunda aplicación incumple la restricción de cómputo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-pilot-light--0e0b2edf",
+      "conceptId": "dr-pilot-light",
+      "secondaryConcepts": [
+        "dr-backup-restore",
+        "dr-warm-standby",
+        "dr-multi-site-active-active"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional museum runs its ticketing application on Amazon EC2 with an Amazon RDS database. It wants changes replicated to a second Region and can allow time to launch application servers after a regional outage. The recovery Region must not run a ticketing application during normal operations. Which DR design meets these requirements with the LOWEST ongoing compute cost?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the ticketing application in both Regions and distribute customer requests between them.",
+          "correct": false,
+          "why": "Serving requests from both Regions violates the passive-recovery requirement and runs additional application compute."
+        },
+        {
+          "id": "B",
+          "text": "Copy RDS snapshots to the recovery Region and restore the database and EC2 application during failover.",
+          "correct": false,
+          "why": "Snapshots require a database restore rather than keeping changes replicated to a live recovery database."
+        },
+        {
+          "id": "C",
+          "text": "Maintain a cross-Region RDS read replica and recovery infrastructure definitions; launch EC2 application servers and promote the replica during failover.",
+          "correct": true,
+          "why": "This keeps core data available in the recovery Region without paying to run application servers there before failover."
+        },
+        {
+          "id": "D",
+          "text": "Maintain a cross-Region RDS read replica and a running, reduced-capacity EC2 application that can receive requests.",
+          "correct": false,
+          "why": "A running recovery application violates the requirement not to operate one during normal conditions and adds ongoing compute cost."
+        }
+      ],
+      "explanation": "The deciding constraints are replicated changes, no running recovery application, and time to launch servers after an outage. Pilot light keeps the data resource available while leaving application compute off until failover; the RDS replica must then be promoted for writes. Snapshot restoration does not provide the requested live replicated database, while warm standby and active/active keep application compute running.",
+      "keywordCues": [
+        "changes replicated to a second Region",
+        "can allow time to launch application servers",
+        "must not run a ticketing application during normal operations",
+        "LOWEST ongoing compute cost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Un museo regional ejecuta su aplicación de boletos en Amazon EC2 con una base de datos Amazon RDS. Quiere replicar los cambios a una segunda Región y puede esperar a lanzar los servidores de aplicación después de una interrupción regional. La Región de recuperación no debe ejecutar una aplicación de boletos durante la operación normal. ¿Qué diseño de DR cumple estos requisitos con el LOWEST ongoing compute cost?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar la aplicación de boletos en ambas Regiones y distribuir entre ellas las solicitudes de los clientes.",
+            "why": "Atender solicitudes desde ambas Regiones incumple el requisito de recuperación pasiva y ejecuta cómputo de aplicación adicional."
+          },
+          {
+            "id": "B",
+            "text": "Copiar snapshots de RDS a la Región de recuperación y restaurar la base de datos y la aplicación EC2 durante el failover.",
+            "why": "Los snapshots requieren restaurar la base de datos, en lugar de mantener los cambios replicados en una base de datos de recuperación activa."
+          },
+          {
+            "id": "C",
+            "text": "Mantener una réplica de lectura de RDS entre Regiones y las definiciones de la infraestructura de recuperación; lanzar los servidores de aplicación EC2 y promover la réplica durante el failover.",
+            "why": "Esto mantiene los datos centrales disponibles en la Región de recuperación sin pagar por servidores de aplicación allí antes del failover."
+          },
+          {
+            "id": "D",
+            "text": "Mantener una réplica de lectura de RDS entre Regiones y una aplicación EC2 en ejecución, de capacidad reducida, que pueda recibir solicitudes.",
+            "why": "Una aplicación de recuperación en ejecución incumple el requisito de no operarla en condiciones normales y agrega costo continuo de cómputo."
+          }
+        ],
+        "explanation": "Los criterios decisivos son replicar los cambios, no ejecutar la aplicación de recuperación y disponer de tiempo para lanzar servidores después de la interrupción. Pilot light mantiene disponible el recurso de datos y deja apagado el cómputo de la aplicación hasta el failover; después debes promover la réplica de RDS para permitir escrituras. Restaurar snapshots no proporciona la base de datos activa y replicada que se solicita, mientras que warm standby y active/active mantienen cómputo de aplicación en ejecución."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-pilot-light--6e9258e1",
+      "conceptId": "dr-pilot-light",
+      "secondaryConcepts": [
+        "dr-backup-restore",
+        "dr-warm-standby",
+        "dr-multi-site-active-active"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small publisher is replacing a DR plan that restores its database from backups after a regional outage. It now requires continuously replicated data but accepts that its website will be unavailable while application servers are deployed in the recovery Region. It wants to avoid operating a request-serving website there before an outage. Which strategy is MOST cost-effective for these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Pilot light, with replicated data available and website servers deployed during failover.",
+          "correct": true,
+          "why": "Pilot light supplies live replicated data without running request-serving website servers in the recovery Region beforehand."
+        },
+        {
+          "id": "B",
+          "text": "Multi-site active/active, with the website serving visitors from both Regions.",
+          "correct": false,
+          "why": "Serving visitors from both Regions runs an additional website before an outage and adds unnecessary complexity."
+        },
+        {
+          "id": "C",
+          "text": "Warm standby, with a reduced-capacity website running in the recovery Region.",
+          "correct": false,
+          "why": "A warm standby website can already serve requests, contrary to the requirement not to operate one before an outage."
+        },
+        {
+          "id": "D",
+          "text": "Backup and restore, with periodic database backups copied to the recovery Region.",
+          "correct": false,
+          "why": "Periodic backups do not meet the requirement for continuously replicated data."
+        }
+      ],
+      "explanation": "The publisher requires continuous data replication but explicitly allows a delay to deploy its website. Pilot light fits that combination by keeping core data resources available and turning on application resources for recovery. Backup and restore lacks the requested live replica; warm standby and active/active operate a website in the second Region before an outage.",
+      "keywordCues": [
+        "continuously replicated data",
+        "while application servers are deployed",
+        "avoid operating a request-serving website",
+        "MOST cost-effective"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una editorial pequeña reemplaza un plan de DR que restaura su base de datos desde respaldos después de una interrupción regional. Ahora requiere datos replicados continuamente, pero acepta que su sitio web no esté disponible mientras se despliegan los servidores de aplicación en la Región de recuperación. Quiere evitar operar allí un sitio web que atienda solicitudes antes de una interrupción. ¿Qué estrategia es MOST cost-effective para estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Pilot light, con los datos replicados disponibles y los servidores del sitio web desplegados durante el failover.",
+            "why": "Pilot light proporciona datos activos y replicados sin ejecutar previamente servidores web que atiendan solicitudes en la Región de recuperación."
+          },
+          {
+            "id": "B",
+            "text": "Multi-site active/active, con el sitio web atendiendo visitantes desde ambas Regiones.",
+            "why": "Atender visitantes desde ambas Regiones ejecuta otro sitio web antes de una interrupción y agrega complejidad innecesaria."
+          },
+          {
+            "id": "C",
+            "text": "Warm standby, con un sitio web de capacidad reducida en ejecución en la Región de recuperación.",
+            "why": "Un sitio web warm standby ya puede atender solicitudes, en contra del requisito de no operarlo antes de una interrupción."
+          },
+          {
+            "id": "D",
+            "text": "Backup and restore, con respaldos periódicos de la base de datos copiados a la Región de recuperación.",
+            "why": "Los respaldos periódicos no cumplen el requisito de replicar datos continuamente."
+          }
+        ],
+        "explanation": "La editorial requiere replicación continua de datos, pero permite expresamente una demora para desplegar el sitio web. Pilot light combina ambas condiciones: mantiene disponibles los recursos centrales de datos y activa los recursos de aplicación para la recuperación. Backup and restore no aporta la réplica activa solicitada; warm standby y active/active operan un sitio web en la segunda Región antes de una interrupción."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dr-pilot-light--r0",
+      "conceptId": "dr-pilot-light",
+      "kind": "recall",
+      "prompt": "A second Region needs live replicated data, but application servers may be launched during recovery. Which DR strategy fits, and why?",
+      "promptEs": "Una segunda Región necesita datos activos y replicados, pero puedes lanzar los servidores de aplicación durante la recuperación. ¿Qué estrategia de DR corresponde y por qué?",
+      "idealAnswer": "Pilot light fits because it keeps replicated data and core recovery resources available while application servers remain off or undeployed. During failover, you turn on the application resources and, for an RDS read replica, promote it to support writes.",
+      "rubric": [
+        "Names pilot light.",
+        "Identifies live replicated data and core resources in the recovery Region.",
+        "Explains that application servers are deployed or turned on during failover."
+      ]
+    },
+    {
+      "id": "dr-pilot-light--r1",
+      "conceptId": "dr-pilot-light",
+      "kind": "why-not",
+      "prompt": "Why is a running, reduced-capacity application in the recovery Region warm standby rather than pilot light?",
+      "promptEs": "¿Por qué una aplicación de capacidad reducida en ejecución en la Región de recuperación es warm standby y no pilot light?",
+      "idealAnswer": "Warm standby already has a functional application that can handle requests at reduced capacity. Pilot light cannot handle requests until its application servers are turned on and any needed non-core resources are deployed.",
+      "rubric": [
+        "States that warm standby can handle requests immediately at reduced capacity.",
+        "States that pilot light requires application resources to be turned on before it can process requests.",
+        "Connects the distinction to whether the recovery application is already running."
+      ]
+    }
+  ]
+}
