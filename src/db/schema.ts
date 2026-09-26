@@ -109,6 +109,8 @@ export const attempts = pgTable(
       enum: ["knowledge-gap", "misread-keyword", "service-confusion", "overconfidence"],
     }),
     transcript: text("transcript"),
+    /** Game XP earned by this answer (see lib/game/xp.ts). */
+    xp: integer("xp").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

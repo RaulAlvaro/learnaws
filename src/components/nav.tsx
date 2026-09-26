@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 
 const TABS = [
-  { href: "/", label: "Hoy", icon: "M3 12l9-8 9 8M5 10v10h14V10" },
-  { href: "/study", label: "Estudiar", icon: "M4 5h16v14H4zM8 9h8M8 13h5" },
+  { href: "/", label: "Jugar", icon: "M7 5l12 7-12 7V5z" },
+  { href: "/progress", label: "Progreso", icon: "M4 19V9M10 19V5M16 19v-7M22 19H2" },
   { href: "/voice", label: "Voz", icon: "M12 3a3 3 0 00-3 3v6a3 3 0 006 0V6a3 3 0 00-3-3zM5 11a7 7 0 0014 0M12 18v3" },
   { href: "/mock", label: "Simulacros", icon: "M12 7v5l3 2M12 21a9 9 0 110-18 9 9 0 010 18z" },
   { href: "/more", label: "Más", icon: "M5 12h.01M12 12h.01M19 12h.01" },
 ];
 
-const MORE = ["/more", "/errors", "/labs", "/guide", "/settings", "/concepts"];
+const MORE = ["/more", "/errors", "/labs", "/guide", "/settings", "/concepts", "/study", "/admin"];
 
 export function Nav() {
   const path = usePathname();

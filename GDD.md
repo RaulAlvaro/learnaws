@@ -130,3 +130,4 @@ Multijugador, rankings, grupos de estudio cooperativos (candidato v2), música a
 
 - 2026-09-26: GDD inicial (entrevista de diseño + investigación de gamificación, multimedia y legibilidad).
 - 2026-09-26: M0 multiusuario (userId en todo, BYOK cifrada, admin, feedback, resultado de examen, rate limits, privacidad/borrado).
+- 2026-09-26: M1 rondas relámpago (hub Jugar, rondas de 8 estilo Kahoot, chips y frases clave resaltadas, auto-lectura, XP con calibración, racha con comodín, meta diaria, SFX sintetizados). SFX por Web Audio en vez de Kenney.

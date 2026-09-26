@@ -179,3 +179,28 @@ test("booking gate needs two full mocks ≥ 80%, no weak domain, and an external
   );
   assert.equal(bookingGate([full(85, true, 1), full(82, false, 2), { kind: "external", scorePct: 90, perDomain: null, finishedAt: new Date(3) }]).ready, false);
 });
+
+test("XP: only unaided answers earn; sure+wrong costs a little", async () => {
+  const { xpFor, levelFor } = await import("../game/xp");
+  assert.equal(xpFor({ correct: true, confidence: 3, aided: false }), 15);
+  assert.equal(xpFor({ correct: true, confidence: 2, aided: false }), 10);
+  assert.equal(xpFor({ correct: true, confidence: 1, aided: false }), 5);
+  assert.equal(xpFor({ correct: false, confidence: 3, aided: false }), -5);
+  assert.equal(xpFor({ correct: false, confidence: 2, aided: false }), 0);
+  assert.equal(xpFor({ correct: true, confidence: 3, aided: true }), 0);
+  assert.equal(levelFor(0).level, 1);
+  assert.equal(levelFor(100).level, 2);
+  assert.equal(levelFor(224).level, 2);
+  assert.equal(levelFor(225).level, 3);
+});
+
+test("streak: one missed day per week is forgiven, two break it; today not studied yet is fine", async () => {
+  const { streakWithFreeze } = await import("../game/xp");
+  const s = (days: string[], today: string) => streakWithFreeze(new Set(days), today);
+  assert.equal(s(["2026-09-24", "2026-09-25", "2026-09-26"], "2026-09-26").streak, 3);
+  assert.equal(s(["2026-09-24", "2026-09-25"], "2026-09-26").streak, 2);
+  const frozen = s(["2026-09-22", "2026-09-23", "2026-09-25", "2026-09-26"], "2026-09-26");
+  assert.equal(frozen.streak, 4);
+  assert.equal(frozen.freezeUsed, true);
+  assert.equal(s(["2026-09-22", "2026-09-25", "2026-09-26"], "2026-09-26").streak, 2);
+});

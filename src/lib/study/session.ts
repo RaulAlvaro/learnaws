@@ -2,6 +2,8 @@ import "server-only";
 import { db, schema } from "@/db";
 import { and, eq } from "drizzle-orm";
 import { getContent } from "../content/load";
+import { chipsFor } from "../game/cues";
+import { xpFor } from "../game/xp";
 import type { Question } from "../content/types";
 import { planSession, type QuestionMode } from "../engine/planner";
 import {
@@ -37,6 +39,9 @@ export function publicQuestion(q: Question) {
     type: q.type,
     answerCount: q.options.filter((o) => o.correct).length,
     stem: q.stem,
+    /** Requirement phrases from the stem (not the answer): shown as chips/highlights. */
+    cues: q.keywordCues,
+    chips: chipsFor(q.keywordCues, q.stem),
     options: q.options.map((o) => ({ id: o.id, text: o.text })),
     es: { stem: q.es.stem, options: q.es.options.map((o) => ({ id: o.id, text: o.text })) },
   };
@@ -165,6 +170,7 @@ export async function submitAnswer(userId: string, input: AnswerInput) {
   const hintLevel = input.hintLevel ?? 0;
   const aided = !!input.retryOf || hintLevel > 0;
 
+  const xp = xpFor({ correct, confidence: input.confidence, aided });
   const [fresh, gap] = await Promise.all([isFreshQuestion(userId, q.id), gapDays(userId, q.conceptId, now)]);
   const [attempt] = await db
     .insert(schema.attempts)
@@ -183,6 +189,7 @@ export async function submitAnswer(userId: string, input: AnswerInput) {
       timeMs: input.timeMs,
       fresh: fresh && !aided,
       gapDays: gap,
+      xp,
     })
     .returning({ id: schema.attempts.id });
   await logStudy(userId, Math.min(input.timeMs, 5 * 60_000) / 60_000);
@@ -196,6 +203,7 @@ export async function submitAnswer(userId: string, input: AnswerInput) {
   return {
     attemptId: attempt.id,
     correct,
+    xp,
     needsSelfExplanation,
     reveal: correct || aided ? revealQuestion(q) : null,
   };

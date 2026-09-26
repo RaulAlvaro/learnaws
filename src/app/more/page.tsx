@@ -4,6 +4,7 @@ import { isAdmin, requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui";
 
 const LINKS = [
+  { href: "/study", title: "Modo clásico", desc: "La sesión de estudio en formato texto, con fichas y preguntas largas." },
   { href: "/errors", title: "Registro de errores", desc: "Tus fallos clasificados por tipo, con la explicación." },
   { href: "/concepts", title: "Conceptos", desc: "Los 259 conceptos del examen y en qué fase está cada uno." },
   { href: "/labs", title: "Labs", desc: "Prácticas guiadas en tu cuenta de AWS, con limpieza y costos." },
