@@ -1,0 +1,275 @@
+{
+  "conceptId": "documentdb",
+  "card": {
+    "en": {
+      "tldr": "Amazon DocumentDB is a fully managed, MongoDB-compatible database for document workloads. Choose it when a migration must retain MongoDB application code, drivers, and tools rather than adopt a different database interface.",
+      "whenToUse": [
+        "An existing MongoDB application must move to a managed database with minimal application changes.",
+        "A MongoDB-compatible workload needs read scaling through replicas.",
+        "A MongoDB-compatible workload needs to scale to millions of reads and writes per second with petabytes of storage."
+      ],
+      "keyFacts": [
+        "Applications can use the same code, drivers, and tools they use with MongoDB.",
+        "Instance-based clusters can have up to 15 replicas; a reader endpoint lets applications connect without tracking replica changes.",
+        "In instance-based clusters, all writes go through the primary instance, while the primary and replicas can serve reads.",
+        "For instance-based clusters, storage has six copies across three Availability Zones. Failover can use a provisioned replica in another Availability Zone.",
+        "Elastic clusters support millions of reads and writes per second and petabytes of storage."
+      ],
+      "gotchas": [
+        "Adding instance-based replicas scales reads; it does not move writes off the primary.",
+        "Replicated storage alone is not the same as having a provisioned replica available for failover.",
+        "A document data model alone does not establish MongoDB driver compatibility."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon DynamoDB",
+          "difference": "DynamoDB is also a NoSQL option, but DocumentDB is the choice when retaining MongoDB code and drivers is required."
+        },
+        {
+          "concept": "Amazon Keyspaces",
+          "difference": "Keyspaces is Apache Cassandra compatible and uses CQL, not the MongoDB interface."
+        },
+        {
+          "concept": "Amazon Aurora",
+          "difference": "Aurora is MySQL- or PostgreSQL-compatible; DocumentDB is MongoDB-compatible."
+        }
+      ],
+      "examCues": [
+        "retain existing MongoDB drivers",
+        "scale reads without tracking replicas",
+        "MongoDB-compatible workload with millions of reads and writes per second"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon DocumentDB es una base de datos de documentos totalmente administrada y compatible con MongoDB. Elígela cuando una migración deba conservar el código, los drivers y las herramientas de MongoDB en lugar de adoptar otra interfaz de base de datos.",
+      "whenToUse": [
+        "Debes mover una aplicación MongoDB existente a una base de datos administrada con cambios mínimos en la aplicación.",
+        "Una carga compatible con MongoDB necesita escalar las lecturas mediante réplicas.",
+        "Una carga compatible con MongoDB necesita escalar a millones de lecturas y escrituras por segundo y petabytes de almacenamiento."
+      ],
+      "keyFacts": [
+        "Las aplicaciones pueden usar el mismo código, los mismos drivers y las mismas herramientas que usan con MongoDB.",
+        "Los clústeres basados en instancias admiten hasta 15 réplicas; un reader endpoint permite conectarse sin rastrear los cambios en las réplicas.",
+        "En los clústeres basados en instancias, todas las escrituras pasan por la instancia primaria; tanto la primaria como las réplicas pueden atender lecturas.",
+        "En los clústeres basados en instancias, el almacenamiento mantiene seis copias en tres Availability Zones. El failover puede usar una réplica aprovisionada en otra Availability Zone.",
+        "Los elastic clusters admiten millones de lecturas y escrituras por segundo y petabytes de almacenamiento."
+      ],
+      "gotchas": [
+        "Agregar réplicas basadas en instancias escala las lecturas; no traslada las escrituras fuera de la instancia primaria.",
+        "La replicación del almacenamiento no equivale a tener una réplica aprovisionada para failover.",
+        "Un modelo de documentos, por sí solo, no garantiza compatibilidad con los drivers de MongoDB."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon DynamoDB",
+          "difference": "DynamoDB también es una opción NoSQL, pero DocumentDB corresponde cuando debes conservar el código y los drivers de MongoDB."
+        },
+        {
+          "concept": "Amazon Keyspaces",
+          "difference": "Keyspaces es compatible con Apache Cassandra y usa CQL, no la interfaz de MongoDB."
+        },
+        {
+          "concept": "Amazon Aurora",
+          "difference": "Aurora es compatible con MySQL o PostgreSQL; DocumentDB es compatible con MongoDB."
+        }
+      ],
+      "examCues": [
+        "retain existing MongoDB drivers",
+        "scale reads without tracking replicas",
+        "MongoDB-compatible workload with millions of reads and writes per second"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/documentdb/latest/developerguide/what-is.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "documentdb--44e7991a",
+      "conceptId": "documentdb",
+      "secondaryConcepts": [
+        "dynamodb-fundamentals",
+        "keyspaces"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media platform stores personalized content records in MongoDB and wants to keep using its MongoDB application code and drivers after migration. Its forecast calls for millions of reads and writes per second and petabytes of storage. Engineers propose adding read replicas, but write growth is also a primary constraint. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Keyspaces and move the record operations to CQL.",
+          "correct": false,
+          "why": "Moving operations to CQL violates the requirement to retain MongoDB code and drivers."
+        },
+        {
+          "id": "B",
+          "text": "Use a DocumentDB instance-based cluster and add replicas through its reader endpoint.",
+          "correct": false,
+          "why": "Instance-based replicas increase read throughput, but all writes still pass through the primary instance."
+        },
+        {
+          "id": "C",
+          "text": "Use an Amazon DocumentDB elastic cluster for the MongoDB-compatible workload.",
+          "correct": true,
+          "why": "DocumentDB retains MongoDB compatibility, and elastic clusters support the stated read, write, and storage scale."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon DynamoDB and redesign access to the records around partition keys.",
+          "correct": false,
+          "why": "Redesigning access for DynamoDB does not retain the existing MongoDB code and drivers."
+        }
+      ],
+      "explanation": "This migration requires both MongoDB compatibility and scale for writes as well as reads. Amazon DocumentDB elastic clusters support workloads with millions of reads and writes per second and petabytes of storage. Adding replicas to an instance-based cluster addresses read throughput, but its writes still go through the primary. DynamoDB and Keyspaces would also require changing away from the existing MongoDB interface.",
+      "keywordCues": [
+        "keep using its MongoDB application code and drivers",
+        "millions of reads and writes per second",
+        "petabytes of storage",
+        "write growth is also a primary constraint"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/documentdb/latest/developerguide/what-is.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de medios almacena registros de contenido personalizado en MongoDB y quiere seguir usando el código y los drivers de MongoDB después de la migración. Su proyección contempla millones de lecturas y escrituras por segundo y petabytes de almacenamiento. Los ingenieros proponen agregar réplicas de lectura, pero el crecimiento de las escrituras también es una restricción principal. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon Keyspaces y trasladar las operaciones sobre los registros a CQL.",
+            "why": "Trasladar las operaciones a CQL incumple el requisito de conservar el código y los drivers de MongoDB."
+          },
+          {
+            "id": "B",
+            "text": "Usar un clúster de DocumentDB basado en instancias y agregar réplicas mediante su reader endpoint.",
+            "why": "Las réplicas basadas en instancias aumentan la capacidad de lectura, pero todas las escrituras siguen pasando por la instancia primaria."
+          },
+          {
+            "id": "C",
+            "text": "Usar un elastic cluster de Amazon DocumentDB para la carga compatible con MongoDB.",
+            "why": "DocumentDB conserva la compatibilidad con MongoDB, y los elastic clusters admiten la escala indicada de lecturas, escrituras y almacenamiento."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon DynamoDB y rediseñar el acceso a los registros alrededor de partition keys.",
+            "why": "Rediseñar el acceso para DynamoDB no conserva el código ni los drivers de MongoDB existentes."
+          }
+        ],
+        "explanation": "Esta migración exige compatibilidad con MongoDB y capacidad para escalar tanto escrituras como lecturas. Los elastic clusters de Amazon DocumentDB admiten cargas con millones de lecturas y escrituras por segundo y petabytes de almacenamiento. Agregar réplicas a un clúster basado en instancias aumenta la capacidad de lectura, pero sus escrituras siguen pasando por la instancia primaria. DynamoDB y Keyspaces también exigirían abandonar la interfaz de MongoDB existente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "documentdb--c44b31f9",
+      "conceptId": "documentdb",
+      "secondaryConcepts": [
+        "dynamodb-fundamentals",
+        "aurora-architecture",
+        "keyspaces"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher is moving its MongoDB-backed article catalog to AWS. Its application team must retain the existing MongoDB code and drivers, while a growing number of searches requires additional read capacity. The team does not want to update connection settings each time it adds a read replica. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the catalog to Amazon Aurora PostgreSQL and direct searches to its read replicas.",
+          "correct": false,
+          "why": "Aurora PostgreSQL does not meet the requirement to retain the MongoDB code and drivers."
+        },
+        {
+          "id": "B",
+          "text": "Use an Amazon DocumentDB instance-based cluster with replicas and connect searches through its reader endpoint.",
+          "correct": true,
+          "why": "DocumentDB supports MongoDB code and drivers, and its reader endpoint avoids tracking replicas as read capacity changes."
+        },
+        {
+          "id": "C",
+          "text": "Move the catalog to Amazon DynamoDB and redesign the application's data access around partition keys.",
+          "correct": false,
+          "why": "DynamoDB requires a different application access approach instead of retaining the MongoDB code and drivers."
+        },
+        {
+          "id": "D",
+          "text": "Move the catalog to Amazon Keyspaces and access the articles through CQL.",
+          "correct": false,
+          "why": "Keyspaces uses the Apache Cassandra-compatible CQL interface rather than the existing MongoDB interface."
+        }
+      ],
+      "explanation": "Retaining MongoDB code and drivers is the deciding migration constraint. Amazon DocumentDB provides that compatibility, and instance-based replicas add read throughput. Its reader endpoint also prevents the application from having to track replicas as they are added or removed. DynamoDB, Aurora PostgreSQL, and Keyspaces each require a different database interface.",
+      "keywordCues": [
+        "retain the existing MongoDB code and drivers",
+        "additional read capacity",
+        "does not want to update connection settings each time it adds a read replica"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/documentdb/latest/developerguide/what-is.html"
+      ],
+      "es": {
+        "stem": "Una editorial está trasladando a AWS su catálogo de artículos respaldado por MongoDB. El equipo debe conservar el código y los drivers de MongoDB, mientras que el aumento de búsquedas exige más capacidad de lectura. El equipo no quiere actualizar la configuración de conexión cada vez que agregue una réplica de lectura. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mover el catálogo a Amazon Aurora PostgreSQL y dirigir las búsquedas a sus réplicas de lectura.",
+            "why": "Aurora PostgreSQL no cumple el requisito de conservar el código y los drivers de MongoDB."
+          },
+          {
+            "id": "B",
+            "text": "Usar un clúster de Amazon DocumentDB basado en instancias con réplicas y conectar las búsquedas mediante su reader endpoint.",
+            "why": "DocumentDB admite el código y los drivers de MongoDB, y su reader endpoint evita rastrear las réplicas cuando cambia la capacidad de lectura."
+          },
+          {
+            "id": "C",
+            "text": "Mover el catálogo a Amazon DynamoDB y rediseñar el acceso a los datos de la aplicación alrededor de partition keys.",
+            "why": "DynamoDB requiere otro enfoque de acceso en lugar de conservar el código y los drivers de MongoDB."
+          },
+          {
+            "id": "D",
+            "text": "Mover el catálogo a Amazon Keyspaces y acceder a los artículos mediante CQL.",
+            "why": "Keyspaces usa la interfaz CQL compatible con Apache Cassandra, no la interfaz de MongoDB existente."
+          }
+        ],
+        "explanation": "Conservar el código y los drivers de MongoDB es la restricción decisiva de la migración. Amazon DocumentDB ofrece esa compatibilidad y sus réplicas basadas en instancias aumentan la capacidad de lectura. El reader endpoint evita que la aplicación tenga que rastrear las réplicas cuando se agregan o eliminan. DynamoDB, Aurora PostgreSQL y Keyspaces requieren una interfaz de base de datos diferente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "documentdb--r0",
+      "conceptId": "documentdb",
+      "kind": "recall",
+      "prompt": "A MongoDB application must retain its drivers after moving to a managed AWS database. What would you choose, and why?",
+      "promptEs": "Una aplicación MongoDB debe conservar sus drivers al trasladarse a una base de datos administrada en AWS. ¿Qué elegirías y por qué?",
+      "idealAnswer": "Choose Amazon DocumentDB because it is a fully managed, MongoDB-compatible database. The application can continue using its MongoDB code, drivers, and tools.",
+      "rubric": [
+        "Names Amazon DocumentDB.",
+        "Explains its MongoDB compatibility and retention of existing code or drivers."
+      ]
+    },
+    {
+      "id": "documentdb--r1",
+      "conceptId": "documentdb",
+      "kind": "why-not",
+      "prompt": "Why would Amazon Keyspaces not fit a migration that must keep using MongoDB drivers?",
+      "promptEs": "¿Por qué Amazon Keyspaces no serviría para una migración que debe seguir usando los drivers de MongoDB?",
+      "idealAnswer": "Amazon Keyspaces is compatible with Apache Cassandra and uses CQL, so it does not meet a requirement to keep the MongoDB interface. Amazon DocumentDB is the MongoDB-compatible choice.",
+      "rubric": [
+        "Identifies Keyspaces as Apache Cassandra compatible or CQL based.",
+        "Connects that difference to the MongoDB driver requirement.",
+        "Identifies Amazon DocumentDB as the compatible alternative."
+      ]
+    }
+  ]
+}

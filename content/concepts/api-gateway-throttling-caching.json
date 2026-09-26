@@ -1,0 +1,324 @@
+{
+  "conceptId": "api-gateway-throttling-caching",
+  "card": {
+    "en": {
+      "tldr": "API Gateway REST API throttling sets rate and burst targets to protect integrations from excess requests; usage plans add per-client targets through API keys. Stage caching can reduce integration calls and latency when responses can be reused.",
+      "whenToUse": [
+        "Different clients need different request-rate or quota targets.",
+        "A stage or method needs protection from traffic spikes.",
+        "Repeated GET requests can reuse responses instead of calling the integration."
+      ],
+      "keyFacts": [
+        "Throttles and quotas are best-effort targets, not guaranteed ceilings.",
+        "Rate is the rate at which tokens are added to the token bucket; burst is its capacity. Throttled clients may receive HTTP 429 responses.",
+        "Usage plans identify clients by associated API keys for per-client throttling.",
+        "Stage caching applies to GET methods by default. The default TTL is 300 seconds; the maximum is 3600 seconds.",
+        "Cache capacity is billed by the hour. CacheHitCount and CacheMissCount show cache activity."
+      ],
+      "gotchas": [
+        "A stage-level throttle alone does not provide different targets for individual clients.",
+        "Enabling stage caching does not automatically cache non-GET methods.",
+        "A cache key that omits a response-changing parameter can reuse the wrong response.",
+        "A method-level cache setting is not active until a cache cluster is provisioned for the stage."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "different limits for each API client",
+        "protect the integration from request bursts",
+        "repeated GET requests with the same query parameters",
+        "reduce calls to the backend without changing it"
+      ]
+    },
+    "es": {
+      "tldr": "El throttling de una REST API en API Gateway establece objetivos de rate y burst para proteger la integración del exceso de solicitudes; los usage plans agregan objetivos por cliente mediante API keys. El caché de una stage puede reducir las llamadas a la integración y la latencia cuando las respuestas se pueden reutilizar.",
+      "whenToUse": [
+        "Necesitas objetivos distintos de tasa de solicitudes o cuota para cada cliente.",
+        "Necesitas proteger una stage o un método frente a picos de tráfico.",
+        "Las solicitudes GET repetidas pueden reutilizar respuestas en vez de llamar a la integración."
+      ],
+      "keyFacts": [
+        "Los límites de throttling y las cuotas son objetivos best-effort, no topes garantizados.",
+        "Rate indica la velocidad a la que se agregan tokens al token bucket; burst es su capacidad. Los clientes limitados pueden recibir respuestas HTTP 429.",
+        "Los usage plans identifican a los clientes mediante API keys asociadas para aplicar throttling por cliente.",
+        "El caché de una stage se aplica por defecto a métodos GET. El TTL predeterminado es de 300 segundos y el máximo es de 3600 segundos.",
+        "La capacidad del caché se cobra por hora. CacheHitCount y CacheMissCount muestran su actividad."
+      ],
+      "gotchas": [
+        "El throttling a nivel de stage, por sí solo, no establece objetivos diferentes para cada cliente.",
+        "Habilitar el caché de la stage no almacena automáticamente respuestas de métodos distintos de GET.",
+        "Si una cache key omite un parámetro que cambia la respuesta, se puede reutilizar una respuesta incorrecta.",
+        "Una configuración de caché a nivel de método no está activa hasta que aprovisiones un cache cluster para la stage."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "different limits for each API client",
+        "protect the integration from request bursts",
+        "repeated GET requests with the same query parameters",
+        "reduce calls to the backend without changing it"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html",
+      "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "api-gateway-throttling-caching--f0b8f41b",
+      "conceptId": "api-gateway-throttling-caching",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A public library's REST API serves the same GET /catalog response to many readers, while a few catalog partners also submit heavy bursts across other methods. The library wants fewer integration calls for repeated GET requests and distinct request-rate targets for each partner, without changing its integration. Which TWO API Gateway configurations meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set a common method-level burst target on the other methods for all partners.",
+          "correct": false,
+          "why": "A shared method target may address bursts but does not assign distinct rate targets to individual partners."
+        },
+        {
+          "id": "B",
+          "text": "Enable GET /catalog method caching without provisioning a stage cache cluster.",
+          "correct": false,
+          "why": "Method caching is inactive until a cache cluster is provisioned for the stage."
+        },
+        {
+          "id": "C",
+          "text": "Create usage plans with rate targets and associate each partner's API key with its plan.",
+          "correct": true,
+          "why": "Usage plans and associated API keys enable per-client throttling targets."
+        },
+        {
+          "id": "D",
+          "text": "Set one stage-level throttle target and use it as the distinct target for every partner.",
+          "correct": false,
+          "why": "A single stage target does not provide distinct per-partner rate targets."
+        },
+        {
+          "id": "E",
+          "text": "Provision a stage cache and enable caching for GET /catalog.",
+          "correct": true,
+          "why": "The stage cache can answer repeated GET requests without calling the integration."
+        }
+      ],
+      "explanation": "The library has two separate requirements: reuse repeated GET responses and set different rate targets for partners. Provisioning a stage cache and enabling GET /catalog caching addresses the first; usage plans associated with partner API keys address the second. A method cache without a provisioned stage cache cluster is not active. Shared stage or method throttling targets cannot differentiate the partners.",
+      "keywordCues": [
+        "fewer integration calls for repeated GET requests",
+        "distinct request-rate targets for each partner",
+        "without changing its integration"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html"
+      ],
+      "es": {
+        "stem": "La REST API de una biblioteca pública entrega la misma respuesta de GET /catalog a muchos lectores, mientras algunos socios del catálogo también envían grandes picos de solicitudes a otros métodos. La biblioteca quiere menos llamadas a la integración para las solicitudes GET repetidas y objetivos de tasa de solicitudes distintos para cada socio, sin cambiar la integración. ¿Qué DOS configuraciones de API Gateway cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar un objetivo común de burst a nivel de método en los otros métodos para todos los socios.",
+            "why": "Un objetivo compartido por método puede atender los picos, pero no asigna objetivos de rate distintos a cada socio."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar el caché del método GET /catalog sin aprovisionar un cache cluster para la stage.",
+            "why": "El caché del método permanece inactivo hasta que aprovisiones un cache cluster para la stage."
+          },
+          {
+            "id": "C",
+            "text": "Crear usage plans con objetivos de rate y asociar la API key de cada socio con su plan.",
+            "why": "Los usage plans y las API keys asociadas permiten establecer objetivos de throttling por cliente."
+          },
+          {
+            "id": "D",
+            "text": "Configurar un solo objetivo de throttling a nivel de stage y usarlo como objetivo distinto para cada socio.",
+            "why": "Un único objetivo de la stage no proporciona objetivos de tasa distintos por socio."
+          },
+          {
+            "id": "E",
+            "text": "Aprovisionar un caché para la stage y habilitar el caché de GET /catalog.",
+            "why": "El caché de la stage puede responder a solicitudes GET repetidas sin llamar a la integración."
+          }
+        ],
+        "explanation": "La biblioteca tiene dos requisitos independientes: reutilizar las respuestas GET repetidas y establecer objetivos de rate distintos para los socios. Aprovisionar un caché de stage y habilitar el caché de GET /catalog resuelve el primero; los usage plans asociados con las API keys de los socios resuelven el segundo. El caché de un método no está activo sin un cache cluster aprovisionado para la stage. Los objetivos compartidos de throttling por stage o método no distinguen entre socios."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "api-gateway-throttling-caching--bc606478",
+      "conceptId": "api-gateway-throttling-caching",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics company exposes a REST API through API Gateway to several partner applications. One partner generates large request bursts, but each partner needs its own request-rate target and quota so the shared integration is not overwhelmed. Which configuration meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable the stage cache and assign each partner a different cache TTL.",
+          "correct": false,
+          "why": "Response caching reduces integration calls but does not supply per-client request-rate and quota targets."
+        },
+        {
+          "id": "B",
+          "text": "Give each partner an API key associated with a usage plan that specifies its throttling and quota targets.",
+          "correct": true,
+          "why": "Usage plans use associated API keys to apply per-client throttling and quotas."
+        },
+        {
+          "id": "C",
+          "text": "Set a method-level throttle on the busiest endpoint and use that target for every partner.",
+          "correct": false,
+          "why": "A common method target does not distinguish partners or assign each a quota."
+        },
+        {
+          "id": "D",
+          "text": "Set one stage-level rate and burst target for all methods used by the partners.",
+          "correct": false,
+          "why": "A shared stage target does not set distinct throttling and quota targets for each partner."
+        }
+      ],
+      "explanation": "The deciding requirement is a separate request-rate target and quota for each partner. Associate partner API keys with usage plans to set per-client targets without implementing this logic in the integration. Stage- and method-level targets can protect API traffic, but a shared target does not differentiate clients. These limits are best-effort targets, not guaranteed ceilings.",
+      "keywordCues": [
+        "each partner needs its own request-rate target and quota",
+        "shared integration is not overwhelmed",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística expone una REST API mediante API Gateway a varias aplicaciones de socios. Un socio genera grandes picos de solicitudes, pero cada socio necesita su propio objetivo de tasa de solicitudes y cuota para que la integración compartida no se sobrecargue. ¿Qué configuración cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar el caché de la stage y asignar a cada socio un cache TTL diferente.",
+            "why": "El caché de respuestas reduce llamadas a la integración, pero no establece objetivos de tasa de solicitudes y cuota por cliente."
+          },
+          {
+            "id": "B",
+            "text": "Asignar a cada socio una API key asociada a un usage plan que especifique sus objetivos de throttling y cuota.",
+            "why": "Los usage plans utilizan API keys asociadas para aplicar throttling y cuotas por cliente."
+          },
+          {
+            "id": "C",
+            "text": "Configurar throttling a nivel de método en el endpoint más utilizado y aplicar ese objetivo a todos los socios.",
+            "why": "Un objetivo común por método no distingue entre socios ni asigna una cuota a cada uno."
+          },
+          {
+            "id": "D",
+            "text": "Configurar un único objetivo de rate y burst a nivel de stage para todos los métodos que usan los socios.",
+            "why": "Un objetivo compartido de la stage no establece objetivos distintos de throttling y cuota para cada socio."
+          }
+        ],
+        "explanation": "El requisito decisivo es tener un objetivo de tasa de solicitudes y una cuota distintos para cada socio. Asocia las API keys de los socios con usage plans para establecer objetivos por cliente sin implementar esa lógica en la integración. Los objetivos a nivel de stage o método pueden proteger el tráfico de la API, pero un objetivo compartido no distingue a los clientes. Estos límites son objetivos best-effort, no topes garantizados."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "api-gateway-throttling-caching--abe5381d",
+      "conceptId": "api-gateway-throttling-caching",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research institute has a REST API stage with a costly POST /simulations method and several lightweight GET methods. Traffic bursts to POST /simulations threaten the integration, but the GET methods should keep their existing request capacity. Which configuration meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lower the stage-level throttling targets equally for every method.",
+          "correct": false,
+          "why": "The shared target would also constrain the GET methods that should retain their request capacity."
+        },
+        {
+          "id": "B",
+          "text": "Set a lower throttling rate and burst target for POST /simulations at the method level.",
+          "correct": true,
+          "why": "A method-specific target addresses the burst-prone method without applying the same target to the GET methods."
+        },
+        {
+          "id": "C",
+          "text": "Assign an API key and the same usage-plan target to every caller of the stage.",
+          "correct": false,
+          "why": "A shared per-client target does not isolate the POST method while preserving GET capacity."
+        },
+        {
+          "id": "D",
+          "text": "Enable the stage cache and rely on its default settings to cache POST /simulations.",
+          "correct": false,
+          "why": "Stage caching enables GET caching by default, not POST caching, and caching does not set a burst target."
+        }
+      ],
+      "explanation": "Only POST /simulations needs a lower traffic target. API Gateway supports per-method throttling targets for a stage, so the institute can limit that method without imposing the same target on its GET methods. Lowering a target across the stage would affect the lightweight methods too. Default stage caching applies to GET, not POST, and does not establish a throttling target.",
+      "keywordCues": [
+        "bursts to POST /simulations",
+        "GET methods should keep their existing request capacity",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html",
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación tiene una stage de REST API con un método POST /simulations costoso y varios métodos GET ligeros. Los picos de tráfico hacia POST /simulations amenazan la integración, pero los métodos GET deben conservar su capacidad actual de solicitudes. ¿Qué configuración cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reducir por igual los objetivos de throttling de la stage para todos los métodos.",
+            "why": "El objetivo compartido también limitaría los métodos GET que deben conservar su capacidad de solicitudes."
+          },
+          {
+            "id": "B",
+            "text": "Configurar objetivos de rate y burst más bajos para POST /simulations a nivel de método.",
+            "why": "Un objetivo específico del método atiende los picos de ese método sin imponer el mismo objetivo a los métodos GET."
+          },
+          {
+            "id": "C",
+            "text": "Asignar una API key y el mismo objetivo de usage plan a cada cliente de la stage.",
+            "why": "Un objetivo por cliente compartido no aísla el método POST mientras conserva la capacidad de GET."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar el caché de la stage y confiar en su configuración predeterminada para almacenar POST /simulations.",
+            "why": "El caché de la stage habilita por defecto el caché de GET, no el de POST, y el caché no establece un objetivo de burst."
+          }
+        ],
+        "explanation": "Solo POST /simulations necesita un objetivo de tráfico más bajo. API Gateway admite objetivos de throttling por método en una stage, por lo que puedes limitar ese método sin imponer el mismo objetivo a los GET. Reducir un objetivo para toda la stage también afectaría a los métodos ligeros. El caché predeterminado de la stage se aplica a GET, no a POST, y no establece un objetivo de throttling."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "api-gateway-throttling-caching--r0",
+      "conceptId": "api-gateway-throttling-caching",
+      "kind": "recall",
+      "prompt": "Partners share a REST API integration but need different request-rate targets and quotas. What would you configure, and why?",
+      "promptEs": "Varios socios comparten la integración de una REST API, pero necesitan objetivos distintos de tasa de solicitudes y cuotas. ¿Qué configurarías y por qué?",
+      "idealAnswer": "Associate each partner's API key with an API Gateway usage plan that sets its throttling and quota targets. Usage plans apply these targets per client, helping protect the shared integration; the targets are best-effort rather than guaranteed ceilings.",
+      "rubric": [
+        "Names API Gateway usage plans and associated API keys.",
+        "Explains that they provide per-client throttling and quota targets.",
+        "Notes that the targets are best-effort, not guaranteed ceilings."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,319 @@
+{
+  "conceptId": "microservices-design",
+  "card": {
+    "en": {
+      "tldr": "Microservices divide an application into small, loosely coupled services that teams can deploy and scale independently. In an exam scenario, choose service boundaries and API-driven or event-driven communication based on whether a workflow needs an immediate response or can proceed asynchronously.",
+      "whenToUse": [
+        "Teams need to release different application capabilities independently.",
+        "Components have different scaling needs.",
+        "One service should continue responding without waiting for another service's work."
+      ],
+      "keyFacts": [
+        "Microservices communicate through well-defined APIs and are managed by autonomous teams.",
+        "API-driven and event-driven designs are both microservices patterns.",
+        "AWS guidance describes container-based and serverless approaches to implementing microservices.",
+        "Serverless can reduce infrastructure management and scale by unit of consumption.",
+        "Data consistency, asynchronous communication, and monitoring require attention across service boundaries."
+      ],
+      "gotchas": [
+        "Putting an entire monolith in a container does not, by itself, make its components independently deployable.",
+        "A chain of synchronous API calls can make a user-facing response depend on work that could happen asynchronously.",
+        "Microservices are not automatically preferable; weigh their complexity and costs against the application's needs."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "independent team releases",
+        "different scaling needs",
+        "do not wait for downstream processing",
+        "separate service data ownership"
+      ]
+    },
+    "es": {
+      "tldr": "Los microservicios dividen una aplicación en servicios pequeños y poco acoplados que los equipos pueden desplegar y escalar de forma independiente. En un escenario de examen, elige los límites de los servicios y la comunicación mediante API o eventos según si el flujo necesita una respuesta inmediata o puede continuar de forma asíncrona.",
+      "whenToUse": [
+        "Los equipos necesitan publicar distintas capacidades de la aplicación de forma independiente.",
+        "Los componentes tienen distintas necesidades de escalamiento.",
+        "Un servicio debe seguir respondiendo sin esperar el trabajo de otro."
+      ],
+      "keyFacts": [
+        "Los microservicios se comunican mediante API bien definidas y están a cargo de equipos autónomos.",
+        "Los diseños basados en API y en eventos son patrones de microservicios.",
+        "La guía de AWS describe enfoques de microservicios basados en contenedores y en serverless.",
+        "Serverless puede reducir la administración de infraestructura y escalar por unidad de consumo.",
+        "La consistencia de datos, la comunicación asíncrona y el monitoreo requieren atención entre servicios."
+      ],
+      "gotchas": [
+        "Poner todo un monolito en un contenedor no permite, por sí solo, desplegar sus componentes de forma independiente.",
+        "Una cadena de llamadas API síncronas puede hacer que la respuesta al usuario dependa de trabajo que podría realizarse de forma asíncrona.",
+        "Los microservicios no siempre son preferibles; compara su complejidad y costo con las necesidades de la aplicación."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "independent team releases",
+        "different scaling needs",
+        "do not wait for downstream processing",
+        "separate service data ownership"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "microservices-design--1a9dd594",
+      "conceptId": "microservices-design",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing platform confirms reservations through an API and then updates audience analytics. Analytics jobs can run after confirmation, and a delay in analytics must not hold up the customer's response. The reservation and analytics teams also want to release their services independently. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place reservation and analytics in one Amazon ECS service and increase its capacity during ticket launches.",
+          "correct": false,
+          "why": "Additional capacity does not provide independent releases or remove the wait for analytics."
+        },
+        {
+          "id": "B",
+          "text": "Keep reservation and analytics as separate services and initiate analytics through an event after reservation confirmation.",
+          "correct": true,
+          "why": "Separate services support independent releases, and an event lets analytics proceed without delaying confirmation."
+        },
+        {
+          "id": "C",
+          "text": "Keep reservation and analytics as separate services but wait for the analytics API to finish before confirming the reservation.",
+          "correct": false,
+          "why": "Waiting for analytics makes the customer response depend on a job allowed to run later."
+        },
+        {
+          "id": "D",
+          "text": "Combine reservation and analytics in one AWS Lambda function so both operations finish in one request.",
+          "correct": false,
+          "why": "One function couples the teams' releases and keeps analytics in the response path."
+        }
+      ],
+      "explanation": "Analytics is not required to complete before the customer receives confirmation. An event-driven interaction allows a separate analytics service to work after confirmation, while separate service boundaries support independent releases. A synchronous analytics API call is a plausible integration, but it introduces precisely the response dependency the scenario prohibits.",
+      "keywordCues": [
+        "can run after confirmation",
+        "must not hold up the customer's response",
+        "release their services independently"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de boletos confirma reservas mediante una API y después actualiza los análisis de audiencia. Los trabajos de análisis pueden ejecutarse después de la confirmación, y una demora en ellos no debe retrasar la respuesta al cliente. Los equipos de reservas y análisis también quieren publicar sus servicios de forma independiente. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar reservas y análisis en un solo servicio de Amazon ECS y aumentar su capacidad durante los lanzamientos de boletos.",
+            "why": "La capacidad adicional no permite publicaciones independientes ni elimina la espera del análisis."
+          },
+          {
+            "id": "B",
+            "text": "Mantener reservas y análisis como servicios separados e iniciar el análisis mediante un evento después de confirmar la reserva.",
+            "why": "Los servicios separados permiten publicaciones independientes, y un evento deja que el análisis continúe sin retrasar la confirmación."
+          },
+          {
+            "id": "C",
+            "text": "Mantener reservas y análisis como servicios separados, pero esperar a que termine la API de análisis antes de confirmar la reserva.",
+            "why": "Esperar al análisis hace que la respuesta al cliente dependa de un trabajo que puede ejecutarse más tarde."
+          },
+          {
+            "id": "D",
+            "text": "Combinar reservas y análisis en una sola función de AWS Lambda para terminar ambas operaciones en una solicitud.",
+            "why": "Una sola función acopla las publicaciones de los equipos y mantiene el análisis en la ruta de respuesta."
+          }
+        ],
+        "explanation": "No es necesario que el análisis termine antes de que el cliente reciba la confirmación. Una interacción basada en eventos permite que un servicio de análisis separado trabaje después de confirmar, mientras que los límites entre servicios permiten publicaciones independientes. Una llamada síncrona a la API de análisis es una integración posible, pero crea precisamente la dependencia en la respuesta que el escenario prohíbe."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "microservices-design--1dbd8dc9",
+      "conceptId": "microservices-design",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A retailer is splitting its ordering application into order, inventory, and fulfillment capabilities. Each team needs to deploy without coordinating a shared application release, and fulfillment may start after an order response is returned. The retailer also wants each team to control changes to the data used by its capability rather than having every team write to one shared data model. Which TWO design decisions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have the order API synchronously call the fulfillment API and return only after fulfillment completes.",
+          "correct": false,
+          "why": "This makes the order response wait for work the scenario says can start afterward."
+        },
+        {
+          "id": "B",
+          "text": "Initiate fulfillment through an event after accepting an order, instead of waiting for fulfillment before responding.",
+          "correct": true,
+          "why": "Event-driven communication allows fulfillment to proceed after the order response."
+        },
+        {
+          "id": "C",
+          "text": "Package the three capabilities as modules in one Amazon ECS deployment and give each team ownership of a module.",
+          "correct": false,
+          "why": "Module ownership does not let teams deploy without a shared application release."
+        },
+        {
+          "id": "D",
+          "text": "Give all three services write access to one shared data model so every team sees order changes immediately.",
+          "correct": false,
+          "why": "A shared writable data model conflicts with the requirement for each team to control changes to its capability's data."
+        },
+        {
+          "id": "E",
+          "text": "Create independently deployable services with service-owned data stores and defined interfaces between them.",
+          "correct": true,
+          "why": "Separate deployments and service-owned data stores match the stated team and data-control boundaries."
+        }
+      ],
+      "explanation": "The requirements establish three boundaries: independent releases, team control of capability data, and an order response that need not wait for fulfillment. Independently deployable services with service-owned data stores address the first two, while an event initiates fulfillment without making it part of the response path. Shared module deployment misses release independence, and a shared writable data model misses the requested data ownership. A synchronous fulfillment call would add an unnecessary wait.",
+      "keywordCues": [
+        "deploy without coordinating a shared application release",
+        "fulfillment may start after an order response is returned",
+        "each team to control changes to the data",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista está dividiendo su aplicación de pedidos en capacidades de pedidos, inventario y preparación de pedidos. Cada equipo necesita desplegar sin coordinar una publicación compartida de la aplicación, y la preparación puede comenzar después de responder al pedido. La empresa también quiere que cada equipo controle los cambios en los datos de su capacidad, en lugar de que todos escriban en un mismo modelo de datos. ¿Qué DOS decisiones de diseño cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Hacer que la API de pedidos llame de forma síncrona a la API de preparación y responda solo cuando esta termine.",
+            "why": "Esto hace que la respuesta al pedido espere un trabajo que, según el escenario, puede empezar después."
+          },
+          {
+            "id": "B",
+            "text": "Iniciar la preparación mediante un evento después de aceptar un pedido, en lugar de esperar a que termine antes de responder.",
+            "why": "La comunicación basada en eventos permite continuar la preparación después de responder al pedido."
+          },
+          {
+            "id": "C",
+            "text": "Empaquetar las tres capacidades como módulos en un solo despliegue de Amazon ECS y asignar un módulo a cada equipo.",
+            "why": "La propiedad de un módulo no permite desplegar sin una publicación compartida de la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Dar a los tres servicios acceso de escritura a un único modelo de datos compartido para que todos los equipos vean los cambios de pedidos de inmediato.",
+            "why": "Un modelo de datos compartido con escritura para todos contradice el requisito de que cada equipo controle los cambios en los datos de su capacidad."
+          },
+          {
+            "id": "E",
+            "text": "Crear servicios que se puedan desplegar independientemente, con almacenes de datos propios e interfaces definidas entre ellos.",
+            "why": "Los despliegues separados y los almacenes de datos propios coinciden con los límites de los equipos y del control de datos solicitados."
+          }
+        ],
+        "explanation": "Los requisitos establecen tres límites: publicaciones independientes, control de los datos de cada capacidad y una respuesta al pedido que no necesita esperar la preparación. Los servicios desplegables de forma independiente con almacenes de datos propios resuelven los dos primeros; un evento inicia la preparación sin incluirla en la respuesta. Un despliegue compartido de módulos no permite publicaciones independientes, y un modelo de datos compartido con escritura no cumple el requisito de control de datos. Una llamada síncrona a preparación agregaría una espera innecesaria."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "microservices-design--0a621db3",
+      "conceptId": "microservices-design",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An online learning company has one application for course enrollment, video access, and certificates. Separate teams need to release certificate changes without redeploying enrollment, and certificate generation does not need to finish before an enrollment response is returned. Which design meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create separate Amazon ECS services but require enrollment to call the certificate API and wait for completion before responding.",
+          "correct": false,
+          "why": "The synchronous wait contradicts the requirement to return the enrollment response without waiting for certificate work."
+        },
+        {
+          "id": "B",
+          "text": "Keep the application as one deployment behind Amazon API Gateway and add a certificate API route.",
+          "correct": false,
+          "why": "Separate routes do not let the certificate team deploy its code independently."
+        },
+        {
+          "id": "C",
+          "text": "Put enrollment and certificate code in separate modules of one Amazon ECS service and scale the service for enrollment traffic.",
+          "correct": false,
+          "why": "Scaling the shared service does not make the modules independently deployable."
+        },
+        {
+          "id": "D",
+          "text": "Implement separate enrollment and certificate services with AWS Lambda, expose the enrollment API through Amazon API Gateway, and initiate certificate work asynchronously.",
+          "correct": true,
+          "why": "The services can be released separately, and asynchronous work avoids delaying enrollment while the serverless approach reduces infrastructure management."
+        }
+      ],
+      "explanation": "The deciding requirements are independent releases and no need to wait for certificate generation. Separate services meet the release requirement, while asynchronous initiation keeps certificate work out of the enrollment response path. AWS describes serverless as reducing infrastructure management, making the Lambda-based design a fit for the overhead qualifier. Separate ECS services could support independent releases, but option A unnecessarily makes enrollment wait.",
+      "keywordCues": [
+        "release certificate changes without redeploying enrollment",
+        "does not need to finish before an enrollment response",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+      ],
+      "es": {
+        "stem": "Una empresa de educación en línea tiene una sola aplicación para inscripciones, acceso a videos y certificados. Distintos equipos necesitan publicar cambios en certificados sin volver a desplegar inscripciones, y la generación de certificados no tiene que terminar antes de responder a una inscripción. ¿Qué diseño cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear servicios separados en Amazon ECS, pero exigir que inscripciones llame a la API de certificados y espere a que termine antes de responder.",
+            "why": "La espera síncrona contradice el requisito de responder a la inscripción sin esperar el trabajo de certificados."
+          },
+          {
+            "id": "B",
+            "text": "Mantener la aplicación como un solo despliegue detrás de Amazon API Gateway y agregar una ruta API para certificados.",
+            "why": "Las rutas separadas no permiten que el equipo de certificados despliegue su código de forma independiente."
+          },
+          {
+            "id": "C",
+            "text": "Colocar el código de inscripciones y certificados en módulos separados de un mismo servicio de Amazon ECS y escalarlo según el tráfico de inscripciones.",
+            "why": "Escalar el servicio compartido no permite desplegar los módulos de forma independiente."
+          },
+          {
+            "id": "D",
+            "text": "Implementar servicios separados de inscripciones y certificados con AWS Lambda, exponer la API de inscripciones mediante Amazon API Gateway e iniciar el trabajo de certificados de forma asíncrona.",
+            "why": "Los servicios pueden publicarse por separado, y el trabajo asíncrono evita retrasar la inscripción mientras serverless reduce la administración de infraestructura."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son las publicaciones independientes y que no hace falta esperar la generación del certificado. Los servicios separados permiten publicar por separado, mientras que la ejecución asíncrona deja ese trabajo fuera de la respuesta de inscripción. AWS describe serverless como un enfoque que reduce la administración de infraestructura, lo que favorece el diseño con AWS Lambda para el requisito de overhead. Los servicios separados en Amazon ECS podrían permitir publicaciones independientes, pero la opción A hace esperar a inscripciones sin necesidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "microservices-design--r0",
+      "conceptId": "microservices-design",
+      "kind": "recall",
+      "prompt": "A customer request need not wait for downstream work, and teams need independent releases. What microservices design would you choose, and why?",
+      "promptEs": "Una solicitud del cliente no necesita esperar el trabajo posterior y los equipos necesitan publicaciones independientes. ¿Qué diseño de microservicios eliges y por qué?",
+      "idealAnswer": "Use independently deployable services with well-defined interfaces, and initiate the downstream work through an event. This lets the customer-facing service respond without waiting and allows teams to release their services separately.",
+      "rubric": [
+        "Identifies independently deployable services.",
+        "Uses an event or asynchronous communication for downstream work.",
+        "Explains both the response-time and independent-release benefits."
+      ]
+    }
+  ]
+}

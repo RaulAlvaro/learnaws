@@ -24,8 +24,9 @@ pnpm content gen         # genera (Batch API, 50% más barato; --direct --limit 
 pnpm content collect     # recoge batches terminados
 pnpm content verify      # verificación (batch)
 pnpm content collect
-pnpm content finalize    # filtra, asigna el 20% reservado para simulacros → content/concepts/*.json
+pnpm content finalize    # filtra, reserva 1 pregunta por concepto (≥3) para simulacros → content/concepts/*.json
 pnpm content status
+bash scripts/content/run-all.sh   # todo lo anterior en modo directo (reanudable)
 ```
 
 - `content/syllabus.json` — 4 dominios, 14 tareas oficiales, 259 conceptos, 32 grupos de servicios confundibles.

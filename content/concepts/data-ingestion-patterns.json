@@ -1,0 +1,324 @@
+{
+  "conceptId": "data-ingestion-patterns",
+  "card": {
+    "en": {
+      "tldr": "Choose ingestion by how data arrives and how soon it must be available. Amazon Data Firehose fits continuously generated records delivered to Amazon S3; AWS DataSync fits recurring transfers of existing on-premises files; AWS Glue fits scheduled transformation jobs.",
+      "whenToUse": [
+        "Choose Amazon Data Firehose when applications continuously produce records that need streaming delivery to Amazon S3.",
+        "Choose AWS DataSync when existing NFS, SMB, object-store, or HDFS data must be transferred to Amazon S3 over the network.",
+        "Choose AWS Glue when the requirement is to clean or transform data in an on-demand or scheduled ETL job."
+      ],
+      "keyFacts": [
+        "Amazon Data Firehose is fully managed, scales with streaming throughput, and can deliver streaming records to Amazon S3.",
+        "Firehose can batch multiple incoming records into an S3 object and can transform data before delivery.",
+        "AWS DataSync automates transfers from supported on-premises storage systems to Amazon S3 and supports encryption and integrity validation.",
+        "AWS Glue jobs extract, transform, and load data; they can run on demand or on a schedule."
+      ],
+      "gotchas": [
+        "A large transfer of files is not a streaming-record workload merely because it runs frequently.",
+        "Firehose batching of incoming records does not make it the choice for a scheduled ETL job over existing files.",
+        "DataSync moves data; choose Glue when cleaning or transforming the data is the deciding requirement."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Storage Gateway File Gateway",
+          "difference": "File Gateway provides an on-premises NFS file share whose writes become S3 objects; DataSync transfers data from an existing supported storage source."
+        },
+        {
+          "concept": "AWS Glue",
+          "difference": "Glue performs ETL jobs, while Firehose is a managed delivery path for incoming streaming records."
+        }
+      ],
+      "examCues": [
+        "continuously generated records",
+        "streaming delivery to Amazon S3",
+        "weekly transfer from an existing NFS share",
+        "scheduled cleaning of files already in Amazon S3"
+      ]
+    },
+    "es": {
+      "tldr": "Elige el patrón de ingesta según cómo llegan los datos y cuándo deben estar disponibles. Amazon Data Firehose sirve para entregar registros generados continuamente a Amazon S3; AWS DataSync, para transferir archivos existentes; y AWS Glue, para trabajos programados de transformación.",
+      "whenToUse": [
+        "Elige Amazon Data Firehose si las aplicaciones generan registros continuamente y necesitas entregarlos a Amazon S3 como flujo.",
+        "Elige AWS DataSync si necesitas transferir por red datos existentes de NFS, SMB, un almacén de objetos o HDFS a Amazon S3.",
+        "Elige AWS Glue si necesitas limpiar o transformar datos mediante un trabajo ETL bajo demanda o programado."
+      ],
+      "keyFacts": [
+        "Amazon Data Firehose es completamente administrado, escala según el volumen del flujo y puede entregar registros a Amazon S3.",
+        "Firehose puede agrupar varios registros entrantes en un objeto de S3 y transformarlos antes de la entrega.",
+        "AWS DataSync automatiza transferencias desde sistemas de almacenamiento locales compatibles a Amazon S3 y admite cifrado y validación de integridad.",
+        "Los trabajos de AWS Glue extraen, transforman y cargan datos; pueden ejecutarse bajo demanda o con una programación."
+      ],
+      "gotchas": [
+        "Una transferencia grande de archivos no se convierte en un flujo de registros solo porque se repita con frecuencia.",
+        "Que Firehose agrupe registros entrantes no lo convierte en la opción para ETL programado sobre archivos existentes.",
+        "DataSync mueve datos; elige Glue si el requisito decisivo es limpiarlos o transformarlos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Storage Gateway File Gateway",
+          "difference": "File Gateway ofrece un recurso compartido NFS local cuyas escrituras se convierten en objetos de S3; DataSync transfiere datos desde una fuente de almacenamiento compatible ya existente."
+        },
+        {
+          "concept": "AWS Glue",
+          "difference": "Glue ejecuta trabajos ETL, mientras que Firehose entrega registros entrantes de un flujo."
+        }
+      ],
+      "examCues": [
+        "continuously generated records",
+        "streaming delivery to Amazon S3",
+        "weekly transfer from an existing NFS share",
+        "scheduled cleaning of files already in Amazon S3"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/building-data-lakes/data-ingestion-methods.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "data-ingestion-patterns--747af97b",
+      "conceptId": "data-ingestion-patterns",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A transit operator's vehicles continuously send location records to an application. The operator wants the incoming records delivered to Amazon S3 for analysis throughout the day, rather than waiting for a scheduled file transfer. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Write the records to an AWS Storage Gateway File Gateway share backed by Amazon S3.",
+          "correct": false,
+          "why": "File Gateway supplies a file-share interface, which the stated record-streaming application does not require."
+        },
+        {
+          "id": "B",
+          "text": "Send the records to Amazon Data Firehose for managed delivery to Amazon S3.",
+          "correct": true,
+          "why": "Firehose is a fully managed delivery service for incoming streaming records and can deliver them to Amazon S3."
+        },
+        {
+          "id": "C",
+          "text": "Run AWS DataSync tasks to transfer record files from an on-premises share to Amazon S3.",
+          "correct": false,
+          "why": "DataSync transfers data from storage systems, while this application produces a continuous record stream."
+        },
+        {
+          "id": "D",
+          "text": "Run scheduled AWS Glue ETL jobs to load the records into Amazon S3.",
+          "correct": false,
+          "why": "Scheduled ETL jobs do not match the requirement to ingest incoming records continuously."
+        }
+      ],
+      "explanation": "The deciding requirement is continuous delivery of incoming records to Amazon S3, not a scheduled transfer of stored files. Amazon Data Firehose provides managed streaming delivery to S3 and scales with streaming throughput. AWS Glue is useful for ETL jobs, but scheduling those jobs does not address the specified continuous ingestion pattern.",
+      "keywordCues": [
+        "continuously send location records",
+        "delivered to Amazon S3 for analysis throughout the day",
+        "rather than waiting for a scheduled file transfer"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/building-data-lakes/data-ingestion-methods.html"
+      ],
+      "es": {
+        "stem": "Los vehículos de una empresa de transporte envían continuamente registros de ubicación a una aplicación. La empresa quiere que los registros entrantes se entreguen a Amazon S3 para analizarlos durante el día, en lugar de esperar una transferencia programada de archivos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Escribir los registros en un recurso compartido de AWS Storage Gateway File Gateway respaldado por Amazon S3.",
+            "why": "File Gateway proporciona una interfaz de archivos que la aplicación de flujo de registros descrita no necesita."
+          },
+          {
+            "id": "B",
+            "text": "Enviar los registros a Amazon Data Firehose para su entrega administrada a Amazon S3.",
+            "why": "Firehose entrega registros entrantes de un flujo a Amazon S3 como servicio completamente administrado."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar tareas de AWS DataSync para transferir archivos de registros desde un recurso compartido local a Amazon S3.",
+            "why": "DataSync transfiere datos desde sistemas de almacenamiento, pero esta aplicación produce un flujo continuo de registros."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar trabajos ETL programados de AWS Glue para cargar los registros en Amazon S3.",
+            "why": "Los trabajos ETL programados no cumplen el requisito de ingerir continuamente los registros entrantes."
+          }
+        ],
+        "explanation": "El requisito decisivo es entregar continuamente registros entrantes a Amazon S3, no transferir archivos almacenados según una programación. Amazon Data Firehose proporciona entrega administrada de flujos a S3 y escala según el volumen del flujo. AWS Glue sirve para trabajos ETL, pero programarlos no resuelve el patrón de ingesta continua indicado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-ingestion-patterns--c094b78f",
+      "conceptId": "data-ingestion-patterns",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab saves large sets of microscope images on an existing on-premises NFS server each week. It needs to transfer those files to its Amazon S3 data lake over the network, with integrity validation, without changing how researchers write files. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS DataSync to transfer files from the existing NFS server to Amazon S3.",
+          "correct": true,
+          "why": "DataSync supports transfers from on-premises NFS to Amazon S3 and provides data integrity validation."
+        },
+        {
+          "id": "B",
+          "text": "Send image data through Amazon Data Firehose to Amazon S3.",
+          "correct": false,
+          "why": "Firehose is for incoming streaming data, not transferring files from the existing NFS server."
+        },
+        {
+          "id": "C",
+          "text": "Replace the NFS server's write location with an AWS Storage Gateway File Gateway share.",
+          "correct": false,
+          "why": "File Gateway would require changing the write location rather than transferring files from the existing NFS server."
+        },
+        {
+          "id": "D",
+          "text": "Use scheduled AWS Glue ETL jobs to move the images into Amazon S3.",
+          "correct": false,
+          "why": "Glue is an ETL service, while the requirement is file transfer with integrity validation."
+        }
+      ],
+      "explanation": "These are existing files on an NFS server, and the lab needs a network transfer that preserves its current write workflow. AWS DataSync supports NFS-to-S3 movement and data integrity validation. File Gateway is a plausible file-based alternative, but replacing the write location conflicts with the requirement not to change how researchers save files.",
+      "keywordCues": [
+        "existing on-premises NFS server",
+        "transfer those files to its Amazon S3 data lake over the network",
+        "with integrity validation",
+        "without changing how researchers write files"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/building-data-lakes/data-ingestion-methods.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación guarda cada semana grandes conjuntos de imágenes de microscopio en un servidor NFS local existente. Necesita transferir esos archivos por red a su data lake en Amazon S3, con validación de integridad y sin cambiar la forma en que los investigadores guardan los archivos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS DataSync para transferir archivos del servidor NFS existente a Amazon S3.",
+            "why": "DataSync admite transferencias desde NFS local a Amazon S3 y proporciona validación de integridad."
+          },
+          {
+            "id": "B",
+            "text": "Enviar los datos de las imágenes mediante Amazon Data Firehose a Amazon S3.",
+            "why": "Firehose sirve para datos entrantes en flujo, no para transferir archivos del servidor NFS existente."
+          },
+          {
+            "id": "C",
+            "text": "Sustituir la ubicación de escritura del servidor NFS por un recurso compartido de AWS Storage Gateway File Gateway.",
+            "why": "File Gateway obligaría a cambiar la ubicación de escritura en vez de transferir archivos desde el servidor NFS existente."
+          },
+          {
+            "id": "D",
+            "text": "Usar trabajos ETL programados de AWS Glue para mover las imágenes a Amazon S3.",
+            "why": "Glue es un servicio ETL, mientras que el requisito es transferir archivos con validación de integridad."
+          }
+        ],
+        "explanation": "Se trata de archivos que ya están en un servidor NFS, y el laboratorio necesita transferirlos por red sin alterar su proceso de escritura. AWS DataSync admite el movimiento de NFS a S3 y la validación de integridad. File Gateway parece una alternativa para archivos, pero sustituir la ubicación de escritura contradice el requisito de mantener la forma en que los investigadores guardan los archivos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "data-ingestion-patterns--984d2084",
+      "conceptId": "data-ingestion-patterns",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An online marketplace receives partner CSV files in Amazon S3 once each night. Before analysts use the data, the company must clean inconsistent records and load the results into a separate S3 location; processing can start after the nightly files arrive. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS DataSync to copy the nightly files to the destination S3 location.",
+          "correct": false,
+          "why": "Copying the files does not clean their inconsistent records."
+        },
+        {
+          "id": "B",
+          "text": "Run an AWS Glue ETL job after the files arrive to clean and load the data.",
+          "correct": true,
+          "why": "Glue provides managed ETL jobs that can clean and transfer data between data stores."
+        },
+        {
+          "id": "C",
+          "text": "Route the partner data through Amazon Data Firehose into the destination S3 location.",
+          "correct": false,
+          "why": "The data arrives as nightly S3 files rather than incoming streaming records, and routing it through Firehose does not specify the required cleaning job."
+        },
+        {
+          "id": "D",
+          "text": "Use an AWS Snowball Edge device to move the nightly files to the destination S3 location.",
+          "correct": false,
+          "why": "A physical bulk-transfer device does not address cleaning files already in Amazon S3."
+        }
+      ],
+      "explanation": "The deciding requirement is transformation of files that already arrive in Amazon S3 on a nightly schedule. An AWS Glue ETL job can clean the records and load the results to the target location after arrival. DataSync is a transfer service, so copying the files would leave the inconsistent records unchanged. Firehose addresses incoming streaming data rather than this stored-file ETL workflow.",
+      "keywordCues": [
+        "partner CSV files in Amazon S3 once each night",
+        "clean inconsistent records",
+        "processing can start after the nightly files arrive"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/building-data-lakes/data-ingestion-methods.html"
+      ],
+      "es": {
+        "stem": "Un marketplace recibe archivos CSV de sus socios en Amazon S3 una vez cada noche. Antes de que los analistas usen los datos, la empresa debe limpiar los registros inconsistentes y cargar los resultados en otra ubicación de S3; el procesamiento puede empezar después de que lleguen los archivos nocturnos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS DataSync para copiar los archivos nocturnos a la ubicación de destino en S3.",
+            "why": "Copiar los archivos no limpia los registros inconsistentes."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar un trabajo ETL de AWS Glue después de que lleguen los archivos para limpiar y cargar los datos.",
+            "why": "Glue ofrece trabajos ETL administrados que pueden limpiar y transferir datos entre almacenes."
+          },
+          {
+            "id": "C",
+            "text": "Enviar los datos de los socios mediante Amazon Data Firehose a la ubicación de destino en S3.",
+            "why": "Los datos llegan como archivos nocturnos en S3, no como registros entrantes de un flujo, y esta opción no define el trabajo de limpieza requerido."
+          },
+          {
+            "id": "D",
+            "text": "Usar un dispositivo AWS Snowball Edge para mover los archivos nocturnos a la ubicación de destino en S3.",
+            "why": "Un dispositivo físico para transferencias masivas no resuelve la limpieza de archivos que ya están en Amazon S3."
+          }
+        ],
+        "explanation": "El requisito decisivo es transformar archivos que ya llegan cada noche a Amazon S3. Un trabajo ETL de AWS Glue puede limpiar los registros y cargar los resultados en la ubicación de destino después de su llegada. DataSync transfiere datos, por lo que copiar los archivos dejaría intactos los registros inconsistentes. Firehose atiende datos entrantes en flujo, no este proceso ETL sobre archivos almacenados."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "data-ingestion-patterns--r0",
+      "conceptId": "data-ingestion-patterns",
+      "kind": "recall",
+      "prompt": "Which ingestion service fits continuously generated application records destined for Amazon S3, and why?",
+      "promptEs": "¿Qué servicio de ingesta elegirías para registros que una aplicación genera continuamente con destino a Amazon S3, y por qué?",
+      "idealAnswer": "Choose Amazon Data Firehose. It provides fully managed delivery of incoming streaming data to Amazon S3 and scales with streaming throughput.",
+      "rubric": [
+        "Names Amazon Data Firehose.",
+        "Identifies the input as continuously generated streaming records.",
+        "Explains that it delivers the stream to Amazon S3 with managed scaling."
+      ]
+    }
+  ]
+}

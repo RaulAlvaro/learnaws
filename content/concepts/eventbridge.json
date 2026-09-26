@@ -1,0 +1,445 @@
+{
+  "conceptId": "eventbridge",
+  "card": {
+    "en": {
+      "tldr": "Amazon EventBridge connects applications through events. Choose an event bus to route events from AWS services, third-party software, or custom applications to multiple targets; choose EventBridge Scheduler for managed recurring or one-time invocations.",
+      "whenToUse": [
+        "Events from multiple sources need filtering and routing to different consumers.",
+        "A stream needs transformation or enrichment before its events reach one target, possibly an event bus.",
+        "A team wants to replace a server that runs scheduled tasks."
+      ],
+      "keyFacts": [
+        "An event bus can deliver an event to zero or more targets.",
+        "Event buses are suited to many-source, many-target routing and can transform events before delivery.",
+        "Each EventBridge pipe connects one source to one target and can transform or enrich events.",
+        "A pipe can send events from a DynamoDB stream to an event bus for routing to multiple targets.",
+        "EventBridge Scheduler supports cron expressions, rate expressions, and one-time invocations."
+      ],
+      "gotchas": [
+        "A pipe alone is point-to-point; use an event bus when events must reach multiple targets.",
+        "EventBridge Scheduler is the recommended managed scheduling option; scheduled rules on the default event bus can also invoke targets on a schedule.",
+        "SNS fan-out is not the deciding feature when the requirement is to route events from many AWS, third-party, and custom sources."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS pushes a message to subscribers; EventBridge event buses are designed to route events from many sources to many targets."
+        },
+        {
+          "concept": "Amazon MQ",
+          "difference": "Choose Amazon MQ for applications that must retain existing messaging protocols; choose EventBridge for event routing without that compatibility requirement."
+        },
+        {
+          "concept": "AWS Step Functions",
+          "difference": "Step Functions orchestrates the steps and state of a workflow; EventBridge routes events to consumers."
+        }
+      ],
+      "examCues": [
+        "route AWS and SaaS events to different consumers",
+        "filter events before delivery to multiple targets",
+        "enrich a stream before routing events",
+        "replace a server running cron jobs"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon EventBridge conecta aplicaciones mediante eventos. Elige un event bus para dirigir eventos de servicios de AWS, software de terceros o aplicaciones propias a varios destinos; elige EventBridge Scheduler para invocaciones recurrentes o de una sola vez sin administrar un servidor.",
+      "whenToUse": [
+        "Tienes eventos de varias fuentes y necesitas filtrarlos y dirigirlos a distintos consumidores.",
+        "Necesitas transformar o enriquecer eventos de un stream antes de enviarlos a un destino, posiblemente un event bus.",
+        "Quieres reemplazar un servidor que ejecuta tareas programadas."
+      ],
+      "keyFacts": [
+        "Un event bus puede entregar un evento a cero o más destinos.",
+        "Los event buses son adecuados para dirigir eventos de muchas fuentes a muchos destinos y pueden transformar eventos antes de entregarlos.",
+        "Cada EventBridge pipe conecta una fuente con un destino y puede transformar o enriquecer eventos.",
+        "Un pipe puede enviar eventos de un DynamoDB stream a un event bus, que después los dirige a varios destinos.",
+        "EventBridge Scheduler admite expresiones cron, expresiones rate e invocaciones de una sola vez."
+      ],
+      "gotchas": [
+        "Un pipe por sí solo conecta un punto con otro; usa un event bus si los eventos deben llegar a varios destinos.",
+        "EventBridge Scheduler es la opción administrada recomendada para programar tareas; las reglas programadas en el default event bus también pueden invocar destinos según un horario.",
+        "El fan-out de SNS no es la pista decisiva cuando necesitas dirigir eventos de muchas fuentes de AWS, terceros y aplicaciones propias."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS envía mensajes a suscriptores; los event buses de EventBridge están diseñados para dirigir eventos de muchas fuentes a muchos destinos."
+        },
+        {
+          "concept": "Amazon MQ",
+          "difference": "Elige Amazon MQ si debes conservar protocolos de mensajería existentes; elige EventBridge para dirigir eventos cuando no tienes ese requisito."
+        },
+        {
+          "concept": "AWS Step Functions",
+          "difference": "Step Functions coordina los pasos y el estado de un flujo de trabajo; EventBridge dirige eventos a consumidores."
+        }
+      ],
+      "examCues": [
+        "route AWS and SaaS events to different consumers",
+        "filter events before delivery to multiple targets",
+        "enrich a stream before routing events",
+        "replace a server running cron jobs"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "eventbridge--88041498",
+      "conceptId": "eventbridge",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "sqs-standard-vs-fifo"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A property management company runs a small server solely to invoke a maintenance application every night. It also needs to schedule occasional one-time inspection reminders and wants to retire the server. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place reminder messages in an SQS queue and have the maintenance application poll for due work.",
+          "correct": false,
+          "why": "A queue buffers messages but does not replace the requested managed scheduling of invocations."
+        },
+        {
+          "id": "B",
+          "text": "Publish maintenance events to an SNS topic and ask subscribers to check whether each event is due.",
+          "correct": false,
+          "why": "SNS distributes published messages but does not meet the requirement for managed recurring and one-time schedules."
+        },
+        {
+          "id": "C",
+          "text": "Send a daily event to an EventBridge event bus from the existing server and route it to the application.",
+          "correct": false,
+          "why": "This retains the server that the company needs to retire."
+        },
+        {
+          "id": "D",
+          "text": "Use EventBridge Scheduler for a recurring nightly invocation and one-time reminder invocations.",
+          "correct": true,
+          "why": "EventBridge Scheduler provides managed recurring and one-time invocations."
+        }
+      ],
+      "explanation": "The company needs both recurring and one-time invocations without maintaining its cron server. EventBridge Scheduler is a managed service that supports cron or rate schedules as well as one-time invocations. An event bus could route an event produced by the server, but that design fails to retire the server. SNS and SQS address message delivery rather than the stated scheduling need.",
+      "keywordCues": [
+        "invoke a maintenance application every night",
+        "one-time inspection reminders",
+        "retire the server"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+      ],
+      "es": {
+        "stem": "Una empresa de administración de propiedades mantiene un servidor pequeño solo para invocar una aplicación de mantenimiento cada noche. También necesita programar recordatorios ocasionales de inspección de una sola vez y quiere retirar el servidor. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Coloca mensajes de recordatorio en una cola de SQS y haz que la aplicación de mantenimiento consulte el trabajo pendiente.",
+            "why": "Una cola almacena mensajes temporalmente, pero no sustituye la programación administrada de invocaciones que se solicita."
+          },
+          {
+            "id": "B",
+            "text": "Publica eventos de mantenimiento en un tema de SNS y pide a los suscriptores que verifiquen cuándo corresponde atenderlos.",
+            "why": "SNS distribuye mensajes publicados, pero no cumple el requisito de programas recurrentes y de una sola vez administrados."
+          },
+          {
+            "id": "C",
+            "text": "Envía un evento diario a un EventBridge event bus desde el servidor existente y dirígelo a la aplicación.",
+            "why": "Esta opción conserva el servidor que la empresa quiere retirar."
+          },
+          {
+            "id": "D",
+            "text": "Usa EventBridge Scheduler para una invocación nocturna recurrente y para invocaciones de recordatorio de una sola vez.",
+            "why": "EventBridge Scheduler ofrece invocaciones recurrentes y de una sola vez mediante un servicio administrado."
+          }
+        ],
+        "explanation": "La empresa necesita invocaciones recurrentes y de una sola vez sin mantener su servidor con cron. EventBridge Scheduler es un servicio administrado que admite programas cron o rate e invocaciones de una sola vez. Un event bus podría dirigir un evento producido por el servidor, pero no permitiría retirarlo. SNS y SQS resuelven la entrega de mensajes, no la necesidad de programación indicada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "eventbridge--7faff8d7",
+      "conceptId": "eventbridge",
+      "secondaryConcepts": [
+        "sqs-standard-vs-fifo"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A utilities company records meter changes in a DynamoDB stream. It needs to enrich each change before routing selected events to several internal applications, and it must replace a server that invokes a separate reconciliation application on a recurring schedule. Which TWO components meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the scheduling server and send its reconciliation events through the event bus.",
+          "correct": false,
+          "why": "Keeping the server fails the explicit requirement to replace it."
+        },
+        {
+          "id": "B",
+          "text": "Use EventBridge Scheduler to invoke the reconciliation application on a recurring schedule.",
+          "correct": true,
+          "why": "Scheduler supplies the managed recurring invocation needed to replace the server."
+        },
+        {
+          "id": "C",
+          "text": "Use an EventBridge pipe to enrich stream events and deliver them directly to one internal application.",
+          "correct": false,
+          "why": "A direct pipe target does not route selected enriched events to several applications."
+        },
+        {
+          "id": "D",
+          "text": "Use a shared SQS queue so every internal application can poll for its selected meter changes.",
+          "correct": false,
+          "why": "A shared queue does not provide the requested routing of selected events to several applications."
+        },
+        {
+          "id": "E",
+          "text": "Use an EventBridge pipe to enrich stream events and deliver them to an EventBridge event bus for routing.",
+          "correct": true,
+          "why": "The pipe handles stream enrichment, and the bus routes its output to multiple targets."
+        }
+      ],
+      "explanation": "The scenario has two distinct needs: enrich a stream before many-target routing, and replace a recurring-invocation server. A pipe can enrich DynamoDB stream events and target an event bus, which then routes events to multiple applications. EventBridge Scheduler supplies the managed recurring invocation. Sending the pipe directly to one application misses the routing requirement, while retaining the scheduling server misses the replacement requirement.",
+      "keywordCues": [
+        "DynamoDB stream",
+        "enrich each change before routing selected events to several internal applications",
+        "replace a server",
+        "recurring schedule"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+      ],
+      "es": {
+        "stem": "Una empresa de servicios públicos registra cambios de medidores en un DynamoDB stream. Necesita enriquecer cada cambio antes de dirigir eventos seleccionados a varias aplicaciones internas y debe reemplazar un servidor que invoca otra aplicación de conciliación de forma recurrente. ¿Qué DOS componentes cumplen estos requisitos con el LEAST operational overhead? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conserva el servidor de programación y envía sus eventos de conciliación por el event bus.",
+            "why": "Conservar el servidor incumple el requisito explícito de reemplazarlo."
+          },
+          {
+            "id": "B",
+            "text": "Usa EventBridge Scheduler para invocar la aplicación de conciliación de forma recurrente.",
+            "why": "Scheduler proporciona la invocación recurrente administrada necesaria para reemplazar el servidor."
+          },
+          {
+            "id": "C",
+            "text": "Usa un EventBridge pipe para enriquecer los eventos del stream y entregarlos directamente a una aplicación interna.",
+            "why": "Un destino directo del pipe no dirige los eventos enriquecidos seleccionados a varias aplicaciones."
+          },
+          {
+            "id": "D",
+            "text": "Usa una cola compartida de SQS para que cada aplicación interna consulte sus cambios de medidores seleccionados.",
+            "why": "Una cola compartida no proporciona el enrutamiento solicitado de eventos seleccionados a varias aplicaciones."
+          },
+          {
+            "id": "E",
+            "text": "Usa un EventBridge pipe para enriquecer los eventos del stream y entregarlos a un EventBridge event bus para dirigirlos.",
+            "why": "El pipe enriquece los eventos del stream y el event bus dirige el resultado a varios destinos."
+          }
+        ],
+        "explanation": "El escenario tiene dos necesidades: enriquecer un stream antes de dirigir eventos a varios destinos y reemplazar un servidor de invocaciones recurrentes. Un pipe puede enriquecer los eventos de un DynamoDB stream y enviarlos a un event bus, que después los dirige a varias aplicaciones. EventBridge Scheduler proporciona la invocación recurrente administrada. Enviar el pipe directamente a una aplicación no satisface el enrutamiento, y conservar el servidor no satisface el requisito de reemplazarlo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "eventbridge--86532f06",
+      "conceptId": "eventbridge",
+      "secondaryConcepts": [
+        "sqs-standard-vs-fifo",
+        "step-functions"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A travel platform receives events from its own booking application, AWS services, and a third-party reservation system. Different teams need selected events delivered to their applications, and the platform wants to avoid custom routing code. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send the events to an EventBridge event bus and configure routing rules for the consumer applications.",
+          "correct": true,
+          "why": "An event bus routes events from many sources to multiple targets according to rules."
+        },
+        {
+          "id": "B",
+          "text": "Send every event through a single EventBridge pipe to one consumer application.",
+          "correct": false,
+          "why": "A pipe has one source and one target, while this platform has multiple sources and consumers."
+        },
+        {
+          "id": "C",
+          "text": "Start a Step Functions workflow for every event and use its steps to deliver events to teams.",
+          "correct": false,
+          "why": "Workflow orchestration adds machinery when the stated requirement is event routing."
+        },
+        {
+          "id": "D",
+          "text": "Put all events in one SQS queue and have each team poll it.",
+          "correct": false,
+          "why": "One queue does not provide the requested routing of selected events to different teams."
+        }
+      ],
+      "explanation": "The deciding requirement is routing selected events from several kinds of sources to different consumers. An EventBridge event bus is suited to many-source, many-target event routing, so it avoids building that routing into application code. A single pipe is a tempting EventBridge alternative, but it connects only one source to one target. Step Functions addresses workflow orchestration rather than this routing problem.",
+      "keywordCues": [
+        "its own booking application, AWS services, and a third-party reservation system",
+        "Different teams need selected events delivered",
+        "avoid custom routing code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de viajes recibe eventos de su aplicación de reservas, de servicios de AWS y de un sistema de reservas de terceros. Distintos equipos necesitan recibir eventos seleccionados en sus aplicaciones, y la plataforma quiere evitar código de enrutamiento propio. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Envía los eventos a un EventBridge event bus y configura reglas de enrutamiento para las aplicaciones consumidoras.",
+            "why": "Un event bus dirige eventos de muchas fuentes a varios destinos según sus reglas."
+          },
+          {
+            "id": "B",
+            "text": "Envía todos los eventos por un único EventBridge pipe a una aplicación consumidora.",
+            "why": "Un pipe tiene una fuente y un destino, pero la plataforma tiene varias fuentes y consumidores."
+          },
+          {
+            "id": "C",
+            "text": "Inicia un flujo de Step Functions por cada evento y usa sus pasos para entregarlo a los equipos.",
+            "why": "Coordinar flujos de trabajo añade componentes cuando el requisito indicado es dirigir eventos."
+          },
+          {
+            "id": "D",
+            "text": "Coloca todos los eventos en una sola cola de SQS y haz que cada equipo la consulte.",
+            "why": "Una sola cola no proporciona el enrutamiento solicitado de eventos seleccionados a distintos equipos."
+          }
+        ],
+        "explanation": "El requisito decisivo es dirigir eventos seleccionados de distintos tipos de fuentes a diferentes consumidores. Un EventBridge event bus es adecuado para el enrutamiento de muchas fuentes a muchos destinos y evita incorporar esa lógica en las aplicaciones. Un solo pipe parece una alternativa cercana, pero conecta únicamente una fuente con un destino. Step Functions resuelve la coordinación de flujos de trabajo, no este problema de enrutamiento."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "eventbridge--1f26173a",
+      "conceptId": "eventbridge",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "step-functions"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturing application writes equipment changes to DynamoDB, and a downstream application needs enriched change events. The team wants a managed integration from the DynamoDB stream to that one application, with enrichment before delivery. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Publish each stream record to an SNS topic and make the downstream application enrich it after receipt.",
+          "correct": false,
+          "why": "Enrichment after receipt misses the requirement to enrich events before delivery."
+        },
+        {
+          "id": "B",
+          "text": "Start a Step Functions workflow for each change and track enrichment as a workflow step.",
+          "correct": false,
+          "why": "Workflow state tracking adds overhead to a stated point-to-point integration."
+        },
+        {
+          "id": "C",
+          "text": "Send the stream records to an EventBridge event bus and have each consumer enrich its own copy.",
+          "correct": false,
+          "why": "Consumer-side enrichment does not provide the requested enrichment before delivery to the application."
+        },
+        {
+          "id": "D",
+          "text": "Create an EventBridge pipe with the DynamoDB stream as its source, enrichment, and the application as its target.",
+          "correct": true,
+          "why": "A pipe provides a one-source, one-target integration with enrichment before delivery."
+        }
+      ],
+      "explanation": "This is a point-to-point integration: one stream feeds one application, and events must be enriched before delivery. EventBridge Pipes is intended for that pattern and supports enrichment. Sending events to a bus for consumers to enrich changes the point at which enrichment occurs. Step Functions would introduce workflow orchestration that the scenario does not require.",
+      "keywordCues": [
+        "DynamoDB stream",
+        "that one application",
+        "enrichment before delivery"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de manufactura escribe cambios de equipos en DynamoDB, y una aplicación consumidora necesita eventos de cambio enriquecidos. El equipo quiere una integración administrada desde el DynamoDB stream hasta esa única aplicación, con enriquecimiento antes de la entrega. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Publica cada registro del stream en un tema de SNS y haz que la aplicación consumidora lo enriquezca después de recibirlo.",
+            "why": "Enriquecerlo después de recibirlo no cumple el requisito de enriquecimiento antes de la entrega."
+          },
+          {
+            "id": "B",
+            "text": "Inicia un flujo de Step Functions por cada cambio y registra el enriquecimiento como un paso del flujo.",
+            "why": "Mantener el estado de un flujo añade overhead a una integración directa entre dos puntos."
+          },
+          {
+            "id": "C",
+            "text": "Envía los registros del stream a un EventBridge event bus y haz que cada consumidor enriquezca su propia copia.",
+            "why": "Enriquecer los eventos en el consumidor no cumple el requisito de hacerlo antes de entregarlos a la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Crea un EventBridge pipe con el DynamoDB stream como fuente, enriquecimiento y la aplicación como destino.",
+            "why": "Un pipe proporciona una integración de una fuente a un destino con enriquecimiento antes de la entrega."
+          }
+        ],
+        "explanation": "Esta es una integración entre dos puntos: un stream alimenta una aplicación y los eventos deben enriquecerse antes de entregarlos. EventBridge Pipes está diseñado para este patrón y admite enriquecimiento. Enviar los eventos a un event bus para que los consumidores los enriquezcan cambia el momento del enriquecimiento. Step Functions añadiría coordinación de flujos de trabajo que el escenario no necesita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "eventbridge--r0",
+      "conceptId": "eventbridge",
+      "kind": "recall",
+      "prompt": "A DynamoDB stream needs enrichment before its events reach several applications. Which EventBridge components would you combine, and why?",
+      "promptEs": "Un DynamoDB stream necesita enriquecimiento antes de que sus eventos lleguen a varias aplicaciones. ¿Qué componentes de EventBridge combinarías y por qué?",
+      "idealAnswer": "Use an EventBridge pipe to receive and enrich the stream events, with an event bus as its target. The bus then routes the enriched events to multiple applications.",
+      "rubric": [
+        "Identifies EventBridge Pipes for stream ingestion and enrichment.",
+        "Identifies an event bus as the pipe target.",
+        "Explains that the bus routes events to multiple applications."
+      ]
+    },
+    {
+      "id": "eventbridge--r1",
+      "conceptId": "eventbridge",
+      "kind": "why-not",
+      "prompt": "Why isn't an SNS topic the best default for routing selected events from AWS services, third-party software, and custom apps?",
+      "promptEs": "¿Por qué un tema de SNS no es la opción predeterminada más adecuada para dirigir eventos seleccionados de servicios de AWS, software de terceros y aplicaciones propias?",
+      "idealAnswer": "SNS is useful for pushing messages to subscribers, but the decisive need here is routing events from many kinds of sources to different targets. An EventBridge event bus is designed for that many-source, many-target routing.",
+      "rubric": [
+        "Acknowledges SNS push or fan-out rather than claiming it cannot distribute messages.",
+        "Identifies the many-source, different-target routing requirement.",
+        "Selects an EventBridge event bus for that requirement."
+      ]
+    }
+  ]
+}

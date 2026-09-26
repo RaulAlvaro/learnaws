@@ -1,0 +1,317 @@
+{
+  "conceptId": "cloudwatch-logs",
+  "card": {
+    "en": {
+      "tldr": "CloudWatch Logs centralizes logs so teams can retain, search, and monitor them without building a separate log store. In an exam scenario, choose Logs Insights for interactive investigation and a metric filter with a CloudWatch alarm for ongoing alerts on matching log events.",
+      "whenToUse": [
+        "Centralize application or AWS service logs and set a retention period for each log group.",
+        "Investigate incidents by querying existing log events with CloudWatch Logs Insights.",
+        "Count occurrences of a log pattern and alert when the resulting metric crosses a threshold."
+      ],
+      "keyFacts": [
+        "Log groups retain logs indefinitely by default; retention can be set per log group to a period from one day to 10 years.",
+        "CloudWatch Logs Insights provides interactive queries for searching and analyzing log data.",
+        "Metric filters can report matching log events to a CloudWatch metric, which can be used for an alarm.",
+        "Standard log groups support all CloudWatch Logs features; Infrequent Access log groups have lower ingestion charges but support only a subset.",
+        "CloudWatch Logs encrypts log data in transit and at rest."
+      ],
+      "gotchas": [
+        "Logs do not expire by default; a fixed retention requirement needs an explicit log-group retention setting.",
+        "An interactive Logs Insights query does not replace a metric and alarm for continuous threshold monitoring.",
+        "Do not assume every Standard-class feature is available in the Infrequent Access class."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "search centralized logs during an incident",
+        "alert when an error pattern exceeds a threshold",
+        "expire application logs after a defined period",
+        "no application code changes for log-based monitoring"
+      ]
+    },
+    "es": {
+      "tldr": "CloudWatch Logs centraliza los registros para que los equipos puedan conservarlos, consultarlos y monitorearlos sin crear un almacén de logs aparte. En un escenario de examen, elige Logs Insights para investigar de forma interactiva y un metric filter con una alarma de CloudWatch para alertas continuas basadas en eventos coincidentes.",
+      "whenToUse": [
+        "Necesitas centralizar logs de aplicaciones o servicios de AWS y definir la retención de cada log group.",
+        "Necesitas investigar incidentes mediante consultas de eventos existentes con CloudWatch Logs Insights.",
+        "Necesitas contar eventos que coincidan con un patrón y recibir una alerta cuando la métrica supere un umbral."
+      ],
+      "keyFacts": [
+        "De forma predeterminada, los log groups conservan los logs indefinidamente; puedes configurar por log group una retención de un día a 10 años.",
+        "CloudWatch Logs Insights permite buscar y analizar logs mediante consultas interactivas.",
+        "Los metric filters pueden enviar los eventos coincidentes a una métrica de CloudWatch que puedes usar en una alarma.",
+        "Los log groups de la clase Standard admiten todas las funciones de CloudWatch Logs; los de Infrequent Access tienen menores cargos por ingesta, pero admiten solo un subconjunto.",
+        "CloudWatch Logs cifra los datos de logs en tránsito y en reposo."
+      ],
+      "gotchas": [
+        "Los logs no vencen de forma predeterminada; si necesitas retención limitada, debes configurarla explícitamente en el log group.",
+        "Una consulta interactiva de Logs Insights no reemplaza una métrica y una alarma para monitorear continuamente un umbral.",
+        "No supongas que todas las funciones de Standard están disponibles en Infrequent Access."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "search centralized logs during an incident",
+        "alert when an error pattern exceeds a threshold",
+        "expire application logs after a defined period",
+        "no application code changes for log-based monitoring"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudwatch-logs--12792639",
+      "conceptId": "cloudwatch-logs",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company sends application logs from its EC2 instances to CloudWatch Logs. Its operations team must be notified when occurrences of a particular exception exceed a defined threshold, without changing application code or manually running queries. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a CloudWatch Logs metric filter for the exception and a CloudWatch alarm on the resulting metric.",
+          "correct": true,
+          "why": "The filter turns matching log events into metric data, and the alarm monitors the threshold without application changes."
+        },
+        {
+          "id": "B",
+          "text": "Create a field index for the exception field and have operators query it after receiving customer reports.",
+          "correct": false,
+          "why": "A field index can improve applicable queries but does not create continuous alerts."
+        },
+        {
+          "id": "C",
+          "text": "Run a CloudWatch Logs Insights query for the exception whenever an operator starts an incident.",
+          "correct": false,
+          "why": "An on-demand query does not provide continuous threshold-based notification."
+        },
+        {
+          "id": "D",
+          "text": "Enable deletion protection on the log group and review exception events in the console.",
+          "correct": false,
+          "why": "Deletion protection guards against log-group deletion but does not detect or notify on error rates."
+        }
+      ],
+      "explanation": "The deciding requirement is automatic notification when a log pattern exceeds a threshold. A CloudWatch Logs metric filter reports matching events to a metric, and a CloudWatch alarm can monitor that metric. Logs Insights is useful for investigation, but running queries after an incident begins does not satisfy continuous monitoring. Deletion protection and field indexes address different needs.",
+      "keywordCues": [
+        "occurrences of a particular exception exceed a defined threshold",
+        "without changing application code",
+        "manually running queries"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas envía los logs de su aplicación en instancias EC2 a CloudWatch Logs. El equipo de operaciones debe recibir una notificación cuando las ocurrencias de una excepción específica superen un umbral definido, sin cambiar el código ni ejecutar consultas manualmente. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un metric filter de CloudWatch Logs para la excepción y una alarma de CloudWatch sobre la métrica resultante.",
+            "why": "El filtro convierte los eventos coincidentes en datos de una métrica, y la alarma monitorea el umbral sin cambiar la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Crear un field index para el campo de excepción y pedir a los operadores que lo consulten después de recibir reportes de clientes.",
+            "why": "Un field index puede mejorar las consultas pertinentes, pero no crea alertas continuas."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar una consulta de CloudWatch Logs Insights para buscar la excepción cada vez que un operador inicie una investigación.",
+            "why": "Una consulta bajo demanda no proporciona notificaciones continuas basadas en un umbral."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar deletion protection en el log group y revisar los eventos de excepción en la consola.",
+            "why": "Deletion protection evita la eliminación del log group, pero no detecta tasas de error ni envía notificaciones."
+          }
+        ],
+        "explanation": "El requisito decisivo es recibir una notificación automática cuando un patrón en los logs supere un umbral. Un metric filter de CloudWatch Logs informa los eventos coincidentes a una métrica, y una alarma de CloudWatch puede monitorearla. Logs Insights sirve para investigar, pero ejecutar consultas después del inicio de un incidente no proporciona monitoreo continuo. Deletion protection y los field indexes resuelven otras necesidades."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudwatch-logs--0a7d7956",
+      "conceptId": "cloudwatch-logs",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization collects application logs in several CloudWatch Logs log groups. Its internal policy requires the logs to expire after a defined period, and the team also needs to guard a critical audit log group against accidental deletion. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Leave retention at its default and enable deletion protection on every log group.",
+          "correct": false,
+          "why": "Default retention is indefinite, so the logs would not expire after the required period."
+        },
+        {
+          "id": "B",
+          "text": "Create metric filters on all log groups and alarm when the audit log group receives no new events.",
+          "correct": false,
+          "why": "Monitoring event matches does not set log expiration or block accidental log-group deletion."
+        },
+        {
+          "id": "C",
+          "text": "Set a retention period on each log group and enable deletion protection on the audit log group.",
+          "correct": true,
+          "why": "Per-group retention controls expiration, while deletion protection guards the critical group against accidental deletion."
+        },
+        {
+          "id": "D",
+          "text": "Set a retention period on each log group and use Logs Insights queries to prevent deletion of the audit log group.",
+          "correct": false,
+          "why": "Logs Insights analyzes events but does not prevent a log group from being deleted."
+        }
+      ],
+      "explanation": "This scenario has two separate controls: expiration of retained events and protection against accidental log-group deletion. Set retention explicitly for each log group because the default is indefinite. Enable deletion protection on the critical audit group to block deletion operations until that protection is disabled. An alarm or query cannot substitute for either required control.",
+      "keywordCues": [
+        "expire after a defined period",
+        "guard a critical audit log group against accidental deletion"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación recopila logs de aplicaciones en varios log groups de CloudWatch Logs. Su política interna exige que los logs venzan después de un período definido, y el equipo también necesita proteger un log group crítico de auditoría contra eliminaciones accidentales. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener la retención predeterminada y habilitar deletion protection en todos los log groups.",
+            "why": "La retención predeterminada es indefinida, por lo que los logs no vencerían al finalizar el período requerido."
+          },
+          {
+            "id": "B",
+            "text": "Crear metric filters en todos los log groups y activar una alarma si el log group de auditoría deja de recibir eventos.",
+            "why": "Monitorear eventos coincidentes no configura el vencimiento de los logs ni bloquea la eliminación accidental del log group."
+          },
+          {
+            "id": "C",
+            "text": "Configurar un período de retención en cada log group y habilitar deletion protection en el log group de auditoría.",
+            "why": "La retención por log group controla el vencimiento, mientras que deletion protection protege el grupo crítico contra eliminaciones accidentales."
+          },
+          {
+            "id": "D",
+            "text": "Configurar un período de retención en cada log group y usar consultas de Logs Insights para impedir la eliminación del log group de auditoría.",
+            "why": "Logs Insights analiza eventos, pero no impide que se elimine un log group."
+          }
+        ],
+        "explanation": "El escenario exige dos controles distintos: el vencimiento de los eventos conservados y la protección contra la eliminación accidental del log group. Configura la retención de cada log group explícitamente porque, de forma predeterminada, es indefinida. Habilita deletion protection en el grupo crítico de auditoría para bloquear las operaciones de eliminación hasta que se deshabilite esa protección. Ni una alarma ni una consulta sustituyen estos controles."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudwatch-logs--d7307980",
+      "conceptId": "cloudwatch-logs",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company uses CloudWatch Logs for application events. During incidents, engineers must interactively investigate recent failures; separately, the operations team must receive an alert when a known error pattern crosses a threshold. The company wants to use the logs it already collects rather than modify the application. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a metric filter for the error pattern and a CloudWatch alarm for its metric.",
+          "correct": true,
+          "why": "A metric filter reports matches to a metric that an alarm can monitor against a threshold."
+        },
+        {
+          "id": "B",
+          "text": "Set indefinite retention so engineers receive automatic notification of matching errors.",
+          "correct": false,
+          "why": "Retention determines when logs expire, not whether error matches produce alerts."
+        },
+        {
+          "id": "C",
+          "text": "Enable deletion protection on the application log group to generate incident alerts.",
+          "correct": false,
+          "why": "Deletion protection prevents accidental deletion, not threshold-based notification."
+        },
+        {
+          "id": "D",
+          "text": "Use CloudWatch Logs Insights to search and analyze the application events during incidents.",
+          "correct": true,
+          "why": "Logs Insights supports the required interactive investigation."
+        },
+        {
+          "id": "E",
+          "text": "Create a field index and use it as the alarm threshold for the error pattern.",
+          "correct": false,
+          "why": "Field indexes can improve applicable queries but are not metrics or alarm thresholds."
+        }
+      ],
+      "explanation": "The scenario distinguishes an interactive investigation from an ongoing alert. CloudWatch Logs Insights handles searches and analysis during incidents, while a metric filter and CloudWatch alarm handle threshold-based monitoring of a known pattern. A field index may make applicable queries more efficient, but it does not act as an alarm threshold. Retention and deletion protection manage log lifecycle and safety, not error notifications.",
+      "keywordCues": [
+        "interactively investigate recent failures",
+        "alert when a known error pattern crosses a threshold",
+        "rather than modify the application"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios usa CloudWatch Logs para los eventos de su aplicación. Durante los incidentes, los ingenieros deben investigar fallas recientes de forma interactiva; por separado, el equipo de operaciones debe recibir una alerta cuando un patrón de error conocido supere un umbral. La empresa quiere usar los logs que ya recopila en lugar de modificar la aplicación. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un metric filter para el patrón de error y una alarma de CloudWatch para su métrica.",
+            "why": "Un metric filter envía las coincidencias a una métrica que una alarma puede monitorear frente a un umbral."
+          },
+          {
+            "id": "B",
+            "text": "Configurar retención indefinida para que los ingenieros reciban notificaciones automáticas sobre errores coincidentes.",
+            "why": "La retención determina cuándo vencen los logs, no si los errores coincidentes generan alertas."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar deletion protection en el log group de la aplicación para generar alertas de incidentes.",
+            "why": "Deletion protection evita eliminaciones accidentales, pero no envía notificaciones basadas en umbrales."
+          },
+          {
+            "id": "D",
+            "text": "Usar CloudWatch Logs Insights para buscar y analizar los eventos de la aplicación durante los incidentes.",
+            "why": "Logs Insights permite la investigación interactiva requerida."
+          },
+          {
+            "id": "E",
+            "text": "Crear un field index y usarlo como umbral de alarma para el patrón de error.",
+            "why": "Los field indexes pueden mejorar las consultas pertinentes, pero no son métricas ni umbrales de alarma."
+          }
+        ],
+        "explanation": "El escenario distingue entre investigar interactivamente y mantener una alerta continua. CloudWatch Logs Insights permite buscar y analizar eventos durante los incidentes, mientras que un metric filter y una alarma de CloudWatch monitorean un patrón conocido según un umbral. Un field index puede hacer más eficientes ciertas consultas, pero no funciona como umbral de alarma. La retención y deletion protection administran el ciclo de vida y la protección de los logs, no las notificaciones de errores."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudwatch-logs--r0",
+      "conceptId": "cloudwatch-logs",
+      "kind": "recall",
+      "prompt": "Your team needs to investigate logs interactively and alert when a recurring error exceeds a threshold. Which CloudWatch Logs capabilities fit each need, and why?",
+      "promptEs": "Tu equipo necesita investigar logs interactivamente y recibir una alerta cuando un error recurrente supere un umbral. ¿Qué funciones de CloudWatch Logs usarías y por qué?",
+      "idealAnswer": "Use CloudWatch Logs Insights to search and analyze events interactively. Use a metric filter to turn matches for the error pattern into a CloudWatch metric, then monitor that metric with a CloudWatch alarm.",
+      "rubric": [
+        "Names CloudWatch Logs Insights for interactive investigation.",
+        "Names a metric filter for generating a metric from matching log events.",
+        "Names a CloudWatch alarm for monitoring the metric against a threshold."
+      ]
+    }
+  ]
+}

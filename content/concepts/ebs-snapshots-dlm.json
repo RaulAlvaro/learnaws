@@ -1,0 +1,369 @@
+{
+  "conceptId": "ebs-snapshots-dlm",
+  "card": {
+    "en": {
+      "tldr": "EBS snapshots are point-in-time, incremental backups of EBS volumes; AWS does not create them automatically. Choose Amazon Data Lifecycle Manager (DLM) when an EBS-focused workload needs scheduled snapshots, retention, deletion, or a disaster recovery policy for an isolated Region or account.",
+      "whenToUse": [
+        "EC2 workloads need regular backups of attached EBS volumes without manually creating each snapshot.",
+        "A policy must retain backups and delete outdated snapshots or EBS-backed AMIs.",
+        "An EBS-focused disaster recovery policy must back up data to an isolated Region or account."
+      ],
+      "keyFacts": [
+        "EBS snapshots save blocks changed since the most recent snapshot, rather than duplicating unchanged data.",
+        "Snapshot data is replicated across Availability Zones in its Region; a snapshot can restore a new volume in any Availability Zone in that Region.",
+        "DLM automates creation, retention, and deletion of EBS snapshots and EBS-backed AMIs.",
+        "DLM cannot manage snapshots or AMIs created by other means.",
+        "Deleting one snapshot does not remove data still referenced by other snapshots."
+      ],
+      "gotchas": [
+        "Do not assume AWS automatically backs up EBS volumes.",
+        "Do not expect a DLM policy to apply retention or deletion rules to existing manually created snapshots.",
+        "Do not use the Amazon S3 console or API to access the underlying EBS snapshot data."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Backup",
+          "difference": "AWS Backup can automate EBS backups; DLM is the EBS-focused choice for snapshot and EBS-backed AMI lifecycle policies."
+        },
+        {
+          "concept": "RDS automated backups",
+          "difference": "RDS backups protect a database, not the data on an EC2 instance's EBS volumes."
+        },
+        {
+          "concept": "DynamoDB PITR",
+          "difference": "DynamoDB PITR protects a table, not an EBS volume."
+        }
+      ],
+      "examCues": [
+        "scheduled backups of tagged EBS volumes",
+        "delete outdated EBS snapshots",
+        "restore an EBS volume in another Availability Zone",
+        "existing manually created snapshots"
+      ]
+    },
+    "es": {
+      "tldr": "Los EBS snapshots son respaldos incrementales y de un momento específico de los volúmenes EBS; AWS no los crea automáticamente. Elige Amazon Data Lifecycle Manager (DLM) cuando necesites programar snapshots, conservarlos, eliminar los antiguos o definir una política de disaster recovery para una Region o cuenta aislada.",
+      "whenToUse": [
+        "Necesitas respaldar regularmente los volúmenes EBS de instancias EC2 sin crear cada snapshot a mano.",
+        "Debes conservar respaldos y eliminar snapshots o EBS-backed AMIs antiguos mediante una política.",
+        "Necesitas una política de disaster recovery centrada en EBS que respalde datos en una Region o cuenta aislada."
+      ],
+      "keyFacts": [
+        "Los EBS snapshots guardan los bloques modificados desde el snapshot anterior, sin duplicar los datos que no cambiaron.",
+        "Los datos del snapshot se replican entre las Availability Zones de su Region; puedes restaurar un volumen nuevo en cualquier Availability Zone de esa Region.",
+        "DLM automatiza la creación, retención y eliminación de EBS snapshots y EBS-backed AMIs.",
+        "DLM no puede administrar snapshots ni AMIs creados por otros medios.",
+        "Eliminar un snapshot no elimina los datos que otros snapshots todavía referencian."
+      ],
+      "gotchas": [
+        "No supongas que AWS respalda automáticamente tus volúmenes EBS.",
+        "No esperes que una política de DLM aplique reglas de retención o eliminación a snapshots existentes creados manualmente.",
+        "No intentes acceder a los datos subyacentes de EBS snapshots mediante la consola o API de Amazon S3."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Backup",
+          "difference": "AWS Backup también puede automatizar respaldos de EBS; DLM se enfoca en políticas de ciclo de vida para snapshots y EBS-backed AMIs."
+        },
+        {
+          "concept": "RDS automated backups",
+          "difference": "RDS automated backups protegen una base de datos, no los datos de los volúmenes EBS de una instancia EC2."
+        },
+        {
+          "concept": "DynamoDB PITR",
+          "difference": "DynamoDB PITR protege una tabla, no un volumen EBS."
+        }
+      ],
+      "examCues": [
+        "scheduled backups of tagged EBS volumes",
+        "delete outdated EBS snapshots",
+        "restore an EBS volume in another Availability Zone",
+        "existing manually created snapshots"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html",
+      "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ebs-snapshots-dlm--272660a8",
+      "conceptId": "ebs-snapshots-dlm",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer has a collection of EBS snapshots that engineers created manually during a migration. It now wants scheduled snapshots for the same volumes and automatic deletion of future backups after the required retention period. The existing manual snapshots must also be reviewed for deletion, without assuming the new policy will manage them. Which approach meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create future snapshots with the EC2 API and use a DLM policy to manage their retention.",
+          "correct": false,
+          "why": "Snapshots created through the EC2 API rather than by DLM are outside DLM's management."
+        },
+        {
+          "id": "B",
+          "text": "Continue creating snapshots manually and use a DLM policy only to delete snapshots that exceed the retention period.",
+          "correct": false,
+          "why": "DLM cannot delete the manually created snapshots under its lifecycle policy."
+        },
+        {
+          "id": "C",
+          "text": "Create a DLM policy for future snapshots and handle retention of the existing manual snapshots separately.",
+          "correct": true,
+          "why": "DLM can manage the snapshots it creates, while snapshots created manually require separate management."
+        },
+        {
+          "id": "D",
+          "text": "Create a DLM policy and apply its retention schedule to both future and existing manual snapshots.",
+          "correct": false,
+          "why": "DLM cannot manage snapshots created by other means, including the existing manual snapshots."
+        }
+      ],
+      "explanation": "The critical distinction is how each snapshot was created. DLM can automate creation and retention for its own future snapshots, but it cannot manage snapshots created by other means. The manufacturer therefore needs a separate process for its existing manually created snapshots. Creating future snapshots manually or through the EC2 API does not bring them under DLM's lifecycle policy.",
+      "keywordCues": [
+        "created manually during a migration",
+        "scheduled snapshots",
+        "automatic deletion of future backups",
+        "existing manual snapshots",
+        "without assuming the new policy will manage them"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html"
+      ],
+      "es": {
+        "stem": "Un fabricante tiene varios EBS snapshots que sus ingenieros crearon manualmente durante una migración. Ahora quiere snapshots programados para los mismos volúmenes y la eliminación automática de los respaldos futuros al terminar el período de retención requerido. También debe revisar los snapshots manuales existentes para eliminarlos, sin suponer que la nueva política los administrará. ¿Qué enfoque cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea los snapshots futuros mediante la API de EC2 y usa una política de DLM para administrar su retención.",
+            "why": "Los snapshots creados mediante la API de EC2, y no por DLM, quedan fuera de su administración."
+          },
+          {
+            "id": "B",
+            "text": "Sigue creando snapshots manualmente y usa una política de DLM solo para eliminar los que superen el período de retención.",
+            "why": "DLM no puede eliminar bajo su política de ciclo de vida los snapshots creados manualmente."
+          },
+          {
+            "id": "C",
+            "text": "Crea una política de DLM para los snapshots futuros y administra por separado la retención de los snapshots manuales existentes.",
+            "why": "DLM puede administrar los snapshots que crea, mientras que los creados manualmente requieren una gestión separada."
+          },
+          {
+            "id": "D",
+            "text": "Crea una política de DLM y aplica su período de retención tanto a los snapshots futuros como a los manuales existentes.",
+            "why": "DLM no puede administrar snapshots creados por otros medios, incluidos los snapshots manuales existentes."
+          }
+        ],
+        "explanation": "La distinción clave es cómo se creó cada snapshot. DLM puede automatizar la creación y retención de sus propios snapshots futuros, pero no puede administrar los creados por otros medios. Por eso, el fabricante necesita un proceso separado para los snapshots manuales existentes. Crear los snapshots futuros manualmente o mediante la API de EC2 tampoco los incorpora a la política de ciclo de vida de DLM."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-snapshots-dlm--c0fc595f",
+      "conceptId": "ebs-snapshots-dlm",
+      "secondaryConcepts": [
+        "rds-backups-pitr"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An architecture firm takes regular snapshots of an EBS volume containing project files. After an Availability Zone disruption, it needs a new volume in another Availability Zone of the same Region, using the data captured in its latest snapshot. The firm wants to avoid an unnecessary cross-Region recovery step. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an RDS automated backup from the snapshot and restore it in the target Availability Zone.",
+          "correct": false,
+          "why": "RDS automated backups are not the mechanism for restoring data from an EBS volume snapshot."
+        },
+        {
+          "id": "B",
+          "text": "Create a new EBS volume from the snapshot in the target Availability Zone.",
+          "correct": true,
+          "why": "An EBS snapshot can restore a new volume in any Availability Zone within its Region."
+        },
+        {
+          "id": "C",
+          "text": "Access the snapshot in Amazon S3 and upload its objects into a new EBS volume in the target Availability Zone.",
+          "correct": false,
+          "why": "EBS snapshot data is not directly accessible through the Amazon S3 console or API."
+        },
+        {
+          "id": "D",
+          "text": "Copy the snapshot to another Region before creating a replacement volume in the original Region.",
+          "correct": false,
+          "why": "A cross-Region step is unnecessary when the replacement volume is in the snapshot's own Region."
+        }
+      ],
+      "explanation": "The target Availability Zone is in the same Region as the snapshot. EBS snapshot data is replicated across the Region's Availability Zones, and the snapshot can restore a new EBS volume in any of them. Copying data to another Region adds a step the requirement explicitly excludes. Direct access to the snapshot's underlying S3 data is not available.",
+      "keywordCues": [
+        "another Availability Zone of the same Region",
+        "data captured in its latest snapshot",
+        "avoid an unnecessary cross-Region recovery step"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html"
+      ],
+      "es": {
+        "stem": "Una firma de arquitectura toma snapshots periódicos de un volumen EBS que contiene archivos de proyectos. Después de una interrupción en una Availability Zone, necesita un volumen nuevo en otra Availability Zone de la misma Region, con los datos capturados en su último snapshot. La firma quiere evitar un paso innecesario de recuperación entre Regions. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un RDS automated backup a partir del snapshot y restáuralo en la Availability Zone de destino.",
+            "why": "RDS automated backups no es el mecanismo para restaurar datos de un snapshot de volumen EBS."
+          },
+          {
+            "id": "B",
+            "text": "Crea un volumen EBS nuevo a partir del snapshot en la Availability Zone de destino.",
+            "why": "Un EBS snapshot puede restaurar un volumen nuevo en cualquier Availability Zone de su Region."
+          },
+          {
+            "id": "C",
+            "text": "Accede al snapshot desde Amazon S3 y carga sus objetos en un volumen EBS nuevo en la Availability Zone de destino.",
+            "why": "No puedes acceder directamente a los datos de EBS snapshots mediante la consola o API de Amazon S3."
+          },
+          {
+            "id": "D",
+            "text": "Copia el snapshot a otra Region antes de crear un volumen de reemplazo en la Region original.",
+            "why": "El paso entre Regions es innecesario cuando el volumen de reemplazo estará en la misma Region del snapshot."
+          }
+        ],
+        "explanation": "La Availability Zone de destino está en la misma Region que el snapshot. Los datos de EBS snapshots se replican entre las Availability Zones de esa Region, y puedes restaurar un volumen EBS nuevo en cualquiera de ellas. Copiar los datos a otra Region agrega un paso que el requisito excluye. Tampoco puedes acceder directamente a los datos subyacentes del snapshot en Amazon S3."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-snapshots-dlm--b6a94318",
+      "conceptId": "ebs-snapshots-dlm",
+      "secondaryConcepts": [
+        "dynamodb-backups-pitr"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research lab keeps experiment logs on EBS volumes attached to EC2 instances. It needs a recurring backup schedule, deletion of outdated policy-created backups, and a disaster recovery policy that backs up data to an isolated Region. The lab wants to use EBS snapshot lifecycle capabilities without managing the snapshots' underlying storage objects. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the Amazon S3 API to move the underlying EBS snapshot objects into the isolated Region.",
+          "correct": false,
+          "why": "The underlying snapshot objects cannot be accessed through the Amazon S3 API."
+        },
+        {
+          "id": "B",
+          "text": "Enable DynamoDB PITR for the EC2 instances' EBS volumes.",
+          "correct": false,
+          "why": "DynamoDB PITR protects DynamoDB tables, not EBS volumes."
+        },
+        {
+          "id": "C",
+          "text": "Configure a DLM policy to create scheduled EBS snapshots and manage their retention and deletion.",
+          "correct": true,
+          "why": "DLM automates the scheduled creation, retention, and deletion of its EBS snapshots."
+        },
+        {
+          "id": "D",
+          "text": "Configure a DLM disaster recovery policy to back up the data to the isolated Region.",
+          "correct": true,
+          "why": "DLM supports disaster recovery backup policies for isolated Regions."
+        },
+        {
+          "id": "E",
+          "text": "Create snapshots manually and let DLM automatically delete them when they become outdated.",
+          "correct": false,
+          "why": "DLM cannot manage snapshots created manually."
+        }
+      ],
+      "explanation": "The lab needs two EBS-specific capabilities: automated snapshot lifecycle management and a disaster recovery policy for an isolated Region. DLM supports scheduled creation, retention, and deletion of its snapshots, as well as disaster recovery backup policies for isolated Regions or accounts. It cannot take over snapshots created manually. EBS snapshot data is also inaccessible through the Amazon S3 API, so moving underlying objects is not an option.",
+      "keywordCues": [
+        "EBS volumes attached to EC2 instances",
+        "recurring backup schedule",
+        "outdated policy-created backups",
+        "isolated Region",
+        "without managing the snapshots' underlying storage objects"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html",
+        "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación guarda registros de experimentos en volúmenes EBS conectados a instancias EC2. Necesita respaldos periódicos, eliminación de respaldos antiguos creados por la política y una política de disaster recovery que respalde los datos en una Region aislada. El laboratorio quiere usar las capacidades de ciclo de vida de EBS snapshots sin administrar los objetos de almacenamiento subyacentes. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa la API de Amazon S3 para mover los objetos subyacentes de EBS snapshots a la Region aislada.",
+            "why": "No puedes acceder a los objetos subyacentes de los snapshots mediante la API de Amazon S3."
+          },
+          {
+            "id": "B",
+            "text": "Activa DynamoDB PITR para los volúmenes EBS de las instancias EC2.",
+            "why": "DynamoDB PITR protege tablas de DynamoDB, no volúmenes EBS."
+          },
+          {
+            "id": "C",
+            "text": "Configura una política de DLM para crear EBS snapshots programados y administrar su retención y eliminación.",
+            "why": "DLM automatiza la creación programada, retención y eliminación de los EBS snapshots que crea."
+          },
+          {
+            "id": "D",
+            "text": "Configura una política de DLM para disaster recovery que respalde los datos en la Region aislada.",
+            "why": "DLM admite políticas de respaldo para disaster recovery en Regions aisladas."
+          },
+          {
+            "id": "E",
+            "text": "Crea snapshots manualmente y deja que DLM los elimine automáticamente cuando sean antiguos.",
+            "why": "DLM no puede administrar snapshots creados manualmente."
+          }
+        ],
+        "explanation": "El laboratorio necesita dos capacidades específicas de EBS: administrar automáticamente el ciclo de vida de los snapshots y respaldar los datos en una Region aislada para disaster recovery. DLM admite la creación programada, retención y eliminación de sus snapshots, así como políticas de disaster recovery para Regions o cuentas aisladas. No puede asumir la administración de snapshots creados manualmente. Además, no puedes acceder a los datos de EBS snapshots mediante la API de Amazon S3 para mover sus objetos subyacentes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ebs-snapshots-dlm--r0",
+      "conceptId": "ebs-snapshots-dlm",
+      "kind": "recall",
+      "prompt": "An EC2 workload needs scheduled EBS snapshots, retention, and backups in an isolated Region. What would you configure, and why?",
+      "promptEs": "Una carga de EC2 necesita EBS snapshots programados, retención y respaldos en una Region aislada. ¿Qué configurarías y por qué?",
+      "idealAnswer": "Configure Amazon Data Lifecycle Manager policies for EBS snapshots. DLM automates creation, retention, and deletion and supports disaster recovery backup policies for isolated Regions or accounts.",
+      "rubric": [
+        "Names Amazon Data Lifecycle Manager.",
+        "Explains scheduled snapshot creation and lifecycle management.",
+        "Mentions disaster recovery backups to an isolated Region."
+      ]
+    },
+    {
+      "id": "ebs-snapshots-dlm--r1",
+      "conceptId": "ebs-snapshots-dlm",
+      "kind": "why-not",
+      "prompt": "Why would RDS automated backups not satisfy a requirement to back up an EC2 instance's attached EBS volume?",
+      "promptEs": "¿Por qué RDS automated backups no cumpliría el requisito de respaldar un volumen EBS conectado a una instancia EC2?",
+      "idealAnswer": "RDS automated backups protect an RDS database, not an EC2 instance's attached EBS volume. Use EBS snapshots for that volume, and use DLM if its snapshot schedule and lifecycle should be automated.",
+      "rubric": [
+        "Distinguishes an RDS database from an EC2-attached EBS volume.",
+        "Names EBS snapshots as the appropriate backup mechanism.",
+        "Identifies DLM for automated EBS snapshot lifecycle management."
+      ]
+    }
+  ]
+}

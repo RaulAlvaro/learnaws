@@ -1,0 +1,437 @@
+{
+  "conceptId": "aurora-global-database",
+  "card": {
+    "en": {
+      "tldr": "Aurora Global Database spans Regions with one writable primary cluster and read-only secondary clusters. Choose it when a relational application needs local reads worldwide and a path to recover from a Region-wide outage.",
+      "whenToUse": [
+        "A relational application needs reads close to users in multiple Regions.",
+        "The database needs a secondary cluster in another Region for disaster recovery.",
+        "Writes can go to one primary Region."
+      ],
+      "keyFacts": [
+        "A global database has one primary Region and up to 10 read-only secondary Regions.",
+        "Aurora replicates changes to secondary Regions using dedicated infrastructure, typically with latency under a second.",
+        "The global database writer endpoint points to the primary writer, including after a switchover or failover.",
+        "Use switchover for a planned move of a healthy primary with no data loss; use failover after a primary-Region outage."
+      ],
+      "gotchas": [
+        "A secondary cluster does not independently accept writes; optional write forwarding sends its write requests to the primary.",
+        "Sub-second replication is typical latency, not a promise of zero data loss during an unplanned outage.",
+        "Aurora Global Database does not support Aurora Auto Scaling for secondary clusters."
+      ],
+      "confusedWith": [
+        {
+          "concept": "RDS Multi-AZ",
+          "difference": "Its standby addresses availability within one Region, not local reads and recovery across Regions."
+        },
+        {
+          "concept": "RDS read replicas",
+          "difference": "Cross-Region replicas can serve reads, but DR requires promoting a replica rather than using an Aurora global database secondary."
+        },
+        {
+          "concept": "DynamoDB global tables",
+          "difference": "They support multi-Region, multi-active writes for NoSQL; Aurora Global Database has one writable primary Region."
+        }
+      ],
+      "examCues": [
+        "relational app with users on several continents",
+        "local-latency reads in secondary Regions",
+        "recover from a primary-Region outage",
+        "planned move of the primary with no data loss"
+      ]
+    },
+    "es": {
+      "tldr": "Aurora Global Database abarca varias Regions con un clúster primario que acepta escrituras y clústeres secundarios de solo lectura. Elígelo cuando una aplicación relacional necesita lecturas locales en distintas partes del mundo y una ruta de recuperación ante la caída de una Region.",
+      "whenToUse": [
+        "Tu aplicación relacional necesita lecturas cerca de los usuarios en varias Regions.",
+        "Tu base de datos necesita un clúster secundario en otra Region para recuperación ante desastres.",
+        "Puedes dirigir las escrituras a una sola Region primaria."
+      ],
+      "keyFacts": [
+        "Una base de datos global tiene una Region primaria y hasta 10 Regions secundarias de solo lectura.",
+        "Aurora replica los cambios a las Regions secundarias mediante infraestructura dedicada, normalmente con una latencia inferior a un segundo.",
+        "El global database writer endpoint apunta al escritor primario, incluso después de un switchover o failover.",
+        "Usa switchover para trasladar de forma planificada un primario en buen estado sin pérdida de datos; usa failover tras una caída de la Region primaria."
+      ],
+      "gotchas": [
+        "Un clúster secundario no acepta escrituras de forma independiente; write forwarding opcional envía sus solicitudes de escritura al primario.",
+        "La replicación normalmente inferior a un segundo no garantiza cero pérdida de datos durante una caída imprevista.",
+        "Aurora Global Database no admite Aurora Auto Scaling en los clústeres secundarios."
+      ],
+      "confusedWith": [
+        {
+          "concept": "RDS Multi-AZ",
+          "difference": "Su standby ofrece disponibilidad dentro de una Region, no lecturas locales ni recuperación entre Regions."
+        },
+        {
+          "concept": "RDS read replicas",
+          "difference": "Las réplicas entre Regions pueden atender lecturas, pero para DR debes promover una réplica en lugar de usar un secundario de Aurora Global Database."
+        },
+        {
+          "concept": "DynamoDB global tables",
+          "difference": "Permiten escrituras multi-active entre Regions para NoSQL; Aurora Global Database tiene una sola Region primaria que acepta escrituras."
+        }
+      ],
+      "examCues": [
+        "relational app with users on several continents",
+        "local-latency reads in secondary Regions",
+        "recover from a primary-Region outage",
+        "planned move of the primary with no data loss"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aurora-global-database--7acfaf8c",
+      "conceptId": "aurora-global-database",
+      "secondaryConcepts": [
+        "rds-read-replicas"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer operates an Aurora Global Database across two Regions. It will move production writes to the secondary Region during a scheduled relocation, while both Regions and their database clusters remain healthy. The database team requires no data loss during the move. Which operation should the team use?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Promote an RDS read replica in the destination Region.",
+          "correct": false,
+          "why": "The deployment uses an Aurora global database secondary, and replica promotion is not its planned-move operation."
+        },
+        {
+          "id": "B",
+          "text": "Enable write forwarding on the secondary cluster and redirect all writers to it.",
+          "correct": false,
+          "why": "Write forwarding sends requests to the existing primary; it does not relocate the primary cluster."
+        },
+        {
+          "id": "C",
+          "text": "Perform an Aurora Global Database switchover to the secondary Region.",
+          "correct": true,
+          "why": "Switchover moves a healthy primary to a secondary Region for planned operations with no data loss."
+        },
+        {
+          "id": "D",
+          "text": "Perform a managed cross-Region failover to the secondary cluster.",
+          "correct": false,
+          "why": "Failover is the recovery operation for an outage of the primary Region, not the planned no-data-loss move."
+        }
+      ],
+      "explanation": "This is a planned relocation with healthy clusters and an explicit no-data-loss requirement. Aurora Global Database switchover is designed to move the primary under those conditions. Failover addresses an outage in the primary Region, while write forwarding leaves the primary where it is.",
+      "keywordCues": [
+        "scheduled relocation",
+        "both Regions and their database clusters remain healthy",
+        "no data loss"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html"
+      ],
+      "es": {
+        "stem": "Un fabricante opera una Aurora Global Database en dos Regions. Trasladará las escrituras de producción a la Region secundaria durante una reubicación programada, mientras ambas Regions y sus clústeres permanecen en buen estado. El equipo de bases de datos exige que no haya pérdida de datos durante el traslado. ¿Qué operación debe usar?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Promueve una RDS read replica en la Region de destino.",
+            "why": "La implementación usa un secundario de Aurora Global Database; promover una réplica no es su operación de traslado planificado."
+          },
+          {
+            "id": "B",
+            "text": "Habilita write forwarding en el clúster secundario y redirige allí todas las escrituras.",
+            "why": "Write forwarding envía las solicitudes al primario existente; no traslada el clúster primario."
+          },
+          {
+            "id": "C",
+            "text": "Realiza un Aurora Global Database switchover hacia la Region secundaria.",
+            "why": "Switchover traslada un primario en buen estado a una Region secundaria para operaciones planificadas sin pérdida de datos."
+          },
+          {
+            "id": "D",
+            "text": "Realiza un failover administrado entre Regions hacia el clúster secundario.",
+            "why": "Failover es la operación de recuperación ante una caída de la Region primaria, no el traslado planificado sin pérdida de datos."
+          }
+        ],
+        "explanation": "Se trata de una reubicación planificada con clústeres en buen estado y el requisito explícito de no perder datos. Aurora Global Database switchover está diseñado para trasladar el primario en esas condiciones. Failover atiende una caída de la Region primaria, mientras write forwarding deja el primario donde está."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-global-database--eb88f0d3",
+      "conceptId": "aurora-global-database",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A streaming analytics company uses Aurora Global Database to serve read-only dashboards from a secondary Region. A new audience in that Region has increased dashboard traffic, but writes must continue in the existing primary Region. Which change increases read capacity in the secondary Region without changing the write location?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Aurora Auto Scaling for the secondary cluster's readers.",
+          "correct": false,
+          "why": "Aurora Global Database does not support Aurora Auto Scaling for secondary clusters."
+        },
+        {
+          "id": "B",
+          "text": "Promote the secondary cluster and send dashboard reads to its writer.",
+          "correct": false,
+          "why": "Promotion changes the primary Region even though writes must stay in the existing primary Region."
+        },
+        {
+          "id": "C",
+          "text": "Add a reader instance to the primary cluster and route the secondary Region's dashboards to it.",
+          "correct": false,
+          "why": "The dashboards would no longer read from a database in their own Region."
+        },
+        {
+          "id": "D",
+          "text": "Add Aurora reader instances to the secondary cluster for the dashboards.",
+          "correct": true,
+          "why": "Secondary clusters can be scaled with additional read-only instances while the primary continues to handle writes."
+        }
+      ],
+      "explanation": "The company needs more read capacity specifically in the secondary Region without moving writes. Adding reader instances to that secondary cluster meets both conditions. Aurora Auto Scaling is a tempting alternative, but it is not supported for Aurora Global Database secondary clusters.",
+      "keywordCues": [
+        "read-only dashboards from a secondary Region",
+        "increased dashboard traffic",
+        "writes must continue in the existing primary Region"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html"
+      ],
+      "es": {
+        "stem": "Una empresa de análisis de streaming usa Aurora Global Database para ofrecer dashboards de solo lectura desde una Region secundaria. Una nueva audiencia en esa Region ha aumentado el tráfico de los dashboards, pero las escrituras deben continuar en la Region primaria actual. ¿Qué cambio aumenta la capacidad de lectura en la Region secundaria sin cambiar dónde se escribe?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita Aurora Auto Scaling para los readers del clúster secundario.",
+            "why": "Aurora Global Database no admite Aurora Auto Scaling para clústeres secundarios."
+          },
+          {
+            "id": "B",
+            "text": "Promueve el clúster secundario y envía las lecturas de los dashboards a su escritor.",
+            "why": "La promoción cambia la Region primaria, aunque las escrituras deben permanecer en la Region primaria actual."
+          },
+          {
+            "id": "C",
+            "text": "Agrega un reader al clúster primario y dirige allí los dashboards de la Region secundaria.",
+            "why": "Los dashboards dejarían de leer desde una base de datos en su propia Region."
+          },
+          {
+            "id": "D",
+            "text": "Agrega instancias Aurora reader al clúster secundario para los dashboards.",
+            "why": "Puedes ampliar los clústeres secundarios con instancias adicionales de solo lectura mientras el primario sigue atendiendo las escrituras."
+          }
+        ],
+        "explanation": "La empresa necesita más capacidad de lectura específicamente en la Region secundaria sin trasladar las escrituras. Agregar instancias reader a ese clúster satisface ambas condiciones. Aurora Auto Scaling parece una alternativa, pero no se admite en los clústeres secundarios de Aurora Global Database."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-global-database--f0a130e8",
+      "conceptId": "aurora-global-database",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company has an Aurora Global Database and periodically switches its healthy primary cluster between Regions for operational reasons. Its application configuration should keep a single write connection target that follows the primary after each switch. Which endpoint should the application use?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A reader endpoint in the Region where the application currently runs.",
+          "correct": false,
+          "why": "A reader endpoint does not connect the application to the primary writer."
+        },
+        {
+          "id": "B",
+          "text": "The Aurora Global Database writer endpoint.",
+          "correct": true,
+          "why": "It points to the primary cluster's writer even after a switchover."
+        },
+        {
+          "id": "C",
+          "text": "The primary Regional cluster's writer endpoint, updating configuration after each switch.",
+          "correct": false,
+          "why": "A Regional endpoint requires changing the configured target when the primary moves."
+        },
+        {
+          "id": "D",
+          "text": "A secondary cluster endpoint with write forwarding enabled.",
+          "correct": false,
+          "why": "Forwarding sends writes to the primary but does not provide an endpoint that follows the primary writer."
+        }
+      ],
+      "explanation": "The requirement is one write target that continues to identify the primary after a planned switch. The Aurora Global Database writer endpoint always points to the primary writer, including after switchover. Write forwarding is different: it can relay requests from a secondary cluster but does not make that secondary endpoint follow the primary.",
+      "keywordCues": [
+        "switches its healthy primary cluster between Regions",
+        "a single write connection target",
+        "follows the primary after each switch"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene una Aurora Global Database y cambia periódicamente su clúster primario en buen estado entre Regions por motivos operativos. La configuración de su aplicación debe mantener un único destino de conexión para escrituras que siga al primario después de cada cambio. ¿Qué endpoint debe usar la aplicación?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Un reader endpoint en la Region donde se ejecuta actualmente la aplicación.",
+            "why": "Un reader endpoint no conecta la aplicación con el escritor primario."
+          },
+          {
+            "id": "B",
+            "text": "El Aurora Global Database writer endpoint.",
+            "why": "Apunta al escritor del clúster primario incluso después de un switchover."
+          },
+          {
+            "id": "C",
+            "text": "El writer endpoint del clúster regional primario, actualizando la configuración después de cada cambio.",
+            "why": "Un endpoint regional exige cambiar el destino configurado cuando se traslada el primario."
+          },
+          {
+            "id": "D",
+            "text": "Un endpoint del clúster secundario con write forwarding habilitado.",
+            "why": "Write forwarding envía escrituras al primario, pero no proporciona un endpoint que siga al escritor primario."
+          }
+        ],
+        "explanation": "El requisito es un único destino de escritura que siga identificando al primario después de un cambio planificado. El Aurora Global Database writer endpoint siempre apunta al escritor primario, incluso después de un switchover. Write forwarding es distinto: puede reenviar solicitudes desde un clúster secundario, pero no hace que ese endpoint siga al primario."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-global-database--8a48cd4b",
+      "conceptId": "aurora-global-database",
+      "secondaryConcepts": [
+        "rds-multi-az",
+        "rds-read-replicas"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research publisher is designing an Aurora-based catalog for editors in two Regions. Editors in the secondary Region need local reads, and the publisher wants a database in that Region for recovery if the primary Region fails. The team also plans periodic, no-data-loss moves of the primary while both Regions are healthy. Which two choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy an Aurora Global Database with a read-only secondary cluster in the editors' Region.",
+          "correct": true,
+          "why": "The secondary cluster provides local reads and a cross-Region recovery option."
+        },
+        {
+          "id": "B",
+          "text": "Use Aurora Global Database failover for each planned move of the healthy primary.",
+          "correct": false,
+          "why": "Failover is for recovery from a primary-Region outage, not a planned no-data-loss move."
+        },
+        {
+          "id": "C",
+          "text": "Use an RDS Multi-AZ standby in the primary Region as the editors' read target.",
+          "correct": false,
+          "why": "The standby is in the primary Region and does not serve reads in an instance deployment."
+        },
+        {
+          "id": "D",
+          "text": "Use a cross-Region RDS read replica and rely on its automatic promotion for disaster recovery.",
+          "correct": false,
+          "why": "RDS read replicas do not provide automatic failover."
+        },
+        {
+          "id": "E",
+          "text": "Use Aurora Global Database switchover for each planned move of the healthy primary.",
+          "correct": true,
+          "why": "Switchover supports planned relocation of a healthy primary with no data loss."
+        }
+      ],
+      "explanation": "The architecture must provide local secondary-Region reads and a cross-Region recovery option; an Aurora Global Database secondary does both. Because the periodic moves are planned and both Regions remain healthy, use switchover to avoid data loss. RDS Multi-AZ does not supply the requested remote reads, and Aurora Global Database failover is intended for an outage rather than this planned operation.",
+      "keywordCues": [
+        "local reads",
+        "recovery if the primary Region fails",
+        "periodic, no-data-loss moves",
+        "both Regions are healthy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html"
+      ],
+      "es": {
+        "stem": "Una editorial de investigación diseña un catálogo basado en Aurora para editores en dos Regions. Los editores de la Region secundaria necesitan lecturas locales, y la editorial quiere una base de datos allí para recuperación si falla la Region primaria. El equipo también planea traslados periódicos del primario sin pérdida de datos mientras ambas Regions estén en buen estado. ¿Qué dos opciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementa una Aurora Global Database con un clúster secundario de solo lectura en la Region de esos editores.",
+            "why": "El clúster secundario ofrece lecturas locales y una opción de recuperación entre Regions."
+          },
+          {
+            "id": "B",
+            "text": "Usa Aurora Global Database failover para cada traslado planificado del primario en buen estado.",
+            "why": "Failover sirve para recuperarse de una caída de la Region primaria, no para un traslado planificado sin pérdida de datos."
+          },
+          {
+            "id": "C",
+            "text": "Usa un standby de RDS Multi-AZ en la Region primaria como destino de lectura de los editores.",
+            "why": "El standby está en la Region primaria y no atiende lecturas en una implementación de instancia."
+          },
+          {
+            "id": "D",
+            "text": "Usa una RDS read replica entre Regions y depende de su promoción automática para recuperación ante desastres.",
+            "why": "Las RDS read replicas no proporcionan failover automático."
+          },
+          {
+            "id": "E",
+            "text": "Usa Aurora Global Database switchover para cada traslado planificado del primario en buen estado.",
+            "why": "Switchover permite trasladar de forma planificada un primario en buen estado sin pérdida de datos."
+          }
+        ],
+        "explanation": "La arquitectura debe ofrecer lecturas locales en la Region secundaria y una opción de recuperación entre Regions; un secundario de Aurora Global Database satisface ambos requisitos. Como los traslados son planificados y ambas Regions siguen en buen estado, usa switchover para evitar la pérdida de datos. RDS Multi-AZ no ofrece las lecturas remotas solicitadas, y Aurora Global Database failover está destinado a una caída, no a esta operación planificada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aurora-global-database--r0",
+      "conceptId": "aurora-global-database",
+      "kind": "recall",
+      "prompt": "Which database feature fits a relational app needing local reads in another Region and recovery from a primary-Region outage, and why?",
+      "promptEs": "¿Qué feature de base de datos usarías para una aplicación relacional que necesita lecturas locales en otra Region y recuperación ante la caída de la Region primaria? ¿Por qué?",
+      "idealAnswer": "Use Aurora Global Database. Its read-only secondary clusters serve local reads in other Regions and can be used to recover after an outage in the primary Region.",
+      "rubric": [
+        "Names Aurora Global Database.",
+        "Explains local reads from secondary-Region clusters.",
+        "Mentions cross-Region recovery and a single writable primary Region."
+      ]
+    },
+    {
+      "id": "aurora-global-database--r1",
+      "conceptId": "aurora-global-database",
+      "kind": "why-not",
+      "prompt": "Why doesn't an RDS Multi-AZ instance standby meet a requirement for European local reads and recovery from a North American Region outage?",
+      "promptEs": "¿Por qué un standby de instancia de RDS Multi-AZ no cumple el requisito de lecturas locales en Europa y recuperación ante la caída de una Region norteamericana?",
+      "idealAnswer": "An RDS Multi-AZ instance standby is in the same Region as its primary and does not serve reads. It therefore cannot provide a European read target or a database in Europe for recovery from a North American Region outage.",
+      "rubric": [
+        "States that the standby is in the same Region.",
+        "States that an instance standby does not serve reads.",
+        "Connects both limitations to the cross-Region requirements."
+      ]
+    }
+  ]
+}

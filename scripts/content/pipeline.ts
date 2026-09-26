@@ -395,21 +395,12 @@ function finalize() {
     perConcept.push({ conceptId: c.id, card: { ...g.card, docs: c.docs }, questions, recall });
   }
 
-  // Held-out bank (~20% per domain): at most one per concept, only from concepts with ≥ 3 questions,
-  // so every concept keeps ≥ 2 practice questions. Deterministic by hash.
-  for (const d of syllabus.domains) {
-    const inDomain = perConcept.filter((pc) => syllabus.concepts.find((c) => c.id === pc.conceptId)?.domain === d.id);
-    const total = inDomain.reduce((s, pc) => s + pc.questions.length, 0);
-    const want = Math.round(total * 0.2);
-    const candidates = inDomain
-      .filter((pc) => pc.questions.length >= 3)
-      .map((pc) => pc.questions.slice().sort((a, b) => hash(a.id) - hash(b.id))[0])
-      .sort((a, b) => hash(a.id) - hash(b.id));
-    // keep multi-response share realistic in the held-out bank
-    const multi = candidates.filter((q) => q.type === "multi");
-    const single = candidates.filter((q) => q.type === "single");
-    const nMulti = Math.min(multi.length, Math.round(want * 0.2));
-    for (const q of [...multi.slice(0, nMulti), ...single.slice(0, want - nMulti)]) q.heldOut = true;
+  // Held-out bank: every concept with ≥ 3 questions reserves exactly one (lowest hash) for full mocks.
+  // Stable per concept, so publishing more concepts later never moves an already-practised question
+  // into the held-out set. Yields ~25% of the bank; every concept keeps ≥ 2 practice questions.
+  for (const pc of perConcept) {
+    if (pc.questions.length < 3) continue;
+    pc.questions.slice().sort((a, b) => hash(a.id) - hash(b.id))[0].heldOut = true;
   }
 
   fs.rmSync(OUT, { recursive: true, force: true });

@@ -1,0 +1,354 @@
+{
+  "conceptId": "cloudhsm",
+  "card": {
+    "en": {
+      "tldr": "Choose AWS CloudHSM when an application needs single-tenant HSMs and direct control of cryptographic keys, algorithms, and HSM users. If the requirement is simply managed encryption keys without operating HSMs, consider AWS KMS instead.",
+      "whenToUse": [
+        "A compliance requirement calls for single-tenant, FIPS 140-3 Level 3 validated HSMs.",
+        "An application needs direct control over generating, storing, importing, exporting, or using cryptographic keys.",
+        "An existing PKCS #11, JCE, CNG, or KSP workload must move to AWS with fewer application changes."
+      ],
+      "keyFacts": [
+        "CloudHSM offers single-tenant HSMs; HSMs in FIPS-mode clusters are validated at either FIPS 140-2 Level 3 or FIPS 140-3 Level 3.",
+        "FIPS mode permits only FIPS-validated keys and algorithms; non-FIPS mode offers all CloudHSM-supported keys and algorithms.",
+        "CloudHSM's end-to-end encrypted data plane is not visible to AWS.",
+        "Customers manage CloudHSM users outside IAM roles, gaining control but taking on more responsibility than with a managed service.",
+        "CloudHSM automates HSM tasks including backups, provisioning, configuration, and maintenance."
+      ],
+      "gotchas": [
+        "Selecting FIPS mode alone does not establish that the HSMs are FIPS 140-3 Level 3 validated; the documentation also describes FIPS 140-2 Level 3 HSMs.",
+        "Single-tenant HSM control does not mean zero customer responsibility: CloudHSM users are managed outside IAM roles.",
+        "Do not choose CloudHSM solely because an application needs managed encryption keys and explicitly does not need to operate HSMs."
+      ],
+      "confusedWith": [
+        {
+          "concept": "kms-key-types",
+          "difference": "Choose AWS KMS for managed key creation and control when operating HSMs is unnecessary; choose CloudHSM for direct control of single-tenant HSMs."
+        },
+        {
+          "concept": "kms-multi-region-keys",
+          "difference": "A requirement for single-tenant HSMs and direct control of their cryptographic operations points to CloudHSM, not a regional key-availability decision."
+        }
+      ],
+      "examCues": [
+        "single-tenant FIPS 140-3 Level 3 HSMs",
+        "cryptographic users managed outside IAM roles",
+        "migrate an existing PKCS #11 workload",
+        "export and manage application cryptographic keys"
+      ]
+    },
+    "es": {
+      "tldr": "Elige AWS CloudHSM cuando una aplicación necesite HSM single-tenant y control directo de claves, algoritmos y usuarios criptográficos. Si solo necesita claves de cifrado administradas sin operar HSM, considera AWS KMS.",
+      "whenToUse": [
+        "Un requisito de cumplimiento exige HSM single-tenant validados según FIPS 140-3 Level 3.",
+        "Una aplicación necesita controlar directamente la generación, el almacenamiento, la importación, la exportación o el uso de claves criptográficas.",
+        "Debes migrar a AWS una carga PKCS #11, JCE, CNG o KSP con menos cambios en la aplicación."
+      ],
+      "keyFacts": [
+        "CloudHSM ofrece HSM single-tenant; los HSM de clústeres en FIPS mode están validados según FIPS 140-2 Level 3 o FIPS 140-3 Level 3.",
+        "FIPS mode solo permite claves y algoritmos validados por FIPS; non-FIPS mode ofrece todas las claves y algoritmos compatibles con CloudHSM.",
+        "El plano de datos con cifrado de extremo a extremo de CloudHSM no es visible para AWS.",
+        "Tú administras los usuarios de CloudHSM fuera de los roles de IAM; esto te da control, pero también más responsabilidades que un servicio administrado.",
+        "CloudHSM automatiza tareas de los HSM, incluidos los respaldos, el aprovisionamiento, la configuración y el mantenimiento."
+      ],
+      "gotchas": [
+        "Elegir FIPS mode no demuestra por sí solo que los HSM estén validados según FIPS 140-3 Level 3; la documentación también describe HSM FIPS 140-2 Level 3.",
+        "El control de HSM single-tenant no elimina tus responsabilidades: administras los usuarios de CloudHSM fuera de los roles de IAM.",
+        "No elijas CloudHSM solo porque una aplicación necesita claves de cifrado administradas si no necesita operar HSM."
+      ],
+      "confusedWith": [
+        {
+          "concept": "kms-key-types",
+          "difference": "Elige AWS KMS para crear y controlar claves mediante un servicio administrado cuando no necesitas operar HSM; elige CloudHSM para controlar directamente HSM single-tenant."
+        },
+        {
+          "concept": "kms-multi-region-keys",
+          "difference": "Si el requisito es tener HSM single-tenant y controlar directamente sus operaciones criptográficas, corresponde CloudHSM, no una decisión sobre disponibilidad regional de claves."
+        }
+      ],
+      "examCues": [
+        "single-tenant FIPS 140-3 Level 3 HSMs",
+        "cryptographic users managed outside IAM roles",
+        "migrate an existing PKCS #11 workload",
+        "export and manage application cryptographic keys"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudhsm--b792c7ac",
+      "conceptId": "cloudhsm",
+      "secondaryConcepts": [
+        "kms-key-types"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company has an on-premises application that calls PKCS #11 to generate and use cryptographic keys. It wants to move the workload to AWS with fewer application changes while retaining direct control of its algorithms and keys. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Payment Cryptography for the application’s key operations.",
+          "correct": false,
+          "why": "The scenario is not a payment-processing workload, the use case identified for AWS Payment Cryptography."
+        },
+        {
+          "id": "B",
+          "text": "Move the keys to AWS KMS and replace the application’s cryptographic integration.",
+          "correct": false,
+          "why": "Replacing the integration conflicts with the requirement for fewer application changes to the PKCS #11 workload."
+        },
+        {
+          "id": "C",
+          "text": "Move the cryptographic workload to AWS CloudHSM using its PKCS #11 support.",
+          "correct": true,
+          "why": "CloudHSM supports PKCS #11 migration with fewer application changes and gives customers control of algorithms and keys."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS KMS and redesign the application to delegate its key operations to a managed service.",
+          "correct": false,
+          "why": "Redesigning the application misses the stated goal of migrating its existing PKCS #11 integration with fewer changes."
+        }
+      ],
+      "explanation": "The existing PKCS #11 integration and the need for direct algorithm and key control decide the answer. AWS CloudHSM supports migration of PKCS #11 workloads with fewer application changes. A redesign around AWS KMS may be a valid managed-service approach, but it misses the stated migration constraint.",
+      "keywordCues": [
+        "calls PKCS #11",
+        "fewer application changes",
+        "direct control of its algorithms and keys"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene una aplicación local que utiliza PKCS #11 para generar y usar claves criptográficas. Quiere trasladar la carga a AWS con menos cambios en la aplicación y conservar el control directo de sus algoritmos y claves. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Payment Cryptography para las operaciones con claves de la aplicación.",
+            "why": "Este no es un caso de procesamiento de pagos, que es el uso indicado para AWS Payment Cryptography."
+          },
+          {
+            "id": "B",
+            "text": "Trasladar las claves a AWS KMS y reemplazar la integración criptográfica de la aplicación.",
+            "why": "Reemplazar la integración contradice el requisito de hacer menos cambios en la aplicación que utiliza PKCS #11."
+          },
+          {
+            "id": "C",
+            "text": "Trasladar la carga criptográfica a AWS CloudHSM mediante su compatibilidad con PKCS #11.",
+            "why": "CloudHSM permite migrar cargas PKCS #11 con menos cambios en la aplicación y da al cliente control de algoritmos y claves."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS KMS y rediseñar la aplicación para delegar las operaciones con claves a un servicio administrado.",
+            "why": "Rediseñar la aplicación no cumple el objetivo de migrar la integración existente con PKCS #11 con menos cambios."
+          }
+        ],
+        "explanation": "La integración existente con PKCS #11 y la necesidad de controlar directamente algoritmos y claves determinan la respuesta. AWS CloudHSM permite migrar cargas PKCS #11 con menos cambios en la aplicación. Rediseñar la solución en torno a AWS KMS puede ser válido si buscas un servicio administrado, pero no cumple la restricción de migración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudhsm--d3e05041",
+      "conceptId": "cloudhsm",
+      "secondaryConcepts": [
+        "kms-key-types"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research institute is designing an AWS-based cryptographic service. Its policy requires single-tenant HSMs validated at FIPS 140-3 Level 3, use of FIPS-validated keys and algorithms, and direct administration of cryptographic users by its security team. Which TWO design decisions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use IAM roles as the sole way to manage cryptographic users on the HSMs.",
+          "correct": false,
+          "why": "CloudHSM customers manage their own users outside IAM roles."
+        },
+        {
+          "id": "B",
+          "text": "Select a CloudHSM FIPS-mode cluster with FIPS 140-3 Level 3 validated HSMs.",
+          "correct": true,
+          "why": "This specifies both the required HSM validation and the mode that permits only FIPS-validated keys and algorithms."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS KMS in place of the single-tenant HSM cluster.",
+          "correct": false,
+          "why": "A managed key service does not address the explicit requirement to select single-tenant CloudHSM HSMs."
+        },
+        {
+          "id": "D",
+          "text": "Use a CloudHSM non-FIPS cluster to make all supported algorithms available.",
+          "correct": false,
+          "why": "Non-FIPS mode does not restrict use to FIPS-validated keys and algorithms."
+        },
+        {
+          "id": "E",
+          "text": "Have the security team manage CloudHSM users outside IAM roles.",
+          "correct": true,
+          "why": "Customer-managed CloudHSM users satisfy the requirement for direct cryptographic-user administration."
+        }
+      ],
+      "explanation": "The design must meet separate HSM validation, algorithm, and user-administration requirements. Choose a FIPS-mode CloudHSM cluster with HSMs validated at FIPS 140-3 Level 3, and manage CloudHSM users outside IAM roles. Non-FIPS mode misses the FIPS-key-and-algorithm restriction; IAM roles alone do not manage CloudHSM cryptographic users.",
+      "keywordCues": [
+        "single-tenant HSMs validated at FIPS 140-3 Level 3",
+        "use of FIPS-validated keys and algorithms",
+        "direct administration of cryptographic users"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación está diseñando un servicio criptográfico en AWS. Su política exige HSM single-tenant validados según FIPS 140-3 Level 3, uso de claves y algoritmos validados por FIPS y administración directa de usuarios criptográficos por su equipo de seguridad. ¿Qué DOS decisiones de diseño cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar roles de IAM como único mecanismo para administrar los usuarios criptográficos de los HSM.",
+            "why": "Los clientes de CloudHSM administran sus propios usuarios fuera de los roles de IAM."
+          },
+          {
+            "id": "B",
+            "text": "Seleccionar un clúster de CloudHSM en FIPS mode con HSM validados según FIPS 140-3 Level 3.",
+            "why": "Esto especifica tanto la validación requerida de los HSM como el modo que solo permite claves y algoritmos validados por FIPS."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS KMS en lugar del clúster de HSM single-tenant.",
+            "why": "Un servicio administrado de claves no atiende el requisito explícito de seleccionar HSM single-tenant de CloudHSM."
+          },
+          {
+            "id": "D",
+            "text": "Usar un clúster de CloudHSM en non-FIPS mode para disponer de todos los algoritmos compatibles.",
+            "why": "Non-FIPS mode no restringe el uso a claves y algoritmos validados por FIPS."
+          },
+          {
+            "id": "E",
+            "text": "Hacer que el equipo de seguridad administre los usuarios de CloudHSM fuera de los roles de IAM.",
+            "why": "La administración de usuarios de CloudHSM por parte del cliente cumple el requisito de control directo de usuarios criptográficos."
+          }
+        ],
+        "explanation": "El diseño debe cumplir requisitos distintos de validación de HSM, algoritmos y administración de usuarios. Selecciona un clúster de CloudHSM en FIPS mode con HSM validados según FIPS 140-3 Level 3 y administra los usuarios de CloudHSM fuera de los roles de IAM. Non-FIPS mode no cumple la restricción de claves y algoritmos FIPS; los roles de IAM por sí solos no administran usuarios criptográficos de CloudHSM."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudhsm--aaf67982",
+      "conceptId": "cloudhsm",
+      "secondaryConcepts": [
+        "kms-key-types"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A medical device manufacturer is moving a signing application to AWS. Its compliance review requires single-tenant HSMs validated at FIPS 140-3 Level 3, and the security team must control the application’s cryptographic users. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS CloudHSM in FIPS mode with FIPS 140-3 Level 3 validated HSMs.",
+          "correct": true,
+          "why": "This selects single-tenant HSMs with the required validation and lets the team manage CloudHSM users."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS KMS as the managed service for the signing keys.",
+          "correct": false,
+          "why": "The stated requirement is for single-tenant HSMs with customer-managed cryptographic users, not merely a managed key service."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS CloudHSM in non-FIPS mode to allow all supported algorithms.",
+          "correct": false,
+          "why": "Non-FIPS mode does not enforce the FIPS-validated keys and algorithms required by the compliance review."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Payment Cryptography to manage the signing keys.",
+          "correct": false,
+          "why": "AWS Payment Cryptography is described as a service for payment-processing applications, not this single-tenant HSM requirement."
+        }
+      ],
+      "explanation": "The deciding constraints are single tenancy, FIPS 140-3 Level 3 validation, and control of cryptographic users. CloudHSM provides single-tenant HSMs, and its users are managed outside IAM roles. Specify both FIPS mode and HSMs validated at FIPS 140-3 Level 3: FIPS-mode CloudHSM HSMs can instead be validated at FIPS 140-2 Level 3.",
+      "keywordCues": [
+        "single-tenant HSMs validated at FIPS 140-3 Level 3",
+        "control the application’s cryptographic users"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html"
+      ],
+      "es": {
+        "stem": "Un fabricante de dispositivos médicos está trasladando una aplicación de firma a AWS. Su revisión de cumplimiento exige HSM single-tenant validados según FIPS 140-3 Level 3, y el equipo de seguridad debe controlar los usuarios criptográficos de la aplicación. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS CloudHSM en FIPS mode con HSM validados según FIPS 140-3 Level 3.",
+            "why": "Esta opción selecciona HSM single-tenant con la validación exigida y permite que el equipo administre los usuarios de CloudHSM."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS KMS como servicio administrado para las claves de firma.",
+            "why": "El requisito exige HSM single-tenant y usuarios criptográficos administrados por el cliente, no solo un servicio administrado de claves."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS CloudHSM en non-FIPS mode para permitir todos los algoritmos compatibles.",
+            "why": "Non-FIPS mode no impone el uso de claves y algoritmos validados por FIPS que exige la revisión de cumplimiento."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS Payment Cryptography para administrar las claves de firma.",
+            "why": "AWS Payment Cryptography se describe como un servicio para aplicaciones de procesamiento de pagos, no para este requisito de HSM single-tenant."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son single tenancy, validación FIPS 140-3 Level 3 y control de usuarios criptográficos. CloudHSM ofrece HSM single-tenant, y sus usuarios se administran fuera de los roles de IAM. Debes especificar tanto FIPS mode como HSM validados según FIPS 140-3 Level 3: los HSM de CloudHSM en FIPS mode también pueden estar validados según FIPS 140-2 Level 3."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudhsm--r0",
+      "conceptId": "cloudhsm",
+      "kind": "recall",
+      "prompt": "A team needs single-tenant FIPS 140-3 Level 3 HSMs and control of cryptographic users. What would you choose, and what must you verify?",
+      "promptEs": "Un equipo necesita HSM single-tenant FIPS 140-3 Level 3 y controlar usuarios criptográficos. ¿Qué elegirías y qué verificarías?",
+      "idealAnswer": "Choose AWS CloudHSM in FIPS mode and verify that the selected HSMs are FIPS 140-3 Level 3 validated, because FIPS-mode HSMs can also be FIPS 140-2 Level 3 validated. The team manages CloudHSM users outside IAM roles.",
+      "rubric": [
+        "Select AWS CloudHSM in FIPS mode.",
+        "Verify FIPS 140-3 Level 3 validation rather than assuming it from FIPS mode.",
+        "Mention customer management of CloudHSM users outside IAM roles."
+      ]
+    },
+    {
+      "id": "cloudhsm--r1",
+      "conceptId": "cloudhsm",
+      "kind": "why-not",
+      "prompt": "Why not choose CloudHSM when a team only wants managed encryption keys and explicitly does not want to operate HSMs?",
+      "promptEs": "¿Por qué no elegirías CloudHSM si un equipo solo quiere claves de cifrado administradas y no quiere operar HSM?",
+      "idealAnswer": "AWS KMS is the managed service to consider when the team needs to create and control encryption keys without operating HSMs. CloudHSM provides greater direct HSM control, but the customer takes on responsibilities such as managing its users outside IAM roles.",
+      "rubric": [
+        "Identify AWS KMS as the managed alternative.",
+        "Explain that dedicated HSM control is unnecessary in this situation.",
+        "Mention CloudHSM's added customer responsibility."
+      ]
+    }
+  ]
+}

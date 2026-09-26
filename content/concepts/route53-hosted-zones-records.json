@@ -1,0 +1,310 @@
+{
+  "conceptId": "route53-hosted-zones-records",
+  "card": {
+    "en": {
+      "tldr": "A Route 53 hosted zone contains DNS records for a domain and its subdomains. Use a public hosted zone for internet traffic and a private hosted zone for DNS within a VPC; use an alias record when a zone-apex name must point to a supported AWS resource.",
+      "whenToUse": [
+        "An internet-facing domain apex must route to a CloudFront distribution, load balancer, or S3 static website.",
+        "Names for an application need to resolve within a VPC.",
+        "A supported AWS resource may change IP addresses, and DNS should follow it without manual record updates."
+      ],
+      "keyFacts": [
+        "A CNAME cannot be created at a hosted zone’s apex; an alias record generally can.",
+        "Route 53 detects changes to a supported AWS resource targeted by an alias record and updates its DNS responses.",
+        "Route 53 does not charge for alias queries to AWS resources; it charges for CNAME queries.",
+        "An alias targeting an AWS resource uses that resource’s default TTL; you cannot set the alias TTL.",
+        "A CNAME can point to a DNS record outside Route 53, while an alias is limited to supported targets."
+      ],
+      "gotchas": [
+        "An alias at the zone apex cannot target a CNAME record in the same hosted zone.",
+        "For an alias to an S3 website bucket, the bucket must be configured as a static website and its name must match the alias record name.",
+        "Private hosted zones route DNS traffic within a VPC; they are not the choice for an internet-facing name."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "root domain must point to CloudFront",
+        "DNS names used within a VPC",
+        "load balancer IP addresses may change",
+        "subdomain points to an external DNS name"
+      ]
+    },
+    "es": {
+      "tldr": "Una hosted zone de Route 53 contiene registros DNS de un dominio y sus subdominios. Usa una public hosted zone para tráfico de internet y una private hosted zone para DNS dentro de una VPC; usa un alias record cuando el zone apex deba apuntar a un recurso de AWS compatible.",
+      "whenToUse": [
+        "Necesitas dirigir el zone apex público a una distribución de CloudFront, un load balancer o un sitio web estático de S3.",
+        "Necesitas resolver nombres de una aplicación dentro de una VPC.",
+        "Quieres que el DNS siga los cambios de dirección IP de un recurso de AWS compatible sin actualizar registros manualmente."
+      ],
+      "keyFacts": [
+        "No puedes crear un CNAME en el zone apex de una hosted zone; por lo general, sí puedes crear un alias record.",
+        "Route 53 detecta cambios en un recurso de AWS compatible al que apunta un alias record y actualiza sus respuestas DNS.",
+        "Route 53 no cobra las consultas de alias a recursos de AWS; sí cobra las consultas de CNAME.",
+        "Si un alias apunta a un recurso de AWS, usa el TTL predeterminado del recurso y no puedes establecerlo tú.",
+        "Un CNAME puede apuntar a un registro DNS fuera de Route 53; un alias solo admite destinos compatibles."
+      ],
+      "gotchas": [
+        "Un alias en el zone apex no puede apuntar a un registro CNAME de la misma hosted zone.",
+        "Para usar un alias hacia un bucket de S3 como sitio web, el bucket debe estar configurado como sitio web estático y su nombre debe coincidir con el del alias record.",
+        "Una private hosted zone dirige tráfico DNS dentro de una VPC; no es la opción para un nombre público."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "root domain must point to CloudFront",
+        "DNS names used within a VPC",
+        "load balancer IP addresses may change",
+        "subdomain points to an external DNS name"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html",
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route53-hosted-zones-records--5950dfa4",
+      "conceptId": "route53-hosted-zones-records",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A magazine serves its public website through a CloudFront distribution. Readers must be able to enter the bare domain, gazette.example, and the publisher wants to avoid DNS query charges where the record type permits. Which Route 53 configuration meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a public hosted zone and a CNAME record for gazette.example pointing to the distribution.",
+          "correct": false,
+          "why": "A CNAME cannot be created at the zone apex."
+        },
+        {
+          "id": "B",
+          "text": "Create a public hosted zone and a CNAME record for www.gazette.example pointing to the distribution.",
+          "correct": false,
+          "why": "This configures the www subdomain but does not route queries for the required bare domain."
+        },
+        {
+          "id": "C",
+          "text": "Create a public hosted zone and an A alias record for gazette.example pointing to the distribution.",
+          "correct": true,
+          "why": "An alias supports a zone-apex CloudFront target, and Route 53 does not charge for alias queries to AWS resources."
+        },
+        {
+          "id": "D",
+          "text": "Create a private hosted zone and an A alias record for gazette.example pointing to the distribution.",
+          "correct": false,
+          "why": "A private hosted zone routes DNS traffic within a VPC, not for the magazine’s public readers."
+        }
+      ],
+      "explanation": "The deciding requirement is that the public zone apex must resolve to CloudFront. A public hosted zone with an A alias record supports that target at the apex, and Route 53 does not charge for alias queries to AWS resources. A CNAME cannot be placed at the apex, while a record for www does not satisfy requests for gazette.example.",
+      "keywordCues": [
+        "public website",
+        "bare domain, gazette.example",
+        "avoid DNS query charges"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html",
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html"
+      ],
+      "es": {
+        "stem": "Una revista publica su sitio web mediante una distribución de CloudFront. Los lectores deben poder ingresar el dominio raíz, gazette.example, y la editorial quiere evitar cargos por consultas DNS cuando el tipo de registro lo permita. ¿Qué configuración de Route 53 cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una public hosted zone y un registro CNAME para gazette.example que apunte a la distribución.",
+            "why": "No puedes crear un CNAME en el zone apex."
+          },
+          {
+            "id": "B",
+            "text": "Crea una public hosted zone y un registro CNAME para www.gazette.example que apunte a la distribución.",
+            "why": "Esto configura el subdominio www, pero no dirige las consultas del dominio raíz requerido."
+          },
+          {
+            "id": "C",
+            "text": "Crea una public hosted zone y un A alias record para gazette.example que apunte a la distribución.",
+            "why": "Un alias admite CloudFront como destino en el zone apex, y Route 53 no cobra las consultas de alias a recursos de AWS."
+          },
+          {
+            "id": "D",
+            "text": "Crea una private hosted zone y un A alias record para gazette.example que apunte a la distribución.",
+            "why": "Una private hosted zone dirige tráfico DNS dentro de una VPC, no para los lectores públicos de la revista."
+          }
+        ],
+        "explanation": "El requisito decisivo es que el zone apex público debe resolver a CloudFront. Una public hosted zone con un A alias record admite ese destino en el apex, y Route 53 no cobra las consultas de alias a recursos de AWS. No puedes crear un CNAME en el apex, mientras que un registro para www no satisface las consultas de gazette.example."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-hosted-zones-records--2c192bbe",
+      "conceptId": "route53-hosted-zones-records",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing company uses Route 53 for the public domain tickets.example. Its vendor has supplied an external DNS name, entry.vendor.example.net, as the destination for the subdomain checkin.tickets.example; the vendor has not supplied a fixed IP address. Which record should the company create to meet the requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a CNAME record for tickets.example pointing to entry.vendor.example.net.",
+          "correct": false,
+          "why": "A CNAME at the zone apex is unsupported and would not configure the requested checkin subdomain."
+        },
+        {
+          "id": "B",
+          "text": "Create an A record for checkin.tickets.example containing the vendor destination’s IP address.",
+          "correct": false,
+          "why": "The vendor supplied a DNS name rather than the fixed IP address this configuration requires."
+        },
+        {
+          "id": "C",
+          "text": "Create a CNAME record for checkin.tickets.example pointing to entry.vendor.example.net.",
+          "correct": true,
+          "why": "A CNAME can direct a subdomain to an external DNS record without requiring a fixed IP address."
+        },
+        {
+          "id": "D",
+          "text": "Create an A alias record for checkin.tickets.example pointing to entry.vendor.example.net.",
+          "correct": false,
+          "why": "A Route 53 alias cannot target an arbitrary external DNS name."
+        }
+      ],
+      "explanation": "The destination is an external DNS name, and the requested source is a subdomain rather than the zone apex. A CNAME can point to a DNS record outside Route 53 without requiring the company to maintain an IP address. An alias is not a general-purpose pointer to arbitrary external DNS names, and a CNAME for tickets.example would be at the unsupported apex.",
+      "keywordCues": [
+        "external DNS name, entry.vendor.example.net",
+        "subdomain checkin.tickets.example",
+        "has not supplied a fixed IP address"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html",
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html"
+      ],
+      "es": {
+        "stem": "Una empresa de boletos usa Route 53 para el dominio público tickets.example. Su proveedor indicó un nombre DNS externo, entry.vendor.example.net, como destino del subdominio checkin.tickets.example; no proporcionó una dirección IP fija. ¿Qué registro debes crear para cumplir el requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un registro CNAME para tickets.example que apunte a entry.vendor.example.net.",
+            "why": "Un CNAME en el zone apex no está admitido y tampoco configuraría el subdominio checkin solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Crea un registro A para checkin.tickets.example con la dirección IP del destino del proveedor.",
+            "why": "El proveedor proporcionó un nombre DNS, no la dirección IP fija que requiere esta configuración."
+          },
+          {
+            "id": "C",
+            "text": "Crea un registro CNAME para checkin.tickets.example que apunte a entry.vendor.example.net.",
+            "why": "Un CNAME puede dirigir un subdominio a un registro DNS externo sin requerir una dirección IP fija."
+          },
+          {
+            "id": "D",
+            "text": "Crea un A alias record para checkin.tickets.example que apunte a entry.vendor.example.net.",
+            "why": "Un alias de Route 53 no puede apuntar a un nombre DNS externo arbitrario."
+          }
+        ],
+        "explanation": "El destino es un nombre DNS externo y el origen solicitado es un subdominio, no el zone apex. Un CNAME puede apuntar a un registro DNS fuera de Route 53 sin que tengas que mantener una dirección IP. Un alias no sirve para apuntar a cualquier nombre DNS externo, y un CNAME para tickets.example estaría en el apex, donde no se admite."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-hosted-zones-records--d1d992ed",
+      "conceptId": "route53-hosted-zones-records",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturer is assigning names under machines.factory.example to services used by applications in an Amazon VPC. The team wants those names to direct DNS traffic within the VPC rather than serve as public internet records. Which Route 53 configuration meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a public hosted zone and add CNAME records for the machine services.",
+          "correct": false,
+          "why": "Changing the record type to CNAME does not change a public hosted zone into a VPC-focused private zone."
+        },
+        {
+          "id": "B",
+          "text": "Create a public hosted zone and add alias records targeting each service name.",
+          "correct": false,
+          "why": "Alias records in a public hosted zone do not make the zone a private DNS container for the VPC."
+        },
+        {
+          "id": "C",
+          "text": "Create a public hosted zone for factory.example and add records for the machine services.",
+          "correct": false,
+          "why": "Public hosted zones contain records for routing traffic on the internet, not specifically within a VPC."
+        },
+        {
+          "id": "D",
+          "text": "Create a private hosted zone for factory.example and add records for the machine services.",
+          "correct": true,
+          "why": "A private hosted zone contains records specifying how to route DNS traffic in a VPC."
+        }
+      ],
+      "explanation": "The requirement is DNS routing within an Amazon VPC, so a private hosted zone is the appropriate container for the records. A public hosted zone instead contains records specifying how to route traffic on the internet. Choosing alias or CNAME records in a public zone does not address the requirement for a private zone.",
+      "keywordCues": [
+        "in an Amazon VPC",
+        "within the VPC rather than serve as public internet records"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html",
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html"
+      ],
+      "es": {
+        "stem": "Un fabricante asigna nombres bajo machines.factory.example a servicios que usan aplicaciones en una Amazon VPC. El equipo quiere que esos nombres dirijan tráfico DNS dentro de la VPC, en lugar de funcionar como registros públicos de internet. ¿Qué configuración de Route 53 cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una public hosted zone y agrega registros CNAME para los servicios.",
+            "why": "Cambiar el tipo de registro a CNAME no convierte una public hosted zone en una zona privada para la VPC."
+          },
+          {
+            "id": "B",
+            "text": "Crea una public hosted zone y agrega alias records que apunten al nombre de cada servicio.",
+            "why": "Los alias records en una public hosted zone no convierten la zona en un contenedor DNS privado para la VPC."
+          },
+          {
+            "id": "C",
+            "text": "Crea una public hosted zone para factory.example y agrega registros para los servicios.",
+            "why": "Las public hosted zones contienen registros para dirigir tráfico en internet, no específicamente dentro de una VPC."
+          },
+          {
+            "id": "D",
+            "text": "Crea una private hosted zone para factory.example y agrega registros para los servicios.",
+            "why": "Una private hosted zone contiene registros que especifican cómo dirigir tráfico DNS en una VPC."
+          }
+        ],
+        "explanation": "El requisito es dirigir tráfico DNS dentro de una Amazon VPC, por lo que una private hosted zone es el contenedor adecuado para los registros. Una public hosted zone contiene registros que especifican cómo dirigir tráfico en internet. Elegir alias records o registros CNAME en una zona pública no satisface el requisito de una zona privada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "route53-hosted-zones-records--r0",
+      "conceptId": "route53-hosted-zones-records",
+      "kind": "recall",
+      "prompt": "A public root domain must point to a load balancer whose IP addresses may change. Which Route 53 record fits, and why?",
+      "promptEs": "Un dominio raíz público debe apuntar a un load balancer cuyas direcciones IP pueden cambiar. ¿Qué registro de Route 53 usarías y por qué?",
+      "idealAnswer": "Use an alias record in a public hosted zone targeting the load balancer. Alias records can be created at the zone apex, and Route 53 follows changes to the load balancer’s IP addresses.",
+      "rubric": [
+        "Selects a public hosted zone and an alias record targeting the load balancer.",
+        "Explains that an alias can be used at the zone apex.",
+        "Explains that Route 53 detects changes to the targeted load balancer’s IP addresses."
+      ]
+    }
+  ]
+}

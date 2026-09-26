@@ -1,0 +1,277 @@
+{
+  "conceptId": "firewall-manager",
+  "card": {
+    "en": {
+      "tldr": "AWS Firewall Manager centrally administers protections across accounts and resources in an AWS Organizations organization. Choose it when the decision is how to apply and maintain policies organization-wide, especially as accounts or resources are added.",
+      "whenToUse": [
+        "Apply AWS WAF protections consistently across multiple accounts and newly added resources.",
+        "Subscribe in-scope member accounts, including new ones, to AWS Shield Advanced.",
+        "Apply security group rules to all member accounts or selected subsets."
+      ],
+      "keyFacts": [
+        "Firewall Manager supports protections including AWS WAF, AWS Shield Advanced, VPC security groups and network ACLs, AWS Network Firewall, and Route 53 Resolver DNS Firewall.",
+        "Policies can protect resources by type or by tag.",
+        "Protections can automatically apply to newly added accounts and resources.",
+        "Firewall Manager provides centralized monitoring of DDoS attacks across an organization."
+      ],
+      "gotchas": [
+        "Configuring AWS WAF on individual resources does not provide Firewall Manager’s organization-wide policy administration.",
+        "An AWS Network Firewall policy is not a substitute for a requirement to apply security group rules.",
+        "A policy scoped to every member account does not meet a requirement limited to selected accounts."
+      ],
+      "confusedWith": [
+        {
+          "concept": "waf",
+          "difference": "AWS WAF provides web protections; Firewall Manager centrally applies and maintains protections such as WAF across accounts and resources."
+        },
+        {
+          "concept": "shield",
+          "difference": "Shield Advanced is a protection; Firewall Manager can subscribe in-scope organization accounts to it, including newly joined accounts."
+        },
+        {
+          "concept": "network-firewall",
+          "difference": "AWS Network Firewall is a supported protection; Firewall Manager centrally administers its policies across accounts and resources."
+        }
+      ],
+      "examCues": [
+        "new accounts must inherit the policy",
+        "protect all resources with a specific tag",
+        "subscribe member accounts to Shield Advanced",
+        "apply security group rules to a subset of accounts"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Firewall Manager administra protecciones de forma centralizada en las cuentas y los recursos de una organización de AWS Organizations. Elígelo cuando debas aplicar y mantener políticas en toda la organización, especialmente al agregar cuentas o recursos.",
+      "whenToUse": [
+        "Aplicar protecciones de AWS WAF de manera uniforme en varias cuentas y recursos nuevos.",
+        "Suscribir a AWS Shield Advanced las cuentas miembro incluidas en el alcance, incluso las nuevas.",
+        "Aplicar reglas de security groups a todas las cuentas miembro o a subconjuntos seleccionados."
+      ],
+      "keyFacts": [
+        "Firewall Manager admite protecciones como AWS WAF, AWS Shield Advanced, VPC security groups y network ACLs, AWS Network Firewall y Route 53 Resolver DNS Firewall.",
+        "Puedes definir el alcance de las políticas por tipo de recurso o por etiqueta.",
+        "Las protecciones pueden aplicarse automáticamente a cuentas y recursos nuevos.",
+        "Firewall Manager ofrece monitoreo centralizado de ataques DDoS en una organización."
+      ],
+      "gotchas": [
+        "Configurar AWS WAF en cada recurso no te da la administración de políticas para toda la organización que ofrece Firewall Manager.",
+        "Una política de AWS Network Firewall no sustituye un requisito de aplicar reglas de security groups.",
+        "Una política para todas las cuentas miembro no cumple un requisito limitado a cuentas seleccionadas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "waf",
+          "difference": "AWS WAF proporciona protección web; Firewall Manager aplica y mantiene de forma centralizada protecciones como WAF en distintas cuentas y recursos."
+        },
+        {
+          "concept": "shield",
+          "difference": "Shield Advanced es una protección; Firewall Manager puede suscribir a ella las cuentas de la organización incluidas en el alcance, incluso las nuevas."
+        },
+        {
+          "concept": "network-firewall",
+          "difference": "AWS Network Firewall es una protección admitida; Firewall Manager administra sus políticas de forma centralizada en distintas cuentas y recursos."
+        }
+      ],
+      "examCues": [
+        "new accounts must inherit the policy",
+        "protect all resources with a specific tag",
+        "subscribe member accounts to Shield Advanced",
+        "apply security group rules to a subset of accounts"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "firewall-manager--4c2039a4",
+      "conceptId": "firewall-manager",
+      "secondaryConcepts": [
+        "waf",
+        "network-firewall"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs customer-facing applications in multiple accounts in an AWS Organizations organization. Its security team wants the same AWS WAF protection on every CloudFront distribution, including distributions created later. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure AWS WAF protection separately on each CloudFront distribution and repeat the process for new distributions.",
+          "correct": false,
+          "why": "This requires ongoing per-resource administration instead of automatically protecting new distributions."
+        },
+        {
+          "id": "B",
+          "text": "Create an AWS Firewall Manager policy for AWS Network Firewall across the organization's accounts.",
+          "correct": false,
+          "why": "A Network Firewall policy does not provide the requested AWS WAF protection for CloudFront distributions."
+        },
+        {
+          "id": "C",
+          "text": "Create an AWS Firewall Manager security group policy for the organization's member accounts.",
+          "correct": false,
+          "why": "A security group policy does not apply the requested AWS WAF protection to CloudFront distributions."
+        },
+        {
+          "id": "D",
+          "text": "Create an AWS Firewall Manager policy for AWS WAF that covers CloudFront distributions across the organization.",
+          "correct": true,
+          "why": "Firewall Manager can apply WAF protection by resource type across accounts and to newly added resources."
+        }
+      ],
+      "explanation": "The deciding requirements are consistent AWS WAF protection across accounts and automatic coverage of future CloudFront distributions. Firewall Manager can target all resources of a type and automatically apply protections as resources are added. Configuring WAF distribution by distribution misses the operational-overhead requirement. The other Firewall Manager policies administer different protections.",
+      "keywordCues": [
+        "same AWS WAF protection",
+        "every CloudFront distribution",
+        "including distributions created later",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta aplicaciones para clientes en varias cuentas de una organización de AWS Organizations. Su equipo de seguridad quiere la misma protección de AWS WAF en todas las distribuciones de CloudFront, incluso en las que se creen después. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar la protección de AWS WAF por separado en cada distribución de CloudFront y repetir el proceso para las nuevas distribuciones.",
+            "why": "Esto exige administrar continuamente cada recurso en vez de proteger automáticamente las distribuciones nuevas."
+          },
+          {
+            "id": "B",
+            "text": "Crear una política de AWS Firewall Manager para AWS Network Firewall en las cuentas de la organización.",
+            "why": "Una política de Network Firewall no proporciona la protección de AWS WAF solicitada para las distribuciones de CloudFront."
+          },
+          {
+            "id": "C",
+            "text": "Crear una política de security groups de AWS Firewall Manager para las cuentas miembro de la organización.",
+            "why": "Una política de security groups no aplica la protección de AWS WAF solicitada a las distribuciones de CloudFront."
+          },
+          {
+            "id": "D",
+            "text": "Crear una política de AWS Firewall Manager para AWS WAF que abarque las distribuciones de CloudFront de toda la organización.",
+            "why": "Firewall Manager puede aplicar protección de WAF por tipo de recurso en varias cuentas y a recursos nuevos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la protección uniforme de AWS WAF entre cuentas y la cobertura automática de futuras distribuciones de CloudFront. Firewall Manager puede incluir todos los recursos de un tipo y aplicar protecciones automáticamente cuando se agregan recursos. Configurar WAF distribución por distribución no cumple el requisito de LEAST operational overhead. Las otras políticas de Firewall Manager administran protecciones diferentes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "firewall-manager--dba44f1e",
+      "conceptId": "firewall-manager",
+      "secondaryConcepts": [
+        "shield",
+        "waf",
+        "network-firewall"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing company uses AWS Shield Advanced for member accounts in its AWS Organizations organization. It regularly creates accounts for new events and wants every new in-scope account subscribed without a separate enrollment task. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Subscribe each member account to AWS Shield Advanced when the account is created.",
+          "correct": false,
+          "why": "Manual enrollment creates the separate task the company wants to eliminate."
+        },
+        {
+          "id": "B",
+          "text": "Maintain an AWS WAF policy in AWS Firewall Manager for the organization's accounts.",
+          "correct": false,
+          "why": "A WAF policy does not perform the requested Shield Advanced account subscriptions."
+        },
+        {
+          "id": "C",
+          "text": "Maintain an AWS Network Firewall policy in AWS Firewall Manager for new member accounts.",
+          "correct": false,
+          "why": "A Network Firewall policy does not subscribe accounts to Shield Advanced."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Firewall Manager to subscribe in-scope organization accounts to AWS Shield Advanced.",
+          "correct": true,
+          "why": "Firewall Manager can subscribe member accounts and automatically subscribe new in-scope accounts."
+        }
+      ],
+      "explanation": "The requirement is automatic Shield Advanced subscription when in-scope accounts join the organization. Firewall Manager explicitly supports both subscribing member accounts and automatically subscribing new in-scope accounts. Enrolling accounts one at a time misses the operational requirement. WAF and Network Firewall policies address different protections.",
+      "keywordCues": [
+        "AWS Shield Advanced",
+        "every new in-scope account subscribed",
+        "without a separate enrollment task",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas usa AWS Shield Advanced para las cuentas miembro de su organización de AWS Organizations. Crea cuentas con frecuencia para eventos nuevos y quiere que cada cuenta nueva incluida en el alcance quede suscrita sin una tarea de inscripción independiente. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Suscribir cada cuenta miembro a AWS Shield Advanced cuando se crea la cuenta.",
+            "why": "La inscripción manual introduce la tarea independiente que la empresa quiere eliminar."
+          },
+          {
+            "id": "B",
+            "text": "Mantener una política de AWS WAF en AWS Firewall Manager para las cuentas de la organización.",
+            "why": "Una política de WAF no realiza las suscripciones solicitadas a Shield Advanced."
+          },
+          {
+            "id": "C",
+            "text": "Mantener una política de AWS Network Firewall en AWS Firewall Manager para las cuentas miembro nuevas.",
+            "why": "Una política de Network Firewall no suscribe cuentas a Shield Advanced."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS Firewall Manager para suscribir a AWS Shield Advanced las cuentas de la organización incluidas en el alcance.",
+            "why": "Firewall Manager puede suscribir cuentas miembro y suscribir automáticamente las cuentas nuevas incluidas en el alcance."
+          }
+        ],
+        "explanation": "El requisito decisivo es la suscripción automática a Shield Advanced cuando se unen cuentas incluidas en el alcance. Firewall Manager permite suscribir cuentas miembro y suscribir automáticamente las cuentas nuevas incluidas en el alcance. Inscribirlas una por una no cumple el requisito operativo. Las políticas de WAF y Network Firewall corresponden a protecciones diferentes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "firewall-manager--r0",
+      "conceptId": "firewall-manager",
+      "kind": "recall",
+      "prompt": "Which service would automatically apply security group rules to selected organization accounts as new accounts join, and why?",
+      "promptEs": "¿Qué servicio aplicaría automáticamente reglas de security groups a cuentas seleccionadas de la organización cuando se incorporen cuentas nuevas, y por qué?",
+      "idealAnswer": "AWS Firewall Manager. It centrally applies security group rules to all member accounts or selected subsets and automatically covers new in-scope accounts.",
+      "rubric": [
+        "Names AWS Firewall Manager.",
+        "Explains that security group rules can target a subset of organization accounts.",
+        "Mentions automatic application to new in-scope accounts."
+      ]
+    },
+    {
+      "id": "firewall-manager--r1",
+      "conceptId": "firewall-manager",
+      "kind": "why-not",
+      "prompt": "Why is configuring AWS WAF separately on each distribution a poor fit when new distributions across accounts must inherit protection?",
+      "promptEs": "¿Por qué configurar AWS WAF por separado en cada distribución no conviene si las distribuciones nuevas de varias cuentas deben heredar la protección?",
+      "idealAnswer": "Per-distribution configuration requires continued work whenever resources are added. AWS Firewall Manager can centrally apply WAF protection across accounts and automatically protect newly added in-scope resources.",
+      "rubric": [
+        "Identifies the ongoing per-resource administration problem.",
+        "Names AWS Firewall Manager as the centralized approach.",
+        "Mentions automatic coverage for new in-scope resources."
+      ]
+    }
+  ]
+}

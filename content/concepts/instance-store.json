@@ -1,0 +1,368 @@
+{
+  "conceptId": "instance-store",
+  "card": {
+    "en": {
+      "tldr": "EC2 instance store provides temporary block storage on disks physically attached to the host. Choose it for frequently changing caches, scratch data, or replicated data that can be rebuilt—not for data that must remain available after an instance stops or terminates.",
+      "whenToUse": [
+        "An EC2 workload needs local block storage for temporary, frequently changing data.",
+        "A cache, scratch file, or replicated dataset can be recreated if the instance goes away.",
+        "The workload can use an instance type with instance store and benefits from storage included in the instance usage cost."
+      ],
+      "keyFacts": [
+        "Instance store volumes are exposed to an EC2 instance as block devices.",
+        "The disks are physically attached to the host computer.",
+        "Not every instance type provides instance store; available capacity and device count vary by type and size.",
+        "Instance store volumes have no additional charge beyond the instance usage cost."
+      ],
+      "gotchas": [
+        "Do not place the only copy of important data on instance store; it is temporary storage.",
+        "Do not assume an existing EC2 instance type has instance store volumes.",
+        "Local block storage does not provide a shared file system for multiple instances."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EBS",
+          "difference": "Choose EBS when the block data must persist beyond an instance stop; instance store is temporary."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS provides a shared file system; instance store provides local block devices."
+        },
+        {
+          "concept": "Amazon S3",
+          "difference": "S3 stores objects; instance store supplies temporary block storage to an EC2 instance."
+        }
+      ],
+      "examCues": [
+        "rebuildable scratch data on EC2",
+        "frequently changing local cache",
+        "replicated across a fleet of instances",
+        "included with the instance usage cost"
+      ]
+    },
+    "es": {
+      "tldr": "EC2 instance store ofrece almacenamiento de bloques temporal en discos conectados físicamente al host. Elígelo para cachés, datos de trabajo o datos replicados que puedas reconstruir, no para datos que deban seguir disponibles después de detener o terminar una instancia.",
+      "whenToUse": [
+        "Una carga en EC2 necesita almacenamiento de bloques local para datos temporales que cambian con frecuencia.",
+        "Puedes reconstruir una caché, un archivo de trabajo o un conjunto de datos replicado si la instancia deja de estar disponible.",
+        "Puedes elegir un tipo de instancia con instance store y te conviene que el almacenamiento esté incluido en el costo de uso de la instancia."
+      ],
+      "keyFacts": [
+        "Los volúmenes de instance store se presentan a una instancia EC2 como dispositivos de bloques.",
+        "Los discos están conectados físicamente al host.",
+        "No todos los tipos de instancia ofrecen instance store; la capacidad y la cantidad de dispositivos varían según el tipo y el tamaño.",
+        "Los volúmenes de instance store no tienen un cargo adicional al costo de uso de la instancia."
+      ],
+      "gotchas": [
+        "No guardes la única copia de datos importantes en instance store: es almacenamiento temporal.",
+        "No supongas que el tipo de instancia EC2 que usas incluye volúmenes de instance store.",
+        "El almacenamiento de bloques local no proporciona un sistema de archivos compartido entre varias instancias."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EBS",
+          "difference": "Elige EBS si los datos de bloques deben persistir después de detener una instancia; instance store es temporal."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS proporciona un sistema de archivos compartido; instance store proporciona dispositivos de bloques locales."
+        },
+        {
+          "concept": "Amazon S3",
+          "difference": "S3 almacena objetos; instance store proporciona almacenamiento de bloques temporal a una instancia EC2."
+        }
+      ],
+      "examCues": [
+        "rebuildable scratch data on EC2",
+        "frequently changing local cache",
+        "replicated across a fleet of instances",
+        "included with the instance usage cost"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "instance-store--fb96160e",
+      "conceptId": "instance-store",
+      "secondaryConcepts": [
+        "ebs-volume-types",
+        "s3-fundamentals",
+        "efs-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab runs an analysis application on one EC2 instance. The application writes checkpoints to a block device, and operators stop the instance between work sessions to control compute costs. Every checkpoint must still be available when they start the instance again. Which storage choice meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Write the checkpoints to an instance store volume on the analysis instance.",
+          "correct": false,
+          "why": "Instance store is temporary and cannot be relied on to retain checkpoints through an instance stop."
+        },
+        {
+          "id": "B",
+          "text": "Write the checkpoints to an Amazon EFS file system mounted by the instance.",
+          "correct": false,
+          "why": "EFS is a file system, not the block device required by the application."
+        },
+        {
+          "id": "C",
+          "text": "Write the checkpoints to an Amazon EBS volume attached to the analysis instance.",
+          "correct": true,
+          "why": "EBS provides persistent block storage for checkpoints that must remain after the instance stops."
+        },
+        {
+          "id": "D",
+          "text": "Write the checkpoints to Amazon S3 and treat it as the application's block device.",
+          "correct": false,
+          "why": "S3 stores objects and does not satisfy the application's block-device requirement."
+        }
+      ],
+      "explanation": "The deciding requirements are block access and retention across planned instance stops. An EBS volume fits both. Instance store looks attractive because it is a local block device, but its temporary data is not suitable for checkpoints that must survive a stop.",
+      "keywordCues": [
+        "block device",
+        "stop the instance between work sessions",
+        "still be available when they start the instance again"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ejecuta una aplicación de análisis en una instancia EC2. La aplicación escribe puntos de control en un dispositivo de bloques, y los operadores detienen la instancia entre sesiones para controlar los costos de cómputo. Todos los puntos de control deben seguir disponibles cuando vuelvan a iniciar la instancia. ¿Qué opción de almacenamiento cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Escribir los puntos de control en un volumen de instance store de la instancia de análisis.",
+            "why": "Instance store es temporal y no es adecuado para conservar puntos de control cuando se detiene una instancia."
+          },
+          {
+            "id": "B",
+            "text": "Escribir los puntos de control en un sistema de archivos Amazon EFS montado en la instancia.",
+            "why": "EFS es un sistema de archivos, no el dispositivo de bloques que requiere la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Escribir los puntos de control en un volumen de Amazon EBS conectado a la instancia de análisis.",
+            "why": "EBS proporciona almacenamiento de bloques persistente para los puntos de control que deben permanecer después de detener la instancia."
+          },
+          {
+            "id": "D",
+            "text": "Escribir los puntos de control en Amazon S3 y tratarlo como el dispositivo de bloques de la aplicación.",
+            "why": "S3 almacena objetos y no cumple el requisito de un dispositivo de bloques."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el acceso de bloques y la conservación de los datos durante las detenciones programadas. Un volumen EBS cumple ambos. Instance store puede parecer atractivo porque es un dispositivo de bloques local, pero sus datos temporales no son adecuados para puntos de control que deben sobrevivir a una detención."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "instance-store--edc41882",
+      "conceptId": "instance-store",
+      "secondaryConcepts": [
+        "s3-fundamentals",
+        "efs-fundamentals",
+        "ebs-volume-types"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A game studio runs EC2 workers that use two datasets: intermediate files created during asset builds and a local index replicated across the worker fleet. Both datasets change frequently, can be recreated, and must be placed on local temporary block devices included in the instance usage cost. Which two placements meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the replicated index on instance store volumes of the workers.",
+          "correct": true,
+          "why": "Rebuildable data replicated across a fleet is an instance store use case."
+        },
+        {
+          "id": "B",
+          "text": "Place the replicated index on Amazon EBS volumes attached to the workers.",
+          "correct": false,
+          "why": "EBS is block storage, but it does not satisfy the requirement for temporary volumes included in instance usage cost."
+        },
+        {
+          "id": "C",
+          "text": "Place the build intermediates on instance store volumes of the workers.",
+          "correct": true,
+          "why": "Frequently rewritten, rebuildable intermediates fit instance store's temporary local block storage."
+        },
+        {
+          "id": "D",
+          "text": "Place the replicated index in an Amazon EFS file system.",
+          "correct": false,
+          "why": "EFS is a shared file system rather than local block storage included with each instance."
+        },
+        {
+          "id": "E",
+          "text": "Place the build intermediates in Amazon S3 objects.",
+          "correct": false,
+          "why": "S3 objects do not provide local temporary block devices to the workers."
+        }
+      ],
+      "explanation": "Both datasets can be recreated, so temporary storage is acceptable. Instance store supplies local block devices included in the EC2 instance usage cost for both scratch data and replicated fleet data. EBS is a plausible block-storage distractor, but the question specifically requires volumes included with the instance; S3 and EFS also miss the local block-device requirement.",
+      "keywordCues": [
+        "intermediate files created during asset builds",
+        "local index replicated across the worker fleet",
+        "can be recreated",
+        "local temporary block devices included in the instance usage cost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos ejecuta procesos en EC2 que usan dos conjuntos de datos: archivos intermedios creados durante la compilación de recursos y un índice local replicado entre las instancias. Ambos cambian con frecuencia, pueden reconstruirse y deben guardarse en dispositivos de bloques locales y temporales incluidos en el costo de uso de la instancia. ¿Qué dos ubicaciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar el índice replicado en volúmenes de instance store de las instancias.",
+            "why": "Los datos que pueden reconstruirse y están replicados entre instancias son un caso de uso de instance store."
+          },
+          {
+            "id": "B",
+            "text": "Guardar el índice replicado en volúmenes de Amazon EBS conectados a las instancias.",
+            "why": "EBS es almacenamiento de bloques, pero no cumple el requisito de volúmenes temporales incluidos en el costo de uso de la instancia."
+          },
+          {
+            "id": "C",
+            "text": "Guardar los archivos intermedios de compilación en volúmenes de instance store de las instancias.",
+            "why": "Los archivos intermedios que se reescriben con frecuencia y pueden reconstruirse son adecuados para el almacenamiento de bloques local y temporal de instance store."
+          },
+          {
+            "id": "D",
+            "text": "Guardar el índice replicado en un sistema de archivos Amazon EFS.",
+            "why": "EFS es un sistema de archivos compartido, no almacenamiento de bloques local incluido con cada instancia."
+          },
+          {
+            "id": "E",
+            "text": "Guardar los archivos intermedios de compilación como objetos en Amazon S3.",
+            "why": "Los objetos de S3 no proporcionan dispositivos de bloques locales y temporales a las instancias."
+          }
+        ],
+        "explanation": "Ambos conjuntos de datos pueden reconstruirse, así que el almacenamiento temporal es aceptable. Instance store proporciona dispositivos de bloques locales incluidos en el costo de uso de la instancia EC2, tanto para datos de trabajo como para datos replicados. EBS es un distractor plausible porque ofrece almacenamiento de bloques, pero aquí se requieren volúmenes incluidos con la instancia; S3 y EFS tampoco cumplen el requisito de dispositivos de bloques locales."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "instance-store--7a429455",
+      "conceptId": "instance-store",
+      "secondaryConcepts": [
+        "s3-fundamentals",
+        "ebs-volume-types",
+        "efs-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs video-processing workers on EC2. Each worker repeatedly rewrites intermediate files, while the input files and finished videos are stored separately and any intermediate file can be recreated. The company wants local block storage included in the instance usage cost. Which storage choice meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the intermediate files as Amazon S3 objects.",
+          "correct": false,
+          "why": "S3 is object storage, not the requested local block storage for frequently rewritten intermediate files."
+        },
+        {
+          "id": "B",
+          "text": "Mount an Amazon EFS file system on every worker for the intermediate files.",
+          "correct": false,
+          "why": "EFS provides a shared file system rather than the requested local block devices."
+        },
+        {
+          "id": "C",
+          "text": "Choose EC2 workers with instance store volumes and place the intermediate files there.",
+          "correct": true,
+          "why": "Instance store provides local temporary block storage included in the instance usage cost."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon EBS volumes for the intermediate files on each worker.",
+          "correct": false,
+          "why": "EBS provides block storage, but instance store specifically meets the requirement for temporary local storage included in the instance usage cost."
+        }
+      ],
+      "explanation": "The intermediate files are rebuildable, so they do not need persistent storage. Instance store is temporary block storage on disks attached to the EC2 host, and its volumes are included in the instance usage cost. EBS is a plausible block-storage choice, but it does not match the stated preference for storage included with the instance.",
+      "keywordCues": [
+        "intermediate file can be recreated",
+        "local block storage",
+        "included in the instance usage cost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta procesos de video en instancias EC2. Cada instancia reescribe continuamente archivos intermedios; los archivos de entrada y los videos terminados se guardan por separado, y cualquier archivo intermedio puede reconstruirse. La empresa quiere almacenamiento de bloques local incluido en el costo de uso de la instancia. ¿Qué opción cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar los archivos intermedios como objetos en Amazon S3.",
+            "why": "S3 es almacenamiento de objetos, no el almacenamiento de bloques local solicitado para archivos que se reescriben con frecuencia."
+          },
+          {
+            "id": "B",
+            "text": "Montar un sistema de archivos Amazon EFS en cada instancia para los archivos intermedios.",
+            "why": "EFS proporciona un sistema de archivos compartido, no los dispositivos de bloques locales solicitados."
+          },
+          {
+            "id": "C",
+            "text": "Elegir instancias EC2 con volúmenes de instance store y guardar allí los archivos intermedios.",
+            "why": "Instance store proporciona almacenamiento de bloques local y temporal incluido en el costo de uso de la instancia."
+          },
+          {
+            "id": "D",
+            "text": "Usar volúmenes de Amazon EBS para los archivos intermedios de cada instancia.",
+            "why": "EBS proporciona almacenamiento de bloques, pero instance store cumple específicamente el requisito de almacenamiento local temporal incluido en el costo de uso de la instancia."
+          }
+        ],
+        "explanation": "Los archivos intermedios pueden reconstruirse, así que no necesitan almacenamiento persistente. Instance store ofrece almacenamiento de bloques temporal en discos conectados al host de EC2, y sus volúmenes están incluidos en el costo de uso de la instancia. EBS es una opción plausible de almacenamiento de bloques, pero no cumple la preferencia indicada por almacenamiento incluido con la instancia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "instance-store--r0",
+      "conceptId": "instance-store",
+      "kind": "recall",
+      "prompt": "Which EC2 storage would you choose for rebuildable, frequently changing scratch data on local block devices, and why?",
+      "promptEs": "¿Qué almacenamiento de EC2 elegirías para datos de trabajo reconstruibles que cambian con frecuencia y necesitan dispositivos de bloques locales, y por qué?",
+      "idealAnswer": "Choose an EC2 instance type with instance store. It provides temporary local block storage suited to scratch data, with volumes included in the instance usage cost.",
+      "rubric": [
+        "Names EC2 instance store.",
+        "Connects the choice to temporary, rebuildable scratch data.",
+        "Identifies local block storage and checks that the instance type provides it."
+      ]
+    },
+    {
+      "id": "instance-store--r1",
+      "conceptId": "instance-store",
+      "kind": "why-not",
+      "prompt": "Why should a team not use instance store instead of EBS for checkpoints required after stopping an EC2 instance?",
+      "promptEs": "¿Por qué un equipo no debería usar instance store en lugar de EBS para puntos de control necesarios después de detener una instancia EC2?",
+      "idealAnswer": "Instance store is temporary and cannot be relied on to retain checkpoints after the instance stops. EBS is the appropriate block-storage choice when those checkpoints must persist.",
+      "rubric": [
+        "States that instance store is temporary.",
+        "Explains that the checkpoints must remain after a stop.",
+        "Identifies EBS as the persistent block-storage alternative."
+      ]
+    }
+  ]
+}

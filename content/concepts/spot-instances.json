@@ -1,0 +1,441 @@
+{
+  "conceptId": "spot-instances",
+  "card": {
+    "en": {
+      "tldr": "Spot Instances use spare EC2 capacity at a discount, but EC2 can interrupt them when it needs capacity back. Choose Spot for work that can be retried, resumed, or delayed—not work that must run without interruption.",
+      "whenToUse": [
+        "Batch, analysis, or background jobs can tolerate interruptions.",
+        "Workers are stateless or can checkpoint progress and resume.",
+        "The workload can use multiple instance types and Availability Zones rather than depend on one Spot capacity pool."
+      ],
+      "keyFacts": [
+        "A Spot capacity pool consists of one instance type in one Availability Zone.",
+        "EC2 provides a two-minute interruption notice for termination or stopping; for hibernation, the notice arrives when hibernation begins.",
+        "An EC2 instance rebalance recommendation can signal elevated interruption risk before that notice.",
+        "An interruption can terminate, stop, or hibernate an instance, depending on the request's interruption behavior.",
+        "A persistent Spot request is resubmitted after interruption; it does not preserve the interrupted job's progress.",
+        "Savings Plans do not add a discount to Spot usage, and Spot spend does not apply toward Compute Savings Plans commitments."
+      ],
+      "gotchas": [
+        "A two-minute notice for termination or stopping is time to react, not a promise that the job will finish; hibernation has no two-minute window.",
+        "Setting a maximum Spot price can increase interruptions.",
+        "A persistent request can seek another instance, but the application must still recover its work."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Savings Plans",
+          "difference": "A Savings Plan does not stack an additional discount on Spot Instances or count Spot spend toward a Compute Savings Plans commitment."
+        },
+        {
+          "concept": "On-Demand Instances",
+          "difference": "On-Demand avoids Spot's capacity-reclamation interruptions; Spot suits work that can tolerate them."
+        }
+      ],
+      "examCues": [
+        "retryable background jobs",
+        "checkpoint progress before interruption",
+        "flexible instance types and Availability Zones",
+        "two-minute notice except hibernation",
+        "rebalance at elevated interruption risk"
+      ]
+    },
+    "es": {
+      "tldr": "Las Spot Instances usan capacidad EC2 disponible a un precio reducido, pero EC2 puede interrumpirlas cuando necesita recuperar esa capacidad. Elige Spot para trabajo que puedas reintentar, reanudar o posponer, no para trabajo que deba ejecutarse sin interrupciones.",
+      "whenToUse": [
+        "Tus trabajos batch, de análisis o en segundo plano toleran interrupciones.",
+        "Tus workers no guardan estado o pueden registrar su progreso y reanudar el trabajo.",
+        "Puedes usar varios tipos de instancia y Availability Zones en lugar de depender de un solo pool de capacidad Spot."
+      ],
+      "keyFacts": [
+        "Un pool de capacidad Spot corresponde a un tipo de instancia en una Availability Zone.",
+        "EC2 envía un aviso de interrupción con dos minutos de anticipación si termina o detiene la instancia; si la hiberna, el aviso llega cuando comienza la hibernación.",
+        "Una EC2 instance rebalance recommendation puede señalar un mayor riesgo antes de ese aviso.",
+        "Una interrupción puede terminar, detener o hibernar una instancia, según el comportamiento configurado en la solicitud.",
+        "Una solicitud Spot persistente se vuelve a enviar después de una interrupción; no conserva el progreso del trabajo.",
+        "Savings Plans no añade otro descuento al uso de Spot, y el gasto en Spot no cuenta para los compromisos de Compute Savings Plans."
+      ],
+      "gotchas": [
+        "El aviso de dos minutos para terminar o detener la instancia te da tiempo para reaccionar, pero no garantiza que el trabajo termine; la hibernación no ofrece ese margen.",
+        "Definir un precio máximo para Spot puede aumentar las interrupciones.",
+        "Una solicitud persistente puede buscar otra instancia, pero tu aplicación debe recuperar el trabajo."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Savings Plans",
+          "difference": "Savings Plans no acumula otro descuento sobre Spot Instances ni contabiliza el gasto en Spot para un compromiso de Compute Savings Plans."
+        },
+        {
+          "concept": "On-Demand Instances",
+          "difference": "On-Demand evita las interrupciones por recuperación de capacidad propias de Spot; Spot es para trabajo que las tolera."
+        }
+      ],
+      "examCues": [
+        "retryable background jobs",
+        "checkpoint progress before interruption",
+        "flexible instance types and Availability Zones",
+        "two-minute notice except hibernation",
+        "rebalance at elevated interruption risk"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html",
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "spot-instances--ba9fea15",
+      "conceptId": "spot-instances",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media archive distributes retryable encoding tasks among Spot workers that already use several instance types and Availability Zones. The team wants workers to respond both to early signs of interruption risk and to the final warning so that less work must be repeated. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rely on persistent Spot requests to restore each interrupted task's in-memory progress.",
+          "correct": false,
+          "why": "A persistent request resubmits the instance request, not the interrupted task's in-memory progress."
+        },
+        {
+          "id": "B",
+          "text": "Set a maximum Spot price to prevent EC2 from interrupting workers for capacity.",
+          "correct": false,
+          "why": "A maximum price cannot prevent capacity interruptions and can increase interruptions."
+        },
+        {
+          "id": "C",
+          "text": "Use the two-minute interruption notice to checkpoint active tasks before the worker is interrupted.",
+          "correct": true,
+          "why": "Checkpointing during the warning can reduce the amount of active work repeated."
+        },
+        {
+          "id": "D",
+          "text": "Act on EC2 instance rebalance recommendations by shifting pending tasks to other workers.",
+          "correct": true,
+          "why": "The recommendation provides an opportunity to respond to elevated interruption risk before the final notice."
+        },
+        {
+          "id": "E",
+          "text": "Move all tasks to one instance type in one Availability Zone to avoid changing Spot pools.",
+          "correct": false,
+          "why": "This concentrates the workload in one Spot pool instead of addressing interruption risk or saving progress."
+        }
+      ],
+      "explanation": "The scenario asks for responses to two distinct signals: early elevated risk and the final interruption warning. Rebalance recommendations support proactive task movement, while the two-minute notice provides a window to checkpoint active work. Neither signal guarantees that an instance will remain available. Persistent requests seek replacement capacity but do not restore in-memory task progress.",
+      "keywordCues": [
+        "retryable encoding tasks",
+        "already use several instance types and Availability Zones",
+        "early signs of interruption risk",
+        "final warning",
+        "less work must be repeated"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html"
+      ],
+      "es": {
+        "stem": "Un archivo de medios distribuye tareas de codificación que pueden reintentarse entre workers Spot que ya usan varios tipos de instancia y Availability Zones. El equipo quiere responder tanto a señales tempranas de riesgo de interrupción como al aviso final para repetir menos trabajo. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Depender de solicitudes Spot persistentes para recuperar el progreso en memoria de cada tarea interrumpida.",
+            "why": "Una solicitud persistente vuelve a enviar la solicitud de instancia, pero no recupera el progreso en memoria de la tarea."
+          },
+          {
+            "id": "B",
+            "text": "Definir un precio máximo para Spot a fin de impedir que EC2 interrumpa los workers por falta de capacidad.",
+            "why": "Un precio máximo no impide interrupciones por capacidad y puede aumentar las interrupciones."
+          },
+          {
+            "id": "C",
+            "text": "Usar el aviso de interrupción de dos minutos para guardar el progreso de las tareas activas antes de que se interrumpa el worker.",
+            "why": "Guardar el progreso durante el aviso puede reducir la cantidad de trabajo activo que debes repetir."
+          },
+          {
+            "id": "D",
+            "text": "Actuar ante EC2 instance rebalance recommendations y mover las tareas pendientes a otros workers.",
+            "why": "La recomendación permite responder a un mayor riesgo de interrupción antes del aviso final."
+          },
+          {
+            "id": "E",
+            "text": "Mover todas las tareas a un tipo de instancia en una Availability Zone para evitar cambios entre pools Spot.",
+            "why": "Esto concentra el trabajo en un solo pool Spot en vez de afrontar el riesgo de interrupción o guardar el progreso."
+          }
+        ],
+        "explanation": "El caso pide responder a dos señales distintas: el riesgo elevado temprano y el aviso final de interrupción. EC2 instance rebalance recommendations permiten mover tareas de forma proactiva, y el aviso de dos minutos da tiempo para guardar el progreso del trabajo activo. Ninguna señal garantiza que la instancia siga disponible. Las solicitudes persistentes buscan capacidad de reemplazo, pero no recuperan el progreso en memoria."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "spot-instances--154ec987",
+      "conceptId": "spot-instances",
+      "secondaryConcepts": [
+        "savings-plans"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab runs nightly simulations that save progress periodically and can resume on another worker. Jobs may finish later if EC2 capacity becomes scarce, but the lab wants to reduce compute costs and avoid dependence on a single Spot capacity pool. Which approach meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Spot workers of one instance type and apply a Compute Savings Plans commitment for an additional Spot discount.",
+          "correct": false,
+          "why": "Savings Plans do not add savings to Spot usage, and this design still depends on one instance type."
+        },
+        {
+          "id": "B",
+          "text": "Use Spot workers across multiple instance types and Availability Zones, and checkpoint when an interruption notice arrives.",
+          "correct": true,
+          "why": "The jobs tolerate Spot interruptions, while multiple pools and checkpoints address capacity changes and lost work."
+        },
+        {
+          "id": "C",
+          "text": "Use Spot workers of one instance type in one Availability Zone, and checkpoint when an interruption notice arrives.",
+          "correct": false,
+          "why": "One instance type in one Availability Zone leaves the jobs dependent on a single Spot capacity pool."
+        },
+        {
+          "id": "D",
+          "text": "Use only On-Demand workers across multiple Availability Zones, and keep the existing checkpoints.",
+          "correct": false,
+          "why": "On-Demand does not use the discounted spare capacity that these interruptible jobs can tolerate."
+        }
+      ],
+      "explanation": "The simulations can resume and have flexible completion times, so interruptions are acceptable. Spot offers discounted spare capacity, and using different instance types and Availability Zones avoids relying on just one pool. Checkpointing lets workers recover after an interruption. A single-pool design misses the explicit capacity-diversity requirement.",
+      "keywordCues": [
+        "save progress periodically",
+        "can resume on another worker",
+        "may finish later",
+        "avoid dependence on a single Spot capacity pool",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio ejecuta simulaciones nocturnas que guardan su progreso periódicamente y pueden reanudarse en otro worker. Los trabajos pueden terminar más tarde si escasea la capacidad EC2, pero el laboratorio quiere reducir costos y evitar la dependencia de un solo pool de capacidad Spot. ¿Qué enfoque cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar workers Spot de un solo tipo de instancia y aplicar un compromiso de Compute Savings Plans para obtener un descuento adicional en Spot.",
+            "why": "Savings Plans no añade descuentos al uso de Spot, y el diseño aún depende de un solo tipo de instancia."
+          },
+          {
+            "id": "B",
+            "text": "Usar workers Spot con varios tipos de instancia y Availability Zones, y guardar el progreso cuando llegue un aviso de interrupción.",
+            "why": "Los trabajos toleran interrupciones de Spot, mientras que los distintos pools y los registros de progreso permiten afrontar cambios de capacidad."
+          },
+          {
+            "id": "C",
+            "text": "Usar workers Spot de un solo tipo de instancia en una Availability Zone y guardar el progreso cuando llegue un aviso de interrupción.",
+            "why": "Un solo tipo de instancia en una Availability Zone deja los trabajos dependientes de un único pool de capacidad Spot."
+          },
+          {
+            "id": "D",
+            "text": "Usar únicamente workers On-Demand en varias Availability Zones y conservar los registros de progreso existentes.",
+            "why": "On-Demand no aprovecha la capacidad disponible con descuento que estos trabajos interrumpibles pueden tolerar."
+          }
+        ],
+        "explanation": "Las simulaciones pueden reanudarse y tienen horarios de finalización flexibles, así que toleran interrupciones. Spot ofrece capacidad disponible con descuento; usar distintos tipos de instancia y Availability Zones evita depender de un único pool. Guardar el progreso permite recuperarlo tras una interrupción. La opción de un solo pool no cumple el requisito explícito de diversificar la capacidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "spot-instances--2526e9ce",
+      "conceptId": "spot-instances",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An online publisher has a customer-facing request processor that must remain available while separate workers generate optional article previews overnight. Preview tasks can be retried, and their completion time is flexible. Which compute purchasing approach reduces costs without exposing the request processor to Spot interruptions?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run both the request processor and preview workers on On-Demand Instances.",
+          "correct": false,
+          "why": "The retryable preview work misses the opportunity to use discounted Spot capacity."
+        },
+        {
+          "id": "B",
+          "text": "Run both the request processor and preview workers on Spot Instances.",
+          "correct": false,
+          "why": "The request processor cannot tolerate Spot capacity-reclamation interruptions."
+        },
+        {
+          "id": "C",
+          "text": "Run the request processor on On-Demand Instances and the preview workers on Spot Instances.",
+          "correct": true,
+          "why": "This limits Spot interruptions to optional, retryable work while using discounted capacity for that work."
+        },
+        {
+          "id": "D",
+          "text": "Run the request processor on Spot Instances and preview workers on On-Demand Instances.",
+          "correct": false,
+          "why": "This exposes the availability-sensitive component to interruptions while paying On-Demand prices for flexible work."
+        }
+      ],
+      "explanation": "The deciding constraint is that only the optional preview generation can be interrupted and retried. Spot fits those background workers, while the customer-facing processor should not depend on Spot capacity. Running everything On-Demand avoids Spot interruptions but misses the cost-saving opportunity for previews. Reversing the placement puts interruption risk on the wrong component.",
+      "keywordCues": [
+        "customer-facing request processor that must remain available",
+        "optional article previews overnight",
+        "Preview tasks can be retried",
+        "completion time is flexible"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html"
+      ],
+      "es": {
+        "stem": "Una editorial digital tiene un procesador de solicitudes de clientes que debe permanecer disponible, mientras otros workers generan vistas previas opcionales de artículos durante la noche. Las tareas de vistas previas pueden reintentarse y su horario de finalización es flexible. ¿Qué enfoque de compra de capacidad reduce costos sin exponer el procesador de solicitudes a interrupciones de Spot?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar tanto el procesador de solicitudes como los workers de vistas previas en On-Demand Instances.",
+            "why": "El trabajo de vistas previas, que puede reintentarse, pierde la oportunidad de usar capacidad Spot con descuento."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar tanto el procesador de solicitudes como los workers de vistas previas en Spot Instances.",
+            "why": "El procesador de solicitudes no tolera interrupciones por recuperación de capacidad Spot."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar el procesador de solicitudes en On-Demand Instances y los workers de vistas previas en Spot Instances.",
+            "why": "Así limitas las interrupciones de Spot al trabajo opcional que puede reintentarse y usas capacidad con descuento para ese trabajo."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar el procesador de solicitudes en Spot Instances y los workers de vistas previas en On-Demand Instances.",
+            "why": "Expones el componente que necesita disponibilidad a interrupciones y pagas On-Demand por el trabajo flexible."
+          }
+        ],
+        "explanation": "La condición decisiva es que solo la generación opcional de vistas previas puede interrumpirse y reintentarse. Spot sirve para esos workers de segundo plano, pero el procesador que atiende a clientes no debe depender de capacidad Spot. Ejecutar todo en On-Demand evita interrupciones de Spot, pero desaprovecha el ahorro posible en las vistas previas. Invertir la asignación pone el riesgo de interrupción en el componente equivocado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "spot-instances--265ceb3b",
+      "conceptId": "spot-instances",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A mapping company runs restartable tile-generation jobs on Spot Instances. Its workers can transfer pending jobs to replacement workers, and the team wants to act before an interruption notice when EC2 detects increased risk. Which solution BEST addresses that requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use EC2 instance rebalance recommendations to start transferring jobs, and use interruption notices for final cleanup.",
+          "correct": true,
+          "why": "A rebalance recommendation can arrive before the two-minute notice and gives workers a chance to respond proactively."
+        },
+        {
+          "id": "B",
+          "text": "Use persistent Spot requests and assume interrupted workers will retain their pending jobs.",
+          "correct": false,
+          "why": "Resubmitting a Spot request does not preserve application work on an interrupted worker."
+        },
+        {
+          "id": "C",
+          "text": "Set a low maximum Spot price so that workers remain available until their jobs finish.",
+          "correct": false,
+          "why": "A specified maximum price can increase interruptions rather than ensure completion."
+        },
+        {
+          "id": "D",
+          "text": "Wait for each two-minute interruption notice before beginning any transfer of pending jobs.",
+          "correct": false,
+          "why": "This does not act on the earlier signal of elevated interruption risk."
+        }
+      ],
+      "explanation": "The team specifically wants a signal before the two-minute interruption notice. EC2 instance rebalance recommendations indicate elevated interruption risk and provide an opportunity to shift work proactively. The interruption notice remains useful for final cleanup. Waiting for that notice alone misses the early-action requirement, and a persistent request does not transfer pending jobs.",
+      "keywordCues": [
+        "restartable tile-generation jobs",
+        "transfer pending jobs to replacement workers",
+        "before an interruption notice",
+        "increased risk"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html"
+      ],
+      "es": {
+        "stem": "Una empresa de cartografía ejecuta trabajos de generación de mosaicos que pueden reiniciarse en Spot Instances. Sus workers pueden transferir trabajos pendientes a workers de reemplazo, y el equipo quiere actuar antes del aviso de interrupción cuando EC2 detecta un mayor riesgo. ¿Qué solución cumple MEJOR ese requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar EC2 instance rebalance recommendations para empezar a transferir trabajos y los avisos de interrupción para la limpieza final.",
+            "why": "Una rebalance recommendation puede llegar antes del aviso de dos minutos y permite responder de forma proactiva."
+          },
+          {
+            "id": "B",
+            "text": "Usar solicitudes Spot persistentes y asumir que los workers interrumpidos conservarán sus trabajos pendientes.",
+            "why": "Volver a enviar una solicitud Spot no conserva el trabajo de la aplicación en un worker interrumpido."
+          },
+          {
+            "id": "C",
+            "text": "Definir un precio máximo bajo para Spot de modo que los workers sigan disponibles hasta terminar sus trabajos.",
+            "why": "Definir un precio máximo puede aumentar las interrupciones en lugar de asegurar que el trabajo termine."
+          },
+          {
+            "id": "D",
+            "text": "Esperar el aviso de interrupción de dos minutos antes de empezar a transferir los trabajos pendientes.",
+            "why": "Esto no permite actuar ante la señal más temprana de un mayor riesgo de interrupción."
+          }
+        ],
+        "explanation": "El equipo necesita específicamente una señal anterior al aviso de interrupción de dos minutos. EC2 instance rebalance recommendations indican un mayor riesgo y dan la oportunidad de mover el trabajo de forma proactiva. El aviso de interrupción sigue siendo útil para la limpieza final. Esperar únicamente ese aviso no cumple el requisito de actuar antes, y una solicitud persistente no transfiere los trabajos pendientes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "spot-instances--r0",
+      "conceptId": "spot-instances",
+      "kind": "recall",
+      "prompt": "Which EC2 purchasing option fits flexible, checkpointed batch jobs, and how should workers prepare for capacity interruptions?",
+      "promptEs": "¿Qué opción de compra de EC2 sirve para trabajos batch flexibles que guardan su progreso, y cómo deben prepararse los workers para interrupciones por capacidad?",
+      "idealAnswer": "Use Spot Instances because the jobs can tolerate interruptions in exchange for discounted spare capacity. Use multiple instance types and Availability Zones, and have workers checkpoint or transfer work when interruption signals arrive.",
+      "rubric": [
+        "Selects Spot Instances for flexible, recoverable work.",
+        "Mentions diversifying instance types or Availability Zones.",
+        "Explains checkpointing or transferring work in response to interruption signals."
+      ]
+    },
+    {
+      "id": "spot-instances--r1",
+      "conceptId": "spot-instances",
+      "kind": "why-not",
+      "prompt": "Why doesn't an existing Compute Savings Plans commitment provide an extra discount or commitment credit for a retryable job running on Spot?",
+      "promptEs": "¿Por qué un compromiso existente de Compute Savings Plans no aporta otro descuento ni crédito al compromiso para un trabajo que puede reintentarse y se ejecuta en Spot?",
+      "idealAnswer": "Spot Instances already use Spot pricing, and Savings Plans do not add savings on top of it. Spot spend also does not apply toward Compute Savings Plans commitments, so it must be accounted for separately.",
+      "rubric": [
+        "States that Savings Plans do not add a discount to Spot.",
+        "States that Spot spend does not apply toward Compute Savings Plans commitments."
+      ]
+    }
+  ]
+}

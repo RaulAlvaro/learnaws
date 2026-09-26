@@ -1,0 +1,446 @@
+{
+  "conceptId": "dynamodb-global-tables",
+  "card": {
+    "en": {
+      "tldr": "DynamoDB global tables replicate a table across Regions so each replica can serve local reads and writes. Choose them when a NoSQL application needs multi-Region, multi-active access and the ability to shift traffic after a Region interruption.",
+      "whenToUse": [
+        "Users in multiple Regions need fast local reads and writes to the same DynamoDB dataset.",
+        "The application must keep serving reads and writes from another Region if processing stops in one Region.",
+        "Separate AWS accounts need to own local replicas while sharing a replication group."
+      ],
+      "keyFacts": [
+        "Global tables are fully managed and automatically replicate DynamoDB data across Regions.",
+        "Any replica can serve reads and writes.",
+        "The default consistency mode is multi-Region eventual consistency (MREC); multi-Region strong consistency (MRSC) is also supported.",
+        "A table cannot mix consistency modes across replicas or change its mode after creation.",
+        "MRSC supports same-account global tables only."
+      ],
+      "gotchas": [
+        "A cross-Region replica intended only for reads does not satisfy a requirement for writes in every Region.",
+        "Do not assume the default MREC mode provides multi-Region strong consistency.",
+        "Choose the account model deliberately: MRSC cannot be used with multi-account global tables."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Aurora Global Database",
+          "difference": "Choose global tables for multi-active writes to a DynamoDB dataset, not for a global relational database."
+        },
+        {
+          "concept": "RDS Multi-AZ",
+          "difference": "Same-Region database availability does not provide local read and write replicas across Regions."
+        },
+        {
+          "concept": "RDS read replicas",
+          "difference": "A read-focused replica does not meet a requirement for active writes in each Region."
+        }
+      ],
+      "examCues": [
+        "DynamoDB users on multiple continents need local writes",
+        "every Region must accept reads and writes",
+        "shift traffic after a Region interruption",
+        "replicas owned by separate AWS accounts"
+      ]
+    },
+    "es": {
+      "tldr": "DynamoDB global tables replica una tabla entre Regions para que cada réplica atienda lecturas y escrituras locales. Elígelo cuando una aplicación NoSQL necesite acceso multi-Region y multi-active, además de poder desviar el tráfico si se interrumpe una Region.",
+      "whenToUse": [
+        "Usuarios en varias Regions necesitan lecturas y escrituras locales rápidas sobre los mismos datos de DynamoDB.",
+        "La aplicación debe seguir atendiendo lecturas y escrituras desde otra Region si se interrumpe el procesamiento en una.",
+        "Distintas cuentas de AWS deben ser propietarias de sus réplicas locales y compartir un grupo de replicación."
+      ],
+      "keyFacts": [
+        "Global tables es una característica completamente administrada que replica automáticamente datos de DynamoDB entre Regions.",
+        "Cualquier réplica puede atender lecturas y escrituras.",
+        "El modo de consistencia predeterminado es multi-Region eventual consistency (MREC); también existe multi-Region strong consistency (MRSC).",
+        "No puedes combinar modos de consistencia entre las réplicas de una tabla ni cambiar el modo después de crearla.",
+        "MRSC solo admite global tables dentro de una misma cuenta."
+      ],
+      "gotchas": [
+        "Una réplica entre Regions destinada solo a lecturas no satisface el requisito de escribir en cada Region.",
+        "No supongas que el modo predeterminado MREC ofrece multi-Region strong consistency.",
+        "Elige el modelo de cuentas con cuidado: no puedes usar MRSC con multi-account global tables."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Aurora Global Database",
+          "difference": "Elige global tables para escrituras multi-active en datos de DynamoDB, no para una base de datos relacional global."
+        },
+        {
+          "concept": "RDS Multi-AZ",
+          "difference": "La disponibilidad de una base de datos dentro de una misma Region no proporciona réplicas de lectura y escritura locales en varias Regions."
+        },
+        {
+          "concept": "RDS read replicas",
+          "difference": "Una réplica orientada a lecturas no cumple un requisito de escrituras activas en cada Region."
+        }
+      ],
+      "examCues": [
+        "DynamoDB users on multiple continents need local writes",
+        "every Region must accept reads and writes",
+        "shift traffic after a Region interruption",
+        "replicas owned by separate AWS accounts"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-global-tables--2584378d",
+      "conceptId": "dynamodb-global-tables",
+      "secondaryConcepts": [
+        "rds-multi-az",
+        "rds-read-replicas"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company stores seat reservations in DynamoDB. Its applications in two AWS Regions must each accept nearby customers' reads and writes, and either Region must be able to serve traffic if application processing stops in the other. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep separate DynamoDB tables in each Region and build application code to copy reservation changes between them.",
+          "correct": false,
+          "why": "Custom replication adds operational work that global tables manage automatically."
+        },
+        {
+          "id": "B",
+          "text": "Use a cross-Region RDS read replica and send each application's reads to its nearest Region.",
+          "correct": false,
+          "why": "A read-focused replica does not meet the requirement for active writes in both Regions."
+        },
+        {
+          "id": "C",
+          "text": "Create a DynamoDB global table with a replica in each Region and use the local replica for reads and writes.",
+          "correct": true,
+          "why": "Global tables manage cross-Region replication, and either replica can serve reads and writes."
+        },
+        {
+          "id": "D",
+          "text": "Use an RDS Multi-AZ deployment in the first Region and direct both applications to it.",
+          "correct": false,
+          "why": "A deployment in one Region does not provide local writes or a database replica in the other Region."
+        }
+      ],
+      "explanation": "The deciding requirements are local reads and writes in both Regions and continued service after a Region interruption. A DynamoDB global table provides managed replication, and any replica can handle reads and writes. Separate tables with custom copying could pursue a similar architecture but would not meet the least-operational-overhead qualifier.",
+      "keywordCues": [
+        "stores seat reservations in DynamoDB",
+        "each accept nearby customers' reads and writes",
+        "if application processing stops in the other",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+      ],
+      "es": {
+        "stem": "Una empresa de boletos guarda las reservas de asientos en DynamoDB. Sus aplicaciones en dos AWS Regions deben aceptar lecturas y escrituras de clientes cercanos, y cualquiera de las Regions debe poder atender el tráfico si se interrumpe el procesamiento en la otra. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener tablas de DynamoDB separadas en cada Region y crear código de aplicación para copiar los cambios de las reservas entre ellas.",
+            "why": "La replicación personalizada agrega trabajo operativo que global tables administra automáticamente."
+          },
+          {
+            "id": "B",
+            "text": "Usar una RDS read replica entre Regions y enviar las lecturas de cada aplicación a la Region más cercana.",
+            "why": "Una réplica orientada a lecturas no cumple el requisito de escrituras activas en ambas Regions."
+          },
+          {
+            "id": "C",
+            "text": "Crear una DynamoDB global table con una réplica en cada Region y usar la réplica local para lecturas y escrituras.",
+            "why": "Global tables administra la replicación entre Regions y cualquiera de las réplicas puede atender lecturas y escrituras."
+          },
+          {
+            "id": "D",
+            "text": "Usar una implementación de RDS Multi-AZ en la primera Region y dirigir ambas aplicaciones hacia ella.",
+            "why": "Una implementación en una sola Region no ofrece escrituras locales ni una réplica de la base de datos en la otra Region."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son lecturas y escrituras locales en ambas Regions y la continuidad del servicio si se interrumpe una Region. Una DynamoDB global table proporciona replicación administrada y cualquier réplica puede atender lecturas y escrituras. Mantener tablas separadas con código para copiarlas agrega trabajo y no cumple el criterio de LEAST operational overhead."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-global-tables--73630bfe",
+      "conceptId": "dynamodb-global-tables",
+      "secondaryConcepts": [
+        "aurora-global-database"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A global retailer uses DynamoDB for a product-availability dataset. Regional business units operate in separate AWS accounts and require ownership of their local replicas, with distinct IAM, KMS, billing, and governance boundaries. Each unit must update the shared dataset from its own Region. Which design meets these requirements with the LEAST custom replication work?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a multi-account DynamoDB global table with a replica owned by each regional account.",
+          "correct": true,
+          "why": "Multi-account global tables support shared replication and local replica ownership across account boundaries."
+        },
+        {
+          "id": "B",
+          "text": "Create a same-account DynamoDB global table and grant every business unit access to its regional replica.",
+          "correct": false,
+          "why": "The replicas would remain under one account rather than being owned by the separate business-unit accounts."
+        },
+        {
+          "id": "C",
+          "text": "Create an Aurora Global Database and give each business unit access to a regional database.",
+          "correct": false,
+          "why": "This replaces the required DynamoDB dataset with a relational database design."
+        },
+        {
+          "id": "D",
+          "text": "Place independent DynamoDB tables in the regional accounts and implement replication between them.",
+          "correct": false,
+          "why": "This retains separate ownership but requires the custom replication work the company wants to avoid."
+        }
+      ],
+      "explanation": "The separate account-ownership and governance boundaries determine the account model. Multi-account DynamoDB global tables allow each account to own its local replica while participating in shared replication and supporting writes across Regions. A same-account global table offers multi-Region access but misses the explicit requirement that separate accounts own their replicas.",
+      "keywordCues": [
+        "uses DynamoDB",
+        "separate AWS accounts",
+        "ownership of their local replicas",
+        "Each unit must update the shared dataset",
+        "LEAST custom replication work"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+      ],
+      "es": {
+        "stem": "Una tienda global usa DynamoDB para los datos de disponibilidad de productos. Sus unidades regionales trabajan en cuentas de AWS separadas y necesitan ser propietarias de sus réplicas locales, con límites distintos de IAM, KMS, facturación y gobernanza. Cada unidad debe actualizar los datos compartidos desde su propia Region. ¿Qué diseño cumple estos requisitos con el LEAST custom replication work?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una multi-account DynamoDB global table con una réplica propiedad de cada cuenta regional.",
+            "why": "Multi-account global tables permite replicación compartida y propiedad local de las réplicas entre cuentas."
+          },
+          {
+            "id": "B",
+            "text": "Crear una same-account DynamoDB global table y conceder a cada unidad acceso a su réplica regional.",
+            "why": "Las réplicas seguirían perteneciendo a una sola cuenta, no a las cuentas separadas de las unidades."
+          },
+          {
+            "id": "C",
+            "text": "Crear una Aurora Global Database y dar acceso a cada unidad a una base de datos regional.",
+            "why": "Esto reemplaza los datos requeridos en DynamoDB por un diseño de base de datos relacional."
+          },
+          {
+            "id": "D",
+            "text": "Colocar tablas independientes de DynamoDB en las cuentas regionales e implementar replicación entre ellas.",
+            "why": "Esto conserva la propiedad separada, pero exige el trabajo de replicación personalizada que se busca evitar."
+          }
+        ],
+        "explanation": "La propiedad de las réplicas por cuentas separadas y los límites de gobernanza determinan el modelo de cuentas. Multi-account DynamoDB global tables permite que cada cuenta sea propietaria de su réplica local, participe en la replicación compartida y admita escrituras entre Regions. Una same-account global table ofrece acceso multi-Region, pero no cumple el requisito de propiedad por cuentas separadas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-global-tables--fb508f58",
+      "conceptId": "dynamodb-global-tables",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization is creating a new DynamoDB table whose data must be readable and writable from two Regions. Its policy requires multi-Region strong consistency, and the organization can keep both replicas in one AWS account. Which configuration meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a same-account global table and select multi-Region strong consistency at creation.",
+          "correct": true,
+          "why": "The required mode is supported for same-account global tables and must be chosen when the table is created."
+        },
+        {
+          "id": "B",
+          "text": "Create a multi-account global table and select multi-Region strong consistency.",
+          "correct": false,
+          "why": "Multi-Region strong consistency is supported only for same-account global tables."
+        },
+        {
+          "id": "C",
+          "text": "Create a same-account global table and leave its consistency mode at the default.",
+          "correct": false,
+          "why": "The default mode is multi-Region eventual consistency, not the required strong consistency."
+        },
+        {
+          "id": "D",
+          "text": "Create a same-account global table in the default mode and switch its mode after both replicas are active.",
+          "correct": false,
+          "why": "A global table's consistency mode cannot be changed after creation."
+        }
+      ],
+      "explanation": "The deciding constraint is multi-Region strong consistency for a new table. DynamoDB global tables support MRSC, but only in a same-account configuration, so the organization must select that mode at creation. Leaving the mode unspecified selects MREC, and changing the mode later is not supported.",
+      "keywordCues": [
+        "creating a new DynamoDB table",
+        "readable and writable from two Regions",
+        "requires multi-Region strong consistency",
+        "one AWS account"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación está creando una nueva tabla de DynamoDB cuyos datos deben poder leerse y escribirse desde dos Regions. Su política exige multi-Region strong consistency y la organización puede mantener ambas réplicas en una sola cuenta de AWS. ¿Qué configuración cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una same-account global table y seleccionar multi-Region strong consistency al momento de crearla.",
+            "why": "El modo requerido se admite en same-account global tables y debe elegirse durante la creación."
+          },
+          {
+            "id": "B",
+            "text": "Crear una multi-account global table y seleccionar multi-Region strong consistency.",
+            "why": "Multi-Region strong consistency solo se admite en same-account global tables."
+          },
+          {
+            "id": "C",
+            "text": "Crear una same-account global table y conservar el modo de consistencia predeterminado.",
+            "why": "El modo predeterminado es multi-Region eventual consistency, no la consistencia fuerte requerida."
+          },
+          {
+            "id": "D",
+            "text": "Crear una same-account global table con el modo predeterminado y cambiarlo después de activar ambas réplicas.",
+            "why": "No puedes cambiar el modo de consistencia de una global table después de crearla."
+          }
+        ],
+        "explanation": "El requisito decisivo es multi-Region strong consistency para una tabla nueva. DynamoDB global tables admite MRSC, pero solo en una configuración same-account, por lo que debes seleccionar ese modo al crear la tabla. Si no especificas un modo, se usa MREC, y no puedes cambiarlo después."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-global-tables--9aeedb31",
+      "conceptId": "dynamodb-global-tables",
+      "secondaryConcepts": [
+        "rds-read-replicas"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics platform keeps shipment state in DynamoDB and runs applications in two AWS Regions. Both applications must read and update shipment state locally, and the platform must be able to shift traffic to the remaining Region if processing stops in one. Which TWO design choices meet these requirements while avoiding custom table replication? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a DynamoDB global table with a replica in each application Region.",
+          "correct": true,
+          "why": "Global tables automatically replicate the dataset across the two Regions."
+        },
+        {
+          "id": "B",
+          "text": "Use an RDS read replica in the second Region to receive that application's updates.",
+          "correct": false,
+          "why": "A read-focused replica does not meet the requirement for local updates to the DynamoDB dataset."
+        },
+        {
+          "id": "C",
+          "text": "Keep one DynamoDB table in the first Region and route all updates there.",
+          "correct": false,
+          "why": "Updates from the second Region would not be served locally."
+        },
+        {
+          "id": "D",
+          "text": "Have each application read from and write to its local global table replica.",
+          "correct": true,
+          "why": "Either global table replica can serve local reads and writes."
+        },
+        {
+          "id": "E",
+          "text": "Keep independent regional DynamoDB tables and copy changes with application code.",
+          "correct": false,
+          "why": "Application-managed copying violates the requirement to avoid custom table replication."
+        }
+      ],
+      "explanation": "The architecture must support writes in both Regions without application-managed replication. A global table supplies managed cross-Region replication, and each application can use its local replica for reads and writes. Sending updates to one Region misses local-write access; maintaining separate tables requires the custom replication the platform wants to avoid.",
+      "keywordCues": [
+        "keeps shipment state in DynamoDB",
+        "Both applications must read and update shipment state locally",
+        "shift traffic to the remaining Region",
+        "avoiding custom table replication",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+      ],
+      "es": {
+        "stem": "Una plataforma logística guarda el estado de sus envíos en DynamoDB y ejecuta aplicaciones en dos AWS Regions. Ambas aplicaciones deben leer y actualizar el estado de los envíos localmente, y la plataforma debe poder desviar el tráfico a la Region restante si se interrumpe el procesamiento en una. ¿Qué DOS decisiones de diseño cumplen estos requisitos y evitan la replicación personalizada de tablas? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una DynamoDB global table con una réplica en cada Region donde se ejecuta la aplicación.",
+            "why": "Global tables replica automáticamente los datos entre las dos Regions."
+          },
+          {
+            "id": "B",
+            "text": "Usar una RDS read replica en la segunda Region para recibir las actualizaciones de esa aplicación.",
+            "why": "Una réplica orientada a lecturas no cumple el requisito de actualizaciones locales de los datos de DynamoDB."
+          },
+          {
+            "id": "C",
+            "text": "Mantener una sola tabla de DynamoDB en la primera Region y dirigir allí todas las actualizaciones.",
+            "why": "Las actualizaciones desde la segunda Region no se atenderían localmente."
+          },
+          {
+            "id": "D",
+            "text": "Hacer que cada aplicación lea y escriba en su réplica local de global tables.",
+            "why": "Cualquiera de las réplicas de global tables puede atender lecturas y escrituras locales."
+          },
+          {
+            "id": "E",
+            "text": "Mantener tablas regionales independientes de DynamoDB y copiar los cambios mediante código de aplicación.",
+            "why": "La copia administrada por la aplicación incumple el requisito de evitar la replicación personalizada de tablas."
+          }
+        ],
+        "explanation": "La arquitectura debe permitir escrituras en ambas Regions sin replicación administrada por la aplicación. Una global table proporciona replicación administrada entre Regions, y cada aplicación puede usar su réplica local para lecturas y escrituras. Enviar las actualizaciones a una sola Region no permite escrituras locales; mantener tablas separadas exige la replicación personalizada que la plataforma quiere evitar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-global-tables--r0",
+      "conceptId": "dynamodb-global-tables",
+      "kind": "recall",
+      "prompt": "A DynamoDB application needs local reads and writes in multiple Regions. Which feature fits, and how does it help during a Region interruption?",
+      "promptEs": "Una aplicación de DynamoDB necesita lecturas y escrituras locales en varias Regions. ¿Qué característica usarías y cómo ayuda si se interrumpe una Region?",
+      "idealAnswer": "Use DynamoDB global tables. Each regional replica can serve reads and writes, and the application can shift traffic to another Region if processing is interrupted.",
+      "rubric": [
+        "Names DynamoDB global tables.",
+        "Explains that regional replicas can each serve reads and writes.",
+        "Mentions shifting traffic to another Region after an interruption."
+      ]
+    },
+    {
+      "id": "dynamodb-global-tables--r1",
+      "conceptId": "dynamodb-global-tables",
+      "kind": "why-not",
+      "prompt": "Why is Aurora Global Database not the direct fit for an existing DynamoDB dataset requiring active writes in multiple Regions?",
+      "promptEs": "¿Por qué Aurora Global Database no es la opción directa para datos existentes de DynamoDB que requieren escrituras activas en varias Regions?",
+      "idealAnswer": "The requirement is for multi-active writes to an existing DynamoDB dataset. DynamoDB global tables replicate that dataset across Regions while allowing each replica to serve writes; Aurora Global Database is a relational database design, not a DynamoDB replication feature.",
+      "rubric": [
+        "Identifies the existing DynamoDB dataset as a deciding constraint.",
+        "States that global table replicas can accept writes in multiple Regions.",
+        "Distinguishes Aurora Global Database as a relational database design."
+      ]
+    }
+  ]
+}

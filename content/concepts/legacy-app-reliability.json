@@ -1,0 +1,330 @@
+{
+  "conceptId": "legacy-app-reliability",
+  "card": {
+    "en": {
+      "tldr": "When a legacy application cannot be changed, choose a reliability mechanism that matches what must survive failure. EC2 automatic recovery attempts to preserve one instance’s identity after a host-level failure; Elastic Load Balancing and EC2 Auto Scaling support traffic failover across healthy instances.",
+      "whenToUse": [
+        "Choose EC2 automatic recovery when a supported singleton must retain its instance ID, IP addresses, and attached EBS volumes after an underlying host failure.",
+        "Choose Elastic Load Balancing with multiple EC2 instances and EC2 Auto Scaling when traffic must continue through healthy instances."
+      ],
+      "keyFacts": [
+        "A failed EC2 system status check indicates an underlying host problem; automatic instance recovery does not act when only the instance status check fails.",
+        "Simplified automatic recovery is enabled by default on supported instances. CloudWatch action-based recovery requires configuration.",
+        "Successful instance recovery preserves the instance ID, public and private IP addresses, attached EBS volumes, and Availability Zone.",
+        "Recovery loses data in RAM and resets operating-system uptime. CloudWatch action-based recovery also loses instance store data.",
+        "Automatic recovery protects an individual instance; it does not replace an architecture that fails traffic over to healthy instances."
+      ],
+      "gotchas": [
+        "Do not treat a failed instance status check as a trigger that EC2 automatic recovery can fix.",
+        "Do not assume automatic recovery moves the instance to another Availability Zone.",
+        "Do not use single-instance recovery as the sole answer when users must continue reaching other healthy instances."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 Auto Scaling",
+          "difference": "Auto Scaling manages instance capacity based on demand and health; EC2 automatic recovery attempts to restore an individual instance after an underlying host failure."
+        },
+        {
+          "concept": "CloudWatch action-based recovery",
+          "difference": "It requires an alarm and recovery action, whereas simplified automatic recovery is enabled by default on supported instances."
+        }
+      ],
+      "examCues": [
+        "cannot change the application",
+        "retain the instance ID and IP addresses",
+        "system status check fails",
+        "route traffic to healthy instances"
+      ]
+    },
+    "es": {
+      "tldr": "Cuando no puedes modificar una aplicación heredada, elige un mecanismo de confiabilidad según lo que debe sobrevivir a una falla. EC2 automatic recovery intenta conservar la identidad de una instancia ante una falla del host; Elastic Load Balancing y EC2 Auto Scaling permiten dirigir tráfico a instancias sanas.",
+      "whenToUse": [
+        "Elige EC2 automatic recovery si una instancia única compatible debe conservar su instance ID, direcciones IP y volúmenes EBS adjuntos después de una falla del host.",
+        "Elige Elastic Load Balancing con varias instancias EC2 y EC2 Auto Scaling si el tráfico debe continuar mediante instancias sanas."
+      ],
+      "keyFacts": [
+        "Una falla de EC2 system status check indica un problema del host; automatic instance recovery no actúa si solo falla instance status check.",
+        "Simplified automatic recovery viene habilitado de forma predeterminada en instancias compatibles. CloudWatch action-based recovery requiere configuración.",
+        "Una recuperación exitosa conserva instance ID, direcciones IP públicas y privadas, volúmenes EBS adjuntos y Availability Zone.",
+        "La recuperación pierde los datos en RAM y reinicia el tiempo de actividad del sistema operativo. CloudWatch action-based recovery también pierde los datos de instance store.",
+        "Automatic recovery protege una instancia individual; no sustituye una arquitectura que desvía el tráfico hacia instancias sanas."
+      ],
+      "gotchas": [
+        "No supongas que EC2 automatic recovery resuelve una falla que solo afecta a instance status check.",
+        "No supongas que automatic recovery traslada la instancia a otra Availability Zone.",
+        "No dependas únicamente de la recuperación de una instancia si los usuarios deben seguir accediendo a otras instancias sanas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 Auto Scaling",
+          "difference": "Auto Scaling administra la cantidad de instancias según la demanda y la salud; EC2 automatic recovery intenta restaurar una instancia individual tras una falla del host."
+        },
+        {
+          "concept": "CloudWatch action-based recovery",
+          "difference": "Requiere una alarma y una acción de recuperación; simplified automatic recovery viene habilitado de forma predeterminada en instancias compatibles."
+        }
+      ],
+      "examCues": [
+        "cannot change the application",
+        "retain the instance ID and IP addresses",
+        "system status check fails",
+        "route traffic to healthy instances"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html",
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "legacy-app-reliability--638016ec",
+      "conceptId": "legacy-app-reliability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturer runs an unmodified licensing application on one supported EC2 instance. The license is tied to the instance ID, and the application uses an attached EBS volume. Operations wants the instance to recover automatically from an underlying host failure while retaining those identifiers. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a CloudWatch alarm to notify operators when the system status check fails.",
+          "correct": false,
+          "why": "Notification alone does not automatically attempt to recover the instance."
+        },
+        {
+          "id": "B",
+          "text": "Stop and start the instance manually whenever its system status check fails.",
+          "correct": false,
+          "why": "Manual intervention does not meet the automatic-recovery requirement."
+        },
+        {
+          "id": "C",
+          "text": "Use EC2 Auto Scaling to replace the instance when its health check fails.",
+          "correct": false,
+          "why": "Replacing the instance does not meet the requirement to retain the original instance ID."
+        },
+        {
+          "id": "D",
+          "text": "Use simplified automatic recovery on the EC2 instance.",
+          "correct": true,
+          "why": "On a supported instance, it attempts recovery after a system status check failure and preserves the instance ID and attached EBS volumes."
+        }
+      ],
+      "explanation": "The deciding requirements are automatic response to an underlying host failure and preservation of the instance ID and EBS attachment. Simplified automatic recovery is enabled by default on supported instances and attempts recovery after a system status check failure. An Auto Scaling replacement misses the identity requirement, while a notification still leaves recovery to operators.",
+      "keywordCues": [
+        "one supported EC2 instance",
+        "license is tied to the instance ID",
+        "attached EBS volume",
+        "underlying host failure",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html"
+      ],
+      "es": {
+        "stem": "Un fabricante ejecuta una aplicación de licencias sin modificaciones en una instancia EC2 compatible. La licencia está vinculada al instance ID y la aplicación usa un volumen EBS adjunto. El equipo de operaciones quiere que la instancia se recupere automáticamente de una falla del host y conserve esos identificadores. ¿Qué solución cumple los requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar una alarma de CloudWatch para avisar a los operadores cuando falle system status check.",
+            "why": "Una notificación por sí sola no intenta recuperar la instancia automáticamente."
+          },
+          {
+            "id": "B",
+            "text": "Detener e iniciar la instancia manualmente cuando falle su system status check.",
+            "why": "La intervención manual no cumple el requisito de recuperación automática."
+          },
+          {
+            "id": "C",
+            "text": "Usar EC2 Auto Scaling para reemplazar la instancia cuando falle su health check.",
+            "why": "El reemplazo no cumple el requisito de conservar el instance ID original."
+          },
+          {
+            "id": "D",
+            "text": "Usar simplified automatic recovery en la instancia EC2.",
+            "why": "En una instancia compatible, intenta recuperarla tras una falla de system status check y conserva el instance ID y los volúmenes EBS adjuntos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son responder automáticamente a una falla del host y conservar el instance ID y el volumen EBS adjunto. Simplified automatic recovery viene habilitado de forma predeterminada en instancias compatibles e intenta recuperarlas tras una falla de system status check. Un reemplazo mediante Auto Scaling no conserva la identidad, y una notificación deja la recuperación en manos de los operadores."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "legacy-app-reliability--4b8d455d",
+      "conceptId": "legacy-app-reliability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing company has an older web application that can run on multiple EC2 instances without code changes. Customers must continue reaching healthy instances if one instance becomes unhealthy, including when the problem is within its operating system rather than its host. Which design meets the availability requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Put multiple instances behind Elastic Load Balancing and manage their number with EC2 Auto Scaling.",
+          "correct": true,
+          "why": "The load balancer can distribute traffic across instances, while Auto Scaling adjusts instance capacity based on demand and health."
+        },
+        {
+          "id": "B",
+          "text": "Run multiple instances with automatic recovery enabled, but route all customer traffic to one designated instance.",
+          "correct": false,
+          "why": "The other instances cannot keep serving customers if traffic is directed only to the unhealthy instance."
+        },
+        {
+          "id": "C",
+          "text": "Run one instance with simplified automatic recovery and send all traffic directly to it.",
+          "correct": false,
+          "why": "Automatic recovery protects an individual instance from underlying failures but does not fail traffic over to other healthy instances."
+        },
+        {
+          "id": "D",
+          "text": "Run one instance with CloudWatch action-based recovery and send all traffic directly to it.",
+          "correct": false,
+          "why": "Action-based recovery is still an individual-instance mechanism and does not address a failure detected only by an instance status check."
+        }
+      ],
+      "explanation": "The key requirement is continued service through other healthy instances, including when the issue is not an underlying host failure. Elastic Load Balancing distributes incoming traffic across multiple EC2 instances, and EC2 Auto Scaling adjusts their number based on demand and health. Either form of EC2 automatic recovery focuses on an individual instance and does not operate when only its instance status check fails.",
+      "keywordCues": [
+        "can run on multiple EC2 instances",
+        "continue reaching healthy instances",
+        "within its operating system rather than its host"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos tiene una aplicación web antigua que puede ejecutarse en varias instancias EC2 sin cambios de código. Los clientes deben seguir accediendo a instancias sanas si una instancia deja de estar sana, incluso cuando el problema está en su sistema operativo y no en el host. ¿Qué diseño cumple el requisito de disponibilidad?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar varias instancias detrás de Elastic Load Balancing y administrar su cantidad con EC2 Auto Scaling.",
+            "why": "El balanceador distribuye el tráfico entre instancias y Auto Scaling ajusta la capacidad según la demanda y la salud."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar varias instancias con automatic recovery habilitado, pero dirigir todo el tráfico de clientes a una instancia designada.",
+            "why": "Las otras instancias no pueden seguir atendiendo a los clientes si el tráfico solo se dirige a la instancia que dejó de estar sana."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar una instancia con simplified automatic recovery y enviarle todo el tráfico directamente.",
+            "why": "Automatic recovery protege una instancia individual ante fallas subyacentes, pero no desvía el tráfico hacia otras instancias sanas."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar una instancia con CloudWatch action-based recovery y enviarle todo el tráfico directamente.",
+            "why": "Action-based recovery sigue siendo un mecanismo para una sola instancia y no resuelve una falla detectada únicamente por instance status check."
+          }
+        ],
+        "explanation": "El requisito decisivo es mantener el servicio mediante otras instancias sanas, incluso si no existe una falla del host. Elastic Load Balancing distribuye el tráfico entre varias instancias EC2 y EC2 Auto Scaling ajusta su cantidad según la demanda y la salud. Ambas formas de EC2 automatic recovery se centran en una instancia individual y no actúan cuando solo falla su instance status check."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "legacy-app-reliability--f0454742",
+      "conceptId": "legacy-app-reliability",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small archive service runs on a supported EC2 instance and can tolerate a reboot, but its clients refer to the instance's current public IPv4 address. The team wants an automatic attempt to restore service after a host hardware failure without configuring alarms or adding their associated charges. Which approach is MOST cost-effective?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the instance through EC2 Auto Scaling after a health failure.",
+          "correct": false,
+          "why": "Replacing the instance does not preserve the original instance's public IPv4 address."
+        },
+        {
+          "id": "B",
+          "text": "Use simplified automatic recovery on the instance.",
+          "correct": true,
+          "why": "It requires no additional configuration on supported instances, has no additional cost, and preserves the public IPv4 address if recovery succeeds."
+        },
+        {
+          "id": "C",
+          "text": "Stop and start the instance after a system status check failure.",
+          "correct": false,
+          "why": "Stopping and starting requires intervention and ordinarily changes its public IPv4 address unless it has an Elastic IP address."
+        },
+        {
+          "id": "D",
+          "text": "Configure CloudWatch action-based recovery with a system status check alarm.",
+          "correct": false,
+          "why": "It can attempt recovery but requires alarm configuration and might incur CloudWatch charges."
+        }
+      ],
+      "explanation": "The instance is supported, the fault is at the host, and the team wants to avoid alarm configuration and associated charges. Simplified automatic recovery is enabled by default on supported instances, has no additional cost, and preserves the public IPv4 address if it succeeds. CloudWatch action-based recovery adds configuration and might incur charges; a stop/start can change the public IPv4 address.",
+      "keywordCues": [
+        "supported EC2 instance",
+        "current public IPv4 address",
+        "host hardware failure",
+        "without configuring alarms or adding their associated charges"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html"
+      ],
+      "es": {
+        "stem": "Un pequeño servicio de archivo se ejecuta en una instancia EC2 compatible y tolera un reinicio, pero sus clientes usan la dirección IPv4 pública actual de la instancia. El equipo quiere que se intente restaurar el servicio automáticamente tras una falla del hardware del host, sin configurar alarmas ni añadir sus posibles cargos. ¿Qué enfoque es MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplazar la instancia mediante EC2 Auto Scaling tras una falla de salud.",
+            "why": "El reemplazo no conserva la dirección IPv4 pública de la instancia original."
+          },
+          {
+            "id": "B",
+            "text": "Usar simplified automatic recovery en la instancia.",
+            "why": "No requiere configuración adicional en instancias compatibles, no tiene costo adicional y conserva la dirección IPv4 pública si la recuperación tiene éxito."
+          },
+          {
+            "id": "C",
+            "text": "Detener e iniciar la instancia después de una falla de system status check.",
+            "why": "Requiere intervención y normalmente cambia su dirección IPv4 pública, a menos que tenga una Elastic IP address."
+          },
+          {
+            "id": "D",
+            "text": "Configurar CloudWatch action-based recovery con una alarma de system status check.",
+            "why": "Puede intentar la recuperación, pero exige configurar una alarma y podría generar cargos de CloudWatch."
+          }
+        ],
+        "explanation": "La instancia es compatible, la falla ocurre en el host y el equipo quiere evitar la configuración y los posibles cargos de una alarma. Simplified automatic recovery viene habilitado de forma predeterminada en instancias compatibles, no tiene costo adicional y conserva la dirección IPv4 pública si tiene éxito. CloudWatch action-based recovery añade configuración y posibles cargos; detener e iniciar la instancia puede cambiar su IPv4 pública."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "legacy-app-reliability--r0",
+      "conceptId": "legacy-app-reliability",
+      "kind": "recall",
+      "prompt": "A supported legacy EC2 singleton must retain its instance ID after a host failure. What would you use, and why?",
+      "promptEs": "Una instancia EC2 única y compatible debe conservar su instance ID tras una falla del host. ¿Qué usarías y por qué?",
+      "idealAnswer": "Use EC2 automatic recovery, such as simplified automatic recovery. It attempts recovery after a system status check failure and preserves the instance ID if successful.",
+      "rubric": [
+        "Names EC2 automatic recovery or simplified automatic recovery.",
+        "Identifies an underlying host or system status check failure as the trigger.",
+        "States that successful recovery preserves the instance ID."
+      ]
+    }
+  ]
+}

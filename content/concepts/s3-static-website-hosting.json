@@ -1,0 +1,331 @@
+{
+  "conceptId": "s3-static-website-hosting",
+  "card": {
+    "en": {
+      "tldr": "Amazon S3 can serve static webpages, including pages with client-side scripts. Choose S3 website hosting when an HTTP website is sufficient; for HTTPS with private S3 content, use CloudFront with an S3 bucket origin and origin access control (OAC).",
+      "whenToUse": [
+        "A site consists of static files and does not need server-side application processing.",
+        "An HTTP-only site can be served directly from an S3 website endpoint.",
+        "Visitors need HTTPS while the S3 bucket remains private.",
+        "S3 content uses SSE-KMS and must be served through CloudFront."
+      ],
+      "keyFacts": [
+        "S3 static website hosting supports an index document and a custom error document.",
+        "An S3 website endpoint does not provide HTTPS.",
+        "CloudFront can serve static content stored in S3 over HTTPS.",
+        "For an SSE-KMS-encrypted S3 website served through CloudFront, use OAC; origin access identity (OAI) does not support SSE-KMS.",
+        "AWS recommends Amplify Hosting for a fully managed deployment of static S3 content to a CloudFront-powered CDN with a public HTTPS URL."
+      ],
+      "gotchas": [
+        "Do not choose a direct S3 website endpoint when visitors require HTTPS.",
+        "Do not treat an S3 website endpoint as the private S3 bucket origin protected by CloudFront OAC.",
+        "For SSE-KMS content, replacing OAC with OAI does not meet the encryption requirement."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Amplify Hosting",
+          "difference": "Amplify manages deployment to a CloudFront-powered CDN and provides a public HTTPS URL; direct S3 website hosting does not provide HTTPS."
+        },
+        {
+          "concept": "CloudFront OAI",
+          "difference": "For an S3 origin with SSE-KMS-encrypted objects, use OAC rather than OAI."
+        }
+      ],
+      "examCues": [
+        "static HTML and client-side scripts",
+        "HTTP is acceptable",
+        "HTTPS with a private S3 bucket",
+        "SSE-KMS-encrypted website files",
+        "managed CDN deployment"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon S3 puede servir páginas estáticas, incluso con scripts del lado del cliente. Elige S3 website hosting si basta HTTP; para HTTPS con contenido privado en S3, usa CloudFront con un origen de bucket S3 y origin access control (OAC).",
+      "whenToUse": [
+        "El sitio contiene archivos estáticos y no necesita procesamiento de aplicaciones en el servidor.",
+        "Un sitio solo HTTP puede servirse directamente desde un S3 website endpoint.",
+        "Los visitantes necesitan HTTPS y el bucket S3 debe permanecer privado.",
+        "El contenido de S3 usa SSE-KMS y debe servirse mediante CloudFront."
+      ],
+      "keyFacts": [
+        "S3 static website hosting admite un documento de índice y un documento de error personalizado.",
+        "Un S3 website endpoint no proporciona HTTPS.",
+        "CloudFront puede servir contenido estático almacenado en S3 mediante HTTPS.",
+        "Para un sitio en S3 cifrado con SSE-KMS y servido mediante CloudFront, usa OAC; origin access identity (OAI) no admite SSE-KMS.",
+        "AWS recomienda Amplify Hosting para implementar contenido estático de S3 en un CDN administrado basado en CloudFront, con una URL pública HTTPS."
+      ],
+      "gotchas": [
+        "No elijas un S3 website endpoint directo si los visitantes necesitan HTTPS.",
+        "No confundas un S3 website endpoint con un origen de bucket S3 privado protegido mediante CloudFront OAC.",
+        "Para contenido SSE-KMS, sustituir OAC por OAI no cumple el requisito de cifrado."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Amplify Hosting",
+          "difference": "Amplify administra la implementación en un CDN basado en CloudFront y proporciona una URL pública HTTPS; S3 website hosting directo no proporciona HTTPS."
+        },
+        {
+          "concept": "CloudFront OAI",
+          "difference": "Para un origen S3 con objetos cifrados mediante SSE-KMS, usa OAC en lugar de OAI."
+        }
+      ],
+      "examCues": [
+        "static HTML and client-side scripts",
+        "HTTP is acceptable",
+        "HTTPS with a private S3 bucket",
+        "SSE-KMS-encrypted website files",
+        "managed CDN deployment"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-static-website-hosting--af41126e",
+      "conceptId": "s3-static-website-hosting",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A neighborhood association publishes meeting notes as HTML pages with a small amount of client-side JavaScript. Its existing link uses HTTP, HTTPS is not required, and the association does not need a CDN. Which solution serves the site with the LEAST configuration?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a CloudFront distribution that uses the S3 website endpoint as its origin.",
+          "correct": false,
+          "why": "The CloudFront distribution adds configuration despite the stated lack of a CDN requirement."
+        },
+        {
+          "id": "B",
+          "text": "Deploy the files through AWS Amplify Hosting to its managed CDN.",
+          "correct": false,
+          "why": "Amplify adds a managed CDN deployment that the association does not need."
+        },
+        {
+          "id": "C",
+          "text": "Enable static website hosting on an S3 bucket and configure an index document.",
+          "correct": true,
+          "why": "S3 website hosting directly serves the static files and supports an index document."
+        },
+        {
+          "id": "D",
+          "text": "Create a CloudFront distribution with an S3 bucket origin and OAC.",
+          "correct": false,
+          "why": "CloudFront and OAC add configuration when neither HTTPS nor private-origin access is required."
+        }
+      ],
+      "explanation": "The pages are static, HTTP is acceptable, and the association does not need a CDN. S3 static website hosting can serve the files directly, with an index document for the site's entry page. Amplify Hosting and both CloudFront designs introduce a CDN that this scenario does not call for.",
+      "keywordCues": [
+        "HTML pages with a small amount of client-side JavaScript",
+        "HTTPS is not required",
+        "does not need a CDN",
+        "LEAST configuration"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html"
+      ],
+      "es": {
+        "stem": "Una asociación vecinal publica actas como páginas HTML con un poco de JavaScript del lado del cliente. Su enlace actual usa HTTP, no se requiere HTTPS y la asociación no necesita un CDN. ¿Qué solución sirve el sitio con la LEAST configuration?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una distribución de CloudFront que use el S3 website endpoint como origen.",
+            "why": "La distribución de CloudFront agrega configuración pese a que no se necesita un CDN."
+          },
+          {
+            "id": "B",
+            "text": "Implementar los archivos mediante AWS Amplify Hosting en su CDN administrado.",
+            "why": "Amplify agrega una implementación en un CDN administrado que la asociación no necesita."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar static website hosting en un bucket S3 y configurar un documento de índice.",
+            "why": "S3 website hosting sirve directamente los archivos estáticos y admite un documento de índice."
+          },
+          {
+            "id": "D",
+            "text": "Crear una distribución de CloudFront con un origen de bucket S3 y OAC.",
+            "why": "CloudFront y OAC agregan configuración cuando no se requiere HTTPS ni acceso privado al origen."
+          }
+        ],
+        "explanation": "Las páginas son estáticas, HTTP es aceptable y la asociación no necesita un CDN. S3 static website hosting puede servir los archivos directamente y usar un documento de índice para la página inicial. Amplify Hosting y ambas opciones de CloudFront agregan un CDN que este caso no requiere."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-static-website-hosting--0d5d2a26",
+      "conceptId": "s3-static-website-hosting",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research nonprofit stores its static publication site in an S3 bucket and requires SSE-KMS encryption for the files. Visitors must use HTTPS, and the bucket must not grant anonymous public access. Which design meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 website hosting and grant public read access to the encrypted files.",
+          "correct": false,
+          "why": "A direct website endpoint does not provide HTTPS, and public read access violates the bucket requirement."
+        },
+        {
+          "id": "B",
+          "text": "Use a CloudFront distribution with an S3 bucket origin and OAI.",
+          "correct": false,
+          "why": "OAI does not support the required SSE-KMS-encrypted origin content."
+        },
+        {
+          "id": "C",
+          "text": "Put CloudFront in front of the S3 website endpoint and allow public access to the bucket.",
+          "correct": false,
+          "why": "Although CloudFront can provide HTTPS to visitors, this design leaves the bucket publicly accessible."
+        },
+        {
+          "id": "D",
+          "text": "Use a CloudFront distribution with an S3 bucket origin and OAC.",
+          "correct": true,
+          "why": "CloudFront provides the HTTPS entry point, while OAC supports securing an S3 origin with SSE-KMS content."
+        }
+      ],
+      "explanation": "The deciding constraints are HTTPS, a bucket without anonymous public access, and SSE-KMS-encrypted files. CloudFront with an S3 bucket origin and OAC addresses those constraints. A direct S3 website endpoint cannot provide HTTPS, and a public website origin fails the access requirement. OAI is also unsuitable because it does not support SSE-KMS.",
+      "keywordCues": [
+        "SSE-KMS encryption",
+        "Visitors must use HTTPS",
+        "must not grant anonymous public access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación guarda su sitio estático de publicaciones en un bucket S3 y exige cifrado SSE-KMS para los archivos. Los visitantes deben usar HTTPS y el bucket no debe permitir acceso público anónimo. ¿Qué diseño cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar S3 website hosting y conceder acceso público de lectura a los archivos cifrados.",
+            "why": "Un website endpoint directo no proporciona HTTPS y el acceso público de lectura incumple el requisito del bucket."
+          },
+          {
+            "id": "B",
+            "text": "Usar una distribución de CloudFront con un origen de bucket S3 y OAI.",
+            "why": "OAI no admite el contenido cifrado mediante SSE-KMS que se requiere en el origen."
+          },
+          {
+            "id": "C",
+            "text": "Colocar CloudFront delante del S3 website endpoint y permitir acceso público al bucket.",
+            "why": "Aunque CloudFront puede proporcionar HTTPS a los visitantes, este diseño deja el bucket accesible públicamente."
+          },
+          {
+            "id": "D",
+            "text": "Usar una distribución de CloudFront con un origen de bucket S3 y OAC.",
+            "why": "CloudFront proporciona el acceso mediante HTTPS y OAC permite proteger un origen S3 con contenido SSE-KMS."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son HTTPS, un bucket sin acceso público anónimo y archivos cifrados mediante SSE-KMS. CloudFront con un origen de bucket S3 y OAC cumple esas condiciones. Un S3 website endpoint directo no proporciona HTTPS y un origen de sitio web público incumple el requisito de acceso. OAI tampoco sirve porque no admite SSE-KMS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-static-website-hosting--5815c8e9",
+      "conceptId": "s3-static-website-hosting",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small publisher keeps a set of static articles in an S3 bucket. The team wants to deploy the articles to a globally available CDN and receive a public HTTPS URL, but does not want to configure the CDN distribution itself. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 static website hosting and distribute its website endpoint URL.",
+          "correct": false,
+          "why": "The S3 website endpoint does not provide the required HTTPS URL or CDN deployment."
+        },
+        {
+          "id": "B",
+          "text": "Configure a CloudFront distribution with the S3 website endpoint as its origin.",
+          "correct": false,
+          "why": "This also requires the team to configure the CDN distribution itself."
+        },
+        {
+          "id": "C",
+          "text": "Configure a CloudFront distribution with the S3 bucket as its origin.",
+          "correct": false,
+          "why": "This requires the team to configure the CDN distribution itself."
+        },
+        {
+          "id": "D",
+          "text": "Deploy the S3 content with AWS Amplify Hosting.",
+          "correct": true,
+          "why": "Amplify provides managed deployment to a CloudFront-powered CDN and a public HTTPS URL."
+        }
+      ],
+      "explanation": "The publisher wants a managed CDN deployment, a public HTTPS URL, and minimal distribution configuration. Amplify Hosting deploys static content from S3 to a managed CloudFront-powered CDN and supplies an HTTPS URL. Direct S3 website hosting misses HTTPS and the CDN. Either self-configured CloudFront option misses the stated operational-overhead preference.",
+      "keywordCues": [
+        "globally available CDN",
+        "public HTTPS URL",
+        "does not want to configure the CDN distribution itself",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html"
+      ],
+      "es": {
+        "stem": "Una editorial pequeña guarda artículos estáticos en un bucket S3. El equipo quiere implementarlos en un CDN disponible globalmente y obtener una URL pública HTTPS, pero no quiere configurar la distribución del CDN por su cuenta. ¿Qué solución cumple los requisitos con la LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar S3 static website hosting y compartir la URL de su website endpoint.",
+            "why": "El S3 website endpoint no proporciona la URL HTTPS ni la implementación en un CDN que se requieren."
+          },
+          {
+            "id": "B",
+            "text": "Configurar una distribución de CloudFront con el S3 website endpoint como origen.",
+            "why": "Esta opción también exige que el equipo configure la distribución del CDN por su cuenta."
+          },
+          {
+            "id": "C",
+            "text": "Configurar una distribución de CloudFront con el bucket S3 como origen.",
+            "why": "Esta opción exige que el equipo configure la distribución del CDN por su cuenta."
+          },
+          {
+            "id": "D",
+            "text": "Implementar el contenido de S3 con AWS Amplify Hosting.",
+            "why": "Amplify ofrece una implementación administrada en un CDN basado en CloudFront y una URL pública HTTPS."
+          }
+        ],
+        "explanation": "La editorial quiere una implementación administrada en un CDN, una URL pública HTTPS y mínima configuración de la distribución. Amplify Hosting implementa contenido estático de S3 en un CDN administrado basado en CloudFront y proporciona una URL HTTPS. S3 website hosting directo no aporta HTTPS ni el CDN. Ambas opciones de CloudFront configuradas por el equipo incumplen la preferencia de reducir la carga operativa."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-static-website-hosting--r0",
+      "conceptId": "s3-static-website-hosting",
+      "kind": "recall",
+      "prompt": "A static S3 site needs HTTPS, a private bucket, and SSE-KMS encryption. What origin and access-control design would you choose, and why?",
+      "promptEs": "Un sitio estático en S3 necesita HTTPS, un bucket privado y cifrado SSE-KMS. ¿Qué origen y mecanismo de control de acceso elegirías, y por qué?",
+      "idealAnswer": "Use CloudFront with an S3 bucket origin and OAC. CloudFront serves visitors over HTTPS, and OAC supports securing an S3 origin whose content uses SSE-KMS; OAI does not support SSE-KMS.",
+      "rubric": [
+        "Names CloudFront as the HTTPS entry point.",
+        "Specifies an S3 bucket origin rather than an S3 website endpoint.",
+        "Chooses OAC and explains that OAI does not support SSE-KMS."
+      ]
+    }
+  ]
+}

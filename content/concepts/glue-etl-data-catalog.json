@@ -1,0 +1,454 @@
+{
+  "conceptId": "glue-etl-data-catalog",
+  "card": {
+    "en": {
+      "tldr": "AWS Glue is a serverless service for discovering, cataloging, and transforming data. Choose crawlers to infer schemas, the Data Catalog to share metadata, and Glue ETL jobs to prepare data for analysis without managing infrastructure.",
+      "whenToUse": [
+        "New or changing data sources need automatic schema discovery.",
+        "Analytics services need a central record of data locations and schemas.",
+        "Data must be cleaned or transformed before it is analyzed, with minimal infrastructure management."
+      ],
+      "keyFacts": [
+        "Crawlers scan data sources, extract metadata, and populate the AWS Glue Data Catalog.",
+        "The Data Catalog stores metadata such as data location and schema; it does not replace the underlying data store.",
+        "AWS Glue runs serverless ETL jobs, including Spark-based jobs.",
+        "Glue jobs can run on a schedule, on demand, or in response to an event.",
+        "Athena, Amazon EMR, and Amazon Redshift Spectrum can use cataloged data."
+      ],
+      "gotchas": [
+        "A crawler discovers metadata; it does not perform the data-cleaning work of an ETL job.",
+        "The Data Catalog holds metadata, not the source records themselves.",
+        "Athena can query cataloged S3 data, but querying is not a substitute for a required transformation pipeline."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Athena",
+          "difference": "Athena queries S3 data with SQL; Glue discovers schemas, catalogs metadata, and runs ETL."
+        },
+        {
+          "concept": "Amazon EMR",
+          "difference": "EMR fits processing that calls for control over big-data frameworks; Glue provides serverless ETL."
+        },
+        {
+          "concept": "Amazon Redshift",
+          "difference": "Redshift is a data warehouse; the Glue Data Catalog is a shared metadata repository."
+        }
+      ],
+      "examCues": [
+        "automatically infer schemas",
+        "central catalog for multiple analytics teams",
+        "clean data before analysis",
+        "serverless Spark-based ETL"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Glue es un servicio serverless para descubrir, catalogar y transformar datos. Elige crawlers para inferir esquemas, Data Catalog para compartir metadatos y trabajos de ETL de Glue para preparar datos sin administrar infraestructura.",
+      "whenToUse": [
+        "Necesitas descubrir automáticamente los esquemas de fuentes de datos nuevas o cambiantes.",
+        "Varios servicios de análisis necesitan un registro central de ubicaciones y esquemas.",
+        "Debes limpiar o transformar datos antes de analizarlos, con poca administración de infraestructura."
+      ],
+      "keyFacts": [
+        "Los crawlers examinan las fuentes, extraen metadatos y completan AWS Glue Data Catalog.",
+        "Data Catalog almacena metadatos como la ubicación y el esquema; no reemplaza el almacén de datos subyacente.",
+        "AWS Glue ejecuta trabajos de ETL serverless, incluidos trabajos basados en Spark.",
+        "Puedes ejecutar trabajos de Glue según un horario, bajo demanda o a partir de un evento.",
+        "Athena, Amazon EMR y Amazon Redshift Spectrum pueden usar datos catalogados."
+      ],
+      "gotchas": [
+        "Un crawler descubre metadatos; no realiza la limpieza de datos que corresponde a un trabajo de ETL.",
+        "Data Catalog contiene metadatos, no los registros originales.",
+        "Athena puede consultar datos catalogados en S3, pero una consulta no sustituye una transformación requerida."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Athena",
+          "difference": "Athena consulta datos de S3 con SQL; Glue descubre esquemas, cataloga metadatos y ejecuta ETL."
+        },
+        {
+          "concept": "Amazon EMR",
+          "difference": "EMR sirve cuando necesitas controlar frameworks de procesamiento de datos; Glue ofrece ETL serverless."
+        },
+        {
+          "concept": "Amazon Redshift",
+          "difference": "Redshift es un data warehouse; Glue Data Catalog es un repositorio compartido de metadatos."
+        }
+      ],
+      "examCues": [
+        "automatically infer schemas",
+        "central catalog for multiple analytics teams",
+        "clean data before analysis",
+        "serverless Spark-based ETL"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
+      "https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "glue-etl-data-catalog--2cb17cdd",
+      "conceptId": "glue-etl-data-catalog",
+      "secondaryConcepts": [
+        "athena",
+        "emr"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A healthcare organization collects records from several data sources. Before analysts use them, a nightly pipeline must clean and combine the records, and the team does not want to manage processing infrastructure. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run AWS Glue crawlers nightly to infer and catalog the source schemas.",
+          "correct": false,
+          "why": "Crawlers discover metadata but do not clean and combine the records."
+        },
+        {
+          "id": "B",
+          "text": "Run the nightly transformations on an Amazon EMR cluster.",
+          "correct": false,
+          "why": "EMR can process data, but it does not match the stated preference for serverless ETL without infrastructure management."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon Athena to query each source after the nightly files arrive.",
+          "correct": false,
+          "why": "Queries alone do not provide the required cleaning and combining pipeline."
+        },
+        {
+          "id": "D",
+          "text": "Schedule an AWS Glue ETL job to clean and combine the records.",
+          "correct": true,
+          "why": "Glue provides schedulable, serverless ETL for the required preparation work."
+        }
+      ],
+      "explanation": "The records must be cleaned and combined before analysis, so schema discovery or queries alone are insufficient. AWS Glue runs ETL jobs on a schedule without infrastructure to manage. EMR is a plausible processing option, but it misses the scenario's minimal-management preference.",
+      "keywordCues": [
+        "nightly pipeline",
+        "clean and combine the records",
+        "does not want to manage processing infrastructure"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
+        "https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html"
+      ],
+      "es": {
+        "stem": "Una organización de salud reúne registros de varias fuentes de datos. Antes de que los analistas los utilicen, una canalización nocturna debe limpiarlos y combinarlos, y el equipo no quiere administrar infraestructura de procesamiento. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta crawlers de AWS Glue cada noche para inferir y catalogar los esquemas de las fuentes.",
+            "why": "Los crawlers descubren metadatos, pero no limpian ni combinan los registros."
+          },
+          {
+            "id": "B",
+            "text": "Ejecuta las transformaciones nocturnas en un clúster de Amazon EMR.",
+            "why": "EMR puede procesar datos, pero no se ajusta a la preferencia por ETL serverless sin administrar infraestructura."
+          },
+          {
+            "id": "C",
+            "text": "Usa Amazon Athena para consultar cada fuente cuando lleguen los archivos nocturnos.",
+            "why": "Las consultas por sí solas no proporcionan la canalización requerida para limpiar y combinar los datos."
+          },
+          {
+            "id": "D",
+            "text": "Programa un trabajo de ETL de AWS Glue para limpiar y combinar los registros.",
+            "why": "Glue ofrece ETL serverless que puedes programar para realizar la preparación requerida."
+          }
+        ],
+        "explanation": "Debes limpiar y combinar los registros antes del análisis; descubrir esquemas o ejecutar consultas no basta. AWS Glue permite programar trabajos de ETL sin administrar infraestructura. EMR es una opción de procesamiento plausible, pero no satisface tan bien la preferencia por una administración mínima."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "glue-etl-data-catalog--927f8394",
+      "conceptId": "glue-etl-data-catalog",
+      "secondaryConcepts": [
+        "athena",
+        "emr",
+        "redshift",
+        "quick-visualization"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer stores sensor exports in Amazon S3. Its analytics team already uses Athena, while a separate team plans to process the same data with Amazon EMR. New exports may introduce schema changes, and both teams need a shared metadata layer rather than separate definitions. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Load every export into Amazon Redshift and use its warehouse tables as the teams' shared definitions.",
+          "correct": false,
+          "why": "Loading data into a warehouse is unnecessary when the teams need shared metadata for existing S3 exports."
+        },
+        {
+          "id": "B",
+          "text": "Create a Quick dashboard to display fields found in the latest sensor exports.",
+          "correct": false,
+          "why": "A visualization does not maintain shared table metadata for Athena and EMR."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Glue crawlers to update Data Catalog tables that both analytics services can use.",
+          "correct": true,
+          "why": "Crawlers can discover updated sources, and the Data Catalog supplies metadata to Athena and EMR."
+        },
+        {
+          "id": "D",
+          "text": "Maintain the schema definitions independently in Athena and in the EMR processing jobs.",
+          "correct": false,
+          "why": "Independent definitions conflict with the requirement for a shared metadata layer."
+        }
+      ],
+      "explanation": "A changing schema and two analytics services point to automatic discovery and one shared metadata repository. Glue crawlers can update Data Catalog metadata, which Athena and EMR can use. Separate schema definitions fail the sharing requirement, while a warehouse would add an unnecessary loading step.",
+      "keywordCues": [
+        "New exports may introduce schema changes",
+        "both teams need a shared metadata layer",
+        "Athena",
+        "Amazon EMR"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
+        "https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html"
+      ],
+      "es": {
+        "stem": "Una empresa manufacturera guarda exportaciones de sensores en Amazon S3. Su equipo de análisis ya usa Athena y otro equipo planea procesar los mismos datos con Amazon EMR. Las exportaciones nuevas pueden cambiar de esquema y ambos equipos necesitan una capa compartida de metadatos, no definiciones separadas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Carga cada exportación en Amazon Redshift y usa sus tablas como definiciones compartidas para los equipos.",
+            "why": "No necesitas cargar datos en un data warehouse para compartir metadatos de exportaciones que ya están en S3."
+          },
+          {
+            "id": "B",
+            "text": "Crea un dashboard de Quick que muestre los campos encontrados en las exportaciones de sensores más recientes.",
+            "why": "Una visualización no mantiene metadatos de tablas compartidos para Athena y EMR."
+          },
+          {
+            "id": "C",
+            "text": "Usa crawlers de AWS Glue para actualizar tablas de Data Catalog que ambos servicios de análisis puedan utilizar.",
+            "why": "Los crawlers pueden descubrir fuentes actualizadas y Data Catalog proporciona metadatos a Athena y EMR."
+          },
+          {
+            "id": "D",
+            "text": "Mantén las definiciones de esquemas por separado en Athena y en los trabajos de procesamiento de EMR.",
+            "why": "Las definiciones independientes contradicen el requisito de compartir una capa de metadatos."
+          }
+        ],
+        "explanation": "Un esquema cambiante y dos servicios de análisis requieren descubrimiento automático y un repositorio compartido de metadatos. Los crawlers de Glue pueden actualizar Data Catalog, que Athena y EMR pueden usar. Las definiciones separadas no cumplen el requisito de compartirlas, mientras que un data warehouse agregaría una carga innecesaria."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "glue-etl-data-catalog--e64f8163",
+      "conceptId": "glue-etl-data-catalog",
+      "secondaryConcepts": [
+        "athena",
+        "redshift"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An energy company has already defined tables for its data in the AWS Glue Data Catalog. A new reporting team wants to run SQL queries against the cataloged Amazon S3 data without first moving that data into a warehouse. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Athena to query the S3 data using the existing Data Catalog tables.",
+          "correct": true,
+          "why": "Athena can query cataloged S3 data with SQL without loading it into a warehouse."
+        },
+        {
+          "id": "B",
+          "text": "Load the S3 data into Amazon Redshift tables before running the reporting queries.",
+          "correct": false,
+          "why": "Loading the data into a warehouse violates the requirement to query it without first moving it."
+        },
+        {
+          "id": "C",
+          "text": "Create an AWS Glue ETL job to transform the data before the team writes SQL queries.",
+          "correct": false,
+          "why": "The scenario requests queries against existing cataloged data, not a transformation."
+        },
+        {
+          "id": "D",
+          "text": "Run an AWS Glue crawler against the same S3 data and review the resulting table definitions.",
+          "correct": false,
+          "why": "The tables are already defined, and a crawler does not run the requested SQL queries."
+        }
+      ],
+      "explanation": "The Data Catalog tables already exist, so neither discovery nor transformation is the missing step. Athena uses catalog metadata to query S3 data with SQL. Loading the data into Redshift would violate the explicit requirement not to move it into a warehouse first.",
+      "keywordCues": [
+        "already defined tables",
+        "run SQL queries",
+        "without first moving that data into a warehouse"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
+        "https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html"
+      ],
+      "es": {
+        "stem": "Una empresa de energía ya definió tablas para sus datos en AWS Glue Data Catalog. Un nuevo equipo de informes quiere ejecutar consultas SQL sobre los datos catalogados en Amazon S3 sin moverlos primero a un data warehouse. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa Amazon Athena para consultar los datos de S3 mediante las tablas existentes de Data Catalog.",
+            "why": "Athena puede consultar con SQL datos catalogados en S3 sin cargarlos en un data warehouse."
+          },
+          {
+            "id": "B",
+            "text": "Carga los datos de S3 en tablas de Amazon Redshift antes de ejecutar las consultas de informes.",
+            "why": "Cargar los datos en un data warehouse incumple el requisito de consultarlos sin moverlos primero."
+          },
+          {
+            "id": "C",
+            "text": "Crea un trabajo de ETL de AWS Glue para transformar los datos antes de que el equipo escriba consultas SQL.",
+            "why": "El escenario pide consultas sobre datos ya catalogados, no una transformación."
+          },
+          {
+            "id": "D",
+            "text": "Ejecuta un crawler de AWS Glue sobre los mismos datos de S3 y revisa las definiciones de tablas resultantes.",
+            "why": "Las tablas ya están definidas y un crawler no ejecuta las consultas SQL solicitadas."
+          }
+        ],
+        "explanation": "Las tablas de Data Catalog ya existen, así que no falta descubrir ni transformar datos. Athena usa los metadatos del catálogo para consultar datos de S3 con SQL. Cargar los datos en Redshift incumpliría el requisito explícito de no moverlos primero a un data warehouse."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "glue-etl-data-catalog--30940d8d",
+      "conceptId": "glue-etl-data-catalog",
+      "secondaryConcepts": [
+        "athena",
+        "redshift",
+        "emr"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company receives files from new partners into Amazon S3. It must discover their schemas centrally and clean the incoming data before analysts query it; the team does not want to manage processing infrastructure. Which TWO actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run AWS Glue crawlers to populate the Data Catalog with partner schemas.",
+          "correct": true,
+          "why": "Crawlers discover schemas and store their metadata centrally."
+        },
+        {
+          "id": "B",
+          "text": "Run AWS Glue ETL jobs to clean the data before analysis.",
+          "correct": true,
+          "why": "Glue jobs perform the required cleaning without managed processing infrastructure."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon Athena queries to identify fields in each incoming file.",
+          "correct": false,
+          "why": "Queries do not automatically maintain central schema metadata or perform the required cleaning pipeline."
+        },
+        {
+          "id": "D",
+          "text": "Run Spark transformations on an Amazon EMR cluster before analysis.",
+          "correct": false,
+          "why": "EMR can transform data but does not match the preference to avoid managing processing infrastructure."
+        },
+        {
+          "id": "E",
+          "text": "Load the incoming files into Amazon Redshift to establish the authoritative schemas.",
+          "correct": false,
+          "why": "Warehouse loading adds a data movement step instead of cataloging the incoming S3 sources."
+        }
+      ],
+      "explanation": "This scenario has two distinct tasks: discover partner schemas and clean records before analysis. Glue crawlers populate the central Data Catalog, while Glue ETL jobs perform the cleaning without infrastructure to manage. Athena queries do not replace both tasks, and EMR does not best satisfy the management constraint.",
+      "keywordCues": [
+        "discover their schemas centrally",
+        "clean the incoming data before analysts query it",
+        "does not want to manage processing infrastructure"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
+        "https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística recibe archivos de nuevos socios en Amazon S3. Debe descubrir sus esquemas de forma central y limpiar los datos entrantes antes de que los analistas los consulten; el equipo no quiere administrar infraestructura de procesamiento. ¿Qué DOS acciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta crawlers de AWS Glue para completar Data Catalog con los esquemas de los socios.",
+            "why": "Los crawlers descubren esquemas y almacenan sus metadatos de forma central."
+          },
+          {
+            "id": "B",
+            "text": "Ejecuta trabajos de ETL de AWS Glue para limpiar los datos antes del análisis.",
+            "why": "Los trabajos de Glue realizan la limpieza requerida sin administrar infraestructura de procesamiento."
+          },
+          {
+            "id": "C",
+            "text": "Usa consultas de Amazon Athena para identificar los campos de cada archivo entrante.",
+            "why": "Las consultas no mantienen automáticamente metadatos centrales de esquemas ni realizan la limpieza requerida."
+          },
+          {
+            "id": "D",
+            "text": "Ejecuta transformaciones de Spark en un clúster de Amazon EMR antes del análisis.",
+            "why": "EMR puede transformar datos, pero no se ajusta tan bien a la preferencia por no administrar infraestructura de procesamiento."
+          },
+          {
+            "id": "E",
+            "text": "Carga los archivos entrantes en Amazon Redshift para establecer los esquemas de referencia.",
+            "why": "La carga en un data warehouse agrega un paso de movimiento de datos en lugar de catalogar las fuentes existentes en S3."
+          }
+        ],
+        "explanation": "El escenario tiene dos tareas distintas: descubrir los esquemas de los socios y limpiar los registros antes del análisis. Los crawlers de Glue completan Data Catalog y los trabajos de ETL de Glue realizan la limpieza sin que tengas que administrar infraestructura. Las consultas de Athena no sustituyen ambas tareas y EMR no satisface tan bien la restricción de administración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "glue-etl-data-catalog--r0",
+      "conceptId": "glue-etl-data-catalog",
+      "kind": "recall",
+      "prompt": "New S3 files need automatic schema discovery and cleaning before analysis. Which Glue components would you choose, and what does each do?",
+      "promptEs": "Llegan archivos nuevos a S3 y necesitas descubrir sus esquemas y limpiarlos antes del análisis. ¿Qué componentes de Glue eliges y qué hace cada uno?",
+      "idealAnswer": "Use AWS Glue crawlers to infer schemas and store metadata in the Data Catalog. Use Glue ETL jobs to clean the records before analysis without managing processing infrastructure.",
+      "rubric": [
+        "Names crawlers for automatic schema discovery.",
+        "Identifies Data Catalog as the central metadata repository.",
+        "Names Glue ETL jobs for cleaning or transformation."
+      ]
+    },
+    {
+      "id": "glue-etl-data-catalog--r1",
+      "conceptId": "glue-etl-data-catalog",
+      "kind": "why-not",
+      "prompt": "Why would Athena alone not meet a requirement to discover changing source schemas and clean records before analysis?",
+      "promptEs": "¿Por qué Athena por sí solo no cumple un requisito de descubrir esquemas cambiantes y limpiar registros antes del análisis?",
+      "idealAnswer": "Athena can query cataloged S3 data with SQL, but querying does not replace the required discovery and cleaning pipeline. Use Glue crawlers for schema discovery and Glue ETL jobs for cleaning.",
+      "rubric": [
+        "Recognizes Athena's role in querying cataloged S3 data.",
+        "Explains why queries do not replace schema discovery and ETL cleaning.",
+        "Identifies crawlers and ETL jobs as the appropriate Glue components."
+      ]
+    }
+  ]
+}

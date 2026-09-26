@@ -1,0 +1,237 @@
+{
+  "conceptId": "distributed-design-patterns",
+  "card": {
+    "en": {
+      "tldr": "Distributed calls can fail briefly or remain unavailable. Retry transient failures with bounded exponential backoff and jitter, make operations safe to repeat, and use a circuit breaker to stop calling a dependency that repeatedly fails.",
+      "whenToUse": [
+        "A dependency has occasional timeouts, and retries could help it recover.",
+        "A consumer might repeat a mutating operation after an uncertain outcome.",
+        "A synchronous dependency repeatedly times out, threatening the caller’s responsiveness."
+      ],
+      "keyFacts": [
+        "Exponential backoff increases the interval between retries; jitter randomizes it to reduce coordinated traffic spikes.",
+        "Set a maximum retry count or elapsed time, and choose timeouts appropriate to the workload.",
+        "Retry transient failures at an appropriate layer; retries at multiple layers can compound into a retry storm.",
+        "Verify that an operation is idempotent before retrying it, or repeated calls can produce duplicate results.",
+        "An open circuit breaker stops routing calls to a failing service and can check later whether it has recovered.",
+        "An AWS example implements a circuit breaker with a Step Functions Express workflow and a DynamoDB table that tracks circuit status."
+      ],
+      "gotchas": [
+        "Retrying every error is not resilience: permission and configuration errors may require intervention.",
+        "Backoff without jitter can still synchronize retries; retries without a stopping point can create backlogs.",
+        "A circuit breaker is not simply a larger retry limit: it prevents further calls while the circuit is open."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "transient timeouts during traffic spikes",
+        "same operation may be attempted again",
+        "synchronous dependency repeatedly times out",
+        "stop calls until the dependency recovers"
+      ]
+    },
+    "es": {
+      "tldr": "Las llamadas distribuidas pueden fallar brevemente o permanecer indisponibles. Para fallas transitorias, usa reintentos limitados con exponential backoff y jitter; haz que las operaciones sean seguras de repetir y usa un circuit breaker para dejar de llamar a una dependencia que falla repetidamente.",
+      "whenToUse": [
+        "Una dependencia presenta timeouts ocasionales y los reintentos podrían permitir que se recupere.",
+        "Un consumidor podría repetir una operación que modifica datos después de un resultado incierto.",
+        "Una dependencia síncrona presenta timeouts repetidos y afecta la capacidad de respuesta del servicio que la llama."
+      ],
+      "keyFacts": [
+        "Exponential backoff aumenta el intervalo entre reintentos; jitter lo aleatoriza para reducir picos de tráfico coordinados.",
+        "Define un número máximo de reintentos o un tiempo máximo transcurrido, y elige timeouts adecuados para tu carga de trabajo.",
+        "Reintenta fallas transitorias en una capa apropiada; hacerlo en varias capas puede multiplicar los intentos.",
+        "Verifica que una operación sea idempotente antes de reintentarla; de lo contrario, las llamadas repetidas pueden producir resultados duplicados.",
+        "Un circuit breaker abierto deja de enviar llamadas a un servicio con fallas y puede comprobar más adelante si se recuperó.",
+        "Un ejemplo de AWS implementa un circuit breaker con un workflow Express de AWS Step Functions y una tabla de Amazon DynamoDB que registra su estado."
+      ],
+      "gotchas": [
+        "Reintentar todos los errores no mejora la resiliencia: los errores de permisos o configuración pueden requerir intervención.",
+        "Backoff sin jitter aún puede sincronizar reintentos; no establecer un límite puede crear acumulaciones de solicitudes.",
+        "Un circuit breaker no es solo un límite de reintentos más alto: impide nuevas llamadas mientras está abierto."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "transient timeouts during traffic spikes",
+        "same operation may be attempted again",
+        "synchronous dependency repeatedly times out",
+        "stop calls until the dependency recovers"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_limit_retries.html",
+      "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/circuit-breaker.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "distributed-design-patterns--d7d2aa1d",
+      "conceptId": "distributed-design-patterns",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing platform calls a seating service that occasionally returns temporary errors during event launches. Several application layers currently retry the same request immediately, creating bursts of calls while the seating service is strained. The team wants successful requests to recover without amplifying the load. Which change meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep retries at every layer, but increase each layer’s timeout.",
+          "correct": false,
+          "why": "Retries at multiple layers can compound attempts, and longer timeouts do not prevent traffic bursts."
+        },
+        {
+          "id": "B",
+          "text": "Retry all errors at a fixed interval until the seating service responds.",
+          "correct": false,
+          "why": "Fixed, unbounded retries can synchronize traffic and repeatedly retry errors that will not resolve."
+        },
+        {
+          "id": "C",
+          "text": "Disable retries and require customers to submit the request again after every temporary error.",
+          "correct": false,
+          "why": "This gives up the requested automatic recovery from occasional temporary errors."
+        },
+        {
+          "id": "D",
+          "text": "Use an applicable SDK retry capability at one chosen layer, with exponential backoff, jitter, and a retry limit.",
+          "correct": true,
+          "why": "A bounded retry strategy at one layer addresses temporary errors without multiplying or synchronizing attempts."
+        }
+      ],
+      "explanation": "The deciding constraints are temporary failures and bursts caused by retries at several layers. Bounded exponential backoff gives the seating service time to recover, while jitter reduces synchronized spikes. Using applicable SDK behavior avoids unnecessary custom retry logic, but the team should verify and test its configuration. Increasing timeouts while retaining retries at every layer does not fix compounded attempts.",
+      "keywordCues": [
+        "occasionally returns temporary errors",
+        "Several application layers currently retry",
+        "creating bursts of calls",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_limit_retries.html",
+        "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/circuit-breaker.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de venta de boletos llama a un servicio de asientos que ocasionalmente devuelve errores temporales durante el lanzamiento de eventos. Varias capas de la aplicación reintentan de inmediato la misma solicitud, lo que genera ráfagas de llamadas mientras el servicio está bajo presión. El equipo quiere que las solicitudes se recuperen sin aumentar la carga. ¿Qué cambio cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener los reintentos en todas las capas, pero aumentar el timeout de cada una.",
+            "why": "Los reintentos en varias capas pueden multiplicar los intentos, y aumentar los timeouts no evita las ráfagas."
+          },
+          {
+            "id": "B",
+            "text": "Reintentar todos los errores a intervalos fijos hasta que el servicio de asientos responda.",
+            "why": "Los reintentos fijos y sin límite pueden sincronizar el tráfico e insistir ante errores que no se resolverán."
+          },
+          {
+            "id": "C",
+            "text": "Desactivar los reintentos y pedir a los clientes que vuelvan a enviar la solicitud después de cada error temporal.",
+            "why": "Esto renuncia a la recuperación automática solicitada ante errores temporales ocasionales."
+          },
+          {
+            "id": "D",
+            "text": "Usar la capacidad de reintentos de un AWS SDK, si corresponde, en una sola capa elegida, con exponential backoff, jitter y un límite de reintentos.",
+            "why": "Una estrategia de reintentos limitada y ubicada en una sola capa atiende errores temporales sin multiplicar ni sincronizar intentos."
+          }
+        ],
+        "explanation": "Las restricciones decisivas son las fallas temporales y las ráfagas causadas por reintentos en varias capas. Exponential backoff limitado da tiempo al servicio para recuperarse, mientras que jitter reduce los picos sincronizados. Usar la capacidad del SDK cuando corresponda evita lógica personalizada innecesaria, pero debes verificar y probar su configuración. Aumentar los timeouts y conservar los reintentos en todas las capas no resuelve la multiplicación de intentos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "distributed-design-patterns--29fc26e2",
+      "conceptId": "distributed-design-patterns",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A meal-delivery company processes payment requests from an Amazon SQS-backed worker. If a payment call times out, the worker cannot tell whether the charge succeeded, but the business still needs to retry transient failures without charging a customer twice. Which design meets these requirements MOST safely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Make the charge operation idempotent using a stable operation identifier, then apply bounded retries for transient failures.",
+          "correct": true,
+          "why": "Idempotency makes repeated attempts of the same charge safe, while bounded retries address transient failures."
+        },
+        {
+          "id": "B",
+          "text": "Stop retrying timed-out calls and treat every timeout as a failed payment.",
+          "correct": false,
+          "why": "A timeout does not establish that the charge failed, and this design does not meet the retry requirement."
+        },
+        {
+          "id": "C",
+          "text": "Retry each timed-out payment call immediately with a new request identifier.",
+          "correct": false,
+          "why": "A new identifier does not make a repeated charge recognizable as the same operation."
+        },
+        {
+          "id": "D",
+          "text": "Apply exponential backoff and jitter to payment calls without changing how charges are processed.",
+          "correct": false,
+          "why": "Backoff controls retry traffic but does not prevent a timed-out, successful charge from being repeated."
+        }
+      ],
+      "explanation": "The timeout leaves the outcome of a mutating operation uncertain. Before retrying, the charge must be idempotent so that another attempt for the same operation cannot create an unintended duplicate result. Bounded retries can then help with transient failures. Exponential backoff and jitter alone address load, not duplicate charges.",
+      "keywordCues": [
+        "cannot tell whether the charge succeeded",
+        "retry transient failures",
+        "without charging a customer twice"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_limit_retries.html",
+        "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/circuit-breaker.html"
+      ],
+      "es": {
+        "stem": "Una empresa de entrega de comidas procesa solicitudes de pago con un worker respaldado por Amazon SQS. Si una llamada de pago llega a timeout, el worker no puede saber si el cobro se realizó, pero el negocio necesita reintentar las fallas transitorias sin cobrarle dos veces al cliente. ¿Qué diseño cumple estos requisitos de la forma MOST segura?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Hacer idempotente la operación de cobro mediante un identificador estable de la operación y luego aplicar reintentos limitados ante fallas transitorias.",
+            "why": "La idempotencia hace seguros los intentos repetidos del mismo cobro, y los reintentos limitados atienden las fallas transitorias."
+          },
+          {
+            "id": "B",
+            "text": "No reintentar las llamadas que lleguen a timeout y considerar cada timeout como un pago fallido.",
+            "why": "Un timeout no demuestra que el cobro haya fallado, y este diseño no cumple el requisito de reintentar."
+          },
+          {
+            "id": "C",
+            "text": "Reintentar de inmediato cada llamada de pago que llegue a timeout con un nuevo identificador de solicitud.",
+            "why": "Un identificador nuevo no permite reconocer que el cobro repetido corresponde a la misma operación."
+          },
+          {
+            "id": "D",
+            "text": "Aplicar exponential backoff y jitter a las llamadas de pago sin cambiar cómo se procesan los cobros.",
+            "why": "Backoff controla el tráfico de reintentos, pero no impide repetir un cobro que se realizó antes del timeout."
+          }
+        ],
+        "explanation": "El timeout deja incierto el resultado de una operación que modifica datos. Antes de reintentar, debes hacer idempotente el cobro para que otro intento de la misma operación no produzca un duplicado inesperado. Luego, los reintentos limitados pueden ayudar ante fallas transitorias. Exponential backoff y jitter por sí solos controlan la carga, no los cobros duplicados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "distributed-design-patterns--r0",
+      "conceptId": "distributed-design-patterns",
+      "kind": "recall",
+      "prompt": "A synchronous dependency repeatedly times out, but the caller can provide a degraded response. Which pattern fits, and why?",
+      "promptEs": "Una dependencia síncrona llega repetidamente a timeout, pero el servicio que la llama puede ofrecer una respuesta degradada. ¿Qué patrón conviene y por qué?",
+      "idealAnswer": "Use a circuit breaker. After repeated failures, it stops calls to the dependency so the caller can respond promptly, then checks later whether the dependency has recovered.",
+      "rubric": [
+        "Names the circuit breaker pattern.",
+        "Explains that an open circuit prevents repeated calls to the failing dependency.",
+        "Mentions a prompt degraded response and a later recovery check."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,447 @@
+{
+  "conceptId": "cloudfront-fundamentals",
+  "card": {
+    "en": {
+      "tldr": "Amazon CloudFront delivers static and dynamic HTTP(S) content through edge locations, caching eligible content near viewers. Choose it when a scenario calls for lower global delivery latency and fewer requests to an S3 or HTTP origin; set cache expiration to match freshness requirements.",
+      "whenToUse": [
+        "Viewers around the world repeatedly request website files or other HTTP(S) content.",
+        "An S3 bucket or HTTP server must serve as the definitive origin while edge caches handle repeat requests.",
+        "The origin needs fewer direct requests without sacrificing a stated content-freshness requirement."
+      ],
+      "keyFacts": [
+        "A CloudFront distribution identifies the origins from which CloudFront retrieves requested content.",
+        "An origin can be an S3 bucket or a custom HTTP server, including one running on EC2 or outside AWS.",
+        "A cache hit is served from an edge location; an edge miss may be satisfied by a regional edge cache or Origin Shield without contacting the origin.",
+        "Origin response headers can control cache duration. The documented default expiration is 24 hours, and the minimum is 0 seconds.",
+        "CloudFront Origin Shield can help minimize requests forwarded to an origin."
+      ],
+      "gotchas": [
+        "Do not assume the default cache duration meets a short freshness deadline.",
+        "A TTL of 0 seconds does not meet a goal of offloading repeated requests through caching.",
+        "CloudFront delivers cached HTTP(S) content; it is not a substitute for accelerating uploads into one S3 bucket."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Global Accelerator",
+          "difference": "Use CloudFront when edge caching of HTTP(S) content is the deciding requirement; Global Accelerator does not cache content."
+        },
+        {
+          "concept": "S3 Transfer Acceleration",
+          "difference": "It addresses long-distance uploads to an S3 bucket, not cached delivery from an origin to viewers."
+        }
+      ],
+      "examCues": [
+        "repeat image requests from global viewers",
+        "reduce requests to the origin",
+        "cache website content at the edge",
+        "content must refresh within minutes"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon CloudFront entrega contenido HTTP(S) estático y dinámico mediante edge locations y puede almacenarlo en caché cerca de los usuarios. Elígelo cuando necesites menor latencia global y menos solicitudes a un origen S3 o HTTP; ajusta la expiración de caché según el requisito de actualización.",
+      "whenToUse": [
+        "Usuarios de distintas regiones solicitan repetidamente archivos de un sitio web u otro contenido HTTP(S).",
+        "Un bucket S3 o un servidor HTTP debe conservar la versión definitiva, mientras las edge locations atienden solicitudes repetidas.",
+        "Necesitas reducir las solicitudes directas al origen sin incumplir un requisito de actualización del contenido."
+      ],
+      "keyFacts": [
+        "Una distribución de CloudFront identifica los orígenes de los que obtiene el contenido solicitado.",
+        "El origen puede ser un bucket S3 o un servidor HTTP personalizado, incluso en EC2 o fuera de AWS.",
+        "Si el contenido está en caché, se entrega desde una edge location; si no está en esa edge location, una regional edge cache o Origin Shield puede atender la solicitud sin contactar al origen.",
+        "Los encabezados de respuesta del origen pueden controlar la duración en caché. La expiración predeterminada documentada es de 24 horas y el mínimo es de 0 segundos.",
+        "CloudFront Origin Shield puede ayudar a minimizar las solicitudes enviadas al origen."
+      ],
+      "gotchas": [
+        "No supongas que la duración predeterminada de caché cumple un plazo corto de actualización.",
+        "Un TTL de 0 segundos no cumple el objetivo de descargar solicitudes repetidas mediante caché.",
+        "CloudFront entrega contenido HTTP(S) en caché; no sustituye la aceleración de cargas hacia un único bucket S3."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Global Accelerator",
+          "difference": "Elige CloudFront si el requisito decisivo es almacenar contenido HTTP(S) en caché en el borde; Global Accelerator no almacena contenido en caché."
+        },
+        {
+          "concept": "S3 Transfer Acceleration",
+          "difference": "Resuelve cargas de larga distancia hacia un bucket S3, no la entrega en caché desde un origen a los usuarios."
+        }
+      ],
+      "examCues": [
+        "repeat image requests from global viewers",
+        "reduce requests to the origin",
+        "cache website content at the edge",
+        "content must refresh within minutes"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html",
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudfront-fundamentals--05b8911a",
+      "conceptId": "cloudfront-fundamentals",
+      "secondaryConcepts": [
+        "global-accelerator",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum publishes photographs in an S3 bucket. Visitors on several continents repeatedly download the same photographs, and the museum wants faster delivery with fewer requests reaching the bucket. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Serve the photographs from an Application Load Balancer backed by web servers in additional Regions.",
+          "correct": false,
+          "why": "Additional web servers do not provide the requested edge cache and add infrastructure to operate."
+        },
+        {
+          "id": "B",
+          "text": "Create a CloudFront distribution with the S3 bucket as its origin.",
+          "correct": true,
+          "why": "CloudFront can cache the photographs at edge locations and retrieve misses from the S3 origin."
+        },
+        {
+          "id": "C",
+          "text": "Place the photographs behind AWS Global Accelerator and an Application Load Balancer.",
+          "correct": false,
+          "why": "Global Accelerator does not cache the photographs or reduce repeat requests through cache hits."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Transfer Acceleration for visitors downloading the photographs.",
+          "correct": false,
+          "why": "S3 Transfer Acceleration addresses uploads to a bucket rather than caching repeated downloads."
+        }
+      ],
+      "explanation": "The deciding requirements are repeated downloads, global viewers, and fewer requests to the S3 bucket. CloudFront serves cached photographs from edge locations and uses S3 as the origin when content is not cached. S3 Transfer Acceleration targets uploads, while Global Accelerator does not provide content caching. Adding regional web servers also misses the edge-caching requirement and increases operational work.",
+      "keywordCues": [
+        "repeatedly download the same photographs",
+        "faster delivery",
+        "fewer requests reaching the bucket",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html"
+      ],
+      "es": {
+        "stem": "Un museo publica fotografías en un bucket S3. Visitantes de varios continentes descargan repetidamente las mismas fotografías, y el museo quiere entregarlas más rápido y reducir las solicitudes que llegan al bucket. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Entregar las fotografías mediante un Application Load Balancer respaldado por servidores web en más regiones.",
+            "why": "Los servidores adicionales no proporcionan la caché en el borde solicitada y agregan infraestructura que debes operar."
+          },
+          {
+            "id": "B",
+            "text": "Crear una distribución de CloudFront con el bucket S3 como origen.",
+            "why": "CloudFront puede almacenar las fotografías en caché en las edge locations y obtener del origen S3 el contenido que no esté allí."
+          },
+          {
+            "id": "C",
+            "text": "Colocar las fotografías detrás de AWS Global Accelerator y un Application Load Balancer.",
+            "why": "Global Accelerator no almacena las fotografías en caché ni reduce las solicitudes repetidas mediante aciertos de caché."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Transfer Acceleration para los visitantes que descargan las fotografías.",
+            "why": "S3 Transfer Acceleration atiende cargas hacia un bucket, no la entrega en caché de descargas repetidas."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son las descargas repetidas, los usuarios globales y menos solicitudes al bucket S3. CloudFront entrega las fotografías almacenadas en las edge locations y consulta el origen S3 cuando no están en caché. S3 Transfer Acceleration se orienta a las cargas, mientras que Global Accelerator no proporciona caché de contenido. Agregar servidores web regionales tampoco satisface el requisito de caché en el borde y aumenta el trabajo operativo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-fundamentals--d49e3bce",
+      "conceptId": "cloudfront-fundamentals",
+      "secondaryConcepts": [
+        "global-accelerator",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An online magazine serves frequently requested article pages from an HTTP server that it manages outside AWS. Readers are spread across continents, and the publisher wants repeat page requests served near readers rather than repeatedly contacting that server. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Put AWS Global Accelerator in front of the existing HTTP server.",
+          "correct": false,
+          "why": "Global Accelerator does not cache repeated article requests near readers."
+        },
+        {
+          "id": "B",
+          "text": "Create a CloudFront distribution with the HTTP server as a custom origin.",
+          "correct": true,
+          "why": "CloudFront supports custom HTTP origins and can serve cached pages from edge locations."
+        },
+        {
+          "id": "C",
+          "text": "Deploy copies of the HTTP server in more locations and direct readers to the nearest copy.",
+          "correct": false,
+          "why": "Operating additional servers does not provide the requested managed edge cache and increases overhead."
+        },
+        {
+          "id": "D",
+          "text": "Use S3 Transfer Acceleration to deliver the article pages from the existing server.",
+          "correct": false,
+          "why": "S3 Transfer Acceleration is for uploads to S3 and does not cache pages from this HTTP server."
+        }
+      ],
+      "explanation": "The publisher needs edge caching but must retain its existing HTTP server as the source of the pages. A CloudFront distribution can use that server as a custom origin and serve cached requests from edge locations. Global Accelerator does not cache pages, and S3 Transfer Acceleration does not address delivery from an HTTP origin. Operating more servers adds work instead of providing a managed cache.",
+      "keywordCues": [
+        "HTTP server that it manages outside AWS",
+        "repeat page requests served near readers",
+        "rather than repeatedly contacting that server",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html"
+      ],
+      "es": {
+        "stem": "Una revista digital entrega páginas de artículos solicitadas con frecuencia desde un servidor HTTP que administra fuera de AWS. Sus lectores están en varios continentes, y la editorial quiere atender las solicitudes repetidas cerca de ellos en vez de consultar continuamente ese servidor. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar AWS Global Accelerator delante del servidor HTTP existente.",
+            "why": "Global Accelerator no almacena en caché las solicitudes repetidas de artículos cerca de los lectores."
+          },
+          {
+            "id": "B",
+            "text": "Crear una distribución de CloudFront con el servidor HTTP como origen personalizado.",
+            "why": "CloudFront admite orígenes HTTP personalizados y puede entregar páginas en caché desde edge locations."
+          },
+          {
+            "id": "C",
+            "text": "Implementar copias del servidor HTTP en más ubicaciones y dirigir a los lectores a la copia más cercana.",
+            "why": "Operar servidores adicionales no proporciona la caché administrada en el borde solicitada y aumenta el trabajo operativo."
+          },
+          {
+            "id": "D",
+            "text": "Usar S3 Transfer Acceleration para entregar las páginas desde el servidor existente.",
+            "why": "S3 Transfer Acceleration se usa para cargas hacia S3 y no almacena en caché páginas de este servidor HTTP."
+          }
+        ],
+        "explanation": "La editorial necesita caché en el borde, pero debe conservar su servidor HTTP como fuente de las páginas. Una distribución de CloudFront puede usarlo como origen personalizado y atender solicitudes desde las edge locations. Global Accelerator no almacena páginas en caché y S3 Transfer Acceleration no resuelve la entrega desde un origen HTTP. Operar más servidores añade trabajo en lugar de proporcionar una caché administrada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-fundamentals--e7dc937e",
+      "conceptId": "cloudfront-fundamentals",
+      "secondaryConcepts": [
+        "global-accelerator",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher uses CloudFront to deliver the same popular images to viewers worldwide from an on-premises HTTP origin. Even with edge caching, the publisher wants to minimize how many requests reach that origin as demand grows. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable CloudFront Origin Shield for the distribution.",
+          "correct": true,
+          "why": "Origin Shield is a CloudFront option for minimizing requests forwarded to an origin."
+        },
+        {
+          "id": "B",
+          "text": "Replace CloudFront with AWS Global Accelerator for image delivery.",
+          "correct": false,
+          "why": "Global Accelerator does not cache images to reduce repeat origin requests."
+        },
+        {
+          "id": "C",
+          "text": "Set the images' CloudFront cache expiration to 0 seconds.",
+          "correct": false,
+          "why": "A zero-second expiration works against serving repeat requests from cache."
+        },
+        {
+          "id": "D",
+          "text": "Use S3 Transfer Acceleration for requests to the on-premises origin.",
+          "correct": false,
+          "why": "S3 Transfer Acceleration addresses uploads to S3, not requests to this HTTP origin."
+        }
+      ],
+      "explanation": "The deciding requirement is to further minimize requests to an existing HTTP origin while continuing to use CloudFront. CloudFront Origin Shield is specifically identified as an option for reducing requests forwarded to an origin. Setting expiration to zero undermines caching, and Global Accelerator provides no content cache. S3 Transfer Acceleration addresses a different traffic direction and destination.",
+      "keywordCues": [
+        "uses CloudFront",
+        "same popular images",
+        "minimize how many requests reach that origin",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html"
+      ],
+      "es": {
+        "stem": "Una editorial usa CloudFront para entregar las mismas imágenes populares a usuarios de todo el mundo desde un origen HTTP local. Incluso con la caché en el borde, quiere minimizar cuántas solicitudes llegan a ese origen a medida que crece la demanda. ¿Qué solución cumple el requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar CloudFront Origin Shield para la distribución.",
+            "why": "Origin Shield es una opción de CloudFront para minimizar las solicitudes enviadas al origen."
+          },
+          {
+            "id": "B",
+            "text": "Sustituir CloudFront por AWS Global Accelerator para entregar las imágenes.",
+            "why": "Global Accelerator no almacena imágenes en caché para reducir las solicitudes repetidas al origen."
+          },
+          {
+            "id": "C",
+            "text": "Establecer la expiración de caché de las imágenes en CloudFront en 0 segundos.",
+            "why": "Una expiración de cero segundos dificulta atender solicitudes repetidas desde la caché."
+          },
+          {
+            "id": "D",
+            "text": "Usar S3 Transfer Acceleration para las solicitudes al origen local.",
+            "why": "S3 Transfer Acceleration atiende cargas hacia S3, no solicitudes a este origen HTTP."
+          }
+        ],
+        "explanation": "El requisito decisivo es reducir aún más las solicitudes a un origen HTTP existente sin dejar de usar CloudFront. CloudFront Origin Shield es una opción indicada específicamente para reducir las solicitudes enviadas al origen. Establecer la expiración en cero perjudica el uso de la caché, y Global Accelerator no ofrece caché de contenido. S3 Transfer Acceleration resuelve otro tipo de tráfico y destino."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-fundamentals--c64c38f1",
+      "conceptId": "cloudfront-fundamentals",
+      "secondaryConcepts": [
+        "global-accelerator",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A learning platform has downloadable lesson images in S3 and frequently requested HTML pages on an existing HTTP server. Students across continents repeatedly access both kinds of content; the platform wants nearby cached responses while keeping each existing source as the definitive origin. Which two solutions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy additional HTTP servers near students and have them serve copies of both content types.",
+          "correct": false,
+          "why": "Additional servers increase operational work and replace the requested managed edge-caching approach."
+        },
+        {
+          "id": "B",
+          "text": "Enable S3 Transfer Acceleration for students downloading lesson images.",
+          "correct": false,
+          "why": "S3 Transfer Acceleration targets uploads and does not cache the requested image downloads."
+        },
+        {
+          "id": "C",
+          "text": "Use a CloudFront distribution with the S3 bucket as an origin for the lesson images.",
+          "correct": true,
+          "why": "CloudFront can cache images near students while retaining S3 as their origin."
+        },
+        {
+          "id": "D",
+          "text": "Use a CloudFront distribution with the existing HTTP server as a custom origin for the HTML pages.",
+          "correct": true,
+          "why": "CloudFront supports custom HTTP origins and can cache page responses at edge locations."
+        },
+        {
+          "id": "E",
+          "text": "Use AWS Global Accelerator for the HTTP pages to cache them near students.",
+          "correct": false,
+          "why": "Global Accelerator does not cache HTML pages."
+        }
+      ],
+      "explanation": "Both content types need nearby cached delivery while their current sources remain definitive. CloudFront can use S3 as the image origin and a custom HTTP server as the page origin, so A and D address the two sources. S3 Transfer Acceleration does not cache downloads, and Global Accelerator does not cache pages. Deploying more servers adds operational overhead rather than using managed edge caching.",
+      "keywordCues": [
+        "lesson images in S3",
+        "HTML pages on an existing HTTP server",
+        "nearby cached responses",
+        "keeping each existing source as the definitive origin",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html"
+      ],
+      "es": {
+        "stem": "Una plataforma educativa tiene imágenes descargables de lecciones en S3 y páginas HTML solicitadas con frecuencia en un servidor HTTP existente. Estudiantes de varios continentes acceden repetidamente a ambos tipos de contenido; la plataforma quiere respuestas en caché cercanas y conservar cada fuente existente como origen definitivo. ¿Qué dos soluciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar servidores HTTP adicionales cerca de los estudiantes para entregar copias de ambos tipos de contenido.",
+            "why": "Los servidores adicionales aumentan el trabajo operativo y sustituyen el enfoque solicitado de caché administrada en el borde."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar S3 Transfer Acceleration para los estudiantes que descargan imágenes de las lecciones.",
+            "why": "S3 Transfer Acceleration se orienta a las cargas y no almacena en caché las descargas solicitadas."
+          },
+          {
+            "id": "C",
+            "text": "Usar una distribución de CloudFront con el bucket S3 como origen para las imágenes de las lecciones.",
+            "why": "CloudFront puede almacenar las imágenes en caché cerca de los estudiantes y conservar S3 como origen."
+          },
+          {
+            "id": "D",
+            "text": "Usar una distribución de CloudFront con el servidor HTTP existente como origen personalizado para las páginas HTML.",
+            "why": "CloudFront admite orígenes HTTP personalizados y puede almacenar las respuestas de las páginas en las edge locations."
+          },
+          {
+            "id": "E",
+            "text": "Usar AWS Global Accelerator para almacenar las páginas HTTP en caché cerca de los estudiantes.",
+            "why": "Global Accelerator no almacena páginas HTML en caché."
+          }
+        ],
+        "explanation": "Ambos tipos de contenido necesitan entrega en caché cerca de los usuarios sin cambiar sus fuentes definitivas. CloudFront puede usar S3 como origen de las imágenes y un servidor HTTP personalizado como origen de las páginas; por eso A y D cubren las dos fuentes. S3 Transfer Acceleration no almacena descargas en caché y Global Accelerator no almacena páginas en caché. Implementar más servidores aumenta el trabajo operativo en lugar de aprovechar la caché administrada en el borde."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudfront-fundamentals--r0",
+      "conceptId": "cloudfront-fundamentals",
+      "kind": "recall",
+      "prompt": "Global viewers repeatedly request images from S3. What would you put in front of the bucket, and why?",
+      "promptEs": "Usuarios globales solicitan repetidamente imágenes de S3. ¿Qué colocarías delante del bucket y por qué?",
+      "idealAnswer": "Create a CloudFront distribution with the S3 bucket as its origin. CloudFront can serve cached images from edge locations near viewers, reducing latency and repeat requests to S3.",
+      "rubric": [
+        "Names a CloudFront distribution.",
+        "Identifies S3 as the origin.",
+        "Explains nearby edge delivery and fewer repeat origin requests."
+      ]
+    },
+    {
+      "id": "cloudfront-fundamentals--r1",
+      "conceptId": "cloudfront-fundamentals",
+      "kind": "why-not",
+      "prompt": "Why would Global Accelerator not replace CloudFront when a website must cache frequently requested pages near global viewers?",
+      "promptEs": "¿Por qué Global Accelerator no sustituiría a CloudFront si un sitio debe almacenar páginas muy solicitadas en caché cerca de usuarios globales?",
+      "idealAnswer": "Global Accelerator does not cache website pages. CloudFront can cache HTTP(S) content at edge locations and serve repeat requests without retrieving every page from the origin.",
+      "rubric": [
+        "States that Global Accelerator does not cache content.",
+        "Identifies CloudFront as the edge-caching choice.",
+        "Connects cache hits to fewer origin requests."
+      ]
+    }
+  ]
+}

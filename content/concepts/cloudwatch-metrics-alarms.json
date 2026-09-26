@@ -1,0 +1,450 @@
+{
+  "conceptId": "cloudwatch-metrics-alarms",
+  "card": {
+    "en": {
+      "tldr": "Amazon CloudWatch collects operational metrics, displays them on dashboards, and evaluates alarms that can notify teams or trigger supported resource actions. In an exam scenario, choose it when the decision depends on measured performance or an application KPI—not on API auditing or configuration history.",
+      "whenToUse": [
+        "An EC2 workload needs memory or disk-usage monitoring: collect those system metrics with the CloudWatch agent.",
+        "A measured threshold must notify a team or trigger an EC2 Auto Scaling action.",
+        "An application must publish a business KPI as a custom metric and display it with infrastructure metrics."
+      ],
+      "keyFacts": [
+        "Many AWS services automatically report basic metrics to CloudWatch; applications can publish custom metrics.",
+        "A metric alarm evaluates a metric or metric-math expression against a threshold over specified periods.",
+        "Metric alarms can send Amazon SNS notifications or perform EC2 and EC2 Auto Scaling actions.",
+        "A composite alarm combines other alarm states to reduce alert noise, but cannot perform EC2 or Auto Scaling actions.",
+        "Dashboards present metrics and logs together and can be shared across accounts and Regions."
+      ],
+      "gotchas": [
+        "Do not assume an EC2 instance's memory and disk-usage metrics are covered by automatically reported basic metrics; use the CloudWatch agent.",
+        "A composite alarm can notify, but it cannot directly trigger an Auto Scaling action.",
+        "An alarm with missing metric data can enter INSUFFICIENT_DATA; that state does not necessarily indicate a resource failure."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS CloudTrail",
+          "difference": "CloudTrail addresses who made an API call; CloudWatch evaluates operational metrics."
+        },
+        {
+          "concept": "AWS Config",
+          "difference": "Config tracks configuration history and compliance; CloudWatch tracks performance metrics and alarms."
+        },
+        {
+          "concept": "AWS X-Ray",
+          "difference": "X-Ray traces requests to find distributed latency bottlenecks; CloudWatch alarms evaluate metrics against thresholds."
+        }
+      ],
+      "examCues": [
+        "alert when a business KPI breaches a threshold",
+        "scale EC2 capacity based on measured load",
+        "monitor memory usage across EC2 instances",
+        "reduce noisy alerts from several metric alarms"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon CloudWatch recopila métricas operativas, las muestra en dashboards y evalúa alarmas que pueden notificar a un equipo o activar acciones compatibles sobre recursos. En un escenario de examen, elígelo cuando la decisión dependa del rendimiento medido o de un KPI de la aplicación, no de la auditoría de llamadas API ni del historial de configuración.",
+      "whenToUse": [
+        "Una carga en EC2 necesita monitoreo de memoria o uso de disco: recopila esas métricas del sistema con CloudWatch agent.",
+        "Un umbral medido debe notificar a un equipo o activar una acción de EC2 Auto Scaling.",
+        "Una aplicación debe publicar un KPI de negocio como custom metric y mostrarlo junto con métricas de infraestructura."
+      ],
+      "keyFacts": [
+        "Muchos servicios de AWS envían automáticamente métricas básicas a CloudWatch; las aplicaciones también pueden publicar custom metrics.",
+        "Una metric alarm evalúa una métrica o una expresión de metric math frente a un umbral durante los períodos especificados.",
+        "Las metric alarms pueden enviar notificaciones de Amazon SNS o ejecutar acciones de EC2 y EC2 Auto Scaling.",
+        "Una composite alarm combina los estados de otras alarmas para reducir alertas innecesarias, pero no puede ejecutar acciones de EC2 ni de Auto Scaling.",
+        "Los dashboards reúnen métricas y logs y se pueden compartir entre cuentas y Regions."
+      ],
+      "gotchas": [
+        "No supongas que las métricas básicas enviadas automáticamente incluyen el uso de memoria y disco de una instancia EC2; usa CloudWatch agent.",
+        "Una composite alarm puede notificar, pero no puede activar directamente una acción de Auto Scaling.",
+        "Si faltan datos de una métrica, una alarma puede pasar a INSUFFICIENT_DATA; eso no necesariamente significa que el recurso falló."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS CloudTrail",
+          "difference": "CloudTrail responde quién hizo una llamada API; CloudWatch evalúa métricas operativas."
+        },
+        {
+          "concept": "AWS Config",
+          "difference": "Config registra el historial de configuración y el cumplimiento; CloudWatch monitorea métricas de rendimiento y alarmas."
+        },
+        {
+          "concept": "AWS X-Ray",
+          "difference": "X-Ray rastrea solicitudes para encontrar cuellos de botella de latencia distribuida; las alarmas de CloudWatch evalúan métricas frente a umbrales."
+        }
+      ],
+      "examCues": [
+        "alert when a business KPI breaches a threshold",
+        "scale EC2 capacity based on measured load",
+        "monitor memory usage across EC2 instances",
+        "reduce noisy alerts from several metric alarms"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html",
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudwatch-metrics-alarms--f40211f3",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "secondaryConcepts": [
+        "x-ray"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A photo-processing company runs workers in an EC2 Auto Scaling group. During large uploads, worker memory usage rises before CPU usage does, and the team wants capacity to increase when memory usage crosses its chosen threshold. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a CloudWatch composite alarm on CPU alarms and assign it an Auto Scaling action.",
+          "correct": false,
+          "why": "It uses the wrong signal, and composite alarms cannot perform Auto Scaling actions."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS X-Ray traces to identify slow requests and initiate the capacity change.",
+          "correct": false,
+          "why": "Request tracing does not provide the required memory-threshold alarm for Auto Scaling."
+        },
+        {
+          "id": "C",
+          "text": "Create a CloudWatch alarm on the instances' automatically reported CPU metric and use it for Auto Scaling.",
+          "correct": false,
+          "why": "CPU rises later than memory in this workload, so it misses the stated scaling signal."
+        },
+        {
+          "id": "D",
+          "text": "Deploy CloudWatch agent to collect memory usage and create a metric alarm with an Auto Scaling action.",
+          "correct": true,
+          "why": "The agent supplies the memory metric, and a metric alarm can trigger an Auto Scaling action."
+        }
+      ],
+      "explanation": "The requirement is to scale on memory usage, which leads CPU usage for these workers. CloudWatch agent can collect EC2 memory metrics, and a metric alarm can perform an EC2 Auto Scaling action when its threshold is breached. An automatically reported CPU metric would react to a different signal. A composite alarm cannot perform the required Auto Scaling action.",
+      "keywordCues": [
+        "memory usage rises before CPU usage does",
+        "capacity to increase when memory usage crosses its chosen threshold"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html"
+      ],
+      "es": {
+        "stem": "Una empresa de procesamiento de fotos ejecuta workers en un grupo de EC2 Auto Scaling. Durante las cargas grandes, el uso de memoria aumenta antes que el uso de CPU, y el equipo quiere aumentar la capacidad cuando la memoria supere el umbral elegido. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una composite alarm de CloudWatch basada en alarmas de CPU y asígnale una acción de Auto Scaling.",
+            "why": "Usa la señal equivocada y las composite alarms no pueden ejecutar acciones de Auto Scaling."
+          },
+          {
+            "id": "B",
+            "text": "Usa trazas de AWS X-Ray para identificar solicitudes lentas e iniciar el cambio de capacidad.",
+            "why": "El rastreo de solicitudes no proporciona la alarma de umbral de memoria requerida para Auto Scaling."
+          },
+          {
+            "id": "C",
+            "text": "Crea una alarma de CloudWatch sobre la métrica de CPU que las instancias envían automáticamente y úsala para Auto Scaling.",
+            "why": "La CPU aumenta después que la memoria en esta carga, por lo que no corresponde a la señal requerida."
+          },
+          {
+            "id": "D",
+            "text": "Implementa CloudWatch agent para recopilar el uso de memoria y crea una metric alarm con una acción de Auto Scaling.",
+            "why": "El agente proporciona la métrica de memoria y una metric alarm puede activar una acción de Auto Scaling."
+          }
+        ],
+        "explanation": "El requisito es escalar según el uso de memoria, que aumenta antes que la CPU en estos workers. CloudWatch agent puede recopilar métricas de memoria de EC2 y una metric alarm puede ejecutar una acción de EC2 Auto Scaling al superar el umbral. Una métrica de CPU enviada automáticamente respondería a otra señal. Una composite alarm no puede ejecutar la acción de Auto Scaling requerida."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudwatch-metrics-alarms--1e88eb01",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "secondaryConcepts": [
+        "aws-config",
+        "vpc-flow-logs",
+        "cloudtrail"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company sends application error events to CloudWatch Logs. Its operations team wants a numerical count derived from matching log events so it can graph the count beside other metrics and alert when the count crosses a threshold. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a CloudWatch Logs metric filter, then graph and alarm on the resulting CloudWatch metric.",
+          "correct": true,
+          "why": "A metric filter extracts numerical values from logs to generate a metric usable in dashboards and alarms."
+        },
+        {
+          "id": "B",
+          "text": "Create AWS Config rules for the application resources and add their compliance results to a dashboard.",
+          "correct": false,
+          "why": "Configuration compliance does not turn matching application log events into a numerical metric."
+        },
+        {
+          "id": "C",
+          "text": "Enable CloudTrail for the account and use its API activity records as the application error metric.",
+          "correct": false,
+          "why": "API activity records do not extract a metric from the application's CloudWatch Logs events."
+        },
+        {
+          "id": "D",
+          "text": "Enable VPC Flow Logs for the application's VPC and alarm on accepted and rejected traffic records.",
+          "correct": false,
+          "why": "IP traffic metadata does not supply the requested count of matching application error events."
+        }
+      ],
+      "explanation": "The requirement is specifically to derive a metric from matching CloudWatch Logs events and then graph and alarm on it. A CloudWatch Logs metric filter extracts numerical values and generates a CloudWatch metric for dashboards and alerting. VPC Flow Logs describe IP traffic metadata, not application error events. Config and CloudTrail likewise answer different operational questions.",
+      "keywordCues": [
+        "application error events to CloudWatch Logs",
+        "numerical count derived from matching log events",
+        "graph the count beside other metrics"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios envía eventos de error de su aplicación a CloudWatch Logs. El equipo de operaciones quiere obtener una cantidad numérica de los eventos de log coincidentes para graficarla junto a otras métricas y recibir una alerta cuando supere un umbral. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un metric filter de CloudWatch Logs; después, grafica la métrica de CloudWatch resultante y configura una alarma sobre ella.",
+            "why": "Un metric filter extrae valores numéricos de los logs para generar una métrica que puede usarse en dashboards y alarmas."
+          },
+          {
+            "id": "B",
+            "text": "Crea reglas de AWS Config para los recursos de la aplicación y agrega sus resultados de cumplimiento a un dashboard.",
+            "why": "El cumplimiento de configuración no convierte los eventos de error coincidentes de la aplicación en una métrica numérica."
+          },
+          {
+            "id": "C",
+            "text": "Activa CloudTrail para la cuenta y usa sus registros de actividad API como métrica de errores de la aplicación.",
+            "why": "Los registros de actividad API no extraen una métrica de los eventos de la aplicación en CloudWatch Logs."
+          },
+          {
+            "id": "D",
+            "text": "Activa VPC Flow Logs para la VPC de la aplicación y configura una alarma sobre los registros de tráfico aceptado y rechazado.",
+            "why": "Los metadatos de tráfico IP no proporcionan la cantidad solicitada de eventos de error de la aplicación."
+          }
+        ],
+        "explanation": "El requisito específico es derivar una métrica de eventos coincidentes de CloudWatch Logs para graficarla y configurar una alarma. Un metric filter de CloudWatch Logs extrae valores numéricos y genera una métrica de CloudWatch para dashboards y alertas. VPC Flow Logs describe metadatos de tráfico IP, no eventos de error de la aplicación. Config y CloudTrail también responden a otras preguntas operativas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudwatch-metrics-alarms--65a48cb6",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "secondaryConcepts": [
+        "aws-config",
+        "cloudtrail"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare software provider operates an application in several AWS accounts. Its central operations team needs to see metrics and logs from those accounts in one monitoring account and receive alerts based on metrics from the source accounts. Which TWO CloudWatch capabilities should the team use to meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Config rules in the monitoring account to evaluate resource compliance in place of operational metrics.",
+          "correct": false,
+          "why": "Configuration compliance does not provide the requested cross-account metric and log monitoring."
+        },
+        {
+          "id": "B",
+          "text": "Create CloudWatch composite alarms whose rules directly combine alarms from different AWS accounts.",
+          "correct": false,
+          "why": "CloudWatch does not support creating cross-account composite alarms."
+        },
+        {
+          "id": "C",
+          "text": "Create cross-account CloudWatch alarms that watch metrics in the linked source accounts.",
+          "correct": true,
+          "why": "With cross-account functionality enabled, alarms can watch metrics in other AWS accounts."
+        },
+        {
+          "id": "D",
+          "text": "Use CloudTrail activity records as substitutes for application metrics and logs in the monitoring account.",
+          "correct": false,
+          "why": "API audit records do not replace the requested operational metrics and logs."
+        },
+        {
+          "id": "E",
+          "text": "Enable CloudWatch cross-account observability and link the application accounts to the monitoring account.",
+          "correct": true,
+          "why": "Linked source accounts let the monitoring account view their metrics and logs."
+        }
+      ],
+      "explanation": "The team needs both centralized visibility and metric-based alerting across accounts. CloudWatch cross-account observability links source accounts to a monitoring account for viewing metrics and logs, and enabled cross-account functionality permits alarms on metrics in other accounts. A cross-account composite alarm is an attractive but unsupported substitute. Config compliance and CloudTrail API auditing do not meet the operational-monitoring requirement.",
+      "keywordCues": [
+        "several AWS accounts",
+        "metrics and logs from those accounts in one monitoring account",
+        "alerts based on metrics from the source accounts"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de software de salud ejecuta una aplicación en varias cuentas de AWS. Su equipo central de operaciones necesita ver las métricas y los logs de esas cuentas en una sola cuenta de monitoreo y recibir alertas basadas en métricas de las cuentas de origen. ¿Qué DOS capacidades de CloudWatch debe usar el equipo para cumplir estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa reglas de AWS Config en la cuenta de monitoreo para evaluar el cumplimiento de recursos en lugar de métricas operativas.",
+            "why": "El cumplimiento de configuración no proporciona el monitoreo entre cuentas de métricas y logs solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Crea composite alarms de CloudWatch cuyas reglas combinen directamente alarmas de diferentes cuentas de AWS.",
+            "why": "CloudWatch no admite crear composite alarms entre cuentas."
+          },
+          {
+            "id": "C",
+            "text": "Crea alarmas de CloudWatch entre cuentas que vigilen métricas de las cuentas de origen vinculadas.",
+            "why": "Con la funcionalidad entre cuentas activada, las alarmas pueden vigilar métricas de otras cuentas de AWS."
+          },
+          {
+            "id": "D",
+            "text": "Usa registros de actividad de CloudTrail en vez de métricas y logs de la aplicación en la cuenta de monitoreo.",
+            "why": "Los registros de auditoría API no sustituyen las métricas y los logs operativos solicitados."
+          },
+          {
+            "id": "E",
+            "text": "Activa CloudWatch cross-account observability y vincula las cuentas de la aplicación con la cuenta de monitoreo.",
+            "why": "Las cuentas de origen vinculadas permiten que la cuenta de monitoreo vea sus métricas y logs."
+          }
+        ],
+        "explanation": "El equipo necesita tanto visibilidad centralizada como alertas basadas en métricas entre cuentas. CloudWatch cross-account observability vincula las cuentas de origen con una cuenta de monitoreo para ver métricas y logs; con la funcionalidad entre cuentas activada, también se pueden crear alarmas sobre métricas de otras cuentas. Una composite alarm entre cuentas parece útil, pero no se admite. El cumplimiento de Config y la auditoría API de CloudTrail no cumplen el requisito de monitoreo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudwatch-metrics-alarms--272e5101",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "secondaryConcepts": [
+        "cloudtrail",
+        "aws-config",
+        "x-ray"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing startup wants an on-call notification when the number of completed purchases reported by its application falls below a chosen threshold. Its operators also want to view that business measure beside infrastructure metrics in one place. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Track the application resources with AWS Config rules and notify the team of configuration changes.",
+          "correct": false,
+          "why": "Configuration changes do not measure the application's completed-purchase count."
+        },
+        {
+          "id": "B",
+          "text": "Publish completed purchases as a CloudWatch custom metric, add it to a dashboard, and create a metric alarm that notifies an SNS topic.",
+          "correct": true,
+          "why": "A custom metric captures the KPI, while the dashboard and metric alarm meet the viewing and notification requirements."
+        },
+        {
+          "id": "C",
+          "text": "Record purchase-related API activity in CloudTrail and use its event history as the operational dashboard.",
+          "correct": false,
+          "why": "API auditing does not provide the requested application-published KPI and metric-threshold alarm."
+        },
+        {
+          "id": "D",
+          "text": "Trace checkout requests with AWS X-Ray and use the traces as the purchase-count dashboard.",
+          "correct": false,
+          "why": "Request traces address distributed request behavior rather than the specified KPI dashboard and threshold alarm."
+        }
+      ],
+      "explanation": "The deciding requirement is a business count reported by the application and evaluated against a threshold. CloudWatch accepts custom metrics, displays metrics together on dashboards, and can send SNS notifications from metric alarms. CloudTrail answers questions about API activity rather than providing this KPI alarm. Config and X-Ray address different monitoring questions.",
+      "keywordCues": [
+        "number of completed purchases reported by its application",
+        "falls below a chosen threshold",
+        "beside infrastructure metrics in one place"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html"
+      ],
+      "es": {
+        "stem": "Una startup de venta de boletos quiere notificar al personal de guardia cuando el número de compras completadas que informa su aplicación caiga por debajo de un umbral elegido. Sus operadores también quieren ver esa medida de negocio junto a las métricas de infraestructura en un solo lugar. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Supervisa los recursos de la aplicación con reglas de AWS Config y notifica al equipo los cambios de configuración.",
+            "why": "Los cambios de configuración no miden la cantidad de compras completadas por la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Publica las compras completadas como custom metric de CloudWatch, agrégala a un dashboard y crea una metric alarm que notifique a un tema de SNS.",
+            "why": "La custom metric captura el KPI; el dashboard y la metric alarm cumplen los requisitos de visualización y notificación."
+          },
+          {
+            "id": "C",
+            "text": "Registra la actividad API relacionada con las compras en CloudTrail y usa su historial de eventos como dashboard operativo.",
+            "why": "La auditoría de API no proporciona el KPI publicado por la aplicación ni una alarma sobre su umbral."
+          },
+          {
+            "id": "D",
+            "text": "Rastrea las solicitudes de pago con AWS X-Ray y usa las trazas como dashboard de compras.",
+            "why": "Las trazas de solicitudes sirven para analizar su comportamiento distribuido, no para el dashboard del KPI y su alarma de umbral."
+          }
+        ],
+        "explanation": "El requisito decisivo es una cantidad de negocio que publica la aplicación y que debe evaluarse frente a un umbral. CloudWatch acepta custom metrics, las muestra en dashboards junto a otras métricas y puede enviar notificaciones de SNS desde metric alarms. CloudTrail responde preguntas sobre actividad API, pero no proporciona esta alarma del KPI. Config y X-Ray atienden otras necesidades de monitoreo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudwatch-metrics-alarms--r0",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "kind": "recall",
+      "prompt": "EC2 workers must scale when memory usage rises. What collects the signal, and what triggers scaling?",
+      "promptEs": "Los workers de EC2 deben escalar cuando aumenta el uso de memoria. ¿Qué recopila la señal y qué activa el escalado?",
+      "idealAnswer": "CloudWatch agent collects memory-usage metrics from the EC2 instances. A CloudWatch metric alarm evaluates the chosen threshold and can trigger an EC2 Auto Scaling action.",
+      "rubric": [
+        "Names CloudWatch agent as the source of the memory metric.",
+        "Names a CloudWatch metric alarm for threshold evaluation.",
+        "Connects the alarm to an EC2 Auto Scaling action."
+      ]
+    },
+    {
+      "id": "cloudwatch-metrics-alarms--r1",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "kind": "why-not",
+      "prompt": "Why would CloudTrail not replace CloudWatch for alerting when an application-published purchase count drops?",
+      "promptEs": "¿Por qué CloudTrail no reemplaza a CloudWatch para alertar cuando disminuye la cantidad de compras publicada por una aplicación?",
+      "idealAnswer": "CloudTrail records API activity to answer who made a call, not to evaluate an application-published business metric. Publish the purchase count as a CloudWatch custom metric and use a metric alarm to alert when it crosses the chosen threshold.",
+      "rubric": [
+        "Identifies CloudTrail's role as API-activity auditing.",
+        "Identifies the purchase count as an application-published custom metric.",
+        "Uses a CloudWatch metric alarm for threshold-based alerting."
+      ]
+    }
+  ]
+}

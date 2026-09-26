@@ -1,0 +1,403 @@
+{
+  "conceptId": "multi-tier-vpc-architecture",
+  "card": {
+    "en": {
+      "tldr": "Place the internet-facing load balancer in public subnets and application servers in private subnets across at least two Availability Zones. Keep internal tiers private, use security-group references to restrict tier-to-tier traffic, and choose routes based on whether traffic stays inside the VPC or needs outbound internet access.",
+      "whenToUse": [
+        "A public application must remain available if one Availability Zone fails.",
+        "Application or data servers must not receive direct internet traffic.",
+        "Private servers need outbound internet access without being placed in public subnets."
+      ],
+      "keyFacts": [
+        "The documented resilient VPC example uses public and private subnets in two Availability Zones, with an Application Load Balancer in the public subnets and Auto Scaling servers in the private subnets.",
+        "Public subnet route tables have a route to an internet gateway; private subnet route tables retain local routes for VPC traffic.",
+        "Private servers can use NAT gateways for outbound internet access; the example places one NAT gateway in each Availability Zone for resiliency.",
+        "A server security group must allow traffic from the load balancer security group on the backend target port and health-check port.",
+        "A gateway VPC endpoint can provide private-subnet access to Amazon S3."
+      ],
+      "gotchas": [
+        "Putting servers in public subnets is not necessary just because users reach the application through a public load balancer.",
+        "A NAT gateway supports outbound internet access from private servers; it does not replace the load balancer's inbound path.",
+        "Do not send traffic between tiers in the same VPC through a NAT gateway or internet gateway when local routing applies.",
+        "Allowing the load balancer's application port but omitting its distinct health-check port can break health checks."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "public entry point, private application servers",
+        "survive an Availability Zone failure",
+        "restrict each tier to the preceding tier",
+        "private instances need outbound updates"
+      ]
+    },
+    "es": {
+      "tldr": "Ubica el load balancer expuesto a internet en subredes públicas y los servidores de aplicación en subredes privadas de al menos dos Availability Zones. Mantén privadas las capas internas, usa referencias a security groups para limitar el tráfico entre capas y elige las rutas según si el tráfico permanece en la VPC o necesita salir a internet.",
+      "whenToUse": [
+        "Una aplicación pública debe seguir disponible si falla una Availability Zone.",
+        "Los servidores de aplicación o datos no deben recibir tráfico directo desde internet.",
+        "Los servidores privados necesitan salida a internet sin ubicarse en subredes públicas."
+      ],
+      "keyFacts": [
+        "El ejemplo documentado de una VPC resiliente usa subredes públicas y privadas en dos Availability Zones, con un Application Load Balancer en las públicas y servidores de Auto Scaling en las privadas.",
+        "Las tablas de rutas de subredes públicas incluyen una ruta hacia un internet gateway; las de subredes privadas conservan rutas locales para el tráfico de la VPC.",
+        "Los servidores privados pueden usar NAT gateways para salir a internet; el ejemplo coloca uno en cada Availability Zone para mejorar la resiliencia.",
+        "El security group de los servidores debe permitir tráfico desde el security group del load balancer en el puerto de destino del backend y en el puerto de comprobación de estado.",
+        "Un gateway VPC endpoint puede dar acceso a Amazon S3 desde subredes privadas."
+      ],
+      "gotchas": [
+        "No necesitas poner los servidores en subredes públicas solo porque los usuarios accedan mediante un load balancer público.",
+        "Un NAT gateway permite la salida a internet desde servidores privados; no reemplaza la ruta de entrada del load balancer.",
+        "No envíes tráfico entre capas de la misma VPC a través de un NAT gateway o internet gateway si corresponde la ruta local.",
+        "Permitir el puerto de aplicación del load balancer sin incluir un puerto diferente de comprobación de estado puede hacer fallar esas comprobaciones."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "public entry point, private application servers",
+        "survive an Availability Zone failure",
+        "restrict each tier to the preceding tier",
+        "private instances need outbound updates"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html",
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/plan-your-network-topology.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "multi-tier-vpc-architecture--ea8b1a26",
+      "conceptId": "multi-tier-vpc-architecture",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare portal serves users through an Application Load Balancer in public subnets. Its application instances run in private subnets in two Availability Zones; the load balancer uses a separate health-check port, and the instances need outbound internet access for updates. The team is reviewing changes that must preserve the private application tier and avoid a single-AZ dependency for outbound access. Which TWO changes meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allow the load balancer security group into the instance security group on both the application port and the health-check port.",
+          "correct": true,
+          "why": "The private instances need to accept both application requests and health checks from the load balancer."
+        },
+        {
+          "id": "B",
+          "text": "Deploy a NAT gateway in a public subnet in each Availability Zone and route private-subnet outbound internet traffic through the gateway in the corresponding Availability Zone.",
+          "correct": true,
+          "why": "A NAT gateway in each Availability Zone follows the documented pattern for resilient outbound access from private servers."
+        },
+        {
+          "id": "C",
+          "text": "Deploy one NAT gateway in a public subnet in either Availability Zone and route both private subnet tiers through it.",
+          "correct": false,
+          "why": "A single NAT gateway does not avoid the specified single-AZ dependency for outbound access."
+        },
+        {
+          "id": "D",
+          "text": "Allow the load balancer security group on the application port only and use the public subnet's internet-gateway route for health checks.",
+          "correct": false,
+          "why": "The instances' security group must also allow load-balancer health-check traffic on its required port."
+        },
+        {
+          "id": "E",
+          "text": "Move the application instances into the public subnets and permit only the load balancer security group as an inbound source.",
+          "correct": false,
+          "why": "This violates the requirement to preserve the private application tier."
+        }
+      ],
+      "explanation": "Two separate requirements decide the answer: accept both types of load-balancer traffic and provide resilient outbound internet access without moving instances out of private subnets. The instance security group must allow the load balancer's application and separate health-check ports, and the documented resilient NAT pattern uses a gateway in each Availability Zone. A single NAT gateway misses the outbound resilience requirement, while public application subnets miss the privacy requirement.",
+      "keywordCues": [
+        "load balancer uses a separate health-check port",
+        "instances need outbound internet access for updates",
+        "preserve the private application tier",
+        "avoid a single-AZ dependency for outbound access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/plan-your-network-topology.html"
+      ],
+      "es": {
+        "stem": "Un portal de salud atiende a los usuarios mediante un Application Load Balancer en subredes públicas. Sus instancias de aplicación se ejecutan en subredes privadas de dos Availability Zones; el load balancer usa un puerto separado para las comprobaciones de estado y las instancias necesitan salida a internet para obtener actualizaciones. El equipo evalúa cambios que deben mantener privada la capa de aplicación y evitar una dependencia de una sola Availability Zone para la salida. ¿Qué DOS cambios cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Permitir el security group del load balancer en el security group de las instancias tanto en el puerto de aplicación como en el puerto de comprobación de estado.",
+            "why": "Las instancias privadas deben aceptar tanto las solicitudes de aplicación como las comprobaciones de estado del load balancer."
+          },
+          {
+            "id": "B",
+            "text": "Implementar un NAT gateway en una subred pública de cada Availability Zone y dirigir el tráfico saliente a internet de las subredes privadas por el gateway de la Availability Zone correspondiente.",
+            "why": "Un NAT gateway por Availability Zone sigue el patrón documentado de salida resiliente para servidores privados."
+          },
+          {
+            "id": "C",
+            "text": "Implementar un NAT gateway en una subred pública de cualquiera de las Availability Zones y dirigir ambas capas de subredes privadas a través de él.",
+            "why": "Un solo NAT gateway no elimina la dependencia de una única Availability Zone para la salida."
+          },
+          {
+            "id": "D",
+            "text": "Permitir el security group del load balancer solo en el puerto de aplicación y usar la ruta hacia el internet gateway de la subred pública para las comprobaciones de estado.",
+            "why": "El security group de las instancias también debe permitir el tráfico de comprobación de estado del load balancer en el puerto correspondiente."
+          },
+          {
+            "id": "E",
+            "text": "Mover las instancias de aplicación a las subredes públicas y permitir como origen de entrada únicamente el security group del load balancer.",
+            "why": "Esto incumple el requisito de mantener privada la capa de aplicación."
+          }
+        ],
+        "explanation": "Dos requisitos determinan la respuesta: aceptar ambos tipos de tráfico del load balancer y ofrecer salida a internet resiliente sin sacar las instancias de las subredes privadas. El security group de las instancias debe permitir los puertos de aplicación y de comprobación de estado del load balancer, y el patrón NAT resiliente documentado usa un gateway por Availability Zone. Un solo NAT gateway no cumple la resiliencia de salida, mientras que las subredes públicas para la aplicación incumplen el requisito de privacidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "multi-tier-vpc-architecture--a3857af8",
+      "conceptId": "multi-tier-vpc-architecture",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is moving a customer-facing application into a VPC. Customers must reach the service over the internet, but application instances must not receive direct internet traffic. The application must continue serving requests if one Availability Zone fails. Which design meets these requirements while keeping the application tier private?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the Application Load Balancer in a public subnet in one Availability Zone and the Auto Scaling group in private subnets across two Availability Zones.",
+          "correct": false,
+          "why": "The public entry-point design does not span both Availability Zones as required."
+        },
+        {
+          "id": "B",
+          "text": "Place the Auto Scaling group in private subnets across two Availability Zones and route customer requests through NAT gateways in the corresponding public subnets.",
+          "correct": false,
+          "why": "NAT gateways provide outbound internet connectivity for private servers, not the required inbound load-balanced entry point."
+        },
+        {
+          "id": "C",
+          "text": "Place an Application Load Balancer in public subnets across two Availability Zones and an Auto Scaling group in private subnets across both; allow the instances to receive the load balancer's application and health-check traffic.",
+          "correct": true,
+          "why": "The public load balancer provides the entry point while private instances in two Availability Zones receive only the required load-balancer traffic."
+        },
+        {
+          "id": "D",
+          "text": "Place an Application Load Balancer and the Auto Scaling group in public subnets across two Availability Zones; restrict instance traffic with security groups.",
+          "correct": false,
+          "why": "This places the application tier in public subnets despite the requirement to keep it private."
+        }
+      ],
+      "explanation": "The deciding constraints are a public entry point, private application instances, and resilience across two Availability Zones. An Application Load Balancer in public subnets can send requests to Auto Scaling instances in private subnets, whose security group permits the required application and health-check traffic. NAT gateways address outbound traffic from private servers, so they cannot substitute for the inbound load balancer.",
+      "keywordCues": [
+        "Customers must reach the service over the internet",
+        "application instances must not receive direct internet traffic",
+        "if one Availability Zone fails"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/plan-your-network-topology.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos está trasladando a una VPC una aplicación para clientes. Los clientes deben acceder al servicio por internet, pero las instancias de aplicación no deben recibir tráfico directo desde internet. La aplicación debe seguir atendiendo solicitudes si falla una Availability Zone. ¿Qué diseño cumple estos requisitos y mantiene privada la capa de aplicación?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ubicar el Application Load Balancer en una subred pública de una Availability Zone y el grupo de Auto Scaling en subredes privadas de dos Availability Zones.",
+            "why": "El diseño del punto de entrada público no abarca ambas Availability Zones como se requiere."
+          },
+          {
+            "id": "B",
+            "text": "Ubicar el grupo de Auto Scaling en subredes privadas de dos Availability Zones y dirigir las solicitudes de los clientes mediante NAT gateways en las subredes públicas correspondientes.",
+            "why": "Los NAT gateways proporcionan salida a internet a servidores privados, no el punto de entrada con balanceo que se necesita."
+          },
+          {
+            "id": "C",
+            "text": "Ubicar un Application Load Balancer en subredes públicas de dos Availability Zones y un grupo de Auto Scaling en subredes privadas de ambas; permitir que las instancias reciban el tráfico de aplicación y de comprobación de estado del load balancer.",
+            "why": "El load balancer público proporciona la entrada, mientras que las instancias privadas en dos Availability Zones solo reciben el tráfico necesario del load balancer."
+          },
+          {
+            "id": "D",
+            "text": "Ubicar un Application Load Balancer y el grupo de Auto Scaling en subredes públicas de dos Availability Zones; restringir el tráfico de las instancias mediante security groups.",
+            "why": "Esto coloca la capa de aplicación en subredes públicas, aunque el requisito indica que debe ser privada."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son una entrada pública, instancias de aplicación privadas y resiliencia en dos Availability Zones. Un Application Load Balancer en subredes públicas puede enviar solicitudes a instancias de Auto Scaling en subredes privadas, cuyo security group permite el tráfico necesario de aplicación y comprobación de estado. Los NAT gateways resuelven el tráfico saliente de servidores privados, por lo que no sustituyen al load balancer de entrada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "multi-tier-vpc-architecture--e9ec21e7",
+      "conceptId": "multi-tier-vpc-architecture",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company runs an application tier in private subnets in two Availability Zones. Each instance must download software updates from the internet, and the company wants outbound connectivity to remain resilient to the loss of either Availability Zone. Inbound customer traffic already passes through a public Application Load Balancer. Which routing design meets the outbound requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an internet-gateway default route to each private subnet's route table and keep the instances behind the load balancer.",
+          "correct": false,
+          "why": "The documented private-subnet design sends outbound IPv4 internet traffic to NAT gateways, not directly to the internet gateway."
+        },
+        {
+          "id": "B",
+          "text": "Point both private subnets' default routes to the Application Load Balancer and use local routes for communication between tiers.",
+          "correct": false,
+          "why": "The load balancer handles inbound application requests and is not the documented outbound internet route for private servers."
+        },
+        {
+          "id": "C",
+          "text": "Place one NAT gateway in a public subnet and point both private subnets' default routes to it.",
+          "correct": false,
+          "why": "Using a single NAT gateway does not meet the requirement for outbound connectivity resilient to the loss of either Availability Zone."
+        },
+        {
+          "id": "D",
+          "text": "Place a NAT gateway in a public subnet in each Availability Zone and route each private subnet's outbound internet traffic through a NAT gateway in its own Availability Zone.",
+          "correct": true,
+          "why": "The documented resilient pattern deploys a NAT gateway in each Availability Zone for outbound access from private servers."
+        }
+      ],
+      "explanation": "The application instances must stay private yet reach the internet for updates, even if an Availability Zone fails. The documented VPC pattern places a NAT gateway in each Availability Zone and uses private-subnet routes to reach it. A single NAT gateway may provide outbound access, but it misses the stated resilience requirement.",
+      "keywordCues": [
+        "private subnets in two Availability Zones",
+        "download software updates from the internet",
+        "outbound connectivity to remain resilient to the loss of either Availability Zone"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/plan-your-network-topology.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta una capa de aplicación en subredes privadas de dos Availability Zones. Cada instancia debe descargar actualizaciones de software desde internet y la empresa quiere que la conectividad saliente resista la pérdida de cualquiera de las Availability Zones. El tráfico entrante de clientes ya pasa por un Application Load Balancer público. ¿Qué diseño de rutas cumple el requisito de salida?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar una ruta predeterminada hacia un internet gateway en la tabla de rutas de cada subred privada y mantener las instancias detrás del load balancer.",
+            "why": "El diseño documentado de subredes privadas envía el tráfico IPv4 saliente hacia internet mediante NAT gateways, no directamente al internet gateway."
+          },
+          {
+            "id": "B",
+            "text": "Dirigir las rutas predeterminadas de ambas subredes privadas hacia el Application Load Balancer y usar rutas locales para la comunicación entre capas.",
+            "why": "El load balancer gestiona solicitudes entrantes de la aplicación y no es la ruta documentada de salida a internet para servidores privados."
+          },
+          {
+            "id": "C",
+            "text": "Colocar un NAT gateway en una subred pública y dirigir hacia él las rutas predeterminadas de ambas subredes privadas.",
+            "why": "Un único NAT gateway no cumple el requisito de que la conectividad saliente resista la pérdida de cualquiera de las Availability Zones."
+          },
+          {
+            "id": "D",
+            "text": "Colocar un NAT gateway en una subred pública de cada Availability Zone y dirigir el tráfico saliente a internet de cada subred privada mediante un NAT gateway de su propia Availability Zone.",
+            "why": "El patrón resiliente documentado implementa un NAT gateway en cada Availability Zone para la salida de los servidores privados."
+          }
+        ],
+        "explanation": "Las instancias de aplicación deben permanecer privadas, pero necesitan acceder a internet para obtener actualizaciones incluso si falla una Availability Zone. El patrón documentado de VPC coloca un NAT gateway en cada Availability Zone y utiliza rutas de las subredes privadas para alcanzarlo. Un solo NAT gateway puede ofrecer acceso saliente, pero no cumple el requisito explícito de resiliencia."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "multi-tier-vpc-architecture--582ed14e",
+      "conceptId": "multi-tier-vpc-architecture",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics platform separates its web-facing load balancer, application servers, and data servers into subnet tiers across two Availability Zones. Only the load balancer should initiate requests to the application tier; only the application tier should initiate requests to the data tier. Both server tiers must remain private. Which access design MOST closely matches these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep both server tiers in private subnets; allow the load balancer security group into the application security group and the application security group into the data security group on required ports.",
+          "correct": true,
+          "why": "Security-group references restrict each private tier to its intended upstream source."
+        },
+        {
+          "id": "B",
+          "text": "Keep both server tiers in private subnets; allow the load balancer security group into the application tier and route application-to-data traffic through the NAT gateways.",
+          "correct": false,
+          "why": "Traffic between these VPC tiers uses local routing rather than an outbound internet path through NAT gateways."
+        },
+        {
+          "id": "C",
+          "text": "Keep both server tiers in private subnets; allow the load balancer security group into both the application and data security groups.",
+          "correct": false,
+          "why": "This permits the load balancer to initiate traffic to the data tier rather than limiting that tier to application-server sources."
+        },
+        {
+          "id": "D",
+          "text": "Place the application and data servers in public subnets; use security groups to allow only the intended source tiers.",
+          "correct": false,
+          "why": "The server tiers would occupy public subnets rather than remaining in private subnets."
+        }
+      ],
+      "explanation": "The requirement is segmentation by both subnet placement and permitted source tier. Keeping the servers private and referencing the preceding tier's security group limits application access to the load balancer and data access to the application tier. Allowing the load balancer into the data tier skips the required boundary, while NAT gateways are for outbound internet access rather than local tier-to-tier routing.",
+      "keywordCues": [
+        "Only the load balancer should initiate requests to the application tier",
+        "only the application tier should initiate requests to the data tier",
+        "Both server tiers must remain private"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/plan-your-network-topology.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de logística separa su load balancer de entrada, sus servidores de aplicación y sus servidores de datos en capas de subredes distribuidas en dos Availability Zones. Solo el load balancer debe iniciar solicitudes a la capa de aplicación; solo la capa de aplicación debe iniciar solicitudes a la capa de datos. Ambas capas de servidores deben permanecer privadas. ¿Qué diseño de acceso cumple MEJOR estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener ambas capas de servidores en subredes privadas; permitir el security group del load balancer en el security group de aplicación y el security group de aplicación en el de datos, en los puertos necesarios.",
+            "why": "Las referencias a security groups restringen cada capa privada a la capa anterior prevista."
+          },
+          {
+            "id": "B",
+            "text": "Mantener ambas capas de servidores en subredes privadas; permitir el security group del load balancer en la capa de aplicación y dirigir el tráfico entre aplicación y datos mediante los NAT gateways.",
+            "why": "El tráfico entre estas capas de la VPC usa rutas locales, no una ruta de salida a internet mediante NAT gateways."
+          },
+          {
+            "id": "C",
+            "text": "Mantener ambas capas de servidores en subredes privadas; permitir el security group del load balancer en los security groups de aplicación y datos.",
+            "why": "Esto permite que el load balancer inicie tráfico hacia la capa de datos, en vez de limitarla a orígenes de los servidores de aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Colocar los servidores de aplicación y datos en subredes públicas; usar security groups para permitir solo las capas de origen previstas.",
+            "why": "Las capas de servidores quedarían en subredes públicas en lugar de permanecer en subredes privadas."
+          }
+        ],
+        "explanation": "El requisito es segmentar tanto por ubicación en subredes como por capa de origen permitida. Mantener privados los servidores y referenciar el security group de la capa anterior limita el acceso a aplicación desde el load balancer y el acceso a datos desde la capa de aplicación. Permitir acceso del load balancer a datos omite el límite requerido, mientras que los NAT gateways sirven para salida a internet y no para rutas locales entre capas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "multi-tier-vpc-architecture--r0",
+      "conceptId": "multi-tier-vpc-architecture",
+      "kind": "recall",
+      "prompt": "How would you place and connect a public load balancer, private application tier, and private data tier across two Availability Zones?",
+      "promptEs": "¿Cómo ubicarías y conectarías un load balancer público, una capa de aplicación privada y una capa de datos privada en dos Availability Zones?",
+      "idealAnswer": "Place the load balancer in public subnets and both server tiers in private subnets across two Availability Zones. Restrict application access to the load balancer's security group and data access to the application tier's security group on the required ports; use local routing for traffic within the VPC.",
+      "rubric": [
+        "Public load balancer and private server tiers",
+        "Placement across two Availability Zones",
+        "Security-group restrictions between consecutive tiers",
+        "Local routing for traffic within the VPC"
+      ]
+    }
+  ]
+}

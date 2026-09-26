@@ -1,0 +1,322 @@
+{
+  "conceptId": "ebs-encryption",
+  "card": {
+    "en": {
+      "tldr": "Amazon EBS encryption uses AWS KMS keys to encrypt volumes and snapshots. Enable encryption by default for future EBS resources; to replace an existing unencrypted volume, take a snapshot and create a new encrypted volume from it.",
+      "whenToUse": [
+        "New EBS volumes must be encrypted without requiring encryption to be selected for each creation request.",
+        "An existing unencrypted EBS volume must be replaced with an encrypted one.",
+        "An unencrypted snapshot needs an encrypted copy, or a snapshot needs to be copied under a different KMS key."
+      ],
+      "keyFacts": [
+        "EBS encryption uses AWS KMS keys and protects data at rest and data in transit between an EC2 instance and its attached EBS storage.",
+        "Encryption by default automatically encrypts new empty volumes using the default KMS key for EBS encryption.",
+        "You cannot directly encrypt an existing unencrypted volume or snapshot.",
+        "To encrypt an unencrypted volume, create a snapshot and then create a new encrypted volume from it; to encrypt an unencrypted snapshot, create an encrypted snapshot copy.",
+        "You cannot change the KMS key associated with an existing volume or snapshot, but you can specify a different KMS key during a snapshot copy.",
+        "You cannot remove encryption from an encrypted volume or snapshot."
+      ],
+      "gotchas": [
+        "Enabling encryption by default does not retroactively encrypt existing unencrypted resources.",
+        "Creating a snapshot of an unencrypted volume is not, by itself, the step that produces an encrypted replacement volume.",
+        "Changing an existing snapshot's KMS key requires a copy; the key cannot be changed in place."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "encrypt all newly created EBS volumes",
+        "existing unencrypted volume must be replaced",
+        "encrypted copy of an unencrypted snapshot",
+        "use a different KMS key for a snapshot copy"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon EBS encryption usa claves de AWS KMS para cifrar volúmenes y snapshots. Habilita encryption by default para los recursos EBS futuros; si necesitas reemplazar un volumen existente sin cifrar, crea un snapshot y, a partir de él, un volumen nuevo cifrado.",
+      "whenToUse": [
+        "Los volúmenes EBS nuevos deben quedar cifrados sin seleccionar el cifrado en cada solicitud de creación.",
+        "Necesitas reemplazar un volumen EBS existente sin cifrar por uno cifrado.",
+        "Necesitas una copia cifrada de un snapshot sin cifrar o copiar un snapshot con otra clave de KMS."
+      ],
+      "keyFacts": [
+        "EBS encryption usa claves de AWS KMS y protege los datos en reposo y en tránsito entre una instancia EC2 y su almacenamiento EBS adjunto.",
+        "Encryption by default cifra automáticamente los volúmenes vacíos nuevos con la clave predeterminada de KMS para EBS encryption.",
+        "No puedes cifrar directamente un volumen o snapshot existente sin cifrar.",
+        "Para cifrar un volumen sin cifrar, crea un snapshot y luego un volumen nuevo cifrado a partir de él; para cifrar un snapshot sin cifrar, crea una copia cifrada.",
+        "No puedes cambiar la clave de KMS asociada a un volumen o snapshot existente, pero sí puedes indicar otra clave al copiar un snapshot.",
+        "No puedes quitar el cifrado de un volumen o snapshot cifrado."
+      ],
+      "gotchas": [
+        "Habilitar encryption by default no cifra retroactivamente los recursos existentes sin cifrar.",
+        "Crear un snapshot de un volumen sin cifrar no produce, por sí solo, un volumen cifrado de reemplazo.",
+        "Para usar otra clave de KMS en un snapshot existente, debes crear una copia; no puedes cambiar la clave directamente."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "encrypt all newly created EBS volumes",
+        "existing unencrypted volume must be replaced",
+        "encrypted copy of an unencrypted snapshot",
+        "use a different KMS key for a snapshot copy"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-encryption.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ebs-encryption--d103a112",
+      "conceptId": "ebs-encryption",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company creates new, empty EBS volumes through several deployment workflows. The security team wants those future volumes encrypted even when a workflow does not explicitly request encryption, and it wants to avoid changing every workflow. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an encryption setting to each volume creation request.",
+          "correct": false,
+          "why": "This can encrypt new volumes, but it requires changes to every workflow and does not cover requests that omit the setting."
+        },
+        {
+          "id": "B",
+          "text": "Enable EBS encryption by default for the account.",
+          "correct": true,
+          "why": "Encryption by default automatically encrypts new empty EBS volumes without requiring each workflow to request it."
+        },
+        {
+          "id": "C",
+          "text": "Create encrypted snapshot copies after each new volume is created.",
+          "correct": false,
+          "why": "Copying snapshots afterward does not ensure that each new volume is encrypted when created."
+        },
+        {
+          "id": "D",
+          "text": "Specify a symmetric KMS key only when a deployment needs an encrypted volume.",
+          "correct": false,
+          "why": "Requests that do not specify encryption would still miss the requirement to encrypt future volumes automatically."
+        }
+      ],
+      "explanation": "The deciding requirement is to encrypt future volumes even when creation requests omit encryption settings. EBS encryption by default automatically encrypts new empty volumes using the default KMS key for EBS encryption. Setting encryption in each workflow could work, but it does not meet the stated operational-overhead constraint.",
+      "keywordCues": [
+        "new, empty EBS volumes",
+        "even when a workflow does not explicitly request encryption",
+        "avoid changing every workflow"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-encryption.html"
+      ],
+      "es": {
+        "stem": "Una editorial crea volúmenes EBS nuevos y vacíos mediante varios flujos de despliegue. El equipo de seguridad quiere que esos volúmenes futuros queden cifrados aunque un flujo no solicite explícitamente el cifrado, y desea evitar cambios en cada flujo. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega una configuración de cifrado a cada solicitud de creación de volumen.",
+            "why": "Esto puede cifrar los volúmenes nuevos, pero exige modificar todos los flujos y no cubre las solicitudes que omitan la configuración."
+          },
+          {
+            "id": "B",
+            "text": "Habilita EBS encryption by default para la cuenta.",
+            "why": "Encryption by default cifra automáticamente los volúmenes EBS nuevos y vacíos sin exigir que cada flujo lo solicite."
+          },
+          {
+            "id": "C",
+            "text": "Crea copias cifradas de snapshots después de crear cada volumen nuevo.",
+            "why": "Copiar snapshots después no garantiza que cada volumen nuevo esté cifrado desde su creación."
+          },
+          {
+            "id": "D",
+            "text": "Indica una clave simétrica de KMS solo cuando un despliegue necesite un volumen cifrado.",
+            "why": "Las solicitudes que no indiquen cifrado seguirían sin cumplir el requisito de cifrar automáticamente los volúmenes futuros."
+          }
+        ],
+        "explanation": "El requisito decisivo es cifrar los volúmenes futuros aunque las solicitudes de creación omitan la configuración de cifrado. EBS encryption by default cifra automáticamente los volúmenes nuevos y vacíos con la clave predeterminada de KMS para EBS encryption. Configurar el cifrado en cada flujo podría funcionar, pero no cumple la restricción de LEAST operational overhead."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-encryption--3a9568c9",
+      "conceptId": "ebs-encryption",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company has an encrypted EBS snapshot used to prepare recovery volumes. Its security policy now requires the recovery snapshot to use a different symmetric KMS key, while the original snapshot must remain available. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Change the KMS key associated with the original snapshot in place.",
+          "correct": false,
+          "why": "The KMS key associated with an existing snapshot cannot be changed in place."
+        },
+        {
+          "id": "B",
+          "text": "Enable EBS encryption by default with the new key and continue using the original snapshot.",
+          "correct": false,
+          "why": "Changing the default does not change the KMS key associated with the existing snapshot."
+        },
+        {
+          "id": "C",
+          "text": "Copy the snapshot and specify the new KMS key for the copied snapshot.",
+          "correct": true,
+          "why": "A snapshot copy can use a different KMS key while leaving the original snapshot available."
+        },
+        {
+          "id": "D",
+          "text": "Create a volume from the original snapshot and change that volume's KMS key afterward.",
+          "correct": false,
+          "why": "The KMS key associated with an existing volume cannot be changed afterward, and this does not produce the required snapshot."
+        }
+      ],
+      "explanation": "The recovery artifact must be a snapshot encrypted under a different KMS key, and the original must remain available. During a snapshot copy, a different KMS key can be associated with the resulting copy. The key on an existing snapshot cannot be changed in place, so changing the account default or editing the original does not meet the requirement.",
+      "keywordCues": [
+        "encrypted EBS snapshot",
+        "different symmetric KMS key",
+        "original snapshot must remain available"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-encryption.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene un snapshot EBS cifrado que usa para preparar volúmenes de recuperación. Su política de seguridad ahora exige que el snapshot de recuperación use otra clave simétrica de KMS, mientras el snapshot original permanece disponible. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Cambia directamente la clave de KMS asociada con el snapshot original.",
+            "why": "No puedes cambiar directamente la clave de KMS asociada con un snapshot existente."
+          },
+          {
+            "id": "B",
+            "text": "Habilita EBS encryption by default con la clave nueva y continúa usando el snapshot original.",
+            "why": "Cambiar la clave predeterminada no cambia la clave de KMS asociada con el snapshot existente."
+          },
+          {
+            "id": "C",
+            "text": "Copia el snapshot e indica la clave nueva de KMS para la copia.",
+            "why": "Una copia de snapshot puede usar otra clave de KMS y dejar disponible el snapshot original."
+          },
+          {
+            "id": "D",
+            "text": "Crea un volumen a partir del snapshot original y cambia después la clave de KMS de ese volumen.",
+            "why": "No puedes cambiar después la clave de KMS asociada con un volumen existente, y esto tampoco produce el snapshot requerido."
+          }
+        ],
+        "explanation": "El recurso de recuperación debe ser un snapshot cifrado con otra clave de KMS, y el original debe permanecer disponible. Al copiar un snapshot, puedes asociar una clave de KMS distinta con la copia resultante. No puedes cambiar directamente la clave de un snapshot existente, así que modificar la clave predeterminada o editar el original no cumple el requisito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-encryption--3c900ce9",
+      "conceptId": "ebs-encryption",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare organization has an existing unencrypted EBS volume holding records and a separate unencrypted EBS snapshot used for archival storage. Compliance requires an encrypted replacement volume containing the records and an encrypted copy of the archival snapshot; the original resources must remain available during the change. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an encrypted copy of the archival snapshot.",
+          "correct": true,
+          "why": "Copying the unencrypted archival snapshot with encryption produces the required encrypted copy."
+        },
+        {
+          "id": "B",
+          "text": "Change the archival snapshot's KMS key in place.",
+          "correct": false,
+          "why": "An existing snapshot cannot be encrypted or assigned a different KMS key in place."
+        },
+        {
+          "id": "C",
+          "text": "Enable EBS encryption by default and use the existing volume as the encrypted replacement.",
+          "correct": false,
+          "why": "Enabling encryption by default does not encrypt the existing unencrypted volume."
+        },
+        {
+          "id": "D",
+          "text": "Create a snapshot of the records volume and use it to create a new encrypted volume.",
+          "correct": true,
+          "why": "The snapshot supplies the existing data for a new encrypted volume without directly changing the original."
+        },
+        {
+          "id": "E",
+          "text": "Create a snapshot of the records volume and continue using the original volume as the replacement.",
+          "correct": false,
+          "why": "The original volume remains unencrypted and therefore cannot serve as the encrypted replacement."
+        }
+      ],
+      "explanation": "The scenario requires two separate encrypted outputs while retaining the originals. An encrypted copy addresses the existing unencrypted archival snapshot, and a snapshot of the records volume can be used to create a new encrypted replacement volume. Encryption by default does not retroactively encrypt the existing volume, and neither existing resource can be encrypted in place.",
+      "keywordCues": [
+        "existing unencrypted EBS volume",
+        "separate unencrypted EBS snapshot",
+        "encrypted replacement volume",
+        "encrypted copy of the archival snapshot",
+        "original resources must remain available"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-encryption.html"
+      ],
+      "es": {
+        "stem": "Una organización de salud tiene un volumen EBS existente sin cifrar con expedientes y, por separado, un snapshot EBS sin cifrar para archivo. El cumplimiento exige un volumen de reemplazo cifrado que contenga los expedientes y una copia cifrada del snapshot de archivo; los recursos originales deben seguir disponibles durante el cambio. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una copia cifrada del snapshot de archivo.",
+            "why": "Copiar el snapshot de archivo sin cifrar con cifrado produce la copia cifrada requerida."
+          },
+          {
+            "id": "B",
+            "text": "Cambia directamente la clave de KMS del snapshot de archivo.",
+            "why": "No puedes cifrar directamente un snapshot existente ni asignarle directamente otra clave de KMS."
+          },
+          {
+            "id": "C",
+            "text": "Habilita EBS encryption by default y usa el volumen existente como reemplazo cifrado.",
+            "why": "Habilitar encryption by default no cifra el volumen existente sin cifrar."
+          },
+          {
+            "id": "D",
+            "text": "Crea un snapshot del volumen de expedientes y úsalo para crear un volumen nuevo cifrado.",
+            "why": "El snapshot aporta los datos existentes para un volumen nuevo cifrado sin modificar directamente el original."
+          },
+          {
+            "id": "E",
+            "text": "Crea un snapshot del volumen de expedientes y continúa usando el volumen original como reemplazo.",
+            "why": "El volumen original sigue sin cifrar y, por tanto, no puede servir como reemplazo cifrado."
+          }
+        ],
+        "explanation": "El escenario exige dos recursos cifrados distintos y conservar los originales. Una copia cifrada resuelve el caso del snapshot de archivo existente sin cifrar, y puedes usar un snapshot del volumen de expedientes para crear un volumen nuevo cifrado de reemplazo. Encryption by default no cifra retroactivamente el volumen existente, y ninguno de los dos recursos puede cifrarse directamente."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ebs-encryption--r0",
+      "conceptId": "ebs-encryption",
+      "kind": "recall",
+      "prompt": "How would you create an encrypted replacement for an existing unencrypted EBS volume while preserving its data?",
+      "promptEs": "¿Cómo crearías un reemplazo cifrado para un volumen EBS existente sin cifrar y conservarías sus datos?",
+      "idealAnswer": "Create a snapshot of the existing volume, then use that snapshot to create a new encrypted EBS volume. EBS cannot directly encrypt the existing unencrypted volume.",
+      "rubric": [
+        "Create a snapshot of the existing unencrypted volume.",
+        "Create a new encrypted volume from that snapshot.",
+        "Recognize that the existing volume cannot be encrypted directly."
+      ]
+    }
+  ]
+}

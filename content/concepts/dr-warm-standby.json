@@ -1,0 +1,451 @@
+{
+  "conceptId": "dr-warm-standby",
+  "card": {
+    "en": {
+      "tldr": "Warm standby keeps a scaled-down but fully functional copy of a workload running in a DR Region. Choose it when the recovery site must accept traffic immediately at reduced capacity, then scale up after failover.",
+      "whenToUse": [
+        "A regional outage is in scope, and the DR site must already be able to process requests.",
+        "The business can pay for a small running environment but not full production capacity in both Regions.",
+        "Recovery can begin at reduced capacity while the DR Region scales out."
+      ],
+      "keyFacts": [
+        "Warm standby is active/passive: the DR workload is running, but normal traffic goes to the primary Region.",
+        "Unlike pilot light, warm standby can handle traffic at reduced capacity without first turning on application servers.",
+        "Amazon Route 53 health checks can support DNS failover to a healthy recovery endpoint.",
+        "Amazon EC2 Auto Scaling can increase the DR Auto Scaling group's desired capacity; DR Region service quotas must permit the increase.",
+        "Scaling up depends on a control plane operation, so keep enough initial capacity running to handle the traffic expected at failover."
+      ],
+      "gotchas": [
+        "A replicated database alone does not make a functional warm standby application.",
+        "Warm standby does not mean both Regions serve users during normal operation.",
+        "Do not assume the DR site can handle full production traffic before scaling finishes.",
+        "Continuous replication does not replace point-in-time protection against data corruption or deletion."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Pilot light",
+          "difference": "Its application servers must be turned on or deployed before the DR site can process requests; warm standby can process requests immediately at reduced capacity."
+        },
+        {
+          "concept": "Backup and restore",
+          "difference": "Backups must be restored and the workload redeployed, rather than failing over to an already running application."
+        },
+        {
+          "concept": "Multi-site active/active",
+          "difference": "Multiple Regions serve traffic simultaneously; warm standby normally serves traffic from only the primary Region."
+        }
+      ],
+      "examCues": [
+        "scaled-down full stack running in the DR Region",
+        "must accept requests immediately after failover",
+        "scale recovery capacity after traffic switches",
+        "avoid full-capacity deployments in both Regions"
+      ]
+    },
+    "es": {
+      "tldr": "Warm standby mantiene una copia reducida, pero completamente funcional, de la carga de trabajo en una Región de DR. Elígela cuando el sitio de recuperación deba aceptar tráfico de inmediato con capacidad limitada y escalar después del failover.",
+      "whenToUse": [
+        "Debes prepararte para una interrupción regional y el sitio de DR ya debe poder procesar solicitudes.",
+        "Puedes pagar por un entorno pequeño en ejecución, pero no por capacidad de producción completa en ambas Regiones.",
+        "Puedes iniciar la recuperación con capacidad limitada mientras la Región de DR escala."
+      ],
+      "keyFacts": [
+        "Warm standby es active/passive: la carga de DR está en ejecución, pero el tráfico normal va a la Región principal.",
+        "A diferencia de pilot light, warm standby puede atender tráfico con capacidad limitada sin encender primero los servidores de aplicaciones.",
+        "Los health checks de Amazon Route 53 pueden facilitar el DNS failover hacia un endpoint de recuperación saludable.",
+        "Amazon EC2 Auto Scaling puede aumentar la desired capacity del Auto Scaling group de DR; las service quotas de la Región de DR deben permitirlo.",
+        "Escalar depende de una operación de control plane, así que mantén capacidad inicial suficiente para el tráfico esperado al hacer failover."
+      ],
+      "gotchas": [
+        "Una base de datos replicada, por sí sola, no constituye una aplicación warm standby funcional.",
+        "Warm standby no implica que ambas Regiones atiendan usuarios durante la operación normal.",
+        "No supongas que el sitio de DR soportará todo el tráfico de producción antes de terminar de escalar.",
+        "La replicación continua no sustituye la protección point-in-time frente a corrupción o eliminación de datos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Pilot light",
+          "difference": "Sus servidores de aplicaciones deben encenderse o desplegarse antes de procesar solicitudes; warm standby puede hacerlo de inmediato con capacidad limitada."
+        },
+        {
+          "concept": "Backup and restore",
+          "difference": "Debes restaurar las copias y volver a desplegar la carga, en vez de dirigir tráfico a una aplicación que ya está ejecutándose."
+        },
+        {
+          "concept": "Multi-site active/active",
+          "difference": "Varias Regiones atienden tráfico a la vez; con warm standby, normalmente solo la Región principal atiende tráfico."
+        }
+      ],
+      "examCues": [
+        "scaled-down full stack running in the DR Region",
+        "must accept requests immediately after failover",
+        "scale recovery capacity after traffic switches",
+        "avoid full-capacity deployments in both Regions"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dr-warm-standby--1716b352",
+      "conceptId": "dr-warm-standby",
+      "secondaryConcepts": [
+        "dr-pilot-light",
+        "dr-multi-site-active-active",
+        "dr-backup-restore"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company needs protection against a primary Region outage during an event launch. Its recovery Region must accept new requests as soon as traffic is redirected, although it can initially operate at reduced capacity. The company does not want to pay for full application capacity in two Regions. Which DR strategy meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep cross-Region backups and restore the application stack in the recovery Region after an outage.",
+          "correct": false,
+          "why": "Restoring backups and redeploying the stack prevents the recovery Region from accepting requests immediately."
+        },
+        {
+          "id": "B",
+          "text": "Replicate the data to the recovery Region but deploy the application servers only when failover begins.",
+          "correct": false,
+          "why": "Pilot light requires the application servers to be deployed before the recovery Region can accept requests."
+        },
+        {
+          "id": "C",
+          "text": "Run full-capacity application stacks in both Regions and serve user traffic from both.",
+          "correct": false,
+          "why": "Multi-site active/active incurs the full-capacity expense the company wants to avoid."
+        },
+        {
+          "id": "D",
+          "text": "Run a scaled-down, functional application in the recovery Region and scale it out after failover.",
+          "correct": true,
+          "why": "Warm standby accepts requests at reduced capacity without paying for a second full-capacity deployment."
+        }
+      ],
+      "explanation": "The deciding requirement is that the recovery Region must accept requests as soon as traffic is redirected, but only at reduced capacity initially. Warm standby keeps the complete workload running at that capacity and scales it out after failover. Pilot light must first turn on or deploy application servers, while multi-site active/active pays for capacity and simultaneous service in both Regions.",
+      "keywordCues": [
+        "accept new requests as soon as traffic is redirected",
+        "initially operate at reduced capacity",
+        "does not want to pay for full application capacity in two Regions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas necesita protección ante una interrupción de su Región principal durante el lanzamiento de un evento. Su Región de recuperación debe aceptar solicitudes nuevas en cuanto se redirija el tráfico, aunque al principio opere con capacidad limitada. La empresa no quiere pagar por capacidad completa de la aplicación en dos Regiones. ¿Qué estrategia de DR cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener backups entre Regiones y restaurar la aplicación en la Región de recuperación después de una interrupción.",
+            "why": "Restaurar backups y volver a desplegar la aplicación impide aceptar solicitudes de inmediato en la Región de recuperación."
+          },
+          {
+            "id": "B",
+            "text": "Replicar los datos en la Región de recuperación, pero desplegar los servidores de aplicaciones solo al iniciar el failover.",
+            "why": "Con pilot light debes desplegar los servidores de aplicaciones antes de aceptar solicitudes en la Región de recuperación."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar aplicaciones con capacidad completa en ambas Regiones y atender usuarios desde las dos.",
+            "why": "Multi-site active/active implica el gasto de capacidad completa que la empresa quiere evitar."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar una aplicación funcional de menor capacidad en la Región de recuperación y escalarla después del failover.",
+            "why": "Warm standby acepta solicitudes con capacidad limitada sin pagar por un segundo despliegue de capacidad completa."
+          }
+        ],
+        "explanation": "El requisito decisivo es que la Región de recuperación acepte solicitudes apenas se redirija el tráfico, aunque inicialmente tenga capacidad limitada. Warm standby mantiene toda la carga en ejecución a esa capacidad y la escala después del failover. Pilot light primero debe encender o desplegar servidores de aplicaciones, mientras que multi-site active/active requiere capacidad para atender usuarios desde ambas Regiones."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-warm-standby--db26b7d2",
+      "conceptId": "dr-warm-standby",
+      "secondaryConcepts": [
+        "dr-pilot-light",
+        "dr-multi-site-active-active"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional grocery platform replicates its application data into a second AWS Region. Its DR plan currently keeps the database available there but deploys web servers only after an incident; a test showed that deployment delays its first customer response. The platform can afford a small running web tier but not a second full-size site. Which change BEST addresses the test result?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run both Regions at full capacity and direct grocery customers to both during normal operation.",
+          "correct": false,
+          "why": "Multi-site active/active conflicts with the stated limit on paying for a second full-size site."
+        },
+        {
+          "id": "B",
+          "text": "Retain only cross-Region backups and restore the database and web tier during an outage.",
+          "correct": false,
+          "why": "Restoring and redeploying adds work before the first request can be handled."
+        },
+        {
+          "id": "C",
+          "text": "Keep a smaller web tier running in the DR Region and scale it out when traffic moves there.",
+          "correct": true,
+          "why": "A running, functional web tier lets the DR site handle initial requests without waiting for deployment."
+        },
+        {
+          "id": "D",
+          "text": "Keep the web servers undeployed but automate their launch during a regional outage.",
+          "correct": false,
+          "why": "Automation may shorten deployment, but the site still cannot serve requests until the servers are launched."
+        }
+      ],
+      "explanation": "The test identified a delay before the DR site can process its first request. Keeping a small but functional web tier running converts the design from pilot light to warm standby, so initial traffic can be handled before scale-out completes. Automating web-server deployment still leaves a period when the site cannot process requests. Full-capacity active/active would exceed the stated spending constraint.",
+      "keywordCues": [
+        "deploys web servers only after an incident",
+        "deployment delays its first customer response",
+        "small running web tier",
+        "not a second full-size site"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una plataforma regional de supermercados replica los datos de su aplicación a una segunda Región de AWS. Su plan de DR mantiene la base de datos disponible allí, pero despliega los servidores web solo después de un incidente; una prueba mostró que ese despliegue retrasa la primera respuesta al cliente. La plataforma puede pagar por una capa web pequeña en ejecución, pero no por un segundo sitio de tamaño completo. ¿Qué cambio resuelve MEJOR el resultado de la prueba?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar ambas Regiones con capacidad completa y dirigir clientes a las dos durante la operación normal.",
+            "why": "Multi-site active/active contradice el límite de gasto para un segundo sitio de tamaño completo."
+          },
+          {
+            "id": "B",
+            "text": "Conservar solo backups entre Regiones y restaurar la base de datos y la capa web durante una interrupción.",
+            "why": "La restauración y el nuevo despliegue agregan pasos antes de poder atender la primera solicitud."
+          },
+          {
+            "id": "C",
+            "text": "Mantener una capa web más pequeña en ejecución en la Región de DR y escalarla cuando el tráfico se dirija allí.",
+            "why": "Una capa web funcional en ejecución permite atender las solicitudes iniciales sin esperar al despliegue."
+          },
+          {
+            "id": "D",
+            "text": "Mantener los servidores web sin desplegar, pero automatizar su lanzamiento durante una interrupción regional.",
+            "why": "La automatización puede acortar el despliegue, pero el sitio sigue sin poder atender solicitudes hasta lanzar los servidores."
+          }
+        ],
+        "explanation": "La prueba reveló una demora antes de que el sitio de DR pueda procesar su primera solicitud. Mantener una capa web pequeña pero funcional en ejecución transforma el diseño de pilot light a warm standby, por lo que puedes atender tráfico inicial antes de terminar de escalar. Automatizar el despliegue de servidores web todavía deja un período sin capacidad para procesar solicitudes. Active/active con capacidad completa incumple la restricción de gasto."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-warm-standby--41d22880",
+      "conceptId": "dr-warm-standby",
+      "secondaryConcepts": [
+        "dr-pilot-light",
+        "dr-backup-restore",
+        "dr-multi-site-active-active"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A digital publisher serves readers from one AWS Region and needs a DR Region that can take initial requests immediately after a regional failure. Its team will pay for a small running copy, but not full capacity in both Regions, and plans to expand the copy after failover. Which TWO design choices support this plan MOST directly? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Prepare an EC2 Auto Scaling group to increase DR capacity after failover.",
+          "correct": true,
+          "why": "Increasing the group's desired capacity supports expansion of the running DR application."
+        },
+        {
+          "id": "B",
+          "text": "Maintain only cross-Region backups and restore the workload after traffic switches.",
+          "correct": false,
+          "why": "Backups alone do not provide an application that can accept initial requests."
+        },
+        {
+          "id": "C",
+          "text": "Keep the complete application running at reduced capacity in the DR Region.",
+          "correct": true,
+          "why": "A functional reduced-capacity stack can accept requests as soon as traffic is redirected."
+        },
+        {
+          "id": "D",
+          "text": "Keep the DR database running but deploy application servers when an outage occurs.",
+          "correct": false,
+          "why": "Application servers deployed only after an outage cannot handle the required initial requests immediately."
+        },
+        {
+          "id": "E",
+          "text": "Serve normal reader traffic from full-capacity stacks in both Regions.",
+          "correct": false,
+          "why": "Full-capacity multi-site active/active does not meet the publisher's cost constraint."
+        }
+      ],
+      "explanation": "The publisher needs a working DR application before a failure and more capacity after traffic moves. A reduced-capacity running copy satisfies the immediate-request requirement, and an EC2 Auto Scaling group supports subsequent scale-out. Deploying application servers during the incident is pilot light, which cannot process requests without that additional action. Full-capacity active/active conflicts with the stated spending limit.",
+      "keywordCues": [
+        "take initial requests immediately",
+        "small running copy",
+        "not full capacity in both Regions",
+        "expand the copy after failover"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una editorial digital atiende lectores desde una Región de AWS y necesita una Región de DR que pueda recibir solicitudes iniciales inmediatamente después de una interrupción regional. El equipo pagará por una copia pequeña en ejecución, pero no por capacidad completa en ambas Regiones, y planea ampliarla después del failover. ¿Qué DOS decisiones de diseño apoyan este plan MOST directly? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Preparar un EC2 Auto Scaling group para aumentar la capacidad de DR después del failover.",
+            "why": "Aumentar su desired capacity permite ampliar la aplicación de DR que ya está en ejecución."
+          },
+          {
+            "id": "B",
+            "text": "Mantener solo backups entre Regiones y restaurar la carga después de cambiar el tráfico.",
+            "why": "Los backups por sí solos no proporcionan una aplicación que pueda aceptar solicitudes iniciales."
+          },
+          {
+            "id": "C",
+            "text": "Mantener la aplicación completa en ejecución con capacidad reducida en la Región de DR.",
+            "why": "Una aplicación funcional de capacidad reducida puede aceptar solicitudes apenas se redirija el tráfico."
+          },
+          {
+            "id": "D",
+            "text": "Mantener la base de datos de DR en ejecución, pero desplegar los servidores de aplicaciones cuando ocurra una interrupción.",
+            "why": "Los servidores desplegados solo después de una interrupción no pueden atender de inmediato las solicitudes iniciales."
+          },
+          {
+            "id": "E",
+            "text": "Atender el tráfico normal de lectores desde aplicaciones de capacidad completa en ambas Regiones.",
+            "why": "Multi-site active/active con capacidad completa incumple la restricción de costo de la editorial."
+          }
+        ],
+        "explanation": "La editorial necesita una aplicación de DR funcional antes de la interrupción y más capacidad después de mover el tráfico. Una copia en ejecución con capacidad reducida cumple el requisito de solicitudes inmediatas, y un EC2 Auto Scaling group permite escalar después. Desplegar servidores de aplicaciones durante el incidente corresponde a pilot light, que no puede procesar solicitudes sin esa acción adicional. Active/active con capacidad completa contradice el límite de gasto."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-warm-standby--3f08fb8f",
+      "conceptId": "dr-warm-standby",
+      "secondaryConcepts": [
+        "dr-backup-restore"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A museum runs its reservations application in one Region and keeps a smaller, functioning copy in a second Region. During a primary Region outage, the operations team wants to trigger a reviewed failover decision, route visitors to the copy without depending on a DNS configuration change, and then expand its EC2 capacity. Which approach meets these requirements MOST reliably?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure automatic Route 53 DNS failover based on endpoint health checks, then scale the recovery application.",
+          "correct": false,
+          "why": "Automatic failover bypasses the team's requirement for a reviewed, manually triggered decision."
+        },
+        {
+          "id": "B",
+          "text": "Restore backups into the second Region after approval, then change the primary application's DNS record.",
+          "correct": false,
+          "why": "Backup restoration discards the advantage of the already functioning recovery copy and delays traffic acceptance."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon Application Recovery Controller (ARC) routing controls to switch Route 53 traffic after approval, then increase the recovery Auto Scaling group's desired capacity.",
+          "correct": true,
+          "why": "ARC provides a manually triggered, data plane traffic switch, and Auto Scaling can expand the running recovery stack."
+        },
+        {
+          "id": "D",
+          "text": "Change Amazon Route 53 weighted-routing values after approval, then increase the recovery Auto Scaling group's desired capacity.",
+          "correct": false,
+          "why": "Changing routing weights is a Route 53 control plane operation, contrary to the requested failover behavior."
+        }
+      ],
+      "explanation": "The team needs a manual failover trigger without changing DNS routing configuration during the event. ARC routing controls can act as switches for Route 53 health checks through a data plane API, directing traffic to the already functioning standby. The recovery Auto Scaling group can then increase capacity. Editing Route 53 routing weights instead is a control plane operation and is less resilient as a failover dependency.",
+      "keywordCues": [
+        "smaller, functioning copy",
+        "reviewed failover decision",
+        "without depending on a DNS configuration change",
+        "expand its EC2 capacity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Un museo ejecuta su aplicación de reservas en una Región y mantiene una copia funcional más pequeña en otra. Ante una interrupción de la Región principal, el equipo de operaciones quiere aprobar manualmente la decisión de failover, dirigir visitantes a la copia sin depender de un cambio de configuración de DNS y después ampliar la capacidad de EC2. ¿Qué enfoque cumple estos requisitos MOST reliably?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar DNS failover automático de Route 53 mediante health checks de los endpoints y después escalar la aplicación de recuperación.",
+            "why": "El failover automático omite el requisito de una decisión revisada y activada manualmente."
+          },
+          {
+            "id": "B",
+            "text": "Restaurar backups en la segunda Región tras la aprobación y después cambiar el registro DNS de la aplicación principal.",
+            "why": "Restaurar backups desaprovecha la copia funcional de recuperación y retrasa la aceptación de tráfico."
+          },
+          {
+            "id": "C",
+            "text": "Usar routing controls de Amazon Application Recovery Controller (ARC) para cambiar el tráfico de Route 53 tras la aprobación y después aumentar la desired capacity del Auto Scaling group de recuperación.",
+            "why": "ARC ofrece un cambio de tráfico manual mediante el data plane, y Auto Scaling puede ampliar la aplicación de recuperación ya operativa."
+          },
+          {
+            "id": "D",
+            "text": "Cambiar los valores de weighted routing de Amazon Route 53 tras la aprobación y después aumentar la desired capacity del Auto Scaling group de recuperación.",
+            "why": "Cambiar los pesos de enrutamiento es una operación de control plane de Route 53, contraria al requisito de failover."
+          }
+        ],
+        "explanation": "El equipo necesita activar el failover manualmente sin cambiar la configuración de enrutamiento DNS durante el evento. Los routing controls de ARC pueden funcionar como interruptores para los health checks de Route 53 mediante una API del data plane y dirigir el tráfico al standby funcional. Después, el Auto Scaling group de recuperación puede ampliar la capacidad. Cambiar los pesos de Route 53 es una operación de control plane y crea una dependencia menos resiliente para el failover."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dr-warm-standby--r0",
+      "conceptId": "dr-warm-standby",
+      "kind": "recall",
+      "prompt": "A DR Region must accept requests immediately at reduced capacity, then expand after failover. Which strategy fits, and what can scale its EC2 tier?",
+      "promptEs": "Una Región de DR debe aceptar solicitudes de inmediato con capacidad reducida y ampliarse después del failover. ¿Qué estrategia eliges y qué puede escalar su capa EC2?",
+      "idealAnswer": "Choose warm standby: keep a scaled-down but functional application running in the DR Region. After failover, increase the EC2 Auto Scaling group's desired capacity, ensuring DR Region service quotas allow the expansion.",
+      "rubric": [
+        "Identifies warm standby.",
+        "States that the DR application is already running and can accept traffic at reduced capacity.",
+        "Explains EC2 Auto Scaling scale-out and the need for sufficient DR Region service quotas."
+      ]
+    },
+    {
+      "id": "dr-warm-standby--r1",
+      "conceptId": "dr-warm-standby",
+      "kind": "why-not",
+      "prompt": "Why does pilot light not fit when the recovery application must process requests immediately after traffic is redirected?",
+      "promptEs": "¿Por qué pilot light no sirve si la aplicación de recuperación debe procesar solicitudes apenas se redirija el tráfico?",
+      "idealAnswer": "Pilot light keeps core resources such as replicated data available, but its application servers are switched off or not deployed. They must be started or deployed before requests can be processed; warm standby already has a functional application running at reduced capacity.",
+      "rubric": [
+        "Describes the application tier in pilot light as switched off or not deployed.",
+        "Notes the additional action required before processing requests.",
+        "Contrasts this with warm standby's immediately functional, reduced-capacity application."
+      ]
+    }
+  ]
+}

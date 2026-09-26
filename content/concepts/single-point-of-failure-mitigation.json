@@ -1,0 +1,317 @@
+{
+  "conceptId": "single-point-of-failure-mitigation",
+  "card": {
+    "en": {
+      "tldr": "A highly available design must keep serving requests when a component fails. In an exam scenario, identify the component with no healthy alternative—such as an instance, Availability Zone, NAT gateway, network connection, or database—and add redundancy and a way to fail over.",
+      "whenToUse": [
+        "A single instance or Availability Zone supports a service that must remain available.",
+        "Private-subnet egress, a network connection, or a database has only one serving path.",
+        "The requirement calls for low recovery time or automatic response to failure."
+      ],
+      "keyFacts": [
+        "Monitor workload components to detect failures.",
+        "Fail over to healthy resources rather than merely creating extra resources.",
+        "Automate healing across layers when low mean time to recovery matters.",
+        "Check each layer independently: redundant application instances do not remove a single network or database dependency."
+      ],
+      "gotchas": [
+        "More instances in one Availability Zone do not address loss of that Availability Zone.",
+        "A standby resource does not help promptly if traffic cannot move to it.",
+        "Backups help recovery but do not by themselves provide a serving database during a failure."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "single instance must remain available",
+        "survive an Availability Zone failure",
+        "private-subnet egress has one path",
+        "fail over to a healthy resource"
+      ]
+    },
+    "es": {
+      "tldr": "Un diseño highly available debe seguir atendiendo solicitudes cuando falla un componente. En un escenario de examen, identifica el componente sin una alternativa en buen estado —como una instancia, Availability Zone, NAT gateway, conexión de red o base de datos— y agrega redundancia y una forma de hacer failover.",
+      "whenToUse": [
+        "Una sola instancia o Availability Zone sostiene un servicio que debe permanecer disponible.",
+        "La salida de una subred privada, una conexión de red o una base de datos tiene una sola ruta operativa.",
+        "El requisito exige poco tiempo de recuperación o respuesta automática ante fallas."
+      ],
+      "keyFacts": [
+        "Monitorea los componentes de la carga de trabajo para detectar fallas.",
+        "Haz failover hacia recursos en buen estado; no basta con crear recursos adicionales.",
+        "Automatiza la recuperación en las distintas capas cuando importa reducir el tiempo medio de recuperación.",
+        "Revisa cada capa por separado: tener instancias de aplicación redundantes no elimina una dependencia única de red o base de datos."
+      ],
+      "gotchas": [
+        "Más instancias en una sola Availability Zone no resuelven la pérdida de esa Availability Zone.",
+        "Un recurso de respaldo no ayuda con rapidez si el tráfico no puede dirigirse a él.",
+        "Los backups ayudan a recuperar datos, pero por sí solos no ofrecen una base de datos operativa durante una falla."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "single instance must remain available",
+        "survive an Availability Zone failure",
+        "private-subnet egress has one path",
+        "fail over to a healthy resource"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-your-workload-to-withstand-component-failures.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "single-point-of-failure-mitigation--83734a6e",
+      "conceptId": "single-point-of-failure-mitigation",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A publishing platform serves readers through one EC2 application instance in its primary AWS Region. An independently running version of the application is already available in a second Region, but the public hostname always points to the primary; editors require service to continue after either an instance failure or loss of the primary regional endpoint. Which TWO changes provide failover at both layers? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach a load balancer to the single primary instance and leave the hostname pointed only at the primary Region.",
+          "correct": false,
+          "why": "The load balancer has no other primary target to serve requests when that instance fails."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Route 53 health-checked failover for the public hostname to direct readers to the existing second-Region endpoint when the primary endpoint is unhealthy.",
+          "correct": true,
+          "why": "Health-checked failover gives the hostname a path to the already running regional alternative."
+        },
+        {
+          "id": "C",
+          "text": "Publish the two regional endpoints in DNS without health checks.",
+          "correct": false,
+          "why": "DNS can continue directing readers to an unhealthy regional endpoint."
+        },
+        {
+          "id": "D",
+          "text": "Increase the size of the primary EC2 instance and retain the current public hostname configuration.",
+          "correct": false,
+          "why": "A larger instance remains one instance, and the hostname still has no regional failover."
+        },
+        {
+          "id": "E",
+          "text": "Place the primary application's instances in an EC2 Auto Scaling group across multiple Availability Zones behind a load balancer with target health checks.",
+          "correct": true,
+          "why": "Multiple checked targets across Availability Zones provide a healthy alternative to the single primary instance."
+        }
+      ],
+      "explanation": "The scenario has two distinct gaps: one serving instance in the primary Region and a hostname with no failover to the existing second Region. An Auto Scaling group across Availability Zones behind a health-checking load balancer addresses the instance-level gap. Route 53 health-checked failover addresses the regional endpoint gap. Simply publishing both endpoints without health checks can still send readers to a failed endpoint.",
+      "keywordCues": [
+        "one EC2 application instance",
+        "already available in a second Region",
+        "public hostname always points to the primary",
+        "either an instance failure or loss of the primary regional endpoint"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-your-workload-to-withstand-component-failures.html"
+      ],
+      "es": {
+        "stem": "Una plataforma editorial atiende a sus lectores mediante una sola instancia de aplicación EC2 en su AWS Region principal. Una versión independiente de la aplicación ya está operativa en una segunda Region, pero el nombre de host público siempre apunta a la principal; los editores necesitan que el servicio continúe después de una falla de instancia o de la pérdida del endpoint regional principal. ¿Qué DOS cambios proporcionan failover en ambas capas? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conecta un balanceador a la única instancia principal y deja el nombre de host apuntando solo a la Region principal.",
+            "why": "El balanceador no tiene otro destino principal para atender solicitudes cuando falla esa instancia."
+          },
+          {
+            "id": "B",
+            "text": "Usa failover de Amazon Route 53 con comprobaciones de estado para que el nombre de host público dirija a los lectores al endpoint existente en la segunda Region cuando el principal no esté en buen estado.",
+            "why": "El failover con comprobaciones de estado da al nombre de host una ruta hacia la alternativa regional que ya está operativa."
+          },
+          {
+            "id": "C",
+            "text": "Publica los dos endpoints regionales en DNS sin comprobaciones de estado.",
+            "why": "DNS puede seguir dirigiendo lectores a un endpoint regional que no esté en buen estado."
+          },
+          {
+            "id": "D",
+            "text": "Aumenta el tamaño de la instancia EC2 principal y conserva la configuración actual del nombre de host público.",
+            "why": "Una instancia más grande sigue siendo una sola instancia, y el nombre de host continúa sin failover regional."
+          },
+          {
+            "id": "E",
+            "text": "Coloca las instancias de la aplicación principal en un grupo de EC2 Auto Scaling distribuido entre varias Availability Zones, detrás de un balanceador con comprobaciones de estado de los destinos.",
+            "why": "Varios destinos supervisados en distintas Availability Zones ofrecen una alternativa en buen estado a la única instancia principal."
+          }
+        ],
+        "explanation": "El escenario presenta dos problemas distintos: una sola instancia operativa en la Region principal y un nombre de host sin failover hacia la segunda Region existente. Un grupo de Auto Scaling distribuido entre Availability Zones, detrás de un balanceador que comprueba el estado de los destinos, resuelve el problema de la instancia. El failover de Route 53 con comprobaciones de estado resuelve el problema del endpoint regional. Publicar ambos endpoints sin comprobaciones de estado todavía puede enviar lectores a un endpoint que haya fallado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "single-point-of-failure-mitigation--034987c3",
+      "conceptId": "single-point-of-failure-mitigation",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media-processing application has workers in private subnets in two Availability Zones. Each subnet's route table sends outbound traffic through the same NAT gateway in the first Availability Zone, and workers must retain outbound connectivity if either Availability Zone fails. Which change best removes the single point of failure?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy a second NAT gateway in the second Availability Zone but leave both private-subnet route tables pointing to the first.",
+          "correct": false,
+          "why": "The unused second NAT gateway does not provide an outbound path when the first path fails."
+        },
+        {
+          "id": "B",
+          "text": "Deploy a NAT gateway in each Availability Zone and route each private subnet through the NAT gateway in its own Availability Zone.",
+          "correct": true,
+          "why": "Each Availability Zone has its own outbound path instead of depending on the NAT gateway in the first Availability Zone."
+        },
+        {
+          "id": "C",
+          "text": "Move the NAT gateway to the second Availability Zone and keep both private-subnet routes pointing to it.",
+          "correct": false,
+          "why": "Moving the shared NAT gateway changes the location of the single point of failure without removing it."
+        },
+        {
+          "id": "D",
+          "text": "Add more workers in the second Availability Zone while retaining the existing private-subnet routes.",
+          "correct": false,
+          "why": "Additional workers still depend on the single NAT gateway for outbound connectivity."
+        }
+      ],
+      "explanation": "The workers already span Availability Zones, but their outbound path does not. A NAT gateway in each Availability Zone, paired with the corresponding private-subnet route, avoids making both worker groups depend on one Availability Zone for egress. Merely adding a second NAT gateway is insufficient when both route tables still use the first one. This illustrates why each component and its path must be checked for failover.",
+      "keywordCues": [
+        "private subnets in two Availability Zones",
+        "same NAT gateway in the first Availability Zone",
+        "retain outbound connectivity if either Availability Zone fails"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-your-workload-to-withstand-component-failures.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de procesamiento de contenido multimedia tiene workers en subredes privadas de dos Availability Zones. La tabla de rutas de cada subred envía el tráfico saliente por el mismo NAT gateway en la primera Availability Zone, y los workers deben conservar la conectividad saliente si falla cualquiera de las dos Availability Zones. ¿Qué cambio elimina mejor el punto único de falla?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementa un segundo NAT gateway en la segunda Availability Zone, pero deja que ambas tablas de rutas privadas apunten al primero.",
+            "why": "El segundo NAT gateway, al no utilizarse, no proporciona una ruta de salida cuando falla la primera."
+          },
+          {
+            "id": "B",
+            "text": "Implementa un NAT gateway en cada Availability Zone y dirige cada subred privada al NAT gateway de su propia Availability Zone.",
+            "why": "Cada Availability Zone tiene su propia ruta de salida en vez de depender del NAT gateway de la primera Availability Zone."
+          },
+          {
+            "id": "C",
+            "text": "Mueve el NAT gateway a la segunda Availability Zone y mantén las rutas de ambas subredes privadas apuntando a él.",
+            "why": "Mover el NAT gateway compartido cambia la ubicación del punto único de falla, pero no lo elimina."
+          },
+          {
+            "id": "D",
+            "text": "Agrega más workers en la segunda Availability Zone y conserva las rutas actuales de las subredes privadas.",
+            "why": "Los workers adicionales todavía dependen del único NAT gateway para la conectividad saliente."
+          }
+        ],
+        "explanation": "Los workers ya están distribuidos entre Availability Zones, pero su ruta de salida no lo está. Un NAT gateway en cada Availability Zone, junto con la ruta correspondiente de cada subred privada, evita que ambos grupos dependan de una sola Availability Zone para la salida. No basta con agregar un segundo NAT gateway si ambas tablas de rutas siguen usando el primero. Por eso debes revisar cada componente y su ruta de failover."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "single-point-of-failure-mitigation--d9d4cb52",
+      "conceptId": "single-point-of-failure-mitigation",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer exchanges time-sensitive orders between its data center and an application in AWS through one AWS Direct Connect connection. The application runs across multiple Availability Zones, but an interruption to the Direct Connect connection would stop new orders. Which design best addresses the remaining single point of failure while preserving a private connectivity option?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a second Direct Connect connection at the same connectivity location and use only that location for both paths.",
+          "correct": false,
+          "why": "Both paths would still depend on one connectivity location."
+        },
+        {
+          "id": "B",
+          "text": "Add application instances in another Availability Zone and keep the existing Direct Connect connection.",
+          "correct": false,
+          "why": "More application instances do not provide an alternative path from the data center."
+        },
+        {
+          "id": "C",
+          "text": "Add a second data-center router, but connect both routers through the existing Direct Connect connection.",
+          "correct": false,
+          "why": "The existing Direct Connect connection remains the only connectivity path."
+        },
+        {
+          "id": "D",
+          "text": "Add an independent Direct Connect connection at a separate location and configure failover to the healthy connection.",
+          "correct": true,
+          "why": "Independent connections at separate locations provide an alternative private path when one path fails."
+        }
+      ],
+      "explanation": "The application's instances are redundant, but incoming orders still rely on one Direct Connect path. An independent connection at a separate location provides an alternative, and failover makes that alternative usable when the original path fails. A second router attached to the same connection does not remove the connection as a single point of failure. Two connections at one location leave that location as a shared dependency.",
+      "keywordCues": [
+        "one AWS Direct Connect connection",
+        "interruption to the Direct Connect connection would stop new orders",
+        "preserving a private connectivity option"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-your-workload-to-withstand-component-failures.html"
+      ],
+      "es": {
+        "stem": "Una empresa manufacturera intercambia pedidos urgentes entre su centro de datos y una aplicación en AWS mediante una sola conexión de AWS Direct Connect. La aplicación se ejecuta en varias Availability Zones, pero una interrupción de la conexión de Direct Connect detendría los nuevos pedidos. ¿Qué diseño resuelve mejor el punto único de falla restante y conserva una opción de conectividad privada?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega una segunda conexión de Direct Connect en la misma ubicación de conectividad y utiliza solo esa ubicación para ambas rutas.",
+            "why": "Ambas rutas seguirían dependiendo de una sola ubicación de conectividad."
+          },
+          {
+            "id": "B",
+            "text": "Agrega instancias de aplicación en otra Availability Zone y conserva la conexión de Direct Connect actual.",
+            "why": "Más instancias de aplicación no proporcionan una ruta alternativa desde el centro de datos."
+          },
+          {
+            "id": "C",
+            "text": "Agrega un segundo enrutador en el centro de datos, pero conecta ambos enrutadores mediante la conexión de Direct Connect actual.",
+            "why": "La conexión de Direct Connect actual sigue siendo la única ruta de conectividad."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una conexión independiente de Direct Connect en una ubicación distinta y configura failover hacia la conexión en buen estado.",
+            "why": "Las conexiones independientes en ubicaciones distintas proporcionan una ruta privada alternativa cuando falla una ruta."
+          }
+        ],
+        "explanation": "Las instancias de la aplicación son redundantes, pero los pedidos entrantes todavía dependen de una sola ruta de Direct Connect. Una conexión independiente en otra ubicación proporciona una alternativa, y failover permite utilizarla cuando falla la ruta original. Un segundo enrutador conectado a la misma conexión no elimina esa conexión como punto único de falla. Dos conexiones en una misma ubicación conservan esa ubicación como dependencia compartida."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "single-point-of-failure-mitigation--r0",
+      "conceptId": "single-point-of-failure-mitigation",
+      "kind": "recall",
+      "prompt": "A web app has one EC2 instance in one Availability Zone. What design removes both failure points, and how does traffic reach healthy instances?",
+      "promptEs": "Una aplicación web tiene una instancia EC2 en una Availability Zone. ¿Qué diseño elimina ambos puntos de falla y cómo llega el tráfico a instancias en buen estado?",
+      "idealAnswer": "Run multiple instances across Availability Zones, for example in an EC2 Auto Scaling group behind an Application Load Balancer. Use target health checks so requests go to healthy instances rather than a failed target.",
+      "rubric": [
+        "Places application instances in multiple Availability Zones.",
+        "Provides more than one serving instance.",
+        "Explains health checking and routing to healthy targets."
+      ]
+    }
+  ]
+}

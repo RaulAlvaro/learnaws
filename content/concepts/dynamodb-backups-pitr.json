@@ -1,0 +1,356 @@
+{
+  "conceptId": "dynamodb-backups-pitr",
+  "card": {
+    "en": {
+      "tldr": "DynamoDB point-in-time recovery (PITR) continuously backs up a table so you can restore it to a specific second within its configured recovery period, up to 35 days. Choose it for accidental writes or deletes; choose an on-demand backup when you need a snapshot to retain beyond that period.",
+      "whenToUse": [
+        "A bad write or delete requires recovery to a specific time rather than to a scheduled snapshot.",
+        "One DynamoDB table needs continuous, fully managed backups.",
+        "A table needs a long-term snapshot for retention or archiving."
+      ],
+      "keyFacts": [
+        "PITR provides recovery points at per-second granularity for a configurable period of 1–35 days; the default is 35 days.",
+        "After PITR is enabled, you can restore to a time from five minutes before the present back through the configured recovery period.",
+        "PITR restores data to a new DynamoDB table, not over the source table.",
+        "Disabling and re-enabling PITR resets the start of the table's recoverable period.",
+        "An on-demand backup is a snapshot of the entire table at backup time and can be used for long-term retention."
+      ],
+      "gotchas": [
+        "A daily snapshot cannot restore the table to an arbitrary second between snapshots.",
+        "PITR does not provide recovery points older than its configured period or from before it was re-enabled.",
+        "Tags are not preserved on restored tables; add them before relying on tag-based policy conditions."
+      ],
+      "confusedWith": [
+        {
+          "concept": "aws-backup",
+          "difference": "AWS Backup can create and manage DynamoDB on-demand backups; DynamoDB PITR is the table-level continuous backup feature for per-second recovery."
+        },
+        {
+          "concept": "rds-backups-pitr",
+          "difference": "RDS automated backups apply to RDS databases, not DynamoDB tables."
+        },
+        {
+          "concept": "ebs-snapshots-dlm",
+          "difference": "EBS snapshot schedules protect EBS volumes, not DynamoDB tables."
+        }
+      ],
+      "examCues": [
+        "accidental write to a DynamoDB table",
+        "restore to a specific second",
+        "recover within the last 35 days",
+        "retain a table snapshot long term"
+      ]
+    },
+    "es": {
+      "tldr": "DynamoDB point-in-time recovery (PITR) respalda continuamente una tabla para que puedas restaurarla a un segundo específico dentro del período configurado, de hasta 35 días. Elígelo ante escrituras o eliminaciones accidentales; elige un on-demand backup si necesitas conservar una instantánea más allá de ese período.",
+      "whenToUse": [
+        "Una escritura o eliminación incorrecta exige recuperar un momento específico, no una instantánea programada.",
+        "Una tabla de DynamoDB necesita respaldos continuos administrados por el servicio.",
+        "Necesitas una instantánea de la tabla para retención o archivo a largo plazo."
+      ],
+      "keyFacts": [
+        "PITR ofrece puntos de recuperación con granularidad de un segundo durante un período configurable de 1 a 35 días; el valor predeterminado es 35 días.",
+        "Después de habilitar PITR, puedes restaurar desde cinco minutos antes del momento actual hasta el límite del período configurado.",
+        "PITR restaura los datos en una tabla nueva de DynamoDB; no sobrescribe la tabla de origen.",
+        "Deshabilitar y volver a habilitar PITR reinicia el comienzo del período recuperable de la tabla.",
+        "Un on-demand backup captura toda la tabla en el momento del respaldo y puede conservarse a largo plazo."
+      ],
+      "gotchas": [
+        "Una instantánea diaria no permite recuperar un segundo arbitrario entre instantáneas.",
+        "PITR no ofrece puntos anteriores al período configurado ni anteriores a su última reactivación.",
+        "Las etiquetas no se conservan en las tablas restauradas; agrégalas antes de depender de condiciones de políticas basadas en etiquetas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "aws-backup",
+          "difference": "AWS Backup puede crear y administrar on-demand backups de DynamoDB; DynamoDB PITR es la función de respaldo continuo de la tabla para recuperación con granularidad de un segundo."
+        },
+        {
+          "concept": "rds-backups-pitr",
+          "difference": "Los respaldos automáticos de RDS se aplican a bases de datos RDS, no a tablas de DynamoDB."
+        },
+        {
+          "concept": "ebs-snapshots-dlm",
+          "difference": "Las programaciones de EBS snapshots protegen volúmenes EBS, no tablas de DynamoDB."
+        }
+      ],
+      "examCues": [
+        "accidental write to a DynamoDB table",
+        "restore to a specific second",
+        "recover within the last 35 days",
+        "retain a table snapshot long term"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Point-in-time-recovery.html",
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup-and-Restore.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-backups-pitr--505fcae8",
+      "conceptId": "dynamodb-backups-pitr",
+      "secondaryConcepts": [
+        "aws-backup",
+        "ebs-snapshots-dlm"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company stores reservations in a DynamoDB table. A deployment script occasionally overwrites valid reservations, and operators must recover the table to a moment just before a bad run, which may occur between scheduled backups. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Schedule daily EBS snapshots with Data Lifecycle Manager and restore the latest snapshot.",
+          "correct": false,
+          "why": "EBS snapshots protect EBS volumes rather than the DynamoDB table."
+        },
+        {
+          "id": "B",
+          "text": "Enable DynamoDB PITR on the table and restore to a time before the bad run.",
+          "correct": true,
+          "why": "PITR provides continuous, per-second recovery points without requiring operators to schedule snapshots."
+        },
+        {
+          "id": "C",
+          "text": "Schedule a daily DynamoDB backup using AWS Backup and restore the latest backup.",
+          "correct": false,
+          "why": "A daily scheduled backup cannot guarantee recovery to a moment between backups."
+        },
+        {
+          "id": "D",
+          "text": "Create a DynamoDB on-demand backup every night and restore the latest backup after a bad run.",
+          "correct": false,
+          "why": "A nightly snapshot might not represent the table immediately before a bad run."
+        }
+      ],
+      "explanation": "The deciding requirement is recovery to a moment just before an unpredictable bad write. DynamoDB PITR continuously creates recovery points at per-second granularity and requires no on-demand backup schedule. Nightly on-demand backups and daily AWS Backup backups capture scheduled states, so either could miss the required moment.",
+      "keywordCues": [
+        "DynamoDB table",
+        "moment just before a bad run",
+        "between scheduled backups",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Point-in-time-recovery.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup-and-Restore.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos guarda reservas en una tabla de DynamoDB. A veces, un script de implementación sobrescribe reservas válidas, y los operadores deben recuperar la tabla al momento inmediatamente anterior a la ejecución incorrecta, que puede ocurrir entre respaldos programados. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Programa EBS snapshots diarios con Data Lifecycle Manager y restaura la instantánea más reciente.",
+            "why": "Los EBS snapshots protegen volúmenes EBS, no la tabla de DynamoDB."
+          },
+          {
+            "id": "B",
+            "text": "Habilita DynamoDB PITR en la tabla y restaura a un momento anterior a la ejecución incorrecta.",
+            "why": "PITR ofrece puntos de recuperación continuos con granularidad de un segundo sin que tengas que programar instantáneas."
+          },
+          {
+            "id": "C",
+            "text": "Programa un respaldo diario de DynamoDB con AWS Backup y restaura el más reciente.",
+            "why": "Un respaldo diario programado no garantiza la recuperación a un momento entre respaldos."
+          },
+          {
+            "id": "D",
+            "text": "Crea un on-demand backup de DynamoDB cada noche y restaura el más reciente tras una ejecución incorrecta.",
+            "why": "Una instantánea nocturna podría no representar la tabla inmediatamente antes de la ejecución incorrecta."
+          }
+        ],
+        "explanation": "El requisito decisivo es recuperar el momento anterior a una escritura incorrecta impredecible. DynamoDB PITR crea continuamente puntos de recuperación con granularidad de un segundo y no requiere programar on-demand backups. Tanto los respaldos on-demand nocturnos como los respaldos diarios de AWS Backup capturan estados programados, por lo que podrían omitir el momento necesario."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-backups-pitr--86631f16",
+      "conceptId": "dynamodb-backups-pitr",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research team disabled PITR on a DynamoDB table last week and re-enabled it this morning. Investigators now need the table's state from a checkpoint taken three days ago, and an on-demand backup was created at that checkpoint. Which solution can recover the requested state?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Wait until PITR has been enabled for 35 days, then restore to the checkpoint time.",
+          "correct": false,
+          "why": "Waiting does not recreate recovery points from before PITR was re-enabled."
+        },
+        {
+          "id": "B",
+          "text": "Set the PITR recovery period to 35 days and restore the table to the checkpoint time.",
+          "correct": false,
+          "why": "Increasing the period cannot recover PITR points from before PITR was re-enabled."
+        },
+        {
+          "id": "C",
+          "text": "Create a new on-demand backup now and restore it as the checkpoint state.",
+          "correct": false,
+          "why": "A backup created now captures the current table, not its state three days ago."
+        },
+        {
+          "id": "D",
+          "text": "Restore the on-demand backup created at the checkpoint to a new table.",
+          "correct": true,
+          "why": "That existing backup captured the table's state at the requested checkpoint."
+        }
+      ],
+      "explanation": "Disabling and re-enabling DynamoDB PITR resets the start of the recoverable period. Changing its configured length or waiting cannot make the three-day-old checkpoint recoverable through the newly enabled PITR. The on-demand backup taken at the checkpoint already contains the requested table state and can be restored.",
+      "keywordCues": [
+        "disabled PITR",
+        "re-enabled it this morning",
+        "checkpoint taken three days ago",
+        "on-demand backup was created at that checkpoint"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Point-in-time-recovery.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup-and-Restore.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación deshabilitó PITR en una tabla de DynamoDB la semana pasada y lo volvió a habilitar esta mañana. Ahora los investigadores necesitan el estado de la tabla correspondiente a un punto de control de hace tres días, cuando se creó un on-demand backup. ¿Qué solución puede recuperar el estado solicitado?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Espera hasta que PITR lleve habilitado 35 días y luego restaura al momento del punto de control.",
+            "why": "Esperar no recrea puntos de recuperación anteriores a la reactivación de PITR."
+          },
+          {
+            "id": "B",
+            "text": "Configura el período de recuperación de PITR en 35 días y restaura la tabla al momento del punto de control.",
+            "why": "Ampliar el período no recupera puntos de PITR anteriores a su reactivación."
+          },
+          {
+            "id": "C",
+            "text": "Crea un on-demand backup nuevo ahora y restáuralo como si fuera el estado del punto de control.",
+            "why": "Un respaldo creado ahora captura la tabla actual, no su estado de hace tres días."
+          },
+          {
+            "id": "D",
+            "text": "Restaura el on-demand backup creado en el punto de control en una tabla nueva.",
+            "why": "Ese respaldo existente capturó el estado de la tabla en el punto de control solicitado."
+          }
+        ],
+        "explanation": "Deshabilitar y volver a habilitar DynamoDB PITR reinicia el comienzo del período recuperable. Cambiar la duración configurada o esperar no permite recuperar mediante el PITR recién habilitado el punto de control de hace tres días. El on-demand backup creado en ese momento ya contiene el estado solicitado y puede restaurarse."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-backups-pitr--b4ba66d9",
+      "conceptId": "dynamodb-backups-pitr",
+      "secondaryConcepts": [
+        "aws-backup"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A food distributor uses a DynamoDB table for inventory. It needs to recover from an accidental bulk update at a specific time within the last month and to retain a separate month-end copy for more than 35 days. Which TWO actions together meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable DynamoDB PITR with a 35-day recovery period for the inventory table.",
+          "correct": true,
+          "why": "PITR supports recovery to a specific time within that period at per-second granularity."
+        },
+        {
+          "id": "B",
+          "text": "Create and retain a DynamoDB on-demand backup at each month-end.",
+          "correct": true,
+          "why": "An on-demand backup captures a month-end snapshot that can be retained beyond the PITR period."
+        },
+        {
+          "id": "C",
+          "text": "Configure DynamoDB PITR to retain month-end recovery points for more than 35 days.",
+          "correct": false,
+          "why": "PITR has a maximum configurable recovery period of 35 days."
+        },
+        {
+          "id": "D",
+          "text": "Create only a month-end DynamoDB on-demand backup and use it for precise bulk-update recovery.",
+          "correct": false,
+          "why": "A month-end snapshot cannot recover an arbitrary time later in the month."
+        },
+        {
+          "id": "E",
+          "text": "Schedule one daily DynamoDB backup through AWS Backup as the only recovery mechanism for bulk updates.",
+          "correct": false,
+          "why": "A daily backup alone may not capture the table's state at the required time between backups."
+        }
+      ],
+      "explanation": "These are two different recovery requirements: a precise recent recovery point and a long-retained month-end snapshot. PITR addresses the first with per-second recovery points within its configured period; on-demand backups address the second through long-term snapshot retention. A daily or month-end snapshot alone cannot guarantee precise recovery between snapshots, and PITR cannot extend beyond 35 days.",
+      "keywordCues": [
+        "specific time within the last month",
+        "separate month-end copy",
+        "more than 35 days",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Point-in-time-recovery.html",
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup-and-Restore.html"
+      ],
+      "es": {
+        "stem": "Un distribuidor de alimentos usa una tabla de DynamoDB para el inventario. Necesita recuperarse de una actualización masiva accidental a una hora específica dentro del último mes y conservar una copia independiente de fin de mes durante más de 35 días. ¿Qué DOS acciones juntas cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita DynamoDB PITR con un período de recuperación de 35 días para la tabla de inventario.",
+            "why": "PITR permite recuperar una hora específica dentro de ese período con granularidad de un segundo."
+          },
+          {
+            "id": "B",
+            "text": "Crea y conserva un on-demand backup de DynamoDB al final de cada mes.",
+            "why": "Un on-demand backup captura una instantánea de fin de mes que puedes conservar más allá del período de PITR."
+          },
+          {
+            "id": "C",
+            "text": "Configura DynamoDB PITR para conservar puntos de recuperación de fin de mes durante más de 35 días.",
+            "why": "El período máximo de recuperación configurable de PITR es de 35 días."
+          },
+          {
+            "id": "D",
+            "text": "Crea solamente un on-demand backup de DynamoDB a fin de mes y úsalo para recuperar con precisión una actualización masiva.",
+            "why": "Una instantánea de fin de mes no permite recuperar una hora arbitraria posterior durante el mes."
+          },
+          {
+            "id": "E",
+            "text": "Programa un respaldo diario de DynamoDB mediante AWS Backup como único mecanismo de recuperación ante actualizaciones masivas.",
+            "why": "Un respaldo diario por sí solo podría no capturar el estado de la tabla a la hora requerida entre respaldos."
+          }
+        ],
+        "explanation": "Hay dos requisitos distintos: un punto de recuperación reciente y preciso, y una instantánea de fin de mes conservada a largo plazo. PITR cubre el primero con puntos de recuperación de granularidad de un segundo dentro del período configurado; los on-demand backups cubren el segundo. Un respaldo diario o de fin de mes por sí solo no garantiza recuperación precisa entre instantáneas, y PITR no puede extenderse más allá de 35 días."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-backups-pitr--r1",
+      "conceptId": "dynamodb-backups-pitr",
+      "kind": "why-not",
+      "prompt": "Why is a daily AWS Backup backup of a DynamoDB table insufficient when recovery must target a specific second between backups?",
+      "promptEs": "¿Por qué un respaldo diario de AWS Backup para una tabla de DynamoDB no basta si debes recuperar un segundo específico entre respaldos?",
+      "idealAnswer": "A daily backup captures a scheduled snapshot, which might not contain the table's state at the required second. DynamoDB PITR provides continuous backups with per-second recovery points within its configured period.",
+      "rubric": [
+        "Distinguishes scheduled snapshots from continuous recovery.",
+        "Explains why an intervening second may be missing.",
+        "Identifies DynamoDB PITR as the suitable feature."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,320 @@
+{
+  "conceptId": "relational-vs-nonrelational",
+  "card": {
+    "en": {
+      "tldr": "Choose the database model from the application's access patterns. Amazon RDS fits relational workloads that use SQL relationships; Amazon DynamoDB fits key-value or document workloads that need low-latency access at scale.",
+      "whenToUse": [
+        "Choose Amazon RDS when an application depends on a relational database engine such as PostgreSQL or MySQL.",
+        "Choose Amazon DynamoDB when requests primarily retrieve or update items by key and the application needs low-latency access at scale."
+      ],
+      "keyFacts": [
+        "Amazon RDS is a managed relational database service that supports engines including MySQL and PostgreSQL.",
+        "Amazon RDS automates tasks including provisioning, database setup, patching, and backups.",
+        "Amazon DynamoDB is a fully managed key-value and document database.",
+        "DynamoDB delivers single-digit millisecond performance at any scale."
+      ],
+      "gotchas": [
+        "High traffic alone does not decide the database model; check whether the application needs relational queries or key-based access.",
+        "A document-oriented workload does not automatically require Amazon DocumentDB; weigh access and query patterns, not just MongoDB compatibility.",
+        "Amazon Redshift is a data warehouse, not a substitute for an application's operational relational database."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB is a managed document database with MongoDB compatibility; choose between it and DynamoDB based on access and query patterns, not compatibility alone."
+        },
+        {
+          "concept": "Amazon Redshift",
+          "difference": "Redshift serves data warehousing; RDS serves operational relational applications."
+        }
+      ],
+      "examCues": [
+        "retrieve player state by player ID",
+        "existing PostgreSQL application",
+        "SQL queries across related records",
+        "low-latency key-value access at scale"
+      ]
+    },
+    "es": {
+      "tldr": "Elige el modelo de base de datos según los patrones de acceso de la aplicación. Amazon RDS se ajusta a cargas relacionales que usan relaciones SQL; Amazon DynamoDB se ajusta a cargas de clave-valor o documentos que necesitan acceso de baja latencia a escala.",
+      "whenToUse": [
+        "Elige Amazon RDS cuando la aplicación depende de un motor de base de datos relacional como PostgreSQL o MySQL.",
+        "Elige Amazon DynamoDB cuando las solicitudes principalmente consultan o actualizan elementos por clave y la aplicación necesita acceso de baja latencia a escala."
+      ],
+      "keyFacts": [
+        "Amazon RDS es un servicio administrado de bases de datos relacionales que admite motores como MySQL y PostgreSQL.",
+        "Amazon RDS automatiza tareas como el aprovisionamiento, la configuración de la base de datos, la aplicación de parches y las copias de seguridad.",
+        "Amazon DynamoDB es una base de datos de clave-valor y documentos completamente administrada.",
+        "DynamoDB ofrece rendimiento de milisegundos de un solo dígito a cualquier escala."
+      ],
+      "gotchas": [
+        "Un tráfico elevado no determina por sí solo el modelo de base de datos; comprueba si la aplicación necesita consultas relacionales o acceso por clave.",
+        "Una carga basada en documentos no requiere automáticamente Amazon DocumentDB; evalúa los patrones de acceso y consulta, no solo la compatibilidad con MongoDB.",
+        "Amazon Redshift es un almacén de datos analíticos, no un reemplazo de la base de datos relacional operativa de una aplicación."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB es una base de datos de documentos administrada compatible con MongoDB; elige entre esta y DynamoDB según los patrones de acceso y consulta, no solo por la compatibilidad."
+        },
+        {
+          "concept": "Amazon Redshift",
+          "difference": "Redshift se usa para almacenamiento analítico de datos; RDS se usa para aplicaciones relacionales operativas."
+        }
+      ],
+      "examCues": [
+        "retrieve player state by player ID",
+        "existing PostgreSQL application",
+        "SQL queries across related records",
+        "low-latency key-value access at scale"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "relational-vs-nonrelational--15ff523a",
+      "conceptId": "relational-vs-nonrelational",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A regional wholesaler is moving an application that uses PostgreSQL tables for customers, orders, and invoices. Staff run SQL queries that combine those tables, and the application must continue using its PostgreSQL database engine. Which solution meets these requirements with the LEAST application change?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store customer and order documents in Amazon DocumentDB.",
+          "correct": false,
+          "why": "DocumentDB supports MongoDB workloads rather than the required PostgreSQL engine."
+        },
+        {
+          "id": "B",
+          "text": "Load the operational tables into Amazon Redshift.",
+          "correct": false,
+          "why": "Redshift is a data warehouse and does not meet the requirement to retain the application's PostgreSQL database engine."
+        },
+        {
+          "id": "C",
+          "text": "Store each customer's records as keyed items in Amazon DynamoDB.",
+          "correct": false,
+          "why": "DynamoDB is a key-value and document database, not the PostgreSQL relational engine the application must retain."
+        },
+        {
+          "id": "D",
+          "text": "Run the application database on Amazon RDS for PostgreSQL.",
+          "correct": true,
+          "why": "RDS supports PostgreSQL and preserves the relational database model used by the application."
+        }
+      ],
+      "explanation": "The application must retain PostgreSQL and its SQL queries across related tables. Amazon RDS supports PostgreSQL as a managed relational database, so it matches both constraints. DynamoDB may serve large-scale key-based workloads, but choosing it would not retain the required PostgreSQL engine.",
+      "keywordCues": [
+        "uses PostgreSQL tables",
+        "SQL queries that combine those tables",
+        "continue using its PostgreSQL database engine"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html"
+      ],
+      "es": {
+        "stem": "Un mayorista regional va a trasladar una aplicación que usa tablas PostgreSQL para clientes, pedidos y facturas. El personal ejecuta consultas SQL que combinan esas tablas, y la aplicación debe seguir usando su motor de base de datos PostgreSQL. ¿Qué solución cumple estos requisitos con el LEAST application change?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar los documentos de clientes y pedidos en Amazon DocumentDB.",
+            "why": "DocumentDB admite cargas de MongoDB, no el motor PostgreSQL requerido."
+          },
+          {
+            "id": "B",
+            "text": "Cargar las tablas operativas en Amazon Redshift.",
+            "why": "Redshift es un almacén de datos analíticos y no cumple el requisito de conservar el motor PostgreSQL de la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Guardar los registros de cada cliente como elementos con clave en Amazon DynamoDB.",
+            "why": "DynamoDB es una base de datos de clave-valor y documentos, no el motor relacional PostgreSQL que la aplicación debe conservar."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar la base de datos de la aplicación en Amazon RDS for PostgreSQL.",
+            "why": "RDS admite PostgreSQL y conserva el modelo de base de datos relacional que usa la aplicación."
+          }
+        ],
+        "explanation": "La aplicación debe conservar PostgreSQL y sus consultas SQL entre tablas relacionadas. Amazon RDS admite PostgreSQL como base de datos relacional administrada, por lo que cumple ambas condiciones. DynamoDB puede servir cargas de acceso por clave a gran escala, pero no conservaría el motor PostgreSQL requerido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "relational-vs-nonrelational--93468efb",
+      "conceptId": "relational-vs-nonrelational",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A delivery company is building a mobile feature that retrieves each driver's latest route preferences by driver ID. Different app versions may send different preference fields, and the company expects a large increase in requests without adding database administration work. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store preferences in Amazon DocumentDB using MongoDB-compatible documents.",
+          "correct": false,
+          "why": "DocumentDB is a managed document option, but no MongoDB workload or compatibility requirement is stated."
+        },
+        {
+          "id": "B",
+          "text": "Store driver preferences in Amazon RDS for MySQL and query relational tables by driver ID.",
+          "correct": false,
+          "why": "RDS is managed, but the scenario describes document-like fields and key-based access rather than a need for relational tables."
+        },
+        {
+          "id": "C",
+          "text": "Store preferences in Amazon Neptune as connected driver and route records.",
+          "correct": false,
+          "why": "Neptune is designed for highly connected datasets, while the application retrieves preferences by driver ID."
+        },
+        {
+          "id": "D",
+          "text": "Store each driver's preferences as an item in Amazon DynamoDB keyed by driver ID.",
+          "correct": true,
+          "why": "DynamoDB fits key-based access to document-like items and is fully managed for workloads at scale."
+        }
+      ],
+      "explanation": "The application reads each driver's record by ID and accepts varying fields, so a key-value or document model fits its access pattern. DynamoDB provides that model with fully managed, low-latency access at scale. DocumentDB also stores documents, but its distinguishing fit is a MongoDB-compatible workload, which the scenario does not require.",
+      "keywordCues": [
+        "by driver ID",
+        "different preference fields",
+        "large increase in requests",
+        "without adding database administration work"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html"
+      ],
+      "es": {
+        "stem": "Una empresa de entregas está creando una función móvil que consulta las preferencias de ruta más recientes de cada conductor por ID de conductor. Distintas versiones de la aplicación pueden enviar campos de preferencias diferentes, y la empresa espera un gran aumento de solicitudes sin agregar trabajo de administración de bases de datos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar las preferencias en Amazon DocumentDB como documentos compatibles con MongoDB.",
+            "why": "DocumentDB es una opción administrada para documentos, pero no se indica una carga de MongoDB ni un requisito de compatibilidad."
+          },
+          {
+            "id": "B",
+            "text": "Guardar las preferencias en Amazon RDS for MySQL y consultar tablas relacionales por ID de conductor.",
+            "why": "RDS es administrado, pero el escenario describe campos similares a documentos y acceso por clave, no una necesidad de tablas relacionales."
+          },
+          {
+            "id": "C",
+            "text": "Guardar las preferencias en Amazon Neptune como registros conectados de conductores y rutas.",
+            "why": "Neptune está diseñado para conjuntos de datos muy conectados, mientras que la aplicación consulta preferencias por ID de conductor."
+          },
+          {
+            "id": "D",
+            "text": "Guardar las preferencias de cada conductor como un elemento en Amazon DynamoDB con el ID de conductor como clave.",
+            "why": "DynamoDB se ajusta al acceso por clave a elementos similares a documentos y es completamente administrado para cargas a escala."
+          }
+        ],
+        "explanation": "La aplicación consulta el registro de cada conductor por ID y acepta campos variables, por lo que un modelo de clave-valor o documentos se ajusta al patrón de acceso. DynamoDB ofrece ese modelo con acceso de baja latencia a escala y administración completa. DocumentDB también almacena documentos, pero su característica diferenciadora es la compatibilidad con MongoDB, que aquí no se requiere."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "relational-vs-nonrelational--a27eebdb",
+      "conceptId": "relational-vs-nonrelational",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A media company has two separate applications. Its subscription application runs on PostgreSQL and uses SQL queries across subscriber, plan, and invoice tables; its new viewing app retrieves a viewer's saved settings by viewer ID and needs low-latency access as traffic grows. Which database recommendations fit the respective applications with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon RDS for PostgreSQL for the subscription application.",
+          "correct": true,
+          "why": "RDS supports the application's existing PostgreSQL relational model."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Neptune for the viewing app's settings.",
+          "correct": false,
+          "why": "Neptune targets highly connected data, not the stated retrieval of settings by viewer ID."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon DocumentDB for the subscription application's invoices.",
+          "correct": false,
+          "why": "DocumentDB serves MongoDB-compatible document workloads rather than the subscription application's PostgreSQL queries across tables."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon DynamoDB for the viewing app's settings.",
+          "correct": true,
+          "why": "DynamoDB supports fully managed, low-latency key-based access at scale."
+        },
+        {
+          "id": "E",
+          "text": "Use Amazon RDS for PostgreSQL for the viewing app's settings.",
+          "correct": false,
+          "why": "RDS offers a relational model, but the viewing app's stated pattern is low-latency access to individual settings by key."
+        }
+      ],
+      "explanation": "The two applications have different access patterns and need not share a database model. RDS for PostgreSQL preserves the subscription application's relational engine and queries, while DynamoDB fits the viewing app's key-based settings lookups at scale. Using RDS for the settings is possible, but it does not match the stated access pattern as directly as DynamoDB.",
+      "keywordCues": [
+        "runs on PostgreSQL",
+        "SQL queries across subscriber, plan, and invoice tables",
+        "by viewer ID",
+        "low-latency access as traffic grows"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene dos aplicaciones independientes. Su aplicación de suscripciones se ejecuta en PostgreSQL y usa consultas SQL entre tablas de suscriptores, planes y facturas; su nueva aplicación de visualización consulta la configuración guardada de cada usuario por ID de usuario y necesita acceso de baja latencia a medida que crece el tráfico. ¿Qué recomendaciones de bases de datos se ajustan a las respectivas aplicaciones con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon RDS for PostgreSQL para la aplicación de suscripciones.",
+            "why": "RDS admite el modelo relacional PostgreSQL que ya usa la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon Neptune para la configuración de la aplicación de visualización.",
+            "why": "Neptune se orienta a datos muy conectados, no a la consulta de configuraciones por ID de usuario."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon DocumentDB para las facturas de la aplicación de suscripciones.",
+            "why": "DocumentDB sirve cargas de documentos compatibles con MongoDB, no las consultas PostgreSQL entre tablas de la aplicación de suscripciones."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon DynamoDB para la configuración de la aplicación de visualización.",
+            "why": "DynamoDB admite acceso por clave de baja latencia a escala y es completamente administrado."
+          },
+          {
+            "id": "E",
+            "text": "Usar Amazon RDS for PostgreSQL para la configuración de la aplicación de visualización.",
+            "why": "RDS ofrece un modelo relacional, pero el patrón indicado para esta aplicación es el acceso de baja latencia a configuraciones individuales por clave."
+          }
+        ],
+        "explanation": "Las dos aplicaciones tienen patrones de acceso distintos y no necesitan compartir un modelo de base de datos. RDS for PostgreSQL conserva el motor relacional y las consultas de la aplicación de suscripciones, mientras que DynamoDB se ajusta a las consultas por clave de la aplicación de visualización a escala. Usar RDS para la configuración es posible, pero no se ajusta tan directamente al patrón de acceso indicado como DynamoDB."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": []
+}
