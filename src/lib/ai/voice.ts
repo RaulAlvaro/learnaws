@@ -41,7 +41,10 @@ export async function speak(text: string, lang: "en" | "es"): Promise<Buffer> {
 
 export async function transcribe(audio: Blob, durationSec: number): Promise<string> {
   await assertBudget();
-  const file = await toFile(audio, "answer.webm", { type: audio.type || "audio/webm" });
+  // The extension must match the container: Chrome records webm, Safari/iOS records mp4.
+  const type = (audio.type || "audio/webm").split(";")[0];
+  const ext = { "audio/mpeg": "mp3", "audio/mp4": "m4a", "audio/ogg": "ogg", "audio/wav": "wav" }[type] ?? "webm";
+  const file = await toFile(audio, `answer.${ext}`, { type });
   const res = await openai().audio.transcriptions.create({
     model: MODELS.stt,
     file,
