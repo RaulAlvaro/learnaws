@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { GameIcon } from "@/components/game/icons";
 import { requireUser } from "@/lib/auth";
 import { dashboard } from "@/lib/study/metrics";
 import { Badge, Bar, Button, Card, DOMAIN_ES, Stat } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
-const pct = (v: number | null | undefined, digits = 0) => (v == null ? "—" : `${v.toFixed(digits)}%`);
+const pct = (v: number | null | undefined, digits = 0) => (v == null ? "-" : `${v.toFixed(digits)}%`);
 
 export default async function ProgressPage() {
   const d = await dashboard(await requireUser());
@@ -17,7 +18,7 @@ export default async function ProgressPage() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-sm text-muted">Hoy</div>
-            <div className="text-2xl font-semibold">
+            <div className="display text-2xl">
               {d.dueNow > 0 ? `${d.dueNow} repasos pendientes` : "Sesión lista"}
             </div>
             <div className="mt-1 text-sm text-muted">
@@ -30,7 +31,7 @@ export default async function ProgressPage() {
           </Badge>
         </div>
         <Link href="/" className="block">
-          <Button className="w-full">Jugar ▶</Button>
+          <Button className="w-full">Jugar</Button>
         </Link>
       </Card>
 
@@ -43,12 +44,12 @@ export default async function ProgressPage() {
 
       <Card className="space-y-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-semibold">Probabilidad de aprobar</h2>
+          <h2 className="display text-xl">Probabilidad de aprobar</h2>
           <span className="text-xs text-muted">{r.evidence} respuestas válidas</span>
         </div>
         {r.enoughData ? (
           <>
-            <div className="text-3xl font-semibold tabular-nums">
+            <div className="display text-3xl tabular-nums">
               {pct(r.passProbability * 100)}
               <span className="ml-2 text-base font-normal text-muted">
                 rango {pct(r.passLow * 100)}–{pct(r.passHigh * 100)}
@@ -68,7 +69,7 @@ export default async function ProgressPage() {
       </Card>
 
       <Card className="space-y-4">
-        <h2 className="font-semibold">Dominios</h2>
+        <h2 className="display text-xl">Dominios</h2>
         {d.domains.map((dm) => (
           <div key={dm.id} className="space-y-1.5">
             <div className="flex items-baseline justify-between text-sm">
@@ -101,7 +102,7 @@ export default async function ProgressPage() {
 
       <Card className="space-y-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-semibold">Calibración</h2>
+          <h2 className="display text-xl">Calibración</h2>
           {d.brier != null && <span className="text-xs text-muted">Brier {d.brier.toFixed(3)} (menor es mejor)</span>}
         </div>
         <p className="text-xs text-muted">¿Aciertas cuando dices estar seguro? Si “Seguro” está por debajo de 85%, estás sobreconfiado.</p>
@@ -110,7 +111,7 @@ export default async function ProgressPage() {
             <div key={c.confidence} className="rounded-lg bg-surface-2 p-2">
               <div className="text-xs text-muted">{["Adivinando", "Bastante seguro", "Seguro"][c.confidence - 1]}</div>
               <div
-                className={`text-lg font-semibold tabular-nums ${c.confidence === 3 && c.pct != null && c.pct < 85 ? "text-bad" : ""}`}
+                className={`display text-xl tabular-nums ${c.confidence === 3 && c.pct != null && c.pct < 85 ? "text-bad" : ""}`}
               >
                 {pct(c.pct)}
               </div>
@@ -121,7 +122,7 @@ export default async function ProgressPage() {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="font-semibold">Para reservar el examen</h2>
+        <h2 className="display text-xl">Para reservar el examen</h2>
         <GateRow ok={d.gate.twoFullOver80} text="2 simulacros completos seguidos ≥ 80%" />
         <GateRow ok={d.gate.noWeakDomain} text="Ningún dominio < 70% en esos simulacros" />
         <GateRow ok={d.gate.externalOk} text="Simulacro externo ≥ 80% (Skill Builder o Tutorials Dojo)" />
@@ -134,7 +135,7 @@ function GateRow({ ok, text }: { ok: boolean; text: string }) {
   return (
     <div className="flex items-center gap-2 text-sm">
       <span className={`flex h-5 w-5 items-center justify-center rounded-full text-xs ${ok ? "bg-good-bg text-good" : "bg-surface-2 text-muted"}`}>
-        {ok ? "✓" : "·"}
+        {ok ? <GameIcon name="check-mark" size={12} /> : null}
       </span>
       <span className={ok ? "" : "text-muted"}>{text}</span>
     </div>

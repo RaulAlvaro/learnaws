@@ -4,21 +4,22 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DiagramNode, Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { play } from "@/lib/game/sfx";
+import { GameIcon, type GameIconName } from "./icons";
 
-const KIND_STYLE: Record<DiagramNode["kind"], { fill: string; stroke: string; text: string; emoji: string }> = {
-  service: { fill: "#FFF3E6", stroke: "#D9731A", text: "#5A2E00", emoji: "☁️" },
-  actor: { fill: "#EAF1FF", stroke: "#2F6FEB", text: "#0B2A66", emoji: "👤" },
-  data: { fill: "#EAF7EF", stroke: "#1F9D55", text: "#0B3D22", emoji: "📦" },
-  zone: { fill: "none", stroke: "#8A857C", text: "#5C5850", emoji: "" },
-  note: { fill: "#F6F3EE", stroke: "#B8B2A7", text: "#4A463F", emoji: "💡" },
-};
+const KIND_STYLE: Record<DiagramNode["kind"], { fill: string; text: string; icon: GameIconName | null; iconClass?: string }> = {
+  service: { fill: "#ffc933", text: "#1c1840", icon: "mesh-network" },
+  actor: { fill: "#3d8bff", text: "#ffffff", icon: null },
+  data: { fill: "#dff5e9", text: "#1c1840", icon: "cardboard-box", iconClass: "text-green" },
+  zone: { fill: "none", text: "#5e5a86", icon: null },
+  note: { fill: "#efeefa", text: "#1c1840", icon: "light-bulb", iconClass: "text-amber" },
+}
 
 const W = 100;
 const H = 64;
 const NODE_W = 21;
 const NODE_H = 10;
-/** Box width grows with the label (plus room for the kind emoji). */
-const widthOf = (n: DiagramNode) => Math.min(34, Math.max(NODE_W, n.label.length * 1.75 + 7));
+/** Box width grows with the label (plus room for the kind glyph). */
+const widthOf = (n: DiagramNode) => Math.min(36, Math.max(NODE_W, n.label.length * 1.8 + (KIND_STYLE[n.kind]?.icon ? 10 : 6)));
 
 /** Map percentage coordinates into the viewBox, then push overlapping boxes apart. */
 function relax(nodes: DiagramNode[]): Map<string, { cx: number; cy: number }> {
@@ -115,18 +116,19 @@ export function Discover({
   return (
     <div className="space-y-4" style={{ fontSize: "calc(1rem * var(--fs, 1))" }}>
       <div className="text-center">
-        <div className="text-[0.8em] font-semibold uppercase tracking-wide" style={{ color: island?.color ?? "var(--accent)" }}>
-          {island ? `${island.emoji} ${island.nameEs}` : "Descubre"} · nuevo servicio
-        </div>
-        <h2 className="mt-1 text-[1.6em] font-extrabold leading-tight">{overview.title}</h2>
-        <p className="mt-1 text-[1em] text-muted">{overview.hook}</p>
+        <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-yellow px-3 py-1 text-[0.8em] font-black uppercase tracking-wide text-ink">
+          <GameIcon name="gift-of-knowledge" size={15} />
+          {island ? island.nameEs : "Descubre"} · servicio nuevo
+        </span>
+        <h2 className="display mt-2 text-[2.1em] leading-tight text-white [text-shadow:0_4px_0_var(--ink)]">{overview.title}</h2>
+        <p className="mx-auto mt-1 max-w-[34ch] text-[1.02em] font-extrabold text-white/90">{overview.hook}</p>
       </div>
 
-      <div className="rounded-3xl border border-border bg-surface p-2">
+      <div className="chunk p-2">
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`Diagrama de ${overview.title}`}>
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#8A857C" />
+              <path d="M0,0 L10,5 L0,10 z" fill="#1c1840" />
             </marker>
           </defs>
           {overview.diagram.edges.map((e, i) => {
@@ -145,15 +147,16 @@ export function Discover({
             const ey = q.cy - (dy / len) * Math.min(pad, len / 3);
             return (
               <motion.g key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-                <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="#8A857C" strokeWidth={0.5} markerEnd="url(#arrow)" />
+                <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="#1c1840" strokeWidth={0.7} markerEnd="url(#arrow)" />
                 {e.label && (
                   <text
                     x={(sx + ex) / 2}
                     y={(sy + ey) / 2 - 1}
                     textAnchor="middle"
-                    fontSize={2.4}
-                    fill="#6B675F"
-                    stroke="#FFFFFF"
+                    fontSize={2.5}
+                    fontWeight={800}
+                    fill="#5e5a86"
+                    stroke="#ffffff"
                     strokeWidth={0.9}
                     paintOrder="stroke"
                   >
@@ -169,28 +172,30 @@ export function Discover({
             const { cx, cy } = pos(n);
             const nw = widthOf(n);
             const focused = focus === n.id;
+            const glyph = s.icon;
             return (
               <motion.g
                 key={n.id}
-                initial={{ opacity: 0, scale: 0.6 }}
+                initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: focused ? 1.08 : 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                transition={{ type: "spring", stiffness: 280, damping: 16 }}
                 style={{ transformOrigin: `${cx}px ${cy}px` }}
               >
                 {focused && (
                   <motion.rect
-                    x={cx - nw / 2 - 1.2}
-                    y={cy - NODE_H / 2 - 1.2}
-                    width={nw + 2.4}
-                    height={NODE_H + 2.4}
-                    rx={3.5}
+                    x={cx - nw / 2 - 1.4}
+                    y={cy - NODE_H / 2 - 1.4}
+                    width={nw + 2.8}
+                    height={NODE_H + 2.8}
+                    rx={3.8}
                     fill="none"
-                    stroke="#D9731A"
-                    strokeWidth={0.8}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.4, repeat: Infinity }}
+                    stroke="#ffc933"
+                    strokeWidth={1.3}
+                    animate={{ opacity: [0.35, 1, 0.35] }}
+                    transition={{ duration: 1.3, repeat: Infinity }}
                   />
                 )}
+                {n.kind !== "zone" && <rect x={cx - nw / 2} y={cy - NODE_H / 2 + 1} width={nw} height={NODE_H} rx={2.8} fill="#1c1840" />}
                 <rect
                   x={cx - nw / 2}
                   y={cy - NODE_H / 2}
@@ -198,12 +203,12 @@ export function Discover({
                   height={NODE_H}
                   rx={2.8}
                   fill={s.fill}
-                  stroke={s.stroke}
-                  strokeWidth={n.kind === "zone" ? 0.4 : 0.6}
+                  stroke="#1c1840"
+                  strokeWidth={n.kind === "zone" ? 0.5 : 0.8}
                   strokeDasharray={n.kind === "zone" ? "1.5 1" : undefined}
                 />
-                <text x={cx} y={cy + 1.1} textAnchor="middle" fontSize={3} fontWeight={600} fill={s.text}>
-                  {s.emoji ? `${s.emoji} ` : ""}
+                {glyph && <GameIcon name={glyph} x={cx - nw / 2 + 1.6} y={cy - 2.3} size={4.6} className={s.iconClass} />}
+                <text x={cx + (glyph ? 2.2 : 0)} y={cy + 1.1} textAnchor="middle" fontSize={3} fontWeight={900} fill={s.text}>
                   {n.label}
                 </text>
               </motion.g>
@@ -215,46 +220,55 @@ export function Discover({
       <AnimatePresence mode="wait">
         {!summary ? (
           <motion.div key={seg} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3">
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-1.5">
               {overview.segments.map((_, i) => (
-                <span key={i} className={`h-2 rounded-full transition-all ${i === seg ? "w-6 bg-accent" : i < seg ? "w-2 bg-accent/50" : "w-2 bg-surface-2"}`} />
+                <span
+                  key={i}
+                  className={`h-3 rounded-full border-2 border-ink transition-all ${i === seg ? "w-8 bg-yellow" : i < seg ? "w-3 bg-yellow/70" : "w-3 bg-white/40"}`}
+                />
               ))}
             </div>
-            {showText && <p className="rounded-2xl bg-surface p-4 text-[1.1em] leading-relaxed">{overview.segments[seg].narration}</p>}
-            <div className="flex justify-center gap-2 text-[0.85em]">
-              <button onClick={() => speak(`unit:${unit.id}:${seg}`)} className="rounded-full border border-border px-3 py-1.5 text-muted">
-                🔊 Repetir
+            {showText && <p className="chunk p-4 text-[1.1em] font-bold leading-relaxed">{overview.segments[seg].narration}</p>}
+            <div className="flex justify-center gap-2">
+              <button onClick={() => speak(`unit:${unit.id}:${seg}`)} className="press chunk-sm flex items-center gap-1.5 px-3 py-2 text-[0.9em] font-extrabold">
+                <GameIcon name="speaker" size={16} /> Repetir
               </button>
-              <button onClick={() => setShowText((v) => !v)} className="rounded-full border border-border px-3 py-1.5 text-muted">
-                {showText ? "Ocultar texto" : "Ver texto"}
+              <button onClick={() => setShowText((v) => !v)} className="press chunk-sm flex items-center gap-1.5 px-3 py-2 text-[0.9em] font-extrabold">
+                <GameIcon name="open-book" size={16} /> {showText ? "Ocultar texto" : "Ver texto"}
               </button>
               {seg > 0 && (
-                <button onClick={() => setSeg(seg - 1)} className="rounded-full border border-border px-3 py-1.5 text-muted">
-                  ← Atrás
+                <button onClick={() => setSeg(seg - 1)} className="press chunk-sm px-3 py-2 text-[0.9em] font-extrabold">
+                  Atrás
                 </button>
               )}
             </div>
-            <button onClick={next} className="w-full rounded-2xl bg-accent py-4 text-[1.15em] font-bold text-accent-fg">
-              {seg < last ? "Siguiente →" : "Ver resumen"}
+            <button onClick={next} className="press chunk display w-full !bg-yellow py-4 text-[1.5em]">
+              {seg < last ? "Siguiente" : "Ver resumen"}
             </button>
           </motion.div>
         ) : (
           <motion.div key="summary" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <div className="rounded-2xl bg-surface p-4">
-              <div className="mb-2 text-[0.85em] font-semibold uppercase tracking-wide text-muted">Lo esencial</div>
-              <ul className="space-y-2 text-[1.1em] leading-snug">
+            <div className="chunk p-4">
+              <div className="display mb-3 text-xl">Lo esencial</div>
+              <ul className="grid gap-2.5 text-[1.08em] font-bold leading-snug">
                 {overview.keyPoints.map((k) => (
-                  <li key={k}>✅ {k}</li>
+                  <li key={k} className="flex gap-2.5">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green text-white">
+                      <GameIcon name="check-mark" size={14} />
+                    </span>
+                    {k}
+                  </li>
                 ))}
               </ul>
             </div>
             {overview.confusedWith.length > 0 && (
-              <div className="rounded-2xl bg-surface p-4">
-                <div className="mb-2 text-[0.85em] font-semibold uppercase tracking-wide text-muted">No lo confundas con</div>
-                <ul className="space-y-2 text-[1em] leading-snug">
+              <div className="chunk p-4">
+                <div className="display mb-3 text-xl">No lo confundas con</div>
+                <ul className="grid gap-2.5 text-[1em] font-bold leading-snug">
                   {overview.confusedWith.map((c) => (
-                    <li key={c.unitOrService}>
-                      <b>{c.unitOrService}</b>: {c.difference}
+                    <li key={c.unitOrService} className="rounded-xl border-2 border-ink bg-card-2 p-3">
+                      <span className="font-black">{c.unitOrService}</span>
+                      <span className="block text-muted">{c.difference}</span>
                     </li>
                   ))}
                 </ul>
@@ -265,9 +279,9 @@ export function Discover({
                 play("round");
                 onDone();
               }}
-              className="w-full rounded-2xl bg-accent py-4 text-[1.15em] font-bold text-accent-fg"
+              className="press chunk display flex w-full items-center justify-center gap-2 !bg-yellow py-4 text-[1.5em]"
             >
-              ¡A practicar! ▶
+              <GameIcon name="play-button" size={24} /> A practicar
             </button>
           </motion.div>
         )}

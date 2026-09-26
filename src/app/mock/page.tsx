@@ -13,7 +13,7 @@ export default async function MockPage() {
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
-        <h1 className="text-lg font-semibold">Simulacros</h1>
+        <h1 className="display text-2xl">Simulacros</h1>
         <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
           <li>
             <b className="text-fg">Mini semanal</b>: 25 preguntas que no ves hace 14+ días. Mide retención, no memoria de corto plazo.
@@ -29,7 +29,7 @@ export default async function MockPage() {
       </Card>
 
       <Card className="space-y-3">
-        <h2 className="font-semibold">Simulacro externo</h2>
+        <h2 className="display text-xl">Simulacro externo</h2>
         <p className="text-sm text-muted">
           Registra tu resultado del Official Practice Exam (Skill Builder) o de Tutorials Dojo. Es la confirmación externa para reservar.
         </p>
@@ -37,7 +37,7 @@ export default async function MockPage() {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="font-semibold">Historial</h2>
+        <h2 className="display text-xl">Historial</h2>
         {mocks.length === 0 && <p className="text-sm text-muted">Todavía no hiciste ninguno.</p>}
         {mocks.map((m) => (
           <Link

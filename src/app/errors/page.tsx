@@ -18,12 +18,12 @@ export default async function ErrorsPage() {
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
-        <h1 className="text-lg font-semibold">Registro de errores</h1>
+        <h1 className="display text-2xl">Registro de errores</h1>
         <div className="grid grid-cols-2 gap-2">
           {Object.entries(CATEGORY).map(([k, v]) => (
             <div key={k} className="rounded-lg bg-surface-2 p-2.5">
               <div className="text-xs text-muted">{v.label}</div>
-              <div className="text-lg font-semibold tabular-nums">{counts.find((c) => c.category === k)?.n ?? 0}</div>
+              <div className="display text-xl tabular-nums">{counts.find((c) => c.category === k)?.n ?? 0}</div>
               <div className="text-xs text-muted">{v.tip}</div>
             </div>
           ))}
@@ -60,7 +60,7 @@ export default async function ErrorsPage() {
               <p className="text-sm text-muted">{a.transcript ?? a.questionId}</p>
             )}
             <div className="text-xs text-muted">
-              Elegiste {a.selected.join(", ") || "—"} · correcta {correct.join(", ") || "—"}
+              Elegiste {a.selected.join(", ") || "-"} · correcta {correct.join(", ") || "-"}
               {a.explanationFeedback ? ` · ${a.explanationFeedback}` : ""}
             </div>
           </Card>

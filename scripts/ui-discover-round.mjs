@@ -15,7 +15,7 @@ let n = 0;
 const shot = (name) => page.screenshot({ path: `${out}/${String(++n).padStart(2, "0")}-${name}.png`, fullPage: true });
 
 await page.goto(`${base}/`, { waitUntil: "networkidle" });
-if (await page.getByText(/Leer en voz alta: sí/).count()) await page.getByText(/Leer en voz alta: sí/).click();
+if (await page.getByRole("button", { name: /Voz sí/ }).count()) await page.getByRole("button", { name: /Voz sí/ }).click();
 await page.getByRole("button", { name: /Jugar/ }).click();
 
 let discovers = 0;
@@ -54,8 +54,8 @@ for (let step = 0; step < 60 && answered < 8; step++) {
   await conf.click();
   await page.getByText(/¡Correcto!|Casi\./).first().waitFor({ timeout: 30_000 });
   answered++;
-  if (await page.getByText("Casi.").count()) await page.getByRole("button", { name: "Ver respuesta" }).click();
-  await page.getByRole("button", { name: /Siguiente/ }).click();
+  if (await page.getByText("¡Casi!").count()) await page.getByRole("button", { name: "Ver respuesta" }).click();
+  await page.getByRole("button", { name: /^Siguiente$/ }).click();
 }
 await shot("end");
 await browser.close();

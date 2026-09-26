@@ -19,14 +19,14 @@ if (await page.getByRole("button", { name: "Entendido" }).count()) await page.ge
 await page.getByRole("button", { name: /Jugar/ }).waitFor({ timeout: 30_000 });
 await shot("hub");
 // turn auto-read off for the test (no audio in headless)
-if (await page.getByText(/Leer en voz alta: sí/).count()) await page.getByText(/Leer en voz alta: sí/).click();
+if (await page.getByRole("button", { name: /Voz sí/ }).count()) await page.getByRole("button", { name: /Voz sí/ }).click();
 await page.getByRole("button", { name: /Jugar/ }).click();
 
 let answered = 0;
 for (let step = 0; step < 30 && answered < 8; step++) {
   await page.waitForTimeout(400);
-  if (await page.getByText("Ronda completa").count()) break;
-  const card = page.getByRole("button", { name: /Entendido, a jugar/ });
+  if (await page.getByText(/Ronda brillante|Buena ronda|Sembrando/).count()) break;
+  const card = page.getByRole("button", { name: /^A jugar$/ });
   if (await card.count()) {
     if (step < 4) await shot(`card-${step}`);
     await card.click();
@@ -36,23 +36,24 @@ for (let step = 0; step < 30 && answered < 8; step++) {
   await conf.waitFor({ timeout: 30_000 });
   const opts = page.locator("button:has(span[aria-hidden])");
   const need = (await page.getByText(/^Elige 2$/).count()) ? 2 : 1;
-  for (let k = 0; k < need; k++) await opts.nth((answered + k) % 4).click();
+  const cnt = await opts.count();
+  for (let k = 0; k < need; k++) await opts.nth((answered + k) % cnt).click();
   if (answered === 0) await shot("question");
   await conf.click();
-  await page.getByText(/¡Correcto!|Casi\./).first().waitFor({ timeout: 30_000 });
+  await page.getByText(/¡Correcto!|¡Casi!/).first().waitFor({ timeout: 30_000 });
   answered++;
-  if (await page.getByText("Casi.").count()) {
+  if (await page.getByText("¡Casi!").count()) {
     if (answered <= 2) await shot(`wrong-${answered}`);
     await page.getByRole("button", { name: "Ver respuesta" }).click();
   }
-  await page.getByRole("button", { name: /Siguiente/ }).waitFor();
+  await page.getByRole("button", { name: /^Siguiente$/ }).waitFor();
   if (answered <= 2) {
     await page.getByRole("button", { name: /¿Por qué\?/ }).click();
     await shot(`revealed-${answered}`);
   }
-  await page.getByRole("button", { name: /Siguiente/ }).click();
+  await page.getByRole("button", { name: /^Siguiente$/ }).click();
 }
-await page.getByText("Ronda completa").waitFor({ timeout: 30_000 });
+await page.getByText(/Ronda brillante|Buena ronda|Sembrando/).waitFor({ timeout: 30_000 });
 await page.waitForTimeout(1200);
 await shot("result");
 await page.getByRole("button", { name: /Terminar por ahora/ }).click();

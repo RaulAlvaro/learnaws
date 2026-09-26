@@ -214,8 +214,8 @@ function MockReview({ mock, questions, review }: { mock: MockRow; questions: Pub
     <div className="space-y-4">
       <Card className="space-y-3">
         <div className="flex items-baseline justify-between">
-          <h1 className="text-lg font-semibold">Resultado</h1>
-          <span className="text-3xl font-semibold tabular-nums">{(mock.scorePct ?? 0).toFixed(0)}%</span>
+          <h1 className="display text-2xl">Resultado</h1>
+          <span className="display text-3xl tabular-nums">{(mock.scorePct ?? 0).toFixed(0)}%</span>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
           {Object.entries(mock.perDomain ?? {}).map(([d, v]) => {

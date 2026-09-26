@@ -125,7 +125,7 @@ export default function StudyPage() {
 
       {item.kind === "done" && (
         <Card className="space-y-4">
-          <h2 className="text-lg font-semibold">{p.kind === "diagnostic" ? "Diagnóstico terminado" : "Sesión de hoy completa"}</h2>
+          <h2 className="display text-xl">{p.kind === "diagnostic" ? "Diagnóstico terminado" : "Sesión de hoy completa"}</h2>
           <p className="text-sm text-muted">
             {p.kind === "diagnostic"
               ? "Ya sé por dónde empezar. Desde mañana la sesión combina repasos, conceptos nuevos y práctica mezclada."

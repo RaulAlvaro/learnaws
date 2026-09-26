@@ -34,7 +34,7 @@ export function LabRunner({ lab, initial }: { lab: Lab; initial: Progress }) {
     <div className="space-y-4">
       <Card className="space-y-2">
         <div className="text-xs text-muted">Lab {lab.order}</div>
-        <h1 className="text-lg font-semibold">{lab.titleEs}</h1>
+        <h1 className="display text-2xl">{lab.titleEs}</h1>
         <p className="text-sm">{lab.objectiveEs}</p>
         <div className="flex flex-wrap gap-2">
           <Badge>{lab.minutes} min</Badge>
@@ -44,7 +44,7 @@ export function LabRunner({ lab, initial }: { lab: Lab; initial: Progress }) {
       </Card>
 
       <Card className="space-y-3">
-        <h2 className="font-semibold">Predicciones</h2>
+        <h2 className="display text-xl">Predicciones</h2>
         <p className="text-xs text-muted">Escribe tu predicción antes del paso correspondiente; después compárala.</p>
         {lab.checkQuestions.map((q) => (
           <div key={q.id} className="space-y-2 rounded-lg bg-surface-2 p-3">
@@ -72,7 +72,7 @@ export function LabRunner({ lab, initial }: { lab: Lab; initial: Progress }) {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="font-semibold">Pasos</h2>
+        <h2 className="display text-xl">Pasos</h2>
         {lab.steps.map((s, i) => (
           <label key={s.id} className="flex cursor-pointer gap-3 rounded-lg p-2 hover:bg-surface-2">
             <input type="checkbox" checked={p.doneSteps.includes(s.id)} onChange={() => toggleStep(s.id)} className="mt-1" />
@@ -88,7 +88,7 @@ export function LabRunner({ lab, initial }: { lab: Lab; initial: Progress }) {
       </Card>
 
       <Card className="space-y-2 border-bad/40">
-        <h2 className="font-semibold text-bad">Limpieza (obligatoria)</h2>
+        <h2 className="display text-xl text-bad">Limpieza (obligatoria)</h2>
         {lab.cleanup.map((c) => (
           <label key={c.id} className="flex cursor-pointer gap-3 rounded-lg p-2 hover:bg-surface-2">
             <input
@@ -106,7 +106,7 @@ export function LabRunner({ lab, initial }: { lab: Lab; initial: Progress }) {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="font-semibold">Para el examen</h2>
+        <h2 className="display text-xl">Para el examen</h2>
         <ul className="list-disc space-y-1 pl-5 text-sm">
           {lab.examTakeawaysEs.map((t) => (
             <li key={t}>{t}</li>
@@ -115,7 +115,7 @@ export function LabRunner({ lab, initial }: { lab: Lab; initial: Progress }) {
         <div className="flex flex-wrap gap-3 pt-1 text-xs">
           {lab.docs.map((d) => (
             <a key={d} href={d} target="_blank" rel="noreferrer" className="text-accent underline">
-              Docs ↗
+              Docs
             </a>
           ))}
         </div>

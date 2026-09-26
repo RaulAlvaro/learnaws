@@ -38,7 +38,7 @@ export default async function LabsPage() {
   return (
     <div className="space-y-4">
       <Card className="space-y-2">
-        <h1 className="text-lg font-semibold">Labs en tu cuenta de AWS</h1>
+        <h1 className="display text-2xl">Labs en tu cuenta de AWS</h1>
         <p className="text-sm text-muted">
           Pocos y dirigidos: haz el lab cuando la app lo recomiende por tus errores. Cada uno tiene preguntas de predicción (“¿qué
           pasará si…?”) y una limpieza obligatoria. <b className="text-fg">El lab 0 (alerta de presupuesto) va primero.</b>

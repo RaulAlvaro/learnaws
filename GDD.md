@@ -82,7 +82,7 @@ Acierto: botón rebota (scale 1→1.08→1, 180 ms), destello verde, "ding", vib
 
 ## Art direction
 
-- **Estilo**: flat vector, bordes redondeados 16 px, íconos oficiales AWS Architecture Icons en diagramas.
+- **Estilo**: "Arcade" (juego casual móvil): campo azul punteado, tarjetas blancas con contorno tinta de 3 px y sombra sólida de volumen, botones gruesos, Lilita One + Nunito, iconos de game-icons.net (CC BY 3.0), cero emojis.
 - **Palette** (claro por defecto): fondo `#FBFAF8` · texto `#1B1A18` · acento `#D9731A` · opciones ▲`#E23D4B` ◆`#2F6FEB` ●`#E0A100` ■`#1F9D55` · islas por familia con tonos suaves. Tema oscuro cálido opcional.
 - **Legibilidad**: preguntas 20 px, opciones 24 px (botón A+ hasta 150%), contraste ≥ 4.5:1, líneas ≤ 60 caracteres, color nunca como único código (símbolos ▲◆●■).
 - **HUD de ronda**: barra de progreso de la ronda, XP, botones 🔊 / ES / A+ arriba; botón de acción fijo abajo.
@@ -132,3 +132,4 @@ Multijugador, rankings, grupos de estudio cooperativos (candidato v2), música a
 - 2026-09-26: M0 multiusuario (userId en todo, BYOK cifrada, admin, feedback, resultado de examen, rate limits, privacidad/borrado).
 - 2026-09-26: M1 rondas relámpago (hub Jugar, rondas de 8 estilo Kahoot, chips y frases clave resaltadas, auto-lectura, XP con calibración, racha con comodín, meta diaria, SFX sintetizados). SFX por Web Audio en vez de Kenney.
 - 2026-09-26: M2 Descubrir servicios (75 unidades en 9 islas, explicación narrada con diagrama por segmentos, 781 preguntas relámpago/esto-o-aquello; generadas por Claude, auditadas por OpenAI; formato corto al aprender y escenario al consolidar; los formatos cortos no cuentan para la probabilidad de aprobar).
+- 2026-09-26: Rediseño visual "Arcade" (opción B elegida por el usuario): sin emojis, iconos de juego, botones con volumen, tipografías de juego.

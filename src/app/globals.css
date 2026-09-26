@@ -1,42 +1,55 @@
 @import "tailwindcss";
 
+/*
+ * "Arcade" art direction: chunky casual-mobile game UI.
+ * One deliberate world (no light/dark flip): blue dotted playfield, white cards with a
+ * thick ink outline and a solid drop "volume", saturated answer colours, rounded display type.
+ */
 :root {
-  --bg: #fbfaf8;
-  --surface: #ffffff;
-  --surface-2: #f3f1ed;
-  --fg: #1b1a18;
-  --muted: #6b675f;
-  --border: #e5e1da;
-  --accent: #d9731a; /* AWS-ish orange, used sparingly */
-  --accent-fg: #ffffff;
-  --good: #1f8a4c;
-  --good-bg: #e6f4ea;
-  --bad: #c0392b;
-  --bad-bg: #fbeae8;
-  --warn: #9a6b00;
-  --warn-bg: #fdf3d8;
-}
+  color-scheme: light;
+  --field: #3346d6; /* playfield blue */
+  --field-deep: #2536b8;
+  --ink: #1c1840; /* outlines + text */
+  --card: #ffffff;
+  --card-2: #efeefa; /* inset / tracks */
+  --muted: #5e5a86;
+  --yellow: #ffc933; /* primary action */
+  --yellow-deep: #d69a00;
+  --red: #f2545b;
+  --blue: #3d8bff;
+  --amber: #e69a00;
+  --green: #1f9d60;
+  --green-bg: #dff5e9;
+  --red-bg: #fde3e4;
+  --amber-bg: #fff1cc;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111110;
-    --surface: #1a1918;
-    --surface-2: #232220;
-    --fg: #eeece8;
-    --muted: #a19c93;
-    --border: #2f2d2a;
-    --accent: #f0913a;
-    --accent-fg: #1b1a18;
-    --good: #5cc98a;
-    --good-bg: #16291e;
-    --bad: #ef7a6c;
-    --bad-bg: #2e1a18;
-    --warn: #e7bb4f;
-    --warn-bg: #2b2412;
-  }
+  /* legacy token names used by secondary pages */
+  --bg: var(--field);
+  --surface: var(--card);
+  --surface-2: var(--card-2);
+  --fg: var(--ink);
+  --border: var(--ink);
+  /* accent = readable deep blue for text/borders; yellow is used explicitly as the action fill */
+  --accent: #2536b8;
+  --accent-fg: #ffffff;
+  --good: var(--green);
+  --good-bg: var(--green-bg);
+  --bad: var(--red);
+  --bad-bg: var(--red-bg);
+  --warn: #9a6700;
+  --warn-bg: var(--amber-bg);
 }
 
 @theme inline {
+  --color-field: var(--field);
+  --color-ink: var(--ink);
+  --color-card: var(--card);
+  --color-card-2: var(--card-2);
+  --color-yellow: var(--yellow);
+  --color-red: var(--red);
+  --color-blue: var(--blue);
+  --color-amber: var(--amber);
+  --color-green: var(--green);
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
@@ -51,25 +64,71 @@
   --color-bad-bg: var(--bad-bg);
   --color-warn: var(--warn);
   --color-warn-bg: var(--warn-bg);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-lilita);
+  --font-sans: var(--font-nunito);
 }
 
+html {
+  background: var(--field);
+}
 body {
-  background: var(--bg);
-  color: var(--fg);
+  background-color: var(--field);
+  background-image: radial-gradient(rgb(255 255 255 / 0.12) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font-weight: 700;
 }
 
-.prose-guide h1 { font-size: 1.6rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
-.prose-guide h2 { font-size: 1.25rem; font-weight: 650; margin: 1.75rem 0 0.5rem; }
-.prose-guide h3 { font-size: 1.05rem; font-weight: 600; margin: 1.25rem 0 0.4rem; }
-.prose-guide p { margin: 0.6rem 0; line-height: 1.65; }
-.prose-guide ul, .prose-guide ol { margin: 0.5rem 0 0.5rem 1.25rem; line-height: 1.6; }
+/* ---------- chunky primitives ---------- */
+.chunk {
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 5px 0 var(--ink);
+}
+.chunk-sm {
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.press {
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease;
+}
+.press:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+.display {
+  font-family: var(--font-lilita), system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.on-field {
+  color: #fff;
+}
+:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+
+/* Long-form text (guide) inside a white card */
+.prose-guide h1 { font-family: var(--font-lilita); font-weight: 400; font-size: 1.8rem; margin: 1.2rem 0 0.75rem; }
+.prose-guide h2 { font-family: var(--font-lilita); font-weight: 400; font-size: 1.35rem; margin: 1.6rem 0 0.5rem; }
+.prose-guide h3 { font-weight: 800; font-size: 1.08rem; margin: 1.2rem 0 0.4rem; }
+.prose-guide p { margin: 0.6rem 0; line-height: 1.65; font-weight: 600; }
+.prose-guide ul, .prose-guide ol { margin: 0.5rem 0 0.5rem 1.25rem; line-height: 1.6; font-weight: 600; }
 .prose-guide ul { list-style: disc; }
 .prose-guide ol { list-style: decimal; }
-.prose-guide a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-.prose-guide code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; }
-.prose-guide table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; display: block; overflow-x: auto; }
-.prose-guide th, .prose-guide td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
-.prose-guide th { background: var(--surface-2); }
-.prose-guide blockquote { border-left: 3px solid var(--accent); padding-left: 0.9rem; color: var(--muted); margin: 0.75rem 0; }
+.prose-guide a { color: #2536b8; text-decoration: underline; text-underline-offset: 2px; }
+.prose-guide code { background: var(--card-2); padding: 0.1rem 0.3rem; border-radius: 6px; font-size: 0.9em; }
+.prose-guide table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.92rem; display: block; overflow-x: auto; }
+.prose-guide th, .prose-guide td { border: 2px solid var(--ink); padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+.prose-guide th { background: var(--card-2); }
+.prose-guide blockquote { border-left: 4px solid var(--yellow); padding-left: 0.9rem; margin: 0.75rem 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .press:active:not(:disabled) { transform: none; }
+}

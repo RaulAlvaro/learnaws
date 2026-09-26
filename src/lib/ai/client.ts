@@ -32,13 +32,13 @@ export const SYSTEM_USER = "system";
 
 export class NoApiKeyError extends Error {
   constructor() {
-    super("Agrega tu API key de OpenAI en Ajustes → IA para activar el tutor, la corrección y la voz.");
+    super("Agrega tu API key de OpenAI en Ajustes > IA para activar el tutor, la corrección y la voz.");
   }
 }
 
 export class BudgetExceededError extends Error {
   constructor(spent: number, cap: number) {
-    super(`Llegaste a tu tope mensual de IA (US$${spent.toFixed(2)} / US$${cap}). Puedes subirlo en Ajustes → IA.`);
+    super(`Llegaste a tu tope mensual de IA (US$${spent.toFixed(2)} / US$${cap}). Puedes subirlo en Ajustes > IA.`);
   }
 }
 

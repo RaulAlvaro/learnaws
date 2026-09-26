@@ -199,7 +199,7 @@ export default function VoicePage() {
   return (
     <div className="space-y-4">
       <Card className="space-y-2">
-        <h1 className="text-lg font-semibold">Modo manos libres</h1>
+        <h1 className="display text-2xl">Modo manos libres</h1>
         <p className="text-sm text-muted">
           Te leo una pregunta corta sin opciones y respondes en voz alta, en español o inglés. Recordar sin opciones fortalece más que
           reconocer. Di <b>“en español”</b> para oírla traducida o <b>“repite”</b>. Cuenta para tus repasos, no para la probabilidad de

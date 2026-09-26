@@ -1,26 +1,40 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { highlight } from "@/lib/game/cues";
 import { play } from "@/lib/game/sfx";
+import type { Chip } from "@/lib/game/cues";
 import type { PublicQuestion, Reveal } from "../question-view";
+import { GameIcon, type GameIconName } from "./icons";
 
-export type GameQuestionData = PublicQuestion & { cues: string[]; chips: { emoji: string; label: string }[] };
+export type GameQuestionData = PublicQuestion & { cues: string[]; chips: Chip[] };
 
-/** Kahoot-style option colours, always paired with a shape so colour is never the only cue. */
+/** Answer colours, always paired with a drawn shape so colour is never the only cue. */
 export const OPTION_STYLE = [
-  { shape: "▲", bg: "bg-[#E23D4B]", ring: "ring-[#E23D4B]" },
-  { shape: "◆", bg: "bg-[#2F6FEB]", ring: "ring-[#2F6FEB]" },
-  { shape: "●", bg: "bg-[#C98A00]", ring: "ring-[#C98A00]" },
-  { shape: "■", bg: "bg-[#1F9D55]", ring: "ring-[#1F9D55]" },
-  { shape: "★", bg: "bg-[#7C4DDB]", ring: "ring-[#7C4DDB]" },
-];
+  { fill: "bg-red", shape: "tri" },
+  { fill: "bg-blue", shape: "dia" },
+  { fill: "bg-amber", shape: "cir" },
+  { fill: "bg-green", shape: "sqr" },
+  { fill: "bg-[#7c4ddb]", shape: "star" },
+] as const;
 
-const CONFIDENCE = [
-  { value: 1 as const, emoji: "😬", label: "Adivino", key: "q" },
-  { value: 2 as const, emoji: "🙂", label: "Bastante", key: "w" },
-  { value: 3 as const, emoji: "😎", label: "Seguro", key: "e" },
+const SHAPE_CLIP: Record<string, string> = {
+  tri: "polygon(50% 6%, 96% 92%, 4% 92%)",
+  dia: "polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+  cir: "circle(48% at 50% 50%)",
+  sqr: "inset(8% round 3px)",
+  star: "polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)",
+};
+
+export function Shape({ kind, className = "" }: { kind: string; className?: string }) {
+  return <span aria-hidden className={`inline-block h-6 w-6 shrink-0 bg-white ${className}`} style={{ clipPath: SHAPE_CLIP[kind] }} />;
+}
+
+const CONFIDENCE: { value: 1 | 2 | 3; icon: GameIconName; label: string; key: string }[] = [
+  { value: 1, icon: "dice-eight-faces-eight", label: "Adivino", key: "q" },
+  { value: 2, icon: "thumb-up", label: "Bastante", key: "w" },
+  { value: 3, icon: "on-target", label: "Seguro", key: "e" },
 ];
 
 export interface AnswerOutcome {
@@ -51,6 +65,7 @@ export function GameQuestion({
   onAnswered: (o: AnswerOutcome) => void;
   onNext: () => void;
 }) {
+  const reduce = useReducedMotion();
   const [selected, setSelected] = useState<string[]>([]);
   const [spanish, setSpanish] = useState(false);
   const [usedSpanish, setUsedSpanish] = useState(false);
@@ -88,6 +103,7 @@ export function GameQuestion({
   const options = spanish ? question.es.options : question.options;
   const parts = spanish ? [{ text: stem, hit: false }] : highlight(stem, question.cues);
   const ready = selected.length === need;
+  const two = options.length === 2;
 
   function pick(id: string) {
     if (phase === "revealed") return;
@@ -203,47 +219,46 @@ export function GameQuestion({
   const correctIds = reveal?.correctIds ?? [];
   const whyFor = (id: string) =>
     spanish ? reveal?.optionsEs.find((o) => o.id === id)?.why : reveal?.options.find((o) => o.id === id)?.why;
+  const tag =
+    mode === "diagnostic" || mode === "pretest" ? "Prueba previa" : mode === "review" ? "Repaso" : mode === "interleave" ? "Mezcla" : null;
 
   return (
     <div className="space-y-4" style={{ fontSize: "calc(1rem * var(--fs, 1))" }}>
       <div className="flex flex-wrap items-center gap-2">
-        {mode === "diagnostic" || mode === "pretest" ? (
-          <span className="rounded-full bg-warn-bg px-3 py-1 text-[0.8em] font-medium text-warn">Prueba previa · está bien fallar</span>
-        ) : mode === "review" ? (
-          <span className="rounded-full bg-good-bg px-3 py-1 text-[0.8em] font-medium text-good">Repaso</span>
-        ) : null}
+        {tag && <span className="display rounded-full bg-ink px-3 py-1 text-[0.85em] text-yellow">{tag}</span>}
         {question.chips.map((c) => (
-          <span key={c.label} className="rounded-full border border-border bg-surface px-3 py-1 text-[0.8em]">
-            {c.emoji} {c.label}
+          <span key={c.label} className="chunk-sm flex items-center gap-1.5 !rounded-full px-3 py-1 text-[0.8em] font-extrabold !shadow-none">
+            <GameIcon name={c.icon} size={15} /> {c.label}
           </span>
         ))}
-        {need > 1 && <span className="rounded-full bg-accent/15 px-3 py-1 text-[0.8em] font-semibold text-accent">Elige {need}</span>}
+        {need > 1 && <span className="display rounded-full bg-yellow px-3 py-1 text-[0.85em] text-ink ring-2 ring-ink">Elige {need}</span>}
       </div>
 
       <motion.div
         key={shake}
-        animate={shake ? { x: [0, -8, 8, -5, 5, 0] } : {}}
+        animate={shake && !reduce ? { x: [0, -9, 9, -6, 6, 0] } : {}}
         transition={{ duration: 0.35 }}
-        className="rounded-2xl border border-border bg-surface p-4 sm:p-5"
+        className="chunk p-4 sm:p-5"
       >
         <div className="mb-2 flex justify-end gap-2">
-          <button onClick={() => speak(spanish ? "es" : "en")} className="rounded-full border border-border px-3 py-1 text-[0.8em] text-muted">
-            🔊 Escuchar
+          <button onClick={() => speak(spanish ? "es" : "en")} aria-label="Escuchar la pregunta" className="press chunk-sm flex h-10 w-10 items-center justify-center !shadow-[0_3px_0_var(--ink)]">
+            <GameIcon name="speaker" size={20} />
           </button>
           <button
             onClick={() => {
               setSpanish((s) => !s);
               setUsedSpanish(true);
             }}
-            className={`rounded-full border px-3 py-1 text-[0.8em] ${spanish ? "border-accent text-accent" : "border-border text-muted"}`}
+            aria-label={spanish ? "Ver en inglés" : "Ver en español"}
+            className={`press chunk-sm display h-10 min-w-10 px-2 text-[0.95em] ${spanish ? "!bg-yellow" : ""}`}
           >
             {spanish ? "EN" : "ES"}
           </button>
         </div>
-        <p className="text-[1.25em] leading-relaxed">
+        <p className="text-[1.22em] font-bold leading-relaxed">
           {parts.map((p, i) =>
             p.hit ? (
-              <mark key={i} className="rounded bg-accent/20 px-0.5 text-fg">
+              <mark key={i} className="rounded-md bg-yellow/60 px-0.5 text-ink">
                 {p.text}
               </mark>
             ) : (
@@ -253,41 +268,35 @@ export function GameQuestion({
         </p>
       </motion.div>
 
-      <div className={`grid gap-2.5 ${options.length === 2 ? "grid-cols-2" : ""}`}>
+      <div className={`grid gap-3 ${two ? "grid-cols-2" : ""}`}>
         {options.map((o, i) => {
           const s = OPTION_STYLE[i] ?? OPTION_STYLE[0];
           const sel = selected.includes(o.id);
           const isCorrect = correctIds.includes(o.id);
           const wasPicked = firstPick.includes(o.id);
-          const dim = phase === "revealed" && !isCorrect && !wasPicked;
-          const why = phase === "revealed" && showWhy ? whyFor(o.id) : null;
+          const revealed = phase === "revealed";
+          const fill = revealed ? (isCorrect ? "bg-green" : wasPicked ? "bg-red" : `${s.fill} opacity-45`) : s.fill;
+          const why = revealed && showWhy ? whyFor(o.id) : null;
           return (
             <motion.button
               key={o.id}
               onClick={() => pick(o.id)}
-              whileTap={{ scale: 0.97 }}
-              animate={phase === "revealed" && isCorrect ? { scale: [1, 1.04, 1] } : {}}
-              transition={{ duration: 0.25 }}
-              className={`flex ${options.length === 2 ? "min-h-32 flex-col" : "min-h-14"} w-full items-stretch overflow-hidden rounded-2xl border-2 text-left transition ${
-                phase === "revealed"
-                  ? isCorrect
-                    ? "border-good bg-good-bg"
-                    : wasPicked
-                      ? "border-bad bg-bad-bg"
-                      : "border-border bg-surface"
-                  : sel
-                    ? `border-transparent bg-surface ring-4 ${s.ring}`
-                    : phase === "wrong" && wasPicked
-                      ? "border-border bg-surface opacity-50"
-                      : "border-border bg-surface"
-              } ${dim ? "opacity-60" : ""}`}
+              animate={revealed && isCorrect && !reduce ? { y: [0, -6, 0] } : {}}
+              transition={{ duration: 0.3 }}
+              className={`press flex w-full rounded-2xl border-[3px] border-ink text-left text-white shadow-[0_5px_0_var(--ink)] ${fill} ${
+                two ? "min-h-36 flex-col items-center justify-center gap-3 p-4 text-center" : "min-h-16 items-center gap-3 px-4 py-3"
+              } ${sel ? "ring-4 ring-white ring-offset-2 ring-offset-[var(--field)]" : ""} ${phase === "wrong" && wasPicked ? "opacity-45" : ""}`}
             >
-              <span className={`flex ${options.length === 2 ? "h-10 w-full" : "w-12"} shrink-0 items-center justify-center text-[1.3em] text-white ${s.bg}`} aria-hidden>
-                {s.shape}
-              </span>
-              <span className="flex-1 px-3 py-3">
-                <span className="block text-[1.1em] leading-snug">{o.text}</span>
-                {why && <span className="mt-1 block text-[0.85em] leading-snug text-muted">{why}</span>}
+              {revealed && (isCorrect || wasPicked) ? (
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-ink">
+                  <GameIcon name={isCorrect ? "check-mark" : "cross-mark"} size={18} />
+                </span>
+              ) : (
+                <Shape kind={s.shape} />
+              )}
+              <span className="flex-1">
+                <span className={`block font-extrabold leading-snug [text-shadow:0_1px_0_rgb(0_0_0_/_0.25)] ${two ? "text-[1.2em]" : "text-[1.08em]"}`}>{o.text}</span>
+                {why && <span className="mt-1 block text-[0.85em] font-bold leading-snug text-white/90">{why}</span>}
               </span>
             </motion.button>
           );
@@ -297,17 +306,19 @@ export function GameQuestion({
       <AnimatePresence mode="wait">
         {phase === "answering" && (
           <motion.div key="conf" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-2">
-            <p className="text-center text-[0.9em] text-muted">{ready ? "¿Qué tan seguro? (esto envía tu respuesta)" : need > 1 ? `Elige ${need} opciones` : "Elige una opción"}</p>
-            <div className="grid grid-cols-3 gap-2">
+            <p className="text-center text-[0.95em] font-extrabold text-white">
+              {ready ? "¿Qué tan seguro estás? Esto envía tu respuesta" : need > 1 ? `Elige ${need} opciones` : "Elige una opción"}
+            </p>
+            <div className="grid grid-cols-3 gap-2.5">
               {CONFIDENCE.map((c) => (
                 <button
                   key={c.value}
                   disabled={!ready || busy}
                   onClick={() => submit(c.value)}
-                  className="rounded-2xl border-2 border-border bg-surface py-3 text-center transition enabled:hover:border-accent disabled:opacity-40"
+                  className="press chunk-sm flex flex-col items-center gap-1 py-3 disabled:opacity-50"
                 >
-                  <div className="text-[1.6em] leading-none">{c.emoji}</div>
-                  <div className="mt-1 text-[0.85em] font-medium">{c.label}</div>
+                  <GameIcon name={c.icon} size={28} />
+                  <span className="text-[0.9em] font-black">{c.label}</span>
                 </button>
               ))}
             </div>
@@ -315,25 +326,30 @@ export function GameQuestion({
         )}
 
         {phase === "wrong" && (
-          <motion.div key="wrong" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 rounded-2xl bg-bad-bg p-4">
-            <p className="font-semibold text-bad">Casi. {result?.xp && result.xp < 0 ? `(${result.xp} XP por decir “seguro”)` : ""}</p>
+          <motion.div key="wrong" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="chunk space-y-3 !bg-bad-bg p-4">
+            <p className="display flex items-center gap-2 text-[1.35em] text-red">
+              <GameIcon name="cross-mark" size={22} /> ¡Casi!
+              {!!result?.xp && result.xp < 0 && <span className="font-sans text-[0.6em] font-extrabold text-ink">{result.xp} XP por decir “seguro”</span>}
+            </p>
             {hints.map((h, i) => (
-              <p key={i} className="rounded-xl bg-surface p-3 text-[0.95em] leading-relaxed">
-                💡 {h}
+              <p key={i} className="flex gap-2 rounded-xl border-2 border-ink bg-card p-3 text-[0.98em] font-bold leading-relaxed">
+                <GameIcon name="light-bulb" size={20} className="mt-0.5 shrink-0 text-amber" />
+                {h}
               </p>
             ))}
             <div className="flex flex-wrap gap-2">
               {hints.length < 3 && (
-                <button onClick={askHint} disabled={busy} className="rounded-xl bg-surface px-4 py-2.5 font-medium">
-                  {busy ? "…" : hints.length ? "Otra pista" : "💡 Pista"}
+                <button onClick={askHint} disabled={busy} className="press chunk-sm flex items-center gap-2 px-4 py-2.5 font-extrabold">
+                  <GameIcon name="light-bulb" size={18} />
+                  {busy ? "Pensando" : hints.length ? "Otra pista" : "Pista"}
                 </button>
               )}
               {hints.length > 0 && (
-                <button onClick={retry} disabled={busy || !ready} className="rounded-xl bg-accent px-4 py-2.5 font-medium text-accent-fg disabled:opacity-50">
+                <button onClick={retry} disabled={busy || !ready} className="press chunk-sm !bg-yellow px-4 py-2.5 font-extrabold disabled:opacity-50">
                   Reintentar
                 </button>
               )}
-              <button onClick={showAnswer} disabled={busy} className="rounded-xl px-4 py-2.5 text-muted underline">
+              <button onClick={showAnswer} disabled={busy} className="px-3 py-2.5 font-extrabold underline decoration-2 underline-offset-4">
                 Ver respuesta
               </button>
             </div>
@@ -342,36 +358,42 @@ export function GameQuestion({
 
         {phase === "revealed" && (
           <motion.div key="rev" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <div className={`flex items-center justify-between rounded-2xl p-4 ${result?.correct ? "bg-good-bg" : "bg-surface-2"}`}>
-              <span className={`text-[1.2em] font-bold ${result?.correct ? "text-good" : ""}`}>
-                {result?.correct ? "¡Correcto!" : "Así era"}
-                {conceptTitle && <span className="block text-[0.7em] font-normal text-muted">{conceptTitle}</span>}
+            <div className={`chunk flex items-center justify-between p-4 ${result?.correct ? "!bg-green-bg" : ""}`}>
+              <span>
+                <span className={`display block text-[1.5em] leading-none ${result?.correct ? "text-green" : ""}`}>
+                  {result?.correct ? "¡Correcto!" : "Así era"}
+                </span>
+                {conceptTitle && <span className="mt-1 block text-[0.8em] font-bold text-muted">{conceptTitle}</span>}
               </span>
               {!!result?.xp && result.xp > 0 && (
-                <motion.span initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-[1.3em] font-bold text-accent">
-                  +{result.xp} XP
+                <motion.span
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="display flex items-center gap-1 rounded-full border-[3px] border-ink bg-yellow px-3 py-1 text-[1.2em]"
+                >
+                  <GameIcon name="focused-lightning" size={18} />+{result.xp}
                 </motion.span>
               )}
             </div>
             {showWhy ? (
-              <p className="rounded-2xl bg-surface p-4 text-[1em] leading-relaxed">{spanish ? reveal?.explanationEs : reveal?.explanation}</p>
+              <p className="chunk p-4 text-[1em] font-bold leading-relaxed">{spanish ? reveal?.explanationEs : reveal?.explanation}</p>
             ) : (
-              <button onClick={() => setShowWhy(true)} className="w-full rounded-2xl border border-border py-3 text-muted">
-                ¿Por qué? (explicación)
+              <button onClick={() => setShowWhy(true)} className="press chunk-sm flex w-full items-center justify-center gap-2 py-3 font-extrabold">
+                <GameIcon name="open-book" size={20} /> ¿Por qué?
               </button>
             )}
-            <button onClick={onNext} className="w-full rounded-2xl bg-accent py-4 text-[1.15em] font-bold text-accent-fg">
-              Siguiente →
+            <button onClick={onNext} className="press chunk display w-full !bg-yellow py-4 text-[1.5em]">
+              Siguiente
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
       {error && (
-        <p className="break-words text-[0.9em] text-bad">
+        <p className="chunk-sm break-words !bg-bad-bg p-3 text-[0.92em] font-bold">
           {error}{" "}
           {/API key/.test(error) && (
-            <a href="/settings#ia" className="underline">
+            <a href="/settings#ia" className="underline decoration-2">
               Ir a Ajustes
             </a>
           )}

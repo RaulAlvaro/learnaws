@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "motion/react";
+import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ConceptCard, type CardBody } from "@/components/concept-card";
 import { Discover } from "@/components/game/discover";
 import { GameQuestion, type GameQuestionData } from "@/components/game/game-question";
+import { GameIcon, type GameIconName } from "@/components/game/icons";
 import type { Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { play, setSound, soundOn } from "@/lib/game/sfx";
 
@@ -119,7 +120,7 @@ export function PlayClient() {
     }
   }
 
-  if (!state) return <p className="p-6 text-center text-muted">Cargando…</p>;
+  if (!state) return <HubSkeleton />;
 
   if (view === "round") {
     return (
@@ -130,13 +131,14 @@ export function PlayClient() {
         )}
         {item?.kind === "discover" && !item.overview && <SkipEffect onSkip={next} />}
         {item?.kind === "card" && item.card && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <div className="text-center text-sm font-semibold uppercase tracking-wide text-accent">
-              {item.reason === "new" ? "✨ Descubre" : "🔁 Repasa"}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+            <div className="display flex items-center justify-center gap-2 text-2xl text-white [text-shadow:0_3px_0_var(--ink)]">
+              <GameIcon name={item.reason === "new" ? "gift-of-knowledge" : "cycle"} size={26} />
+              {item.reason === "new" ? "Nueva ficha" : "Repasa la ficha"}
             </div>
             <ConceptCard conceptId={item.concept.id} title={item.concept.title} titleEs={item.concept.titleEs} card={item.card} />
-            <button onClick={next} className="w-full rounded-2xl bg-accent py-4 text-lg font-bold text-accent-fg">
-              ¡Entendido, a jugar!
+            <button onClick={next} className="press chunk display w-full !bg-yellow py-4 text-2xl">
+              A jugar
             </button>
           </motion.div>
         )}
@@ -161,10 +163,12 @@ export function PlayClient() {
           />
         )}
         {item?.kind === "done" && results.length === 0 && (
-          <div className="space-y-4 rounded-2xl bg-surface p-6 text-center">
-            <div className="text-4xl">🎉</div>
-            <p className="text-lg font-semibold">¡Completaste todo lo de hoy!</p>
-            <p className="text-muted">Lo que viste vuelve justo cuando estés por olvidarlo. Parar ahora también es parte del método.</p>
+          <div className="chunk space-y-4 p-6 text-center">
+            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-ink bg-yellow">
+              <GameIcon name="checkered-flag" size={34} />
+            </span>
+            <p className="display text-3xl">Día completo</p>
+            <p className="font-bold text-muted">Lo que viste vuelve justo cuando estés por olvidarlo. Parar ahora también es parte del método.</p>
             <button
               onClick={async () => {
                 await fetch("/api/session/extend", {
@@ -174,11 +178,11 @@ export function PlayClient() {
                 });
                 await loadItem();
               }}
-              className="w-full rounded-2xl border border-border py-3"
+              className="press chunk-sm w-full py-3 font-extrabold"
             >
-              Quiero 15 min más
+              Quiero 15 minutos más
             </button>
-            <button onClick={() => setView("hub")} className="w-full rounded-2xl bg-accent py-3 font-bold text-accent-fg">
+            <button onClick={() => setView("hub")} className="press chunk-sm display w-full !bg-yellow py-3 text-xl">
               Volver
             </button>
           </div>
@@ -190,39 +194,67 @@ export function PlayClient() {
   if (view === "result") {
     const correct = results.filter((r) => r.correct).length;
     const xp = results.reduce((s, r) => s + r.xp, 0);
+    const ratio = correct / Math.max(1, results.length);
     const learned = [...new Set(results.filter((r) => r.correct && r.concept).map((r) => r.concept!))].slice(0, 4);
+    const medal: { icon: GameIconName; title: string } =
+      ratio >= 0.75 ? { icon: "trophy-cup", title: "¡Ronda brillante!" } : ratio >= 0.4 ? { icon: "muscle-up", title: "¡Buena ronda!" } : { icon: "sprout", title: "Sembrando" };
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4 text-center">
-        <div className="rounded-3xl bg-surface p-6">
-          <div className="text-5xl">{correct / Math.max(1, results.length) >= 0.75 ? "🏆" : correct > 0 ? "💪" : "🌱"}</div>
-          <div className="mt-2 text-sm uppercase tracking-wide text-muted">Ronda completa</div>
-          <div className="mt-1 text-4xl font-bold tabular-nums">
-            {correct}/{results.length}
-          </div>
-          <div className="mt-2 text-2xl font-bold text-accent">
-            <CountUp to={xp} /> XP
+      <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4 text-center">
+        <div className="chunk relative overflow-hidden p-6">
+          <motion.span
+            initial={{ rotate: -12, scale: 0.4 }}
+            animate={{ rotate: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 14 }}
+            className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border-4 border-ink bg-yellow shadow-[0_6px_0_var(--ink)]"
+          >
+            <GameIcon name={medal.icon} size={56} />
+          </motion.span>
+          <p className="display mt-4 text-3xl">{medal.title}</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border-[3px] border-ink bg-card-2 p-3">
+              <div className="text-xs font-black uppercase tracking-wide text-muted">Aciertos</div>
+              <div className="display text-4xl tabular-nums">
+                {correct}/{results.length}
+              </div>
+            </div>
+            <div className="rounded-2xl border-[3px] border-ink bg-yellow p-3">
+              <div className="text-xs font-black uppercase tracking-wide">XP ganada</div>
+              <div className="display flex items-center justify-center gap-1 text-4xl tabular-nums">
+                <GameIcon name="focused-lightning" size={26} />
+                <CountUp to={xp} />
+              </div>
+            </div>
           </div>
           {state.level > startLevel && (
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-3 rounded-2xl bg-accent/15 p-3 font-bold text-accent">
-              ⬆️ ¡Subiste a nivel {state.level}!
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="display mt-3 flex items-center justify-center gap-2 rounded-2xl border-[3px] border-ink bg-blue p-3 text-xl text-white"
+            >
+              <GameIcon name="star-medal" size={24} /> ¡Subiste a nivel {state.level}!
             </motion.div>
           )}
           {learned.length > 0 && (
-            <div className="mt-4 text-left text-sm">
-              <div className="mb-1 text-muted">Reforzaste:</div>
-              <ul className="space-y-1">
+            <div className="mt-4 text-left">
+              <div className="mb-2 text-xs font-black uppercase tracking-wide text-muted">Reforzaste</div>
+              <ul className="grid gap-1.5">
                 {learned.map((c) => (
-                  <li key={c}>✅ {c}</li>
+                  <li key={c} className="flex items-center gap-2 font-extrabold">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green text-white">
+                      <GameIcon name="check-mark" size={14} />
+                    </span>
+                    {c}
+                  </li>
                 ))}
               </ul>
             </div>
           )}
         </div>
         <DailyGoal done={state.roundsToday} goal={state.goal} />
-        <button onClick={startRound} className="w-full rounded-2xl bg-accent py-4 text-xl font-bold text-accent-fg">
-          Otra ronda ▶
+        <button onClick={startRound} className="press chunk display flex w-full items-center justify-center gap-3 !bg-yellow py-5 text-3xl">
+          <GameIcon name="play-button" size={30} /> Otra ronda
         </button>
-        <button onClick={() => setView("hub")} className="w-full rounded-2xl border border-border py-3">
+        <button onClick={() => setView("hub")} className="press chunk-sm w-full py-3 font-extrabold">
           Terminar por ahora
         </button>
       </motion.div>
@@ -231,70 +263,108 @@ export function PlayClient() {
 
   // Hub
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-2xl bg-surface p-3">
-          <div className="text-2xl">🔥</div>
-          <div className="text-xl font-bold tabular-nums">{state.streak}</div>
-          <div className="text-xs text-muted">{state.freezeUsed ? "racha (comodín usado)" : "días de racha"}</div>
-        </div>
-        <div className="rounded-2xl bg-surface p-3">
-          <div className="text-2xl">⭐</div>
-          <div className="text-xl font-bold tabular-nums">Nv {state.level}</div>
-          <div className="mx-auto mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-accent" style={{ width: `${(state.into / state.needed) * 100}%` }} />
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-2.5">
+        <HudStat icon="flame" color="text-[#ff7a1a]" value={state.streak} label={state.freezeUsed ? "Racha (comodín)" : "Racha"} />
+        <HudStat icon="star-medal" color="text-amber" value={`Nv ${state.level}`} label="Nivel">
+          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full border-2 border-ink bg-card-2">
+            <div className="h-full bg-yellow" style={{ width: `${(state.into / state.needed) * 100}%` }} />
           </div>
-        </div>
-        <div className="rounded-2xl bg-surface p-3">
-          <div className="text-2xl">🔁</div>
-          <div className="text-xl font-bold tabular-nums">{state.dueNow}</div>
-          <div className="text-xs text-muted">repasos hoy</div>
-        </div>
+        </HudStat>
+        <HudStat icon="cycle" color="text-blue" value={state.dueNow} label="Repasos" />
       </div>
+
+      <motion.button
+        whileTap={{ scale: 0.97 }}
+        onClick={startRound}
+        className="chunk flex w-full flex-col items-center justify-center gap-1 !rounded-[28px] !bg-yellow py-9 !shadow-[0_9px_0_var(--ink)]"
+      >
+        <GameIcon name="play-button" size={52} />
+        <span className="display text-5xl leading-none">Jugar</span>
+        <span className="text-sm font-extrabold">Ronda de {ROUND_SIZE} · unos 4 minutos</span>
+      </motion.button>
 
       <DailyGoal done={state.roundsToday} goal={state.goal} />
 
-      <motion.button
-        whileTap={{ scale: 0.96 }}
-        whileHover={{ scale: 1.02 }}
-        onClick={startRound}
-        className="flex w-full flex-col items-center justify-center rounded-[2rem] bg-accent py-10 text-accent-fg shadow-lg"
-      >
-        <span className="text-5xl">▶</span>
-        <span className="mt-2 text-3xl font-extrabold tracking-tight">Jugar</span>
-        <span className="mt-1 text-sm opacity-90">Ronda de {ROUND_SIZE} · ~4 min</span>
-      </motion.button>
-
-      <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-        <button
-          onClick={() => setAutoRead(!autoRead)}
-          className={`rounded-full border px-3 py-1.5 ${autoRead ? "border-accent text-accent" : "border-border text-muted"}`}
-        >
-          🔊 Leer en voz alta: {autoRead ? "sí" : "no"}
-        </button>
-        <button
+      <div className="grid grid-cols-3 gap-2.5">
+        <ToggleChip icon={autoRead ? "speaker" : "sound-off"} label="Voz" on={autoRead} onClick={() => setAutoRead(!autoRead)} />
+        <ToggleChip
+          icon="settings-knobs"
+          label="Sonidos"
+          on={sfx}
           onClick={() => {
             setSound(!sfx);
             setSfx(!sfx);
           }}
-          className={`rounded-full border px-3 py-1.5 ${sfx ? "border-accent text-accent" : "border-border text-muted"}`}
+        />
+        <button
+          onClick={() => setFs(fs >= 1.3 ? 1 : Math.round((fs + 0.15) * 100) / 100)}
+          className="press chunk-sm flex flex-col items-center gap-0.5 py-2.5 font-extrabold"
         >
-          🎵 Sonidos: {sfx ? "sí" : "no"}
-        </button>
-        <button onClick={() => setFs(fs >= 1.3 ? 1 : Math.round((fs + 0.15) * 100) / 100)} className="rounded-full border border-border px-3 py-1.5">
-          Aa {Math.round(fs * 100)}%
+          <span className="display text-xl leading-none">Aa</span>
+          <span className="text-xs">{Math.round(fs * 100)}%</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <Link href="/progress" className="rounded-2xl bg-surface p-3 text-center">
-          📈 Mi progreso
+      <div className="grid grid-cols-2 gap-2.5">
+        <Link href="/progress" className="press chunk-sm flex items-center justify-center gap-2 p-3 font-extrabold">
+          <GameIcon name="histogram" size={20} /> Mi progreso
         </Link>
-        <Link href="/voice" className="rounded-2xl bg-surface p-3 text-center">
-          🎧 Repaso por voz
+        <Link href="/voice" className="press chunk-sm flex items-center justify-center gap-2 p-3 font-extrabold">
+          <GameIcon name="microphone" size={20} /> Repaso por voz
         </Link>
       </div>
-      <p className="text-center text-xs text-muted">XP de hoy: {state.todayXp} · total {state.totalXp}</p>
+      <p className="text-center text-sm font-extrabold text-white/85">
+        XP de hoy {state.todayXp} · total {state.totalXp}
+      </p>
+    </div>
+  );
+}
+
+function HudStat({
+  icon,
+  color,
+  value,
+  label,
+  children,
+}: {
+  icon: GameIconName;
+  color: string;
+  value: React.ReactNode;
+  label: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="chunk flex flex-col items-center px-2 py-3 text-center">
+      <GameIcon name={icon} size={30} className={color} />
+      <div className="display mt-1 text-2xl leading-none tabular-nums">{value}</div>
+      <div className="mt-1 text-[11px] font-black uppercase tracking-wide text-muted">{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function ToggleChip({ icon, label, on, onClick }: { icon: GameIconName; label: string; on: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} aria-pressed={on} className={`press chunk-sm flex flex-col items-center gap-0.5 py-2.5 font-extrabold ${on ? "" : "opacity-60"}`}>
+      <GameIcon name={icon} size={20} />
+      <span className="text-xs">
+        {label} {on ? "sí" : "no"}
+      </span>
+    </button>
+  );
+}
+
+function HubSkeleton() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="grid grid-cols-3 gap-2.5">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="chunk h-28 animate-pulse" />
+        ))}
+      </div>
+      <div className="chunk h-48 animate-pulse !bg-yellow/70" />
+      <div className="chunk h-20 animate-pulse" />
     </div>
   );
 }
@@ -311,8 +381,8 @@ function SkipEffect({ onSkip }: { onSkip: () => void }) {
 function RoundHud({ results, onExit }: { results: { correct: boolean }[]; onExit: () => void }) {
   return (
     <div className="flex items-center gap-3">
-      <button onClick={onExit} aria-label="Salir de la ronda" className="rounded-full px-2 text-2xl text-muted">
-        ×
+      <button onClick={onExit} aria-label="Salir de la ronda" className="press chunk-sm flex h-10 w-10 shrink-0 items-center justify-center">
+        <GameIcon name="exit-door" size={20} />
       </button>
       <div className="flex flex-1 gap-1.5">
         {Array.from({ length: ROUND_SIZE }, (_, i) => {
@@ -321,8 +391,8 @@ function RoundHud({ results, onExit }: { results: { correct: boolean }[]; onExit
             <motion.div
               key={i}
               initial={false}
-              animate={{ scaleY: r ? [1, 1.6, 1] : 1 }}
-              className={`h-2.5 flex-1 rounded-full ${r ? (r.correct ? "bg-good" : "bg-bad") : i === results.length ? "bg-accent/40" : "bg-surface-2"}`}
+              animate={{ scaleY: r ? [1, 1.5, 1] : 1 }}
+              className={`h-3.5 flex-1 rounded-full border-2 border-ink ${r ? (r.correct ? "bg-green" : "bg-red") : i === results.length ? "bg-yellow" : "bg-white/35"}`}
             />
           );
         })}
@@ -332,17 +402,20 @@ function RoundHud({ results, onExit }: { results: { correct: boolean }[]; onExit
 }
 
 function DailyGoal({ done, goal }: { done: number; goal: number }) {
+  const complete = done >= goal;
   return (
-    <div className="rounded-2xl bg-surface p-4">
-      <div className="mb-2 flex items-baseline justify-between text-sm">
-        <span className="font-semibold">Meta de hoy</span>
-        <span className="tabular-nums text-muted">
-          {Math.min(done, goal)}/{goal} rondas {done >= goal ? "✅" : ""}
+    <div className="chunk p-4">
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="display flex items-center gap-2 text-xl">
+          <GameIcon name="checkered-flag" size={20} /> Meta de hoy
+        </span>
+        <span className={`rounded-full border-2 border-ink px-2.5 py-0.5 text-sm font-black tabular-nums ${complete ? "bg-green text-white" : "bg-card-2"}`}>
+          {Math.min(done, goal)}/{goal} rondas
         </span>
       </div>
       <div className="flex gap-1.5">
         {Array.from({ length: goal }, (_, i) => (
-          <div key={i} className={`h-3 flex-1 rounded-full ${i < done ? "bg-accent" : "bg-surface-2"}`} />
+          <div key={i} className={`h-4 flex-1 rounded-md border-2 border-ink ${i < done ? "bg-yellow" : "bg-card-2"}`} />
         ))}
       </div>
     </div>
@@ -361,5 +434,5 @@ function CountUp({ to }: { to: number }) {
       unsub();
     };
   }, [to, v, rounded]);
-  return <AnimatePresence>{<span className="tabular-nums">{shown}</span>}</AnimatePresence>;
+  return <span className="tabular-nums">{shown}</span>;
 }

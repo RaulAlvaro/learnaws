@@ -2,23 +2,25 @@
  * Turns the verified keyword cues of a long scenario into visual requirement chips
  * (signaling principle: highlight what decides the answer, cut reading load).
  */
+import type { GameIconName } from "@/components/game/icons";
+
 export interface Chip {
-  emoji: string;
+  icon: GameIconName;
   label: string;
 }
 
 const RULES: [RegExp, Chip][] = [
-  [/cost|cheap|budget|price|spend|economic/i, { emoji: "💰", label: "Menor costo" }],
-  [/operational overhead|manage|maintenance|administ|serverless|fully managed/i, { emoji: "⚙️", label: "Menos operación" }],
-  [/highly available|high availability|availability zone|multi-az|fault[- ]toleran|resilien|failover|outage|disaster|rpo|rto/i, { emoji: "🛡️", label: "Alta disponibilidad" }],
-  [/latency|performance|throughput|fast|milliseconds|iops|scal/i, { emoji: "⚡", label: "Rendimiento" }],
-  [/secur|encrypt|least privilege|compliance|audit|private|public internet|access control|permission/i, { emoji: "🔒", label: "Seguridad" }],
-  [/decoupl|asynchron|queue|buffer|event|loosely/i, { emoji: "🔗", label: "Desacoplar" }],
-  [/global|region|worldwide|geograph|edge/i, { emoji: "🌍", label: "Global / multi-región" }],
-  [/order|exactly once|duplicate|fifo/i, { emoji: "🔢", label: "Orden / sin duplicados" }],
-  [/real[- ]time|stream|near real/i, { emoji: "📡", label: "Tiempo real" }],
-  [/archiv|retain|retention|long-term|years|infrequent/i, { emoji: "🗄️", label: "Retención / archivo" }],
-  [/migrat|on-premises|on premises|hybrid/i, { emoji: "🏢", label: "Híbrido / migración" }],
+  [/cost|cheap|budget|price|spend|economic/i, { icon: "coins", label: "Menor costo" }],
+  [/operational overhead|manage|maintenance|administ|serverless|fully managed/i, { icon: "cog", label: "Menos operación" }],
+  [/highly available|high availability|availability zone|multi-az|fault[- ]toleran|resilien|failover|outage|disaster|rpo|rto/i, { icon: "checked-shield", label: "Alta disponibilidad" }],
+  [/latency|performance|throughput|fast|milliseconds|iops|scal/i, { icon: "focused-lightning", label: "Rendimiento" }],
+  [/secur|encrypt|least privilege|compliance|audit|private|public internet|access control|permission/i, { icon: "plain-padlock", label: "Seguridad" }],
+  [/decoupl|asynchron|queue|buffer|event|loosely/i, { icon: "linked-rings", label: "Desacoplar" }],
+  [/global|region|worldwide|geograph|edge/i, { icon: "world", label: "Global / multi-región" }],
+  [/order|exactly once|duplicate|fifo/i, { icon: "stack", label: "Orden / sin duplicados" }],
+  [/real[- ]time|stream|near real/i, { icon: "radar-sweep", label: "Tiempo real" }],
+  [/archiv|retain|retention|long-term|years|infrequent/i, { icon: "cardboard-box", label: "Retención / archivo" }],
+  [/migrat|on-premises|on premises|hybrid/i, { icon: "castle", label: "Híbrido / migración" }],
 ];
 
 export function chipsFor(cues: string[], stem = ""): Chip[] {

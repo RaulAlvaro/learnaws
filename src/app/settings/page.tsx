@@ -18,7 +18,7 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
-        <h1 className="text-lg font-semibold">Ajustes</h1>
+        <h1 className="display text-2xl">Ajustes</h1>
         <SettingsForm initial={s} />
         <p className="text-xs text-muted">
           La fecha meta limita el repaso espaciado (nada se agenda después) y controla cuándo dejan de entrar conceptos nuevos (14 días
@@ -43,7 +43,7 @@ export default async function SettingsPage() {
               </a>{" "}
               (crea una cuenta si no tienes).
             </li>
-            <li>“Create new secret key” → copia la clave (empieza con sk-).</li>
+            <li>“Create new secret key” y copia la clave (empieza con sk-).</li>
             <li>Carga saldo en Billing (con US$5 alcanza para meses: cada sesión cuesta centavos).</li>
             <li>Pégala aquí arriba.</li>
           </ol>
@@ -56,7 +56,7 @@ export default async function SettingsPage() {
       </Card>
 
       <Card className="space-y-3">
-        <h2 className="font-semibold">Recordatorio diario</h2>
+        <h2 className="display text-xl">Recordatorio diario</h2>
         <PushToggle vapidKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ""} />
         <p className="text-xs text-muted">
           En iPhone: primero “Agregar a pantalla de inicio” desde Safari y abre la app desde el ícono; luego activa las notificaciones.
@@ -64,7 +64,7 @@ export default async function SettingsPage() {
       </Card>
 
       <Card className="space-y-3">
-        <h2 className="font-semibold">¿Ya rendiste el examen?</h2>
+        <h2 className="display text-xl">¿Ya rendiste el examen?</h2>
         <p className="text-sm text-muted">
           Cuéntanos el resultado real: lo comparamos con lo que la app predecía para saber si el método funciona.
         </p>
@@ -72,7 +72,7 @@ export default async function SettingsPage() {
       </Card>
 
       <Card className="space-y-3">
-        <h2 className="font-semibold">Privacidad y cuenta</h2>
+        <h2 className="display text-xl">Privacidad y cuenta</h2>
         <p className="text-sm text-muted">
           El administrador de la app puede ver tu progreso de estudio (no tu API key) para mejorar el método. Puedes borrar tu cuenta y
           todos tus datos cuando quieras.

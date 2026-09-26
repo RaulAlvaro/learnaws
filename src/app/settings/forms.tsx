@@ -147,7 +147,7 @@ export function ApiKeyForm({ last4 }: { last4: string | null }) {
     setBusy(false);
     if (!r.ok) return setMsg(r.data.error ?? "No se pudo guardar");
     setKey("");
-    setMsg("Guardada y validada ✓");
+    setMsg("Guardada y validada");
     router.refresh();
   }
 
@@ -253,7 +253,7 @@ export function ExamResultForm({
           setSaved(true);
         }}
       >
-        {saved ? "Guardado ✓" : "Guardar resultado"}
+        {saved ? "Guardado" : "Guardar resultado"}
       </Button>
     </div>
   );

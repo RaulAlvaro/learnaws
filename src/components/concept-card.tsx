@@ -37,7 +37,7 @@ export function ConceptCard({
               <Badge tone={reason === "new" ? "accent" : "warn"}>{reason === "new" ? "Ficha nueva" : "Repasa la ficha"}</Badge>
             </div>
           )}
-          <h2 className="text-lg font-semibold">{lang === "es" ? titleEs : title}</h2>
+          <h2 className="display text-xl">{lang === "es" ? titleEs : title}</h2>
         </div>
         <div className="flex gap-2">
           <AudioButton key={`${conceptId}-${lang}`} src={`card:${conceptId}`} lang={lang} />
@@ -78,7 +78,7 @@ export function ConceptCard({
         <div className="flex flex-wrap gap-3 text-xs">
           {card.docs.map((d) => (
             <a key={d} href={d} target="_blank" rel="noreferrer" className="text-accent underline underline-offset-2">
-              Docs AWS ↗
+              Documentación AWS
             </a>
           ))}
         </div>

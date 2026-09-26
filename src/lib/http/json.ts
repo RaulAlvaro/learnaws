@@ -25,7 +25,7 @@ export function handle<A extends unknown[]>(fn: (...args: A) => Promise<Response
       if (e instanceof OpenAI.APIError) {
         console.error("openai", e.status, e.message);
         if (e.status === 401) {
-          return fail("OpenAI rechazó tu API key. Revísala en Ajustes → IA.", 412, "bad-api-key");
+          return fail("OpenAI rechazó tu API key. Revísala en Ajustes > IA.", 412, "bad-api-key");
         }
         if (e.status === 429 && /credits|quota|billing/i.test(e.message)) {
           return fail("Tu cuenta de OpenAI no tiene saldo. Puedes seguir con «Ver explicación».", 402, "no-credits");

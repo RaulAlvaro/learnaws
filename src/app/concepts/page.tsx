@@ -18,7 +18,7 @@ export default async function ConceptsPage() {
   return (
     <div className="space-y-4">
       <Card>
-        <h1 className="text-lg font-semibold">Conceptos</h1>
+        <h1 className="display text-2xl">Conceptos</h1>
         <p className="text-sm text-muted">
           “Dominado” = 3 aciertos al aprenderlo + 3 repasos espaciados correctos sin ayuda. Las fichas se abren desde la sesión; aquí
           solo ves el mapa.
@@ -26,7 +26,7 @@ export default async function ConceptsPage() {
       </Card>
       {syllabus.domains.map((d) => (
         <Card key={d.id} className="space-y-2">
-          <h2 className="font-semibold">
+          <h2 className="display text-xl">
             {DOMAIN_ES[d.id]} <span className="text-sm font-normal text-muted">· {Math.round(d.weight * 100)}%</span>
           </h2>
           <ul className="divide-y divide-border">
@@ -41,7 +41,7 @@ export default async function ConceptsPage() {
                     <span>
                       {c.titleEs}
                       {!content.has(c.id) && <span className="ml-1 text-xs text-muted">(sin contenido)</span>}
-                      <span className="ml-1 text-xs text-muted">{"●".repeat(c.examFrequency)}</span>
+                      <span className="ml-1.5 inline-flex gap-0.5 align-middle" aria-label={`Frecuencia en el examen: ${c.examFrequency} de 3`}>{[1, 2, 3].map((k) => <span key={k} className={`h-2 w-2 rounded-full border border-ink ${k <= c.examFrequency ? "bg-yellow" : "bg-card"}`} />)}</span>
                     </span>
                     <span className="flex items-center gap-2">
                       {r?.due && r.phase !== "unseen" && (

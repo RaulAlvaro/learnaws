@@ -9,7 +9,7 @@ import { ReportActions } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-const pct = (v: number | null | undefined) => (v == null ? "—" : `${Math.round(v * 100)}%`);
+const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)}%`);
 
 function windows() {
   const monthStart = new Date();
@@ -62,7 +62,7 @@ export default async function AdminPage() {
   return (
     <div className="space-y-4">
       <Card className="space-y-1">
-        <h1 className="text-lg font-semibold">Administración</h1>
+        <h1 className="display text-2xl">Administración</h1>
         <p className="text-sm text-muted">
           {users.length} usuarios · {users.filter((u) => recentMap.has(u.id)).length} activos esta semana · IA del sistema este mes: $
           {Number(spendMap.get("system")?.usd ?? 0).toFixed(2)}
@@ -70,7 +70,7 @@ export default async function AdminPage() {
       </Card>
 
       <Card className="space-y-2 overflow-x-auto">
-        <h2 className="font-semibold">Usuarios</h2>
+        <h2 className="display text-xl">Usuarios</h2>
         <table className="w-full min-w-[640px] text-sm">
           <thead className="text-left text-xs text-muted">
             <tr>
@@ -98,18 +98,18 @@ export default async function AdminPage() {
                   <td className="tabular-nums">
                     {gradMap.get(u.id)?.n ?? 0}/{totalConcepts}
                   </td>
-                  <td className="tabular-nums">{r?.enoughData ? pct(r.passProbability) : "—"}</td>
+                  <td className="tabular-nums">{r?.enoughData ? pct(r.passProbability) : "-"}</td>
                   <td>
                     {u.examResult ? (
                       <Badge tone={u.examResult.passed ? "good" : "bad"}>
                         {u.examResult.passed ? "Aprobó" : "No aprobó"} {u.examResult.score ?? ""} · pred {pct(u.examResult.predictedPassProbability)}
                       </Badge>
                     ) : (
-                      "—"
+                      "-"
                     )}
                   </td>
                   <td className="tabular-nums">${Number(spendMap.get(u.id)?.usd ?? 0).toFixed(2)}</td>
-                  <td>{u.openaiKeyLast4 ? "✓" : "—"}</td>
+                  <td>{u.openaiKeyLast4 ? "Sí" : "No"}</td>
                 </tr>
               );
             })}
@@ -118,7 +118,7 @@ export default async function AdminPage() {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="font-semibold">Preguntas reportadas ({reports.length})</h2>
+        <h2 className="display text-xl">Preguntas reportadas ({reports.length})</h2>
         {reports.length === 0 && <p className="text-sm text-muted">Nada pendiente.</p>}
         {reports.map((r) => (
           <div key={r.id} className="space-y-1 rounded-lg border border-border p-3 text-sm">
@@ -143,7 +143,7 @@ export default async function AdminPage() {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="font-semibold">Feedback</h2>
+        <h2 className="display text-xl">Feedback</h2>
         {feedback.length === 0 && <p className="text-sm text-muted">Sin comentarios todavía.</p>}
         {feedback.map((f) => (
           <div key={f.id} className="rounded-lg bg-surface-2 p-3 text-sm">
