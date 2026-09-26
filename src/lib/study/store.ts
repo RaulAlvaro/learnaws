@@ -69,7 +69,10 @@ export async function saveSettings(patch: Partial<Settings>) {
 }
 
 export const getSession = () => getSetting<SessionState>("session");
-export const saveSession = (s: SessionState | null) => putSetting("session", s);
+export async function saveSession(s: SessionState | null) {
+  if (s) return putSetting("session", s);
+  await db.delete(schema.settings).where(eq(schema.settings.key, "session"));
+}
 
 // ---------- concept state ----------
 

@@ -101,7 +101,8 @@ export async function currentItem(): Promise<CurrentItem> {
     if (item.t === "card") return { kind: "card", conceptId: item.conceptId, reason: item.reason, session };
     if (!item.questionId) {
       const used = session.queue.filter((i) => i.t === "q" && i.questionId).map((i) => i.questionId!);
-      const qid = await pickQuestion(item.conceptId, used);
+      // Prefer a wording not used yet today; small concepts fall back to the least recent one.
+      const qid = (await pickQuestion(item.conceptId, used)) ?? (await pickQuestion(item.conceptId));
       if (!qid) {
         session.index++;
         continue;

@@ -5,7 +5,7 @@ import type { Concept } from "../content/types";
 import { applyLearnAttempt, applyReviewAttempt, INITIAL_CRITERION, type MasteryState } from "./mastery";
 import { newShare, planSession, type PlannerConcept } from "./planner";
 import { bookingGate, estimateReadiness } from "./readiness";
-import { daysBetween, firstCard, gradeFor, review } from "./scheduler";
+import { firstCard, gradeFor, review } from "./scheduler";
 
 const DAY = 86_400_000;
 const WEIGHTS = { d1: 0.3, d2: 0.26, d3: 0.24, d4: 0.2 };

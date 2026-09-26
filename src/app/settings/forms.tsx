@@ -71,14 +71,13 @@ function urlBase64ToUint8Array(base64: string) {
 }
 
 export function PushToggle({ vapidKey }: { vapidKey: string }) {
-  const [state, setState] = useState<"unknown" | "unsupported" | "off" | "on" | "denied">("unknown");
+  const [state, setState] = useState<"unknown" | "unsupported" | "off" | "on" | "denied">(() =>
+    typeof window !== "undefined" && !("serviceWorker" in navigator && "PushManager" in window) ? "unsupported" : "unknown",
+  );
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      setState("unsupported");
-      return;
-    }
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
     navigator.serviceWorker.register("/sw.js").then(async (reg) => {
       const sub = await reg.pushManager.getSubscription();
       setState(Notification.permission === "denied" ? "denied" : sub ? "on" : "off");

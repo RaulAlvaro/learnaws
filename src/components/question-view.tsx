@@ -69,7 +69,7 @@ export function QuestionView({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCorrect, setRetryCorrect] = useState<boolean | null>(null);
-  const started = useRef(Date.now());
+  const started = useRef(0);
 
   useEffect(() => {
     started.current = Date.now();
@@ -193,7 +193,7 @@ export function QuestionView({
             {multi ? `Respuesta múltiple · elige ${question.answerCount}` : "Opción única"}
           </span>
           <div className="flex gap-2">
-            <AudioButton src={`question:${question.id}`} lang={spanish ? "es" : "en"} />
+            <AudioButton key={`${question.id}-${spanish}`} src={`question:${question.id}`} lang={spanish ? "es" : "en"} />
             <button
               type="button"
               onClick={toggleSpanish}

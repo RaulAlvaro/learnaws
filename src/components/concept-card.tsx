@@ -40,7 +40,7 @@ export function ConceptCard({
           <h2 className="text-lg font-semibold">{lang === "es" ? titleEs : title}</h2>
         </div>
         <div className="flex gap-2">
-          <AudioButton src={`card:${conceptId}`} lang={lang} />
+          <AudioButton key={`${conceptId}-${lang}`} src={`card:${conceptId}`} lang={lang} />
           <button
             onClick={() => setLang((l) => (l === "en" ? "es" : "en"))}
             className="rounded-md border border-border px-2.5 py-1 text-xs text-muted hover:text-fg"

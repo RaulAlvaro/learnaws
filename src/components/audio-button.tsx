@@ -7,12 +7,8 @@ export function AudioButton({ src: contentRef, lang, label }: { src: string; lan
   const audio = useRef<HTMLAudioElement | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "playing" | "error">("idle");
 
+  // Parents remount this (key) when the content or language changes.
   useEffect(() => () => audio.current?.pause(), []);
-  useEffect(() => {
-    audio.current?.pause();
-    audio.current = null;
-    setState("idle");
-  }, [contentRef, lang]);
 
   async function toggle() {
     if (state === "playing") {

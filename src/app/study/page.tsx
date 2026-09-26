@@ -21,23 +21,29 @@ type Item =
   | { kind: "question"; mode: string; question: PublicQuestion; concept: ConceptMeta | undefined; progress: Progress }
   | { kind: "done"; progress: Progress };
 
+async function fetchSession() {
+  const res = await fetch("/api/session", { cache: "no-store" });
+  return { ok: res.ok, data: await res.json() };
+}
+
 export default function StudyPage() {
   const [item, setItem] = useState<Item | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async () => {
-    setError(null);
-    const res = await fetch("/api/session", { cache: "no-store" });
-    const data = await res.json();
-    if (!res.ok) setError(data.error ?? "Error");
-    else setItem(data);
+  const apply = useCallback((r: { ok: boolean; data: Item & { error?: string } }) => {
+    if (!r.ok) setError(r.data.error ?? "Error");
+    else {
+      setError(null);
+      setItem(r.data);
+    }
     window.scrollTo({ top: 0 });
   }, []);
+  const load = useCallback(() => fetchSession().then(apply), [apply]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    fetchSession().then(apply);
+  }, [apply]);
 
   async function next() {
     setBusy(true);

@@ -30,13 +30,12 @@ export default function MockRunner({ params }: { params: Promise<{ id: string }>
   const { id } = use(params);
   const [data, setData] = useState<{ mock: MockRow; questions: PublicQuestion[]; review?: ReviewRow[] } | null>(null);
 
-  const load = useCallback(async () => {
-    const res = await fetch(`/api/mock/${id}`, { cache: "no-store" });
-    setData(await res.json());
+  const load = useCallback(() => {
+    fetch(`/api/mock/${id}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then(setData);
   }, [id]);
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(load, [load]);
 
   if (!data) return <p className="text-muted">Cargando…</p>;
   if (data.mock.finishedAt && data.review) return <MockReview mock={data.mock} questions={data.questions} review={data.review} />;
@@ -45,19 +44,20 @@ export default function MockRunner({ params }: { params: Promise<{ id: string }>
 
 function MockTaking({ mock, questions, onFinished }: { mock: MockRow; questions: PublicQuestion[]; onFinished: () => void }) {
   const storageKey = `mock-${mock.id}`;
-  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  // Survives a reload mid-mock. This component only mounts on the client (after the fetch).
+  const [answers, setAnswers] = useState<Record<string, Answer>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(storageKey) ?? "{}");
+    } catch {
+      return {};
+    }
+  });
   const [i, setI] = useState(0);
   const [spanish, setSpanish] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
   const submitted = useRef(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) setAnswers(JSON.parse(saved));
-    } catch {}
-  }, [storageKey]);
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify(answers));
