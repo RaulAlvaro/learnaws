@@ -1,0 +1,561 @@
+{
+  "unitId": "vpc-security",
+  "overview": {
+    "title": "Seguridad en la VPC",
+    "hook": "Dos firewalls, uno por subnet y otro por recurso, y registros del tráfico.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "clients",
+          "label": "Clientes",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "nacl",
+          "label": "Network ACL",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 28,
+          "y": 50
+        },
+        {
+          "id": "alb",
+          "label": "ALB (SG-alb)",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 48,
+          "y": 50
+        },
+        {
+          "id": "app",
+          "label": "App (SG-app)",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 68,
+          "y": 50
+        },
+        {
+          "id": "db",
+          "label": "DB (SG-db)",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 88,
+          "y": 50
+        },
+        {
+          "id": "flow",
+          "label": "VPC Flow Logs",
+          "kind": "service",
+          "service": "VPC Flow Logs",
+          "x": 68,
+          "y": 15
+        },
+        {
+          "id": "logs",
+          "label": "Registros de flujo",
+          "kind": "data",
+          "x": 90,
+          "y": 15
+        }
+      ],
+      "edges": [
+        {
+          "from": "clients",
+          "to": "nacl",
+          "label": "borde de subnet"
+        },
+        {
+          "from": "nacl",
+          "to": "alb",
+          "label": "HTTPS 443"
+        },
+        {
+          "from": "alb",
+          "to": "app",
+          "label": "SG-alb → SG-app"
+        },
+        {
+          "from": "app",
+          "to": "db",
+          "label": "SG-app → SG-db"
+        },
+        {
+          "from": "flow",
+          "to": "logs",
+          "label": "metadatos IP"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Poner servidores en una subnet privada no basta: también decides qué tráfico se permite. La VPC te da dos firewalls con reglas muy distintas, y el examen adora compararlos.",
+        "show": [
+          "clients",
+          "nacl"
+        ],
+        "focus": "nacl"
+      },
+      {
+        "narration": "El network ACL vigila la frontera de la subnet. Tiene reglas allow y deny numeradas, que se evalúan de menor a mayor hasta la primera coincidencia. Y es stateless: si permites la solicitud, debes permitir aparte la respuesta, incluidos los puertos efímeros.",
+        "show": [
+          "clients",
+          "nacl"
+        ],
+        "focus": "nacl"
+      },
+      {
+        "narration": "El security group se asocia a recursos como un load balancer o una instancia. Solo tiene reglas allow, y es stateful: si una conexión entra permitida, su respuesta sale sola, sin reglas extra.",
+        "show": [
+          "clients",
+          "nacl",
+          "alb",
+          "app"
+        ],
+        "focus": "alb"
+      },
+      {
+        "narration": "El patrón más examinado es referenciar un security group desde otro. El SG de la app acepta tráfico solo del SG del ALB, y el de la base solo del de la app. Así el acceso sigue a la carga aunque cambien las IPs.",
+        "show": [
+          "clients",
+          "nacl",
+          "alb",
+          "app",
+          "db"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "En la arquitectura multi-tier, el ALB va en subnets públicas y la app y la base en privadas, repartidas en dos AZs. Entre capas se viaja por la ruta local de la VPC, y no olvides abrir el puerto del health check.",
+        "show": [
+          "clients",
+          "nacl",
+          "alb",
+          "app",
+          "db"
+        ],
+        "focus": "db"
+      },
+      {
+        "narration": "Cuando algo no conecta, puedes habilitar VPC Flow Logs, que registran metadatos del tráfico IP de tus interfaces, aceptado o rechazado, y los publican en CloudWatch Logs, S3 o Data Firehose. No guardan el contenido de los paquetes ni afectan el rendimiento.",
+        "show": [
+          "clients",
+          "nacl",
+          "alb",
+          "app",
+          "db",
+          "flow",
+          "logs"
+        ],
+        "focus": "flow"
+      },
+      {
+        "narration": "Dos trampas finales. Si preguntan quién cambió un security group, la respuesta es CloudTrail, no Flow Logs. Y si necesitas bloquear explícitamente una IP, el security group no puede hacerlo: usa el network ACL.",
+        "show": [
+          "clients",
+          "nacl",
+          "alb",
+          "app",
+          "db",
+          "flow",
+          "logs"
+        ],
+        "focus": "nacl"
+      }
+    ],
+    "keyPoints": [
+      "Security group: por recurso, solo allow, stateful.",
+      "Network ACL: por subnet, allow y deny, stateless.",
+      "NACL: gana la regla de número más bajo que coincida.",
+      "Referencia security groups entre capas en lugar de IPs.",
+      "Flow Logs muestra tráfico IP; CloudTrail muestra quién hizo cambios."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS CloudTrail",
+        "difference": "CloudTrail registra quién hizo cada llamada a la API; Flow Logs registra el tráfico IP."
+      },
+      {
+        "unitOrService": "AWS WAF",
+        "difference": "WAF filtra solicitudes HTTP en ALB o CloudFront; SG y NACL filtran puertos e IPs."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "vpc-security--l1",
+      "conceptId": "security-groups",
+      "format": "lightning",
+      "prompt": "Database must accept traffic only from app-tier instances whose IPs keep changing → ?",
+      "promptEs": "La base de datos solo debe aceptar tráfico de instancias de la app cuyas IPs cambian → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allow the app security group as source"
+        },
+        {
+          "id": "B",
+          "text": "NACL rule allowing the app subnet"
+        },
+        {
+          "id": "C",
+          "text": "Allow each current instance IP address"
+        },
+        {
+          "id": "D",
+          "text": "Security group deny for all others"
+        }
+      ],
+      "answer": "A",
+      "why": "Referenciar el SG de la app como origen hace que el acceso siga a la carga de trabajo aunque cambien las IPs. Los security groups no tienen reglas deny."
+    },
+    {
+      "id": "vpc-security--l2",
+      "conceptId": "security-groups",
+      "format": "thisorthat",
+      "prompt": "Security group allows inbound 443 → need a rule for the response?",
+      "promptEs": "El security group permite entrada por 443 → ¿necesitas una regla para la respuesta?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, add an outbound rule"
+        },
+        {
+          "id": "B",
+          "text": "No, responses are automatic"
+        }
+      ],
+      "answer": "B",
+      "why": "Los security groups son stateful: la respuesta a una conexión permitida sale sin regla adicional. Eso es justo lo que el NACL stateless no hace."
+    },
+    {
+      "id": "vpc-security--l3",
+      "conceptId": "security-groups",
+      "format": "lightning",
+      "prompt": "Block one malicious source IP with an explicit deny → ?",
+      "promptEs": "Bloquear una IP de origen maliciosa con un deny explícito → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Security group deny rule"
+        },
+        {
+          "id": "B",
+          "text": "Remove the internet gateway route"
+        },
+        {
+          "id": "C",
+          "text": "Network ACL deny rule"
+        },
+        {
+          "id": "D",
+          "text": "IAM policy with explicit deny"
+        }
+      ],
+      "answer": "C",
+      "why": "Un security group solo tiene reglas allow; no puede negar una IP. El network ACL admite deny en el borde de la subnet. IAM controla APIs, no paquetes."
+    },
+    {
+      "id": "vpc-security--l5",
+      "conceptId": "network-acls",
+      "format": "lightning",
+      "prompt": "Custom NACL allows inbound 443; requests arrive but responses are dropped → ?",
+      "promptEs": "Un NACL personalizado permite entrada por 443; llegan solicitudes pero las respuestas se pierden → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a security group outbound rule"
+        },
+        {
+          "id": "B",
+          "text": "Allow outbound ephemeral ports in NACL"
+        },
+        {
+          "id": "C",
+          "text": "Duplicate the inbound 443 rule"
+        },
+        {
+          "id": "D",
+          "text": "Associate a second NACL with the subnet"
+        }
+      ],
+      "answer": "B",
+      "why": "El NACL es stateless: la respuesta necesita su propia regla de salida hacia los puertos efímeros del cliente. Una subnet solo tiene un NACL a la vez."
+    },
+    {
+      "id": "vpc-security--l6",
+      "conceptId": "network-acls",
+      "format": "thisorthat",
+      "prompt": "NACL rule 100 allows all traffic; rule 200 denies one IP → that IP is?",
+      "promptEs": "La regla 100 del NACL permite todo; la regla 200 niega una IP → ¿esa IP queda?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Denied by rule 200"
+        },
+        {
+          "id": "B",
+          "text": "Allowed by rule 100"
+        }
+      ],
+      "answer": "B",
+      "why": "Las reglas se evalúan de menor a mayor y se detienen en la primera coincidencia. La 100 permite primero, así que el deny debe tener un número menor."
+    },
+    {
+      "id": "vpc-security--l8",
+      "conceptId": "network-acls",
+      "format": "lightning",
+      "prompt": "How many network ACLs can one subnet have associated at a time?",
+      "promptEs": "¿Cuántos network ACLs puede tener asociados una subnet a la vez?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Up to five at once"
+        },
+        {
+          "id": "B",
+          "text": "One per AZ"
+        },
+        {
+          "id": "C",
+          "text": "Unlimited"
+        },
+        {
+          "id": "D",
+          "text": "Exactly one"
+        }
+      ],
+      "answer": "D",
+      "why": "Cada subnet tiene una sola asociación de NACL a la vez, aunque un mismo NACL puede asociarse a varias subnets."
+    },
+    {
+      "id": "vpc-security--l9",
+      "conceptId": "vpc-flow-logs",
+      "format": "lightning",
+      "prompt": "See whether traffic to an instance's network interface is accepted or rejected → ?",
+      "promptEs": "Ver si el tráfico hacia la interfaz de una instancia se acepta o se rechaza → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "id": "B",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "id": "C",
+          "text": "AWS Config"
+        },
+        {
+          "id": "D",
+          "text": "AWS X-Ray"
+        }
+      ],
+      "answer": "B",
+      "why": "Flow Logs registra metadatos del tráfico IP por interfaz, incluido si fue aceptado o rechazado. CloudTrail registra APIs y Config registra configuraciones."
+    },
+    {
+      "id": "vpc-security--l10",
+      "conceptId": "vpc-flow-logs",
+      "format": "thisorthat",
+      "prompt": "Find out who modified a security group rule yesterday → ?",
+      "promptEs": "Averiguar quién modificó ayer una regla de un security group → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "id": "B",
+          "text": "VPC Flow Logs"
+        }
+      ],
+      "answer": "A",
+      "why": "Cambiar una regla es una llamada a la API, y CloudTrail registra quién la hizo. Flow Logs solo ve tráfico IP, no identidades ni cambios."
+    },
+    {
+      "id": "vpc-security--l11",
+      "conceptId": "vpc-flow-logs",
+      "format": "lightning",
+      "prompt": "Where can VPC Flow Logs records be published?",
+      "promptEs": "¿Dónde se pueden publicar los registros de VPC Flow Logs?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only as CloudWatch metrics"
+        },
+        {
+          "id": "B",
+          "text": "AWS Config configuration history"
+        },
+        {
+          "id": "C",
+          "text": "CloudWatch Logs, S3, Data Firehose"
+        },
+        {
+          "id": "D",
+          "text": "An EBS volume attached to the instance"
+        }
+      ],
+      "answer": "C",
+      "why": "Flow Logs publica en CloudWatch Logs, Amazon S3 o Amazon Data Firehose. Las métricas de CloudWatch por sí solas no contienen esos registros."
+    },
+    {
+      "id": "vpc-security--l12",
+      "conceptId": "multi-tier-vpc-architecture",
+      "format": "lightning",
+      "prompt": "Public entry point, private app servers, survive an AZ failure → ?",
+      "promptEs": "Punto de entrada público, servidores privados y sobrevivir a la falla de una AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Public ALB, private servers, two AZs"
+        },
+        {
+          "id": "B",
+          "text": "Public servers with public IPs, two AZs"
+        },
+        {
+          "id": "C",
+          "text": "Public ALB, private servers, one AZ"
+        },
+        {
+          "id": "D",
+          "text": "NAT gateway as entry point, two AZs"
+        }
+      ],
+      "answer": "A",
+      "why": "El ALB en subnets públicas recibe a los clientes y los servidores quedan privados; dos AZs cubren la falla de una. El NAT solo es para salida."
+    },
+    {
+      "id": "vpc-security--l14",
+      "conceptId": "multi-tier-vpc-architecture",
+      "format": "thisorthat",
+      "prompt": "Traffic between app and database tiers in the same VPC uses → ?",
+      "promptEs": "El tráfico entre la app y la base de datos en la misma VPC usa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "The local VPC route"
+        }
+      ],
+      "answer": "B",
+      "why": "Dentro de la VPC el tráfico va por la ruta local. Enviarlo por NAT o internet gateway sobra y agrega costo y exposición."
+    },
+    {
+      "id": "vpc-security--l15",
+      "conceptId": "multi-tier-vpc-architecture",
+      "format": "lightning",
+      "prompt": "Private app servers need Amazon S3 without any internet path → ?",
+      "promptEs": "Servidores privados necesitan Amazon S3 sin ningún camino por internet → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Internet gateway route"
+        },
+        {
+          "id": "B",
+          "text": "Move servers to public subnets"
+        },
+        {
+          "id": "C",
+          "text": "VPC peering to S3"
+        },
+        {
+          "id": "D",
+          "text": "Gateway VPC endpoint for S3"
+        }
+      ],
+      "answer": "D",
+      "why": "Un gateway endpoint lleva el tráfico a S3 desde subnets privadas sin internet. El peering conecta VPCs, no servicios como S3."
+    },
+    {
+      "id": "vpc-security--l16",
+      "conceptId": "security-groups",
+      "format": "lightning",
+      "prompt": "App tier must connect to the database → which rule is required?",
+      "promptEs": "La capa de app debe conectarse a la base de datos → ¿qué regla se necesita?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DB security group inbound from app SG"
+        },
+        {
+          "id": "B",
+          "text": "App security group inbound from DB SG"
+        },
+        {
+          "id": "C",
+          "text": "Default VPC security group rule"
+        },
+        {
+          "id": "D",
+          "text": "Network ACL deny for other IPs"
+        }
+      ],
+      "answer": "A",
+      "why": "El destino debe permitir la entrada: el SG de la base acepta tráfico cuyo origen es el SG de la app. Una regla de salida en la app no reemplaza esa entrada."
+    },
+    {
+      "id": "vpc-security--l17",
+      "conceptId": "network-acls",
+      "format": "lightning",
+      "prompt": "Filter traffic crossing a subnet boundary, with explicit deny rules → ?",
+      "promptEs": "Filtrar el tráfico que cruza el borde de una subnet, con reglas deny explícitas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Security group"
+        },
+        {
+          "id": "B",
+          "text": "Route table"
+        },
+        {
+          "id": "C",
+          "text": "Network ACL"
+        },
+        {
+          "id": "D",
+          "text": "AWS WAF web ACL"
+        }
+      ],
+      "answer": "C",
+      "why": "El NACL filtra el tráfico que entra y sale de la subnet y admite allow y deny. El security group solo tiene allow y se asocia a recursos."
+    },
+    {
+      "id": "vpc-security--l18",
+      "conceptId": "multi-tier-vpc-architecture",
+      "format": "lightning",
+      "prompt": "App listens on 8080; ALB health checks use port 8081 → app SG must allow?",
+      "promptEs": "La app escucha en 8080; el health check del ALB usa 8081 → ¿qué debe permitir el SG de la app?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only 8080 from the ALB SG"
+        },
+        {
+          "id": "B",
+          "text": "8081 from 0.0.0.0/0"
+        },
+        {
+          "id": "C",
+          "text": "8080 and 8081 from the ALB SG"
+        },
+        {
+          "id": "D",
+          "text": "All ports from the internet"
+        }
+      ],
+      "answer": "C",
+      "why": "El SG de los servidores debe permitir desde el SG del ALB tanto el puerto del target como el del health check. Abrirlo a internet es innecesario."
+    }
+  ],
+  "audited": true
+}

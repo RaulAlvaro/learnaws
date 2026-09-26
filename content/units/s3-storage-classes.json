@@ -1,0 +1,614 @@
+{
+  "unitId": "s3-storage-classes",
+  "overview": {
+    "title": "S3 storage classes y Glacier",
+    "hook": "Cuanto menos lees un objeto, más barato guardarlo y más caro recuperarlo.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "obj",
+          "label": "Objeto nuevo",
+          "kind": "data",
+          "x": 6,
+          "y": 50
+        },
+        {
+          "id": "std",
+          "label": "S3 Standard",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 22,
+          "y": 20
+        },
+        {
+          "id": "ia",
+          "label": "Standard-IA",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 40,
+          "y": 50
+        },
+        {
+          "id": "gir",
+          "label": "Glacier Instant",
+          "kind": "service",
+          "service": "Amazon S3 Glacier",
+          "x": 58,
+          "y": 20
+        },
+        {
+          "id": "gfr",
+          "label": "Glacier Flexible",
+          "kind": "service",
+          "service": "Amazon S3 Glacier",
+          "x": 76,
+          "y": 50
+        },
+        {
+          "id": "gda",
+          "label": "Deep Archive",
+          "kind": "service",
+          "service": "Amazon S3 Glacier",
+          "x": 92,
+          "y": 20
+        },
+        {
+          "id": "it",
+          "label": "Intelligent-Tier.",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 40,
+          "y": 86
+        }
+      ],
+      "edges": [
+        {
+          "from": "obj",
+          "to": "std",
+          "label": "PUT"
+        },
+        {
+          "from": "std",
+          "to": "ia",
+          "label": "Lifecycle 30 días"
+        },
+        {
+          "from": "ia",
+          "to": "gir",
+          "label": "Lifecycle"
+        },
+        {
+          "from": "gir",
+          "to": "gfr",
+          "label": "Lifecycle"
+        },
+        {
+          "from": "gfr",
+          "to": "gda",
+          "label": "Lifecycle"
+        },
+        {
+          "from": "obj",
+          "to": "it",
+          "label": "acceso incierto"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Una storage class es el trato de precio y velocidad que eliges para cada objeto. La regla es simple: cuanto menos lo lees, más barato guardarlo, pero más caro o lento recuperarlo. S3 Standard es el punto de partida para datos de uso frecuente.",
+        "show": [
+          "obj",
+          "std"
+        ],
+        "focus": "std"
+      },
+      {
+        "narration": "Standard-IA y One Zone-IA son para datos que lees más o menos una vez al mes, pero necesitas en milisegundos. Cobran por recuperar y tienen 30 días mínimos. One Zone-IA es más barata, pero vive en una sola Availability Zone.",
+        "show": [
+          "obj",
+          "std",
+          "ia"
+        ],
+        "focus": "ia"
+      },
+      {
+        "narration": "Para archivos que casi nunca tocas están las clases Glacier. Instant Retrieval responde en milisegundos, ideal para lecturas trimestrales. Flexible Retrieval y Deep Archive exigen primero un restore: minutos u horas en Flexible, hasta 48 horas en Deep Archive.",
+        "show": [
+          "obj",
+          "std",
+          "ia",
+          "gir",
+          "gfr",
+          "gda"
+        ],
+        "focus": "gfr"
+      },
+      {
+        "narration": "En Flexible Retrieval eliges la velocidad del restore: Expedited en uno a cinco minutos, Standard en tres a cinco horas, y Bulk en cinco a doce horas, sin costo de recuperación. Deep Archive no tiene Expedited: Standard en 12 horas, Bulk en 48.",
+        "show": [
+          "obj",
+          "std",
+          "ia",
+          "gir",
+          "gfr",
+          "gda"
+        ],
+        "focus": "gda"
+      },
+      {
+        "narration": "No mueves objetos a mano. Una Lifecycle rule los transiciona por edad, por ejemplo a Standard-IA a los 30 días y luego a Glacier, y los expira cuando vence la retención. Aplica tanto a objetos existentes como a los nuevos.",
+        "show": [
+          "obj",
+          "std",
+          "ia",
+          "gir",
+          "gfr",
+          "gda"
+        ],
+        "focus": "ia"
+      },
+      {
+        "narration": "¿Y si no sabes cómo se va a acceder? S3 Intelligent-Tiering mueve cada objeto entre tiers según su uso real, sin retrieval fees, a cambio de una pequeña tarifa de monitoreo. Los objetos menores de 128 kilobytes no se mueven.",
+        "show": [
+          "obj",
+          "std",
+          "ia",
+          "gir",
+          "gfr",
+          "gda",
+          "it"
+        ],
+        "focus": "it"
+      },
+      {
+        "narration": "Trampas típicas: One Zone-IA para la única copia de datos irremplazables, Flexible Retrieval cuando piden acceso inmediato, o activar los archive tiers opcionales de Intelligent-Tiering cuando cada lectura debe ser instantánea.",
+        "show": [
+          "obj",
+          "std",
+          "ia",
+          "gir",
+          "gfr",
+          "gda",
+          "it"
+        ],
+        "focus": "gfr"
+      }
+    ],
+    "keyPoints": [
+      "IA: acceso mensual en milisegundos, 30 días mínimo",
+      "One Zone-IA solo para datos que puedes re-crear",
+      "Glacier Instant: milisegundos; Flexible y Deep Archive: restore previo",
+      "Deep Archive: Standard 12 h, Bulk 48 h, sin Expedited",
+      "Acceso impredecible → Intelligent-Tiering; edad predecible → Lifecycle"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "S3 One Zone-IA",
+        "difference": "Misma latencia que Standard-IA y más barata, pero no sobrevive a la pérdida de su AZ."
+      },
+      {
+        "unitOrService": "S3 Glacier Instant Retrieval",
+        "difference": "Milisegundos como Standard-IA, pero pensada para acceso trimestral y con 90 días mínimos."
+      },
+      {
+        "unitOrService": "S3 Lifecycle rules",
+        "difference": "Mueven por edad fija; Intelligent-Tiering reacciona al uso real de cada objeto."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "s3-storage-classes--l1",
+      "conceptId": "s3-storage-classes",
+      "format": "lightning",
+      "prompt": "Only copy, read monthly, millisecond access, must survive AZ loss → ?",
+      "promptEs": "Única copia, lectura mensual, acceso en milisegundos, debe sobrevivir a perder una AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 One Zone-IA"
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard-IA"
+        },
+        {
+          "id": "C",
+          "text": "S3 Glacier Flexible Retrieval"
+        },
+        {
+          "id": "D",
+          "text": "S3 Glacier Deep Archive"
+        }
+      ],
+      "answer": "B",
+      "why": "Standard-IA da milisegundos y guarda en varias AZ. One Zone-IA falla el requisito de AZ y Glacier Flexible exige restore."
+    },
+    {
+      "id": "s3-storage-classes--l3",
+      "conceptId": "s3-storage-classes",
+      "format": "thisorthat",
+      "prompt": "Frequently accessed objects, no minimum storage duration → ?",
+      "promptEs": "Objetos de acceso frecuente, sin duración mínima de almacenamiento → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Standard-IA"
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard"
+        }
+      ],
+      "answer": "B",
+      "why": "S3 Standard es la clase por defecto para acceso frecuente y no cobra mínimo de días. Standard-IA cobra recuperación y 30 días mínimos."
+    },
+    {
+      "id": "s3-storage-classes--l4",
+      "conceptId": "s3-storage-classes",
+      "format": "lightning",
+      "prompt": "Minimum storage duration charged by S3 Glacier Deep Archive → ?",
+      "promptEs": "Duración mínima de almacenamiento que cobra S3 Glacier Deep Archive → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "180 days"
+        },
+        {
+          "id": "B",
+          "text": "30 days"
+        },
+        {
+          "id": "C",
+          "text": "90 days"
+        },
+        {
+          "id": "D",
+          "text": "No minimum"
+        }
+      ],
+      "answer": "A",
+      "why": "Deep Archive cobra 180 días mínimos. Glacier Instant y Flexible cobran 90 días, y las clases IA cobran 30."
+    },
+    {
+      "id": "s3-storage-classes--l6",
+      "conceptId": "s3-infrequent-access-classes",
+      "format": "thisorthat",
+      "prompt": "Irreplaceable records read monthly; must survive an AZ outage → ?",
+      "promptEs": "Registros irremplazables leídos mensualmente; deben sobrevivir a la caída de una AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Standard-IA"
+        },
+        {
+          "id": "B",
+          "text": "S3 One Zone-IA"
+        }
+      ],
+      "answer": "A",
+      "why": "Si necesitas conservar datos ante la pérdida física de una Availability Zone, eliges S3 Standard-IA porque almacena datos en varias zonas; S3 One Zone-IA no ofrece esa resiliencia. Una interrupción temporal no implica pérdida de datos."
+    },
+    {
+      "id": "s3-storage-classes--l7",
+      "conceptId": "s3-infrequent-access-classes",
+      "format": "lightning",
+      "prompt": "Minimum storage duration for Standard-IA and One Zone-IA → ?",
+      "promptEs": "Duración mínima de almacenamiento de Standard-IA y One Zone-IA → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "90 days"
+        },
+        {
+          "id": "B",
+          "text": "7 days"
+        },
+        {
+          "id": "C",
+          "text": "30 days"
+        },
+        {
+          "id": "D",
+          "text": "180 days"
+        }
+      ],
+      "answer": "C",
+      "why": "Ambas clases IA cobran 30 días mínimos y retrieval fees. Borrar o sobrescribir antes cobra lo que falta de esos 30 días."
+    },
+    {
+      "id": "s3-storage-classes--l8",
+      "conceptId": "s3-infrequent-access-classes",
+      "format": "lightning",
+      "prompt": "Objects read often and overwritten every 10 days → ?",
+      "promptEs": "Objetos leídos seguido y sobrescritos cada 10 días → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Standard"
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard-IA"
+        },
+        {
+          "id": "C",
+          "text": "S3 One Zone-IA"
+        },
+        {
+          "id": "D",
+          "text": "S3 Glacier Instant Retrieval"
+        }
+      ],
+      "answer": "A",
+      "why": "Lectura frecuente y vida corta apuntan a S3 Standard. Las clases IA cobrarían retrieval fees y el mínimo de 30 días en cada sobrescritura."
+    },
+    {
+      "id": "s3-storage-classes--l9",
+      "conceptId": "s3-intelligent-tiering",
+      "format": "lightning",
+      "prompt": "Unpredictable access pattern, automatic cost optimization, no retrieval fees → ?",
+      "promptEs": "Patrón de acceso impredecible, optimización automática, sin retrieval fees → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Standard-IA"
+        },
+        {
+          "id": "B",
+          "text": "Lifecycle rule to Glacier"
+        },
+        {
+          "id": "C",
+          "text": "S3 One Zone-IA"
+        },
+        {
+          "id": "D",
+          "text": "S3 Intelligent-Tiering"
+        }
+      ],
+      "answer": "D",
+      "why": "Intelligent-Tiering mueve cada objeto según su uso real y no cobra recuperación. Lifecycle mueve por edad, sin mirar el acceso."
+    },
+    {
+      "id": "s3-storage-classes--l10",
+      "conceptId": "s3-intelligent-tiering",
+      "format": "thisorthat",
+      "prompt": "Intelligent-Tiering, but every read must stay instant → ?",
+      "promptEs": "Intelligent-Tiering, pero cada lectura debe seguir siendo instantánea → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep only automatic access tiers"
+        },
+        {
+          "id": "B",
+          "text": "Enable optional archive access tiers"
+        }
+      ],
+      "answer": "A",
+      "why": "Los tres tiers automáticos mantienen baja latencia. Los tiers opcionales Archive y Deep Archive Access exigen restore antes de leer."
+    },
+    {
+      "id": "s3-storage-classes--l11",
+      "conceptId": "s3-intelligent-tiering",
+      "format": "lightning",
+      "prompt": "Intelligent-Tiering never auto-tiers objects smaller than → ?",
+      "promptEs": "Intelligent-Tiering nunca mueve automáticamente objetos menores de → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "1 MB"
+        },
+        {
+          "id": "B",
+          "text": "128 KB"
+        },
+        {
+          "id": "C",
+          "text": "40 KB"
+        },
+        {
+          "id": "D",
+          "text": "5 GB"
+        }
+      ],
+      "answer": "B",
+      "why": "Los objetos menores de 128 KB no se monitorean y se quedan siempre en Frequent Access."
+    },
+    {
+      "id": "s3-storage-classes--l12",
+      "conceptId": "s3-intelligent-tiering",
+      "format": "thisorthat",
+      "prompt": "Access drops predictably after 60 days; avoid per-object monitoring fees → ?",
+      "promptEs": "El acceso cae de forma predecible a los 60 días; evitar tarifas de monitoreo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Intelligent-Tiering"
+        },
+        {
+          "id": "B",
+          "text": "S3 Lifecycle transition rule"
+        }
+      ],
+      "answer": "B",
+      "why": "Si sabes cuándo se enfrían los datos, una Lifecycle rule basta y no cobra monitoreo. Intelligent-Tiering conviene cuando el acceso es impredecible."
+    },
+    {
+      "id": "s3-storage-classes--l13",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "format": "lightning",
+      "prompt": "Urgent restore from Glacier Flexible Retrieval within minutes → ?",
+      "promptEs": "Restore urgente desde Glacier Flexible Retrieval en minutos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Standard retrieval"
+        },
+        {
+          "id": "B",
+          "text": "Bulk retrieval"
+        },
+        {
+          "id": "C",
+          "text": "Deep Archive Standard retrieval"
+        },
+        {
+          "id": "D",
+          "text": "Expedited retrieval"
+        }
+      ],
+      "answer": "D",
+      "why": "Si necesitas restaurar en minutos, eliges Expedited: en S3 Glacier Flexible Retrieval suele tardar 1–5 minutos para objetos menores de 250 MB. Sin provisioned capacity, la solicitud podría rechazarse; no garantiza el plazo."
+    },
+    {
+      "id": "s3-storage-classes--l14",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "format": "lightning",
+      "prompt": "Cheapest restore from Glacier Flexible Retrieval; 12 hours is acceptable → ?",
+      "promptEs": "Restore más barato desde Glacier Flexible Retrieval; 12 horas es aceptable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Standard retrieval"
+        },
+        {
+          "id": "B",
+          "text": "Bulk retrieval"
+        },
+        {
+          "id": "C",
+          "text": "Expedited retrieval"
+        },
+        {
+          "id": "D",
+          "text": "Provisioned capacity"
+        }
+      ],
+      "answer": "B",
+      "why": "Bulk es la opción más barata y en Flexible Retrieval no cobra recuperación; tarda de 5 a 12 horas, dentro del plazo."
+    },
+    {
+      "id": "s3-storage-classes--l15",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "format": "thisorthat",
+      "prompt": "Deep Archive restore must finish within 12 hours → ?",
+      "promptEs": "Un restore de Deep Archive debe terminar en 12 horas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Bulk retrieval"
+        },
+        {
+          "id": "B",
+          "text": "Standard retrieval"
+        }
+      ],
+      "answer": "B",
+      "why": "Si necesitas un plazo garantizado de 12 horas, ninguna opción lo asegura. Standard es la clave por su tiempo típico de 12 horas en S3 Glacier Deep Archive, frente a 48 horas de Bulk."
+    },
+    {
+      "id": "s3-storage-classes--l16",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "format": "lightning",
+      "prompt": "Typical Bulk retrieval time from S3 Glacier Deep Archive → ?",
+      "promptEs": "Tiempo típico de Bulk retrieval desde S3 Glacier Deep Archive → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "1–5 minutes"
+        },
+        {
+          "id": "B",
+          "text": "3–5 hours"
+        },
+        {
+          "id": "C",
+          "text": "Within 48 hours"
+        },
+        {
+          "id": "D",
+          "text": "Within 12 hours"
+        }
+      ],
+      "answer": "C",
+      "why": "Bulk en Deep Archive suele terminar en 48 horas; Standard, en 12. Los minutos solo existen con Expedited en Flexible Retrieval."
+    },
+    {
+      "id": "s3-storage-classes--l18",
+      "conceptId": "s3-lifecycle-policies",
+      "format": "lightning",
+      "prompt": "Predictable aging: move objects to Glacier Flexible Retrieval after 90 days → ?",
+      "promptEs": "Envejecimiento predecible: mover objetos a Glacier Flexible Retrieval a los 90 días → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Lifecycle transition rule"
+        },
+        {
+          "id": "B",
+          "text": "S3 Intelligent-Tiering"
+        },
+        {
+          "id": "C",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "id": "D",
+          "text": "S3 Batch Operations copy job"
+        }
+      ],
+      "answer": "A",
+      "why": "Cuando el cambio depende de la edad del objeto, una transition rule de Lifecycle lo automatiza. Intelligent-Tiering es para acceso impredecible."
+    },
+    {
+      "id": "s3-storage-classes--l19",
+      "conceptId": "s3-lifecycle-policies",
+      "format": "thisorthat",
+      "prompt": "Bucket policy denies DeleteObject. Can a Lifecycle rule still expire objects?",
+      "promptEs": "La bucket policy niega DeleteObject. ¿Una Lifecycle rule aún puede expirar objetos?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, Lifecycle still deletes"
+        },
+        {
+          "id": "B",
+          "text": "No, the policy blocks it"
+        }
+      ],
+      "answer": "A",
+      "why": "En un general purpose bucket, una bucket policy no impide que Lifecycle borre objetos. Para impedir borrados usa Object Lock."
+    },
+    {
+      "id": "s3-storage-classes--l20",
+      "conceptId": "s3-lifecycle-policies",
+      "format": "lightning",
+      "prompt": "Expire only temporary files under scratch/, keep everything else → ?",
+      "promptEs": "Expirar solo los archivos temporales bajo scratch/ y conservar el resto → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Bucket-wide Lifecycle expiration rule"
+        },
+        {
+          "id": "B",
+          "text": "S3 Object Lock retention"
+        },
+        {
+          "id": "C",
+          "text": "Lifecycle rule filtered by prefix"
+        },
+        {
+          "id": "D",
+          "text": "S3 Access Point policy"
+        }
+      ],
+      "answer": "C",
+      "why": "Las Lifecycle rules admiten filtros por prefijo o tags. Una regla para todo el bucket borraría también los registros que debes conservar."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,313 @@
+{
+  "unitId": "efs",
+  "overview": {
+    "title": "Amazon EFS",
+    "hook": "Una carpeta compartida NFS que muchas instancias Linux montan a la vez.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "ec2a",
+          "label": "EC2 en AZ-a",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 12,
+          "y": 22
+        },
+        {
+          "id": "ec2b",
+          "label": "EC2 en AZ-b",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 12,
+          "y": 78
+        },
+        {
+          "id": "lam",
+          "label": "Lambda / ECS",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 38,
+          "y": 90
+        },
+        {
+          "id": "efs",
+          "label": "Amazon EFS",
+          "kind": "service",
+          "service": "Amazon EFS",
+          "x": 50,
+          "y": 50
+        },
+        {
+          "id": "ia",
+          "label": "IA / Archive",
+          "kind": "data",
+          "x": 86,
+          "y": 22
+        },
+        {
+          "id": "rds",
+          "label": "RDS storage",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 86,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "ec2a",
+          "to": "efs",
+          "label": "NFS"
+        },
+        {
+          "from": "ec2b",
+          "to": "efs",
+          "label": "NFS"
+        },
+        {
+          "from": "lam",
+          "to": "efs",
+          "label": "NFS"
+        },
+        {
+          "from": "efs",
+          "to": "ia",
+          "label": "lifecycle"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon EFS es una carpeta compartida en la nube: un file system NFS que muchas instancias Linux montan al mismo tiempo. No reservas capacidad; crece y se encoge sola mientras escribes y borras archivos.",
+        "show": [
+          "ec2a",
+          "efs"
+        ],
+        "focus": "efs"
+      },
+      {
+        "narration": "Lo montan instancias EC2, contenedores de ECS y EKS, Fargate y también Lambda. Por eso es la respuesta cuando varios servidores deben leer y escribir los mismos archivos. Ojo: no sirve para instancias Windows; ahí va FSx for Windows.",
+        "show": [
+          "ec2a",
+          "efs",
+          "ec2b",
+          "lam"
+        ],
+        "focus": "efs"
+      },
+      {
+        "narration": "Un file system Regional guarda los datos en varias Availability Zones y sigue disponible si cae una. One Zone es más barato, pero vive en una sola zona. Si piden sobrevivir a la caída de una AZ, elige Regional.",
+        "show": [
+          "ec2a",
+          "efs",
+          "ec2b",
+          "lam"
+        ],
+        "focus": "efs"
+      },
+      {
+        "narration": "Hay dos perillas de rendimiento. Performance mode: General Purpose es el valor por defecto y tiene la menor latencia. Throughput mode: Elastic escala solo con la actividad, ideal para demanda impredecible; Provisioned fija un valor; Bursting depende de cuánto guardas.",
+        "show": [
+          "ec2a",
+          "efs",
+          "ec2b",
+          "lam"
+        ],
+        "focus": "efs"
+      },
+      {
+        "narration": "Como en S3, hay clases de almacenamiento: Standard para archivos de uso frecuente, e Infrequent Access y Archive, más baratas para archivos fríos, con decenas de milisegundos en el primer byte. Lifecycle management los mueve por ti.",
+        "show": [
+          "ec2a",
+          "efs",
+          "ec2b",
+          "lam",
+          "ia"
+        ],
+        "focus": "ia"
+      },
+      {
+        "narration": "Cuando el examen pide almacenamiento que crezca sin intervención: EFS y S3 ya son elásticos. Para una base de datos RDS activas storage autoscaling con un límite máximo. Un volumen EBS se agranda con Elastic Volumes, pero no crece solo.",
+        "show": [
+          "ec2a",
+          "efs",
+          "ec2b",
+          "lam",
+          "ia",
+          "rds"
+        ],
+        "focus": "rds"
+      }
+    ],
+    "keyPoints": [
+      "NFS compartido por instancias Linux, contenedores y Lambda",
+      "Regional: varias AZ; One Zone: una sola AZ",
+      "Demanda impredecible → Elastic throughput",
+      "General Purpose: menor latencia por operación",
+      "RDS storage autoscaling necesita un máximo configurado"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon EBS",
+        "difference": "EBS es un volumen de bloques para una instancia; EFS es un file system compartido por muchas."
+      },
+      {
+        "unitOrService": "Amazon FSx for Windows File Server",
+        "difference": "Para SMB, Active Directory y clientes Windows; EFS es NFS para Linux."
+      },
+      {
+        "unitOrService": "Amazon S3",
+        "difference": "S3 guarda objetos accesibles por API; EFS se monta como carpeta con permisos POSIX."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "efs--l1",
+      "conceptId": "efs-fundamentals",
+      "format": "lightning",
+      "prompt": "Many Linux EC2 instances must share the same files over NFS → ?",
+      "promptEs": "Muchas instancias EC2 Linux deben compartir los mismos archivos por NFS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EBS gp3"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EFS"
+        },
+        {
+          "id": "C",
+          "text": "Amazon S3"
+        },
+        {
+          "id": "D",
+          "text": "FSx for Windows File Server"
+        }
+      ],
+      "answer": "B",
+      "why": "EFS es un file system NFS administrado que montan muchas instancias a la vez. S3 guarda objetos, no es NFS, y FSx for Windows usa SMB."
+    },
+    {
+      "id": "efs--l2",
+      "conceptId": "efs-fundamentals",
+      "format": "lightning",
+      "prompt": "Spiky, unpredictable EFS throughput; no capacity planning wanted → ?",
+      "promptEs": "Throughput de EFS impredecible y con picos; sin planificar capacidad → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Bursting throughput"
+        },
+        {
+          "id": "B",
+          "text": "Provisioned throughput"
+        },
+        {
+          "id": "C",
+          "text": "Max I/O performance mode"
+        },
+        {
+          "id": "D",
+          "text": "Elastic throughput"
+        }
+      ],
+      "answer": "D",
+      "why": "Elastic escala con la actividad sin fijar un valor. Bursting depende de lo almacenado y de créditos; Provisioned exige elegir un nivel."
+    },
+    {
+      "id": "efs--l3",
+      "conceptId": "efs-fundamentals",
+      "format": "thisorthat",
+      "prompt": "Shared files must stay available through an AZ outage → ?",
+      "promptEs": "Archivos compartidos deben seguir disponibles si cae una AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EFS One Zone"
+        },
+        {
+          "id": "B",
+          "text": "EFS Regional"
+        }
+      ],
+      "answer": "B",
+      "why": "EFS Regional guarda los datos en varias AZ. One Zone es más barato, pero no sobrevive a la pérdida de su zona."
+    },
+    {
+      "id": "efs--l4",
+      "conceptId": "efs-fundamentals",
+      "format": "lightning",
+      "prompt": "Rarely opened EFS files; cut cost, tens of milliseconds acceptable → ?",
+      "promptEs": "Archivos de EFS que casi no se abren; bajar costo, se aceptan decenas de milisegundos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EFS Infrequent Access class"
+        },
+        {
+          "id": "B",
+          "text": "EFS Standard class"
+        },
+        {
+          "id": "C",
+          "text": "S3 Glacier Deep Archive class"
+        },
+        {
+          "id": "D",
+          "text": "EBS sc1 volume"
+        }
+      ],
+      "answer": "A",
+      "why": "EFS Infrequent Access baja el costo y mantiene el acceso por NFS. Glacier o EBS cambiarían el modelo de acceso a archivos."
+    },
+    {
+      "id": "efs--l5",
+      "conceptId": "storage-auto-scaling",
+      "format": "lightning",
+      "prompt": "RDS database storage grows unpredictably; avoid manual resizing → ?",
+      "promptEs": "El almacenamiento de una base RDS crece de forma impredecible; evitar redimensionar a mano → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EBS Elastic Volumes"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EFS"
+        },
+        {
+          "id": "C",
+          "text": "RDS storage autoscaling"
+        },
+        {
+          "id": "D",
+          "text": "RDS cross-Region read replicas"
+        }
+      ],
+      "answer": "C",
+      "why": "RDS storage autoscaling agranda el almacenamiento cuando queda poco espacio libre, hasta el máximo que configuras. Nunca lo reduce."
+    },
+    {
+      "id": "efs--l6",
+      "conceptId": "storage-auto-scaling",
+      "format": "thisorthat",
+      "prompt": "Enlarge an attached EBS volume without restarting the instance → ?",
+      "promptEs": "Agrandar un volumen EBS conectado sin reiniciar la instancia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EBS Elastic Volumes"
+        },
+        {
+          "id": "B",
+          "text": "RDS storage autoscaling"
+        }
+      ],
+      "answer": "A",
+      "why": "Si tu instancia admite EBS Elastic Volumes, puedes ampliar un volumen conectado sin reiniciarla y después extender el file system; de lo contrario, quizá debas desconectarlo. RDS storage autoscaling solo aplica a RDS."
+    }
+  ],
+  "audited": true
+}

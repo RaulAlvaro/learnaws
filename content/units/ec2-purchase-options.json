@@ -1,0 +1,625 @@
+{
+  "unitId": "ec2-purchase-options",
+  "overview": {
+    "title": "Opciones de compra de EC2",
+    "hook": "La misma instancia cuesta distinto según tu compromiso, tolerancia a cortes y hardware.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "wl",
+          "label": "Tu carga",
+          "kind": "actor",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "od",
+          "label": "On-Demand",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 55,
+          "y": 10
+        },
+        {
+          "id": "sav",
+          "label": "Savings Plans / RI",
+          "kind": "service",
+          "service": "Savings Plans",
+          "x": 55,
+          "y": 30
+        },
+        {
+          "id": "spot",
+          "label": "Spot",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 55,
+          "y": 50
+        },
+        {
+          "id": "cr",
+          "label": "Reserva capacidad",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 55,
+          "y": 70
+        },
+        {
+          "id": "dh",
+          "label": "Dedicated Host",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 55,
+          "y": 90
+        }
+      ],
+      "edges": [
+        {
+          "from": "wl",
+          "to": "od",
+          "label": "sin compromiso"
+        },
+        {
+          "from": "wl",
+          "to": "sav",
+          "label": "1 o 3 años"
+        },
+        {
+          "from": "wl",
+          "to": "spot",
+          "label": "tolera cortes"
+        },
+        {
+          "from": "wl",
+          "to": "cr",
+          "label": "capacidad en AZ"
+        },
+        {
+          "from": "wl",
+          "to": "dh",
+          "label": "licencias por core"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "La misma instancia EC2 puede costar muy distinto según cómo la compres. Para elegir, hazte tres preguntas: ¿puedo comprometerme uno o tres años?, ¿mi carga tolera interrupciones?, ¿necesito capacidad garantizada o hardware dedicado?",
+        "show": [
+          "wl"
+        ],
+        "focus": "wl"
+      },
+      {
+        "narration": "On-Demand es el punto de partida: pagas por segundo, sin compromiso ni recuperación de capacidad como en Spot. Es ideal para cargas cortas, impredecibles o en prueba, aunque puede sufrir eventos programados o fallos.",
+        "show": [
+          "wl",
+          "od"
+        ],
+        "focus": "od"
+      },
+      {
+        "narration": "Si tu uso es estable, te comprometes y ahorras. Un Reserved Instance fija una configuración, como tipo de instancia y Region. Un Savings Plan compromete dólares por hora; el Compute Savings Plan incluso cubre otras familias, otras Regions, Fargate y Lambda.",
+        "show": [
+          "wl",
+          "od",
+          "sav"
+        ],
+        "focus": "sav"
+      },
+      {
+        "narration": "Spot usa capacidad sobrante de EC2 con gran descuento, pero AWS puede recuperarla. Para terminación o detención, recibes un aviso de dos minutos; si hiberna, el aviso llega al comenzar la hibernación. Úsalo para trabajos que puedan reintentarse o reanudarse.",
+        "show": [
+          "wl",
+          "od",
+          "sav",
+          "spot"
+        ],
+        "focus": "spot"
+      },
+      {
+        "narration": "Ojo con esta trampa: Savings Plans y Reserved Instances regionales no reservan capacidad. Si necesitas asegurar instancias en una AZ, usa una On-Demand Capacity Reservation de uso inmediato, sin plazo fijo, o un Reserved Instance zonal. Puedes combinar la reserva con un Savings Plan.",
+        "show": [
+          "wl",
+          "od",
+          "sav",
+          "spot",
+          "cr"
+        ],
+        "focus": "cr"
+      },
+      {
+        "narration": "Finalmente, el hardware dedicado. Dedicated Instances te dan aislamiento físico de otras cuentas. Dedicated Hosts te dan el servidor completo, con visibilidad de sockets y cores y afinidad de host, ideal para licencias BYOL atadas al hardware.",
+        "show": [
+          "wl",
+          "od",
+          "sav",
+          "spot",
+          "cr",
+          "dh"
+        ],
+        "focus": "dh"
+      }
+    ],
+    "keyPoints": [
+      "On-Demand: por segundo y sin compromiso; no está sujeto a recuperación de capacidad como Spot.",
+      "RI fija configuración; Savings Plan fija dólares por hora.",
+      "Spot: interrumpible; el aviso es de dos minutos para terminación o detención, no para hibernación.",
+      "Savings Plans no reservan capacidad: usa Capacity Reservation o RI zonal.",
+      "Licencias por socket o core: Dedicated Hosts."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Savings Plans vs Reserved Instances",
+        "difference": "El RI se ata a una configuración; el Savings Plan a un gasto por hora más flexible."
+      },
+      {
+        "unitOrService": "Dedicated Instances vs Dedicated Hosts",
+        "difference": "Instances: hardware aislado sin visibilidad. Hosts: servidor completo con sockets, cores y afinidad de host."
+      },
+      {
+        "unitOrService": "Capacity Reservations vs Savings Plans",
+        "difference": "La reserva garantiza capacidad en una AZ; el Savings Plan solo da descuento."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ec2-purchase-options--l1",
+      "conceptId": "ec2-purchase-options",
+      "format": "lightning",
+      "prompt": "Short, unpredictable workload that must not be interrupted, no commitment → ?",
+      "promptEs": "Carga corta e impredecible que no debe interrumpirse, sin compromiso → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Spot Instances"
+        },
+        {
+          "id": "B",
+          "text": "On-Demand Instances"
+        },
+        {
+          "id": "C",
+          "text": "Standard Reserved Instances"
+        },
+        {
+          "id": "D",
+          "text": "EC2 Instance Savings Plan"
+        }
+      ],
+      "answer": "B",
+      "why": "On-Demand no exige compromiso y no sufre interrupciones por recuperación de capacidad. Spot se puede interrumpir, y RI o Savings Plans exigen uno o tres años."
+    },
+    {
+      "id": "ec2-purchase-options--l2",
+      "conceptId": "ec2-purchase-options",
+      "format": "thisorthat",
+      "prompt": "Flexible batch jobs that tolerate interruption, lowest cost → ?",
+      "promptEs": "Trabajos por lotes flexibles que toleran interrupciones, al menor costo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "id": "B",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": "B",
+      "why": "Spot usa capacidad sobrante con descuento y encaja con trabajos interrumpibles. Una Capacity Reservation asegura capacidad, pero no da descuento."
+    },
+    {
+      "id": "ec2-purchase-options--l3",
+      "conceptId": "ec2-purchase-options",
+      "format": "lightning",
+      "prompt": "Existing per-core software licenses must run on a physical server you control → ?",
+      "promptEs": "Licencias existentes por core deben correr en un servidor físico que controlas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Dedicated Instances"
+        },
+        {
+          "id": "B",
+          "text": "Zonal Reserved Instances"
+        },
+        {
+          "id": "C",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "id": "D",
+          "text": "On-Demand Capacity Reservations"
+        }
+      ],
+      "answer": "C",
+      "why": "Dedicated Hosts dan el servidor físico completo con visibilidad de sockets y cores, clave para BYOL. Dedicated Instances aíslan hardware pero no exponen esos datos."
+    },
+    {
+      "id": "ec2-purchase-options--l4",
+      "conceptId": "ec2-purchase-options",
+      "format": "lightning",
+      "prompt": "Steady hourly spend for 3 years, but instance families will change → ?",
+      "promptEs": "Gasto por hora estable durante 3 años, pero las familias de instancia cambiarán → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Compute Savings Plan"
+        },
+        {
+          "id": "B",
+          "text": "Standard Reserved Instances"
+        },
+        {
+          "id": "C",
+          "text": "Spot Instances"
+        },
+        {
+          "id": "D",
+          "text": "EC2 Instance Savings Plan"
+        }
+      ],
+      "answer": "A",
+      "why": "Un gasto predecible no implica una configuración predecible. Compute Savings Plan sigue el uso entre familias; el EC2 Instance Savings Plan y el Standard RI se atan a una familia."
+    },
+    {
+      "id": "ec2-purchase-options--l5",
+      "conceptId": "reserved-instances",
+      "format": "lightning",
+      "prompt": "Stable instance type and Region for 3 years, maximum RI discount → ?",
+      "promptEs": "Tipo de instancia y Region estables por 3 años, máximo descuento de RI → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Convertible RI, 1-year term"
+        },
+        {
+          "id": "B",
+          "text": "Convertible RI, 3-year term"
+        },
+        {
+          "id": "C",
+          "text": "Standard RI, 1-year term"
+        },
+        {
+          "id": "D",
+          "text": "Standard RI, 3-year term"
+        }
+      ],
+      "answer": "D",
+      "why": "Standard da más descuento que Convertible, y el plazo de tres años más que el de uno. Como la configuración no cambiará, no necesitas intercambiarla."
+    },
+    {
+      "id": "ec2-purchase-options--l6",
+      "conceptId": "reserved-instances",
+      "format": "thisorthat",
+      "prompt": "Must exchange instance attributes during the RI term → ?",
+      "promptEs": "Debes poder intercambiar atributos de instancia durante el plazo del RI → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Convertible Reserved Instance"
+        },
+        {
+          "id": "B",
+          "text": "Standard Reserved Instance"
+        }
+      ],
+      "answer": "A",
+      "why": "Convertible permite intercambiar atributos a cambio de menos descuento. Standard puede modificarse en algunos aspectos, pero no intercambiarse."
+    },
+    {
+      "id": "ec2-purchase-options--l7",
+      "conceptId": "reserved-instances",
+      "format": "lightning",
+      "prompt": "RI discount plus guaranteed capacity in one specific AZ → ?",
+      "promptEs": "Descuento de RI más capacidad garantizada en una AZ específica → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Regional Reserved Instance"
+        },
+        {
+          "id": "B",
+          "text": "Zonal Reserved Instance"
+        },
+        {
+          "id": "C",
+          "text": "Compute Savings Plan"
+        },
+        {
+          "id": "D",
+          "text": "Dedicated Instance"
+        }
+      ],
+      "answer": "B",
+      "why": "Un RI comprado para una AZ específica (zonal) también reserva capacidad ahí. El RI regional y los Savings Plans solo dan descuento."
+    },
+    {
+      "id": "ec2-purchase-options--l8",
+      "conceptId": "reserved-instances",
+      "format": "thisorthat",
+      "prompt": "What happens to the running instance when its RI expires?",
+      "promptEs": "¿Qué pasa con la instancia en ejecución cuando vence su RI?",
+      "options": [
+        {
+          "id": "A",
+          "text": "It stops until you renew it"
+        },
+        {
+          "id": "B",
+          "text": "It keeps running, billed On-Demand"
+        }
+      ],
+      "answer": "B",
+      "why": "Un RI es solo un descuento de facturación, no una instancia. Al vencer no se renueva solo y la instancia sigue corriendo a precio On-Demand."
+    },
+    {
+      "id": "ec2-purchase-options--l9",
+      "conceptId": "savings-plans",
+      "format": "lightning",
+      "prompt": "Steady compute baseline; part of it will move from EC2 to Fargate and Lambda → ?",
+      "promptEs": "Base de cómputo estable; parte pasará de EC2 a Fargate y Lambda → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 Instance Savings Plan"
+        },
+        {
+          "id": "B",
+          "text": "Standard Reserved Instances"
+        },
+        {
+          "id": "C",
+          "text": "Compute Savings Plan"
+        },
+        {
+          "id": "D",
+          "text": "On-Demand Capacity Reservation"
+        }
+      ],
+      "answer": "C",
+      "why": "Compute Savings Plan aplica a EC2, Fargate y Lambda. El EC2 Instance Savings Plan y los RI no extienden el descuento fuera de EC2."
+    },
+    {
+      "id": "ec2-purchase-options--l10",
+      "conceptId": "savings-plans",
+      "format": "thisorthat",
+      "prompt": "Usage stays in one EC2 family and Region; want the lowest Savings Plan price → ?",
+      "promptEs": "El uso se queda en una familia de EC2 y una Region; quieres el menor precio de Savings Plan → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Compute Savings Plan"
+        },
+        {
+          "id": "B",
+          "text": "EC2 Instance Savings Plan"
+        }
+      ],
+      "answer": "B",
+      "why": "EC2 Instance Savings Plan ofrece los precios más bajos si la familia y la Region no cambian; aun así cubre cambios de tamaño, AZ o sistema operativo."
+    },
+    {
+      "id": "ec2-purchase-options--l11",
+      "conceptId": "savings-plans",
+      "format": "lightning",
+      "prompt": "Usage above the Savings Plan hourly commitment is billed at → ?",
+      "promptEs": "El uso que supera el compromiso por hora del Savings Plan se cobra a → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "On-Demand rates"
+        },
+        {
+          "id": "B",
+          "text": "Spot prices"
+        },
+        {
+          "id": "C",
+          "text": "Reserved Instance rates"
+        },
+        {
+          "id": "D",
+          "text": "The same discounted rate"
+        }
+      ],
+      "answer": "A",
+      "why": "El descuento cubre solo el monto comprometido por hora; lo que excede se cobra On-Demand. Por eso te comprometes con la base estable, no con el pico."
+    },
+    {
+      "id": "ec2-purchase-options--l12",
+      "conceptId": "savings-plans",
+      "format": "lightning",
+      "prompt": "Savings Plan discount AND guaranteed capacity in one AZ → combine with?",
+      "promptEs": "Descuento de Savings Plan Y capacidad garantizada en una AZ → ¿combinar con?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Spot Instances"
+        },
+        {
+          "id": "B",
+          "text": "Convertible Reserved Instance"
+        },
+        {
+          "id": "C",
+          "text": "Dedicated Instances"
+        },
+        {
+          "id": "D",
+          "text": "On-Demand Capacity Reservation"
+        }
+      ],
+      "answer": "D",
+      "why": "Un Savings Plan no reserva capacidad. Una Capacity Reservation la asegura en una AZ y se puede combinar con el Savings Plan para tener ambas cosas."
+    },
+    {
+      "id": "ec2-purchase-options--l13",
+      "conceptId": "spot-instances",
+      "format": "lightning",
+      "prompt": "Spot interruption notice before termination or stop → ?",
+      "promptEs": "Aviso de interrupción de Spot antes de terminar o detener → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "30 seconds"
+        },
+        {
+          "id": "B",
+          "text": "Two minutes"
+        },
+        {
+          "id": "C",
+          "text": "Ten minutes"
+        },
+        {
+          "id": "D",
+          "text": "No notice at all"
+        }
+      ],
+      "answer": "B",
+      "why": "EC2 avisa con dos minutos antes de terminar o detener una instancia Spot. En hibernación no hay esa ventana: el aviso llega cuando empieza a hibernar."
+    },
+    {
+      "id": "ec2-purchase-options--l15",
+      "conceptId": "spot-instances",
+      "format": "thisorthat",
+      "prompt": "Nightly payment settlement job that must never be interrupted → ?",
+      "promptEs": "Proceso nocturno de liquidación de pagos que nunca debe interrumpirse → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "On-Demand Instances"
+        },
+        {
+          "id": "B",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": "A",
+      "why": "Spot puede ser recuperado por EC2 en cualquier momento. Si el trabajo no tolera interrupciones, usa On-Demand (con descuento de Savings Plan si es estable)."
+    },
+    {
+      "id": "ec2-purchase-options--l17",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "format": "thisorthat",
+      "prompt": "Hardware isolated from other accounts; no host-level control needed → ?",
+      "promptEs": "Hardware aislado de otras cuentas; no necesitas control a nivel de host → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "id": "B",
+          "text": "Dedicated Instances"
+        }
+      ],
+      "answer": "B",
+      "why": "Dedicated Instances corren en hardware dedicado a tu cuenta, sin visibilidad de host ni placement. Dedicated Hosts solo hacen falta si necesitas esos controles."
+    },
+    {
+      "id": "ec2-purchase-options--l18",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "format": "lightning",
+      "prompt": "Instance must return to the same physical server after stop and start → ?",
+      "promptEs": "La instancia debe volver al mismo servidor físico tras detenerla e iniciarla → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Dedicated Instances"
+        },
+        {
+          "id": "B",
+          "text": "Spread placement group"
+        },
+        {
+          "id": "C",
+          "text": "Dedicated Host, host affinity"
+        },
+        {
+          "id": "D",
+          "text": "Zonal Reserved Instance"
+        }
+      ],
+      "answer": "C",
+      "why": "Host affinity ata la instancia a un Dedicated Host concreto. Una Dedicated Instance puede quedar en otro host tras detenerla e iniciarla."
+    },
+    {
+      "id": "ec2-purchase-options--l19",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "format": "lightning",
+      "prompt": "Dedicated Hosts are billed → ?",
+      "promptEs": "Los Dedicated Hosts se cobran → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Per host"
+        },
+        {
+          "id": "B",
+          "text": "Per instance"
+        },
+        {
+          "id": "C",
+          "text": "Per licensed core"
+        },
+        {
+          "id": "D",
+          "text": "Per request"
+        }
+      ],
+      "answer": "A",
+      "why": "Pagas el servidor físico completo, uses o no toda su capacidad. Las Dedicated Instances, en cambio, se cobran por instancia."
+    },
+    {
+      "id": "ec2-purchase-options--l20",
+      "conceptId": "on-demand-capacity-reservations",
+      "format": "lightning",
+      "prompt": "Guaranteed capacity in one AZ for DR, no term commitment → ?",
+      "promptEs": "Capacidad garantizada en una AZ para DR, sin compromiso de plazo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Zonal Reserved Instance"
+        },
+        {
+          "id": "B",
+          "text": "Spot Instances"
+        },
+        {
+          "id": "C",
+          "text": "Compute Savings Plan"
+        },
+        {
+          "id": "D",
+          "text": "On-Demand Capacity Reservation"
+        }
+      ],
+      "answer": "D",
+      "why": "Una Capacity Reservation de uso inmediato asegura capacidad sin plazo y puedes cancelarla. El RI zonal también reserva, pero exige uno o tres años."
+    },
+    {
+      "id": "ec2-purchase-options--l21",
+      "conceptId": "on-demand-capacity-reservations",
+      "format": "thisorthat",
+      "prompt": "An On-Demand Capacity Reservation by itself gives you → ?",
+      "promptEs": "Una On-Demand Capacity Reservation por sí sola te da → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Assured capacity, no discount"
+        },
+        {
+          "id": "B",
+          "text": "Billing discount, no capacity"
+        }
+      ],
+      "answer": "A",
+      "why": "La reserva asegura capacidad, no rebaja el precio. Para el descuento, combínala con un Savings Plan."
+    }
+  ],
+  "audited": true
+}

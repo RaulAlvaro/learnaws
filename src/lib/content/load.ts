@@ -4,10 +4,14 @@ import path from "node:path";
 import type {
   Concept,
   ConceptContent,
+  Island,
   Lab,
+  LightningItem,
   Question,
   RecallPrompt,
+  ServiceUnit,
   Syllabus,
+  UnitContent,
 } from "./types";
 
 const CONTENT_DIR = process.env.CONTENT_DIR ?? path.join(process.cwd(), "content");
@@ -21,6 +25,10 @@ interface ContentIndex {
   recall: Map<string, RecallPrompt>;
   recallByConcept: Map<string, RecallPrompt[]>;
   labs: Lab[];
+  islands: Island[];
+  units: Map<string, ServiceUnit>;
+  unitContent: Map<string, UnitContent>;
+  unitByConcept: Map<string, string>;
 }
 
 let cached: ContentIndex | null = null;
@@ -45,7 +53,7 @@ function build(): ContentIndex {
       const cc = readJson<ConceptContent>(path.join(conceptsDir, file));
       if (!concepts.has(cc.conceptId)) continue;
       content.set(cc.conceptId, cc);
-      questionsByConcept.set(cc.conceptId, cc.questions);
+      questionsByConcept.set(cc.conceptId, [...cc.questions]);
       recallByConcept.set(cc.conceptId, cc.recall);
       for (const q of cc.questions) questions.set(q.id, q);
       for (const r of cc.recall) recall.set(r.id, r);
@@ -57,7 +65,39 @@ function build(): ContentIndex {
     ? readJson<{ labs: Lab[] }>(labsFile).labs.sort((a, b) => a.order - b.order)
     : [];
 
+  // Islands, service units and their overviews + lightning items (M2).
+  const servicesFile = path.join(CONTENT_DIR, "services.json");
+  const map = fs.existsSync(servicesFile)
+    ? readJson<{ islands: Island[]; units: ServiceUnit[] }>(servicesFile)
+    : { islands: [], units: [] };
+  const units = new Map(map.units.map((u) => [u.id, u]));
+  const unitByConcept = new Map<string, string>();
+  for (const u of map.units) for (const c of u.concepts) unitByConcept.set(c, u.id);
+  const unitContent = new Map<string, UnitContent>();
+  const unitsDir = path.join(CONTENT_DIR, "units");
+  if (fs.existsSync(unitsDir)) {
+    for (const file of fs.readdirSync(unitsDir)) {
+      if (!file.endsWith(".json") || file.includes(".audit")) continue;
+      const uc = readJson<UnitContent>(path.join(unitsDir, file));
+      // Only audited content reaches learners.
+      if (!units.has(uc.unitId) || !uc.audited) continue;
+      unitContent.set(uc.unitId, uc);
+      for (const item of uc.items) {
+        const concept = concepts.get(item.conceptId);
+        if (!concept) continue;
+        const q = lightningToQuestion(item, concept);
+        questions.set(q.id, q);
+        if (!questionsByConcept.has(q.conceptId)) questionsByConcept.set(q.conceptId, []);
+        questionsByConcept.get(q.conceptId)!.push(q);
+      }
+    }
+  }
+
   return {
+    islands: map.islands.sort((a, b) => a.order - b.order),
+    units,
+    unitContent,
+    unitByConcept,
     syllabus,
     concepts,
     content,
@@ -68,6 +108,34 @@ function build(): ContentIndex {
     labs,
   };
 }
+
+/** Lightning items share the question pipeline (scheduling, answers, XP) as short-format questions. */
+function lightningToQuestion(item: LightningItem, concept: Concept): Question {
+  return {
+    id: item.id,
+    conceptId: item.conceptId,
+    secondaryConcepts: [],
+    domain: concept.domain,
+    type: "single",
+    difficulty: 1,
+    stem: item.prompt,
+    options: item.options.map((o) => ({ id: o.id, text: o.text, correct: o.id === item.answer, why: o.id === item.answer ? item.why : "" })),
+    explanation: item.why,
+    keywordCues: [],
+    docs: concept.docs,
+    es: {
+      stem: item.promptEs,
+      options: item.options.map((o) => ({ id: o.id, text: o.text, why: o.id === item.answer ? item.why : "" })),
+      explanation: item.why,
+    },
+    heldOut: false,
+    source: "lightning",
+    format: item.format,
+    verification: { status: "pass", notes: "" },
+  };
+}
+
+export const isShortFormat = (q: Question) => q.format === "lightning" || q.format === "thisorthat";
 
 export function getContent(): ContentIndex {
   if (!cached || process.env.NODE_ENV === "development") cached = build();

@@ -1,0 +1,212 @@
+{
+  "unitId": "msk",
+  "overview": {
+    "title": "Amazon MSK",
+    "hook": "Tu Apache Kafka de siempre, pero con AWS operando el clúster.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "kprod",
+          "label": "Productores Kafka",
+          "kind": "actor",
+          "x": 10,
+          "y": 45
+        },
+        {
+          "id": "msk",
+          "label": "Amazon MSK",
+          "kind": "service",
+          "service": "Amazon MSK",
+          "x": 40,
+          "y": 45
+        },
+        {
+          "id": "kcons",
+          "label": "Consumidores Kafka",
+          "kind": "actor",
+          "x": 72,
+          "y": 18
+        },
+        {
+          "id": "connect",
+          "label": "MSK Connect",
+          "kind": "note",
+          "x": 66,
+          "y": 78
+        },
+        {
+          "id": "s3",
+          "label": "Amazon S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 90,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "kprod",
+          "to": "msk",
+          "label": "produce a topic"
+        },
+        {
+          "from": "msk",
+          "to": "kcons",
+          "label": "consume"
+        },
+        {
+          "from": "msk",
+          "to": "connect",
+          "label": "conector"
+        },
+        {
+          "from": "connect",
+          "to": "s3",
+          "label": "exporta"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Apache Kafka es una plataforma de streaming open source muy usada, y muchas empresas ya tienen productores y consumidores escritos para Kafka. Amazon MSK ejecuta Kafka como servicio administrado en AWS, para que esas aplicaciones sigan funcionando sin cambiar su código.",
+        "show": [
+          "kprod",
+          "msk"
+        ],
+        "focus": "msk"
+      },
+      {
+        "narration": "Tus aplicaciones siguen hablando Kafka: crean topics, producen y consumen como antes. La diferencia es que AWS se encarga de las operaciones del plano de control del clúster, y tú solo usas las operaciones de datos.",
+        "show": [
+          "kprod",
+          "msk",
+          "kcons"
+        ],
+        "focus": "kcons"
+      },
+      {
+        "narration": "Hay dos sabores. En MSK Provisioned tú eliges cuántos brokers hay por Availability Zone y de qué tipo, y puedes cambiarlos. En MSK Serverless, AWS administra los brokers y no tienes que gestionar ni escalar la capacidad del clúster.",
+        "show": [
+          "kprod",
+          "msk",
+          "kcons"
+        ],
+        "focus": "msk"
+      },
+      {
+        "narration": "Para mover datos entre Kafka y otros sistemas, como S3, existe MSK Connect. Y MSK Replicator copia datos entre clústeres provisionados, en la misma Region o en otra.",
+        "show": [
+          "kprod",
+          "msk",
+          "kcons",
+          "connect",
+          "s3"
+        ],
+        "focus": "connect"
+      },
+      {
+        "narration": "La pista del examen es la compatibilidad. Si dice Kafka existente, herramientas de Kafka o sin cambios de código, es MSK. Si es una carga nueva sin ese requisito, Kinesis Data Streams suele bastar; y si solo quieres entregar a un destino, Firehose.",
+        "show": [
+          "kprod",
+          "msk",
+          "kcons",
+          "connect",
+          "s3"
+        ],
+        "focus": "kprod"
+      }
+    ],
+    "keyPoints": [
+      "Kafka existente sin cambiar código: Amazon MSK.",
+      "MSK Provisioned: tú eliges número y tipo de brokers.",
+      "MSK Serverless: sin gestionar ni escalar capacidad.",
+      "MSK Connect integra Kafka con otros sistemas."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon Kinesis Data Streams",
+        "difference": "Streaming nativo de AWS sin Kafka; elígelo si no exigen compatibilidad con Kafka."
+      },
+      {
+        "unitOrService": "Amazon Data Firehose",
+        "difference": "Entrega con buffer a destinos como S3; no ejecuta productores ni consumidores Kafka."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "msk--l1",
+      "conceptId": "amazon-msk",
+      "format": "lightning",
+      "prompt": "Move existing Kafka producers and consumers to AWS without code changes → ?",
+      "promptEs": "Llevar productores y consumidores Kafka existentes a AWS sin cambiar código → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Kinesis Data Streams"
+        },
+        {
+          "id": "B",
+          "text": "Amazon MSK"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Data Firehose"
+        },
+        {
+          "id": "D",
+          "text": "Amazon SQS FIFO"
+        }
+      ],
+      "answer": "B",
+      "why": "MSK ejecuta Apache Kafka real, así que las apps y herramientas Kafka funcionan sin cambios. Kinesis también es streaming administrado, pero no es compatible con Kafka."
+    },
+    {
+      "id": "msk--l2",
+      "conceptId": "amazon-msk",
+      "format": "thisorthat",
+      "prompt": "Kafka on AWS with no cluster capacity to manage or scale → ?",
+      "promptEs": "Kafka en AWS sin tener que administrar ni escalar la capacidad del clúster → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "MSK Provisioned"
+        },
+        {
+          "id": "B",
+          "text": "MSK Serverless"
+        }
+      ],
+      "answer": "B",
+      "why": "MSK Serverless administra los brokers y elimina la gestión de capacidad. En MSK Provisioned tú defines y ajustas los brokers."
+    },
+    {
+      "id": "msk--l3",
+      "conceptId": "amazon-msk",
+      "format": "lightning",
+      "prompt": "Team must choose Kafka broker count and instance type → ?",
+      "promptEs": "El equipo debe elegir el número de brokers Kafka y su tipo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "MSK Serverless"
+        },
+        {
+          "id": "B",
+          "text": "Kinesis on-demand mode"
+        },
+        {
+          "id": "C",
+          "text": "MSK Provisioned"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Data Firehose"
+        }
+      ],
+      "answer": "C",
+      "why": "Solo MSK Provisioned te deja especificar y actualizar el número y tipo de brokers. Serverless oculta los brokers justamente para que no los gestiones."
+    }
+  ],
+  "audited": true
+}

@@ -74,3 +74,27 @@ export const AuditSchema = z.object({
 export type Audit = z.infer<typeof AuditSchema>;
 
 export const CardFixSchema = z.object({ card: z.object({ en: CardBodySchema, es: CardBodySchema }) });
+
+export const UnitAuditSchema = z.object({
+  overview: z.object({ factualIssues: z.array(z.string()), verdict: z.enum(["pass", "fail"]) }),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      keyCorrect: z.boolean(),
+      uniquelyCorrect: z.boolean(),
+      factualIssues: z.array(z.string()),
+      translationOk: z.boolean(),
+      verdict: z.enum(["pass", "fail"]),
+    }),
+  ),
+});
+export type UnitAudit = z.infer<typeof UnitAuditSchema>;
+
+export const OverviewFixSchema = z.object({
+  hook: z.string(),
+  segments: z.array(z.object({ narration: z.string(), show: z.array(z.string()), focus: z.string() })),
+  keyPoints: z.array(z.string()),
+  confusedWith: z.array(z.object({ unitOrService: z.string(), difference: z.string() })),
+});
+
+export const WhyFixSchema = z.object({ items: z.array(z.object({ id: z.string(), why: z.string() })) });

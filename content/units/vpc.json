@@ -1,0 +1,602 @@
+{
+  "unitId": "vpc",
+  "overview": {
+    "title": "Amazon VPC",
+    "hook": "Tu propia red privada en AWS: tú decides qué sale y qué entra.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "inet",
+          "label": "Internet",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "igw",
+          "label": "Internet gateway",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 28,
+          "y": 50
+        },
+        {
+          "id": "vpc",
+          "label": "VPC 10.0.0.0/16",
+          "kind": "zone",
+          "x": 55,
+          "y": 10
+        },
+        {
+          "id": "pub",
+          "label": "Subnet pública",
+          "kind": "zone",
+          "x": 52,
+          "y": 40
+        },
+        {
+          "id": "nat",
+          "label": "NAT gateway",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 80,
+          "y": 40
+        },
+        {
+          "id": "priv",
+          "label": "Subnet privada",
+          "kind": "zone",
+          "x": 52,
+          "y": 80
+        },
+        {
+          "id": "app",
+          "label": "EC2 privada",
+          "kind": "actor",
+          "x": 82,
+          "y": 80
+        }
+      ],
+      "edges": [
+        {
+          "from": "pub",
+          "to": "igw",
+          "label": "0.0.0.0/0 → IGW"
+        },
+        {
+          "from": "igw",
+          "to": "inet"
+        },
+        {
+          "from": "app",
+          "to": "nat",
+          "label": "0.0.0.0/0 → NAT"
+        },
+        {
+          "from": "nat",
+          "to": "igw",
+          "label": "solo salida"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Una VPC es tu red privada dentro de una Region. Al crearla eliges un bloque CIDR, por ejemplo 10.0.0.0/16, y ese bloque no se puede agrandar después, solo sumar CIDR secundarios. Por eso lo planeas con espacio y sin solaparte con redes que conectarás.",
+        "show": [
+          "vpc"
+        ],
+        "focus": "vpc"
+      },
+      {
+        "narration": "La VPC se reparte en subnets, y cada subnet vive completa en una sola Availability Zone. Si quieres sobrevivir a la caída de una AZ, necesitas subnets en al menos dos zonas.",
+        "show": [
+          "vpc",
+          "pub",
+          "priv"
+        ],
+        "focus": "priv"
+      },
+      {
+        "narration": "¿Qué hace pública a una subnet? No su nombre ni su tamaño, sino su route table. Si tiene una ruta 0.0.0.0/0 hacia un internet gateway, es pública, y sus instancias además necesitan una IP pública o Elastic IP para hablar por IPv4.",
+        "show": [
+          "inet",
+          "igw",
+          "vpc",
+          "pub",
+          "priv"
+        ],
+        "focus": "igw"
+      },
+      {
+        "narration": "Una subnet privada no tiene esa ruta. Ahí viven tus servidores de aplicación y tus bases de datos, y los clientes les llegan a través de un load balancer que está en la subnet pública.",
+        "show": [
+          "inet",
+          "igw",
+          "vpc",
+          "pub",
+          "priv",
+          "app"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "Si esa instancia privada necesita salir a internet, por ejemplo para descargar parches, apuntas su ruta por defecto a un NAT gateway ubicado en la subnet pública. Puede iniciar conexiones hacia afuera, pero nadie en internet puede iniciarlas hacia ella.",
+        "show": [
+          "inet",
+          "igw",
+          "vpc",
+          "pub",
+          "priv",
+          "app",
+          "nat"
+        ],
+        "focus": "nat"
+      },
+      {
+        "narration": "El examen compara NAT gateway con NAT instance. El gateway es administrado y redundante dentro de su AZ; la instance la parchas y le armas failover tú. Para resiliencia real, pones un NAT gateway por AZ y cada subnet privada usa el de su zona.",
+        "show": [
+          "inet",
+          "igw",
+          "vpc",
+          "pub",
+          "priv",
+          "app",
+          "nat"
+        ],
+        "focus": "nat"
+      },
+      {
+        "narration": "Ojo con dos confusiones. El NAT gateway es solo para tráfico saliente, no es la entrada de tus clientes. Y si lo único que necesitas es llegar a S3 o DynamoDB, un gateway endpoint lo resuelve sin NAT y sin costo adicional.",
+        "show": [
+          "inet",
+          "igw",
+          "vpc",
+          "pub",
+          "priv",
+          "app",
+          "nat"
+        ],
+        "focus": "priv"
+      }
+    ],
+    "keyPoints": [
+      "El CIDR primario no se redimensiona; agrega CIDR secundarios.",
+      "Una subnet vive en una sola AZ.",
+      "Pública = ruta hacia internet gateway en su route table.",
+      "NAT gateway: salida a internet, sin conexiones entrantes no solicitadas.",
+      "Un NAT gateway por AZ para salida resiliente."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "NAT instance",
+        "difference": "La NAT instance es autoadministrada y permite port forwarding; el NAT gateway es administrado y no."
+      },
+      {
+        "unitOrService": "VPC endpoints",
+        "difference": "Un endpoint llega a servicios AWS privadamente; no reemplaza la salida general a internet del NAT."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "vpc--l1",
+      "conceptId": "vpc-cidr-subnets-ip-addressing",
+      "format": "lightning",
+      "prompt": "VPC is running out of IP addresses; resources can't be renumbered → ?",
+      "promptEs": "La VPC se queda sin direcciones IP y no puedes renumerar recursos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enlarge the primary CIDR block"
+        },
+        {
+          "id": "B",
+          "text": "Add a secondary CIDR block"
+        },
+        {
+          "id": "C",
+          "text": "Stretch one subnet across AZs"
+        },
+        {
+          "id": "D",
+          "text": "Switch the VPC to /8"
+        }
+      ],
+      "answer": "B",
+      "why": "El CIDR de una VPC existente no se agranda ni se reduce. Puedes asociar un CIDR secundario que no se solape. El tamaño permitido va de /16 a /28."
+    },
+    {
+      "id": "vpc--l2",
+      "conceptId": "vpc-cidr-subnets-ip-addressing",
+      "format": "thisorthat",
+      "prompt": "Need placement in two AZs → how many subnets?",
+      "promptEs": "Necesitas ubicar recursos en dos AZs → ¿cuántas subnets?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One subnet in each AZ"
+        },
+        {
+          "id": "B",
+          "text": "One subnet spanning both AZs"
+        }
+      ],
+      "answer": "A",
+      "why": "Cada subnet reside completamente en una AZ y no puede abarcar varias. Para dos AZs necesitas al menos una subnet en cada una."
+    },
+    {
+      "id": "vpc--l4",
+      "conceptId": "route-tables-internet-gateway",
+      "format": "lightning",
+      "prompt": "What makes a subnet public?",
+      "promptEs": "¿Qué hace que una subnet sea pública?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A tag named “public”"
+        },
+        {
+          "id": "B",
+          "text": "A security group allowing 0.0.0.0/0"
+        },
+        {
+          "id": "C",
+          "text": "A large CIDR block"
+        },
+        {
+          "id": "D",
+          "text": "A route to an internet gateway"
+        }
+      ],
+      "answer": "D",
+      "why": "Lo define la route table asociada: con ruta a un internet gateway es pública. Ni el nombre, ni el tamaño, ni un security group cambian eso."
+    },
+    {
+      "id": "vpc--l5",
+      "conceptId": "route-tables-internet-gateway",
+      "format": "lightning",
+      "prompt": "IGW attached, instance has public IPv4, still no internet → check first?",
+      "promptEs": "IGW conectado, la instancia tiene IPv4 pública y aun así no sale a internet → ¿qué revisas primero?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Subnet route table's route to IGW"
+        },
+        {
+          "id": "B",
+          "text": "Elastic IP address quota"
+        },
+        {
+          "id": "C",
+          "text": "VPC CIDR block size"
+        },
+        {
+          "id": "D",
+          "text": "A NAT gateway in the subnet"
+        }
+      ],
+      "answer": "A",
+      "why": "Un IGW conectado no hace pública a cada subnet; la route table de esa subnet debe tener la ruta. Una IP pública no compensa una ruta faltante."
+    },
+    {
+      "id": "vpc--l6",
+      "conceptId": "route-tables-internet-gateway",
+      "format": "thisorthat",
+      "prompt": "Instance has an IPv6 address; route table only has 0.0.0.0/0 → IGW. Fix?",
+      "promptEs": "La instancia tiene dirección IPv6; la route table solo tiene 0.0.0.0/0 → IGW. ¿Solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Assign an Elastic IP address"
+        },
+        {
+          "id": "B",
+          "text": "Add a ::/0 route to the IGW"
+        }
+      ],
+      "answer": "B",
+      "why": "Una ruta IPv4 al IGW no cubre IPv6. Necesitas una ruta ::/0 hacia el internet gateway; un Elastic IP es IPv4 y no resuelve nada aquí."
+    },
+    {
+      "id": "vpc--l7",
+      "conceptId": "route-tables-internet-gateway",
+      "format": "lightning",
+      "prompt": "Subnet routes to the IGW, but the instance lacks a public IPv4 → ?",
+      "promptEs": "La subnet tiene ruta al IGW, pero la instancia no tiene IPv4 pública → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a second internet gateway"
+        },
+        {
+          "id": "B",
+          "text": "Enable VPC Flow Logs"
+        },
+        {
+          "id": "C",
+          "text": "Assign a public IPv4 or Elastic IP"
+        },
+        {
+          "id": "D",
+          "text": "Create a VPC peering connection"
+        }
+      ],
+      "answer": "C",
+      "why": "Para IPv4 por un IGW hacen falta las dos cosas: la ruta y una IPv4 pública o Elastic IP en la instancia. Un segundo IGW no aporta nada."
+    },
+    {
+      "id": "vpc--l9",
+      "conceptId": "public-vs-private-subnets",
+      "format": "thisorthat",
+      "prompt": "Internet-facing ALB nodes go in which subnets?",
+      "promptEs": "¿En qué subnets van los nodos de un ALB expuesto a internet?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Private subnets"
+        },
+        {
+          "id": "B",
+          "text": "Public subnets"
+        }
+      ],
+      "answer": "B",
+      "why": "Un ALB internet-facing necesita subnets con ruta al internet gateway. Los servidores detrás de él sí van en subnets privadas."
+    },
+    {
+      "id": "vpc--l10",
+      "conceptId": "public-vs-private-subnets",
+      "format": "lightning",
+      "prompt": "Private-subnet instances need outbound-only IPv6 internet access → ?",
+      "promptEs": "Instancias en subnet privada necesitan salida a internet solo por IPv6 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "Internet gateway with ::/0 route"
+        },
+        {
+          "id": "C",
+          "text": "Virtual private gateway"
+        },
+        {
+          "id": "D",
+          "text": "Egress-only internet gateway"
+        }
+      ],
+      "answer": "D",
+      "why": "Para IPv6 saliente desde una subnet privada se usa el egress-only internet gateway. El NAT gateway es la opción equivalente para IPv4."
+    },
+    {
+      "id": "vpc--l12",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "format": "lightning",
+      "prompt": "Private instances call a third-party API; least operational overhead → ?",
+      "promptEs": "Instancias privadas llaman a una API externa, con la menor carga operativa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "NAT instance"
+        },
+        {
+          "id": "C",
+          "text": "Gateway VPC endpoint"
+        },
+        {
+          "id": "D",
+          "text": "Internet gateway route in private subnet"
+        }
+      ],
+      "answer": "A",
+      "why": "El NAT gateway es administrado por AWS y redundante en su AZ. La NAT instance exige parches y failover tuyos; un endpoint no llega a APIs de terceros."
+    },
+    {
+      "id": "vpc--l13",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "format": "thisorthat",
+      "prompt": "The NAT device must support port forwarding → ?",
+      "promptEs": "El dispositivo NAT debe soportar port forwarding → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "NAT instance"
+        }
+      ],
+      "answer": "B",
+      "why": "El NAT gateway no soporta port forwarding ni security groups. Una NAT instance es autoadministrada y se puede personalizar para eso."
+    },
+    {
+      "id": "vpc--l14",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "format": "lightning",
+      "prompt": "Where do you create a public NAT gateway?",
+      "promptEs": "¿Dónde se crea un NAT gateway público?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Private subnet with an Elastic IP"
+        },
+        {
+          "id": "B",
+          "text": "Private subnet, no public address"
+        },
+        {
+          "id": "C",
+          "text": "Public subnet with an Elastic IP"
+        },
+        {
+          "id": "D",
+          "text": "Attached directly to the IGW"
+        }
+      ],
+      "answer": "C",
+      "why": "El NAT gateway público vive en una subnet pública con un Elastic IP y envía el tráfico a internet a través del internet gateway de la VPC."
+    },
+    {
+      "id": "vpc--l15",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "format": "lightning",
+      "prompt": "Private subnets need internet egress with no unsolicited inbound connections → ?",
+      "promptEs": "Subnets privadas necesitan salir a internet sin conexiones entrantes no solicitadas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Private NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "Internet gateway route"
+        },
+        {
+          "id": "C",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "id": "D",
+          "text": "Public NAT gateway"
+        }
+      ],
+      "answer": "D",
+      "why": "El NAT gateway público permite iniciar conexiones hacia afuera sin aceptar las que vienen de internet. Uno privado no puede salir por el internet gateway."
+    },
+    {
+      "id": "vpc--l16",
+      "conceptId": "nat-gateway-per-az-design",
+      "format": "lightning",
+      "prompt": "Private subnets in two AZs need resilient internet egress → ?",
+      "promptEs": "Subnets privadas en dos AZs necesitan salida a internet resiliente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One shared NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "NAT gateway per AZ, local routes"
+        },
+        {
+          "id": "C",
+          "text": "Two NAT gateways in one AZ"
+        },
+        {
+          "id": "D",
+          "text": "One NAT instance with Elastic IP"
+        }
+      ],
+      "answer": "B",
+      "why": "Un NAT gateway por AZ, con cada subnet privada apuntando al de su zona, evita depender de una sola AZ. Dos gateways en la misma AZ comparten su falla."
+    },
+    {
+      "id": "vpc--l17",
+      "conceptId": "nat-gateway-per-az-design",
+      "format": "thisorthat",
+      "prompt": "Non-production accepts an AZ dependency; minimize hourly NAT charges → ?",
+      "promptEs": "Un entorno no productivo acepta depender de una AZ; minimizar cargos por hora de NAT → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One shared NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "One NAT gateway per AZ"
+        }
+      ],
+      "answer": "A",
+      "why": "Cada NAT gateway cobra por hora. Si la dependencia de una AZ es aceptable, uno compartido reduce cargos, aunque suma transferencia entre AZs."
+    },
+    {
+      "id": "vpc--l18",
+      "conceptId": "nat-gateway-per-az-design",
+      "format": "lightning",
+      "prompt": "NAT gateway in each AZ, yet AZ-b loses egress when AZ-a fails → cause?",
+      "promptEs": "Hay un NAT gateway por AZ, pero AZ-b pierde salida cuando falla AZ-a → ¿causa?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateways need security groups"
+        },
+        {
+          "id": "B",
+          "text": "The internet gateway is per AZ"
+        },
+        {
+          "id": "C",
+          "text": "AZ-b's route targets AZ-a's NAT"
+        },
+        {
+          "id": "D",
+          "text": "Elastic IPs cannot cross AZs"
+        }
+      ],
+      "answer": "C",
+      "why": "Tener un gateway por AZ no sirve si la route table de cada subnet privada no apunta al NAT de su propia zona."
+    },
+    {
+      "id": "vpc--l19",
+      "conceptId": "vpc-cidr-subnets-ip-addressing",
+      "format": "lightning",
+      "prompt": "New VPC will later peer with other VPCs → how do you choose its CIDR?",
+      "promptEs": "La nueva VPC se conectará luego por peering con otras VPCs → ¿cómo eliges su CIDR?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Same range as the other VPCs"
+        },
+        {
+          "id": "B",
+          "text": "Smallest /28 to save addresses"
+        },
+        {
+          "id": "C",
+          "text": "Non-overlapping range with room to grow"
+        },
+        {
+          "id": "D",
+          "text": "Default range, resize later"
+        }
+      ],
+      "answer": "C",
+      "why": "El peering no admite rangos CIDR solapados y el CIDR primario no se puede redimensionar. Elige un rango único y con espacio para crecer."
+    },
+    {
+      "id": "vpc--l20",
+      "conceptId": "public-vs-private-subnets",
+      "format": "lightning",
+      "prompt": "Private-subnet servers need outbound IPv4 internet access for patches → route to?",
+      "promptEs": "Servidores en subnet privada necesitan salida IPv4 a internet para parches → ¿ruta hacia?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Internet gateway directly"
+        },
+        {
+          "id": "B",
+          "text": "NAT gateway in a public subnet"
+        },
+        {
+          "id": "C",
+          "text": "Egress-only internet gateway"
+        },
+        {
+          "id": "D",
+          "text": "Gateway VPC endpoint"
+        }
+      ],
+      "answer": "B",
+      "why": "Una subnet privada sale por IPv4 mediante un NAT; el egress-only internet gateway es solo para IPv6. Una ruta directa al IGW la volvería pública."
+    }
+  ],
+  "audited": true
+}

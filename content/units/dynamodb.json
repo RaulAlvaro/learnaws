@@ -1,0 +1,745 @@
+{
+  "unitId": "dynamodb",
+  "overview": {
+    "title": "Amazon DynamoDB y DAX",
+    "hook": "Base NoSQL serverless: lees y escribes por clave en milisegundos, a cualquier escala.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "Aplicación",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "dax",
+          "label": "DAX",
+          "kind": "service",
+          "service": "Amazon DynamoDB Accelerator",
+          "x": 30,
+          "y": 18
+        },
+        {
+          "id": "table",
+          "label": "Tabla DynamoDB",
+          "kind": "service",
+          "service": "Amazon DynamoDB",
+          "x": 52,
+          "y": 50
+        },
+        {
+          "id": "gsi",
+          "label": "GSI / LSI",
+          "kind": "data",
+          "x": 52,
+          "y": 88
+        },
+        {
+          "id": "stream",
+          "label": "DynamoDB Streams",
+          "kind": "data",
+          "x": 74,
+          "y": 18
+        },
+        {
+          "id": "lambda",
+          "label": "Lambda",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 94,
+          "y": 18
+        },
+        {
+          "id": "replica",
+          "label": "Réplica Region B",
+          "kind": "service",
+          "service": "Amazon DynamoDB",
+          "x": 88,
+          "y": 72
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "dax",
+          "label": "lecturas"
+        },
+        {
+          "from": "dax",
+          "to": "table",
+          "label": "miss"
+        },
+        {
+          "from": "app",
+          "to": "table",
+          "label": "escrituras"
+        },
+        {
+          "from": "table",
+          "to": "gsi",
+          "label": "consulta alterna"
+        },
+        {
+          "from": "table",
+          "to": "stream",
+          "label": "cambios"
+        },
+        {
+          "from": "stream",
+          "to": "lambda",
+          "label": "trigger"
+        },
+        {
+          "from": "table",
+          "to": "replica",
+          "label": "global table"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon DynamoDB es una base NoSQL serverless de clave-valor y documentos. No hay servidores ni JOINs: guardas items y los lees por su clave con latencia de milisegundos de un dígito, sin importar la escala.",
+        "show": [
+          "app",
+          "table"
+        ],
+        "focus": "table"
+      },
+      {
+        "narration": "Cada item se identifica por su partition key, a veces con una sort key. Elige una clave que reparta bien el tráfico. Un item pesa como máximo 400 KB; lo grande va a S3 y aquí guardas el puntero.",
+        "show": [
+          "app",
+          "table"
+        ],
+        "focus": "table"
+      },
+      {
+        "narration": "Hay dos modos de capacidad. On-demand cobra por solicitud y se adapta solo, ideal para tráfico impredecible. Provisioned te hace fijar RCUs y WCUs, con auto scaling opcional, y conviene cuando el tráfico es estable y predecible.",
+        "show": [
+          "app",
+          "table"
+        ],
+        "focus": "table"
+      },
+      {
+        "narration": "Si necesitas buscar por otro atributo, creas un índice. Un GSI usa otra partition key y puedes agregarlo cuando quieras. Un LSI conserva la partition key con otra sort key, y solo se crea junto con la tabla.",
+        "show": [
+          "app",
+          "table",
+          "gsi"
+        ],
+        "focus": "gsi"
+      },
+      {
+        "narration": "DynamoDB Streams registra cada cambio de item durante 24 horas, en orden por item. Con Lambda, reaccionas a escrituras. TTL elimina items vencidos sin consumir capacidad de escritura inicial; en global tables, las eliminaciones replicadas sí pueden generar cargos.",
+        "show": [
+          "app",
+          "table",
+          "gsi",
+          "stream",
+          "lambda"
+        ],
+        "focus": "stream"
+      },
+      {
+        "narration": "Con global tables replicas la tabla entre Regions: todas aceptan lecturas y escrituras. PITR restaura a una tabla nueva, con precisión de segundos, dentro de una ventana configurable de 1 a 35 días; el punto más reciente está unos cinco minutos atrás.",
+        "show": [
+          "app",
+          "table",
+          "gsi",
+          "stream",
+          "lambda",
+          "replica"
+        ],
+        "focus": "replica"
+      },
+      {
+        "narration": "Si tu app ya usa DynamoDB y lee mil veces los mismos items, DAX es una caché compatible con su API que baja las lecturas eventualmente consistentes a microsegundos. No sirve si exiges lecturas fuertemente consistentes.",
+        "show": [
+          "app",
+          "table",
+          "gsi",
+          "stream",
+          "lambda",
+          "replica",
+          "dax"
+        ],
+        "focus": "dax"
+      }
+    ],
+    "keyPoints": [
+      "Clave-valor serverless, sin JOINs, item máximo 400 KB.",
+      "Impredecible → on-demand; estable → provisioned con auto scaling.",
+      "GSI se agrega cuando quieras; LSI solo al crear.",
+      "Global tables: escrituras locales en todas las Regions.",
+      "DAX: microsegundos, solo lecturas eventualmente consistentes."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon ElastiCache",
+        "difference": "Caché general para sesiones y leaderboards; DAX es solo para DynamoDB, casi sin cambiar código."
+      },
+      {
+        "unitOrService": "Aurora Global Database",
+        "difference": "Relacional con un único writer; global tables permite escribir en todas las Regions."
+      },
+      {
+        "unitOrService": "Amazon DocumentDB",
+        "difference": "Ofrece una base de documentos con compatibilidad con MongoDB; DynamoDB también guarda documentos, pero diseñas el acceso alrededor de claves."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "dynamodb--l1",
+      "conceptId": "dynamodb-fundamentals",
+      "format": "lightning",
+      "prompt": "Session lookups by session ID, spiky traffic, no servers or capacity planning → ?",
+      "promptEs": "Consultas de sesión por ID, tráfico con picos, sin servidores ni planificar capacidad → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon RDS for MySQL"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Neptune"
+        },
+        {
+          "id": "C",
+          "text": "Amazon DynamoDB on-demand"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Redshift"
+        }
+      ],
+      "answer": "C",
+      "why": "Acceso por clave, picos de tráfico y cero administración apuntan a DynamoDB on-demand. RDS podría servir, pero exige elegir y dimensionar instancias."
+    },
+    {
+      "id": "dynamodb--l2",
+      "conceptId": "dynamodb-fundamentals",
+      "format": "lightning",
+      "prompt": "Product photos of 5 MB each, metadata in DynamoDB → where do photos go?",
+      "promptEs": "Fotos de producto de 5 MB cada una, metadatos en DynamoDB → ¿dónde van las fotos?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon S3, pointer in the item"
+        },
+        {
+          "id": "B",
+          "text": "Inside the DynamoDB item"
+        },
+        {
+          "id": "C",
+          "text": "A local secondary index"
+        },
+        {
+          "id": "D",
+          "text": "DynamoDB Streams records"
+        }
+      ],
+      "answer": "A",
+      "why": "Un item de DynamoDB pesa como máximo 400 KB. Lo correcto es guardar el objeto grande en S3 y dejar en el item la referencia."
+    },
+    {
+      "id": "dynamodb--l3",
+      "conceptId": "dynamodb-fundamentals",
+      "format": "thisorthat",
+      "prompt": "Queries JOIN orders, customers and invoices across tables → ?",
+      "promptEs": "Consultas que hacen JOIN entre pedidos, clientes y facturas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon RDS"
+        }
+      ],
+      "answer": "B",
+      "why": "DynamoDB no tiene operador JOIN; está hecho para acceso por clave. Consultas relacionales entre tablas piden un motor relacional como RDS."
+    },
+    {
+      "id": "dynamodb--l4",
+      "conceptId": "dynamodb-fundamentals",
+      "format": "lightning",
+      "prompt": "Maximum size of a single DynamoDB item → ?",
+      "promptEs": "Tamaño máximo de un item de DynamoDB → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "64 KB"
+        },
+        {
+          "id": "B",
+          "text": "1 MB"
+        },
+        {
+          "id": "C",
+          "text": "16 MB"
+        },
+        {
+          "id": "D",
+          "text": "400 KB"
+        }
+      ],
+      "answer": "D",
+      "why": "El límite es 400 KB por item. Si el enunciado menciona archivos más grandes, la respuesta suele ser S3 más un puntero en DynamoDB."
+    },
+    {
+      "id": "dynamodb--l5",
+      "conceptId": "dynamodb-capacity-modes",
+      "format": "lightning",
+      "prompt": "Unpredictable bursts; no capacity planning or scaling policies → DynamoDB mode?",
+      "promptEs": "Ráfagas impredecibles; sin planificar capacidad ni políticas de escalado → ¿modo DynamoDB?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Provisioned with auto scaling"
+        },
+        {
+          "id": "B",
+          "text": "On-demand (pay per request)"
+        },
+        {
+          "id": "C",
+          "text": "Provisioned, fixed at peak"
+        },
+        {
+          "id": "D",
+          "text": "Provisioned with reserved capacity"
+        }
+      ],
+      "answer": "B",
+      "why": "On-demand gestiona el throughput solo y cobra por solicitud. El auto scaling de provisioned requiere configurar límites y sus alarmas tardan minutos en reaccionar."
+    },
+    {
+      "id": "dynamodb--l6",
+      "conceptId": "dynamodb-capacity-modes",
+      "format": "thisorthat",
+      "prompt": "Steady, forecastable traffic; optimize DynamoDB throughput cost → ?",
+      "promptEs": "Tráfico estable y predecible; optimizar el costo de throughput en DynamoDB → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Provisioned with auto scaling"
+        },
+        {
+          "id": "B",
+          "text": "On-demand (pay per request)"
+        }
+      ],
+      "answer": "A",
+      "why": "Si puedes prever la demanda, provisioned con auto scaling ajusta la capacidad configurada. On-demand brilla cuando el tráfico es impredecible."
+    },
+    {
+      "id": "dynamodb--l7",
+      "conceptId": "dynamodb-capacity-modes",
+      "format": "lightning",
+      "prompt": "One RCU per second, item up to 4 KB, provides → ?",
+      "promptEs": "Una RCU por segundo, item de hasta 4 KB, da → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One eventually consistent read only"
+        },
+        {
+          "id": "B",
+          "text": "Two strongly consistent reads"
+        },
+        {
+          "id": "C",
+          "text": "1 strong or 2 eventual reads"
+        },
+        {
+          "id": "D",
+          "text": "Four eventually consistent reads"
+        }
+      ],
+      "answer": "C",
+      "why": "Una RCU cubre una lectura fuertemente consistente o dos eventualmente consistentes por segundo, para items de hasta 4 KB."
+    },
+    {
+      "id": "dynamodb--l8",
+      "conceptId": "dynamodb-capacity-modes",
+      "format": "lightning",
+      "prompt": "10 writes per second of 2 KB items, provisioned mode → WCUs?",
+      "promptEs": "10 escrituras por segundo de items de 2 KB, modo provisioned → ¿WCUs?",
+      "options": [
+        {
+          "id": "A",
+          "text": "5"
+        },
+        {
+          "id": "B",
+          "text": "10"
+        },
+        {
+          "id": "C",
+          "text": "40"
+        },
+        {
+          "id": "D",
+          "text": "20"
+        }
+      ],
+      "answer": "D",
+      "why": "Una WCU es una escritura por segundo de hasta 1 KB. Un item de 2 KB necesita 2 WCUs, así que 10 escrituras requieren 20."
+    },
+    {
+      "id": "dynamodb--l9",
+      "conceptId": "dynamodb-indexes",
+      "format": "lightning",
+      "prompt": "Existing table keyed by orderId; now query by customerEmail → ?",
+      "promptEs": "Tabla existente con clave orderId; ahora consultar por customerEmail → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a global secondary index"
+        },
+        {
+          "id": "B",
+          "text": "Add a local secondary index"
+        },
+        {
+          "id": "C",
+          "text": "Scan with a filter"
+        },
+        {
+          "id": "D",
+          "text": "Enable DynamoDB Streams"
+        }
+      ],
+      "answer": "A",
+      "why": "Un GSI admite otra partition key y se puede agregar a una tabla existente. Un LSI mantiene la partition key y solo se crea con la tabla; Scan es ineficiente."
+    },
+    {
+      "id": "dynamodb--l10",
+      "conceptId": "dynamodb-indexes",
+      "format": "thisorthat",
+      "prompt": "Index queries must be strongly consistent → ?",
+      "promptEs": "Las consultas al índice deben ser fuertemente consistentes → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Global secondary index"
+        },
+        {
+          "id": "B",
+          "text": "Local secondary index"
+        }
+      ],
+      "answer": "B",
+      "why": "Los GSI solo admiten lecturas eventualmente consistentes. Un LSI permite consistencia fuerte, pero debe definirse al crear la tabla."
+    },
+    {
+      "id": "dynamodb--l11",
+      "conceptId": "dynamodb-streams",
+      "format": "lightning",
+      "prompt": "Run a Lambda function whenever a DynamoDB item changes → ?",
+      "promptEs": "Ejecutar una función Lambda cada vez que cambia un item de DynamoDB → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DynamoDB Time to Live"
+        },
+        {
+          "id": "B",
+          "text": "DynamoDB Streams"
+        },
+        {
+          "id": "C",
+          "text": "DynamoDB Accelerator (DAX)"
+        },
+        {
+          "id": "D",
+          "text": "DynamoDB global tables"
+        }
+      ],
+      "answer": "B",
+      "why": "Streams registra los cambios de items y un event source mapping de Lambda los consume sin que gestiones shards. TTL borra items; DAX cachea lecturas."
+    },
+    {
+      "id": "dynamodb--l12",
+      "conceptId": "dynamodb-streams",
+      "format": "thisorthat",
+      "prompt": "Stream records must contain both before and after item values → StreamViewType?",
+      "promptEs": "Los registros del stream deben incluir los valores del item antes y después → ¿StreamViewType?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NEW_AND_OLD_IMAGES"
+        },
+        {
+          "id": "B",
+          "text": "NEW_IMAGE only"
+        }
+      ],
+      "answer": "A",
+      "why": "NEW_AND_OLD_IMAGES captura ambas versiones del item. NEW_IMAGE solo trae la versión nueva; y el tipo de vista no se edita, se recrea el stream."
+    },
+    {
+      "id": "dynamodb--l13",
+      "conceptId": "dynamodb-streams",
+      "format": "lightning",
+      "prompt": "How long are DynamoDB Streams records available?",
+      "promptEs": "¿Cuánto tiempo están disponibles los registros de DynamoDB Streams?",
+      "options": [
+        {
+          "id": "A",
+          "text": "7 days"
+        },
+        {
+          "id": "B",
+          "text": "35 days"
+        },
+        {
+          "id": "C",
+          "text": "24 hours"
+        },
+        {
+          "id": "D",
+          "text": "365 days"
+        }
+      ],
+      "answer": "C",
+      "why": "Los registros duran hasta 24 horas y respetan el orden por item, no el de toda la tabla. 35 días es el límite de PITR, no de Streams."
+    },
+    {
+      "id": "dynamodb--l14",
+      "conceptId": "dynamodb-global-tables",
+      "format": "lightning",
+      "prompt": "NoSQL app on two continents needs local reads and writes in both → ?",
+      "promptEs": "App NoSQL en dos continentes necesita lecturas y escrituras locales en ambos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "id": "B",
+          "text": "Cross-Region read replica"
+        },
+        {
+          "id": "C",
+          "text": "DynamoDB Accelerator (DAX)"
+        },
+        {
+          "id": "D",
+          "text": "DynamoDB global tables"
+        }
+      ],
+      "answer": "D",
+      "why": "Global tables replica entre Regions y cualquier réplica acepta escrituras. Aurora Global Database tiene un solo writer, y una read replica no acepta escrituras."
+    },
+    {
+      "id": "dynamodb--l15",
+      "conceptId": "dynamodb-global-tables",
+      "format": "thisorthat",
+      "prompt": "Default consistency mode of DynamoDB global tables → ?",
+      "promptEs": "Modo de consistencia por defecto de DynamoDB global tables → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Multi-Region strong (MRSC)"
+        },
+        {
+          "id": "B",
+          "text": "Multi-Region eventual (MREC)"
+        }
+      ],
+      "answer": "B",
+      "why": "Si no eliges, se usa MREC, consistencia eventual entre Regions. MRSC existe, pero debes elegirlo al crear la tabla."
+    },
+    {
+      "id": "dynamodb--l16",
+      "conceptId": "dynamodb-global-tables",
+      "format": "lightning",
+      "prompt": "New global table needs multi-Region strong consistency → how?",
+      "promptEs": "Nueva global table necesita consistencia fuerte multi-Region → ¿cómo?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Choose MRSC at creation, same account"
+        },
+        {
+          "id": "B",
+          "text": "Create with MREC, switch later"
+        },
+        {
+          "id": "C",
+          "text": "Use multi-account replicas"
+        },
+        {
+          "id": "D",
+          "text": "Add DAX in each Region"
+        }
+      ],
+      "answer": "A",
+      "why": "MRSC se elige al crear la tabla y solo funciona en una misma cuenta. El modo no se cambia después, y DAX no aporta consistencia fuerte."
+    },
+    {
+      "id": "dynamodb--l17",
+      "conceptId": "dynamodb-global-tables",
+      "format": "thisorthat",
+      "prompt": "In a DynamoDB global table, which replicas accept writes?",
+      "promptEs": "En una DynamoDB global table, ¿qué réplicas aceptan escrituras?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Any replica, in any Region"
+        },
+        {
+          "id": "B",
+          "text": "Only the primary Region's replica"
+        }
+      ],
+      "answer": "A",
+      "why": "Global tables es multi-activo: cualquier réplica lee y escribe. Un único writer es el modelo de Aurora Global Database."
+    },
+    {
+      "id": "dynamodb--l19",
+      "conceptId": "dynamodb-backups-pitr",
+      "format": "thisorthat",
+      "prompt": "Keep a month-end DynamoDB table snapshot for seven years → ?",
+      "promptEs": "Guardar un snapshot de fin de mes de una tabla DynamoDB por siete años → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Point-in-time recovery"
+        },
+        {
+          "id": "B",
+          "text": "On-demand backup"
+        }
+      ],
+      "answer": "B",
+      "why": "PITR solo cubre hasta 35 días. Para retención larga se usa un on-demand backup, que conserva el estado completo de la tabla."
+    },
+    {
+      "id": "dynamodb--l20",
+      "conceptId": "dynamodb-backups-pitr",
+      "format": "lightning",
+      "prompt": "DynamoDB PITR restores the data into → ?",
+      "promptEs": "DynamoDB PITR restaura los datos en → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The same table, in place"
+        },
+        {
+          "id": "B",
+          "text": "A new DynamoDB table"
+        },
+        {
+          "id": "C",
+          "text": "An Amazon S3 bucket"
+        },
+        {
+          "id": "D",
+          "text": "A global table replica"
+        }
+      ],
+      "answer": "B",
+      "why": "PITR siempre crea una tabla nueva; no sobrescribe la original. Además, las etiquetas no se conservan en la tabla restaurada."
+    },
+    {
+      "id": "dynamodb--l22",
+      "conceptId": "dynamodb-ttl",
+      "format": "thisorthat",
+      "prompt": "Attribute format that DynamoDB TTL honors → ?",
+      "promptEs": "Formato de atributo que respeta DynamoDB TTL → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ISO-8601 date string"
+        },
+        {
+          "id": "B",
+          "text": "Number, Unix epoch seconds"
+        }
+      ],
+      "answer": "B",
+      "why": "TTL solo reconoce un Number con segundos Unix epoch. Una fecha guardada como string se ignora aunque parezca un timestamp."
+    },
+    {
+      "id": "dynamodb--l23",
+      "conceptId": "dynamodb-dax",
+      "format": "lightning",
+      "prompt": "Hot DynamoDB items need microsecond reads with minimal code changes → ?",
+      "promptEs": "Items populares de DynamoDB necesitan lecturas en microsegundos con mínimos cambios de código → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ElastiCache for Redis OSS"
+        },
+        {
+          "id": "B",
+          "text": "More read capacity units"
+        },
+        {
+          "id": "C",
+          "text": "A global secondary index"
+        },
+        {
+          "id": "D",
+          "text": "DynamoDB Accelerator (DAX)"
+        }
+      ],
+      "answer": "D",
+      "why": "DAX es compatible con la API de DynamoDB, así que casi no cambias código, y baja lecturas repetidas a microsegundos. Con Redis tendrías que programar la caché."
+    },
+    {
+      "id": "dynamodb--l24",
+      "conceptId": "dynamodb-dax",
+      "format": "thisorthat",
+      "prompt": "Reads must be strongly consistent. Is DAX a good fit?",
+      "promptEs": "Las lecturas deben ser fuertemente consistentes. ¿DAX encaja?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, read DynamoDB directly"
+        },
+        {
+          "id": "B",
+          "text": "Yes, DAX caches them"
+        }
+      ],
+      "answer": "A",
+      "why": "DAX acelera lecturas eventualmente consistentes. Si el requisito es consistencia fuerte, DAX no es la opción."
+    },
+    {
+      "id": "dynamodb--l25",
+      "conceptId": "dynamodb-dax",
+      "format": "lightning",
+      "prompt": "Which DynamoDB workload benefits most from DAX?",
+      "promptEs": "¿Qué carga de DynamoDB se beneficia más de DAX?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Write-heavy data ingestion"
+        },
+        {
+          "id": "B",
+          "text": "Strongly consistent reads"
+        },
+        {
+          "id": "C",
+          "text": "Repeated reads of hot items"
+        },
+        {
+          "id": "D",
+          "text": "Pub/sub leaderboard updates"
+        }
+      ],
+      "answer": "C",
+      "why": "DAX rinde mejor con muchas lecturas repetidas y alta tasa de aciertos. Cargas de escritura, lecturas fuertes o pub/sub no encajan."
+    }
+  ],
+  "audited": true
+}

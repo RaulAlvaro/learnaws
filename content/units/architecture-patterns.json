@@ -1,0 +1,326 @@
+{
+  "unitId": "architecture-patterns",
+  "overview": {
+    "title": "Microservicios y apps serverless",
+    "hook": "Servicios pequeños e independientes, y una web completa sin servidores.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "user",
+          "label": "Navegador",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "s3",
+          "label": "S3 (web)",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 30,
+          "y": 18
+        },
+        {
+          "id": "apigw",
+          "label": "API Gateway",
+          "kind": "service",
+          "service": "Amazon API Gateway",
+          "x": 30,
+          "y": 75
+        },
+        {
+          "id": "lambda",
+          "label": "Lambda",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 55,
+          "y": 75
+        },
+        {
+          "id": "ddb",
+          "label": "DynamoDB",
+          "kind": "service",
+          "service": "Amazon DynamoDB",
+          "x": 82,
+          "y": 75
+        },
+        {
+          "id": "evt",
+          "label": "Evento / cola",
+          "kind": "service",
+          "service": "Amazon EventBridge",
+          "x": 58,
+          "y": 30
+        },
+        {
+          "id": "svc2",
+          "label": "Otro servicio",
+          "kind": "actor",
+          "x": 85,
+          "y": 30
+        }
+      ],
+      "edges": [
+        {
+          "from": "user",
+          "to": "s3",
+          "label": "HTML, JS"
+        },
+        {
+          "from": "user",
+          "to": "apigw",
+          "label": "API"
+        },
+        {
+          "from": "apigw",
+          "to": "lambda"
+        },
+        {
+          "from": "lambda",
+          "to": "ddb"
+        },
+        {
+          "from": "lambda",
+          "to": "evt",
+          "label": "async"
+        },
+        {
+          "from": "evt",
+          "to": "svc2"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "En un monolito, todo vive en una sola aplicación: cambiar los certificados obliga a redesplegar las inscripciones. Los microservicios parten la app en servicios pequeños, cada uno de un equipo, con su API y sus propios datos, que se despliegan y escalan por separado.",
+        "show": [
+          "user",
+          "apigw"
+        ],
+        "focus": "apigw"
+      },
+      {
+        "narration": "Veamos el patrón serverless que más sale en el examen. Primero, la parte web: los archivos HTML, JavaScript e imágenes de una single-page application se sirven desde Amazon S3, sin servidor web que mantener.",
+        "show": [
+          "user",
+          "apigw",
+          "s3"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "Luego, la API: Amazon API Gateway recibe las peticiones del navegador y AWS Lambda ejecuta la lógica. Ambos escalan solos con el tráfico, ideal para picos impredecibles y equipos pequeños que no quieren administrar servidores.",
+        "show": [
+          "user",
+          "apigw",
+          "s3",
+          "lambda"
+        ],
+        "focus": "lambda"
+      },
+      {
+        "narration": "Por último, los datos: Amazon DynamoDB guarda la información de la aplicación. Así cada capa tiene un papel claro: S3 para la web, API Gateway para la API, Lambda para la lógica y DynamoDB para los datos.",
+        "show": [
+          "user",
+          "apigw",
+          "s3",
+          "lambda",
+          "ddb"
+        ],
+        "focus": "ddb"
+      },
+      {
+        "narration": "Entre servicios, pregúntate si la respuesta al usuario necesita esperar. Si otro servicio puede trabajar después, publica un evento o deja un mensaje en una cola. Una cadena de llamadas síncronas hace que el usuario espere a trabajo que podía ser asíncrono.",
+        "show": [
+          "user",
+          "apigw",
+          "s3",
+          "lambda",
+          "ddb",
+          "evt",
+          "svc2"
+        ],
+        "focus": "evt"
+      },
+      {
+        "narration": "Cuidado con las trampas. Meter un monolito entero en un contenedor no lo vuelve microservicios, y que todos escriban en una misma base de datos sigue acoplando. Y si el enunciado dice sin servidores, descarta EC2 para la lógica.",
+        "show": [
+          "user",
+          "apigw",
+          "s3",
+          "lambda",
+          "ddb",
+          "evt",
+          "svc2"
+        ],
+        "focus": "svc2"
+      }
+    ],
+    "keyPoints": [
+      "Microservicios: equipos autónomos, despliegue y escalado independientes.",
+      "Cada servicio es dueño de sus datos; nada de esquema compartido.",
+      "Serverless web: S3, API Gateway, Lambda y DynamoDB.",
+      "Si no hace falta esperar, comunica por eventos o colas.",
+      "Sin servidores que administrar: descarta EC2 en la capa lógica."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Monolito en contenedor",
+        "difference": "Contenerizar todo junto no permite desplegar partes por separado; eso requiere servicios independientes."
+      },
+      {
+        "unitOrService": "Sitio estático en S3",
+        "difference": "S3 solo sirve la web; sin API Gateway y Lambda no hay API ni lógica."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "architecture-patterns--l1",
+      "conceptId": "serverless-web-app-pattern",
+      "format": "lightning",
+      "prompt": "Single-page app with API and saved data; no servers to manage → ?",
+      "promptEs": "Single-page app con API y datos guardados; sin servidores que administrar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 Auto Scaling, ALB, and RDS"
+        },
+        {
+          "id": "B",
+          "text": "S3, API Gateway, Lambda, DynamoDB"
+        },
+        {
+          "id": "C",
+          "text": "S3 static website only"
+        },
+        {
+          "id": "D",
+          "text": "Elastic Beanstalk with Amazon RDS"
+        }
+      ],
+      "answer": "B",
+      "why": "Web, API, lógica y datos sin servidores: S3, API Gateway, Lambda y DynamoDB. EC2 y Beanstalk dejan servidores que gestionar; S3 solo no da API."
+    },
+    {
+      "id": "architecture-patterns--l3",
+      "conceptId": "serverless-web-app-pattern",
+      "format": "thisorthat",
+      "prompt": "Spiky traffic, small team refuses to manage servers → logic tier?",
+      "promptEs": "Tráfico con picos y equipo pequeño que no quiere administrar servidores → ¿capa lógica?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Lambda"
+        },
+        {
+          "id": "B",
+          "text": "EC2 Auto Scaling group"
+        }
+      ],
+      "answer": "A",
+      "why": "Lambda escala con cada petición y no hay servidores que parchear. Un Auto Scaling group escala, pero sigue siendo una flota de instancias que administrar."
+    },
+    {
+      "id": "architecture-patterns--l4",
+      "conceptId": "serverless-web-app-pattern",
+      "format": "lightning",
+      "prompt": "Host a front-end web app with Git-based CI/CD, minimal setup → ?",
+      "promptEs": "Alojar el front-end de una web con CI/CD desde Git y mínima configuración → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Amplify Hosting"
+        },
+        {
+          "id": "B",
+          "text": "EC2 with Nginx"
+        },
+        {
+          "id": "C",
+          "text": "Amazon API Gateway"
+        },
+        {
+          "id": "D",
+          "text": "AWS Step Functions"
+        }
+      ],
+      "answer": "A",
+      "why": "Amplify Hosting conecta tu repositorio Git y compila y publica el front-end en cada cambio. EC2 exige gestionar servidores; API Gateway expone APIs, no aloja la web."
+    },
+    {
+      "id": "architecture-patterns--l5",
+      "conceptId": "microservices-design",
+      "format": "lightning",
+      "prompt": "Analytics must never delay the reservation confirmation → ?",
+      "promptEs": "La analítica nunca debe retrasar la confirmación de la reserva → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Synchronous call to analytics API"
+        },
+        {
+          "id": "B",
+          "text": "Shared analytics database table"
+        },
+        {
+          "id": "C",
+          "text": "Emit an event after confirming"
+        },
+        {
+          "id": "D",
+          "text": "Bigger reservation service instances"
+        }
+      ],
+      "answer": "C",
+      "why": "Un evento tras confirmar deja que analítica trabaje después, sin estar en el camino de la respuesta. La llamada síncrona crea justo la espera que se prohíbe."
+    },
+    {
+      "id": "architecture-patterns--l6",
+      "conceptId": "microservices-design",
+      "format": "thisorthat",
+      "prompt": "Each team must control changes to its own capability's data → ?",
+      "promptEs": "Cada equipo debe controlar los cambios en los datos de su propia capacidad → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One shared writable schema"
+        },
+        {
+          "id": "B",
+          "text": "Service-owned data stores"
+        }
+      ],
+      "answer": "B",
+      "why": "Con un almacén de datos por servicio, cada equipo cambia sus datos sin coordinar con los demás. Un esquema compartido mantiene el acoplamiento aunque separes el código."
+    },
+    {
+      "id": "architecture-patterns--l7",
+      "conceptId": "microservices-design",
+      "format": "lightning",
+      "prompt": "Teams must release their features without a shared deployment → ?",
+      "promptEs": "Los equipos deben publicar sus funciones sin un despliegue compartido → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Monolith packaged in one container"
+        },
+        {
+          "id": "B",
+          "text": "Shared library released together"
+        },
+        {
+          "id": "C",
+          "text": "One larger EC2 instance"
+        },
+        {
+          "id": "D",
+          "text": "Independently deployable services"
+        }
+      ],
+      "answer": "D",
+      "why": "Solo servicios desplegables por separado, con interfaces definidas, permiten releases independientes. Un monolito en contenedor sigue saliendo todo junto."
+    }
+  ],
+  "audited": true
+}

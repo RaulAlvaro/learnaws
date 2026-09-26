@@ -1,0 +1,237 @@
+{
+  "unitId": "opensearch",
+  "overview": {
+    "title": "Amazon OpenSearch Service",
+    "hook": "Buscar texto en millones de logs y eventos, casi en tiempo real.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "src",
+          "label": "Apps y logs",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "cwl",
+          "label": "CloudWatch Logs",
+          "kind": "service",
+          "service": "Amazon CloudWatch",
+          "x": 30,
+          "y": 20
+        },
+        {
+          "id": "fh",
+          "label": "Data Firehose",
+          "kind": "service",
+          "service": "Amazon Data Firehose",
+          "x": 30,
+          "y": 80
+        },
+        {
+          "id": "os",
+          "label": "Dominio OpenSearch",
+          "kind": "service",
+          "service": "Amazon OpenSearch Service",
+          "x": 58,
+          "y": 50
+        },
+        {
+          "id": "dash",
+          "label": "Dashboards",
+          "kind": "note",
+          "x": 88,
+          "y": 22
+        },
+        {
+          "id": "tiers",
+          "label": "UltraWarm / cold",
+          "kind": "note",
+          "x": 88,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "src",
+          "to": "cwl",
+          "label": "logs"
+        },
+        {
+          "from": "src",
+          "to": "fh",
+          "label": "eventos"
+        },
+        {
+          "from": "cwl",
+          "to": "os",
+          "label": "suscripción"
+        },
+        {
+          "from": "fh",
+          "to": "os",
+          "label": "indexa"
+        },
+        {
+          "from": "os",
+          "to": "dash",
+          "label": "explorar"
+        },
+        {
+          "from": "os",
+          "to": "tiers",
+          "label": "datos antiguos"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Imagina millones de líneas de log y un incidente en curso: necesitas encontrar un mensaje por texto en segundos. Amazon OpenSearch Service es un servicio administrado de búsqueda y análisis, pensado para búsqueda de texto completo y análisis de logs casi en tiempo real.",
+        "show": [
+          "os"
+        ],
+        "focus": "os"
+      },
+      {
+        "narration": "Los datos llegan en streaming desde varias fuentes: Kinesis o Data Firehose, DynamoDB, o CloudWatch Logs mediante una suscripción. OpenSearch los indexa, y ese índice es lo que hace rápida la búsqueda.",
+        "show": [
+          "os",
+          "src",
+          "cwl",
+          "fh"
+        ],
+        "focus": "fh"
+      },
+      {
+        "narration": "Tu despliegue se llama dominio: un clúster de OpenSearch administrado. Para alta disponibilidad, reparte los nodos entre dos o tres Availability Zones de una Region. Ojo: aunque es administrado, un dominio provisionado sigue teniendo nodos y almacenamiento configurados.",
+        "show": [
+          "os",
+          "src",
+          "cwl",
+          "fh"
+        ],
+        "focus": "os"
+      },
+      {
+        "narration": "Para explorar los datos visualmente tienes OpenSearch Dashboards. Y para los logs antiguos que ya solo se leen, UltraWarm y cold storage son niveles de almacenamiento más baratos.",
+        "show": [
+          "os",
+          "src",
+          "cwl",
+          "fh",
+          "dash",
+          "tiers"
+        ],
+        "focus": "tiers"
+      },
+      {
+        "narration": "La palabra clave es buscar. Búsqueda de texto y exploración de eventos indexados, OpenSearch. SQL ocasional sobre archivos en S3, Athena. Dashboards de negocio, Quick Sight. Analítica estructurada de warehouse, Redshift.",
+        "show": [
+          "os",
+          "src",
+          "cwl",
+          "fh",
+          "dash",
+          "tiers"
+        ],
+        "focus": "dash"
+      }
+    ],
+    "keyPoints": [
+      "Búsqueda de texto y análisis de logs: OpenSearch Service.",
+      "Ingesta desde Firehose, Kinesis, DynamoDB o CloudWatch Logs.",
+      "Alta disponibilidad: nodos en dos o tres AZ.",
+      "Logs antiguos de solo lectura: UltraWarm o cold storage."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon Athena",
+        "difference": "Athena lanza SQL ad hoc sobre archivos en S3; OpenSearch indexa para búsqueda interactiva."
+      },
+      {
+        "unitOrService": "Amazon Quick Sight",
+        "difference": "Quick Sight da dashboards de BI; OpenSearch Dashboards explora datos indexados en OpenSearch."
+      },
+      {
+        "unitOrService": "Amazon Redshift",
+        "difference": "Redshift es analítica estructurada de warehouse; OpenSearch es búsqueda de texto y logs."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "opensearch--l1",
+      "conceptId": "opensearch",
+      "format": "lightning",
+      "prompt": "Search application log messages by free text in near real time → ?",
+      "promptEs": "Buscar mensajes de logs de aplicación por texto libre casi en tiempo real → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Athena"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Redshift"
+        },
+        {
+          "id": "C",
+          "text": "Amazon OpenSearch Service"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Quick Sight"
+        }
+      ],
+      "answer": "C",
+      "why": "OpenSearch indexa los eventos para búsqueda de texto y exploración casi en tiempo real. Athena sirve para SQL ocasional sobre S3, no para búsqueda interactiva indexada."
+    },
+    {
+      "id": "opensearch--l2",
+      "conceptId": "opensearch",
+      "format": "lightning",
+      "prompt": "Cheaper storage for older, read-only logs inside OpenSearch → ?",
+      "promptEs": "Almacenamiento más barato para logs antiguos de solo lectura dentro de OpenSearch → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "UltraWarm storage"
+        },
+        {
+          "id": "B",
+          "text": "More hot data nodes"
+        },
+        {
+          "id": "C",
+          "text": "Larger EBS volumes"
+        },
+        {
+          "id": "D",
+          "text": "Redshift Spectrum"
+        }
+      ],
+      "answer": "A",
+      "why": "UltraWarm y cold storage son niveles económicos para datos de solo lectura. Más nodos o discos más grandes mantienen el costo del nivel caliente."
+    },
+    {
+      "id": "opensearch--l3",
+      "conceptId": "opensearch",
+      "format": "thisorthat",
+      "prompt": "Stream CloudWatch Logs into a managed service to search and dashboard them → ?",
+      "promptEs": "Enviar CloudWatch Logs a un servicio administrado para buscarlos y verlos en dashboards → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Athena"
+        },
+        {
+          "id": "B",
+          "text": "Amazon OpenSearch Service"
+        }
+      ],
+      "answer": "B",
+      "why": "CloudWatch Logs puede transmitir datos a OpenSearch, que indexa y ofrece OpenSearch Dashboards. Athena no recibe streams: consulta archivos ya guardados en S3."
+    }
+  ],
+  "audited": true
+}

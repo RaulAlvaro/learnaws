@@ -1,0 +1,589 @@
+{
+  "unitId": "high-availability",
+  "overview": {
+    "title": "Diseño de alta disponibilidad",
+    "hook": "Busca el componente sin alternativa sana y dale una.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "users",
+          "label": "Usuarios",
+          "kind": "actor",
+          "x": 8,
+          "y": 45
+        },
+        {
+          "id": "r53",
+          "label": "Route 53",
+          "kind": "service",
+          "service": "Amazon Route 53",
+          "x": 28,
+          "y": 45
+        },
+        {
+          "id": "alb",
+          "label": "Load balancer",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 48,
+          "y": 45
+        },
+        {
+          "id": "asg",
+          "label": "ASG en 2 AZs",
+          "kind": "service",
+          "service": "Amazon EC2 Auto Scaling",
+          "x": 68,
+          "y": 45
+        },
+        {
+          "id": "rds",
+          "label": "RDS Multi-AZ",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 90,
+          "y": 45
+        },
+        {
+          "id": "nat",
+          "label": "NAT GW por AZ",
+          "kind": "note",
+          "x": 68,
+          "y": 85
+        },
+        {
+          "id": "region2",
+          "label": "Región secundaria",
+          "kind": "zone",
+          "x": 28,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "users",
+          "to": "r53",
+          "label": "DNS"
+        },
+        {
+          "from": "r53",
+          "to": "alb",
+          "label": "endpoint sano"
+        },
+        {
+          "from": "alb",
+          "to": "asg",
+          "label": "solo targets sanos"
+        },
+        {
+          "from": "asg",
+          "to": "rds",
+          "label": "failover automático"
+        },
+        {
+          "from": "asg",
+          "to": "nat",
+          "label": "salida privada"
+        },
+        {
+          "from": "r53",
+          "to": "region2",
+          "label": "failover DNS"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Imagina tu aplicación en una sola instancia dentro de una sola AZ. Si esa instancia o esa AZ cae, todo cae. Alta disponibilidad es eliminar cada single point of failure: cualquier componente que no tenga una alternativa sana hacia donde pasar.",
+        "show": [
+          "users",
+          "asg"
+        ],
+        "focus": "asg"
+      },
+      {
+        "narration": "Una app típica tiene tres capas: presentación, lógica de negocio y datos, y cada una debe sobrevivir por separado. Si no quieres administrar servidores, considera S3 con CloudFront, API Gateway con Lambda y DynamoDB: AWS gestiona la disponibilidad de estos servicios.",
+        "show": [
+          "users",
+          "asg"
+        ],
+        "focus": "users"
+      },
+      {
+        "narration": "Con servidores, un load balancer reparte tráfico a un Auto Scaling group en al menos dos AZs. Los health checks permiten apartar targets no sanos y reemplazar instancias fallidas. Excepción: si todos los targets están no sanos, un ALB puede enviarles tráfico (fail-open).",
+        "show": [
+          "users",
+          "asg",
+          "alb"
+        ],
+        "focus": "alb"
+      },
+      {
+        "narration": "La trampa clásica: web en dos AZs, pero la base de datos en una sola. Usa RDS Multi-AZ para tener un standby en otra AZ con failover automático. Lo mismo con la red: un NAT gateway por AZ, no uno compartido.",
+        "show": [
+          "users",
+          "asg",
+          "alb",
+          "rds",
+          "nat"
+        ],
+        "focus": "rds"
+      },
+      {
+        "narration": "Una sola conexión Direct Connect también es un punto único; agrega otra independiente en otra ubicación. Y si debes sobrevivir a la caída de toda una Region, necesitas cómputo y datos en una segunda Region, más Route 53 con failover por health checks.",
+        "show": [
+          "users",
+          "asg",
+          "alb",
+          "rds",
+          "nat",
+          "r53",
+          "region2"
+        ],
+        "focus": "region2"
+      },
+      {
+        "narration": "Si el requisito es solo tolerar la pérdida de una AZ, no añadas otra Region por eso: Multi-AZ puede bastar. Evalúa también RTO, RPO y residencia de datos. Cambiar DNS no ayuda si la otra Region no tiene aplicación ni datos.",
+        "show": [
+          "users",
+          "asg",
+          "alb",
+          "rds",
+          "nat",
+          "r53",
+          "region2"
+        ],
+        "focus": "r53"
+      },
+      {
+        "narration": "Si una app legacy vive en una sola instancia, EC2 automatic recovery puede recuperarla tras una falla del host, conservando instance ID, IPs y volúmenes EBS. No la mueve a otra AZ. Para seguir atendiendo usuarios durante la falla, necesitas instancias sanas detrás del balanceador.",
+        "show": [
+          "users",
+          "asg",
+          "alb",
+          "rds",
+          "nat",
+          "r53",
+          "region2"
+        ],
+        "focus": "asg"
+      }
+    ],
+    "keyPoints": [
+      "Despliega en varias AZs; S3, CloudFront y DynamoDB ya son gestionados.",
+      "Health checks apartan targets no sanos; si todos fallan: fail-open.",
+      "Un NAT gateway por AZ; Direct Connect redundante.",
+      "Tolerar perder una AZ no exige multi-Region.",
+      "EC2 automatic recovery: misma instancia y AZ tras falla del host."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Arquitectura multi-Region",
+        "difference": "Se justifica por caída regional, latencia global, residencia de datos o cumplimiento; no por perder una AZ."
+      },
+      {
+        "unitOrService": "EC2 automatic recovery",
+        "difference": "Recupera una instancia conservando ID e IPs; Auto Scaling mantiene capacidad reemplazando instancias."
+      },
+      {
+        "unitOrService": "Backups",
+        "difference": "Ayudan a recuperar después, pero no sirven tráfico durante la falla como un standby Multi-AZ."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "high-availability--l1",
+      "conceptId": "multi-tier-architecture",
+      "format": "lightning",
+      "prompt": "Serverless three tiers: CDN for assets, REST business logic, NoSQL data → ?",
+      "promptEs": "Tres capas serverless: CDN para assets, lógica de negocio REST, datos NoSQL → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ALB/EC2 Auto Scaling, RDS Multi-AZ"
+        },
+        {
+          "id": "B",
+          "text": "S3/CloudFront, API Gateway only, DynamoDB"
+        },
+        {
+          "id": "C",
+          "text": "S3/CloudFront, API Gateway/Lambda, DynamoDB"
+        },
+        {
+          "id": "D",
+          "text": "S3/CloudFront, API Gateway/Lambda, Amazon RDS"
+        }
+      ],
+      "answer": "C",
+      "why": "Cada capa usa su servicio serverless: CDN para presentación, Lambda para la lógica y DynamoDB como NoSQL. API Gateway solo no ejecuta lógica; RDS no es NoSQL serverless."
+    },
+    {
+      "id": "high-availability--l2",
+      "conceptId": "multi-tier-architecture",
+      "format": "thisorthat",
+      "prompt": "REST API must apply scheduling rules before storing records, no servers → ?",
+      "promptEs": "Una API REST debe aplicar reglas de agenda antes de guardar registros, sin servidores → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "API Gateway plus Lambda"
+        },
+        {
+          "id": "B",
+          "text": "API Gateway alone"
+        }
+      ],
+      "answer": "A",
+      "why": "API Gateway es la puerta de entrada, pero no aporta código de negocio. Lambda ejecuta las reglas sin que administres servidores."
+    },
+    {
+      "id": "high-availability--l3",
+      "conceptId": "multi-tier-architecture",
+      "format": "lightning",
+      "prompt": "Serverless NoSQL data tier for ticket records and transactions → ?",
+      "promptEs": "Capa de datos NoSQL serverless para registros de tickets y transacciones → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon RDS for MySQL"
+        },
+        {
+          "id": "C",
+          "text": "Amazon ElastiCache"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Redshift"
+        }
+      ],
+      "answer": "A",
+      "why": "DynamoDB es la capa de datos NoSQL serverless del patrón de tres capas. RDS es relacional con instancias; ElastiCache es caché y Redshift es data warehouse."
+    },
+    {
+      "id": "high-availability--l4",
+      "conceptId": "multi-tier-architecture",
+      "format": "lightning",
+      "prompt": "Add managed customer sign-in to a serverless web application → ?",
+      "promptEs": "Agregar inicio de sesión gestionado de clientes a una app web serverless → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM users per customer"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Cognito user pools"
+        },
+        {
+          "id": "C",
+          "text": "API Gateway resource policy"
+        },
+        {
+          "id": "D",
+          "text": "CloudFront signed cookies"
+        }
+      ],
+      "answer": "B",
+      "why": "Cognito user pools autentica usuarios finales de forma gestionada. Los IAM users son para identidades de AWS, no para clientes de una app."
+    },
+    {
+      "id": "high-availability--l5",
+      "conceptId": "multi-az-high-availability",
+      "format": "lightning",
+      "prompt": "Web tier spans two AZs, RDS sits in one AZ. Survive AZ loss → ?",
+      "promptEs": "La capa web abarca dos AZs, RDS está en una sola. Sobrevivir a perder una AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add more web instances"
+        },
+        {
+          "id": "B",
+          "text": "Nightly RDS snapshots"
+        },
+        {
+          "id": "C",
+          "text": "Bigger RDS instance class"
+        },
+        {
+          "id": "D",
+          "text": "RDS Multi-AZ deployment"
+        }
+      ],
+      "answer": "D",
+      "why": "Si la base queda en una AZ, perderla tumba la app aunque la web sobreviva. Multi-AZ da un standby con failover; los snapshots solo sirven para restaurar después."
+    },
+    {
+      "id": "high-availability--l7",
+      "conceptId": "multi-az-high-availability",
+      "format": "lightning",
+      "prompt": "EC2 app must keep serving if either AZ fails, no manual recovery → ?",
+      "promptEs": "App en EC2 debe seguir atendiendo si cae cualquier AZ, sin recuperación manual → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Bigger instance in one AZ"
+        },
+        {
+          "id": "B",
+          "text": "Cluster placement group"
+        },
+        {
+          "id": "C",
+          "text": "Auto Scaling group across AZs, ALB"
+        },
+        {
+          "id": "D",
+          "text": "EC2 automatic recovery, single AZ"
+        }
+      ],
+      "answer": "C",
+      "why": "Un Auto Scaling group en varias AZs detrás de un ALB mantiene capacidad sana en la AZ que sobrevive. La recuperación automática no mueve la instancia a otra AZ."
+    },
+    {
+      "id": "high-availability--l10",
+      "conceptId": "multi-region-architecture",
+      "format": "lightning",
+      "prompt": "Serve users from another Region if the primary Region fails → needs?",
+      "promptEs": "Atender usuarios desde otra Region si falla la Region principal → ¿qué se necesita?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route 53 failover record only"
+        },
+        {
+          "id": "B",
+          "text": "S3 Cross-Region Replication only"
+        },
+        {
+          "id": "C",
+          "text": "Compute, data and DNS redirection"
+        },
+        {
+          "id": "D",
+          "text": "RDS Multi-AZ in primary Region"
+        }
+      ],
+      "answer": "C",
+      "why": "La recuperación regional exige cómputo, datos usables y una forma de dirigir usuarios. Cambiar DNS sin aplicación, o copiar datos sin cómputo, no restaura el servicio."
+    },
+    {
+      "id": "high-availability--l11",
+      "conceptId": "multi-region-architecture",
+      "format": "lightning",
+      "prompt": "Business requirements that decide how much regional DR you need → ?",
+      "promptEs": "Requisitos de negocio que deciden cuánto DR regional necesitas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Instance count and size"
+        },
+        {
+          "id": "B",
+          "text": "Number of Availability Zones"
+        },
+        {
+          "id": "C",
+          "text": "Service Quotas per Region"
+        },
+        {
+          "id": "D",
+          "text": "RTO and RPO"
+        }
+      ],
+      "answer": "D",
+      "why": "RTO (cuánto puedes estar caído) y RPO (cuántos datos puedes perder) son requisitos de negocio. Guían si necesitas otra Region y qué tan preparada debe estar."
+    },
+    {
+      "id": "high-availability--l12",
+      "conceptId": "single-point-of-failure-mitigation",
+      "format": "lightning",
+      "prompt": "Private subnets in two AZs route through one NAT gateway → fix?",
+      "promptEs": "Subnets privadas en dos AZs salen por un solo NAT gateway → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Internet gateway in each AZ"
+        },
+        {
+          "id": "B",
+          "text": "One NAT gateway per AZ"
+        },
+        {
+          "id": "C",
+          "text": "Second route to same NAT"
+        },
+        {
+          "id": "D",
+          "text": "VPC peering to another VPC"
+        }
+      ],
+      "answer": "B",
+      "why": "Si la AZ del NAT cae, la otra subnet pierde salida. Un NAT gateway por AZ, con cada subnet apuntando al suyo, elimina esa dependencia."
+    },
+    {
+      "id": "high-availability--l13",
+      "conceptId": "single-point-of-failure-mitigation",
+      "format": "lightning",
+      "prompt": "One Direct Connect link carries critical orders; keep private connectivity resilient → ?",
+      "promptEs": "Un solo enlace Direct Connect lleva pedidos críticos; conectividad privada resiliente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Second DX at separate location"
+        },
+        {
+          "id": "B",
+          "text": "Upgrade to higher DX bandwidth"
+        },
+        {
+          "id": "C",
+          "text": "Add a Direct Connect gateway"
+        },
+        {
+          "id": "D",
+          "text": "Add more application AZs"
+        }
+      ],
+      "answer": "A",
+      "why": "Una conexión en otra ubicación con failover elimina el punto único. Más ancho de banda o más AZs no ayudan si ese único enlace se corta."
+    },
+    {
+      "id": "high-availability--l14",
+      "conceptId": "single-point-of-failure-mitigation",
+      "format": "thisorthat",
+      "prompt": "Public hostname must switch to a healthy second-Region endpoint automatically → ?",
+      "promptEs": "El hostname público debe cambiar solo a un endpoint sano en otra Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route 53 simple routing record"
+        },
+        {
+          "id": "B",
+          "text": "Route 53 failover with health checks"
+        }
+      ],
+      "answer": "B",
+      "why": "Failover routing con health checks responde con el endpoint secundario cuando el primario no está sano. Simple routing no evalúa salud."
+    },
+    {
+      "id": "high-availability--l17",
+      "conceptId": "legacy-app-reliability",
+      "format": "thisorthat",
+      "prompt": "Only the instance status check fails (OS problem). Does EC2 automatic recovery act?",
+      "promptEs": "Solo falla el instance status check (problema del SO). ¿Actúa EC2 automatic recovery?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, it recovers the instance"
+        },
+        {
+          "id": "B",
+          "text": "No, only on system status failures"
+        }
+      ],
+      "answer": "B",
+      "why": "La recuperación automática responde a fallas del host (system status check). Un problema dentro del sistema operativo requiere otra solución, como reemplazar la instancia."
+    },
+    {
+      "id": "high-availability--l19",
+      "conceptId": "multi-az-high-availability",
+      "format": "thisorthat",
+      "prompt": "ALB must detect instances whose application cannot serve pages → configure?",
+      "promptEs": "El ALB debe detectar instancias cuya aplicación no puede servir páginas → ¿qué configuras?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Health checks on an application path"
+        },
+        {
+          "id": "B",
+          "text": "Cross-zone load balancing"
+        }
+      ],
+      "answer": "A",
+      "why": "Un health check que consulta una ruta de la aplicación marca esos targets como no sanos y el ALB los aparta. Ojo: si todos fallan, el ALB hace fail-open."
+    },
+    {
+      "id": "high-availability--l20",
+      "conceptId": "multi-region-architecture",
+      "format": "lightning",
+      "prompt": "Region lost; recovery Region has replicated data but no application deployed; DNS switched → result?",
+      "promptEs": "Se pierde la Region; la de recuperación tiene datos replicados pero ninguna aplicación; se cambia el DNS → ¿resultado?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Restored once DNS propagates"
+        },
+        {
+          "id": "B",
+          "text": "Restored at reduced capacity"
+        },
+        {
+          "id": "C",
+          "text": "Still down: no compute there"
+        },
+        {
+          "id": "D",
+          "text": "Restored after data sync"
+        }
+      ],
+      "answer": "C",
+      "why": "La recuperación regional necesita cómputo, datos usables y redirección de usuarios. Sin aplicación desplegada en la otra Region, cambiar el DNS no restaura el servicio."
+    },
+    {
+      "id": "high-availability--l22",
+      "conceptId": "legacy-app-reliability",
+      "format": "lightning",
+      "prompt": "Supported EC2 instance, clients use its IP; auto-restore after host failure, no alarms → ?",
+      "promptEs": "Instancia EC2 compatible, los clientes usan su IP; restaurar sola tras falla del host, sin alarmas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudWatch alarm recover action"
+        },
+        {
+          "id": "B",
+          "text": "Auto Scaling group, min=max=1"
+        },
+        {
+          "id": "C",
+          "text": "Manual relaunch from AMI"
+        },
+        {
+          "id": "D",
+          "text": "Simplified automatic recovery"
+        }
+      ],
+      "answer": "D",
+      "why": "En instancias compatibles, simplified automatic recovery viene activa y conserva instance ID, IPs y volúmenes EBS. La acción por alarma requiere configurarla; Auto Scaling crea otra instancia."
+    },
+    {
+      "id": "high-availability--l23",
+      "conceptId": "legacy-app-reliability",
+      "format": "thisorthat",
+      "prompt": "EC2 automatic recovery after a host failure: where does the instance run?",
+      "promptEs": "EC2 automatic recovery tras una falla del host: ¿dónde queda corriendo la instancia?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Same Availability Zone"
+        },
+        {
+          "id": "B",
+          "text": "A different, healthy AZ"
+        }
+      ],
+      "answer": "A",
+      "why": "La recuperación conserva la AZ, el instance ID y las IPs. No protege contra perder la AZ: para eso necesitas instancias en varias AZs."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,330 @@
+{
+  "unitId": "ai-services",
+  "overview": {
+    "title": "Servicios de IA de AWS",
+    "hook": "Modelos ya entrenados: eliges según lo que entra y lo que quieres obtener.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "text",
+          "label": "Texto",
+          "kind": "data",
+          "x": 8,
+          "y": 15
+        },
+        {
+          "id": "voice",
+          "label": "Voz",
+          "kind": "data",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "visual",
+          "label": "Imagen, video, PDF",
+          "kind": "data",
+          "x": 8,
+          "y": 85
+        },
+        {
+          "id": "comp",
+          "label": "Comprehend",
+          "kind": "service",
+          "service": "Amazon Comprehend",
+          "x": 62,
+          "y": 15
+        },
+        {
+          "id": "transcribe",
+          "label": "Transcribe / Polly",
+          "kind": "service",
+          "service": "Amazon Transcribe",
+          "x": 38,
+          "y": 50
+        },
+        {
+          "id": "rek",
+          "label": "Rekognition",
+          "kind": "service",
+          "service": "Amazon Rekognition",
+          "x": 45,
+          "y": 85
+        },
+        {
+          "id": "textract",
+          "label": "Textract",
+          "kind": "service",
+          "service": "Amazon Textract",
+          "x": 80,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "text",
+          "to": "comp",
+          "label": "sentimiento, PII"
+        },
+        {
+          "from": "voice",
+          "to": "transcribe",
+          "label": "voz ↔ texto"
+        },
+        {
+          "from": "transcribe",
+          "to": "comp",
+          "label": "transcripción"
+        },
+        {
+          "from": "visual",
+          "to": "rek",
+          "label": "objetos, rostros"
+        },
+        {
+          "from": "visual",
+          "to": "textract",
+          "label": "formularios, tablas"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Antes de entrenar un modelo propio, pregúntate si AWS ya ofrece uno listo. Los servicios de IA son APIs pre-entrenadas: envías texto, voz, imágenes o documentos, y recibes el resultado sin saber machine learning. Se eligen según qué entra y qué quieres obtener.",
+        "show": [
+          "text",
+          "voice",
+          "visual"
+        ],
+        "focus": "text"
+      },
+      {
+        "narration": "Para texto, Amazon Comprehend entiende el contenido: detecta entidades, frases clave, idioma, sentimiento y datos personales, o PII. Amazon Translate, en cambio, cambia el idioma. Detectar el idioma no es traducirlo.",
+        "show": [
+          "text",
+          "voice",
+          "visual",
+          "comp"
+        ],
+        "focus": "comp"
+      },
+      {
+        "narration": "Para voz hay dos servicios en direcciones opuestas. Amazon Transcribe convierte audio en texto, en streaming o por lotes desde S3. Amazon Polly convierte texto en voz. Y Amazon Lex construye chatbots conversacionales.",
+        "show": [
+          "text",
+          "voice",
+          "visual",
+          "comp",
+          "transcribe"
+        ],
+        "focus": "transcribe"
+      },
+      {
+        "narration": "Se combinan bien: Transcribe convierte llamadas grabadas en texto buscable, y después Comprehend analiza su sentimiento o detecta PII. Translate podría traducir esas transcripciones a otro idioma.",
+        "show": [
+          "text",
+          "voice",
+          "visual",
+          "comp",
+          "transcribe"
+        ],
+        "focus": "comp"
+      },
+      {
+        "narration": "Para lo visual, Amazon Rekognition analiza imágenes y video: objetos, rostros, comparación de caras y contenido inapropiado para moderar. Amazon Textract extrae texto, campos de formularios y tablas de documentos escaneados, en imágenes o PDF.",
+        "show": [
+          "text",
+          "voice",
+          "visual",
+          "comp",
+          "transcribe",
+          "rek",
+          "textract"
+        ],
+        "focus": "rek"
+      },
+      {
+        "narration": "La clave es la tarea, no si el archivo es una foto: para rostros o moderación, Rekognition; para extraer texto, campos o tablas de un documento fotografiado, Textract. Si un servicio pre-entrenado cumple el requisito, no construyas un modelo propio en SageMaker AI.",
+        "show": [
+          "text",
+          "voice",
+          "visual",
+          "comp",
+          "transcribe",
+          "rek",
+          "textract"
+        ],
+        "focus": "textract"
+      }
+    ],
+    "keyPoints": [
+      "Sentimiento, entidades o PII en texto: Comprehend.",
+      "Audio a texto: Transcribe; texto a voz: Polly.",
+      "Chatbot: Lex; traducir entre idiomas: Translate.",
+      "Objetos, rostros y moderación de imágenes: Rekognition.",
+      "Texto, formularios y tablas de documentos, incluso fotografiados: Textract."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon SageMaker AI",
+        "difference": "SageMaker AI entrena modelos propios; los servicios de IA ya vienen entrenados para tareas comunes."
+      },
+      {
+        "unitOrService": "Amazon Polly vs Amazon Transcribe",
+        "difference": "Polly habla: texto a voz. Transcribe escucha: voz a texto."
+      },
+      {
+        "unitOrService": "Amazon Rekognition vs Amazon Textract",
+        "difference": "Rekognition analiza contenido visual; Textract extrae texto, formularios y tablas de documentos, incluso fotografiados."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ai-services--l1",
+      "conceptId": "ai-language-services",
+      "format": "lightning",
+      "prompt": "Detect PII and sentiment in customer support messages → ?",
+      "promptEs": "Detectar PII y sentimiento en mensajes de soporte al cliente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Translate"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Comprehend"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Textract"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Lex"
+        }
+      ],
+      "answer": "B",
+      "why": "Comprehend analiza el significado del texto: sentimiento, entidades y PII. Textract extrae texto de documentos, pero no lo interpreta."
+    },
+    {
+      "id": "ai-services--l2",
+      "conceptId": "ai-language-services",
+      "format": "thisorthat",
+      "prompt": "Turn recorded customer calls into searchable text → ?",
+      "promptEs": "Convertir llamadas grabadas de clientes en texto buscable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Transcribe"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Polly"
+        }
+      ],
+      "answer": "A",
+      "why": "Transcribe convierte voz en texto. Polly hace lo contrario: convierte texto en voz."
+    },
+    {
+      "id": "ai-services--l3",
+      "conceptId": "ai-language-services",
+      "format": "lightning",
+      "prompt": "Conversational chatbot to answer order-status questions → ?",
+      "promptEs": "Chatbot conversacional para responder preguntas sobre el estado de pedidos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Polly"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Comprehend"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Lex"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Translate"
+        }
+      ],
+      "answer": "C",
+      "why": "Lex es el servicio para construir chatbots. Comprehend analiza texto y Polly genera voz, pero ninguno mantiene una conversación."
+    },
+    {
+      "id": "ai-services--l4",
+      "conceptId": "ai-language-services",
+      "format": "lightning",
+      "prompt": "Read news articles aloud in a mobile app → ?",
+      "promptEs": "Leer en voz alta artículos de noticias en una app móvil → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Transcribe"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Lex"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Comprehend"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Polly"
+        }
+      ],
+      "answer": "D",
+      "why": "Polly convierte texto en voz, y el audio generado puede guardarse y reproducirse. Transcribe va en la dirección opuesta: de voz a texto."
+    },
+    {
+      "id": "ai-services--l6",
+      "conceptId": "ai-vision-document-services",
+      "format": "thisorthat",
+      "prompt": "Extract form fields and table cells from scanned PDFs → ?",
+      "promptEs": "Extraer campos de formularios y celdas de tablas de PDF escaneados → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Rekognition"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Textract"
+        }
+      ],
+      "answer": "B",
+      "why": "Textract analiza documentos y extrae texto, formularios y tablas. Rekognition detecta texto en imágenes, pero no la estructura de formularios ni tablas."
+    },
+    {
+      "id": "ai-services--l7",
+      "conceptId": "ai-vision-document-services",
+      "format": "lightning",
+      "prompt": "Compare a visitor's face with a reference photo → ?",
+      "promptEs": "Comparar el rostro de un visitante con una foto de referencia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Rekognition"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Textract"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Comprehend"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Transcribe"
+        }
+      ],
+      "answer": "A",
+      "why": "Comparar rostros es análisis visual: Rekognition. Textract se enfoca en documentos, y Comprehend y Transcribe trabajan con texto y voz."
+    }
+  ],
+  "audited": true
+}

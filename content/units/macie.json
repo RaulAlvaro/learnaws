@@ -1,0 +1,258 @@
+{
+  "unitId": "macie",
+  "overview": {
+    "title": "Amazon Macie",
+    "hook": "Encuentra datos personales escondidos en tus buckets de S3 antes que otro.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "s3",
+          "label": "Buckets S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "macie",
+          "label": "Macie",
+          "kind": "service",
+          "service": "Amazon Macie",
+          "x": 38,
+          "y": 50
+        },
+        {
+          "id": "sens",
+          "label": "Datos sensibles",
+          "kind": "data",
+          "x": 64,
+          "y": 22
+        },
+        {
+          "id": "pol",
+          "label": "Bucket público",
+          "kind": "data",
+          "x": 64,
+          "y": 78
+        },
+        {
+          "id": "eb",
+          "label": "EventBridge",
+          "kind": "service",
+          "service": "Amazon EventBridge",
+          "x": 90,
+          "y": 35
+        },
+        {
+          "id": "sh",
+          "label": "Security Hub",
+          "kind": "service",
+          "service": "AWS Security Hub",
+          "x": 90,
+          "y": 80
+        }
+      ],
+      "edges": [
+        {
+          "from": "s3",
+          "to": "macie",
+          "label": "inventario y muestras"
+        },
+        {
+          "from": "macie",
+          "to": "sens",
+          "label": "sensitive finding"
+        },
+        {
+          "from": "macie",
+          "to": "pol",
+          "label": "policy finding"
+        },
+        {
+          "from": "sens",
+          "to": "eb",
+          "label": "eventos"
+        },
+        {
+          "from": "pol",
+          "to": "sh",
+          "label": "agrega"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Imagina miles de buckets de S3 y nadie sabe dónde hay números de tarjeta o datos personales. Amazon Macie resuelve eso: descubre datos sensibles dentro de los objetos de S3 y además vigila la seguridad de los propios buckets.",
+        "show": [
+          "s3",
+          "macie"
+        ],
+        "focus": "macie"
+      },
+      {
+        "narration": "Para reconocer datos usa managed data identifiers, que combinan machine learning y patrones. Tú puedes sumar custom data identifiers para formatos propios de tu empresa, como un número interno de empleado.",
+        "show": [
+          "s3",
+          "macie",
+          "sens"
+        ],
+        "focus": "sens"
+      },
+      {
+        "narration": "Tienes dos modos. Automated sensitive data discovery evalúa continuamente tu inventario y toma muestras representativas. Un sensitive data discovery job apunta a los buckets que elijas, con la profundidad que definas, una sola vez o de forma recurrente.",
+        "show": [
+          "s3",
+          "macie",
+          "sens"
+        ],
+        "focus": "macie"
+      },
+      {
+        "narration": "Además del contenido, Macie revisa los buckets: cuáles son accesibles públicamente, cómo están cifrados o si se comparten. Eso genera policy findings, que son distintos de los sensitive data findings.",
+        "show": [
+          "s3",
+          "macie",
+          "sens",
+          "pol"
+        ],
+        "focus": "pol"
+      },
+      {
+        "narration": "Los hallazgos llegan a EventBridge, para automatizar respuestas, y pueden publicarse en Security Hub. Para el examen: Macie es S3 y datos sensibles. Actividad maliciosa es GuardDuty; vulnerabilidades de software es Inspector.",
+        "show": [
+          "s3",
+          "macie",
+          "sens",
+          "pol",
+          "eb",
+          "sh"
+        ],
+        "focus": "eb"
+      }
+    ],
+    "keyPoints": [
+      "Macie: datos sensibles como PII dentro de S3.",
+      "Automated discovery muestrea; un discovery job apunta a buckets elegidos.",
+      "Custom data identifiers para patrones propios de tu empresa.",
+      "Detecta buckets públicos o sin cifrado: policy findings.",
+      "Hallazgos a EventBridge para automatizar la respuesta."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon GuardDuty",
+        "difference": "GuardDuty detecta actividad maliciosa; Macie encuentra datos sensibles en S3."
+      },
+      {
+        "unitOrService": "Amazon Inspector",
+        "difference": "Inspector escanea vulnerabilidades de cargas de trabajo; Macie examina el contenido de S3."
+      },
+      {
+        "unitOrService": "AWS Security Hub",
+        "difference": "Security Hub agrega hallazgos de muchos servicios; Macie los genera analizando S3."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "macie--l1",
+      "conceptId": "macie",
+      "format": "lightning",
+      "prompt": "Continuously locate PII across the company's S3 buckets → ?",
+      "promptEs": "Ubicar continuamente PII en los buckets de S3 de la empresa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Macie"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Inspector"
+        },
+        {
+          "id": "D",
+          "text": "AWS Config"
+        }
+      ],
+      "answer": "B",
+      "why": "Macie descubre datos sensibles dentro de objetos de S3 con automated sensitive data discovery. GuardDuty busca actividad maliciosa, no el contenido de los objetos."
+    },
+    {
+      "id": "macie--l2",
+      "conceptId": "macie",
+      "format": "thisorthat",
+      "prompt": "One-time scan of three chosen buckets at a defined sampling depth → ?",
+      "promptEs": "Escaneo único de tres buckets elegidos con profundidad de muestreo definida → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Automated sensitive data discovery"
+        },
+        {
+          "id": "B",
+          "text": "Sensitive data discovery job"
+        }
+      ],
+      "answer": "B",
+      "why": "Un discovery job te deja elegir buckets, profundidad y criterios, y correrlo una vez o de forma recurrente. El automated discovery muestrea todo el inventario por su cuenta."
+    },
+    {
+      "id": "macie--l3",
+      "conceptId": "macie",
+      "format": "lightning",
+      "prompt": "Macie must detect an organization-specific pattern, like internal employee IDs → ?",
+      "promptEs": "Macie debe detectar un patrón propio de la empresa, como IDs internos de empleados → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Managed data identifiers only"
+        },
+        {
+          "id": "B",
+          "text": "S3 Inventory report"
+        },
+        {
+          "id": "C",
+          "text": "GuardDuty threat list"
+        },
+        {
+          "id": "D",
+          "text": "Custom data identifier"
+        }
+      ],
+      "answer": "D",
+      "why": "Los custom data identifiers te permiten definir patrones propios. Los managed data identifiers cubren tipos comunes, como tarjetas o datos personales estándar."
+    },
+    {
+      "id": "macie--l4",
+      "conceptId": "macie",
+      "format": "lightning",
+      "prompt": "Trigger an automated remediation workflow whenever Macie reports a finding → ?",
+      "promptEs": "Disparar un flujo de remediación automática cada vez que Macie reporte un hallazgo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EventBridge rule"
+        },
+        {
+          "id": "B",
+          "text": "AWS Config rule"
+        },
+        {
+          "id": "C",
+          "text": "CloudTrail Lake query"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Inspector scan"
+        }
+      ],
+      "answer": "A",
+      "why": "Macie publica sus hallazgos en EventBridge, donde una regla puede invocar el flujo de remediación. Security Hub también puede recibirlos, pero para agregarlos."
+    }
+  ],
+  "audited": true
+}

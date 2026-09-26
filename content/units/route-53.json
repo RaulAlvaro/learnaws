@@ -1,0 +1,677 @@
+{
+  "unitId": "route-53",
+  "overview": {
+    "title": "Amazon Route 53",
+    "hook": "El DNS que decide a dónde va cada usuario, y cambia si algo falla.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "user",
+          "label": "Usuario",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "zone",
+          "label": "Hosted zone",
+          "kind": "data",
+          "x": 32,
+          "y": 15
+        },
+        {
+          "id": "r53",
+          "label": "Route 53",
+          "kind": "service",
+          "service": "Amazon Route 53",
+          "x": 32,
+          "y": 50
+        },
+        {
+          "id": "policy",
+          "label": "Routing policy",
+          "kind": "note",
+          "x": 56,
+          "y": 50
+        },
+        {
+          "id": "ep1",
+          "label": "Region A",
+          "kind": "zone",
+          "x": 84,
+          "y": 25
+        },
+        {
+          "id": "ep2",
+          "label": "Region B",
+          "kind": "zone",
+          "x": 84,
+          "y": 75
+        },
+        {
+          "id": "hc",
+          "label": "Health check",
+          "kind": "note",
+          "x": 56,
+          "y": 88
+        }
+      ],
+      "edges": [
+        {
+          "from": "user",
+          "to": "r53",
+          "label": "consulta DNS"
+        },
+        {
+          "from": "zone",
+          "to": "r53",
+          "label": "records"
+        },
+        {
+          "from": "r53",
+          "to": "policy"
+        },
+        {
+          "from": "policy",
+          "to": "ep1"
+        },
+        {
+          "from": "policy",
+          "to": "ep2"
+        },
+        {
+          "from": "hc",
+          "to": "ep2",
+          "label": "vigila"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Route 53 es el DNS de AWS: traduce un nombre como app.ejemplo.com en la dirección a la que debe ir cada usuario. Como decide en cada consulta, puede mandar a usuarios distintos a destinos distintos.",
+        "show": [
+          "user",
+          "r53"
+        ],
+        "focus": "r53"
+      },
+      {
+        "narration": "Los records viven en una hosted zone: pública para nombres de internet, privada para nombres que solo se resuelven dentro de tus VPCs. En la raíz del dominio no se permite CNAME; usas un alias record hacia recursos de AWS, con consultas gratis.",
+        "show": [
+          "user",
+          "r53",
+          "zone"
+        ],
+        "focus": "zone"
+      },
+      {
+        "narration": "La routing policy decide la respuesta. Failover es activo-pasivo: responde con el primario mientras está sano y con el secundario cuando falla, por ejemplo una página estática en S3.",
+        "show": [
+          "user",
+          "r53",
+          "zone",
+          "policy",
+          "ep1",
+          "ep2"
+        ],
+        "focus": "policy"
+      },
+      {
+        "narration": "Para saber si algo está sano, los health checks vigilan un endpoint, otros health checks o una alarma de CloudWatch. Pero un health check solo no mueve tráfico, y una alarma que te avisa tampoco: necesitas combinarlo con una routing policy.",
+        "show": [
+          "user",
+          "r53",
+          "zone",
+          "policy",
+          "ep1",
+          "ep2",
+          "hc"
+        ],
+        "focus": "hc"
+      },
+      {
+        "narration": "Latency responde con la Region de menor latencia para ese usuario, ideal para activo-activo en varias Regions. Weighted reparte según pesos relativos, perfecto para mandar una fracción pequeña del tráfico a una versión nueva.",
+        "show": [
+          "user",
+          "r53",
+          "zone",
+          "policy",
+          "ep1",
+          "ep2",
+          "hc"
+        ],
+        "focus": "ep1"
+      },
+      {
+        "narration": "Geolocation decide por país o continente del usuario, útil para derechos de distribución; agrega un record default para ubicaciones sin coincidencia. Geoproximity usa distancia, y un bias agranda o achica la zona que atiende cada recurso.",
+        "show": [
+          "user",
+          "r53",
+          "zone",
+          "policy",
+          "ep1",
+          "ep2",
+          "hc"
+        ],
+        "focus": "user"
+      },
+      {
+        "narration": "Y para DNS híbrido está Route 53 Resolver. Si tus VPCs deben resolver nombres on-premises, usas un outbound endpoint con una forwarding rule. Si on-premises debe resolver tus zonas privadas, un inbound endpoint.",
+        "show": [
+          "user",
+          "r53",
+          "zone",
+          "policy",
+          "ep1",
+          "ep2",
+          "hc"
+        ],
+        "focus": "r53"
+      }
+    ],
+    "keyPoints": [
+      "Alias en la raíz del dominio; CNAME no se permite ahí.",
+      "Failover: primario sano, secundario cuando falla.",
+      "Latency: menor latencia; Geolocation: país; Weighted: porcentajes.",
+      "Health check sin routing policy no mueve tráfico.",
+      "Resolver: outbound hacia on-premises, inbound desde on-premises."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Global Accelerator",
+        "difference": "Global Accelerator cambia de endpoint sin depender de cachés DNS; Route 53 depende del TTL de clientes."
+      },
+      {
+        "unitOrService": "Elastic Load Balancing",
+        "difference": "El ELB reparte conexiones dentro de una Region; Route 53 elige destino al resolver el nombre."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "route-53--l1",
+      "conceptId": "route53-resolver-hybrid-dns",
+      "format": "thisorthat",
+      "prompt": "EC2 instances must resolve a domain hosted on on-premises DNS servers → ?",
+      "promptEs": "Instancias EC2 deben resolver un dominio alojado en DNS on-premises → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Resolver inbound endpoint"
+        },
+        {
+          "id": "B",
+          "text": "Outbound endpoint plus forwarding rule"
+        }
+      ],
+      "answer": "B",
+      "why": "Consultas de la VPC hacia on-premises salen por un outbound endpoint, y la forwarding rule indica qué dominio reenviar. El inbound es la dirección contraria."
+    },
+    {
+      "id": "route-53--l2",
+      "conceptId": "route53-resolver-hybrid-dns",
+      "format": "lightning",
+      "prompt": "On-premises clients must resolve records in a private hosted zone → ?",
+      "promptEs": "Clientes on-premises deben resolver records de una private hosted zone → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Resolver inbound endpoint"
+        },
+        {
+          "id": "B",
+          "text": "Resolver outbound endpoint"
+        },
+        {
+          "id": "C",
+          "text": "Copy records to a public zone"
+        },
+        {
+          "id": "D",
+          "text": "Route 53 health check"
+        }
+      ],
+      "answer": "A",
+      "why": "El DNS on-premises reenvía ese dominio a un inbound endpoint, que responde con los records privados. El Resolver predeterminado solo atiende dentro de la VPC."
+    },
+    {
+      "id": "route-53--l3",
+      "conceptId": "route53-hosted-zones-records",
+      "format": "lightning",
+      "prompt": "Root domain example.com must point to a CloudFront distribution → ?",
+      "promptEs": "El dominio raíz example.com debe apuntar a una distribución de CloudFront → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CNAME record at the apex"
+        },
+        {
+          "id": "B",
+          "text": "Alias record at the apex"
+        },
+        {
+          "id": "C",
+          "text": "A record with CloudFront IPs"
+        },
+        {
+          "id": "D",
+          "text": "Private hosted zone record"
+        }
+      ],
+      "answer": "B",
+      "why": "En el apex no se permite CNAME, pero sí un alias hacia recursos de AWS. El alias sigue los cambios de IP del recurso y sus consultas no se cobran."
+    },
+    {
+      "id": "route-53--l4",
+      "conceptId": "route53-hosted-zones-records",
+      "format": "thisorthat",
+      "prompt": "Internal service names resolvable only inside your VPCs → ?",
+      "promptEs": "Nombres de servicios internos que solo se resuelvan dentro de tus VPCs → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Private hosted zone"
+        },
+        {
+          "id": "B",
+          "text": "Public hosted zone"
+        }
+      ],
+      "answer": "A",
+      "why": "La private hosted zone responde solo dentro de las VPCs asociadas. La pública es para nombres que deben resolverse desde internet."
+    },
+    {
+      "id": "route-53--l5",
+      "conceptId": "route53-hosted-zones-records",
+      "format": "lightning",
+      "prompt": "Subdomain must point to a DNS name hosted outside AWS → ?",
+      "promptEs": "Un subdominio debe apuntar a un nombre DNS alojado fuera de AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Alias record"
+        },
+        {
+          "id": "B",
+          "text": "Private hosted zone"
+        },
+        {
+          "id": "C",
+          "text": "CNAME record"
+        },
+        {
+          "id": "D",
+          "text": "Resolver inbound endpoint"
+        }
+      ],
+      "answer": "C",
+      "why": "Un CNAME puede apuntar a cualquier nombre DNS, incluso externo. El alias solo apunta a destinos compatibles, como recursos de AWS."
+    },
+    {
+      "id": "route-53--l6",
+      "conceptId": "route53-health-checks",
+      "format": "lightning",
+      "prompt": "Automatically route traffic away from an unhealthy web server → ?",
+      "promptEs": "Desviar automáticamente el tráfico de un servidor web que no está sano → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudWatch alarm notification only"
+        },
+        {
+          "id": "B",
+          "text": "Simple routing with one record"
+        },
+        {
+          "id": "C",
+          "text": "Longer TTL on the record"
+        },
+        {
+          "id": "D",
+          "text": "Health check plus DNS failover"
+        }
+      ],
+      "answer": "D",
+      "why": "El health check detecta el problema y el DNS failover mueve el tráfico al recurso sano. Una notificación por sí sola no desvía nada."
+    },
+    {
+      "id": "route-53--l7",
+      "conceptId": "route53-health-checks",
+      "format": "thisorthat",
+      "prompt": "A CloudWatch alarm emails the team when a health check fails. Does traffic fail over?",
+      "promptEs": "Una alarma de CloudWatch avisa al equipo cuando falla un health check. ¿El tráfico hace failover?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, the alarm triggers failover"
+        },
+        {
+          "id": "B",
+          "text": "No, configure DNS failover separately"
+        }
+      ],
+      "answer": "B",
+      "why": "La notificación y el DNS failover son configuraciones separadas. Recibir un correo no cambia las respuestas DNS."
+    },
+    {
+      "id": "route-53--l8",
+      "conceptId": "route53-health-checks",
+      "format": "lightning",
+      "prompt": "Endpoint health must follow an existing CloudWatch alarm → ?",
+      "promptEs": "La salud del endpoint debe seguir una alarma de CloudWatch existente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Health check monitoring the alarm"
+        },
+        {
+          "id": "B",
+          "text": "Health check on the endpoint TCP port"
+        },
+        {
+          "id": "C",
+          "text": "Resolver outbound endpoint"
+        },
+        {
+          "id": "D",
+          "text": "Weighted record with zero weight"
+        }
+      ],
+      "answer": "A",
+      "why": "Un health check de Route 53 puede monitorear el estado de una alarma de CloudWatch, además de endpoints u otros health checks."
+    },
+    {
+      "id": "route-53--l9",
+      "conceptId": "route53-failover-routing",
+      "format": "lightning",
+      "prompt": "Standby site should receive traffic only when the primary fails → ?",
+      "promptEs": "El sitio en espera solo debe recibir tráfico cuando falla el primario → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Weighted routing"
+        },
+        {
+          "id": "B",
+          "text": "Latency routing"
+        },
+        {
+          "id": "C",
+          "text": "Failover routing"
+        },
+        {
+          "id": "D",
+          "text": "Geolocation routing"
+        }
+      ],
+      "answer": "C",
+      "why": "Failover es activo-pasivo y decide por la salud del primario. Weighted reparte porcentajes y latency elige por latencia, sin esperar una falla."
+    },
+    {
+      "id": "route-53--l10",
+      "conceptId": "route53-failover-routing",
+      "format": "lightning",
+      "prompt": "Show a static “under maintenance” page if the application becomes unavailable → ?",
+      "promptEs": "Mostrar una página estática de “en mantenimiento” si la aplicación deja de estar disponible → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Geolocation default record pointing to S3"
+        },
+        {
+          "id": "B",
+          "text": "Weighted 90/10 toward S3"
+        },
+        {
+          "id": "C",
+          "text": "Failover with S3 website secondary"
+        },
+        {
+          "id": "D",
+          "text": "Latency record pointing to S3"
+        }
+      ],
+      "answer": "C",
+      "why": "El secundario del failover puede ser un bucket S3 configurado como sitio web. Weighted mandaría una parte del tráfico a S3 incluso con la app sana."
+    },
+    {
+      "id": "route-53--l11",
+      "conceptId": "route53-failover-routing",
+      "format": "thisorthat",
+      "prompt": "Active-passive records for an internal name in a private hosted zone → ?",
+      "promptEs": "Records activo-pasivo para un nombre interno en una private hosted zone → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Failover routing"
+        },
+        {
+          "id": "B",
+          "text": "Latency routing"
+        }
+      ],
+      "answer": "A",
+      "why": "Failover routing también funciona en private hosted zones. Latency elige por latencia regional, no por la salud de un primario."
+    },
+    {
+      "id": "route-53--l13",
+      "conceptId": "route53-latency-routing",
+      "format": "lightning",
+      "prompt": "Active-active app in several Regions; send each user to the lowest-latency Region → ?",
+      "promptEs": "App activo-activo en varias Regions; enviar a cada usuario a la Region de menor latencia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Geolocation routing by country"
+        },
+        {
+          "id": "B",
+          "text": "Weighted routing"
+        },
+        {
+          "id": "C",
+          "text": "Failover routing"
+        },
+        {
+          "id": "D",
+          "text": "Latency-based routing"
+        }
+      ],
+      "answer": "D",
+      "why": "Latency routing responde con la Region de menor latencia según datos de AWS. El país del usuario no garantiza cuál es la Region más rápida."
+    },
+    {
+      "id": "route-53--l14",
+      "conceptId": "route53-latency-routing",
+      "format": "thisorthat",
+      "prompt": "By contract, users in one country must always reach the same Region → ?",
+      "promptEs": "Por contrato, los usuarios de un país siempre deben llegar a la misma Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Latency routing"
+        },
+        {
+          "id": "B",
+          "text": "Geolocation routing"
+        }
+      ],
+      "answer": "B",
+      "why": "Un requisito fijo por país es geolocation. Latency puede cambiar la Region según las condiciones de red, así que no garantiza el contrato."
+    },
+    {
+      "id": "route-53--l15",
+      "conceptId": "route53-latency-routing",
+      "format": "lightning",
+      "prompt": "Latency routing: why might the same user get a different Region later?",
+      "promptEs": "Latency routing: ¿por qué el mismo usuario podría recibir otra Region después?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Weights rotate automatically"
+        },
+        {
+          "id": "B",
+          "text": "Geolocation database updates"
+        },
+        {
+          "id": "C",
+          "text": "Network latency data changes"
+        },
+        {
+          "id": "D",
+          "text": "Primary record was deleted"
+        }
+      ],
+      "answer": "C",
+      "why": "Route 53 usa datos de latencia que cambian con las condiciones de red, así que la Region elegida puede variar con el tiempo."
+    },
+    {
+      "id": "route-53--l16",
+      "conceptId": "route53-geolocation-geoproximity",
+      "format": "lightning",
+      "prompt": "Geolocation routing: answer queries from locations with no matching record → ?",
+      "promptEs": "Geolocation routing: responder consultas de ubicaciones sin record coincidente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach a health check to each record"
+        },
+        {
+          "id": "B",
+          "text": "Add a latency record for them"
+        },
+        {
+          "id": "C",
+          "text": "Lower the record TTL"
+        },
+        {
+          "id": "D",
+          "text": "Add a default geolocation record"
+        }
+      ],
+      "answer": "D",
+      "why": "Sin record default, Route 53 no responde a IPs sin ubicación mapeada ni a lugares sin record. El default atrapa todo lo demás."
+    },
+    {
+      "id": "route-53--l17",
+      "conceptId": "route53-geolocation-geoproximity",
+      "format": "lightning",
+      "prompt": "Expand the geographic area routed to one Region's resource → ?",
+      "promptEs": "Ampliar el área geográfica que se envía al recurso de una Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Geolocation by continent"
+        },
+        {
+          "id": "B",
+          "text": "Higher weight on that Region record"
+        },
+        {
+          "id": "C",
+          "text": "Geoproximity with positive bias"
+        },
+        {
+          "id": "D",
+          "text": "Latency routing with bias"
+        }
+      ],
+      "answer": "C",
+      "why": "En geoproximity, un bias positivo agranda la zona geográfica de un recurso y uno negativo la achica. No es un porcentaje de tráfico como en weighted."
+    },
+    {
+      "id": "route-53--l18",
+      "conceptId": "route53-geolocation-geoproximity",
+      "format": "thisorthat",
+      "prompt": "A user matches both a country record and a continent record → which wins?",
+      "promptEs": "Un usuario coincide con un record de país y otro de continente → ¿cuál gana?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The country record"
+        },
+        {
+          "id": "B",
+          "text": "The continent record"
+        }
+      ],
+      "answer": "A",
+      "why": "Cuando los records de geolocation se solapan, tiene prioridad la región geográfica más pequeña: el país gana sobre el continente."
+    },
+    {
+      "id": "route-53--l19",
+      "conceptId": "route53-weighted-routing",
+      "format": "lightning",
+      "prompt": "Send a small share of DNS traffic to a new version, then increase gradually → ?",
+      "promptEs": "Enviar una pequeña parte del tráfico DNS a una versión nueva y aumentarla de a poco → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Failover routing"
+        },
+        {
+          "id": "B",
+          "text": "Weighted routing"
+        },
+        {
+          "id": "C",
+          "text": "Latency routing"
+        },
+        {
+          "id": "D",
+          "text": "Geoproximity routing"
+        }
+      ],
+      "answer": "B",
+      "why": "Weighted reparte según pesos relativos y cambias el balance ajustándolos. Failover solo usa el secundario cuando falla el primario."
+    },
+    {
+      "id": "route-53--l20",
+      "conceptId": "route53-weighted-routing",
+      "format": "lightning",
+      "prompt": "Two weighted records with weights 1 and 3 → share for the weight-1 record?",
+      "promptEs": "Dos records weighted con pesos 1 y 3 → ¿qué parte recibe el de peso 1?",
+      "options": [
+        {
+          "id": "A",
+          "text": "1%"
+        },
+        {
+          "id": "B",
+          "text": "33%"
+        },
+        {
+          "id": "C",
+          "text": "10%"
+        },
+        {
+          "id": "D",
+          "text": "25%"
+        }
+      ],
+      "answer": "D",
+      "why": "La parte de cada record es su peso dividido entre la suma total: 1 / (1 + 3) = 25 %. Los pesos son relativos, no porcentajes."
+    },
+    {
+      "id": "route-53--l21",
+      "conceptId": "route53-weighted-routing",
+      "format": "thisorthat",
+      "prompt": "Weighted record with weight 0, health checks configured → gets traffic?",
+      "promptEs": "Record weighted con peso 0 y health checks configurados → ¿recibe tráfico?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only if all others are unhealthy"
+        },
+        {
+          "id": "B",
+          "text": "Yes, an equal share"
+        }
+      ],
+      "answer": "A",
+      "why": "Peso 0 detiene el tráfico normal. Pero con health checks, Route 53 lo considera si todos los records con peso distinto de cero están no sanos."
+    }
+  ],
+  "audited": true
+}

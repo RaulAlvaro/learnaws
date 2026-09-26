@@ -1,0 +1,534 @@
+{
+  "unitId": "identity-federation",
+  "overview": {
+    "title": "STS, federación e IAM Identity Center",
+    "hook": "Usa las identidades que ya existen y entra a AWS con credenciales temporales.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "emp",
+          "label": "Empleado",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "idp",
+          "label": "IdP (SAML/OIDC)",
+          "kind": "actor",
+          "x": 28,
+          "y": 18
+        },
+        {
+          "id": "ad",
+          "label": "Directory Service",
+          "kind": "service",
+          "service": "AWS Directory Service",
+          "x": 28,
+          "y": 82
+        },
+        {
+          "id": "ic",
+          "label": "Identity Center",
+          "kind": "service",
+          "service": "AWS IAM Identity Center",
+          "x": 52,
+          "y": 40
+        },
+        {
+          "id": "sts",
+          "label": "AWS STS",
+          "kind": "service",
+          "service": "AWS Security Token Service",
+          "x": 52,
+          "y": 85
+        },
+        {
+          "id": "role",
+          "label": "IAM role",
+          "kind": "data",
+          "x": 76,
+          "y": 62
+        },
+        {
+          "id": "acct",
+          "label": "Cuenta destino",
+          "kind": "zone",
+          "x": 92,
+          "y": 28
+        }
+      ],
+      "edges": [
+        {
+          "from": "emp",
+          "to": "idp",
+          "label": "login"
+        },
+        {
+          "from": "idp",
+          "to": "ic",
+          "label": "federa"
+        },
+        {
+          "from": "ad",
+          "to": "ic",
+          "label": "identidades"
+        },
+        {
+          "from": "ic",
+          "to": "role",
+          "label": "permission set"
+        },
+        {
+          "from": "sts",
+          "to": "role",
+          "label": "AssumeRole"
+        },
+        {
+          "from": "role",
+          "to": "acct",
+          "label": "temporales"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Tus empleados ya tienen usuario y contraseña en la empresa. Crear un IAM user para cada uno duplicaría identidades y repartiría claves de largo plazo. La federación lo evita: AWS confía en tu identity provider y no guarda contraseñas nuevas.",
+        "show": [
+          "emp",
+          "idp"
+        ],
+        "focus": "idp"
+      },
+      {
+        "narration": "El motor de todo es AWS STS. Alguien pide asumir un IAM role, STS revisa la trust policy del role y, si confía en él, devuelve credenciales temporales. Así funciona también el acceso entre cuentas: el role vive en la cuenta destino.",
+        "show": [
+          "emp",
+          "idp",
+          "sts",
+          "role",
+          "acct"
+        ],
+        "focus": "sts"
+      },
+      {
+        "narration": "Para el acceso cross-account hacen falta tres piezas. La trust policy del role confía en la cuenta de origen o en un principal específico de ella. El usuario de origen necesita permiso para sts:AssumeRole. La permissions policy del role limita lo que puede hacer. También puedes exigir MFA.",
+        "show": [
+          "emp",
+          "idp",
+          "sts",
+          "role",
+          "acct"
+        ],
+        "focus": "role"
+      },
+      {
+        "narration": "Con muchas cuentas, usa IAM Identity Center: un solo punto de federación para toda la organización. Defines permission sets por puesto de trabajo, los asignas a grupos, y cada persona entra por el AWS access portal a las cuentas que le tocan.",
+        "show": [
+          "emp",
+          "idp",
+          "sts",
+          "role",
+          "acct",
+          "ic"
+        ],
+        "focus": "ic"
+      },
+      {
+        "narration": "Federar SAML u OIDC directo a roles de IAM sigue siendo válido en algo pequeño, de una sola cuenta: AssumeRoleWithSAML cambia la aserción por credenciales temporales. Pero si la pregunta habla de acceso centralizado a varias cuentas, piensa en Identity Center.",
+        "show": [
+          "emp",
+          "idp",
+          "sts",
+          "role",
+          "acct",
+          "ic"
+        ],
+        "focus": "idp"
+      },
+      {
+        "narration": "Si una carga necesita Active Directory, mira Directory Service. AD Connector reenvía solicitudes al AD on-premises sin almacenar credenciales ni datos del directorio en AWS. AWS Managed Microsoft AD es un AD real, con trusts. Simple AD es básico y barato, sin MFA ni trusts.",
+        "show": [
+          "emp",
+          "idp",
+          "sts",
+          "role",
+          "acct",
+          "ic",
+          "ad"
+        ],
+        "focus": "ad"
+      }
+    ],
+    "keyPoints": [
+      "STS entrega credenciales temporales al asumir un role.",
+      "Cross-account: trust policy más permiso sts:AssumeRole en origen.",
+      "Empleados en muchas cuentas: Identity Center con permission sets.",
+      "AD Connector reenvía sin almacenar credenciales ni datos del directorio en AWS; Managed Microsoft AD es un AD real.",
+      "Simple AD: básico y barato, sin MFA ni trusts."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon Cognito",
+        "difference": "Cognito autentica clientes de tu app; Identity Center da acceso a empleados en cuentas de AWS."
+      },
+      {
+        "unitOrService": "AWS Organizations",
+        "difference": "Organizations agrupa cuentas; Identity Center decide qué personas entran a cuáles y con qué permisos."
+      },
+      {
+        "unitOrService": "IAM users",
+        "difference": "Un IAM user duplica la identidad con claves largas; la federación reutiliza tu IdP con credenciales temporales."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "identity-federation--l1",
+      "conceptId": "sts-assume-role-cross-account",
+      "format": "lightning",
+      "prompt": "Users in a dev account need occasional, temporary access to the production account → ?",
+      "promptEs": "Usuarios de una cuenta de desarrollo necesitan acceso temporal y ocasional a producción → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cross-account IAM role assumed via STS"
+        },
+        {
+          "id": "B",
+          "text": "Duplicate IAM users in production"
+        },
+        {
+          "id": "C",
+          "text": "Share production access keys"
+        },
+        {
+          "id": "D",
+          "text": "One IAM group spanning both accounts"
+        }
+      ],
+      "answer": "A",
+      "why": "Un role en la cuenta de producción, confiado por la de desarrollo, entrega credenciales temporales sin crear usuarios nuevos. Los IAM groups no pueden abarcar dos cuentas."
+    },
+    {
+      "id": "identity-federation--l2",
+      "conceptId": "sts-assume-role-cross-account",
+      "format": "thisorthat",
+      "prompt": "Role trusts the source account, yet a user there gets AccessDenied assuming it → fix?",
+      "promptEs": "El role confía en la cuenta de origen, pero un usuario de ahí recibe AccessDenied al asumirlo → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add actions to the role's permissions"
+        },
+        {
+          "id": "B",
+          "text": "Allow the user sts:AssumeRole on it"
+        }
+      ],
+      "answer": "B",
+      "why": "Confiar en una cuenta no da permiso automático a todos sus usuarios: la cuenta de origen debe concederles sts:AssumeRole sobre ese role. Los permisos del role importan después de asumirlo."
+    },
+    {
+      "id": "identity-federation--l3",
+      "conceptId": "sts-assume-role-cross-account",
+      "format": "lightning",
+      "prompt": "Which document defines who is allowed to assume an IAM role?",
+      "promptEs": "¿Qué documento define quién puede asumir un IAM role?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The role's permissions policy"
+        },
+        {
+          "id": "B",
+          "text": "The role's trust policy"
+        },
+        {
+          "id": "C",
+          "text": "A permissions boundary"
+        },
+        {
+          "id": "D",
+          "text": "A service control policy"
+        }
+      ],
+      "answer": "B",
+      "why": "La trust policy dice quién puede asumir el role; la permissions policy dice qué puede hacer una vez asumido. Es la pareja clásica del examen."
+    },
+    {
+      "id": "identity-federation--l4",
+      "conceptId": "sts-assume-role-cross-account",
+      "format": "lightning",
+      "prompt": "Administrators must present MFA before assuming a sensitive cross-account role → ?",
+      "promptEs": "Los administradores deben usar MFA antes de asumir un role sensible entre cuentas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable MFA on the root user"
+        },
+        {
+          "id": "B",
+          "text": "Permissions boundary on the role"
+        },
+        {
+          "id": "C",
+          "text": "Require MFA in the role's trust"
+        },
+        {
+          "id": "D",
+          "text": "SCP allowing only AssumeRole"
+        }
+      ],
+      "answer": "C",
+      "why": "Un role puede exigir MFA como condición para asumirlo, y eso se define en su trust policy. La MFA del root user no protege a otras identidades."
+    },
+    {
+      "id": "identity-federation--l5",
+      "conceptId": "iam-identity-center-sso",
+      "format": "lightning",
+      "prompt": "Workforce single sign-on to many AWS accounts in an organization → ?",
+      "promptEs": "Inicio de sesión único de empleados a muchas cuentas de una organización → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS IAM Identity Center"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Cognito user pool"
+        },
+        {
+          "id": "C",
+          "text": "IAM users in every account"
+        },
+        {
+          "id": "D",
+          "text": "Simple AD"
+        }
+      ],
+      "answer": "A",
+      "why": "IAM Identity Center centraliza el acceso de empleados a varias cuentas y aplicaciones. Cognito está pensado para clientes de una app, no para la fuerza laboral."
+    },
+    {
+      "id": "identity-federation--l6",
+      "conceptId": "iam-identity-center-sso",
+      "format": "lightning",
+      "prompt": "Define job-function permissions once and provision them across many accounts → ?",
+      "promptEs": "Definir permisos por puesto de trabajo una vez y aplicarlos en muchas cuentas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Service control policies"
+        },
+        {
+          "id": "B",
+          "text": "IAM groups in each account"
+        },
+        {
+          "id": "C",
+          "text": "Cognito user pool groups"
+        },
+        {
+          "id": "D",
+          "text": "Identity Center permission sets"
+        }
+      ],
+      "answer": "D",
+      "why": "Los permission sets se definen centralmente y Identity Center los aprovisiona como roles en cada cuenta asignada. Las SCPs solo ponen techo; no otorgan acceso a personas."
+    },
+    {
+      "id": "identity-federation--l7",
+      "conceptId": "iam-identity-center-sso",
+      "format": "thisorthat",
+      "prompt": "Manage access to multiple AWS accounts → which IAM Identity Center instance?",
+      "promptEs": "Gestionar el acceso a varias cuentas de AWS → ¿qué instancia de IAM Identity Center?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Organization instance"
+        },
+        {
+          "id": "B",
+          "text": "Account instance"
+        }
+      ],
+      "answer": "A",
+      "why": "Solo la organization instance administra acceso a cuentas de AWS. La account instance sirve para despliegues aislados de algunas aplicaciones administradas por AWS."
+    },
+    {
+      "id": "identity-federation--l8",
+      "conceptId": "iam-identity-center-sso",
+      "format": "lightning",
+      "prompt": "Where do employees see all their assigned AWS accounts and applications?",
+      "promptEs": "¿Dónde ven los empleados todas sus cuentas de AWS y aplicaciones asignadas?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cognito managed login page"
+        },
+        {
+          "id": "B",
+          "text": "Control Tower dashboard"
+        },
+        {
+          "id": "C",
+          "text": "AWS access portal"
+        },
+        {
+          "id": "D",
+          "text": "Each account's IAM sign-in URL"
+        }
+      ],
+      "answer": "C",
+      "why": "El AWS access portal de IAM Identity Center lista las cuentas y apps asignadas a cada persona. El dashboard de Control Tower muestra cumplimiento, no accesos personales."
+    },
+    {
+      "id": "identity-federation--l9",
+      "conceptId": "identity-federation-saml-oidc",
+      "format": "lightning",
+      "prompt": "Single AWS account; employees use a corporate SAML IdP for console access → ?",
+      "promptEs": "Una sola cuenta de AWS; empleados con IdP SAML corporativo necesitan la consola → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cognito user pool"
+        },
+        {
+          "id": "B",
+          "text": "IAM SAML federation to roles"
+        },
+        {
+          "id": "C",
+          "text": "AD Connector"
+        },
+        {
+          "id": "D",
+          "text": "One IAM user per employee"
+        }
+      ],
+      "answer": "B",
+      "why": "Para algo pequeño de una sola cuenta, registras el IdP SAML en IAM y mapeas empleados a roles. Cognito es para clientes de apps, no para acceso corporativo a la consola."
+    },
+    {
+      "id": "identity-federation--l10",
+      "conceptId": "identity-federation-saml-oidc",
+      "format": "lightning",
+      "prompt": "STS API that exchanges a SAML assertion for temporary credentials → ?",
+      "promptEs": "API de STS que cambia una aserción SAML por credenciales temporales → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AssumeRoleWithWebIdentity"
+        },
+        {
+          "id": "B",
+          "text": "GetSessionToken"
+        },
+        {
+          "id": "C",
+          "text": "AssumeRole"
+        },
+        {
+          "id": "D",
+          "text": "AssumeRoleWithSAML"
+        }
+      ],
+      "answer": "D",
+      "why": "AssumeRoleWithSAML recibe la aserción del IdP y devuelve credenciales temporales del role. AssumeRoleWithWebIdentity es la variante para tokens OIDC."
+    },
+    {
+      "id": "identity-federation--l11",
+      "conceptId": "identity-federation-saml-oidc",
+      "format": "thisorthat",
+      "prompt": "External CI workflow issues OIDC tokens and needs S3 access without stored keys → ?",
+      "promptEs": "Un flujo de CI externo emite tokens OIDC y necesita S3 sin guardar claves → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM OIDC provider plus IAM role"
+        },
+        {
+          "id": "B",
+          "text": "IAM user with rotated access keys"
+        }
+      ],
+      "answer": "A",
+      "why": "Registrar el proveedor OIDC en IAM permite que el flujo asuma un role y reciba credenciales temporales. Rotar claves sigue guardando credenciales de largo plazo."
+    },
+    {
+      "id": "identity-federation--l12",
+      "conceptId": "directory-service-options",
+      "format": "lightning",
+      "prompt": "Authenticate against existing on-premises AD, with no directory data cached in AWS → ?",
+      "promptEs": "Autenticar contra el AD on-premises existente, sin guardar datos del directorio en AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AD Connector"
+        },
+        {
+          "id": "B",
+          "text": "Simple AD"
+        },
+        {
+          "id": "C",
+          "text": "AWS Managed Microsoft AD"
+        },
+        {
+          "id": "D",
+          "text": "Cognito user pool"
+        }
+      ],
+      "answer": "A",
+      "why": "AD Connector es un proxy: reenvía las solicitudes a tus controladores de dominio on-premises. Managed Microsoft AD crea un dominio nuevo dentro de AWS."
+    },
+    {
+      "id": "identity-federation--l13",
+      "conceptId": "directory-service-options",
+      "format": "lightning",
+      "prompt": "RDS for SQL Server with Windows authentication and a trust to on-premises AD → ?",
+      "promptEs": "RDS for SQL Server con autenticación Windows y trust con el AD on-premises → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AD Connector"
+        },
+        {
+          "id": "B",
+          "text": "Simple AD"
+        },
+        {
+          "id": "C",
+          "text": "AWS Managed Microsoft AD"
+        },
+        {
+          "id": "D",
+          "text": "IAM Identity Center"
+        }
+      ],
+      "answer": "C",
+      "why": "AWS Managed Microsoft AD soporta trusts, schema extensions y RDS for SQL Server. AD Connector no admite trusts transitivos ni RDS for SQL Server, y Simple AD tampoco."
+    },
+    {
+      "id": "identity-federation--l14",
+      "conceptId": "directory-service-options",
+      "format": "thisorthat",
+      "prompt": "Low-cost standalone directory with basic AD features; no MFA or trusts needed → ?",
+      "promptEs": "Directorio independiente y barato con funciones AD básicas; sin MFA ni trusts → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Managed Microsoft AD"
+        },
+        {
+          "id": "B",
+          "text": "Simple AD"
+        }
+      ],
+      "answer": "B",
+      "why": "Simple AD, basado en Samba 4, ofrece usuarios, grupos, domain join y group policies a bajo costo. Si necesitas MFA, trusts o schema extensions, pasa a Managed Microsoft AD."
+    }
+  ],
+  "audited": true
+}

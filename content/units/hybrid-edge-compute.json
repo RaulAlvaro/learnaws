@@ -1,0 +1,427 @@
+{
+  "unitId": "hybrid-edge-compute",
+  "overview": {
+    "title": "Outposts, Local Zones y cómputo híbrido",
+    "hook": "Lleva el cómputo de AWS a tu sitio, tu ciudad o la red 5G.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "dc",
+          "label": "Tu data center",
+          "kind": "actor",
+          "x": 10,
+          "y": 40
+        },
+        {
+          "id": "op",
+          "label": "Outposts rack",
+          "kind": "service",
+          "service": "AWS Outposts",
+          "x": 10,
+          "y": 82
+        },
+        {
+          "id": "any",
+          "label": "ECS/EKS Anywhere",
+          "kind": "service",
+          "service": "Amazon ECS Anywhere",
+          "x": 36,
+          "y": 82
+        },
+        {
+          "id": "region",
+          "label": "AWS Region",
+          "kind": "zone",
+          "x": 55,
+          "y": 15
+        },
+        {
+          "id": "lz",
+          "label": "Local Zone",
+          "kind": "service",
+          "service": "AWS Local Zones",
+          "x": 70,
+          "y": 50
+        },
+        {
+          "id": "wl",
+          "label": "Wavelength (5G)",
+          "kind": "service",
+          "service": "AWS Wavelength",
+          "x": 90,
+          "y": 82
+        },
+        {
+          "id": "vmw",
+          "label": "VMware Cloud",
+          "kind": "service",
+          "service": "VMware Cloud on AWS",
+          "x": 90,
+          "y": 20
+        }
+      ],
+      "edges": [
+        {
+          "from": "op",
+          "to": "region",
+          "label": "service link"
+        },
+        {
+          "from": "dc",
+          "to": "any",
+          "label": "tus servidores"
+        },
+        {
+          "from": "any",
+          "to": "region",
+          "label": "gestión"
+        },
+        {
+          "from": "region",
+          "to": "lz",
+          "label": "extiende"
+        },
+        {
+          "from": "region",
+          "to": "wl",
+          "label": "extiende"
+        },
+        {
+          "from": "dc",
+          "to": "vmw",
+          "label": "migra vSphere"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "No todo puede correr en una Region de AWS. A veces los datos o las máquinas están en tu fábrica, o tus usuarios necesitan latencia mínima. Esta familia de servicios lleva el cómputo de AWS más cerca de donde se necesita.",
+        "show": [
+          "region",
+          "dc"
+        ],
+        "focus": "region"
+      },
+      {
+        "narration": "AWS Outposts instala hardware de AWS dentro de tu propio sitio. AWS lo opera y lo administra como parte de una Region, conectado por un service link. Úsalo cuando la carga debe correr en tu fábrica con las mismas APIs de AWS.",
+        "show": [
+          "region",
+          "dc",
+          "op"
+        ],
+        "focus": "op"
+      },
+      {
+        "narration": "Local Zones acercan cómputo y almacenamiento a una gran ciudad, para usuarios que buscan latencia de milisegundos de un dígito. Wavelength va más allá: pone el cómputo dentro de la red 5G del operador, para apps de dispositivos móviles.",
+        "show": [
+          "region",
+          "dc",
+          "op",
+          "lz",
+          "wl"
+        ],
+        "focus": "lz"
+      },
+      {
+        "narration": "Si ya tienes servidores propios, ECS Anywhere los registra como instancias externas de un cluster ECS. EKS Anywhere corre Kubernetes en tu hardware, incluso sin conexión a internet, pero el control plane lo administras tú.",
+        "show": [
+          "region",
+          "dc",
+          "op",
+          "lz",
+          "wl",
+          "any"
+        ],
+        "focus": "any"
+      },
+      {
+        "narration": "Y si tu mundo es VMware, VMware Cloud on AWS mueve tus cargas vSphere a infraestructura de AWS conservando tus herramientas. Ojo: desde 2024 AWS ya no lo revende; las suscripciones se gestionan con Broadcom.",
+        "show": [
+          "region",
+          "dc",
+          "op",
+          "lz",
+          "wl",
+          "any",
+          "vmw"
+        ],
+        "focus": "vmw"
+      },
+      {
+        "narration": "Para decidir, pregunta dónde debe estar el cómputo: en tu sitio con hardware de AWS, Outposts; en tu propio hardware, Anywhere; cerca de una ciudad, Local Zones; en la red 5G, Wavelength; y conservando VMware, VMware Cloud on AWS.",
+        "show": [
+          "region",
+          "dc",
+          "op",
+          "lz",
+          "wl",
+          "any",
+          "vmw"
+        ],
+        "focus": "dc"
+      }
+    ],
+    "keyPoints": [
+      "Outposts: hardware de AWS, administrado por AWS, en tu sitio.",
+      "Local Zones: cómputo cerca de usuarios de una ciudad.",
+      "Wavelength: cómputo dentro de la red 5G del operador.",
+      "ECS/EKS Anywhere: contenedores en tu propio hardware.",
+      "VMware Cloud on AWS: conserva tus herramientas vSphere."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Outposts vs ECS/EKS Anywhere",
+        "difference": "Outposts es hardware de AWS en tu sitio; Anywhere usa tus propios servidores."
+      },
+      {
+        "unitOrService": "Local Zones vs Wavelength",
+        "difference": "Local Zones sirven a usuarios de una ciudad; Wavelength a dispositivos móviles en la red del operador."
+      },
+      {
+        "unitOrService": "Amazon EKS",
+        "difference": "EKS regional administra el control plane; en EKS Anywhere lo administras tú."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "hybrid-edge-compute--l1",
+      "conceptId": "outposts",
+      "format": "lightning",
+      "prompt": "Workload must run inside the factory on AWS-managed hardware using AWS APIs → ?",
+      "promptEs": "La carga debe correr dentro de la fábrica en hardware administrado por AWS, con APIs de AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Local Zones"
+        },
+        {
+          "id": "B",
+          "text": "AWS Outposts"
+        },
+        {
+          "id": "C",
+          "text": "Amazon ECS Anywhere"
+        },
+        {
+          "id": "D",
+          "text": "AWS Wavelength"
+        }
+      ],
+      "answer": "B",
+      "why": "Outposts instala infraestructura de AWS, operada por AWS, en tu sitio. ECS Anywhere usa tus propios servidores y Local Zones está en una ciudad, no en tu fábrica."
+    },
+    {
+      "id": "hybrid-edge-compute--l2",
+      "conceptId": "outposts",
+      "format": "thisorthat",
+      "prompt": "Need EBS volumes and RDS DB instances on premises → ?",
+      "promptEs": "Necesitas volúmenes EBS e instancias de RDS en tus instalaciones → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Outposts server"
+        },
+        {
+          "id": "B",
+          "text": "Outposts rack"
+        }
+      ],
+      "answer": "B",
+      "why": "Los Outposts racks soportan EBS y RDS; los Outposts servers, de 1U o 2U, no. Ambos soportan instancias EC2."
+    },
+    {
+      "id": "hybrid-edge-compute--l3",
+      "conceptId": "outposts",
+      "format": "lightning",
+      "prompt": "Connection an Outpost uses to communicate with its parent Region → ?",
+      "promptEs": "Conexión que usa un Outpost para comunicarse con su Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Carrier gateway"
+        },
+        {
+          "id": "B",
+          "text": "VPC peering connection"
+        },
+        {
+          "id": "C",
+          "text": "Service link"
+        },
+        {
+          "id": "D",
+          "text": "Transit gateway attachment"
+        }
+      ],
+      "answer": "C",
+      "why": "El service link conecta el Outpost con su Region asociada, que lo administra. El carrier gateway pertenece a Wavelength."
+    },
+    {
+      "id": "hybrid-edge-compute--l4",
+      "conceptId": "local-zones-wavelength",
+      "format": "lightning",
+      "prompt": "Single-digit-millisecond latency for app users in one metro area → ?",
+      "promptEs": "Latencia de milisegundos de un dígito para usuarios de una ciudad → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Outposts"
+        },
+        {
+          "id": "B",
+          "text": "VMware Cloud on AWS"
+        },
+        {
+          "id": "C",
+          "text": "Amazon EKS Anywhere"
+        },
+        {
+          "id": "D",
+          "text": "AWS Local Zones"
+        }
+      ],
+      "answer": "D",
+      "why": "Local Zones ubican cómputo cerca de centros urbanos sin montar nada en tu data center. Outposts va dentro de tu sitio, no cerca de tus usuarios."
+    },
+    {
+      "id": "hybrid-edge-compute--l5",
+      "conceptId": "local-zones-wavelength",
+      "format": "lightning",
+      "prompt": "Ultra-low latency app for 5G mobile devices on a carrier network → ?",
+      "promptEs": "App de latencia ultrabaja para dispositivos móviles 5G en la red de un operador → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Wavelength"
+        },
+        {
+          "id": "B",
+          "text": "AWS Local Zones"
+        },
+        {
+          "id": "C",
+          "text": "AWS Outposts"
+        },
+        {
+          "id": "D",
+          "text": "Amazon ECS Anywhere"
+        }
+      ],
+      "answer": "A",
+      "why": "Wavelength coloca cómputo en la red del operador, en el camino de los dispositivos móviles. Una ciudad cercana sin red de operador apunta a Local Zones."
+    },
+    {
+      "id": "hybrid-edge-compute--l6",
+      "conceptId": "local-zones-wavelength",
+      "format": "thisorthat",
+      "prompt": "Wavelength subnet must receive traffic from the carrier network → ?",
+      "promptEs": "Una subnet de Wavelength debe recibir tráfico de la red del operador → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Internet gateway"
+        },
+        {
+          "id": "B",
+          "text": "Carrier gateway"
+        }
+      ],
+      "answer": "B",
+      "why": "El carrier gateway permite tráfico entrante desde la red del operador y saliente hacia ella e internet. El internet gateway no conecta con esa red."
+    },
+    {
+      "id": "hybrid-edge-compute--l7",
+      "conceptId": "vmware-cloud-on-aws",
+      "format": "lightning",
+      "prompt": "Move vSphere workloads to AWS while keeping VMware tooling → ?",
+      "promptEs": "Mover cargas vSphere a AWS conservando las herramientas de VMware → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Outposts"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EKS Anywhere"
+        },
+        {
+          "id": "C",
+          "text": "VMware Cloud on AWS"
+        },
+        {
+          "id": "D",
+          "text": "AWS Local Zones"
+        }
+      ],
+      "answer": "C",
+      "why": "VMware Cloud on AWS combina el software SDDC de VMware con infraestructura de AWS. Outposts lleva AWS a tu sitio, no conserva vSphere."
+    },
+    {
+      "id": "hybrid-edge-compute--l8",
+      "conceptId": "vmware-cloud-on-aws",
+      "format": "thisorthat",
+      "prompt": "Existing customer renews a VMware Cloud on AWS subscription through → ?",
+      "promptEs": "Un cliente existente renueva su suscripción de VMware Cloud on AWS a través de → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Broadcom or its resellers"
+        },
+        {
+          "id": "B",
+          "text": "AWS or AWS channel partners"
+        }
+      ],
+      "answer": "A",
+      "why": "Desde el 30 de abril de 2024, AWS y sus partners ya no revenden el servicio. Las renovaciones se hacen con Broadcom o sus revendedores autorizados."
+    },
+    {
+      "id": "hybrid-edge-compute--l10",
+      "conceptId": "ecs-eks-anywhere",
+      "format": "thisorthat",
+      "prompt": "Air-gapped on-premises Kubernetes with a customer-managed control plane → ?",
+      "promptEs": "Kubernetes en tus instalaciones, sin conexión, con control plane administrado por ti → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EKS Hybrid Nodes"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EKS Anywhere"
+        }
+      ],
+      "answer": "B",
+      "why": "EKS Anywhere puede operar sin conexión y tú administras su control plane. EKS Hybrid Nodes necesita conexión fiable a la Region, donde vive el control plane."
+    },
+    {
+      "id": "hybrid-edge-compute--l11",
+      "conceptId": "ecs-eks-anywhere",
+      "format": "lightning",
+      "prompt": "On-premises Kubernetes nodes, but AWS-managed control plane in a Region → ?",
+      "promptEs": "Nodos de Kubernetes en tus instalaciones, pero control plane administrado por AWS en una Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EKS Anywhere"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EKS Distro"
+        },
+        {
+          "id": "C",
+          "text": "Amazon ECS Anywhere"
+        },
+        {
+          "id": "D",
+          "text": "Amazon EKS Hybrid Nodes"
+        }
+      ],
+      "answer": "D",
+      "why": "EKS Hybrid Nodes usa tus máquinas con el control plane administrado por AWS en la Region. EKS Anywhere deja el control plane a tu cargo."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,533 @@
+{
+  "unitId": "s3",
+  "overview": {
+    "title": "Amazon S3",
+    "hook": "Un almacén ilimitado de objetos, accesible por HTTP, sin servidores que administrar.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "Aplicación",
+          "kind": "actor",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "obj",
+          "label": "Objeto + clave",
+          "kind": "data",
+          "x": 30,
+          "y": 18
+        },
+        {
+          "id": "s3",
+          "label": "Bucket S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 50,
+          "y": 50
+        },
+        {
+          "id": "evt",
+          "label": "Lambda / SQS / SNS",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 86,
+          "y": 22
+        },
+        {
+          "id": "web",
+          "label": "Visitantes web",
+          "kind": "actor",
+          "x": 86,
+          "y": 80
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "obj",
+          "label": "multipart upload"
+        },
+        {
+          "from": "obj",
+          "to": "s3",
+          "label": "PUT"
+        },
+        {
+          "from": "app",
+          "to": "s3",
+          "label": "GET / LIST"
+        },
+        {
+          "from": "s3",
+          "to": "evt",
+          "label": "Event Notification"
+        },
+        {
+          "from": "s3",
+          "to": "web",
+          "label": "sitio estático"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon S3 guarda objetos: un archivo completo con sus metadatos, identificado por una clave dentro de un bucket. No montas un disco ni administras servidores; subes y descargas por HTTP, y el espacio total es ilimitado.",
+        "show": [
+          "app",
+          "s3"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "Cada objeto puede medir hasta 50 terabytes, pero un solo PUT sube como máximo 5 gigabytes. Para archivos grandes usas multipart upload: las partes viajan en paralelo y, si una falla, reintentas solo esa parte.",
+        "show": [
+          "app",
+          "s3",
+          "obj"
+        ],
+        "focus": "obj"
+      },
+      {
+        "narration": "En S3 Standard los datos viven en al menos tres Availability Zones. Además, S3 tiene strong read-after-write consistency: apenas termina una escritura, la siguiente lectura o listado ya la ve, sin índices adicionales.",
+        "show": [
+          "app",
+          "s3",
+          "obj"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "Si necesitas muchas solicitudes por segundo, reparte las claves entre prefijos. Cada prefijo soporta al menos 3,500 escrituras y 5,500 lecturas por segundo, así que más prefijos significan más rendimiento en paralelo.",
+        "show": [
+          "app",
+          "s3",
+          "obj"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "S3 también avisa cuando algo pasa: con Event Notifications, un objeto nuevo dispara Lambda, SQS, SNS o EventBridge. La entrega es at least once, así que tu proceso debe tolerar duplicados, y para una cola SQS FIFO pasas por EventBridge.",
+        "show": [
+          "app",
+          "s3",
+          "obj",
+          "evt"
+        ],
+        "focus": "evt"
+      },
+      {
+        "narration": "Un bucket puede servir un sitio web estático, pero su website endpoint solo habla HTTP. Si piden HTTPS con el bucket privado, pones CloudFront con origin access control delante. Y con Requester Pays, quien descarga paga la transferencia.",
+        "show": [
+          "app",
+          "s3",
+          "obj",
+          "evt",
+          "web"
+        ],
+        "focus": "web"
+      },
+      {
+        "narration": "Lo que S3 no es: no es un disco ni una carpeta compartida. Si la aplicación necesita un volumen de bloques, piensa en EBS; si necesita montar un file system NFS compartido, piensa en EFS.",
+        "show": [
+          "app",
+          "s3",
+          "obj",
+          "evt",
+          "web"
+        ],
+        "focus": "s3"
+      }
+    ],
+    "keyPoints": [
+      "Objeto hasta 50 TB; un solo PUT, máximo 5 GB",
+      "Multipart upload recomendado desde 100 MB",
+      "Strong read-after-write consistency, también en listados",
+      "Por prefijo: 3,500 escrituras y 5,500 lecturas por segundo",
+      "Website endpoint solo HTTP; HTTPS privado con CloudFront + OAC"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon EBS",
+        "difference": "EBS es un disco de bloques conectado a una instancia EC2; S3 guarda objetos accesibles por HTTP."
+      },
+      {
+        "unitOrService": "Amazon EFS",
+        "difference": "EFS es un file system NFS compartido y montado; S3 guarda objetos que usas por API."
+      },
+      {
+        "unitOrService": "S3 Transfer Acceleration",
+        "difference": "Acelera subidas desde lejos geográficamente; no reemplaza repartir solicitudes entre prefijos."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "s3--l1",
+      "conceptId": "s3-fundamentals",
+      "format": "lightning",
+      "prompt": "Store one 12 TB file as a single S3 object → ?",
+      "promptEs": "Guardar un archivo de 12 TB como un solo objeto S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Single PUT request"
+        },
+        {
+          "id": "B",
+          "text": "S3 multipart upload"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "S3 Batch Operations"
+        }
+      ],
+      "answer": "B",
+      "why": "Un solo PUT llega hasta 5 GB; multipart upload crea un objeto de hasta 50 TB. Transfer Acceleration mejora la distancia, no el límite de tamaño."
+    },
+    {
+      "id": "s3--l2",
+      "conceptId": "s3-fundamentals",
+      "format": "thisorthat",
+      "prompt": "Read and list an object immediately after its overwrite succeeds → ?",
+      "promptEs": "Leer y listar un objeto justo después de sobrescribirlo con éxito → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Separate index of completed writes"
+        },
+        {
+          "id": "B",
+          "text": "S3 native strong consistency"
+        }
+      ],
+      "answer": "B",
+      "why": "S3 ofrece strong read-after-write consistency para escrituras, sobrescrituras y listados. Un índice aparte solo agrega trabajo operativo."
+    },
+    {
+      "id": "s3--l3",
+      "conceptId": "s3-fundamentals",
+      "format": "lightning",
+      "prompt": "Durable objects across multiple AZs, unpredictable growth, no servers → ?",
+      "promptEs": "Objetos duraderos en varias AZ, crecimiento impredecible, sin servidores → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 One Zone-IA"
+        },
+        {
+          "id": "B",
+          "text": "EBS volume on EC2"
+        },
+        {
+          "id": "C",
+          "text": "EC2 instance store"
+        },
+        {
+          "id": "D",
+          "text": "S3 Standard"
+        }
+      ],
+      "answer": "D",
+      "why": "S3 Standard guarda en al menos tres AZ y escala sin límite. One Zone-IA usa una sola AZ; EBS e instance store requieren instancias."
+    },
+    {
+      "id": "s3--l4",
+      "conceptId": "s3-fundamentals",
+      "format": "lightning",
+      "prompt": "Maximum size of a single PUT upload to S3 → ?",
+      "promptEs": "Tamaño máximo de una sola subida PUT a S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "5 GB"
+        },
+        {
+          "id": "B",
+          "text": "100 MB"
+        },
+        {
+          "id": "C",
+          "text": "5 TB"
+        },
+        {
+          "id": "D",
+          "text": "50 TB"
+        }
+      ],
+      "answer": "A",
+      "why": "Un PUT sube hasta 5 GB. 50 TB es el máximo por objeto y 100 MB es desde donde se recomienda multipart upload."
+    },
+    {
+      "id": "s3--l5",
+      "conceptId": "s3-performance-multipart",
+      "format": "lightning",
+      "prompt": "Very high GET rate across many objects; requests throttled per prefix → ?",
+      "promptEs": "Tasa muy alta de GET sobre muchos objetos; límites por prefijo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Transfer Acceleration"
+        },
+        {
+          "id": "B",
+          "text": "Use multipart upload for each object"
+        },
+        {
+          "id": "C",
+          "text": "Spread keys across more prefixes"
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Versioning"
+        }
+      ],
+      "answer": "C",
+      "why": "El rendimiento de S3 escala por prefijo particionado. Transfer Acceleration ayuda con la distancia y multipart con subidas grandes, no con la tasa de lecturas."
+    },
+    {
+      "id": "s3--l6",
+      "conceptId": "s3-performance-multipart",
+      "format": "thisorthat",
+      "prompt": "Large upload keeps failing midway; avoid restarting from zero → ?",
+      "promptEs": "Una subida grande falla a la mitad; evitar empezar de cero → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Multipart upload"
+        },
+        {
+          "id": "B",
+          "text": "S3 Transfer Acceleration"
+        }
+      ],
+      "answer": "A",
+      "why": "Multipart upload sube partes independientes y reintenta solo la que falló. Transfer Acceleration acelera la ruta, pero no divide ni reanuda la subida."
+    },
+    {
+      "id": "s3--l7",
+      "conceptId": "s3-performance-multipart",
+      "format": "lightning",
+      "prompt": "Abandoned multipart uploads keep incurring storage charges → ?",
+      "promptEs": "Subidas multipart abandonadas siguen cobrando almacenamiento → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Requester Pays"
+        },
+        {
+          "id": "B",
+          "text": "Move objects to S3 Intelligent-Tiering"
+        },
+        {
+          "id": "C",
+          "text": "Lifecycle: abort incomplete uploads"
+        },
+        {
+          "id": "D",
+          "text": "Add a bucket policy deny"
+        }
+      ],
+      "answer": "C",
+      "why": "Las partes subidas se cobran hasta completar o abortar la subida. Una Lifecycle rule elimina automáticamente los multipart uploads incompletos."
+    },
+    {
+      "id": "s3--l8",
+      "conceptId": "s3-event-notifications",
+      "format": "lightning",
+      "prompt": "Create a thumbnail whenever an image is uploaded, least overhead → ?",
+      "promptEs": "Crear una miniatura cada vez que se sube una imagen, mínimo esfuerzo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Event Notification to Lambda"
+        },
+        {
+          "id": "B",
+          "text": "Scheduled Lambda listing the bucket"
+        },
+        {
+          "id": "C",
+          "text": "S3 Replication rule"
+        },
+        {
+          "id": "D",
+          "text": "CloudTrail data events"
+        }
+      ],
+      "answer": "A",
+      "why": "El evento ObjectCreated invoca Lambda directamente. Listar el bucket por horario agrega retraso y trabajo; replicación solo copia objetos."
+    },
+    {
+      "id": "s3--l9",
+      "conceptId": "s3-event-notifications",
+      "format": "thisorthat",
+      "prompt": "Send S3 object-created events to an existing SQS FIFO queue → ?",
+      "promptEs": "Enviar eventos ObjectCreated de S3 a una cola SQS FIFO existente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route through Amazon EventBridge"
+        },
+        {
+          "id": "B",
+          "text": "Direct S3 notification to FIFO"
+        }
+      ],
+      "answer": "A",
+      "why": "S3 no admite una cola SQS FIFO como destino directo de notificaciones. EventBridge recibe el evento y lo envía a la cola FIFO."
+    },
+    {
+      "id": "s3--l10",
+      "conceptId": "s3-event-notifications",
+      "format": "lightning",
+      "prompt": "Lambda writes output to its triggering bucket and loops forever → ?",
+      "promptEs": "Lambda escribe en el mismo bucket que la dispara y entra en bucle → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Versioning"
+        },
+        {
+          "id": "B",
+          "text": "Switch the notification destination to SNS"
+        },
+        {
+          "id": "C",
+          "text": "Enable S3 Object Lock"
+        },
+        {
+          "id": "D",
+          "text": "Trigger on prefix; write output elsewhere"
+        }
+      ],
+      "answer": "D",
+      "why": "Escribir en el bucket que dispara el evento vuelve a dispararlo. Limita el trigger a un prefijo de entrada y escribe en otro prefijo o bucket."
+    },
+    {
+      "id": "s3--l11",
+      "conceptId": "s3-requester-pays",
+      "format": "lightning",
+      "prompt": "Share a huge dataset; consumers pay for their own downloads → ?",
+      "promptEs": "Compartir un dataset enorme; los consumidores pagan sus descargas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 presigned URLs"
+        },
+        {
+          "id": "B",
+          "text": "S3 Requester Pays"
+        },
+        {
+          "id": "C",
+          "text": "CloudFront signed URLs"
+        },
+        {
+          "id": "D",
+          "text": "S3 Access Points"
+        }
+      ],
+      "answer": "B",
+      "why": "Con Requester Pays, el solicitante autenticado paga requests y transferencia. Las URLs firmadas y los Access Points controlan acceso, no quién paga."
+    },
+    {
+      "id": "s3--l12",
+      "conceptId": "s3-requester-pays",
+      "format": "thisorthat",
+      "prompt": "Requester Pays bucket: who pays for storage?",
+      "promptEs": "Bucket con Requester Pays: ¿quién paga el almacenamiento?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The requester"
+        },
+        {
+          "id": "B",
+          "text": "The bucket owner"
+        }
+      ],
+      "answer": "B",
+      "why": "Requester Pays traslada al solicitante el costo de requests y descargas, pero el dueño del bucket sigue pagando el almacenamiento."
+    },
+    {
+      "id": "s3--l13",
+      "conceptId": "s3-static-website-hosting",
+      "format": "lightning",
+      "prompt": "Static site from S3; visitors need HTTPS, bucket stays private → ?",
+      "promptEs": "Sitio estático en S3; visitantes exigen HTTPS y el bucket sigue privado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 website endpoint with public bucket"
+        },
+        {
+          "id": "B",
+          "text": "Public-read bucket policy"
+        },
+        {
+          "id": "C",
+          "text": "S3 presigned URLs"
+        },
+        {
+          "id": "D",
+          "text": "CloudFront with OAC to S3 origin"
+        }
+      ],
+      "answer": "D",
+      "why": "El website endpoint de S3 no ofrece HTTPS y exige acceso público. CloudFront con OAC sirve HTTPS y lee del bucket privado."
+    },
+    {
+      "id": "s3--l14",
+      "conceptId": "s3-static-website-hosting",
+      "format": "thisorthat",
+      "prompt": "CloudFront to a private S3 origin with SSE-KMS objects → ?",
+      "promptEs": "CloudFront hacia un origen S3 privado con objetos SSE-KMS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Origin access identity (OAI)"
+        },
+        {
+          "id": "B",
+          "text": "Origin access control (OAC)"
+        }
+      ],
+      "answer": "B",
+      "why": "OAC soporta objetos cifrados con SSE-KMS; OAI no. Por eso OAC es la opción recomendada para orígenes S3 privados."
+    },
+    {
+      "id": "s3--l15",
+      "conceptId": "s3-static-website-hosting",
+      "format": "lightning",
+      "prompt": "HTTP-only static brochure site, no CDN needed, lowest effort → ?",
+      "promptEs": "Sitio estático simple, solo HTTP, sin CDN, mínimo esfuerzo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 web server with EBS"
+        },
+        {
+          "id": "B",
+          "text": "S3 static website hosting"
+        },
+        {
+          "id": "C",
+          "text": "Elastic Beanstalk environment"
+        },
+        {
+          "id": "D",
+          "text": "ALB with Lambda targets"
+        }
+      ],
+      "answer": "B",
+      "why": "S3 sirve HTML, CSS y JavaScript con index y error document, sin servidores. Las otras opciones agregan cómputo que no se necesita."
+    }
+  ],
+  "audited": true
+}

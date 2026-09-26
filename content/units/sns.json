@@ -1,0 +1,257 @@
+{
+  "unitId": "sns",
+  "overview": {
+    "title": "Amazon SNS",
+    "hook": "Publicas una vez y SNS distribuye el mensaje a los suscriptores.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "pub",
+          "label": "Publicador",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "topic",
+          "label": "Tema SNS",
+          "kind": "service",
+          "service": "Amazon SNS",
+          "x": 38,
+          "y": 50
+        },
+        {
+          "id": "qa",
+          "label": "Cola facturación",
+          "kind": "service",
+          "service": "Amazon SQS",
+          "x": 72,
+          "y": 18
+        },
+        {
+          "id": "qb",
+          "label": "Cola analítica",
+          "kind": "service",
+          "service": "Amazon SQS",
+          "x": 72,
+          "y": 50
+        },
+        {
+          "id": "ep",
+          "label": "Email / HTTPS",
+          "kind": "actor",
+          "x": 72,
+          "y": 82
+        },
+        {
+          "id": "filter",
+          "label": "Filter policy",
+          "kind": "note",
+          "x": 38,
+          "y": 15
+        }
+      ],
+      "edges": [
+        {
+          "from": "pub",
+          "to": "topic",
+          "label": "Publish"
+        },
+        {
+          "from": "topic",
+          "to": "qa",
+          "label": "push"
+        },
+        {
+          "from": "topic",
+          "to": "qb",
+          "label": "push"
+        },
+        {
+          "from": "topic",
+          "to": "ep",
+          "label": "push"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Con una sola cola SQS, los consumidores compiten por los mensajes; SQS también puede entregar duplicados. Pero un mismo evento, como una nueva reserva, puede interesar a facturación, analítica y avisos. SNS permite publicarlo una vez y distribuirlo a varios suscriptores.",
+        "show": [
+          "pub",
+          "topic"
+        ],
+        "focus": "topic"
+      },
+      {
+        "narration": "La pieza central es el topic. El publicador envía el mensaje al topic, sin saber quién escucha. Cada interesado crea una suscripción, que puede ser una cola SQS, una función Lambda, un endpoint HTTPS, un correo o un SMS.",
+        "show": [
+          "pub",
+          "topic",
+          "ep"
+        ],
+        "focus": "ep"
+      },
+      {
+        "narration": "La diferencia clave con SQS es la entrega: SNS envía mensajes mediante push, sin garantizar entrega inmediata; los consumidores de SQS hacen polling. SNS no ofrece ese polling a sus suscriptores, aunque los topics SNS FIFO pueden habilitar archivado y reproducción.",
+        "show": [
+          "pub",
+          "topic",
+          "ep"
+        ],
+        "focus": "topic"
+      },
+      {
+        "narration": "Por eso existe el patrón fan-out: el topic envía mensajes a varias colas SQS, una por aplicación. Cada app tiene su copia duradera y la procesa a su ritmo, aunque esté caída un rato. Con una sola cola compartida, los consumidores competirían por los mensajes.",
+        "show": [
+          "pub",
+          "topic",
+          "ep",
+          "qa",
+          "qb"
+        ],
+        "focus": "qa"
+      },
+      {
+        "narration": "Si un suscriptor solo quiere ciertos mensajes, configuras una filter policy en su suscripción. Así la cola de facturación recibe solo los eventos que le corresponden, sin que el publicador cambie nada.",
+        "show": [
+          "pub",
+          "topic",
+          "ep",
+          "qa",
+          "qb",
+          "filter"
+        ],
+        "focus": "filter"
+      },
+      {
+        "narration": "No confundas SNS con sus vecinos. Si necesitas enrutar eventos de servicios AWS, SaaS y apps propias con reglas de contenido, piensa en EventBridge. Si hay pasos que coordinar, reintentos y estado, eso es Step Functions.",
+        "show": [
+          "pub",
+          "topic",
+          "ep",
+          "qa",
+          "qb",
+          "filter"
+        ],
+        "focus": "topic"
+      }
+    ],
+    "keyPoints": [
+      "Pub/sub: SNS distribuye una publicación a los suscriptores que correspondan.",
+      "SNS usa push sin garantizar entrega inmediata; los consumidores de SQS hacen polling.",
+      "Fan-out SNS + SQS: cada app tiene su propia cola duradera.",
+      "Suscriptores: SQS, Lambda, HTTPS, email, SMS.",
+      "Filter policy: cada suscripción recibe solo los mensajes que le corresponden."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon SQS",
+        "difference": "SQS retiene mensajes para que los consumidores hagan polling; SNS distribuye publicaciones mediante push a suscriptores. SQS puede entregar duplicados."
+      },
+      {
+        "unitOrService": "Amazon EventBridge",
+        "difference": "EventBridge enruta eventos de AWS, SaaS y apps con reglas; SNS es fan-out pub/sub simple."
+      },
+      {
+        "unitOrService": "AWS Step Functions",
+        "difference": "Step Functions coordina pasos con estado; SNS notifica a suscriptores independientes."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "sns--l1",
+      "conceptId": "sns-pub-sub-fanout",
+      "format": "lightning",
+      "prompt": "One event, several apps, each needs its own durable copy → ?",
+      "promptEs": "Un evento, varias apps, cada una necesita su propia copia duradera → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One shared SQS queue"
+        },
+        {
+          "id": "B",
+          "text": "SQS FIFO queue with message groups"
+        },
+        {
+          "id": "C",
+          "text": "SNS topic fanning out to SQS queues"
+        },
+        {
+          "id": "D",
+          "text": "Step Functions Parallel state"
+        }
+      ],
+      "answer": "C",
+      "why": "SNS replica el evento y cada cola SQS suscrita guarda su copia para procesarla a su ritmo. En una cola compartida, los consumidores se reparten los mensajes en vez de recibir todos."
+    },
+    {
+      "id": "sns--l2",
+      "conceptId": "sns-pub-sub-fanout",
+      "format": "thisorthat",
+      "prompt": "Push the same alert to an email address and an HTTPS endpoint → ?",
+      "promptEs": "Enviar la misma alerta a un correo y a un endpoint HTTPS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon SNS topic"
+        },
+        {
+          "id": "B",
+          "text": "Amazon SQS queue"
+        }
+      ],
+      "answer": "A",
+      "why": "Un tema SNS admite suscripciones email y HTTPS y empuja una sola publicación a ambas. SQS solo espera a que un consumidor haga polling."
+    },
+    {
+      "id": "sns--l4",
+      "conceptId": "sns-pub-sub-fanout",
+      "format": "thisorthat",
+      "prompt": "Receiver pulls messages whenever it is ready → ?",
+      "promptEs": "El receptor saca los mensajes cuando está listo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon SNS (push)"
+        },
+        {
+          "id": "B",
+          "text": "Amazon SQS (polling)"
+        }
+      ],
+      "answer": "B",
+      "why": "Con Amazon SQS, tú consultas la cola mediante polling cuando estás listo para procesar mensajes. Amazon SNS usa entrega push a suscriptores, no polling del receptor."
+    },
+    {
+      "id": "sns--l5",
+      "conceptId": "sns-pub-sub-fanout",
+      "format": "lightning",
+      "prompt": "Each subscriber queue should receive only matching message types → ?",
+      "promptEs": "Cada cola suscrita debe recibir solo los tipos de mensaje que le tocan → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SNS subscription filter policy"
+        },
+        {
+          "id": "B",
+          "text": "SQS message group IDs"
+        },
+        {
+          "id": "C",
+          "text": "SQS visibility timeout"
+        },
+        {
+          "id": "D",
+          "text": "One SNS topic per queue"
+        }
+      ],
+      "answer": "A",
+      "why": "La filter policy en cada suscripción filtra por atributos sin tocar al publicador. Un tema por cola obliga al publicador a saber a dónde enviar cada mensaje."
+    }
+  ],
+  "audited": true
+}

@@ -5,7 +5,7 @@ import { getContent } from "../content/load";
 import { chipsFor } from "../game/cues";
 import { xpFor } from "../game/xp";
 import type { Question } from "../content/types";
-import { planSession, type QuestionMode } from "../engine/planner";
+import { planSession, type QueueItem, type QuestionMode } from "../engine/planner";
 import {
   applyLearnAttempt,
   applyReviewAttempt,
@@ -14,6 +14,10 @@ import {
 import { deserializeCard, firstCard, review, serializeCard, daysBetween } from "../engine/scheduler";
 import {
   conceptRow,
+  getUserSetting,
+  putUserSetting,
+  type FormatPreference,
+  type SessionItem,
   dayOf,
   gapDays,
   getSession,
@@ -74,16 +78,37 @@ export async function buildSession(userId: string, budgetMin?: number): Promise<
     budgetMin: budgetMin ?? settings.dailyMinutes,
     hasAnyAttempt: await hasAnyAttempt(userId),
   });
+  const queue = plan.kind === "diagnostic" ? plan.queue : await withDiscovery(userId, plan.queue);
   const session: SessionState = {
     day: dayOf(now),
     kind: plan.kind,
-    queue: plan.queue,
+    queue,
     index: 0,
     total: plan.queue.length,
     startedAt: now.toISOString(),
   };
   await saveSession(userId, session);
   return session;
+}
+
+/**
+ * Pre-training (Mayer): before the first concept of a service the learner has not
+ * met, insert that service's narrated overview ("Descubrir").
+ */
+async function withDiscovery(userId: string, queue: QueueItem[]): Promise<SessionItem[]> {
+  const { unitByConcept, unitContent } = getContent();
+  const discovered = new Set((await getUserSetting<string[]>(userId, "discoveredUnits")) ?? []);
+  const out: SessionItem[] = [];
+  for (const item of queue) {
+    const isNew = (item.t === "q" && item.mode === "pretest") || (item.t === "card" && item.reason === "new");
+    const unitId = unitByConcept.get(item.conceptId);
+    if (isNew && unitId && unitContent.has(unitId) && !discovered.has(unitId)) {
+      out.push({ t: "discover", unitId });
+      discovered.add(unitId);
+    }
+    out.push(item);
+  }
+  return out;
 }
 
 /** Today's session; a new day starts a new plan. */
@@ -96,6 +121,7 @@ export async function todaySession(userId: string): Promise<SessionState> {
 export type CurrentItem =
   | { kind: "done"; session: SessionState }
   | { kind: "card"; conceptId: string; reason: "new" | "relearn"; session: SessionState }
+  | { kind: "discover"; unitId: string; session: SessionState }
   | { kind: "question"; mode: QuestionMode; question: PublicQuestion; session: SessionState };
 
 export async function currentItem(userId: string): Promise<CurrentItem> {
@@ -104,11 +130,14 @@ export async function currentItem(userId: string): Promise<CurrentItem> {
   while (session.index < session.queue.length) {
     const item = session.queue[session.index];
     if (item.t === "card") return { kind: "card", conceptId: item.conceptId, reason: item.reason, session };
+    if (item.t === "discover") return { kind: "discover", unitId: item.unitId, session };
     if (!item.questionId) {
       const used = session.queue.filter((i) => i.t === "q" && i.questionId).map((i) => i.questionId!);
       // Prefer a wording not used yet today; small concepts fall back to the least recent one.
+      const prefer = await formatFor(userId, item.mode, item.conceptId);
       const qid =
-        (await pickQuestion(userId, item.conceptId, used)) ?? (await pickQuestion(userId, item.conceptId));
+        (await pickQuestion(userId, item.conceptId, used, prefer)) ??
+        (await pickQuestion(userId, item.conceptId, [], prefer));
       if (!qid) {
         session.index++;
         continue;
@@ -127,8 +156,27 @@ export async function currentItem(userId: string): Promise<CurrentItem> {
   return { kind: "done", session };
 }
 
+/**
+ * Which question format fits this moment: short retrieval while learning, exam-style
+ * scenarios once the concept is established, and always scenarios in the last 2 weeks.
+ */
+async function formatFor(userId: string, mode: QuestionMode, conceptId: string): Promise<FormatPreference> {
+  const settings = await getSettings(userId);
+  const daysLeft = daysBetween(new Date(), new Date(settings.targetDate));
+  if (mode === "diagnostic" || mode === "pretest" || mode === "learn" || mode === "relearn") return "short";
+  if (daysLeft <= 14 || mode === "interleave") return "scenario";
+  const row = await conceptRow(userId, conceptId);
+  return (row?.spacedSuccesses ?? 0) >= 1 ? "scenario" : "short";
+}
+
 export async function advance(userId: string) {
   const s = await todaySession(userId);
+  const cur = s.queue[s.index];
+  if (cur?.t === "discover") {
+    const done = new Set((await getUserSetting<string[]>(userId, "discoveredUnits")) ?? []);
+    done.add(cur.unitId);
+    await putUserSetting(userId, "discoveredUnits", [...done]);
+  }
   s.index = Math.min(s.index + 1, s.queue.length);
   await saveSession(userId, s);
 }

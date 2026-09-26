@@ -1,0 +1,708 @@
+{
+  "unitId": "auto-scaling",
+  "overview": {
+    "title": "Amazon EC2 Auto Scaling",
+    "hook": "Una flota que crece en los picos, se encoge después y se cura sola.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "users",
+          "label": "Usuarios",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "elb",
+          "label": "Load balancer",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 30,
+          "y": 50
+        },
+        {
+          "id": "lt",
+          "label": "Launch template",
+          "kind": "data",
+          "x": 58,
+          "y": 15
+        },
+        {
+          "id": "asg",
+          "label": "Auto Scaling group",
+          "kind": "service",
+          "service": "Amazon EC2 Auto Scaling",
+          "x": 58,
+          "y": 50
+        },
+        {
+          "id": "cw",
+          "label": "CloudWatch",
+          "kind": "service",
+          "service": "Amazon CloudWatch",
+          "x": 58,
+          "y": 85
+        },
+        {
+          "id": "session",
+          "label": "Sesión compartida",
+          "kind": "service",
+          "service": "Amazon ElastiCache",
+          "x": 88,
+          "y": 50
+        },
+        {
+          "id": "aas",
+          "label": "App Auto Scaling",
+          "kind": "service",
+          "service": "Application Auto Scaling",
+          "x": 88,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "users",
+          "to": "elb",
+          "label": "peticiones"
+        },
+        {
+          "from": "elb",
+          "to": "asg",
+          "label": "reparte"
+        },
+        {
+          "from": "lt",
+          "to": "asg",
+          "label": "configura"
+        },
+        {
+          "from": "cw",
+          "to": "asg",
+          "label": "métrica"
+        },
+        {
+          "from": "asg",
+          "to": "session",
+          "label": "estado fuera"
+        },
+        {
+          "from": "cw",
+          "to": "aas",
+          "label": "ECS, DynamoDB"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "El tráfico sube y baja. Escalar verticalmente es agrandar una instancia; escalar horizontalmente es sumar o quitar instancias. Para una app stateless, lo horizontal gana: agregas capacidad en los picos, la quitas después, y la caída de una instancia no tumba todo.",
+        "show": [
+          "users",
+          "asg"
+        ],
+        "focus": "asg"
+      },
+      {
+        "narration": "Un Auto Scaling group mantiene tu flota en una capacidad deseada, entre un mínimo y un máximo, repartida en varias zonas de disponibilidad. Lanza instancias a partir de un launch template y reemplaza automáticamente las que fallan.",
+        "show": [
+          "users",
+          "asg",
+          "lt"
+        ],
+        "focus": "lt"
+      },
+      {
+        "narration": "El load balancer reparte las peticiones y el grupo le registra las instancias nuevas. Ojo: para que el grupo reemplace instancias que fallan el health check del load balancer, debes activar los ELB health checks en el grupo. Los lifecycle hooks pausan arranques o terminaciones.",
+        "show": [
+          "users",
+          "asg",
+          "lt",
+          "elb"
+        ],
+        "focus": "elb"
+      },
+      {
+        "narration": "¿Cuándo escalar? Target tracking mantiene una métrica cerca de un objetivo, como la CPU promedio. Scheduled actúa a una hora conocida, predictive se anticipa a patrones recurrentes y step responde distinto según qué tan grave sea la alarma.",
+        "show": [
+          "users",
+          "asg",
+          "lt",
+          "elb",
+          "cw"
+        ],
+        "focus": "cw"
+      },
+      {
+        "narration": "La métrica debe reflejar el trabajo de cada instancia. Para workers de SQS, no uses el tamaño bruto de la cola: usa el backlog por instancia, o sea, mensajes entre instancias InService, con un objetivo igual a latencia aceptable entre tiempo por mensaje.",
+        "show": [
+          "users",
+          "asg",
+          "lt",
+          "elb",
+          "cw"
+        ],
+        "focus": "cw"
+      },
+      {
+        "narration": "Para que cualquier instancia atienda la siguiente petición, saca la sesión de la instancia y guárdala en ElastiCache o DynamoDB. Las sticky sessions solo parchean el problema: si esa instancia muere, la sesión se pierde.",
+        "show": [
+          "users",
+          "asg",
+          "lt",
+          "elb",
+          "cw",
+          "session"
+        ],
+        "focus": "session"
+      },
+      {
+        "narration": "EC2 Auto Scaling solo mueve instancias EC2. Para escalar tareas de ECS, capacidad de DynamoDB o réplicas de Aurora, usas Application Auto Scaling. Y si quieres descubrir y coordinar varios recursos con una sola estrategia, usas un scaling plan de AWS Auto Scaling.",
+        "show": [
+          "users",
+          "asg",
+          "lt",
+          "elb",
+          "cw",
+          "session",
+          "aas"
+        ],
+        "focus": "aas"
+      }
+    ],
+    "keyPoints": [
+      "App stateless + escalado horizontal: sumas en picos, quitas después.",
+      "El ASG mantiene la capacidad deseada entre mínimo y máximo.",
+      "Activa ELB health checks para reemplazar según la salud de la app.",
+      "Target tracking: objetivo; scheduled: hora; predictive: patrón; step: niveles.",
+      "Workers de SQS: escala por backlog por instancia."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Elastic Load Balancing",
+        "difference": "Reparte tráfico entre instancias sanas, pero no reemplaza las que fallan; eso lo hace el ASG."
+      },
+      {
+        "unitOrService": "Sticky sessions",
+        "difference": "Envían al usuario a la misma instancia; no eliminan el estado local como sí lo hace ElastiCache."
+      },
+      {
+        "unitOrService": "Application Auto Scaling",
+        "difference": "Escala ECS, DynamoDB o Aurora; EC2 Auto Scaling solo escala instancias EC2."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "auto-scaling--l1",
+      "conceptId": "horizontal-vs-vertical-scaling",
+      "format": "thisorthat",
+      "prompt": "Stateless web tier, unpredictable spikes, must survive one instance failure → ?",
+      "promptEs": "Capa web stateless, picos impredecibles, debe sobrevivir a la caída de una instancia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Scale out with an Auto Scaling group"
+        },
+        {
+          "id": "B",
+          "text": "Resize to a larger instance type"
+        }
+      ],
+      "answer": "A",
+      "why": "Escalar horizontalmente agrega y quita instancias según demanda y tolera que una falle. Una instancia más grande sigue siendo un único punto de falla."
+    },
+    {
+      "id": "auto-scaling--l2",
+      "conceptId": "horizontal-vs-vertical-scaling",
+      "format": "lightning",
+      "prompt": "Component can't share work across instances; maintenance window allowed; needs more CPU → ?",
+      "promptEs": "Componente que no reparte trabajo entre instancias; hay ventana de mantenimiento; necesita más CPU → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add instances behind a load balancer"
+        },
+        {
+          "id": "B",
+          "text": "Enable sticky sessions"
+        },
+        {
+          "id": "C",
+          "text": "Resize to a larger instance type"
+        },
+        {
+          "id": "D",
+          "text": "Add a scheduled scaling action"
+        }
+      ],
+      "answer": "C",
+      "why": "Si el trabajo no se puede repartir, sumar instancias no ayuda; con ventana de mantenimiento, escalar verticalmente es lo adecuado."
+    },
+    {
+      "id": "auto-scaling--l3",
+      "conceptId": "horizontal-vs-vertical-scaling",
+      "format": "lightning",
+      "prompt": "Fleet permanently sized for peak wastes money off-peak → ?",
+      "promptEs": "Flota dimensionada siempre para el pico desperdicia dinero fuera de él → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Bigger instance types"
+        },
+        {
+          "id": "B",
+          "text": "Auto Scaling with scale-in"
+        },
+        {
+          "id": "C",
+          "text": "Sticky sessions on the ALB"
+        },
+        {
+          "id": "D",
+          "text": "More Availability Zones"
+        }
+      ],
+      "answer": "B",
+      "why": "Auto Scaling agrega capacidad en el pico y la retira (scale-in) cuando baja la demanda. Una flota fija sobredimensionada nunca devuelve esa capacidad."
+    },
+    {
+      "id": "auto-scaling--l4",
+      "conceptId": "ec2-auto-scaling-groups",
+      "format": "lightning",
+      "prompt": "Automatically replace impaired EC2 instances and keep capacity across AZs → ?",
+      "promptEs": "Reemplazar automáticamente instancias EC2 dañadas y mantener capacidad en varias AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Application Load Balancer"
+        },
+        {
+          "id": "B",
+          "text": "Route 53 health checks"
+        },
+        {
+          "id": "C",
+          "text": "Spread placement group"
+        },
+        {
+          "id": "D",
+          "text": "EC2 Auto Scaling group"
+        }
+      ],
+      "answer": "D",
+      "why": "El ASG mantiene la capacidad deseada y reemplaza instancias no saludables en varias AZ. El ALB solo deja de enviar tráfico a las malas, no las reemplaza."
+    },
+    {
+      "id": "auto-scaling--l5",
+      "conceptId": "ec2-auto-scaling-groups",
+      "format": "thisorthat",
+      "prompt": "One ASG mixing Spot and On-Demand across several instance types → ?",
+      "promptEs": "Un ASG que mezcla Spot y On-Demand con varios tipos de instancia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Launch configuration"
+        },
+        {
+          "id": "B",
+          "text": "Launch template"
+        }
+      ],
+      "answer": "B",
+      "why": "Solo el launch template permite mezclar Spot y On-Demand o varios tipos de instancia en un ASG, y además tiene versiones."
+    },
+    {
+      "id": "auto-scaling--l6",
+      "conceptId": "ec2-auto-scaling-groups",
+      "format": "lightning",
+      "prompt": "Roll a new AMI across an existing ASG fleet → ?",
+      "promptEs": "Desplegar una AMI nueva en toda la flota existente de un ASG → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Update the launch template only"
+        },
+        {
+          "id": "B",
+          "text": "Raise the desired capacity"
+        },
+        {
+          "id": "C",
+          "text": "Start an instance refresh"
+        },
+        {
+          "id": "D",
+          "text": "Create a scheduled action"
+        }
+      ],
+      "answer": "C",
+      "why": "Actualizar el launch template afecta solo a instancias nuevas; instance refresh reemplaza las existentes de forma escalonada."
+    },
+    {
+      "id": "auto-scaling--l7",
+      "conceptId": "ec2-auto-scaling-groups",
+      "format": "lightning",
+      "prompt": "ASG setting the group works to maintain, between min and max → ?",
+      "promptEs": "Valor del ASG que el grupo intenta mantener, entre el mínimo y el máximo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Desired capacity"
+        },
+        {
+          "id": "B",
+          "text": "Maximum capacity"
+        },
+        {
+          "id": "C",
+          "text": "Warm pool size"
+        },
+        {
+          "id": "D",
+          "text": "Health check grace period"
+        }
+      ],
+      "answer": "A",
+      "why": "Desired capacity es el número que el grupo mantiene; mínimo y máximo solo lo acotan. Las políticas de escalado ajustan ese valor deseado."
+    },
+    {
+      "id": "auto-scaling--l8",
+      "conceptId": "auto-scaling-policies",
+      "format": "lightning",
+      "prompt": "Keep the group's average CPU around 50% → scaling policy?",
+      "promptEs": "Mantener la CPU promedio del grupo cerca de 50 % → ¿política de escalado?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Scheduled scaling"
+        },
+        {
+          "id": "B",
+          "text": "Step scaling"
+        },
+        {
+          "id": "C",
+          "text": "Predictive scaling"
+        },
+        {
+          "id": "D",
+          "text": "Target tracking scaling"
+        }
+      ],
+      "answer": "D",
+      "why": "Target tracking mantiene una métrica cerca de un valor objetivo y crea sus propias alarmas de CloudWatch. Step reacciona por tramos, sin mantener un objetivo."
+    },
+    {
+      "id": "auto-scaling--l9",
+      "conceptId": "auto-scaling-policies",
+      "format": "lightning",
+      "prompt": "Add capacity before a one-time product launch at 9 AM Friday → ?",
+      "promptEs": "Agregar capacidad antes de un lanzamiento único el viernes a las 9 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Target tracking scaling"
+        },
+        {
+          "id": "B",
+          "text": "Scheduled scaling"
+        },
+        {
+          "id": "C",
+          "text": "Predictive scaling"
+        },
+        {
+          "id": "D",
+          "text": "Step scaling"
+        }
+      ],
+      "answer": "B",
+      "why": "Una hora conocida y un evento único piden scheduled scaling. Predictive aprende patrones recurrentes, no un evento que ocurre una sola vez."
+    },
+    {
+      "id": "auto-scaling--l11",
+      "conceptId": "auto-scaling-policies",
+      "format": "thisorthat",
+      "prompt": "Moderate CPU breach adds 1 instance; severe breach adds 4 → ?",
+      "promptEs": "Si la CPU sube moderadamente agrega 1 instancia; si sube mucho, 4 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Target tracking scaling"
+        },
+        {
+          "id": "B",
+          "text": "Step scaling"
+        }
+      ],
+      "answer": "B",
+      "why": "Step scaling define respuestas distintas por rango de la métrica. Target tracking solo persigue un valor objetivo, sin escalones que tú configures."
+    },
+    {
+      "id": "auto-scaling--l12",
+      "conceptId": "asg-health-checks-lifecycle-hooks",
+      "format": "lightning",
+      "prompt": "ASG must replace instances that fail the ALB health check → ?",
+      "promptEs": "El ASG debe reemplazar instancias que fallan el health check del ALB → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable ELB health checks on the ASG"
+        },
+        {
+          "id": "B",
+          "text": "Increase the health check grace period"
+        },
+        {
+          "id": "C",
+          "text": "Add a termination lifecycle hook"
+        },
+        {
+          "id": "D",
+          "text": "Enable cross-zone load balancing"
+        }
+      ],
+      "answer": "A",
+      "why": "Por defecto el ASG usa los status checks de EC2. Adjuntar el ALB no basta: hay que activar los ELB health checks en el grupo."
+    },
+    {
+      "id": "auto-scaling--l13",
+      "conceptId": "asg-health-checks-lifecycle-hooks",
+      "format": "lightning",
+      "prompt": "Copy logs off an instance before scale-in terminates it → ?",
+      "promptEs": "Copiar los logs de una instancia antes de que el scale-in la termine → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Health check grace period"
+        },
+        {
+          "id": "B",
+          "text": "Termination lifecycle hook"
+        },
+        {
+          "id": "C",
+          "text": "Instance scale-in protection"
+        },
+        {
+          "id": "D",
+          "text": "Warm pool"
+        }
+      ],
+      "answer": "B",
+      "why": "El termination hook pausa la instancia y emite un evento para que ejecutes tareas antes de terminarla. Scale-in protection evita la terminación, no ejecuta la tarea."
+    },
+    {
+      "id": "auto-scaling--l14",
+      "conceptId": "asg-health-checks-lifecycle-hooks",
+      "format": "thisorthat",
+      "prompt": "New instance must finish bootstrap before receiving load balancer traffic → ?",
+      "promptEs": "La instancia nueva debe terminar su bootstrap antes de recibir tráfico del load balancer → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Launch lifecycle hook"
+        },
+        {
+          "id": "B",
+          "text": "Longer health check grace period"
+        }
+      ],
+      "answer": "A",
+      "why": "El launch hook retiene la instancia hasta que termine el arranque, antes de registrarla en el load balancer. El grace period solo retrasa la evaluación de salud."
+    },
+    {
+      "id": "auto-scaling--l15",
+      "conceptId": "aws-auto-scaling-multi-service",
+      "format": "lightning",
+      "prompt": "Scale an ECS service's desired task count on a CloudWatch metric → ?",
+      "promptEs": "Escalar el número deseado de tareas de un servicio ECS según una métrica → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 Auto Scaling group"
+        },
+        {
+          "id": "B",
+          "text": "Elastic Load Balancing"
+        },
+        {
+          "id": "C",
+          "text": "Application Auto Scaling"
+        },
+        {
+          "id": "D",
+          "text": "AWS Compute Optimizer"
+        }
+      ],
+      "answer": "C",
+      "why": "Application Auto Scaling escala recursos como tareas de ECS, capacidad de DynamoDB o réplicas de Aurora. Un ASG solo ajusta instancias EC2."
+    },
+    {
+      "id": "auto-scaling--l16",
+      "conceptId": "aws-auto-scaling-multi-service",
+      "format": "thisorthat",
+      "prompt": "Discover related scalable resources and apply one coordinated scaling strategy → ?",
+      "promptEs": "Descubrir recursos escalables relacionados y aplicar una estrategia de escalado coordinada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Separate Application Auto Scaling policies"
+        },
+        {
+          "id": "B",
+          "text": "AWS Auto Scaling scaling plan"
+        }
+      ],
+      "answer": "B",
+      "why": "Los scaling plans descubren recursos relacionados y dan recomendaciones integradas. Las políticas individuales apuntan a un recurso a la vez."
+    },
+    {
+      "id": "auto-scaling--l17",
+      "conceptId": "scaling-metrics-selection",
+      "format": "lightning",
+      "prompt": "SQS worker fleet → best metric for target tracking?",
+      "promptEs": "Flota de workers de SQS → ¿mejor métrica para target tracking?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Raw ApproximateNumberOfMessagesVisible"
+        },
+        {
+          "id": "B",
+          "text": "Backlog per InService instance"
+        },
+        {
+          "id": "C",
+          "text": "Average CPU utilization"
+        },
+        {
+          "id": "D",
+          "text": "Load balancer RequestCount"
+        }
+      ],
+      "answer": "B",
+      "why": "El backlog por instancia crece y baja en proporción a la capacidad del grupo. La cola bruta no dice cuántos workers hacen falta."
+    },
+    {
+      "id": "auto-scaling--l18",
+      "conceptId": "scaling-metrics-selection",
+      "format": "lightning",
+      "prompt": "Acceptable backlog-per-instance target is calculated as → ?",
+      "promptEs": "El objetivo de backlog por instancia aceptable se calcula como → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Queue length ÷ maximum capacity"
+        },
+        {
+          "id": "B",
+          "text": "Visible messages × instance count"
+        },
+        {
+          "id": "C",
+          "text": "Processing time ÷ acceptable latency"
+        },
+        {
+          "id": "D",
+          "text": "Acceptable latency ÷ processing time"
+        }
+      ],
+      "answer": "D",
+      "why": "Si aceptas 100 s de espera y cada mensaje tarda 1 s, cada instancia puede acumular 100 mensajes. Por eso es latencia aceptable dividida entre tiempo por mensaje."
+    },
+    {
+      "id": "auto-scaling--l19",
+      "conceptId": "scaling-metrics-selection",
+      "format": "thisorthat",
+      "prompt": "Target tracking for a web tier behind an ALB, per-request load → ?",
+      "promptEs": "Target tracking para una capa web detrás de un ALB, según carga de peticiones → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ALBRequestCountPerTarget"
+        },
+        {
+          "id": "B",
+          "text": "Load balancer RequestCount"
+        }
+      ],
+      "answer": "A",
+      "why": "ALBRequestCountPerTarget mide carga por instancia y cambia con la capacidad del grupo. RequestCount total no es adecuada para target tracking."
+    },
+    {
+      "id": "auto-scaling--l20",
+      "conceptId": "stateless-vs-stateful-design",
+      "format": "lightning",
+      "prompt": "Users lose their sessions when the ASG replaces an instance → ?",
+      "promptEs": "Los usuarios pierden su sesión cuando el ASG reemplaza una instancia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable sticky sessions"
+        },
+        {
+          "id": "B",
+          "text": "Use a larger instance type"
+        },
+        {
+          "id": "C",
+          "text": "Increase the minimum capacity"
+        },
+        {
+          "id": "D",
+          "text": "Store sessions in ElastiCache"
+        }
+      ],
+      "answer": "D",
+      "why": "Sacar la sesión a un almacén compartido hace la app stateless y sobrevive al reemplazo. Sticky sessions siguen dependiendo de la memoria de esa instancia."
+    },
+    {
+      "id": "auto-scaling--l21",
+      "conceptId": "stateless-vs-stateful-design",
+      "format": "thisorthat",
+      "prompt": "Any instance must be able to serve a user's next request → ?",
+      "promptEs": "Cualquier instancia debe poder atender la siguiente petición de un usuario → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Sticky sessions on the load balancer"
+        },
+        {
+          "id": "B",
+          "text": "Session state in DynamoDB"
+        }
+      ],
+      "answer": "B",
+      "why": "Con la sesión en DynamoDB, cualquier instancia puede leerla. Sticky sessions hacen lo contrario: atan al usuario a una instancia concreta."
+    },
+    {
+      "id": "auto-scaling--l23",
+      "conceptId": "stateless-vs-stateful-design",
+      "format": "lightning",
+      "prompt": "User-uploaded images must be available to every web instance → ?",
+      "promptEs": "Las imágenes que suben los usuarios deben estar disponibles para todas las instancias web → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Local EBS volume"
+        },
+        {
+          "id": "B",
+          "text": "Instance store"
+        },
+        {
+          "id": "C",
+          "text": "Amazon S3"
+        },
+        {
+          "id": "D",
+          "text": "Sticky sessions"
+        }
+      ],
+      "answer": "C",
+      "why": "S3 guarda datos grandes no estructurados, como imágenes, fuera de las instancias. Un volumen local solo lo ve la instancia que lo tiene."
+    }
+  ],
+  "audited": true
+}

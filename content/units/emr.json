@@ -1,0 +1,235 @@
+{
+  "unitId": "emr",
+  "overview": {
+    "title": "Amazon EMR",
+    "hook": "Clústeres administrados de Spark y Hadoop para procesar datos a gran escala.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "s3in",
+          "label": "Datos en S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "spark",
+          "label": "Spark / Hadoop",
+          "kind": "note",
+          "x": 42,
+          "y": 15
+        },
+        {
+          "id": "emr",
+          "label": "Clúster EMR",
+          "kind": "service",
+          "service": "Amazon EMR",
+          "x": 42,
+          "y": 50
+        },
+        {
+          "id": "spot",
+          "label": "Task nodes Spot",
+          "kind": "note",
+          "x": 42,
+          "y": 85
+        },
+        {
+          "id": "out",
+          "label": "S3 / DynamoDB",
+          "kind": "data",
+          "x": 75,
+          "y": 50
+        },
+        {
+          "id": "bi",
+          "label": "Reportes y BI",
+          "kind": "actor",
+          "x": 93,
+          "y": 20
+        }
+      ],
+      "edges": [
+        {
+          "from": "s3in",
+          "to": "emr",
+          "label": "lee"
+        },
+        {
+          "from": "spark",
+          "to": "emr",
+          "label": "framework"
+        },
+        {
+          "from": "spot",
+          "to": "emr",
+          "label": "capacidad extra"
+        },
+        {
+          "from": "emr",
+          "to": "out",
+          "label": "resultados"
+        },
+        {
+          "from": "out",
+          "to": "bi",
+          "label": "análisis"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "A veces no basta con una consulta SQL: tienes un flujo existente en Apache Spark o Hadoop que procesa enormes volúmenes de datos. Amazon EMR es una plataforma de clústeres administrada para ejecutar esos frameworks de big data en AWS.",
+        "show": [
+          "emr",
+          "spark"
+        ],
+        "focus": "spark"
+      },
+      {
+        "narration": "El clúster lee grandes volúmenes desde S3, los transforma con tu código de Spark o Hadoop, y escribe los resultados en almacenes como S3 o DynamoDB, listos para análisis y reportes de BI.",
+        "show": [
+          "emr",
+          "spark",
+          "s3in",
+          "out",
+          "bi"
+        ],
+        "focus": "s3in"
+      },
+      {
+        "narration": "Si conservas los datos necesarios en S3 u otro almacén externo, puedes apagar el clúster al terminar; los datos en HDFS dentro del clúster podrían perderse. Para ahorrar, los task nodes, que aportan cómputo, pueden usar instancias Spot si toleran interrupciones.",
+        "show": [
+          "emr",
+          "spark",
+          "s3in",
+          "out",
+          "bi",
+          "spot"
+        ],
+        "focus": "spot"
+      },
+      {
+        "narration": "La pregunta clave del examen: ¿el requisito exige un framework como Spark o Hadoop en un clúster administrado? Entonces EMR. Si solo es SQL ad hoc sobre S3, Athena. Si es ETL sin administrar clúster, Glue. Si es un warehouse para BI, Redshift.",
+        "show": [
+          "emr",
+          "spark",
+          "s3in",
+          "out",
+          "bi",
+          "spot"
+        ],
+        "focus": "emr"
+      },
+      {
+        "narration": "Tampoco elijas EMR solo porque puede transformar datos, ni porque piden dashboards: eso es Amazon QuickSight. EMR procesa; no presenta ni reemplaza a un servicio más simple que ya cumple el requisito.",
+        "show": [
+          "emr",
+          "spark",
+          "s3in",
+          "out",
+          "bi",
+          "spot"
+        ],
+        "focus": "bi"
+      }
+    ],
+    "keyPoints": [
+      "Spark o Hadoop en clúster administrado: Amazon EMR.",
+      "Procesa grandes volúmenes entre S3 y DynamoDB.",
+      "SQL ad hoc en S3 no justifica EMR: Athena.",
+      "ETL serverless sin clúster: Glue, no EMR."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Glue",
+        "difference": "Glue es ETL serverless; EMR te da un clúster con control sobre el framework."
+      },
+      {
+        "unitOrService": "Amazon Athena",
+        "difference": "Athena lanza SQL ad hoc sobre S3; EMR ejecuta flujos de procesamiento Spark o Hadoop."
+      },
+      {
+        "unitOrService": "Amazon Redshift",
+        "difference": "Redshift es el warehouse para consultas de BI; EMR procesa big data con frameworks."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "emr--l1",
+      "conceptId": "emr",
+      "format": "lightning",
+      "prompt": "Run an existing Apache Spark workflow on a managed cluster → ?",
+      "promptEs": "Ejecutar un flujo existente de Apache Spark en un clúster administrado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Athena"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EMR"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Redshift"
+        },
+        {
+          "id": "D",
+          "text": "AWS Lambda"
+        }
+      ],
+      "answer": "B",
+      "why": "EMR es la plataforma de clústeres administrada para frameworks como Spark, sin reescribir el flujo. Athena es SQL ad hoc y Redshift un warehouse."
+    },
+    {
+      "id": "emr--l2",
+      "conceptId": "emr",
+      "format": "thisorthat",
+      "prompt": "Established Apache Hadoop processing on large partner datasets → ?",
+      "promptEs": "Procesamiento existente con Apache Hadoop sobre grandes datasets de socios → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EMR"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Athena"
+        }
+      ],
+      "answer": "A",
+      "why": "El requisito es ejecutar un flujo Hadoop: eso pide un clúster EMR. Athena consulta con SQL, pero no ejecuta trabajos de Hadoop."
+    },
+    {
+      "id": "emr--l3",
+      "conceptId": "emr",
+      "format": "lightning",
+      "prompt": "ETL with no cluster to manage at all → ?",
+      "promptEs": "ETL sin ningún clúster que administrar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Redshift Spectrum"
+        },
+        {
+          "id": "B",
+          "text": "Amazon MSK"
+        },
+        {
+          "id": "C",
+          "text": "Amazon EMR on EC2"
+        },
+        {
+          "id": "D",
+          "text": "AWS Glue ETL job"
+        }
+      ],
+      "answer": "D",
+      "why": "Glue ofrece ETL serverless. EMR sobre EC2 sirve cuando necesitas controlar un clúster con Spark o Hadoop, algo que aquí no se pide."
+    }
+  ],
+  "audited": true
+}

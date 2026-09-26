@@ -1,0 +1,280 @@
+{
+  "unitId": "database-selection",
+  "overview": {
+    "title": "Elegir una base de datos",
+    "hook": "El patrón de acceso guía tu elección de base de datos; el tráfico también influye.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "Tu aplicación",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "rds",
+          "label": "RDS / Aurora",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 45,
+          "y": 15
+        },
+        {
+          "id": "ddb",
+          "label": "DynamoDB",
+          "kind": "service",
+          "service": "Amazon DynamoDB",
+          "x": 45,
+          "y": 50
+        },
+        {
+          "id": "doc",
+          "label": "DocumentDB",
+          "kind": "service",
+          "service": "Amazon DocumentDB",
+          "x": 45,
+          "y": 85
+        },
+        {
+          "id": "nep",
+          "label": "Neptune",
+          "kind": "service",
+          "service": "Amazon Neptune",
+          "x": 85,
+          "y": 15
+        },
+        {
+          "id": "ks",
+          "label": "Keyspaces",
+          "kind": "service",
+          "service": "Amazon Keyspaces",
+          "x": 85,
+          "y": 50
+        },
+        {
+          "id": "rs",
+          "label": "Redshift",
+          "kind": "service",
+          "service": "Amazon Redshift",
+          "x": 85,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "rds",
+          "label": "SQL + JOINs"
+        },
+        {
+          "from": "app",
+          "to": "ddb",
+          "label": "get por clave"
+        },
+        {
+          "from": "app",
+          "to": "doc",
+          "label": "API MongoDB"
+        },
+        {
+          "from": "app",
+          "to": "nep",
+          "label": "recorrer grafo"
+        },
+        {
+          "from": "app",
+          "to": "ks",
+          "label": "CQL Cassandra"
+        },
+        {
+          "from": "app",
+          "to": "rs",
+          "label": "análisis masivo"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Antes de elegir un servicio, pregúntate cómo lee y escribe datos tu aplicación. En el examen, el patrón de acceso ayuda a elegir el modelo de base de datos; el tráfico influye en la elección y el dimensionamiento, pero no decide por sí solo.",
+        "show": [
+          "app"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "Si necesitas tablas relacionadas, consultas SQL, JOINs y transacciones, piensa en Amazon RDS o Aurora. También son opciones si tu app ya usa PostgreSQL o MySQL y debe conservar su motor.",
+        "show": [
+          "app",
+          "rds"
+        ],
+        "focus": "rds"
+      },
+      {
+        "narration": "Si casi siempre buscas un elemento por su clave, como el estado de un jugador por su ID, y necesitas latencia de milisegundos a cualquier escala, piensa en Amazon DynamoDB, una base de datos de clave-valor y documentos totalmente gestionada.",
+        "show": [
+          "app",
+          "rds",
+          "ddb"
+        ],
+        "focus": "ddb"
+      },
+      {
+        "narration": "Si necesitas compatibilidad con código MongoDB, considera Amazon DocumentDB; también puede servir para una carga documental nueva si sus consultas encajan. Si necesitas compatibilidad con Apache Cassandra o CQL, considera Amazon Keyspaces. No elijas solo por el formato JSON.",
+        "show": [
+          "app",
+          "rds",
+          "ddb",
+          "doc",
+          "ks"
+        ],
+        "focus": "doc"
+      },
+      {
+        "narration": "Si la pregunta habla de recorrer relaciones, como cuentas conectadas con dispositivos en una investigación de fraude, o de redes sociales y recomendaciones, piensa en un grafo: Amazon Neptune.",
+        "show": [
+          "app",
+          "rds",
+          "ddb",
+          "doc",
+          "ks",
+          "nep"
+        ],
+        "focus": "nep"
+      },
+      {
+        "narration": "Amazon Redshift es un data warehouse para análisis a gran escala, no un sustituto de la base operativa de tu app. Y tener datos JSON no obliga a usar DocumentDB: DynamoDB también admite documentos.",
+        "show": [
+          "app",
+          "rds",
+          "ddb",
+          "doc",
+          "ks",
+          "nep",
+          "rs"
+        ],
+        "focus": "rs"
+      }
+    ],
+    "keyPoints": [
+      "El patrón de acceso guía el modelo; el tráfico también influye, pero no lo determina por sí solo.",
+      "SQL, JOINs o motor relacional existente → RDS o Aurora.",
+      "Acceso por clave a gran escala → DynamoDB.",
+      "Cargas documentales, especialmente con compatibilidad MongoDB → DocumentDB; Cassandra → Keyspaces; grafos → Neptune.",
+      "Análisis masivo → Redshift, no como sustituto de una base operativa."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon DocumentDB vs DynamoDB",
+        "difference": "Ambos admiten documentos. DocumentDB ofrece compatibilidad con MongoDB y también puede servir para cargas nuevas; compara sus patrones de consulta y acceso."
+      },
+      {
+        "unitOrService": "Amazon Redshift",
+        "difference": "Data warehouse para análisis; RDS o Aurora pueden servir a una aplicación relacional operativa."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "database-selection--l1",
+      "conceptId": "relational-vs-nonrelational",
+      "format": "lightning",
+      "prompt": "Existing PostgreSQL app runs SQL joins across related tables; keep the engine → ?",
+      "promptEs": "App PostgreSQL existente con JOINs entre tablas relacionadas; conservar el motor → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon RDS for PostgreSQL"
+        },
+        {
+          "id": "C",
+          "text": "Amazon DocumentDB"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Redshift"
+        }
+      ],
+      "answer": "B",
+      "why": "Conservar PostgreSQL y sus JOINs pide una base relacional gestionada. DynamoDB y DocumentDB cambian el modelo, y Redshift es un data warehouse, no la base operativa."
+    },
+    {
+      "id": "database-selection--l5",
+      "conceptId": "purpose-built-databases",
+      "format": "lightning",
+      "prompt": "Migrate an app keeping its MongoDB drivers and code, fully managed → ?",
+      "promptEs": "Migrar una app conservando sus drivers y código MongoDB, totalmente gestionado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DocumentDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Keyspaces"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Aurora PostgreSQL"
+        }
+      ],
+      "answer": "A",
+      "why": "La pista decisiva es conservar código MongoDB: DocumentDB es compatible. DynamoDB también guarda documentos, pero exige cambiar la interfaz; Keyspaces es para Cassandra."
+    },
+    {
+      "id": "database-selection--l6",
+      "conceptId": "purpose-built-databases",
+      "format": "lightning",
+      "prompt": "Reuse Apache Cassandra application code and tools, no servers to manage → ?",
+      "promptEs": "Reutilizar código y herramientas de Apache Cassandra, sin servidores que administrar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cassandra on Amazon EC2"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Keyspaces"
+        },
+        {
+          "id": "D",
+          "text": "Amazon DocumentDB"
+        }
+      ],
+      "answer": "C",
+      "why": "Keyspaces es compatible con Cassandra y serverless. Cassandra en EC2 conserva el código, pero tú administras los servidores; DynamoDB obligaría a reescribir la app."
+    },
+    {
+      "id": "database-selection--l7",
+      "conceptId": "purpose-built-databases",
+      "format": "thisorthat",
+      "prompt": "Large-scale analytical reporting across years of sales data → ?",
+      "promptEs": "Reportes analíticos a gran escala sobre años de datos de ventas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Redshift"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DynamoDB"
+        }
+      ],
+      "answer": "A",
+      "why": "Análisis masivo sobre histórico es trabajo de un data warehouse: Redshift. DynamoDB brilla en lecturas por clave de baja latencia, no en reportes analíticos."
+    }
+  ],
+  "audited": true
+}

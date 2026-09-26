@@ -1,0 +1,286 @@
+{
+  "unitId": "aws-config",
+  "overview": {
+    "title": "AWS Config & Artifact",
+    "hook": "El historial de cómo estaba configurado cada recurso y si cumple tus reglas.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "res",
+          "label": "Recursos AWS",
+          "kind": "data",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "cfg",
+          "label": "AWS Config",
+          "kind": "service",
+          "service": "AWS Config",
+          "x": 32,
+          "y": 50
+        },
+        {
+          "id": "s3",
+          "label": "Historial (S3)",
+          "kind": "data",
+          "x": 32,
+          "y": 15
+        },
+        {
+          "id": "rule",
+          "label": "Config rule",
+          "kind": "note",
+          "x": 56,
+          "y": 50
+        },
+        {
+          "id": "ssm",
+          "label": "SSM Automation",
+          "kind": "service",
+          "service": "AWS Systems Manager",
+          "x": 84,
+          "y": 50
+        },
+        {
+          "id": "agg",
+          "label": "Aggregator",
+          "kind": "service",
+          "service": "AWS Config",
+          "x": 56,
+          "y": 85
+        },
+        {
+          "id": "artifact",
+          "label": "AWS Artifact",
+          "kind": "service",
+          "service": "AWS Artifact",
+          "x": 84,
+          "y": 15
+        }
+      ],
+      "edges": [
+        {
+          "from": "res",
+          "to": "cfg",
+          "label": "graba cambios"
+        },
+        {
+          "from": "cfg",
+          "to": "s3",
+          "label": "snapshots"
+        },
+        {
+          "from": "cfg",
+          "to": "rule",
+          "label": "evalúa"
+        },
+        {
+          "from": "rule",
+          "to": "ssm",
+          "label": "remedia"
+        },
+        {
+          "from": "cfg",
+          "to": "agg",
+          "label": "multicuenta"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "CloudTrail te dice quién hizo un cambio; AWS Config te dice cómo estaba configurado cada recurso antes y después. Graba la configuración y las relaciones de los tipos de recurso que elijas, y guarda historial y snapshots en un bucket de S3.",
+        "show": [
+          "res",
+          "cfg",
+          "s3"
+        ],
+        "focus": "cfg"
+      },
+      {
+        "narration": "Sobre ese historial trabajan las Config rules. Una regla evalúa los recursos grabados dentro de su alcance contra tu política, por ejemplo buckets sin cifrado o security groups con SSH abierto al mundo, y los marca como compliant o noncompliant.",
+        "show": [
+          "res",
+          "cfg",
+          "s3",
+          "rule"
+        ],
+        "focus": "rule"
+      },
+      {
+        "narration": "Marcar no es arreglar. Para corregir automáticamente, asocias a la regla un documento de Systems Manager Automation, y Config lanza la remediación cuando encuentra un recurso que no cumple.",
+        "show": [
+          "res",
+          "cfg",
+          "s3",
+          "rule",
+          "ssm"
+        ],
+        "focus": "ssm"
+      },
+      {
+        "narration": "Con muchas cuentas y Regions, un aggregator reúne configuración y cumplimiento en una sola cuenta y Region. Es solo una vista central: cada cuenta y Region sigue grabando y evaluando por su lado.",
+        "show": [
+          "res",
+          "cfg",
+          "s3",
+          "rule",
+          "ssm",
+          "agg"
+        ],
+        "focus": "agg"
+      },
+      {
+        "narration": "Y si un auditor te pide pruebas de los controles de AWS, como un informe SOC, las descargas de AWS Artifact, donde también aceptas acuerdos con AWS. Pero Artifact documenta lo que hace AWS; tus propios controles los documentas tú.",
+        "show": [
+          "res",
+          "cfg",
+          "s3",
+          "rule",
+          "ssm",
+          "agg",
+          "artifact"
+        ],
+        "focus": "artifact"
+      }
+    ],
+    "keyPoints": [
+      "Config: historial de configuración y cumplimiento de recursos.",
+      "Config rules marcan; SSM Automation remedia.",
+      "Aggregator: vista central multicuenta y multi-Region.",
+      "Artifact: informes de cumplimiento de AWS, como SOC."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS CloudTrail",
+        "difference": "CloudTrail atribuye llamadas a la API; Config muestra configuración histórica y cumplimiento."
+      },
+      {
+        "unitOrService": "AWS Security Hub",
+        "difference": "Security Hub consolida hallazgos y revisa estándares; necesita que Config grabe recursos para la mayoría de controles."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "aws-config--l1",
+      "conceptId": "aws-config",
+      "format": "lightning",
+      "prompt": "How was this security group configured at the time of the incident?",
+      "promptEs": "¿Cómo estaba configurado este security group al momento del incidente?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "id": "B",
+          "text": "AWS Config"
+        },
+        {
+          "id": "C",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "id": "D",
+          "text": "Amazon CloudWatch"
+        }
+      ],
+      "answer": "B",
+      "why": "Config guarda el historial de configuración de cada recurso grabado. CloudTrail diría quién lo cambió, y Flow Logs solo muestran tráfico, no configuraciones."
+    },
+    {
+      "id": "aws-config--l2",
+      "conceptId": "aws-config",
+      "format": "lightning",
+      "prompt": "Automatically fix resources that a Config rule flags as noncompliant → ?",
+      "promptEs": "Corregir automáticamente recursos que una Config rule marca como noncompliant → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudTrail Insights"
+        },
+        {
+          "id": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "id": "C",
+          "text": "Systems Manager Automation remediation"
+        },
+        {
+          "id": "D",
+          "text": "AWS Artifact agreements"
+        }
+      ],
+      "answer": "C",
+      "why": "Config remedia asociando a la regla un documento de Systems Manager Automation. La regla por sí sola solo evalúa y marca; no corrige nada."
+    },
+    {
+      "id": "aws-config--l3",
+      "conceptId": "aws-config",
+      "format": "thisorthat",
+      "prompt": "Single view of configuration compliance across many accounts and Regions → ?",
+      "promptEs": "Vista única del cumplimiento de configuración en muchas cuentas y Regions → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Config aggregator"
+        },
+        {
+          "id": "B",
+          "text": "CloudTrail Event history"
+        }
+      ],
+      "answer": "A",
+      "why": "Un aggregator reúne datos de configuración y cumplimiento de varias cuentas y Regions en una. Event history muestra actividad de API de una sola cuenta y Region."
+    },
+    {
+      "id": "aws-config--l4",
+      "conceptId": "compliance-artifact-data-governance",
+      "format": "lightning",
+      "prompt": "An auditor requests AWS's SOC report as evidence → ?",
+      "promptEs": "Un auditor pide el informe SOC de AWS como evidencia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Config conformance data"
+        },
+        {
+          "id": "B",
+          "text": "AWS Security Hub"
+        },
+        {
+          "id": "C",
+          "text": "AWS Marketplace vendor documents"
+        },
+        {
+          "id": "D",
+          "text": "AWS Artifact"
+        }
+      ],
+      "answer": "D",
+      "why": "AWS Artifact ofrece descargas bajo demanda de los informes de seguridad y cumplimiento de AWS. Los documentos de un vendedor de Marketplace no hablan de los controles de AWS."
+    },
+    {
+      "id": "aws-config--l5",
+      "conceptId": "compliance-artifact-data-governance",
+      "format": "thisorthat",
+      "prompt": "Does an AWS compliance report from Artifact also prove your company's controls?",
+      "promptEs": "¿Un informe de cumplimiento de AWS en Artifact prueba también los controles de tu empresa?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, it covers both sides"
+        },
+        {
+          "id": "B",
+          "text": "No, document your controls separately"
+        }
+      ],
+      "answer": "B",
+      "why": "Artifact aporta evidencia sobre la infraestructura y los servicios de AWS. Los controles que gestiona tu empresa requieren tu propia documentación, según el modelo de responsabilidad compartida."
+    }
+  ],
+  "audited": true
+}

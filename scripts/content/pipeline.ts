@@ -20,7 +20,20 @@ import OpenAI, { toFile } from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import type { Concept, ConceptContent, Question, Syllabus } from "../../src/lib/content/types";
 import { AUDIT_INSTRUCTIONS, auditInput, GEN_INSTRUCTIONS, genInput, questionTarget, SOLVE_INSTRUCTIONS, solveInput } from "./prompts";
-import { AuditSchema, CardFixSchema, GeneratedSchema, SolveSchema, type Audit, type Generated, type Solve } from "./schemas";
+import {
+  AuditSchema,
+  CardFixSchema,
+  GeneratedSchema,
+  OverviewFixSchema,
+  SolveSchema,
+  UnitAuditSchema,
+  WhyFixSchema,
+  type Audit,
+  type Generated,
+  type Solve,
+  type UnitAudit,
+} from "./schemas";
+import type { UnitContent } from "../../src/lib/content/types";
 
 config({ path: [".env.local", ".env"], quiet: true });
 
@@ -200,9 +213,185 @@ ${docsFor(c, 12_000)}`,
   };
 }
 
+// ---------------------------------------------------------------- units (M2)
+
+const UNITS = path.join(CONTENT, "units");
+const UNIT_AUDIT = path.join(WORK, "units-audit");
+const UNIT_BACKUP = path.join(WORK, "units-original");
+fs.mkdirSync(UNIT_AUDIT, { recursive: true });
+fs.mkdirSync(UNIT_BACKUP, { recursive: true });
+
+type ItemVerdict = UnitAudit["items"][number];
+/** Wrong key / another defensible option / bad translation → drop. */
+const isHardFail = (i: ItemVerdict) => !i.keyCorrect || !i.uniquelyCorrect || !i.translationOk;
+/** Key is fine but the explanation has imprecisions → rewrite the "why". */
+const needsWhyFix = (i: ItemVerdict) => !isHardFail(i) && (i.verdict === "fail" || i.factualIssues.length > 0);
+
+function whyFixRequest(u: UnitContent, verdicts: ItemVerdict[]): Req {
+  const items = verdicts
+    .map((v) => {
+      const it = u.items.find((x) => x.id === v.id)!;
+      return `ITEM ${it.id}
+${it.prompt}
+${it.options.map((o) => `${o.id}) ${o.text}${o.id === it.answer ? " [KEY]" : ""}`).join("\n")}
+Current why (es): ${it.why}
+Reviewer issues: ${v.factualIssues.join(" | ")}`;
+    })
+    .join("\n\n");
+  return {
+    custom_id: `whyfix:${u.unitId}`,
+    body: {
+      model: MODEL,
+      instructions: `Rewrite the Spanish explanation ("why") of each AWS SAA-C03 practice item so it fixes the reviewer issues exactly (qualify or remove the inaccurate claim). Keep it ≤ 35 words, neutral Spanish with "tú", AWS terms in English, and keep explaining why the key is right for the stated requirement.`,
+      input: `${items}
+
+VERIFIED FACTS
+${unitGrounding(u)}`,
+      reasoning: { effort: "medium" },
+      max_output_tokens: 6_000,
+      text: { format: strip(zodTextFormat(WhyFixSchema, "why_fix")) },
+    },
+  };
+}
+
+function unitGrounding(u: UnitContent): string {
+  const services = JSON.parse(fs.readFileSync(path.join(CONTENT, "services.json"), "utf8")) as {
+    units: { id: string; concepts: string[] }[];
+  };
+  const concepts = services.units.find((x) => x.id === u.unitId)?.concepts ?? [];
+  return concepts
+    .map((cid) => {
+      const f = path.join(OUT, `${cid}.json`);
+      if (!fs.existsSync(f)) return "";
+      const cc = JSON.parse(fs.readFileSync(f, "utf8"));
+      return `CONCEPT ${cid}\nKey facts: ${cc.card.en.keyFacts.join(" | ")}\nGotchas: ${cc.card.en.gotchas.join(" | ")}`;
+    })
+    .join("\n\n");
+}
+
+function unitAuditRequest(u: UnitContent): Req {
+  const items = u.items
+    .map(
+      (it) =>
+        `ITEM ${it.id} (${it.format})\n${it.prompt}\nES: ${it.promptEs}\n${it.options
+          .map((o) => `${o.id}) ${o.text}${o.id === it.answer ? " [KEY]" : ""}`)
+          .join("\n")}\nWhy (es): ${it.why}`,
+    )
+    .join("\n\n");
+  const ov = u.overview;
+  return {
+    custom_id: `unitaudit:${u.unitId}`,
+    body: {
+      model: VERIFY_MODEL,
+      instructions: `You are a strict technical reviewer of AWS SAA-C03 learning material written in Spanish (AWS terms in English). Check it against the verified facts provided and current AWS behaviour.
+Fail an item if: the key is wrong, another option is also defensible, the prompt is ambiguous, any statement is wrong or outdated, or the Spanish prompt changes the meaning.
+Fail the overview only for factual errors that would mislead a learner (list minor imprecisions as issues but keep "pass").`,
+      input: `UNIT ${u.unitId}\nOVERVIEW\nHook: ${ov.hook}\nNarration:\n${ov.segments.map((s, i) => `${i + 1}. ${s.narration}`).join("\n")}\nKey points: ${ov.keyPoints.join(" | ")}\nConfused with: ${ov.confusedWith.map((c) => `${c.unitOrService}: ${c.difference}`).join(" | ")}\n\nITEMS\n${items}\n\nVERIFIED FACTS\n${unitGrounding(u)}`,
+      reasoning: { effort: "medium" },
+      max_output_tokens: 12_000,
+      text: { format: strip(zodTextFormat(UnitAuditSchema, "unit_audit")) },
+    },
+  };
+}
+
+function overviewFixRequest(u: UnitContent, issues: string[]): Req {
+  return {
+    custom_id: `overviewfix:${u.unitId}`,
+    body: {
+      model: MODEL,
+      instructions: `You correct a Spanish narrated overview of an AWS service for an SAA-C03 study game. Apply the reviewer issues precisely; keep the structure, segment count, node ids in show/focus, brevity (≤ 45 words per segment), neutral Spanish with "tú" and AWS terms in English.`,
+      input: `CURRENT OVERVIEW\n${JSON.stringify(u.overview)}\n\nREVIEWER ISSUES\n- ${issues.join("\n- ")}\n\nVERIFIED FACTS\n${unitGrounding(u)}`,
+      reasoning: { effort: "medium" },
+      max_output_tokens: 8_000,
+      text: { format: strip(zodTextFormat(OverviewFixSchema, "overview_fix")) },
+    },
+  };
+}
+
+function readUnits(): UnitContent[] {
+  if (!fs.existsSync(UNITS)) return [];
+  const only = opt("units")?.split(",");
+  return fs
+    .readdirSync(UNITS)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => JSON.parse(fs.readFileSync(path.join(UNITS, f), "utf8")) as UnitContent)
+    .filter((u) => !only || only.includes(u.unitId));
+}
+
+const auditOf = (id: string): UnitAudit | null => {
+  const f = path.join(UNIT_AUDIT, `${id}.json`);
+  return fs.existsSync(f) ? (JSON.parse(fs.readFileSync(f, "utf8")) as UnitAudit) : null;
+};
+
+/** Drop failed items and apply overview fixes, in place. Returns one report line per unit. */
+function applyUnitAudits(): string[] {
+  const report: string[] = [];
+  for (const u of readUnits()) {
+    const audit = auditOf(u.unitId);
+    if (!audit) {
+      report.push(`${u.unitId}: sin auditoría`);
+      continue;
+    }
+    const backup = path.join(UNIT_BACKUP, `${u.unitId}.json`);
+    if (!fs.existsSync(backup)) fs.writeFileSync(backup, JSON.stringify(u, null, 2));
+    const failed = new Set(audit.items.filter(isHardFail).map((i) => i.id));
+    const whyFile = path.join(UNIT_AUDIT, `${u.unitId}.whyfix.json`);
+    const whys = fs.existsSync(whyFile)
+      ? new Map(WhyFixSchema.parse(JSON.parse(fs.readFileSync(whyFile, "utf8"))).items.map((w) => [w.id, w.why]))
+      : new Map<string, string>();
+    const unfixed = audit.items.filter((i) => needsWhyFix(i) && !whys.has(i.id)).map((i) => i.id);
+    for (const id of unfixed) failed.add(id); // imprecise explanation and no fix available → drop
+    const kept = u.items.filter((i) => !failed.has(i.id)).map((i) => (whys.has(i.id) ? { ...i, why: whys.get(i.id)! } : i));
+    const fix = path.join(UNIT_AUDIT, `${u.unitId}.overviewfix.json`);
+    if (audit.overview.verdict === "fail" && fs.existsSync(fix)) {
+      const f = OverviewFixSchema.parse(JSON.parse(fs.readFileSync(fix, "utf8")));
+      u.overview = { ...u.overview, hook: f.hook, segments: f.segments, keyPoints: f.keyPoints, confusedWith: f.confusedWith };
+    }
+    const dropped = u.items.length - kept.length;
+    u.items = kept;
+    u.audited = true;
+    fs.writeFileSync(path.join(UNITS, `${u.unitId}.json`), JSON.stringify(u, null, 2));
+    const ovNote =
+      audit.overview.verdict === "fail" ? (fs.existsSync(fix) ? " · resumen corregido" : " · RESUMEN CON OBSERVACIONES SIN CORREGIR") : "";
+    report.push(`${u.unitId}: ${kept.length} ítems (${dropped} descartados)${ovNote}`);
+  }
+  return report;
+}
+
+async function auditUnits() {
+  const units = readUnits().filter((u) => flag("all") || !auditOf(u.unitId));
+  console.log(`Auditando ${units.length} unidades con ${VERIFY_MODEL}`);
+  await runDirect(units.map(unitAuditRequest));
+  const toFix = readUnits().filter(
+    (u) => auditOf(u.unitId)?.overview.verdict === "fail" && !fs.existsSync(path.join(UNIT_AUDIT, `${u.unitId}.overviewfix.json`)),
+  );
+  console.log(`Corrigiendo ${toFix.length} resúmenes`);
+  await runDirect(toFix.map((u) => overviewFixRequest(u, auditOf(u.unitId)!.overview.factualIssues)));
+  const whyTargets = readUnits()
+    .map((u) => ({ u, v: (auditOf(u.unitId)?.items ?? []).filter((i) => needsWhyFix(i) && u.items.some((x) => x.id === i.id)) }))
+    .filter(({ u, v }) => v.length > 0 && !fs.existsSync(path.join(UNIT_AUDIT, `${u.unitId}.whyfix.json`)));
+  console.log(`Corrigiendo explicaciones en ${whyTargets.length} unidades`);
+  await runDirect(whyTargets.map(({ u, v }) => whyFixRequest(u, v)));
+  const report = applyUnitAudits();
+  fs.writeFileSync(path.join(WORK, "units-report.txt"), report.join("\n"));
+  console.log(report.join("\n"));
+}
+
 function applyResult(customId: string, text: string) {
   const [kind, id] = customId.split(":");
   const data = JSON.parse(text);
+  if (kind === "unitaudit") {
+    fs.writeFileSync(path.join(UNIT_AUDIT, `${id}.json`), JSON.stringify(UnitAuditSchema.parse(data), null, 2));
+    return;
+  }
+  if (kind === "whyfix") {
+    fs.writeFileSync(path.join(UNIT_AUDIT, `${id}.whyfix.json`), JSON.stringify(WhyFixSchema.parse(data), null, 2));
+    return;
+  }
+  if (kind === "overviewfix") {
+    fs.writeFileSync(path.join(UNIT_AUDIT, `${id}.overviewfix.json`), JSON.stringify(OverviewFixSchema.parse(data), null, 2));
+    return;
+  }
   if (kind === "cardfix") {
     fs.writeFileSync(path.join(VERIFY, `${id}.cardfix.json`), JSON.stringify(CardFixSchema.parse(data), null, 2));
     return;
@@ -464,6 +653,8 @@ async function main() {
       console.log(`Corrigiendo ${reqs.length} fichas con ${MODEL}`);
       return runDirect(reqs);
     }
+    case "audit-units":
+      return auditUnits();
     case "collect":
       return collect();
     case "finalize":

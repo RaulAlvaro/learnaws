@@ -1,0 +1,359 @@
+{
+  "unitId": "kinesis",
+  "overview": {
+    "title": "Amazon Kinesis y Data Firehose",
+    "hook": "Datos que llegan sin parar: retenerlos para tus apps o entregarlos solos.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "prod",
+          "label": "Productores",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "kds",
+          "label": "Data Streams",
+          "kind": "service",
+          "service": "Amazon Kinesis Data Streams",
+          "x": 36,
+          "y": 25
+        },
+        {
+          "id": "cons",
+          "label": "Apps a medida",
+          "kind": "actor",
+          "x": 72,
+          "y": 15
+        },
+        {
+          "id": "fh",
+          "label": "Data Firehose",
+          "kind": "service",
+          "service": "Amazon Data Firehose",
+          "x": 56,
+          "y": 75
+        },
+        {
+          "id": "dest",
+          "label": "S3 / Redshift / OS",
+          "kind": "data",
+          "x": 88,
+          "y": 75
+        }
+      ],
+      "edges": [
+        {
+          "from": "prod",
+          "to": "kds",
+          "label": "partition key"
+        },
+        {
+          "from": "kds",
+          "to": "cons",
+          "label": "leen y releen"
+        },
+        {
+          "from": "kds",
+          "to": "fh",
+          "label": "fuente"
+        },
+        {
+          "from": "prod",
+          "to": "fh",
+          "label": "directo"
+        },
+        {
+          "from": "fh",
+          "to": "dest",
+          "label": "buffer y entrega"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Algunos datos no llegan como archivos, sino como un chorro continuo: clics, sensores, logs de aplicaciones. Kinesis es la familia de servicios de AWS para recibir ese streaming en tiempo real, incluso video con Kinesis Video Streams, sin que tú montes servidores de ingesta.",
+        "show": [
+          "prod"
+        ],
+        "focus": "prod"
+      },
+      {
+        "narration": "Kinesis Data Streams retiene registros en shards. El productor envía cada registro con una partition key que determina su shard. Una misma clave agrupa registros, pero su asignación puede cambiar si cambian los shards. El orden es por shard, no global.",
+        "show": [
+          "prod",
+          "kds"
+        ],
+        "focus": "kds"
+      },
+      {
+        "narration": "Varias aplicaciones tuyas pueden leer el mismo stream de forma independiente, y volver a leer registros mientras no venzan. Si esos lectores compiten por la capacidad de un shard, enhanced fan-out le da a cada consumidor su propio caudal de lectura.",
+        "show": [
+          "prod",
+          "kds",
+          "cons"
+        ],
+        "focus": "cons"
+      },
+      {
+        "narration": "Sobre la capacidad hay dos modos. En on-demand, AWS la administra sola, ideal cuando el tráfico es impredecible. En provisioned, tú decides y ajustas la capacidad del stream.",
+        "show": [
+          "prod",
+          "kds",
+          "cons"
+        ],
+        "focus": "kds"
+      },
+      {
+        "narration": "Amazon Data Firehose es otra idea: no programas consumidores, solo eliges un destino como S3, Redshift, OpenSearch Service o Splunk, y Firehose entrega por ti. Puede recibir directo de los productores o leer de un Data Streams existente.",
+        "show": [
+          "prod",
+          "kds",
+          "cons",
+          "fh",
+          "dest"
+        ],
+        "focus": "fh"
+      },
+      {
+        "narration": "Firehose acumula registros en un buffer por tamaño o por tiempo, así que la entrega no es instantánea. Puede transformar los datos antes de entregarlos. Y hacia Redshift, primero escribe en S3 y luego ejecuta un COPY.",
+        "show": [
+          "prod",
+          "kds",
+          "cons",
+          "fh",
+          "dest"
+        ],
+        "focus": "dest"
+      },
+      {
+        "narration": "La regla del examen: consumidores a medida, replay u orden por entidad, Data Streams. Solo entregar a un destino, Firehose. Para una arquitectura Kafka, existente o nueva, considera MSK. Copiar cada semana archivos existentes no es streaming: considera DataSync o Glue según la tarea.",
+        "show": [
+          "prod",
+          "kds",
+          "cons",
+          "fh",
+          "dest"
+        ],
+        "focus": "kds"
+      }
+    ],
+    "keyPoints": [
+      "Data Streams: shards, partition key y orden por shard; la asignación de una clave puede cambiar al modificar los shards.",
+      "Varios consumidores independientes y replay: Data Streams.",
+      "Entrega administrada a S3, Redshift u OpenSearch: Firehose.",
+      "Firehose usa buffer: casi tiempo real, no instantáneo.",
+      "Tráfico impredecible sin gestionar capacidad: modo on-demand."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon SQS",
+        "difference": "SQS es una cola: cada mensaje se procesa y se borra; no hay replay para consumidores independientes."
+      },
+      {
+        "unitOrService": "Amazon MSK",
+        "difference": "MSK es Kafka administrado; sirve tanto para arquitecturas Kafka existentes como para nuevas."
+      },
+      {
+        "unitOrService": "AWS DataSync",
+        "difference": "DataSync copia archivos existentes desde on-premises; no ingiere registros en streaming."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "kinesis--l1",
+      "conceptId": "data-ingestion-patterns",
+      "format": "lightning",
+      "prompt": "Recurring copy of existing on-premises NFS files to S3 → ?",
+      "promptEs": "Copia recurrente de archivos existentes de un NFS on-premises a S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Kinesis Data Streams"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Data Firehose"
+        },
+        {
+          "id": "C",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "D",
+          "text": "Amazon MSK"
+        }
+      ],
+      "answer": "C",
+      "why": "Son archivos que ya existen y se transfieren periódicamente: eso es DataSync. Que la copia sea frecuente no la convierte en streaming de registros para Kinesis o Firehose."
+    },
+    {
+      "id": "kinesis--l2",
+      "conceptId": "data-ingestion-patterns",
+      "format": "thisorthat",
+      "prompt": "Continuously generated clickstream records delivered to S3 → ?",
+      "promptEs": "Registros de clickstream generados continuamente y entregados a S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Data Firehose"
+        }
+      ],
+      "answer": "B",
+      "why": "Registros que se generan sin parar y deben llegar a S3 piden Firehose. DataSync mueve archivos ya existentes desde un origen de almacenamiento, no un flujo de registros."
+    },
+    {
+      "id": "kinesis--l3",
+      "conceptId": "data-ingestion-patterns",
+      "format": "lightning",
+      "prompt": "Scheduled cleaning and transformation of files already in S3 → ?",
+      "promptEs": "Limpieza y transformación programada de archivos que ya están en S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Glue job"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Data Firehose"
+        },
+        {
+          "id": "C",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "D",
+          "text": "Kinesis Data Streams"
+        }
+      ],
+      "answer": "A",
+      "why": "Transformar archivos existentes en un horario es ETL por lotes: un job de Glue. Firehose transforma registros entrantes, y DataSync solo mueve datos sin limpiarlos."
+    },
+    {
+      "id": "kinesis--l6",
+      "conceptId": "kinesis-data-streams",
+      "format": "thisorthat",
+      "prompt": "Many consumers contend for a shard's read throughput → ?",
+      "promptEs": "Muchos consumidores compiten por la capacidad de lectura de un shard → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Shared fan-out with GetRecords"
+        },
+        {
+          "id": "B",
+          "text": "Enhanced fan-out consumers"
+        }
+      ],
+      "answer": "B",
+      "why": "Con enhanced fan-out cada consumidor registrado recibe su propia capacidad de lectura por shard. Con shared fan-out todos siguen repartiéndose la misma."
+    },
+    {
+      "id": "kinesis--l7",
+      "conceptId": "kinesis-data-streams",
+      "format": "lightning",
+      "prompt": "Unpredictable stream traffic; AWS should manage the capacity → ?",
+      "promptEs": "Tráfico del stream impredecible; AWS debe administrar la capacidad → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Provisioned capacity mode"
+        },
+        {
+          "id": "B",
+          "text": "On-demand capacity mode"
+        },
+        {
+          "id": "C",
+          "text": "Amazon MSK Provisioned"
+        },
+        {
+          "id": "D",
+          "text": "Split shards manually"
+        }
+      ],
+      "answer": "B",
+      "why": "El modo on-demand administra la capacidad automáticamente para tráfico variable. Provisioned o dividir shards a mano deja ese trabajo en tu equipo."
+    },
+    {
+      "id": "kinesis--l9",
+      "conceptId": "data-firehose",
+      "format": "thisorthat",
+      "prompt": "Firehose delivering to Redshift: how does data arrive?",
+      "promptEs": "Firehose entregando a Redshift: ¿cómo llegan los datos?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Staged in S3, then COPY"
+        },
+        {
+          "id": "B",
+          "text": "Direct inserts, no staging"
+        }
+      ],
+      "answer": "A",
+      "why": "Para Redshift, Firehose primero escribe en S3 y luego emite un COPY. Un destino Redshift no se salta la escala en S3."
+    },
+    {
+      "id": "kinesis--l10",
+      "conceptId": "data-firehose",
+      "format": "lightning",
+      "prompt": "Archive an existing Kinesis data stream to S3 with no code → ?",
+      "promptEs": "Archivar en S3 un stream de Kinesis existente sin escribir código → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lambda consumer writing objects"
+        },
+        {
+          "id": "B",
+          "text": "Enhanced fan-out consumer"
+        },
+        {
+          "id": "C",
+          "text": "Amazon MSK Connect"
+        },
+        {
+          "id": "D",
+          "text": "Firehose reading the stream"
+        }
+      ],
+      "answer": "D",
+      "why": "Firehose puede usar un Data Streams existente como fuente y entregarlo a S3 sin aplicación propia. Un consumidor con Lambda o fan-out implica escribir código."
+    },
+    {
+      "id": "kinesis--l11",
+      "conceptId": "data-firehose",
+      "format": "lightning",
+      "prompt": "Firehose records appear in S3 a minute late. Most likely cause?",
+      "promptEs": "Los registros de Firehose aparecen en S3 un minuto tarde. ¿Causa más probable?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Hot shard from partition key"
+        },
+        {
+          "id": "B",
+          "text": "Buffering by size or time"
+        },
+        {
+          "id": "C",
+          "text": "Shard read throttling"
+        },
+        {
+          "id": "D",
+          "text": "S3 Transfer Acceleration disabled"
+        }
+      ],
+      "answer": "B",
+      "why": "Firehose agrupa registros en un buffer por tamaño o por tiempo antes de entregar. No es instantáneo; los shards y partition keys son conceptos de Data Streams."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,253 @@
+{
+  "unitId": "cloudtrail",
+  "overview": {
+    "title": "AWS CloudTrail",
+    "hook": "La cámara de seguridad de tu cuenta: quién llamó a qué API y cuándo.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "user",
+          "label": "Usuario / role",
+          "kind": "actor",
+          "x": 8,
+          "y": 40
+        },
+        {
+          "id": "api",
+          "label": "Llamada a API",
+          "kind": "data",
+          "x": 30,
+          "y": 40
+        },
+        {
+          "id": "accts",
+          "label": "Cuentas miembro",
+          "kind": "zone",
+          "x": 30,
+          "y": 85
+        },
+        {
+          "id": "ct",
+          "label": "CloudTrail",
+          "kind": "service",
+          "service": "AWS CloudTrail",
+          "x": 54,
+          "y": 55
+        },
+        {
+          "id": "eh",
+          "label": "Event history",
+          "kind": "data",
+          "x": 54,
+          "y": 15
+        },
+        {
+          "id": "s3",
+          "label": "Bucket S3 central",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 86,
+          "y": 55
+        }
+      ],
+      "edges": [
+        {
+          "from": "user",
+          "to": "api"
+        },
+        {
+          "from": "api",
+          "to": "ct",
+          "label": "evento"
+        },
+        {
+          "from": "accts",
+          "to": "ct",
+          "label": "organization trail"
+        },
+        {
+          "from": "ct",
+          "to": "eh",
+          "label": "90 días"
+        },
+        {
+          "from": "ct",
+          "to": "s3",
+          "label": "trail"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Algo cambió en producción y nadie sabe quién fue. AWS CloudTrail responde esa pregunta: registra las llamadas a la API de AWS, con quién las hizo, cuándo, desde dónde y sobre qué recurso. Es la cámara de seguridad de tu cuenta.",
+        "show": [
+          "user",
+          "api",
+          "ct"
+        ],
+        "focus": "ct"
+      },
+      {
+        "narration": "Sin configurar nada, Event history muestra los management events de los últimos 90 días, para la cuenta y la Region que estás mirando. Para conservar más tiempo o analizar después, creas un trail que entrega los eventos a un bucket de S3.",
+        "show": [
+          "user",
+          "api",
+          "ct",
+          "eh",
+          "s3"
+        ],
+        "focus": "eh"
+      },
+      {
+        "narration": "Ojo con los tipos de eventos. Los management events incluyen crear instancias o cambiar policies. Los data events, como leer objetos de S3 o invocar funciones Lambda, requieren configuración adicional: puedes registrarlos en un trail o en un CloudTrail Lake event data store.",
+        "show": [
+          "user",
+          "api",
+          "ct",
+          "eh",
+          "s3"
+        ],
+        "focus": "ct"
+      },
+      {
+        "narration": "Con muchas cuentas, crea un organization trail desde la management account o un delegated administrator. Registra todas las cuentas, incluidas las nuevas, en un solo bucket, y los miembros no pueden modificarlo. Si la bucket policy está mal, la entrega falla.",
+        "show": [
+          "user",
+          "api",
+          "ct",
+          "eh",
+          "s3",
+          "accts"
+        ],
+        "focus": "accts"
+      },
+      {
+        "narration": "No lo confundas. CloudTrail dice quién hizo qué llamada. AWS Config dice cómo estaba configurado un recurso y si cumple las reglas. CloudWatch vigila métricas y alarmas. Y VPC Flow Logs registra tráfico de red, no identidades.",
+        "show": [
+          "user",
+          "api",
+          "ct",
+          "eh",
+          "s3",
+          "accts"
+        ],
+        "focus": "ct"
+      }
+    ],
+    "keyPoints": [
+      "CloudTrail: quién hizo qué llamada a la API.",
+      "Event history: 90 días de management events.",
+      "Los data events de S3 y Lambda requieren configuración en un trail o un CloudTrail Lake event data store.",
+      "Organization trail cubre todas las cuentas, incluidas las nuevas."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Config",
+        "difference": "Config registra cómo estaba configurado un recurso; CloudTrail registra quién hizo la llamada."
+      },
+      {
+        "unitOrService": "Amazon CloudWatch",
+        "difference": "CloudWatch vigila métricas y alarmas operativas; CloudTrail audita la actividad de la cuenta."
+      },
+      {
+        "unitOrService": "VPC Flow Logs",
+        "difference": "Flow Logs capturan metadatos de tráfico IP, no la identidad detrás de una llamada a la API."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "cloudtrail--l1",
+      "conceptId": "cloudtrail",
+      "format": "lightning",
+      "prompt": "Identify which IAM principal deleted a security group yesterday → ?",
+      "promptEs": "Identificar qué principal de IAM borró un security group ayer → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Config"
+        },
+        {
+          "id": "B",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "id": "C",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "id": "D",
+          "text": "CloudWatch metrics"
+        }
+      ],
+      "answer": "B",
+      "why": "CloudTrail registra quién hizo cada llamada a la API y sobre qué recurso. Config muestra cómo cambió la configuración, pero la pregunta es quién lo hizo."
+    },
+    {
+      "id": "cloudtrail--l2",
+      "conceptId": "cloudtrail",
+      "format": "lightning",
+      "prompt": "Audit API activity of all member accounts, including future ones, in one bucket → ?",
+      "promptEs": "Auditar la actividad de API de todas las cuentas miembro, incluidas las futuras, en un bucket → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudTrail organization trail"
+        },
+        {
+          "id": "B",
+          "text": "Separate trail in each account"
+        },
+        {
+          "id": "C",
+          "text": "Management account Event history"
+        },
+        {
+          "id": "D",
+          "text": "AWS Config aggregator"
+        }
+      ],
+      "answer": "A",
+      "why": "El organization trail cubre la management account y los miembros, y las cuentas nuevas empiezan a registrar solas. Event history de la management account no muestra eventos de los miembros."
+    },
+    {
+      "id": "cloudtrail--l3",
+      "conceptId": "cloudtrail",
+      "format": "thisorthat",
+      "prompt": "Auditors require logs of S3 object reads and Lambda invocations → ?",
+      "promptEs": "Los auditores exigen registros de lecturas de objetos S3 e invocaciones de Lambda → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable data events on the trail"
+        },
+        {
+          "id": "B",
+          "text": "Management events are enough"
+        }
+      ],
+      "answer": "A",
+      "why": "Leer objetos de S3 o invocar funciones Lambda son data events, y hay que activarlos en el trail. Los management events solo cubren operaciones sobre los recursos."
+    },
+    {
+      "id": "cloudtrail--l4",
+      "conceptId": "cloudtrail",
+      "format": "thisorthat",
+      "prompt": "Retain management events longer than Event history's 90 days → ?",
+      "promptEs": "Conservar management events más allá de los 90 días de Event history → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rely on Event history in each account"
+        },
+        {
+          "id": "B",
+          "text": "Create a trail delivering to S3"
+        }
+      ],
+      "answer": "B",
+      "why": "Event history solo muestra 90 días por cuenta y Region. Un trail entrega los eventos a S3, donde los conservas el tiempo que necesites."
+    }
+  ],
+  "audited": true
+}

@@ -88,7 +88,9 @@ export interface Question {
   es: QuestionEs;
   /** Held-out questions are only ever shown in full mocks. */
   heldOut: boolean;
-  source: "generated" | "open-study";
+  source: "generated" | "open-study" | "lightning";
+  /** Absent = full exam-style scenario. Short formats never count toward readiness nor appear in mocks. */
+  format?: "scenario" | "lightning" | "thisorthat";
   verification: { status: "pass" | "fixed"; notes: string };
 }
 
@@ -126,4 +128,65 @@ export interface Lab {
   cleanup: { id: string; textEs: string }[];
   examTakeawaysEs: string[];
   docs: string[];
+}
+
+// ---------- M2: islands, service units, overviews, lightning items ----------
+
+export interface Island {
+  id: string;
+  name: string;
+  nameEs: string;
+  emoji: string;
+  color: string;
+  order: number;
+  units: string[];
+}
+
+export interface ServiceUnit {
+  id: string;
+  name: string;
+  nameEs: string;
+  island: string;
+  services: string[];
+  concepts: string[];
+  prerequisiteUnits: string[];
+  order: number;
+  iconHint: string | null;
+}
+
+export interface DiagramNode {
+  id: string;
+  label: string;
+  kind: "service" | "actor" | "data" | "zone" | "note";
+  service?: string;
+  x: number;
+  y: number;
+}
+
+export interface UnitOverview {
+  title: string;
+  hook: string;
+  diagram: { nodes: DiagramNode[]; edges: { from: string; to: string; label?: string }[] };
+  segments: { narration: string; show: string[]; focus?: string }[];
+  keyPoints: string[];
+  confusedWith: { unitOrService: string; difference: string }[];
+}
+
+export interface LightningItem {
+  id: string;
+  conceptId: string;
+  format: "lightning" | "thisorthat";
+  prompt: string;
+  promptEs: string;
+  options: { id: string; text: string }[];
+  answer: string;
+  why: string;
+}
+
+export interface UnitContent {
+  unitId: string;
+  /** Set by the content pipeline once the unit passed the independent audit. */
+  audited?: boolean;
+  overview: UnitOverview;
+  items: LightningItem[];
 }

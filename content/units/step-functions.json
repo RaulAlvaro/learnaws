@@ -1,0 +1,357 @@
+{
+  "unitId": "step-functions",
+  "overview": {
+    "title": "AWS Step Functions",
+    "hook": "Un director de orquesta que ejecuta pasos, decide caminos y reintenta fallos.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "start",
+          "label": "Solicitud",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "sfn",
+          "label": "State machine",
+          "kind": "service",
+          "service": "AWS Step Functions",
+          "x": 32,
+          "y": 50
+        },
+        {
+          "id": "checks",
+          "label": "Parallel checks",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 58,
+          "y": 20
+        },
+        {
+          "id": "choice",
+          "label": "Choice",
+          "kind": "note",
+          "x": 58,
+          "y": 50
+        },
+        {
+          "id": "human",
+          "label": "Aprobación",
+          "kind": "actor",
+          "x": 58,
+          "y": 82
+        },
+        {
+          "id": "done",
+          "label": "Publicar",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 88,
+          "y": 50
+        }
+      ],
+      "edges": [
+        {
+          "from": "start",
+          "to": "sfn",
+          "label": "StartExecution"
+        },
+        {
+          "from": "sfn",
+          "to": "checks",
+          "label": "Retry"
+        },
+        {
+          "from": "sfn",
+          "to": "choice"
+        },
+        {
+          "from": "choice",
+          "to": "human",
+          "label": "task token"
+        },
+        {
+          "from": "choice",
+          "to": "done"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Muchos procesos no son un solo paso: validar, luego decidir, esperar una aprobación y publicar. Si lo programas a mano, puede ser difícil seguir en qué paso va cada caso. AWS Step Functions orquesta esos pasos como una máquina de estados.",
+        "show": [
+          "start",
+          "sfn"
+        ],
+        "focus": "sfn"
+      },
+      {
+        "narration": "Cada paso es un estado. Task llama a Lambda u otro servicio; Choice elige el camino según los datos; Parallel corre ramas a la vez y espera a todas; Map aplica los mismos pasos a cada elemento de una lista.",
+        "show": [
+          "start",
+          "sfn",
+          "checks",
+          "choice",
+          "done"
+        ],
+        "focus": "choice"
+      },
+      {
+        "narration": "Puedes gestionar fallos en la definición: Retry reintenta un paso ante fallos transitorios y Catch desvía a un camino alternativo. Algunas tareas también necesitan gestionar errores en su código. Step Functions conserva el estado de la ejecución para que veas en qué punto está.",
+        "show": [
+          "start",
+          "sfn",
+          "checks",
+          "choice",
+          "done"
+        ],
+        "focus": "checks"
+      },
+      {
+        "narration": "La decisión clave es Standard o Express. Standard dura hasta un año, ofrece historial y depuración visual, y tiene semántica exactly-once para la ejecución del workflow. Express dura hasta cinco minutos y sirve para alto volumen: su ejecución es at-least-once si es asíncrona y at-most-once si es síncrona.",
+        "show": [
+          "start",
+          "sfn",
+          "checks",
+          "choice",
+          "done"
+        ],
+        "focus": "sfn"
+      },
+      {
+        "narration": "Si el flujo debe esperar días a que una persona apruebe, usa el patrón de callback con task token: el flujo se pausa hasta recibir la respuesta. Ese patrón está disponible en Standard para integraciones compatibles; Express no lo soporta.",
+        "show": [
+          "start",
+          "sfn",
+          "checks",
+          "choice",
+          "done",
+          "human"
+        ],
+        "focus": "human"
+      },
+      {
+        "narration": "En sistemas distribuidos, reintenta fallos transitorios con exponential backoff, jitter y un límite, en una capa apropiada. Comprueba que las operaciones sean idempotentes antes de reintentarlas. Si una dependencia falla repetidamente, un circuit breaker puede dejar de llamarla mientras esté abierto.",
+        "show": [
+          "start",
+          "sfn",
+          "checks",
+          "choice",
+          "done",
+          "human"
+        ],
+        "focus": "checks"
+      },
+      {
+        "narration": "No confundas orquestar con mover mensajes. SQS guarda trabajo, SNS avisa a suscriptores y EventBridge enruta eventos, pero ninguno rastrea por sí solo en qué paso va un proceso. Cuando hay secuencia, ramas, esperas y estado, piensa en Step Functions.",
+        "show": [
+          "start",
+          "sfn",
+          "checks",
+          "choice",
+          "done",
+          "human"
+        ],
+        "focus": "sfn"
+      }
+    ],
+    "keyPoints": [
+      "Orquesta pasos como máquina de estados y conserva el estado de cada ejecución.",
+      "Choice ramifica, Parallel ejecuta ramas, Map itera; Retry y Catch permiten gestionar fallos en la definición.",
+      "Standard: hasta un año, ejecución del workflow exactly-once, historial y callbacks compatibles.",
+      "Express: hasta cinco minutos y alto volumen; ejecución asíncrona at-least-once y síncrona at-most-once.",
+      "Reintentos con backoff, jitter y límite; comprueba la idempotencia y considera un circuit breaker."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon SQS",
+        "difference": "SQS almacena trabajo para consumidores; Step Functions coordina y rastrea los pasos de un proceso."
+      },
+      {
+        "unitOrService": "Amazon EventBridge",
+        "difference": "EventBridge enruta eventos por reglas; Step Functions mantiene el estado del flujo entre tareas."
+      },
+      {
+        "unitOrService": "Amazon SNS",
+        "difference": "SNS reparte un mensaje a suscriptores; Step Functions controla qué ocurre antes y después de cada tarea."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "step-functions--l1",
+      "conceptId": "step-functions",
+      "format": "lightning",
+      "prompt": "Workflow must pause days for a manager's approval, then resume → ?",
+      "promptEs": "El flujo debe pausar días hasta la aprobación de un gerente y luego seguir → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Express workflow with Wait state"
+        },
+        {
+          "id": "B",
+          "text": "SQS delay queue"
+        },
+        {
+          "id": "C",
+          "text": "Standard workflow with task token"
+        },
+        {
+          "id": "D",
+          "text": "EventBridge rule to Lambda"
+        }
+      ],
+      "answer": "C",
+      "why": "Standard dura hasta un año y soporta el callback con task token para esperar a una persona. Express dura máximo cinco minutos y no admite ese patrón."
+    },
+    {
+      "id": "step-functions--l2",
+      "conceptId": "step-functions",
+      "format": "thisorthat",
+      "prompt": "High event rate, each run under five minutes, at-least-once acceptable → ?",
+      "promptEs": "Alto volumen de eventos, cada ejecución dura menos de cinco minutos, at-least-once aceptable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Express workflow"
+        },
+        {
+          "id": "B",
+          "text": "Standard workflow"
+        }
+      ],
+      "answer": "A",
+      "why": "Express está pensado para volúmenes altos de ejecuciones cortas y tolera at-least-once. Standard aporta duración larga, historial y exactly-once, que aquí no se piden."
+    },
+    {
+      "id": "step-functions--l3",
+      "conceptId": "step-functions",
+      "format": "lightning",
+      "prompt": "Run three independent checks at once; continue only when all succeed → ?",
+      "promptEs": "Correr tres validaciones independientes a la vez y seguir solo si todas pasan → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Choice state"
+        },
+        {
+          "id": "B",
+          "text": "Wait state"
+        },
+        {
+          "id": "C",
+          "text": "Parallel state"
+        },
+        {
+          "id": "D",
+          "text": "SNS fan-out to Lambda"
+        }
+      ],
+      "answer": "C",
+      "why": "Parallel ejecuta las ramas a la vez y solo avanza cuando todas terminan. SNS reparte el mensaje, pero no espera ni une los resultados."
+    },
+    {
+      "id": "step-functions--l4",
+      "conceptId": "step-functions",
+      "format": "lightning",
+      "prompt": "Apply the same workflow steps to every item in a dataset → ?",
+      "promptEs": "Aplicar los mismos pasos del flujo a cada elemento de un conjunto de datos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Choice state"
+        },
+        {
+          "id": "B",
+          "text": "Map state"
+        },
+        {
+          "id": "C",
+          "text": "Parallel state"
+        },
+        {
+          "id": "D",
+          "text": "Pass state"
+        }
+      ],
+      "answer": "B",
+      "why": "Map repite los pasos para cada elemento de la entrada. Parallel corre ramas distintas y fijas; Choice solo elige un camino."
+    },
+    {
+      "id": "step-functions--l5",
+      "conceptId": "distributed-design-patterns",
+      "format": "lightning",
+      "prompt": "Several layers retry instantly and overload a strained service → ?",
+      "promptEs": "Varias capas reintentan al instante y saturan un servicio ya cargado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Longer timeouts at every layer"
+        },
+        {
+          "id": "B",
+          "text": "Unlimited immediate retries"
+        },
+        {
+          "id": "C",
+          "text": "Larger instances for callers"
+        },
+        {
+          "id": "D",
+          "text": "Backoff with jitter, one layer, capped"
+        }
+      ],
+      "answer": "D",
+      "why": "Reintentar en varias capas multiplica los intentos. Una sola capa con backoff exponencial, jitter y límite da tiempo al servicio y evita picos sincronizados."
+    },
+    {
+      "id": "step-functions--l6",
+      "conceptId": "distributed-design-patterns",
+      "format": "thisorthat",
+      "prompt": "Stop calling a dependency that keeps timing out until it recovers → ?",
+      "promptEs": "Dejar de llamar a una dependencia que falla por timeout hasta que se recupere → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Higher retry limit"
+        },
+        {
+          "id": "B",
+          "text": "Circuit breaker"
+        }
+      ],
+      "answer": "B",
+      "why": "Un circuit breaker abierto corta las llamadas y luego comprueba si la dependencia se recuperó. Subir el límite de reintentos solo agrega más carga."
+    },
+    {
+      "id": "step-functions--l7",
+      "conceptId": "distributed-design-patterns",
+      "format": "lightning",
+      "prompt": "Payment call timed out; retry without charging the customer twice → ?",
+      "promptEs": "La llamada de pago dio timeout; reintentar sin cobrar dos veces → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Idempotent charge with stable operation ID"
+        },
+        {
+          "id": "B",
+          "text": "Exponential backoff with jitter only"
+        },
+        {
+          "id": "C",
+          "text": "Longer visibility timeout"
+        },
+        {
+          "id": "D",
+          "text": "Retry at every application layer"
+        }
+      ],
+      "answer": "A",
+      "why": "Si no sabes si el cobro ocurrió, solo es seguro reintentar una operación idempotente. Backoff y jitter reducen la carga, pero no evitan el doble cobro."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,496 @@
+{
+  "unitId": "s3-security",
+  "overview": {
+    "title": "Acceso y cifrado en S3",
+    "hook": "Quién puede entrar a tu bucket y cómo están cifrados sus datos.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "cli",
+          "label": "Cliente externo",
+          "kind": "actor",
+          "x": 8,
+          "y": 22
+        },
+        {
+          "id": "app",
+          "label": "App con IAM",
+          "kind": "actor",
+          "x": 8,
+          "y": 78
+        },
+        {
+          "id": "url",
+          "label": "Presigned URL",
+          "kind": "data",
+          "x": 34,
+          "y": 22
+        },
+        {
+          "id": "ap",
+          "label": "Access Point",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 34,
+          "y": 78
+        },
+        {
+          "id": "pol",
+          "label": "Policy + BPA",
+          "kind": "note",
+          "x": 62,
+          "y": 14
+        },
+        {
+          "id": "bkt",
+          "label": "Bucket S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 62,
+          "y": 50
+        },
+        {
+          "id": "kms",
+          "label": "AWS KMS",
+          "kind": "service",
+          "service": "AWS KMS",
+          "x": 90,
+          "y": 50
+        }
+      ],
+      "edges": [
+        {
+          "from": "cli",
+          "to": "url",
+          "label": "usa por tiempo limitado"
+        },
+        {
+          "from": "url",
+          "to": "bkt",
+          "label": "GET / PUT"
+        },
+        {
+          "from": "app",
+          "to": "ap",
+          "label": "endpoint propio"
+        },
+        {
+          "from": "ap",
+          "to": "bkt",
+          "label": ""
+        },
+        {
+          "from": "pol",
+          "to": "bkt",
+          "label": "evalúa cada request"
+        },
+        {
+          "from": "bkt",
+          "to": "kms",
+          "label": "SSE-KMS"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Por defecto un bucket es privado. La seguridad en S3 responde dos preguntas: quién puede entrar y cómo están cifrados los datos en reposo. Primero veamos las puertas de entrada y luego el cifrado.",
+        "show": [
+          "app",
+          "bkt"
+        ],
+        "focus": "bkt"
+      },
+      {
+        "narration": "La bucket policy es la política de recurso del bucket: da acceso a otra cuenta o exige un VPC endpoint. Block Public Access es el freno de emergencia: bloquea exposición pública aunque una policy o ACL la permita, incluso en toda la organización.",
+        "show": [
+          "app",
+          "bkt",
+          "pol"
+        ],
+        "focus": "pol"
+      },
+      {
+        "narration": "Hoy las ACLs vienen desactivadas, gracias a Object Ownership en modo bucket owner enforced: el dueño del bucket es dueño de todos los objetos y el acceso se controla solo con policies.",
+        "show": [
+          "app",
+          "bkt",
+          "pol"
+        ],
+        "focus": "pol"
+      },
+      {
+        "narration": "¿Un cliente sin credenciales de AWS necesita subir o bajar un solo objeto? Tu aplicación genera una presigned URL con sus propios permisos y una expiración. Quien tenga la URL puede usarla hasta que venza, como un boleto.",
+        "show": [
+          "app",
+          "bkt",
+          "pol",
+          "cli",
+          "url"
+        ],
+        "focus": "url"
+      },
+      {
+        "narration": "Cuando muchas aplicaciones comparten un bucket, una sola policy se vuelve enorme. Con S3 Access Points cada aplicación recibe su propio endpoint y su propia policy, incluso uno que solo acepte tráfico desde una VPC.",
+        "show": [
+          "app",
+          "bkt",
+          "pol",
+          "cli",
+          "url",
+          "ap"
+        ],
+        "focus": "ap"
+      },
+      {
+        "narration": "Todo objeto nuevo se cifra con SSE-S3 por defecto. Si piden controlar la llave y auditar su uso en CloudTrail, es SSE-KMS; si piden dos capas independientes en el servidor, DSSE-KMS. Si tú entregas la llave en cada request, es SSE-C.",
+        "show": [
+          "app",
+          "bkt",
+          "pol",
+          "cli",
+          "url",
+          "ap",
+          "kms"
+        ],
+        "focus": "kms"
+      },
+      {
+        "narration": "Dos trampas: cambiar el cifrado por defecto no recifra los objetos existentes; para eso copias con Batch Operations. Y para compartir objetos SSE-KMS con otra cuenta necesitas una customer managed key, no la llave administrada por AWS.",
+        "show": [
+          "app",
+          "bkt",
+          "pol",
+          "cli",
+          "url",
+          "ap",
+          "kms"
+        ],
+        "focus": "kms"
+      }
+    ],
+    "keyPoints": [
+      "SSE-S3 por defecto; SSE-KMS para control y auditoría",
+      "Block Public Access prevalece sobre policies y ACLs",
+      "Presigned URL: acceso temporal a un objeto sin credenciales",
+      "Access Points: endpoint y policy propios por aplicación",
+      "Cambiar el cifrado por defecto no recifra objetos existentes"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "CloudFront signed URLs",
+        "difference": "Restringen contenido servido por CloudFront; la presigned URL autoriza una operación directo contra S3."
+      },
+      {
+        "unitOrService": "SSE-C vs SSE-KMS",
+        "difference": "Con SSE-C tú entregas y administras la llave; con SSE-KMS la administra AWS KMS."
+      },
+      {
+        "unitOrService": "Bucket policy vs Access Points",
+        "difference": "La bucket policy aplica a todo el bucket; cada Access Point suma su propia policy y red."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "s3-security--l1",
+      "conceptId": "s3-encryption-options",
+      "format": "lightning",
+      "prompt": "Encrypt S3 objects and audit every key use in CloudTrail → ?",
+      "promptEs": "Cifrar objetos S3 y auditar cada uso de la llave en CloudTrail → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SSE-S3"
+        },
+        {
+          "id": "B",
+          "text": "SSE-KMS"
+        },
+        {
+          "id": "C",
+          "text": "SSE-C"
+        },
+        {
+          "id": "D",
+          "text": "Client-side encryption"
+        }
+      ],
+      "answer": "B",
+      "why": "SSE-KMS registra operaciones como Decrypt en CloudTrail y permite key policies. SSE-S3 cifra, pero no da ese control ni esa auditoría."
+    },
+    {
+      "id": "s3-security--l2",
+      "conceptId": "s3-encryption-options",
+      "format": "lightning",
+      "prompt": "Two independent server-side encryption layers required → ?",
+      "promptEs": "Se exigen dos capas independientes de cifrado del lado del servidor → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SSE-KMS"
+        },
+        {
+          "id": "B",
+          "text": "SSE-S3 with AES-256"
+        },
+        {
+          "id": "C",
+          "text": "SSE-C"
+        },
+        {
+          "id": "D",
+          "text": "DSSE-KMS"
+        }
+      ],
+      "answer": "D",
+      "why": "DSSE-KMS aplica dos capas AES-256 independientes en el servidor. SSE-KMS aplica solo una; no elijas DSSE solo porque piden cifrado."
+    },
+    {
+      "id": "s3-security--l3",
+      "conceptId": "s3-encryption-options",
+      "format": "thisorthat",
+      "prompt": "Customer supplies its own key with each request; S3 encrypts → ?",
+      "promptEs": "El cliente entrega su propia llave en cada request y S3 cifra → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SSE-KMS"
+        },
+        {
+          "id": "B",
+          "text": "SSE-C"
+        }
+      ],
+      "answer": "B",
+      "why": "Con SSE-C tú administras y envías la llave; S3 solo cifra y descifra. Con SSE-KMS, las llaves viven en AWS KMS."
+    },
+    {
+      "id": "s3-security--l4",
+      "conceptId": "s3-encryption-options",
+      "format": "lightning",
+      "prompt": "Default changed to SSE-KMS; existing SSE-S3 objects must convert → ?",
+      "promptEs": "Cambiaste el default a SSE-KMS; los objetos SSE-S3 existentes deben convertirse → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Copy them with S3 Batch Operations"
+        },
+        {
+          "id": "B",
+          "text": "Nothing, the change is retroactive"
+        },
+        {
+          "id": "C",
+          "text": "Enable Block Public Access"
+        },
+        {
+          "id": "D",
+          "text": "Enable Replication Time Control"
+        }
+      ],
+      "answer": "A",
+      "why": "El cifrado por defecto solo afecta subidas nuevas. S3 Batch Operations copia los objetos existentes para reescribirlos con SSE-KMS."
+    },
+    {
+      "id": "s3-security--l5",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "format": "lightning",
+      "prompt": "Prevent any bucket in the organization from ever becoming public → ?",
+      "promptEs": "Impedir que cualquier bucket de la organización se vuelva público → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Bucket policy on every bucket"
+        },
+        {
+          "id": "B",
+          "text": "S3 Access Points per account"
+        },
+        {
+          "id": "C",
+          "text": "Org-level Block Public Access"
+        },
+        {
+          "id": "D",
+          "text": "S3 Object Ownership settings"
+        }
+      ],
+      "answer": "C",
+      "why": "Block Public Access a nivel organización aplica a las cuentas miembro y una configuración de bucket no puede relajarlo."
+    },
+    {
+      "id": "s3-security--l6",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "format": "lightning",
+      "prompt": "Allow bucket access only through a specific VPC endpoint → ?",
+      "promptEs": "Permitir acceso al bucket solo a través de un VPC endpoint específico → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Object ACL on each object"
+        },
+        {
+          "id": "B",
+          "text": "S3 presigned URL"
+        },
+        {
+          "id": "C",
+          "text": "Bucket policy with aws:SourceVpce"
+        },
+        {
+          "id": "D",
+          "text": "Block Public Access setting"
+        }
+      ],
+      "answer": "C",
+      "why": "Una bucket policy con la condición aws:SourceVpce limita el acceso a ese endpoint. Block Public Access no filtra por endpoint."
+    },
+    {
+      "id": "s3-security--l8",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "format": "lightning",
+      "prompt": "Disable ACLs so the bucket owner owns every object → ?",
+      "promptEs": "Desactivar ACLs para que el dueño del bucket sea dueño de todo objeto → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Object Ownership: bucket owner enforced"
+        },
+        {
+          "id": "B",
+          "text": "S3 Requester Pays"
+        },
+        {
+          "id": "C",
+          "text": "Block Public Access: BlockPublicAcls setting"
+        },
+        {
+          "id": "D",
+          "text": "S3 MFA Delete"
+        }
+      ],
+      "answer": "A",
+      "why": "Con bucket owner enforced, las ACLs quedan desactivadas y el acceso se maneja solo con policies. Es la configuración por defecto."
+    },
+    {
+      "id": "s3-security--l9",
+      "conceptId": "s3-presigned-urls",
+      "format": "lightning",
+      "prompt": "Customer without AWS credentials uploads one file directly to S3, temporarily → ?",
+      "promptEs": "Un cliente sin credenciales de AWS sube un archivo directo a S3, temporalmente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Public-write bucket policy"
+        },
+        {
+          "id": "B",
+          "text": "CloudFront signed cookie"
+        },
+        {
+          "id": "C",
+          "text": "IAM user per customer"
+        },
+        {
+          "id": "D",
+          "text": "PUT presigned URL"
+        }
+      ],
+      "answer": "D",
+      "why": "Una presigned URL de PUT permite subir esa clave hasta que expire, sin credenciales ni cambios en la bucket policy."
+    },
+    {
+      "id": "s3-security--l10",
+      "conceptId": "s3-presigned-urls",
+      "format": "thisorthat",
+      "prompt": "Temporary download directly from S3, no CloudFront involved → ?",
+      "promptEs": "Descarga temporal directo desde S3, sin CloudFront de por medio → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 presigned URL"
+        },
+        {
+          "id": "B",
+          "text": "CloudFront signed URL"
+        }
+      ],
+      "answer": "A",
+      "why": "La presigned URL autoriza la operación directo contra S3. Una CloudFront signed URL solo protege contenido servido por CloudFront."
+    },
+    {
+      "id": "s3-security--l11",
+      "conceptId": "s3-presigned-urls",
+      "format": "lightning",
+      "prompt": "Presigned URL stopped working before its configured expiration. Likely cause → ?",
+      "promptEs": "Una presigned URL dejó de funcionar antes de su expiración configurada. Causa probable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Versioning was suspended"
+        },
+        {
+          "id": "B",
+          "text": "Signing role session expired"
+        },
+        {
+          "id": "C",
+          "text": "Object Lock was enabled"
+        },
+        {
+          "id": "D",
+          "text": "URL allows only one download"
+        }
+      ],
+      "answer": "B",
+      "why": "La URL expira cuando vence su tiempo o las credenciales que la firmaron, lo que ocurra primero. No es de un solo uso."
+    },
+    {
+      "id": "s3-security--l12",
+      "conceptId": "s3-access-points",
+      "format": "lightning",
+      "prompt": "Many apps share one bucket; each needs its own policy and endpoint → ?",
+      "promptEs": "Muchas apps comparten un bucket; cada una necesita su propia policy y endpoint → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One larger bucket policy"
+        },
+        {
+          "id": "B",
+          "text": "S3 presigned URLs"
+        },
+        {
+          "id": "C",
+          "text": "S3 Requester Pays"
+        },
+        {
+          "id": "D",
+          "text": "S3 Access Points"
+        }
+      ],
+      "answer": "D",
+      "why": "Cada Access Point tiene su endpoint, su policy y controles de red, por ejemplo aceptar solo tráfico de una VPC."
+    },
+    {
+      "id": "s3-security--l13",
+      "conceptId": "s3-access-points",
+      "format": "thisorthat",
+      "prompt": "Access point policy allows a request. Is the bucket policy still evaluated?",
+      "promptEs": "La policy del access point permite la request. ¿Se sigue evaluando la bucket policy?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, the access point replaces it"
+        },
+        {
+          "id": "B",
+          "text": "Yes, both policies apply"
+        }
+      ],
+      "answer": "B",
+      "why": "La policy del Access Point funciona junto con la bucket policy, no la reemplaza. Ambas deben permitir la request."
+    }
+  ],
+  "audited": true
+}

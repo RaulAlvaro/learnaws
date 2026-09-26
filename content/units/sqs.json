@@ -1,0 +1,386 @@
+{
+  "unitId": "sqs",
+  "overview": {
+    "title": "Amazon SQS",
+    "hook": "Una fila de mensajes para que las partes de tu app no se esperen.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "prod",
+          "label": "Productor",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "msg",
+          "label": "Mensaje",
+          "kind": "data",
+          "x": 25,
+          "y": 20
+        },
+        {
+          "id": "q",
+          "label": "Cola SQS",
+          "kind": "service",
+          "service": "Amazon SQS",
+          "x": 45,
+          "y": 50
+        },
+        {
+          "id": "cons",
+          "label": "Workers",
+          "kind": "actor",
+          "x": 78,
+          "y": 50
+        },
+        {
+          "id": "dlq",
+          "label": "DLQ",
+          "kind": "service",
+          "service": "Amazon SQS",
+          "x": 45,
+          "y": 85
+        },
+        {
+          "id": "types",
+          "label": "Standard vs FIFO",
+          "kind": "note",
+          "x": 72,
+          "y": 15
+        }
+      ],
+      "edges": [
+        {
+          "from": "prod",
+          "to": "msg",
+          "label": "SendMessage"
+        },
+        {
+          "from": "msg",
+          "to": "q"
+        },
+        {
+          "from": "cons",
+          "to": "q",
+          "label": "poll"
+        },
+        {
+          "from": "q",
+          "to": "dlq",
+          "label": "maxReceiveCount"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Imagina una tienda en línea que recibe miles de pedidos en un minuto; si la web esperara a que cada uno se procese, se caería. Amazon SQS es una cola: alguien deja el trabajo ahí y sigue con lo suyo.",
+        "show": [
+          "prod",
+          "q"
+        ],
+        "focus": "q"
+      },
+      {
+        "narration": "El productor envía un mensaje con SendMessage, la cola lo guarda de forma duradera y los workers lo sacan cuando pueden. Productor y consumidor nunca se hablan directamente: eso es desacoplar.",
+        "show": [
+          "prod",
+          "msg",
+          "q",
+          "cons"
+        ],
+        "focus": "msg"
+      },
+      {
+        "narration": "Ojo con esto: SQS no empuja mensajes, el worker pregunta, es decir, hace polling. Con long polling la petición espera a que llegue algo y así evitas respuestas vacías. Como la cola absorbe los picos, escalas los workers por separado.",
+        "show": [
+          "prod",
+          "msg",
+          "q",
+          "cons"
+        ],
+        "focus": "cons"
+      },
+      {
+        "narration": "Cuando un worker recibe un mensaje, este no se borra: queda invisible durante el visibility timeout, por defecto treinta segundos. Si el worker termina, lo borra explícitamente; si falla o tarda demasiado, el mensaje reaparece para otro worker.",
+        "show": [
+          "prod",
+          "msg",
+          "q",
+          "cons"
+        ],
+        "focus": "q"
+      },
+      {
+        "narration": "¿Y si un mensaje falla una y otra vez? Tras cierto número de recepciones, el maxReceiveCount, SQS lo mueve a una dead-letter queue de la misma cuenta y Región. Así lo inspeccionas aparte sin bloquear a los demás.",
+        "show": [
+          "prod",
+          "msg",
+          "q",
+          "cons",
+          "dlq"
+        ],
+        "focus": "dlq"
+      },
+      {
+        "narration": "Standard escala casi sin límite, pero entrega at-least-once y sin orden garantizado: tu código debe tolerar duplicados. FIFO respeta el orden y no introduce duplicados, aunque con menos transacciones por segundo. Sus message groups dan orden por cliente o dispositivo.",
+        "show": [
+          "prod",
+          "msg",
+          "q",
+          "cons",
+          "dlq",
+          "types"
+        ],
+        "focus": "types"
+      },
+      {
+        "narration": "Cuándo no usar SQS: si un mensaje debe llegar a varios suscriptores, usa SNS; para enrutar eventos por reglas, EventBridge; si varios lectores deben releer un stream en tiempo real, Kinesis. SQS es una cola de trabajo: cada mensaje, para un worker.",
+        "show": [
+          "prod",
+          "msg",
+          "q",
+          "cons",
+          "dlq",
+          "types"
+        ],
+        "focus": "q"
+      }
+    ],
+    "keyPoints": [
+      "Cola intermedia: el productor no espera al consumidor.",
+      "Los consumidores hacen polling; borran el mensaje al terminar.",
+      "Visibility timeout oculta el mensaje; si no se borra, reaparece.",
+      "Standard: at-least-once, sin orden. FIFO: orden y sin duplicados.",
+      "Escala workers por backlog por instancia, no por cola cruda."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon SNS",
+        "difference": "SNS empuja una publicación a muchos suscriptores; SQS guarda trabajo para que workers lo saquen."
+      },
+      {
+        "unitOrService": "Amazon Kinesis Data Streams",
+        "difference": "Kinesis retiene un stream que varios lectores pueden releer; SQS entrega cada mensaje a un worker."
+      },
+      {
+        "unitOrService": "Amazon EventBridge",
+        "difference": "EventBridge enruta eventos por reglas de contenido; SQS solo almacena mensajes hasta procesarlos."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "sqs--l3",
+      "conceptId": "loose-coupling-principles",
+      "format": "lightning",
+      "prompt": "Add new event consumers without changing the producers → ?",
+      "promptEs": "Agregar nuevos consumidores de eventos sin cambiar a los productores → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Direct Lambda invocation per consumer"
+        },
+        {
+          "id": "B",
+          "text": "One shared SQS queue"
+        },
+        {
+          "id": "C",
+          "text": "Amazon EventBridge event bus"
+        },
+        {
+          "id": "D",
+          "text": "Shared database table"
+        }
+      ],
+      "answer": "C",
+      "why": "EventBridge abstrae a productores de consumidores: cada consumidor nuevo es solo una regla más. Invocar directo obliga al productor a conocer cada destino; una tabla compartida sigue acoplando."
+    },
+    {
+      "id": "sqs--l4",
+      "conceptId": "loose-coupling-principles",
+      "format": "lightning",
+      "prompt": "A failing backend tier must not take down the web tier → ?",
+      "promptEs": "Que un backend caído no tumbe la capa web → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Synchronous REST call with retries"
+        },
+        {
+          "id": "B",
+          "text": "Larger EC2 instances for web"
+        },
+        {
+          "id": "C",
+          "text": "SQS queue between the tiers"
+        },
+        {
+          "id": "D",
+          "text": "Shared database between tiers"
+        }
+      ],
+      "answer": "C",
+      "why": "Una cola en medio aísla fallos: la web sigue aceptando mensajes aunque el backend esté caído. La llamada síncrona propaga el fallo, y una base compartida mantiene el acoplamiento."
+    },
+    {
+      "id": "sqs--l5",
+      "conceptId": "sqs-standard-vs-fifo",
+      "format": "thisorthat",
+      "prompt": "Bursty jobs, any order, consumers handle duplicates, maximum throughput → ?",
+      "promptEs": "Trabajos en ráfagas, sin orden, consumidores toleran duplicados, máximo throughput → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SQS Standard queue"
+        },
+        {
+          "id": "B",
+          "text": "SQS FIFO queue"
+        }
+      ],
+      "answer": "A",
+      "why": "Sin requisito de orden y con duplicados tolerados, Standard es lo indicado por su escala. FIFO paga orden y no-duplicados con un límite de transacciones por segundo."
+    },
+    {
+      "id": "sqs--l6",
+      "conceptId": "sqs-standard-vs-fifo",
+      "format": "lightning",
+      "prompt": "Commands must stay ordered per device; devices are independent → ?",
+      "promptEs": "Los comandos deben mantener el orden por dispositivo; los dispositivos son independientes → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "FIFO queue, one group total"
+        },
+        {
+          "id": "B",
+          "text": "Standard queue with sequence numbers"
+        },
+        {
+          "id": "C",
+          "text": "FIFO queue, message group per device"
+        },
+        {
+          "id": "D",
+          "text": "SNS standard topic"
+        }
+      ],
+      "answer": "C",
+      "why": "Cada message group es un flujo ordenado propio dentro de la cola FIFO, y los grupos se procesan en paralelo. Un solo grupo serializa todo; Standard no garantiza orden."
+    },
+    {
+      "id": "sqs--l8",
+      "conceptId": "sqs-standard-vs-fifo",
+      "format": "thisorthat",
+      "prompt": "SQS Standard queue delivery guarantee → ?",
+      "promptEs": "Garantía de entrega de una cola SQS Standard → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "At-least-once, best-effort order"
+        },
+        {
+          "id": "B",
+          "text": "Exactly-once, strictly ordered"
+        }
+      ],
+      "answer": "A",
+      "why": "Standard puede entregar un mensaje más de una vez y fuera de orden; por eso los consumidores deben ser idempotentes. Orden y exactly-once son propiedades de FIFO."
+    },
+    {
+      "id": "sqs--l11",
+      "conceptId": "sqs-visibility-timeout-dlq",
+      "format": "thisorthat",
+      "prompt": "Mostly empty queue; reduce empty ReceiveMessage responses → ?",
+      "promptEs": "Cola casi siempre vacía; reducir respuestas vacías de ReceiveMessage → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Short polling"
+        },
+        {
+          "id": "B",
+          "text": "Long polling"
+        }
+      ],
+      "answer": "B",
+      "why": "Long polling deja la petición esperando a que llegue un mensaje, así reduces respuestas vacías y costo. Short polling responde de inmediato, aunque no haya nada."
+    },
+    {
+      "id": "sqs--l12",
+      "conceptId": "sqs-queue-based-scaling",
+      "format": "lightning",
+      "prompt": "Scale EC2 queue workers to meet an acceptable queue delay → metric?",
+      "promptEs": "Escalar workers EC2 de una cola para cumplir un retraso aceptable → ¿métrica?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Raw visible message count"
+        },
+        {
+          "id": "B",
+          "text": "Average CPU utilization"
+        },
+        {
+          "id": "C",
+          "text": "Messages sent per minute"
+        },
+        {
+          "id": "D",
+          "text": "Backlog per InService instance"
+        }
+      ],
+      "answer": "D",
+      "why": "Backlog por instancia (mensajes disponibles ÷ instancias InService) refleja cuánto espera cada worker. El conteo crudo ignora cuántos workers hay; la CPU no mide la cola."
+    },
+    {
+      "id": "sqs--l13",
+      "conceptId": "sqs-queue-based-scaling",
+      "format": "lightning",
+      "prompt": "Acceptable delay 10 s, 0.5 s per message → backlog-per-instance target?",
+      "promptEs": "Retraso aceptable 10 s, 0,5 s por mensaje → ¿objetivo de backlog por instancia?",
+      "options": [
+        {
+          "id": "A",
+          "text": "5"
+        },
+        {
+          "id": "B",
+          "text": "20"
+        },
+        {
+          "id": "C",
+          "text": "50"
+        },
+        {
+          "id": "D",
+          "text": "10"
+        }
+      ],
+      "answer": "B",
+      "why": "Objetivo = latencia aceptable ÷ tiempo medio por mensaje: 10 ÷ 0,5 = 20 mensajes por instancia. Con metric math lo calculas sin publicar una métrica personalizada."
+    },
+    {
+      "id": "sqs--l14",
+      "conceptId": "sqs-queue-based-scaling",
+      "format": "thisorthat",
+      "prompt": "Lambda SQS batch: retry only the failed records → ?",
+      "promptEs": "Lote de SQS en Lambda: reintentar solo los registros fallidos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Longer visibility timeout"
+        },
+        {
+          "id": "B",
+          "text": "Partial batch response"
+        }
+      ],
+      "answer": "B",
+      "why": "Por defecto, si falla el lote, todos sus mensajes reaparecen. Partial batch response reporta solo los fallidos; un timeout más largo solo retrasa el reintento de todo."
+    }
+  ],
+  "audited": true
+}

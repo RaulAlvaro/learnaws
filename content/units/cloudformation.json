@@ -1,0 +1,291 @@
+{
+  "unitId": "cloudformation",
+  "overview": {
+    "title": "AWS CloudFormation",
+    "hook": "Tu infraestructura escrita como código: la misma, cada vez, en cualquier lugar.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "tmpl",
+          "label": "Template",
+          "kind": "data",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "cfn",
+          "label": "CloudFormation",
+          "kind": "service",
+          "service": "AWS CloudFormation",
+          "x": 32,
+          "y": 50
+        },
+        {
+          "id": "stack",
+          "label": "Stack",
+          "kind": "data",
+          "x": 60,
+          "y": 25
+        },
+        {
+          "id": "stackset",
+          "label": "StackSets",
+          "kind": "note",
+          "x": 60,
+          "y": 75
+        },
+        {
+          "id": "accts",
+          "label": "Cuentas y Regions",
+          "kind": "zone",
+          "x": 90,
+          "y": 75
+        },
+        {
+          "id": "blue",
+          "label": "Blue / green",
+          "kind": "note",
+          "x": 90,
+          "y": 25
+        }
+      ],
+      "edges": [
+        {
+          "from": "tmpl",
+          "to": "cfn",
+          "label": "describe"
+        },
+        {
+          "from": "cfn",
+          "to": "stack",
+          "label": "crea / borra"
+        },
+        {
+          "from": "cfn",
+          "to": "stackset",
+          "label": "una operación"
+        },
+        {
+          "from": "stackset",
+          "to": "accts",
+          "label": "despliega"
+        },
+        {
+          "from": "stack",
+          "to": "blue",
+          "label": "entorno nuevo"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Crear a mano una VPC, un load balancer, un Auto Scaling group y una base de datos es lento, y cada vez sale un poco distinto. AWS CloudFormation te deja describir todo eso en un template, como código, y crearlo igual siempre.",
+        "show": [
+          "tmpl",
+          "cfn"
+        ],
+        "focus": "tmpl"
+      },
+      {
+        "narration": "CloudFormation lee el template y crea un stack: el conjunto de recursos que se gestiona como una unidad. Lo creas, lo actualizas y lo borras entero, ideal para un entorno de pruebas que vive poco.",
+        "show": [
+          "tmpl",
+          "cfn",
+          "stack"
+        ],
+        "focus": "stack"
+      },
+      {
+        "narration": "El mismo template sirve en otra Region, por ejemplo para recrear el entorno en tu Region de recuperación. Pero ojo: recrear infraestructura no replica tus datos ni hace failover por sí solo, y guardar el template no crea nada.",
+        "show": [
+          "tmpl",
+          "cfn",
+          "stack"
+        ],
+        "focus": "cfn"
+      },
+      {
+        "narration": "Si necesitas el mismo template en muchas cuentas y Regions, usa StackSets: una sola operación crea, actualiza o borra stacks en todos los destinos. Con drift detection verificas si alguien cambió recursos fuera de CloudFormation.",
+        "show": [
+          "tmpl",
+          "cfn",
+          "stack",
+          "stackset",
+          "accts"
+        ],
+        "focus": "stackset"
+      },
+      {
+        "narration": "Infraestructura inmutable significa reemplazar en lugar de parchar. En blue/green levantas un entorno nuevo con la nueva versión, lo validas y mueves el tráfico. Si falla, regresas el tráfico al entorno anterior, que sigue corriendo.",
+        "show": [
+          "tmpl",
+          "cfn",
+          "stack",
+          "stackset",
+          "accts",
+          "blue"
+        ],
+        "focus": "blue"
+      },
+      {
+        "narration": "Dos trampas del examen: si eliminas el entorno viejo de inmediato, pierdes tu rollback. Y mover el tráfico de la aplicación no revierte los cambios en la base de datos; la capa de datos necesita su propio plan.",
+        "show": [
+          "tmpl",
+          "cfn",
+          "stack",
+          "stackset",
+          "accts",
+          "blue"
+        ],
+        "focus": "blue"
+      }
+    ],
+    "keyPoints": [
+      "Template describe recursos; stack los gestiona como unidad.",
+      "StackSets: un template, muchas cuentas y Regions, una operación.",
+      "Drift detection revela cambios hechos fuera de CloudFormation.",
+      "Blue/green: valida el nuevo, mueve tráfico, conserva el viejo.",
+      "Mover tráfico no revierte cambios en los datos."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "CloudFormation stack",
+        "difference": "Gestiona recursos en una cuenta y Region; StackSets despliega el template a varias cuentas y Regions."
+      },
+      {
+        "unitOrService": "Actualización in-place",
+        "difference": "Cambia los servidores en vivo y pierde el entorno anterior para regresar el tráfico."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "cloudformation--l1",
+      "conceptId": "infrastructure-as-code-cloudformation",
+      "format": "lightning",
+      "prompt": "Roll out one approved template to many accounts and Regions in a single operation → ?",
+      "promptEs": "Desplegar un template aprobado en muchas cuentas y Regions con una sola operación → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudFormation nested stacks"
+        },
+        {
+          "id": "B",
+          "text": "CloudFormation change sets"
+        },
+        {
+          "id": "C",
+          "text": "CloudFormation StackSets"
+        },
+        {
+          "id": "D",
+          "text": "AWS Config conformance packs"
+        }
+      ],
+      "answer": "C",
+      "why": "StackSets crea, actualiza o borra stacks en las cuentas y Regions seleccionadas con una operación. Nested stacks y change sets trabajan dentro de un solo stack."
+    },
+    {
+      "id": "cloudformation--l3",
+      "conceptId": "infrastructure-as-code-cloudformation",
+      "format": "lightning",
+      "prompt": "Audit whether StackSet-deployed resources changed from their intended configuration → ?",
+      "promptEs": "Auditar si los recursos desplegados con StackSets cambiaron respecto a su configuración esperada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Stack policy"
+        },
+        {
+          "id": "B",
+          "text": "Drift detection"
+        },
+        {
+          "id": "C",
+          "text": "Change sets"
+        },
+        {
+          "id": "D",
+          "text": "Rollback triggers"
+        }
+      ],
+      "answer": "B",
+      "why": "Drift detection compara los recursos desplegados con lo que define el template. Los change sets previsualizan una actualización; no detectan cambios manuales."
+    },
+    {
+      "id": "cloudformation--l4",
+      "conceptId": "immutable-infrastructure-deployments",
+      "format": "lightning",
+      "prompt": "New version fails after traffic shift; old environment still running → fastest restore?",
+      "promptEs": "La nueva versión falla tras mover el tráfico; el entorno viejo sigue corriendo → ¿restauración más rápida?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Shift traffic back to old"
+        },
+        {
+          "id": "B",
+          "text": "Patch the new version live"
+        },
+        {
+          "id": "C",
+          "text": "Restore a database snapshot"
+        },
+        {
+          "id": "D",
+          "text": "Redeploy the new version"
+        }
+      ],
+      "answer": "A",
+      "why": "Esa es la ventaja de blue/green: regresas el tráfico al entorno anterior y luego investigas la nueva versión sin presión."
+    },
+    {
+      "id": "cloudformation--l5",
+      "conceptId": "immutable-infrastructure-deployments",
+      "format": "thisorthat",
+      "prompt": "Test new instances before production traffic and keep the current version for rollback → ?",
+      "promptEs": "Probar instancias nuevas antes del tráfico real y conservar la versión actual para rollback → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "In-place update of all servers"
+        },
+        {
+          "id": "B",
+          "text": "Blue/green deployment"
+        }
+      ],
+      "answer": "B",
+      "why": "Actualizar in-place cambia los servidores vivos y elimina el entorno previo. Blue/green valida el entorno nuevo aparte y conserva el viejo."
+    },
+    {
+      "id": "cloudformation--l6",
+      "conceptId": "immutable-infrastructure-deployments",
+      "format": "lightning",
+      "prompt": "Blue/green rollback moved traffic back. Which tier still needs its own plan?",
+      "promptEs": "El rollback blue/green regresó el tráfico. ¿Qué capa aún necesita su propio plan?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Load balancer tier"
+        },
+        {
+          "id": "B",
+          "text": "DNS records"
+        },
+        {
+          "id": "C",
+          "text": "Web server AMIs"
+        },
+        {
+          "id": "D",
+          "text": "Data tier"
+        }
+      ],
+      "answer": "D",
+      "why": "Mover el tráfico de aplicación no revierte los cambios que la nueva versión hizo en la base de datos. La capa de datos requiere una estrategia aparte."
+    }
+  ],
+  "audited": true
+}

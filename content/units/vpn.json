@@ -1,0 +1,321 @@
+{
+  "unitId": "vpn",
+  "overview": {
+    "title": "AWS VPN",
+    "hook": "Túneles cifrados sobre internet: uno para tu oficina, otro para cada persona.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "office",
+          "label": "Oficina",
+          "kind": "actor",
+          "x": 8,
+          "y": 28
+        },
+        {
+          "id": "cgw",
+          "label": "Customer gateway",
+          "kind": "actor",
+          "x": 30,
+          "y": 28
+        },
+        {
+          "id": "vgw",
+          "label": "Virtual private GW",
+          "kind": "service",
+          "service": "AWS Site-to-Site VPN",
+          "x": 58,
+          "y": 28
+        },
+        {
+          "id": "vpc",
+          "label": "VPC",
+          "kind": "zone",
+          "x": 88,
+          "y": 50
+        },
+        {
+          "id": "laptop",
+          "label": "Laptop remota",
+          "kind": "actor",
+          "x": 8,
+          "y": 78
+        },
+        {
+          "id": "cvpn",
+          "label": "Client VPN",
+          "kind": "service",
+          "service": "AWS Client VPN",
+          "x": 58,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "office",
+          "to": "cgw"
+        },
+        {
+          "from": "cgw",
+          "to": "vgw",
+          "label": "2 túneles IPsec"
+        },
+        {
+          "from": "vgw",
+          "to": "vpc"
+        },
+        {
+          "from": "laptop",
+          "to": "cvpn",
+          "label": "OpenVPN (TLS)"
+        },
+        {
+          "from": "cvpn",
+          "to": "vpc",
+          "label": "subnet asociada"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Casi ninguna empresa se muda entera a la nube de un día para otro: su oficina o data center necesita hablar con la VPC. La forma más rápida de lograrlo es AWS Site-to-Site VPN, un túnel IPsec cifrado sobre internet.",
+        "show": [
+          "office",
+          "vpc"
+        ],
+        "focus": "office"
+      },
+      {
+        "narration": "Del lado de la oficina está el customer gateway, que es tu router o firewall. Del lado de AWS va un virtual private gateway, conectado a una sola VPC, o un transit gateway si quieres llegar a varias VPCs.",
+        "show": [
+          "office",
+          "cgw",
+          "vgw",
+          "vpc"
+        ],
+        "focus": "vgw"
+      },
+      {
+        "narration": "Cada conexión trae dos túneles, que puedes usar a la vez para alta disponibilidad. Un túnel estándar llega a 1.25 gigabits por segundo. Y crear la VPN no basta: debes configurar las rutas para que el tráfico pase por ella.",
+        "show": [
+          "office",
+          "cgw",
+          "vgw",
+          "vpc"
+        ],
+        "focus": "cgw"
+      },
+      {
+        "narration": "Dos detalles que el examen usa como trampa. El túnel de gran ancho de banda, de hasta 5 gigabits, solo existe con Transit Gateway o Cloud WAN. Y si necesitas IPv6 por la VPN, el virtual private gateway no lo soporta.",
+        "show": [
+          "office",
+          "cgw",
+          "vgw",
+          "vpc"
+        ],
+        "focus": "vgw"
+      },
+      {
+        "narration": "Otro caso es una persona trabajando desde casa. Para eso existe AWS Client VPN, un servicio administrado basado en OpenVPN: cada laptop abre una sesión TLS contra un endpoint. Este puede asociarse a una subnet de VPC o conectarse directamente a Transit Gateway.",
+        "show": [
+          "office",
+          "cgw",
+          "vgw",
+          "vpc",
+          "laptop",
+          "cvpn"
+        ],
+        "focus": "cvpn"
+      },
+      {
+        "narration": "Client VPN autentica con Active Directory, federación o certificados. Por defecto no existe ninguna regla de autorización, así que además de las rutas necesitas authorization rules para que los usuarios lleguen a cada red.",
+        "show": [
+          "office",
+          "cgw",
+          "vgw",
+          "vpc",
+          "laptop",
+          "cvpn"
+        ],
+        "focus": "laptop"
+      },
+      {
+        "narration": "Resumen para el examen: red a red por internet es Site-to-Site VPN; persona a red es Client VPN. Y si piden un enlace privado dedicado, sin internet y con rendimiento consistente, eso ya es Direct Connect.",
+        "show": [
+          "office",
+          "cgw",
+          "vgw",
+          "vpc",
+          "laptop",
+          "cvpn"
+        ],
+        "focus": "vpc"
+      }
+    ],
+    "keyPoints": [
+      "Site-to-Site VPN: IPsec sobre internet, dos túneles por conexión.",
+      "Virtual private gateway: una VPC; Transit Gateway: muchas VPCs.",
+      "Sin rutas configuradas, la VPN no lleva tráfico.",
+      "Client VPN: usuarios individuales con OpenVPN y authorization rules."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Direct Connect",
+        "difference": "Direct Connect es un enlace privado dedicado, no cifrado por defecto; la VPN es IPsec sobre internet."
+      },
+      {
+        "unitOrService": "VPC peering",
+        "difference": "El peering conecta VPCs entre sí; la VPN conecta una red on-premises o usuarios con AWS."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "vpn--l1",
+      "conceptId": "site-to-site-vpn",
+      "format": "lightning",
+      "prompt": "Encrypted connection from a data center to a VPC over the internet, set up quickly → ?",
+      "promptEs": "Conexión cifrada desde un data center a una VPC sobre internet, rápida de montar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Direct Connect link"
+        },
+        {
+          "id": "B",
+          "text": "AWS Client VPN"
+        },
+        {
+          "id": "C",
+          "text": "AWS Site-to-Site VPN"
+        },
+        {
+          "id": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": "C",
+      "why": "Site-to-Site VPN crea túneles IPsec red a red sobre internet. Direct Connect requiere un enlace físico y no cifra por defecto; Client VPN es para personas."
+    },
+    {
+      "id": "vpn--l2",
+      "conceptId": "site-to-site-vpn",
+      "format": "thisorthat",
+      "prompt": "Each Site-to-Site VPN connection includes → ?",
+      "promptEs": "Cada conexión Site-to-Site VPN incluye → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One tunnel per connection"
+        },
+        {
+          "id": "B",
+          "text": "Two tunnels for high availability"
+        }
+      ],
+      "answer": "B",
+      "why": "Cada conexión trae dos túneles cifrados que pueden usarse simultáneamente para alta disponibilidad. Ambos pertenecen a la misma conexión."
+    },
+    {
+      "id": "vpn--l3",
+      "conceptId": "site-to-site-vpn",
+      "format": "lightning",
+      "prompt": "Site-to-Site VPN must carry IPv6 traffic → AWS-side endpoint?",
+      "promptEs": "La Site-to-Site VPN debe transportar tráfico IPv6 → ¿endpoint del lado de AWS?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Virtual private gateway"
+        },
+        {
+          "id": "B",
+          "text": "Transit Gateway"
+        },
+        {
+          "id": "C",
+          "text": "Customer gateway"
+        },
+        {
+          "id": "D",
+          "text": "Egress-only internet gateway"
+        }
+      ],
+      "answer": "B",
+      "why": "Las VPN en un virtual private gateway no soportan tráfico IPv6. Además, una conexión no lleva IPv4 e IPv6 a la vez: necesitas conexiones separadas."
+    },
+    {
+      "id": "vpn--l5",
+      "conceptId": "client-vpn",
+      "format": "lightning",
+      "prompt": "Employees on laptops need managed, OpenVPN-based remote access to a VPC → ?",
+      "promptEs": "Empleados con laptops necesitan acceso remoto administrado, basado en OpenVPN, a una VPC → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Site-to-Site VPN"
+        },
+        {
+          "id": "B",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "id": "C",
+          "text": "Transit Gateway attachment"
+        },
+        {
+          "id": "D",
+          "text": "AWS Client VPN"
+        }
+      ],
+      "answer": "D",
+      "why": "Client VPN conecta dispositivos de personas mediante un cliente OpenVPN. Site-to-Site VPN conecta redes completas a través de un customer gateway."
+    },
+    {
+      "id": "vpn--l7",
+      "conceptId": "site-to-site-vpn",
+      "format": "lightning",
+      "prompt": "After creating a Site-to-Site VPN, what must you configure so traffic uses it?",
+      "promptEs": "Después de crear una Site-to-Site VPN, ¿qué debes configurar para que el tráfico la use?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Routes that send traffic to the VPN"
+        },
+        {
+          "id": "B",
+          "text": "A third IPsec tunnel"
+        },
+        {
+          "id": "C",
+          "text": "A Client VPN endpoint"
+        },
+        {
+          "id": "D",
+          "text": "An internet gateway per subnet"
+        }
+      ],
+      "answer": "A",
+      "why": "Crear la conexión no completa el camino entre redes: debes configurar el ruteo para que el tráfico pase por la VPN."
+    },
+    {
+      "id": "vpn--l8",
+      "conceptId": "client-vpn",
+      "format": "thisorthat",
+      "prompt": "New Client VPN endpoint with routes but no authorization rules → user access?",
+      "promptEs": "Endpoint nuevo de Client VPN con rutas pero sin authorization rules → ¿acceso de usuarios?",
+      "options": [
+        {
+          "id": "A",
+          "text": "All routed networks are reachable"
+        },
+        {
+          "id": "B",
+          "text": "No access until rules are added"
+        }
+      ],
+      "answer": "B",
+      "why": "Por defecto no existen reglas de autorización. Una ruta indica el camino, pero la authorization rule es la que concede a los usuarios acceso a esa red."
+    }
+  ],
+  "audited": true
+}

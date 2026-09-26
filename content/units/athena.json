@@ -1,0 +1,328 @@
+{
+  "unitId": "athena",
+  "overview": {
+    "title": "Amazon Athena y Amazon Quick Sight",
+    "hook": "SQL directo sobre S3 sin servidores, y dashboards para el negocio.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "s3",
+          "label": "Datos en S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 8,
+          "y": 55
+        },
+        {
+          "id": "catalog",
+          "label": "Glue Data Catalog",
+          "kind": "service",
+          "service": "AWS Glue",
+          "x": 30,
+          "y": 18
+        },
+        {
+          "id": "athena",
+          "label": "Athena",
+          "kind": "service",
+          "service": "Amazon Athena",
+          "x": 48,
+          "y": 55
+        },
+        {
+          "id": "analyst",
+          "label": "Analista SQL",
+          "kind": "actor",
+          "x": 48,
+          "y": 90
+        },
+        {
+          "id": "quick",
+          "label": "Quick Sight",
+          "kind": "service",
+          "service": "Amazon Quick Sight",
+          "x": 74,
+          "y": 55
+        },
+        {
+          "id": "users",
+          "label": "Usuarios negocio",
+          "kind": "actor",
+          "x": 92,
+          "y": 18
+        }
+      ],
+      "edges": [
+        {
+          "from": "athena",
+          "to": "s3",
+          "label": "lee in situ"
+        },
+        {
+          "from": "athena",
+          "to": "catalog",
+          "label": "esquema"
+        },
+        {
+          "from": "analyst",
+          "to": "athena",
+          "label": "SQL ad hoc"
+        },
+        {
+          "from": "quick",
+          "to": "athena",
+          "label": "fuente de datos"
+        },
+        {
+          "from": "users",
+          "to": "quick",
+          "label": "dashboards"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Tienes años de logs en S3 y alguien necesita una respuesta con SQL, solo de vez en cuando. Cargar todo en un warehouse sería excesivo. Amazon Athena consulta los archivos directamente en S3, sin cargarlos y sin servidores que administrar.",
+        "show": [
+          "s3",
+          "athena"
+        ],
+        "focus": "athena"
+      },
+      {
+        "narration": "Athena usa schema-on-read: la tabla es solo una definición, normalmente guardada en el Glue Data Catalog, y no modifica ni mueve los archivos. Lee formatos como CSV, JSON, Parquet y ORC.",
+        "show": [
+          "s3",
+          "athena",
+          "catalog"
+        ],
+        "focus": "catalog"
+      },
+      {
+        "narration": "Es serverless y pagas por las consultas que ejecutas, según los datos que escanean. Por eso el examen pregunta cómo bajar costo: particiona, por ejemplo por fecha, comprime y usa Parquet u ORC. Y filtra por la partición en tu consulta.",
+        "show": [
+          "s3",
+          "athena",
+          "catalog",
+          "analyst"
+        ],
+        "focus": "analyst"
+      },
+      {
+        "narration": "Con conectores de fuentes de datos, Athena también puede consultar fuentes fuera de S3 junto con tus archivos, sin copiarlas antes a S3.",
+        "show": [
+          "s3",
+          "athena",
+          "catalog",
+          "analyst"
+        ],
+        "focus": "athena"
+      },
+      {
+        "narration": "Para ver resultados como gráficos entra Amazon Quick Sight, antes llamado QuickSight, la función de BI de Amazon Quick. Se conecta a fuentes como Athena o Redshift y crea dashboards interactivos, sin infraestructura que aprovisionar.",
+        "show": [
+          "s3",
+          "athena",
+          "catalog",
+          "analyst",
+          "quick"
+        ],
+        "focus": "quick"
+      },
+      {
+        "narration": "Quick Sight también embebe analytics en tu aplicación, incluso para usuarios anónimos con precios por sesión. Por separado, las organizaciones pueden aprovisionar Amazon Quick mediante IAM Identity Center o federación, con suscripciones por usuario. Las APIs e integraciones existentes de QuickSight siguen funcionando.",
+        "show": [
+          "s3",
+          "athena",
+          "catalog",
+          "analyst",
+          "quick",
+          "users"
+        ],
+        "focus": "users"
+      },
+      {
+        "narration": "Ojo con las otras funciones de Amazon Quick: Quick Flows y Quick Automate automatizan tareas, y Quick Index da contexto a respuestas de IA. Ninguna crea dashboards. Y recuerda: Athena consulta, Glue transforma, Redshift es el warehouse.",
+        "show": [
+          "s3",
+          "athena",
+          "catalog",
+          "analyst",
+          "quick",
+          "users"
+        ],
+        "focus": "quick"
+      }
+    ],
+    "keyPoints": [
+      "SQL ad hoc serverless sobre S3, sin cargar datos: Athena.",
+      "Pagas por consulta; particiones y Parquet reducen el escaneo.",
+      "Crear una tabla en Athena no mueve ni convierte archivos.",
+      "Dashboards de BI sin infraestructura: Amazon Quick Sight.",
+      "Analytics embebidos en tu aplicación: Quick Sight."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon Redshift",
+        "difference": "Redshift es un warehouse para BI continuo; Athena es SQL ocasional directo sobre S3."
+      },
+      {
+        "unitOrService": "Amazon OpenSearch Service",
+        "difference": "OpenSearch indexa para buscar texto y logs; Athena lanza SQL sobre archivos."
+      },
+      {
+        "unitOrService": "Amazon Quick Flows",
+        "difference": "Quick Flows automatiza tareas repetitivas; Quick Sight crea dashboards y analytics embebidos."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "athena--l2",
+      "conceptId": "athena",
+      "format": "lightning",
+      "prompt": "Reduce data scanned when Athena queries one day of events → ?",
+      "promptEs": "Reducir los datos escaneados cuando Athena consulta un solo día de eventos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Partition by date, filter on it"
+        },
+        {
+          "id": "B",
+          "text": "Run a Glue crawler"
+        },
+        {
+          "id": "C",
+          "text": "Enable S3 Versioning"
+        },
+        {
+          "id": "D",
+          "text": "Raise the query timeout"
+        }
+      ],
+      "answer": "A",
+      "why": "Con particiones por fecha y un filtro sobre ellas, Athena solo lee ese día. Un crawler registra el esquema, pero no reduce por sí solo lo escaneado."
+    },
+    {
+      "id": "athena--l3",
+      "conceptId": "athena",
+      "format": "thisorthat",
+      "prompt": "After creating an Athena table over S3 files, the files are…",
+      "promptEs": "Después de crear una tabla de Athena sobre archivos en S3, los archivos quedan…",
+      "options": [
+        {
+          "id": "A",
+          "text": "Converted and moved by Athena"
+        },
+        {
+          "id": "B",
+          "text": "Unchanged (schema-on-read)"
+        }
+      ],
+      "answer": "B",
+      "why": "Athena aplica el esquema al leer; la definición de tabla no toca los objetos. Para convertir formatos necesitas algo explícito, como CTAS o un job de Glue."
+    },
+    {
+      "id": "athena--l4",
+      "conceptId": "athena",
+      "format": "lightning",
+      "prompt": "One SQL query over S3 plus another database, without copying data → ?",
+      "promptEs": "Una consulta SQL sobre S3 y otra base de datos, sin copiar datos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Glue ETL into S3"
+        },
+        {
+          "id": "B",
+          "text": "Redshift COPY command"
+        },
+        {
+          "id": "C",
+          "text": "AWS DataSync task"
+        },
+        {
+          "id": "D",
+          "text": "Athena data source connector"
+        }
+      ],
+      "answer": "D",
+      "why": "Los conectores de fuentes de datos de Athena consultan fuentes externas junto a S3. Glue, COPY o DataSync implican copiar los datos primero."
+    },
+    {
+      "id": "athena--l5",
+      "conceptId": "quick-visualization",
+      "format": "lightning",
+      "prompt": "Interactive BI dashboards for business users, no infrastructure to provision → ?",
+      "promptEs": "Dashboards de BI interactivos para usuarios de negocio, sin infraestructura que aprovisionar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudWatch dashboards"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Quick Sight"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Athena console"
+        },
+        {
+          "id": "D",
+          "text": "Grafana on EC2"
+        }
+      ],
+      "answer": "B",
+      "why": "Quick Sight es la función de BI de Amazon Quick, totalmente administrada. La consola de Athena ejecuta SQL, y Grafana en EC2 exige administrar servidores."
+    },
+    {
+      "id": "athena--l6",
+      "conceptId": "quick-visualization",
+      "format": "thisorthat",
+      "prompt": "Embed interactive analytics in a customer-facing app → which Amazon Quick feature?",
+      "promptEs": "Embeber analytics interactivos en una app para clientes → ¿qué función de Amazon Quick?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Quick Sight"
+        },
+        {
+          "id": "B",
+          "text": "Quick Flows"
+        }
+      ],
+      "answer": "A",
+      "why": "Quick Sight crea dashboards y embebe analytics en aplicaciones. Quick Flows automatiza tareas repetitivas; no es la función de visualización."
+    },
+    {
+      "id": "athena--l7",
+      "conceptId": "quick-visualization",
+      "format": "lightning",
+      "prompt": "Adopt Amazon Quick without rewriting existing QuickSight integrations → ?",
+      "promptEs": "Adoptar Amazon Quick sin reescribir las integraciones existentes de QuickSight → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rewrite them with Quick Flows"
+        },
+        {
+          "id": "B",
+          "text": "Rebuild in OpenSearch Dashboards"
+        },
+        {
+          "id": "C",
+          "text": "Keep existing QuickSight APIs"
+        },
+        {
+          "id": "D",
+          "text": "Export data to Athena views"
+        }
+      ],
+      "answer": "C",
+      "why": "Quick Sight es la evolución de QuickSight, y sus APIs, SDKs e integraciones existentes siguen funcionando. Reconstruir en otra herramienta sería esfuerzo innecesario."
+    }
+  ],
+  "audited": true
+}

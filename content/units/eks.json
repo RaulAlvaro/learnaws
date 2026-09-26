@@ -1,0 +1,201 @@
+{
+  "unitId": "eks",
+  "overview": {
+    "title": "Amazon EKS",
+    "hook": "Kubernetes administrado en AWS, para cuando Kubernetes es un requisito.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "dev",
+          "label": "Manifiestos K8s",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "eks",
+          "label": "Control plane EKS",
+          "kind": "service",
+          "service": "Amazon EKS",
+          "x": 40,
+          "y": 50
+        },
+        {
+          "id": "ng",
+          "label": "Nodos EC2",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 78,
+          "y": 18
+        },
+        {
+          "id": "fg",
+          "label": "Pods en Fargate",
+          "kind": "service",
+          "service": "AWS Fargate",
+          "x": 78,
+          "y": 50
+        },
+        {
+          "id": "auto",
+          "label": "EKS Auto Mode",
+          "kind": "note",
+          "x": 78,
+          "y": 82
+        }
+      ],
+      "edges": [
+        {
+          "from": "dev",
+          "to": "eks",
+          "label": "kubectl / Argo CD"
+        },
+        {
+          "from": "eks",
+          "to": "ng",
+          "label": "programa pods"
+        },
+        {
+          "from": "eks",
+          "to": "fg",
+          "label": "pods serverless"
+        },
+        {
+          "from": "eks",
+          "to": "auto",
+          "label": "gestiona nodos"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Kubernetes es un orquestador de contenedores de código abierto, muy usado fuera de AWS. Amazon EKS te da clusters de Kubernetes certificados en AWS. Puedes reutilizar manifiestos y herramientas, aunque una migración puede requerir ajustes de versión, almacenamiento, red o integraciones.",
+        "show": [
+          "dev",
+          "eks"
+        ],
+        "focus": "eks"
+      },
+      {
+        "narration": "En EKS estándar, AWS administra el control plane, que es el cerebro del cluster. Los pods corren en nodos que pueden ser instancias EC2, o en Fargate si no quieres administrar servidores.",
+        "show": [
+          "dev",
+          "eks",
+          "ng",
+          "fg"
+        ],
+        "focus": "ng"
+      },
+      {
+        "narration": "Si además quieres que AWS aprovisione, escale y parche los nodos, activas EKS Auto Mode. Y para despliegue continuo estilo GitOps, EKS ofrece Argo CD administrado.",
+        "show": [
+          "dev",
+          "eks",
+          "ng",
+          "fg",
+          "auto"
+        ],
+        "focus": "auto"
+      },
+      {
+        "narration": "Sobre costos: pagas un cargo por cluster y, aparte, los recursos que ejecutan tus apps. La regla del examen: si el enunciado exige Kubernetes o sus herramientas, es EKS; si no lo exige, ECS suele ser más simple.",
+        "show": [
+          "dev",
+          "eks",
+          "ng",
+          "fg",
+          "auto"
+        ],
+        "focus": "eks"
+      }
+    ],
+    "keyPoints": [
+      "EKS: Kubernetes administrado y certificado en AWS.",
+      "Estándar gestiona el control plane; Auto Mode también los nodos.",
+      "Los pods corren en nodos EC2 o en Fargate.",
+      "Cargo por cluster; el cómputo se cobra aparte."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon ECS",
+        "difference": "ECS es más simple si no se exige Kubernetes; EKS conserva manifiestos y herramientas de Kubernetes."
+      },
+      {
+        "unitOrService": "AWS Fargate",
+        "difference": "Fargate es cómputo sin servidores; puede correr pods de EKS o tareas de ECS."
+      },
+      {
+        "unitOrService": "EKS Anywhere",
+        "difference": "Corre Kubernetes en tu propio hardware y tú administras el control plane."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "eks--l2",
+      "conceptId": "amazon-eks",
+      "format": "thisorthat",
+      "prompt": "On EKS, AWS must also provision, scale and patch the nodes → ?",
+      "promptEs": "En EKS, AWS también debe aprovisionar, escalar y parchar los nodos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EKS Auto Mode"
+        },
+        {
+          "id": "B",
+          "text": "EKS standard"
+        }
+      ],
+      "answer": "A",
+      "why": "EKS estándar administra el control plane; Auto Mode además gestiona nodos, escalado y parches del sistema operativo."
+    },
+    {
+      "id": "eks--l3",
+      "conceptId": "amazon-eks",
+      "format": "lightning",
+      "prompt": "Managed GitOps continuous deployment for EKS clusters → ?",
+      "promptEs": "Despliegue continuo GitOps administrado para clusters EKS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EKS Distro"
+        },
+        {
+          "id": "B",
+          "text": "Managed Argo CD (EKS Capabilities)"
+        },
+        {
+          "id": "C",
+          "text": "AWS CloudFormation StackSets"
+        },
+        {
+          "id": "D",
+          "text": "EKS Auto Mode"
+        }
+      ],
+      "answer": "B",
+      "why": "EKS Capabilities incluye Argo CD administrado para GitOps. EKS Distro solo aporta componentes de Kubernetes, y Auto Mode gestiona nodos, no despliegues."
+    },
+    {
+      "id": "eks--l4",
+      "conceptId": "amazon-eks",
+      "format": "thisorthat",
+      "prompt": "Does the EKS per-cluster charge include worker compute?",
+      "promptEs": "¿El cargo por cluster de EKS incluye el cómputo de los workers?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, compute is bundled in"
+        },
+        {
+          "id": "B",
+          "text": "No, compute is billed separately"
+        }
+      ],
+      "answer": "B",
+      "why": "EKS cobra por cluster, y los recursos que ejecutan tus apps, como EC2 o Fargate, se cobran aparte."
+    }
+  ],
+  "audited": true
+}

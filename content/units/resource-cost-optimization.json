@@ -1,0 +1,552 @@
+{
+  "unitId": "resource-cost-optimization",
+  "overview": {
+    "title": "Optimización de costos de recursos",
+    "hook": "Paga solo por lo que tu carga realmente usa, ni un tamaño más.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "metrics",
+          "label": "Métricas CW",
+          "kind": "data",
+          "x": 8,
+          "y": 30
+        },
+        {
+          "id": "co",
+          "label": "Compute Optimizer",
+          "kind": "service",
+          "service": "AWS Compute Optimizer",
+          "x": 34,
+          "y": 30
+        },
+        {
+          "id": "size",
+          "label": "Tamaño correcto",
+          "kind": "data",
+          "x": 62,
+          "y": 30
+        },
+        {
+          "id": "db",
+          "label": "Reserved DB",
+          "kind": "note",
+          "x": 90,
+          "y": 30
+        },
+        {
+          "id": "sched",
+          "label": "Instance Scheduler",
+          "kind": "service",
+          "service": "Instance Scheduler on AWS",
+          "x": 34,
+          "y": 78
+        },
+        {
+          "id": "dev",
+          "label": "Dev/test EC2 y RDS",
+          "kind": "data",
+          "x": 62,
+          "y": 78
+        },
+        {
+          "id": "snap",
+          "label": "Snapshot Archive",
+          "kind": "data",
+          "x": 90,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "metrics",
+          "to": "co",
+          "label": "14 días"
+        },
+        {
+          "from": "co",
+          "to": "size",
+          "label": "recomendaciones"
+        },
+        {
+          "from": "size",
+          "to": "db",
+          "label": "carga estable"
+        },
+        {
+          "from": "sched",
+          "to": "dev",
+          "label": "stop/start por tag"
+        },
+        {
+          "from": "dev",
+          "to": "snap",
+          "label": "retención larga"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Optimizar costos no es elegir el servicio más barato de la lista, sino pagar por los recursos que tu carga necesita. Aquí verás tamaño correcto, modelo de cómputo, horarios y almacenamiento.",
+        "show": [
+          "co"
+        ],
+        "focus": "co"
+      },
+      {
+        "narration": "AWS Compute Optimizer analiza métricas de CloudWatch de los últimos 14 días por defecto y recomienda cambios para recursos compatibles. Debes hacer opt-in y contar con métricas suficientes. Enhanced infrastructure metrics es de pago y amplía la ventana a 93 días solo para recursos compatibles.",
+        "show": [
+          "co",
+          "metrics",
+          "size"
+        ],
+        "focus": "metrics"
+      },
+      {
+        "narration": "Elige el modelo de cómputo según los datos de tu carga. Lambda estándar cobra por requests y duración; puede convenir para ráfagas cortas con mucho tiempo ocioso. Para uso elegible de EC2, compara costos y considera Savings Plans o Reserved Instances.",
+        "show": [
+          "co",
+          "metrics",
+          "size"
+        ],
+        "focus": "size"
+      },
+      {
+        "narration": "Los entornos de desarrollo quizá no necesiten correr de noche. Instance Scheduler on AWS usa tags y Lambda para apagar y encender EC2 y RDS según un horario, incluso en varias cuentas y Regions. No programes paradas para producción si debe permanecer disponible.",
+        "show": [
+          "co",
+          "metrics",
+          "size",
+          "sched",
+          "dev"
+        ],
+        "focus": "sched"
+      },
+      {
+        "narration": "Si detienes RDS, dejas de pagar horas de instancia, pero sigues pagando storage y backups. RDS lo vuelve a encender tras siete días; arrancarlo puede tardar minutos u horas. No puedes detener una instancia que tenga read replicas o sea una read replica.",
+        "show": [
+          "co",
+          "metrics",
+          "size",
+          "sched",
+          "dev"
+        ],
+        "focus": "dev"
+      },
+      {
+        "narration": "Para uso estable de una instancia RDS compatible, una reserved DB instance ofrece un descuento durante uno o tres años. Es un compromiso de facturación: no crea una base de datos, no se puede cancelar y no descuenta storage ni backups.",
+        "show": [
+          "co",
+          "metrics",
+          "size",
+          "sched",
+          "dev",
+          "db"
+        ],
+        "focus": "db"
+      },
+      {
+        "narration": "En almacenamiento, evalúa migrar gp2 a gp3 y eliminar volúmenes huérfanos. EBS Snapshots Archive puede abaratar snapshots poco usados retenidos 90 días o más, pero los guarda como snapshots completos, así que el ahorro no es seguro. Debes restaurarlos antes de usarlos.",
+        "show": [
+          "co",
+          "metrics",
+          "size",
+          "sched",
+          "dev",
+          "db",
+          "snap"
+        ],
+        "focus": "snap"
+      }
+    ],
+    "keyPoints": [
+      "Compute Optimizer requiere opt-in y métricas suficientes; usa 14 días por defecto.",
+      "Enhanced infrastructure metrics (de pago): 93 días en recursos compatibles.",
+      "Instance Scheduler puede apagar dev/test por tags fuera de horario.",
+      "Una reserved DB instance descuenta uso de instancia, no storage ni backups.",
+      "Snapshots Archive: guarda completo; restaura antes de usar; ahorro no garantizado."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Cost Explorer",
+        "difference": "Analiza el gasto; Compute Optimizer recomienda cambios de recursos según métricas de utilización."
+      },
+      {
+        "unitOrService": "AWS Trusted Advisor",
+        "difference": "Hace chequeos generales de buenas prácticas; Compute Optimizer da recomendaciones por recurso."
+      },
+      {
+        "unitOrService": "AWS Budgets",
+        "difference": "Alerta sobre umbrales de gasto; no recomienda qué tamaño elegir."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "resource-cost-optimization--l1",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "format": "lightning",
+      "prompt": "Choose a smaller EC2 size from CPU, network and disk utilization history → ?",
+      "promptEs": "Elegir un tamaño de EC2 menor según el historial de CPU, red y disco → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Budgets"
+        },
+        {
+          "id": "B",
+          "text": "Cost Explorer forecast"
+        },
+        {
+          "id": "C",
+          "text": "AWS Compute Optimizer"
+        },
+        {
+          "id": "D",
+          "text": "Service Quotas"
+        }
+      ],
+      "answer": "C",
+      "why": "Compute Optimizer compara configuraciones con la utilización real y proyectada. Budgets alerta sobre gasto y el forecast predice costos, pero ninguno recomienda tamaños."
+    },
+    {
+      "id": "resource-cost-optimization--l3",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "format": "lightning",
+      "prompt": "Right-size Lambda memory and Fargate tasks using projected utilization graphs → ?",
+      "promptEs": "Ajustar memoria de Lambda y tareas de Fargate con gráficos de utilización proyectada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Compute Optimizer"
+        },
+        {
+          "id": "B",
+          "text": "AWS Trusted Advisor"
+        },
+        {
+          "id": "C",
+          "text": "AWS Budgets actions"
+        },
+        {
+          "id": "D",
+          "text": "CloudWatch Logs Insights"
+        }
+      ],
+      "answer": "A",
+      "why": "Compute Optimizer cubre EC2, EBS, Lambda y ECS on Fargate, con utilización proyectada. Recuerda hacer opt-in primero; sin eso no analiza nada."
+    },
+    {
+      "id": "resource-cost-optimization--l4",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "format": "lightning",
+      "prompt": "Short validations in rare bursts, idle for weeks; avoid paying for idle → ?",
+      "promptEs": "Validaciones cortas en ráfagas ocasionales, semanas sin uso; no pagar por ocio → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 On-Demand instance"
+        },
+        {
+          "id": "B",
+          "text": "ECS service on Fargate"
+        },
+        {
+          "id": "C",
+          "text": "EC2 Reserved Instance"
+        },
+        {
+          "id": "D",
+          "text": "Standard AWS Lambda function"
+        }
+      ],
+      "answer": "D",
+      "why": "Lambda estándar cobra por request y duración, así que el tiempo ocioso no cuesta. EC2 o un servicio en Fargate cobran mientras están corriendo, aunque no hagan nada."
+    },
+    {
+      "id": "resource-cost-optimization--l5",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "format": "thisorthat",
+      "prompt": "Existing container service, stable demand; cost model favors Fargate; no redesign allowed → ?",
+      "promptEs": "Servicio en contenedores existente, demanda estable; el modelo de costos favorece Fargate; sin rediseño → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rewrite as Lambda functions"
+        },
+        {
+          "id": "B",
+          "text": "Keep it on Fargate"
+        }
+      ],
+      "answer": "B",
+      "why": "El modelo de costos medido manda, y pasar a Lambda exige un rediseño que está prohibido. No hay regla de que un servicio sea siempre el más barato."
+    },
+    {
+      "id": "resource-cost-optimization--l6",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "format": "lightning",
+      "prompt": "Steady high-volume Lambda; keep Lambda model, cheaper on AWS-managed EC2 → ?",
+      "promptEs": "Lambda estable de alto volumen; mantener el modelo Lambda, más barato sobre EC2 gestionado por AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lambda provisioned concurrency"
+        },
+        {
+          "id": "B",
+          "text": "EC2 Spot Instances"
+        },
+        {
+          "id": "C",
+          "text": "Lambda Managed Instances"
+        },
+        {
+          "id": "D",
+          "text": "Fargate Spot tasks"
+        }
+      ],
+      "answer": "C",
+      "why": "Lambda Managed Instances conserva el modelo de programación de Lambda sobre EC2 gestionado por Lambda. Cobra requests, instancia EC2 y una tarifa de gestión, no solo duración."
+    },
+    {
+      "id": "resource-cost-optimization--l8",
+      "conceptId": "non-production-scheduling",
+      "format": "lightning",
+      "prompt": "Stop dev EC2 and RDS nightly by tag, across accounts and Regions → ?",
+      "promptEs": "Apagar EC2 y RDS de desarrollo cada noche por tag, en varias cuentas y Regions → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 Auto Scaling scheduled actions"
+        },
+        {
+          "id": "B",
+          "text": "Instance Scheduler on AWS"
+        },
+        {
+          "id": "C",
+          "text": "AWS Backup plan"
+        },
+        {
+          "id": "D",
+          "text": "AWS Compute Optimizer"
+        }
+      ],
+      "answer": "B",
+      "why": "Instance Scheduler usa tags y Lambda para apagar y encender EC2 y RDS por horario en varias cuentas. Las scheduled actions de Auto Scaling no cubren RDS."
+    },
+    {
+      "id": "resource-cost-optimization--l9",
+      "conceptId": "non-production-scheduling",
+      "format": "thisorthat",
+      "prompt": "Stopped RDS DB instance: which charges keep running?",
+      "promptEs": "RDS DB instance detenida: ¿qué cargos siguen corriendo?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DB instance-hours"
+        },
+        {
+          "id": "B",
+          "text": "Storage and backups"
+        }
+      ],
+      "answer": "B",
+      "why": "Detener RDS elimina los cargos por instance-hour, pero el storage y los backups se siguen cobrando."
+    },
+    {
+      "id": "resource-cost-optimization--l10",
+      "conceptId": "non-production-scheduling",
+      "format": "lightning",
+      "prompt": "Maximum time an RDS DB instance stays stopped before RDS starts it → ?",
+      "promptEs": "Tiempo máximo que una RDS DB instance permanece detenida antes de que RDS la encienda → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "24 hours"
+        },
+        {
+          "id": "B",
+          "text": "30 days"
+        },
+        {
+          "id": "C",
+          "text": "Indefinitely"
+        },
+        {
+          "id": "D",
+          "text": "7 days"
+        }
+      ],
+      "answer": "D",
+      "why": "RDS enciende automáticamente la instancia tras siete días consecutivos detenida. Por eso un horario de apagado debe volver a detenerla, no asumir que queda apagada."
+    },
+    {
+      "id": "resource-cost-optimization--l11",
+      "conceptId": "database-cost-optimization",
+      "format": "lightning",
+      "prompt": "RDS PostgreSQL runs 24/7; same engine, type and Region for a year → ?",
+      "promptEs": "RDS PostgreSQL corre 24/7; mismo engine, tipo y Region durante un año → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep On-Demand DB instance"
+        },
+        {
+          "id": "B",
+          "text": "Instance Scheduler nightly stop"
+        },
+        {
+          "id": "C",
+          "text": "One-year RDS reserved DB instance"
+        },
+        {
+          "id": "D",
+          "text": "Self-managed database on Spot"
+        }
+      ],
+      "answer": "C",
+      "why": "Uso predecible durante un año es el caso típico de reserved DB instance: descuento sobre la misma instancia, sin cambiar la conexión. Apagarla de noche rompería la disponibilidad."
+    },
+    {
+      "id": "resource-cost-optimization--l12",
+      "conceptId": "database-cost-optimization",
+      "format": "thisorthat",
+      "prompt": "Backup storage dominates the RDS bill. Does a reserved DB instance fix it?",
+      "promptEs": "El storage de backups domina la factura de RDS. ¿Lo arregla una reserved DB instance?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, it discounts instance usage only"
+        },
+        {
+          "id": "B",
+          "text": "Yes, it discounts backup storage too"
+        }
+      ],
+      "answer": "A",
+      "why": "La reserva solo descuenta horas de instancia, no storage, backups ni I/O. Para costos de backup revisa la retención."
+    },
+    {
+      "id": "resource-cost-optimization--l15",
+      "conceptId": "storage-cost-optimization",
+      "format": "thisorthat",
+      "prompt": "You need to use an archived EBS snapshot → first step?",
+      "promptEs": "Necesitas usar un snapshot de EBS archivado → ¿primer paso?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Restore it to the Standard tier"
+        },
+        {
+          "id": "B",
+          "text": "Create a volume directly from Archive"
+        }
+      ],
+      "answer": "A",
+      "why": "Un snapshot archivado no se usa directo: primero se restaura al Standard tier. Además, al archivarse pasó de incremental a completo."
+    },
+    {
+      "id": "resource-cost-optimization--l16",
+      "conceptId": "storage-cost-optimization",
+      "format": "lightning",
+      "prompt": "Lower EBS gp2 volume cost while keeping SSD performance → ?",
+      "promptEs": "Bajar el costo de volúmenes EBS gp2 manteniendo desempeño SSD → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Migrate volumes to io2"
+        },
+        {
+          "id": "B",
+          "text": "Migrate volumes to sc1"
+        },
+        {
+          "id": "C",
+          "text": "Enable fast snapshot restore"
+        },
+        {
+          "id": "D",
+          "text": "Migrate volumes to gp3"
+        }
+      ],
+      "answer": "D",
+      "why": "gp3 cuesta menos por GB que gp2 y permite ajustar IOPS y throughput sin agrandar el volumen. io2 es más caro y sc1 es HDD."
+    },
+    {
+      "id": "resource-cost-optimization--l17",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "format": "thisorthat",
+      "prompt": "Compute Optimizer was never enabled; team wants EC2 rightsizing recommendations → first step?",
+      "promptEs": "Compute Optimizer nunca se activó; el equipo quiere recomendaciones de tamaño para EC2 → ¿primer paso?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Opt in to Compute Optimizer"
+        },
+        {
+          "id": "B",
+          "text": "Create an AWS Budgets alert"
+        }
+      ],
+      "answer": "A",
+      "why": "Compute Optimizer no analiza nada hasta que haces opt-in, y además necesita métricas suficientes. Budgets alerta sobre gasto, no recomienda tamaños."
+    },
+    {
+      "id": "resource-cost-optimization--l18",
+      "conceptId": "database-cost-optimization",
+      "format": "lightning",
+      "prompt": "RDS reserved DB instance bought, then the DB instance is deleted → the commitment?",
+      "promptEs": "Se compró una RDS reserved DB instance y luego se elimina la DB instance → ¿el compromiso?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Continues until the term ends"
+        },
+        {
+          "id": "B",
+          "text": "Canceled automatically"
+        },
+        {
+          "id": "C",
+          "text": "Refunded for unused months"
+        },
+        {
+          "id": "D",
+          "text": "Converted to a Savings Plan"
+        }
+      ],
+      "answer": "A",
+      "why": "La reserva es un compromiso de facturación de uno o tres años que no se puede cancelar. Borrar la base no termina el compromiso."
+    },
+    {
+      "id": "resource-cost-optimization--l19",
+      "conceptId": "storage-cost-optimization",
+      "format": "lightning",
+      "prompt": "Recent EBS snapshots must support fast recovery during releases → which tier?",
+      "promptEs": "Snapshots recientes de EBS deben permitir recuperación rápida durante releases → ¿qué tier?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EBS Snapshots Archive tier"
+        },
+        {
+          "id": "B",
+          "text": "EBS Snapshot Standard tier"
+        },
+        {
+          "id": "C",
+          "text": "S3 Glacier Deep Archive"
+        },
+        {
+          "id": "D",
+          "text": "EBS Recycle Bin"
+        }
+      ],
+      "answer": "B",
+      "why": "Standard guarda snapshots incrementales listos para usar. Un snapshot archivado debe restaurarse primero al Standard tier, algo incompatible con recuperación rápida."
+    }
+  ],
+  "audited": true
+}

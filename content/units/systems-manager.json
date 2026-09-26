@@ -1,0 +1,285 @@
+{
+  "unitId": "systems-manager",
+  "overview": {
+    "title": "AWS Systems Manager",
+    "hook": "Administra tus servidores sin abrir puertos, sin bastion y sin llaves SSH.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "admin",
+          "label": "Administrador",
+          "kind": "actor",
+          "x": 8,
+          "y": 40
+        },
+        {
+          "id": "ssm",
+          "label": "Systems Manager",
+          "kind": "service",
+          "service": "AWS Systems Manager",
+          "x": 38,
+          "y": 40
+        },
+        {
+          "id": "ec2",
+          "label": "EC2 privada",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 70,
+          "y": 40
+        },
+        {
+          "id": "agent",
+          "label": "SSM Agent",
+          "kind": "note",
+          "x": 70,
+          "y": 78
+        },
+        {
+          "id": "logs",
+          "label": "Logs de sesión",
+          "kind": "data",
+          "x": 38,
+          "y": 80
+        },
+        {
+          "id": "bastion",
+          "label": "Bastion (evitar)",
+          "kind": "note",
+          "x": 92,
+          "y": 10
+        }
+      ],
+      "edges": [
+        {
+          "from": "admin",
+          "to": "ssm",
+          "label": "IAM + sesión"
+        },
+        {
+          "from": "ssm",
+          "to": "ec2",
+          "label": "Session Manager"
+        },
+        {
+          "from": "agent",
+          "to": "ssm",
+          "label": "conexión saliente"
+        },
+        {
+          "from": "ssm",
+          "to": "logs",
+          "label": "S3 / CW Logs"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Tradicionalmente, para entrar a un servidor privado montabas un bastion host: una máquina pública con el puerto 22 abierto y llaves SSH repartidas entre el equipo. AWS Systems Manager existe para eliminar ese riesgo y ese trabajo.",
+        "show": [
+          "admin",
+          "ec2",
+          "bastion"
+        ],
+        "focus": "bastion"
+      },
+      {
+        "narration": "La pieza clave es el SSM Agent, que corre dentro de cada instancia. El agente se comunica con Systems Manager, así que la instancia se vuelve un managed node aunque no tenga IP pública ni puertos de entrada abiertos.",
+        "show": [
+          "admin",
+          "ec2",
+          "bastion",
+          "ssm",
+          "agent"
+        ],
+        "focus": "agent"
+      },
+      {
+        "narration": "Con Session Manager, el administrador abre una shell desde la consola o la CLI. IAM decide quién puede conectarse a qué instancia. No hay puerto 22, no hay bastion y no hay llaves SSH que rotar.",
+        "show": [
+          "admin",
+          "ec2",
+          "bastion",
+          "ssm",
+          "agent"
+        ],
+        "focus": "ssm"
+      },
+      {
+        "narration": "CloudTrail registra llamadas a la API, no comandos. Puedes enviar logs de sesiones de shell a Amazon S3 o CloudWatch Logs. Pero Session Manager no registra el contenido de sesiones con port forwarding o SSH: esos logs no muestran sus comandos.",
+        "show": [
+          "admin",
+          "ec2",
+          "bastion",
+          "ssm",
+          "agent",
+          "logs"
+        ],
+        "focus": "logs"
+      },
+      {
+        "narration": "Si tus instancias no tienen salida a internet, agrega VPC endpoints de Systems Manager con AWS PrivateLink. Así el tráfico entre las instancias y Systems Manager se queda dentro de la red de Amazon.",
+        "show": [
+          "admin",
+          "ec2",
+          "bastion",
+          "ssm",
+          "agent",
+          "logs"
+        ],
+        "focus": "ssm"
+      },
+      {
+        "narration": "Systems Manager también opera flotas enteras. Run Command ejecuta el mismo cambio en muchas instancias sin entrar a ellas. Patch Manager compara contra tu patch baseline: Scan solo reporta parches faltantes, y Scan and install además los instala.",
+        "show": [
+          "admin",
+          "ec2",
+          "bastion",
+          "ssm",
+          "agent",
+          "logs"
+        ],
+        "focus": "ec2"
+      }
+    ],
+    "keyPoints": [
+      "Session Manager: shell sin puerto 22, bastion ni llaves SSH.",
+      "Cada instancia necesita SSM Agent comunicándose con Systems Manager.",
+      "Comandos de shell: logs a S3 o CloudWatch Logs; no con SSH.",
+      "Sin internet: VPC endpoints de Systems Manager con PrivateLink.",
+      "Patch Manager: Scan reporta; Scan and install instala."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "SSH bastion host",
+        "difference": "Es un servidor que mantienes con SSH abierto; Session Manager permite acceder sin bastion, puerto 22 ni llaves."
+      },
+      {
+        "unitOrService": "AWS CloudTrail",
+        "difference": "Registra llamadas a la API de Session Manager, no los comandos escritos en la sesión."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "systems-manager--l1",
+      "conceptId": "bastion-vs-session-manager",
+      "format": "lightning",
+      "prompt": "Shell access to private EC2 instances, no inbound port 22, no SSH keys → ?",
+      "promptEs": "Acceso shell a EC2 privadas, sin puerto 22 de entrada ni llaves SSH → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SSH bastion host in public subnet"
+        },
+        {
+          "id": "B",
+          "text": "Systems Manager Session Manager"
+        },
+        {
+          "id": "C",
+          "text": "Site-to-Site VPN plus SSH"
+        },
+        {
+          "id": "D",
+          "text": "Systems Manager Patch Manager"
+        }
+      ],
+      "answer": "B",
+      "why": "Session Manager da shell controlada por IAM sin puertos de entrada ni llaves. El bastion sigue exigiendo SSH abierto y un servidor que mantener."
+    },
+    {
+      "id": "systems-manager--l3",
+      "conceptId": "bastion-vs-session-manager",
+      "format": "lightning",
+      "prompt": "Session Manager for instances without internet; traffic must stay on Amazon network → ?",
+      "promptEs": "Session Manager para instancias sin internet; el tráfico debe quedarse en la red de Amazon → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateway in a public subnet"
+        },
+        {
+          "id": "B",
+          "text": "Internet gateway and public IPs"
+        },
+        {
+          "id": "C",
+          "text": "VPC peering with a bastion VPC"
+        },
+        {
+          "id": "D",
+          "text": "SSM interface VPC endpoints"
+        }
+      ],
+      "answer": "D",
+      "why": "Los VPC endpoints de Systems Manager con PrivateLink conectan el agente sin pasar por internet. El NAT gateway funciona, pero el tráfico sale hacia endpoints públicos."
+    },
+    {
+      "id": "systems-manager--l4",
+      "conceptId": "systems-manager-operations",
+      "format": "lightning",
+      "prompt": "Apply the same config change to many managed nodes without logging in → ?",
+      "promptEs": "Aplicar el mismo cambio de configuración a muchos managed nodes sin iniciar sesión → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Systems Manager Patch Manager"
+        },
+        {
+          "id": "B",
+          "text": "Systems Manager Session Manager"
+        },
+        {
+          "id": "C",
+          "text": "Systems Manager Run Command"
+        },
+        {
+          "id": "D",
+          "text": "AWS Config managed rules"
+        }
+      ],
+      "answer": "C",
+      "why": "Run Command ejecuta comandos remotos en grupos de nodos sin SSH. Session Manager es una shell interactiva, uno por uno; Patch Manager solo gestiona parches."
+    },
+    {
+      "id": "systems-manager--l5",
+      "conceptId": "systems-manager-operations",
+      "format": "thisorthat",
+      "prompt": "Patch Manager: report missing patches without installing anything → ?",
+      "promptEs": "Patch Manager: reportar parches faltantes sin instalar nada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Scan"
+        },
+        {
+          "id": "B",
+          "text": "Scan and install"
+        }
+      ],
+      "answer": "A",
+      "why": "Scan solo reporta cumplimiento contra tu patch baseline. Scan and install además instala los parches aprobados."
+    },
+    {
+      "id": "systems-manager--l6",
+      "conceptId": "bastion-vs-session-manager",
+      "format": "thisorthat",
+      "prompt": "Keep the commands typed in standard Session Manager shell sessions for audit → ?",
+      "promptEs": "Conservar los comandos escritos en sesiones de shell estándar de Session Manager para auditoría → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudTrail logging of API calls"
+        },
+        {
+          "id": "B",
+          "text": "Session logs to S3 or CloudWatch Logs"
+        }
+      ],
+      "answer": "B",
+      "why": "CloudTrail registra llamadas a la API, no lo escrito en la sesión. En shells estándar, los logs de sesión a S3 o CloudWatch Logs guardan los comandos; con SSH o port forwarding, no."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,518 @@
+{
+  "unitId": "ec2",
+  "overview": {
+    "title": "Amazon EC2",
+    "hook": "Servidores virtuales que eliges por recurso, lanzas desde una imagen y ubicas a propósito.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "ami",
+          "label": "AMI",
+          "kind": "data",
+          "x": 10,
+          "y": 30
+        },
+        {
+          "id": "ud",
+          "label": "User data",
+          "kind": "data",
+          "x": 10,
+          "y": 75
+        },
+        {
+          "id": "type",
+          "label": "Familia + tamaño",
+          "kind": "note",
+          "x": 45,
+          "y": 15
+        },
+        {
+          "id": "ec2",
+          "label": "Instancia EC2",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 45,
+          "y": 55
+        },
+        {
+          "id": "imds",
+          "label": "IMDSv2",
+          "kind": "note",
+          "x": 82,
+          "y": 15
+        },
+        {
+          "id": "ebs",
+          "label": "EBS raíz",
+          "kind": "data",
+          "x": 82,
+          "y": 50
+        },
+        {
+          "id": "pg",
+          "label": "Placement group",
+          "kind": "zone",
+          "x": 82,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "type",
+          "to": "ec2",
+          "label": "elige"
+        },
+        {
+          "from": "ami",
+          "to": "ec2",
+          "label": "lanza"
+        },
+        {
+          "from": "ud",
+          "to": "ec2",
+          "label": "primer arranque"
+        },
+        {
+          "from": "ec2",
+          "to": "imds",
+          "label": "token + GET"
+        },
+        {
+          "from": "ec2",
+          "to": "ebs",
+          "label": "hibernation"
+        },
+        {
+          "from": "ec2",
+          "to": "pg",
+          "label": "ubicación"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon EC2 te da servidores virtuales en la nube, llamados instancias. Tú eliges el sistema, el tamaño y la red, y pagas mientras la instancia corre. Es la base de casi todo el cómputo en AWS.",
+        "show": [
+          "ec2"
+        ],
+        "focus": "ec2"
+      },
+      {
+        "narration": "Primero eliges la familia según el recurso que te limita: M es de propósito general, C para CPU, R para memoria, I o D para almacenamiento local, y P, Trn o Inf para aceleradores. El tamaño va después del punto, como en m7g.large.",
+        "show": [
+          "ec2",
+          "type"
+        ],
+        "focus": "type"
+      },
+      {
+        "narration": "Cada instancia nace de una AMI, una imagen con el sistema y el software. Si instalar todo al arrancar es lento, lo preinstalas en la AMI. El user data corre scripts en el primer arranque. Ojo: la AMI es regional; para otra Region, cópiala.",
+        "show": [
+          "ec2",
+          "type",
+          "ami",
+          "ud"
+        ],
+        "focus": "ami"
+      },
+      {
+        "narration": "Dentro de la instancia, tu app consulta el servicio de metadata para obtener datos y credenciales temporales del rol. IMDSv2 exige primero un token de sesión. Para frenar ataques SSRF no basta con permitirlo: debes configurarlo como required.",
+        "show": [
+          "ec2",
+          "type",
+          "ami",
+          "ud",
+          "imds"
+        ],
+        "focus": "imds"
+      },
+      {
+        "narration": "Con placement groups decides cómo se ubican las instancias en el hardware. Cluster las junta en una sola AZ para mínima latencia. Spread pone unas pocas instancias críticas en hardware distinto. Partition separa grupos grandes, como brokers de Kafka o nodos de Cassandra.",
+        "show": [
+          "ec2",
+          "type",
+          "ami",
+          "ud",
+          "imds",
+          "pg"
+        ],
+        "focus": "pg"
+      },
+      {
+        "narration": "Por último, hibernation. Al detener, guarda la RAM en el volumen raíz de EBS y, al iniciar, tus procesos continúan donde quedaron. No pagas la instancia detenida, pero sí el almacenamiento EBS. Un stop normal, en cambio, pierde la RAM.",
+        "show": [
+          "ec2",
+          "type",
+          "ami",
+          "ud",
+          "imds",
+          "pg",
+          "ebs"
+        ],
+        "focus": "ebs"
+      }
+    ],
+    "keyPoints": [
+      "Familia según el recurso limitante; tamaño después del punto.",
+      "La AMI es regional: cópiala para lanzar en otra Region.",
+      "IMDSv2 como required para mitigar SSRF contra la metadata.",
+      "Cluster = latencia; Spread = hardware distinto; Partition = grupos aislados.",
+      "Hibernation conserva la RAM en EBS; stop normal la pierde."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "EC2 stop",
+        "difference": "Stop apaga y pierde la RAM; hibernation la guarda en EBS y reanuda los procesos."
+      },
+      {
+        "unitOrService": "Default EC2 placement",
+        "difference": "EC2 intenta repartir por defecto, pero solo un spread placement group garantiza hardware distinto."
+      },
+      {
+        "unitOrService": "User data vs AMI",
+        "difference": "User data configura cada lanzamiento; la AMI trae software preinstalado para arrancar más rápido."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ec2--l1",
+      "conceptId": "ec2-instance-families",
+      "format": "lightning",
+      "prompt": "In-memory analytics with a very large working set → instance family?",
+      "promptEs": "Analítica en memoria con un conjunto de trabajo muy grande → ¿familia de instancia?",
+      "options": [
+        {
+          "id": "A",
+          "text": "C family (compute optimized)"
+        },
+        {
+          "id": "B",
+          "text": "R family (memory optimized)"
+        },
+        {
+          "id": "C",
+          "text": "M family (general purpose)"
+        },
+        {
+          "id": "D",
+          "text": "I family (storage optimized)"
+        }
+      ],
+      "answer": "B",
+      "why": "El recurso que limita es la memoria, así que R. C prioriza CPU, M es equilibrada e I prioriza almacenamiento local."
+    },
+    {
+      "id": "ec2--l2",
+      "conceptId": "ec2-instance-families",
+      "format": "lightning",
+      "prompt": "CPU-bound scientific calculations → instance family?",
+      "promptEs": "Cálculos científicos limitados por CPU → ¿familia de instancia?",
+      "options": [
+        {
+          "id": "A",
+          "text": "R family (memory optimized)"
+        },
+        {
+          "id": "B",
+          "text": "Inf family (AWS Inferentia)"
+        },
+        {
+          "id": "C",
+          "text": "M family (general purpose)"
+        },
+        {
+          "id": "D",
+          "text": "C family (compute optimized)"
+        }
+      ],
+      "answer": "D",
+      "why": "C es la familia compute optimized para cargas limitadas por CPU. Inf acelera inferencia de machine learning, no cálculo general."
+    },
+    {
+      "id": "ec2--l3",
+      "conceptId": "ec2-instance-families",
+      "format": "thisorthat",
+      "prompt": "Deep learning model training on purpose-built chips → ?",
+      "promptEs": "Entrenamiento de modelos de deep learning con chips especializados → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Inf instances (AWS Inferentia)"
+        },
+        {
+          "id": "B",
+          "text": "Trn instances (AWS Trainium)"
+        }
+      ],
+      "answer": "B",
+      "why": "Trainium está diseñado para entrenar modelos; Inferentia para servir inferencia. Si el requisito dice training, es Trn."
+    },
+    {
+      "id": "ec2--l4",
+      "conceptId": "ec2-instance-families",
+      "format": "lightning",
+      "prompt": "Balanced workload whose code runs on Arm processors → instance type?",
+      "promptEs": "Carga equilibrada cuyo código corre en procesadores Arm → ¿tipo de instancia?",
+      "options": [
+        {
+          "id": "A",
+          "text": "m7g.large"
+        },
+        {
+          "id": "B",
+          "text": "c7g.large"
+        },
+        {
+          "id": "C",
+          "text": "m7i.large"
+        },
+        {
+          "id": "D",
+          "text": "r7g.large"
+        }
+      ],
+      "answer": "A",
+      "why": "M es propósito general y la g indica Graviton (Arm). c7g y r7g son Arm pero no equilibradas; m7i usa procesadores Intel."
+    },
+    {
+      "id": "ec2--l5",
+      "conceptId": "ec2-amis-user-data",
+      "format": "lightning",
+      "prompt": "Launch instances from your AMI in a DR Region → first step?",
+      "promptEs": "Lanzar instancias desde tu AMI en una Region de DR → ¿primer paso?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Share the AMI with another account"
+        },
+        {
+          "id": "B",
+          "text": "Use the same AMI ID there"
+        },
+        {
+          "id": "C",
+          "text": "Copy the AMI to that Region"
+        },
+        {
+          "id": "D",
+          "text": "Re-run the user data script"
+        }
+      ],
+      "answer": "C",
+      "why": "Las AMI son regionales: no puedes lanzar en otra Region sin copiarla primero. Compartirla con otra cuenta no la cambia de Region."
+    },
+    {
+      "id": "ec2--l6",
+      "conceptId": "ec2-amis-user-data",
+      "format": "thisorthat",
+      "prompt": "Hundreds of identical instances must launch fast; software install is slow → ?",
+      "promptEs": "Cientos de instancias idénticas deben lanzar rápido; instalar el software es lento → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Install software with user data"
+        },
+        {
+          "id": "B",
+          "text": "Pre-bake software into a custom AMI"
+        }
+      ],
+      "answer": "B",
+      "why": "Instalar en cada arranque con user data alarga el lanzamiento. Preinstalar lo común en la AMI lo acelera; user data queda para ajustes de cada instancia."
+    },
+    {
+      "id": "ec2--l7",
+      "conceptId": "ec2-amis-user-data",
+      "format": "lightning",
+      "prompt": "Run a per-instance configuration script at first boot → ?",
+      "promptEs": "Ejecutar un script de configuración propio de cada instancia en el primer arranque → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 user data"
+        },
+        {
+          "id": "B",
+          "text": "A custom AMI"
+        },
+        {
+          "id": "C",
+          "text": "EC2 Image Builder"
+        },
+        {
+          "id": "D",
+          "text": "Instance metadata tags"
+        }
+      ],
+      "answer": "A",
+      "why": "User data ejecuta scripts al lanzar la instancia (en Linux, por defecto solo en el primer arranque). La AMI e Image Builder hornean lo común a todas."
+    },
+    {
+      "id": "ec2--l8",
+      "conceptId": "ec2-instance-metadata-imdsv2",
+      "format": "lightning",
+      "prompt": "Reduce SSRF risk of stealing role credentials from instance metadata → ?",
+      "promptEs": "Reducir el riesgo de SSRF que roba credenciales del rol desde la metadata → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Raise the hop limit to 2"
+        },
+        {
+          "id": "B",
+          "text": "Set IMDSv2 to required"
+        },
+        {
+          "id": "C",
+          "text": "Allow both IMDSv1 and IMDSv2"
+        },
+        {
+          "id": "D",
+          "text": "Rotate IAM user access keys"
+        }
+      ],
+      "answer": "B",
+      "why": "Con IMDSv2 required, las llamadas sin token de sesión fallan. Permitir ambas versiones deja IMDSv1 abierto, y el hop limit no sustituye ese requisito."
+    },
+    {
+      "id": "ec2--l9",
+      "conceptId": "ec2-instance-metadata-imdsv2",
+      "format": "thisorthat",
+      "prompt": "Container on EC2 can't receive the IMDSv2 token response → ?",
+      "promptEs": "Un contenedor en EC2 no recibe la respuesta del token de IMDSv2 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase the IMDS hop limit"
+        },
+        {
+          "id": "B",
+          "text": "Switch the instance back to IMDSv1"
+        }
+      ],
+      "answer": "A",
+      "why": "El hop limit por defecto es 1 y un contenedor puede necesitar uno mayor. Volver a IMDSv1 reabre la exposición a SSRF."
+    },
+    {
+      "id": "ec2--l10",
+      "conceptId": "ec2-placement-groups",
+      "format": "lightning",
+      "prompt": "Tightly coupled HPC nodes need lowest node-to-node latency → ?",
+      "promptEs": "Nodos HPC muy acoplados necesitan la menor latencia entre nodos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Spread placement group"
+        },
+        {
+          "id": "B",
+          "text": "Partition placement group"
+        },
+        {
+          "id": "C",
+          "text": "Cluster placement group"
+        },
+        {
+          "id": "D",
+          "text": "Default EC2 placement"
+        }
+      ],
+      "answer": "C",
+      "why": "Cluster junta las instancias dentro de una AZ para mínima latencia de red. Spread y Partition buscan separación de hardware, no cercanía."
+    },
+    {
+      "id": "ec2--l11",
+      "conceptId": "ec2-placement-groups",
+      "format": "lightning",
+      "prompt": "Large Cassandra fleet; each group of nodes on separate hardware → ?",
+      "promptEs": "Flota grande de Cassandra; cada grupo de nodos en hardware separado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cluster placement group"
+        },
+        {
+          "id": "B",
+          "text": "Spread placement group"
+        },
+        {
+          "id": "C",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "id": "D",
+          "text": "Partition placement group"
+        }
+      ],
+      "answer": "D",
+      "why": "Partition separa particiones lógicas en hardware distinto y es típico de Hadoop, Cassandra o Kafka. Spread sirve para pocas instancias, no para flotas grandes."
+    },
+    {
+      "id": "ec2--l12",
+      "conceptId": "ec2-placement-groups",
+      "format": "thisorthat",
+      "prompt": "Three critical instances, each must run on distinct hardware → ?",
+      "promptEs": "Tres instancias críticas, cada una debe correr en hardware distinto → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Spread placement group"
+        },
+        {
+          "id": "B",
+          "text": "Partition placement group"
+        }
+      ],
+      "answer": "A",
+      "why": "Spread coloca cada instancia de un grupo pequeño en hardware distinto. Partition separa grupos entre sí, pero instancias de una misma partición pueden compartir hardware."
+    },
+    {
+      "id": "ec2--l13",
+      "conceptId": "ec2-hibernation",
+      "format": "lightning",
+      "prompt": "Resume in-memory state after idle nights, no instance charges while paused → ?",
+      "promptEs": "Reanudar el estado en memoria tras noches inactivas, sin cargos de instancia en pausa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Stop the instance"
+        },
+        {
+          "id": "B",
+          "text": "Reboot the instance"
+        },
+        {
+          "id": "C",
+          "text": "Hibernate the instance"
+        },
+        {
+          "id": "D",
+          "text": "Terminate and relaunch from AMI"
+        }
+      ],
+      "answer": "C",
+      "why": "Hibernation guarda la RAM y reanuda los procesos al iniciar, sin cobrar uso de instancia mientras está detenida. Un stop normal pierde la RAM y un reboot no pausa el cobro."
+    },
+    {
+      "id": "ec2--l14",
+      "conceptId": "ec2-hibernation",
+      "format": "thisorthat",
+      "prompt": "Hibernation saves the instance's RAM contents where?",
+      "promptEs": "¿Dónde guarda hibernation el contenido de la RAM de la instancia?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Instance store volume"
+        },
+        {
+          "id": "B",
+          "text": "EBS root volume"
+        }
+      ],
+      "answer": "B",
+      "why": "La RAM se guarda en el volumen raíz de EBS, que persiste; por eso sigues pagando ese almacenamiento. El instance store es efímero."
+    }
+  ],
+  "audited": true
+}

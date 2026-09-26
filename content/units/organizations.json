@@ -1,0 +1,533 @@
+{
+  "unitId": "organizations",
+  "overview": {
+    "title": "AWS Organizations & Control Tower",
+    "hook": "Muchas cuentas de AWS, una sola factura y reglas que nadie puede saltarse.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "mgmt",
+          "label": "Management acct",
+          "kind": "actor",
+          "x": 10,
+          "y": 45
+        },
+        {
+          "id": "org",
+          "label": "Organizations",
+          "kind": "service",
+          "service": "AWS Organizations",
+          "x": 34,
+          "y": 45
+        },
+        {
+          "id": "ct",
+          "label": "Control Tower",
+          "kind": "service",
+          "service": "AWS Control Tower",
+          "x": 22,
+          "y": 85
+        },
+        {
+          "id": "ouprod",
+          "label": "OU Producción",
+          "kind": "zone",
+          "x": 58,
+          "y": 20
+        },
+        {
+          "id": "oudev",
+          "label": "OU Desarrollo",
+          "kind": "zone",
+          "x": 58,
+          "y": 72
+        },
+        {
+          "id": "acct",
+          "label": "Cuentas miembro",
+          "kind": "zone",
+          "x": 86,
+          "y": 20
+        },
+        {
+          "id": "scp",
+          "label": "SCP: techo",
+          "kind": "note",
+          "x": 86,
+          "y": 72
+        }
+      ],
+      "edges": [
+        {
+          "from": "mgmt",
+          "to": "org",
+          "label": "administra"
+        },
+        {
+          "from": "org",
+          "to": "ouprod"
+        },
+        {
+          "from": "org",
+          "to": "oudev"
+        },
+        {
+          "from": "ouprod",
+          "to": "acct",
+          "label": "heredan"
+        },
+        {
+          "from": "scp",
+          "to": "ouprod",
+          "label": "se pega a OU"
+        },
+        {
+          "from": "ct",
+          "to": "org",
+          "label": "orquesta"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Cuando una empresa crece, una sola cuenta de AWS se queda corta. La cuenta es la frontera más fuerte de permisos, costos y cargas de trabajo. AWS Organizations agrupa muchas cuentas bajo una management account y te da una sola factura consolidada.",
+        "show": [
+          "mgmt",
+          "org"
+        ],
+        "focus": "org"
+      },
+      {
+        "narration": "Las cuentas se ordenan en organizational units, u OUs, que pueden anidarse. Lo que pegas a una OU lo heredan todas sus cuentas. Por eso, mover una cuenta a otra OU cambia las reglas que la gobiernan, aunque los cambios pueden tardar en propagarse.",
+        "show": [
+          "mgmt",
+          "org",
+          "ouprod",
+          "oudev",
+          "acct"
+        ],
+        "focus": "ouprod"
+      },
+      {
+        "narration": "La herramienta estrella es la service control policy. Una SCP es un techo: no da permisos a nadie, solo limita lo máximo que pueden hacer las cuentas miembro, incluido su root user. Ni siquiera AdministratorAccess puede saltarse ese techo.",
+        "show": [
+          "mgmt",
+          "org",
+          "ouprod",
+          "oudev",
+          "acct",
+          "scp"
+        ],
+        "focus": "scp"
+      },
+      {
+        "narration": "Tres detalles que el examen adora. Las SCPs exigen tener all features activado, no solo consolidated billing. No afectan a la management account ni a los service-linked roles. Y los permisos reales siguen viniendo de IAM.",
+        "show": [
+          "mgmt",
+          "org",
+          "ouprod",
+          "oudev",
+          "acct",
+          "scp"
+        ],
+        "focus": "mgmt"
+      },
+      {
+        "narration": "Si quieres todo esto armado con buenas prácticas y poco esfuerzo, usa AWS Control Tower. Monta una landing zone, crea cuentas con Account Factory, aplica controles y muestra en un dashboard qué recursos no cumplen, por cuenta y por OU.",
+        "show": [
+          "mgmt",
+          "org",
+          "ouprod",
+          "oudev",
+          "acct",
+          "scp",
+          "ct"
+        ],
+        "focus": "ct"
+      },
+      {
+        "narration": "Tres vecinos útiles. AWS RAM comparte recursos, como subnets de una VPC central, con otras cuentas u OUs sin duplicarlos. Service Catalog ofrece productos aprobados para autoservicio. License Manager controla cuántas licencias de software se consumen.",
+        "show": [
+          "mgmt",
+          "org",
+          "ouprod",
+          "oudev",
+          "acct",
+          "scp",
+          "ct"
+        ],
+        "focus": "org"
+      }
+    ],
+    "keyPoints": [
+      "La cuenta es la frontera de aislamiento más fuerte.",
+      "Una SCP limita cuentas miembro; nunca otorga permisos.",
+      "SCP no afecta la management account ni service-linked roles.",
+      "Control Tower: landing zone gobernada con mínimo esfuerzo.",
+      "AWS RAM comparte recursos entre cuentas sin duplicarlos."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Permissions boundary",
+        "difference": "Un boundary limita a un user o role concreto; una SCP limita cuentas u OUs completas."
+      },
+      {
+        "unitOrService": "AWS IAM Identity Center",
+        "difference": "Identity Center da a las personas acceso a las cuentas; Organizations agrupa cuentas y les aplica policies."
+      },
+      {
+        "unitOrService": "AWS Cost Explorer",
+        "difference": "Cost Explorer analiza y grafica gastos; la factura consolidada la genera Organizations."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "organizations--l1",
+      "conceptId": "aws-organizations-ous",
+      "format": "lightning",
+      "prompt": "Strongly isolate production from development, but keep a single bill → ?",
+      "promptEs": "Aislar fuertemente producción de desarrollo, pero con una sola factura → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Separate accounts in AWS Organizations"
+        },
+        {
+          "id": "B",
+          "text": "One account with environment tags"
+        },
+        {
+          "id": "C",
+          "text": "Separate VPCs in one account"
+        },
+        {
+          "id": "D",
+          "text": "IAM groups per environment"
+        }
+      ],
+      "answer": "A",
+      "why": "La cuenta es la frontera más fuerte de permisos, costos y cargas, y Organizations mantiene la factura consolidada. Los tags clasifican recursos, pero no reemplazan esa frontera."
+    },
+    {
+      "id": "organizations--l2",
+      "conceptId": "aws-organizations-ous",
+      "format": "lightning",
+      "prompt": "Apply the same policy-based control to a whole group of accounts → attach it to?",
+      "promptEs": "Aplicar el mismo control basado en policies a un grupo de cuentas → ¿dónde lo pegas?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Each account's IAM users"
+        },
+        {
+          "id": "B",
+          "text": "An organizational unit (OU)"
+        },
+        {
+          "id": "C",
+          "text": "A resource group"
+        },
+        {
+          "id": "D",
+          "text": "An IAM Identity Center permission set"
+        }
+      ],
+      "answer": "B",
+      "why": "Las cuentas de una OU heredan los controles pegados a ella. Un permission set asigna acceso a personas, no gobierna cuentas."
+    },
+    {
+      "id": "organizations--l3",
+      "conceptId": "aws-organizations-ous",
+      "format": "thisorthat",
+      "prompt": "A pilot account must now follow the regulated OU's controls → ?",
+      "promptEs": "Una cuenta piloto debe cumplir ahora los controles de la OU regulada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Copy the OU's rules into IAM policies"
+        },
+        {
+          "id": "B",
+          "text": "Move the account into that OU"
+        }
+      ],
+      "answer": "B",
+      "why": "Al mover la cuenta a la OU, hereda automáticamente sus controles. Copiar reglas a mano en IAM es trabajo extra y no equivale a una SCP."
+    },
+    {
+      "id": "organizations--l4",
+      "conceptId": "aws-organizations-ous",
+      "format": "lightning",
+      "prompt": "One bill and one payment method for many AWS accounts → ?",
+      "promptEs": "Una factura y un solo medio de pago para muchas cuentas de AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Cost Explorer"
+        },
+        {
+          "id": "B",
+          "text": "AWS Budgets"
+        },
+        {
+          "id": "C",
+          "text": "Organizations consolidated billing"
+        },
+        {
+          "id": "D",
+          "text": "AWS Resource Access Manager"
+        }
+      ],
+      "answer": "C",
+      "why": "La factura consolidada es una función de AWS Organizations. Cost Explorer ayuda a analizar costos entre cuentas, pero no crea la factura única."
+    },
+    {
+      "id": "organizations--l5",
+      "conceptId": "service-control-policies",
+      "format": "lightning",
+      "prompt": "Prevent every member account, even its root user, from using unapproved Regions → ?",
+      "promptEs": "Impedir que toda cuenta miembro, incluso su root user, use Regions no aprobadas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM policy on every user"
+        },
+        {
+          "id": "B",
+          "text": "Permissions boundary on every role"
+        },
+        {
+          "id": "C",
+          "text": "AWS Config rule"
+        },
+        {
+          "id": "D",
+          "text": "SCP attached to the OU"
+        }
+      ],
+      "answer": "D",
+      "why": "Una SCP limita a las cuentas miembro, incluido su root user, sin importar sus permisos de IAM. Una Config rule solo detecta; no impide la acción."
+    },
+    {
+      "id": "organizations--l7",
+      "conceptId": "service-control-policies",
+      "format": "thisorthat",
+      "prompt": "Does an SCP attached to the organization root restrict management-account users?",
+      "promptEs": "¿Una SCP pegada a la raíz de la organización limita a los usuarios de la management account?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, it applies to every account"
+        },
+        {
+          "id": "B",
+          "text": "No, the management account is exempt"
+        }
+      ],
+      "answer": "B",
+      "why": "Las SCPs afectan a las cuentas miembro, pero no a los users ni roles de la management account. Por eso conviene no correr cargas en ella."
+    },
+    {
+      "id": "organizations--l8",
+      "conceptId": "service-control-policies",
+      "format": "lightning",
+      "prompt": "Your organization cannot use SCPs yet → what must be enabled?",
+      "promptEs": "Tu organización todavía no puede usar SCPs → ¿qué debes activar?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Consolidated billing feature only"
+        },
+        {
+          "id": "B",
+          "text": "A Control Tower landing zone"
+        },
+        {
+          "id": "C",
+          "text": "An IAM Identity Center instance"
+        },
+        {
+          "id": "D",
+          "text": "All features in Organizations"
+        }
+      ],
+      "answer": "D",
+      "why": "Las SCPs requieren una organización con all features activado; consolidated billing por sí solo no alcanza. Control Tower no es un requisito para usarlas."
+    },
+    {
+      "id": "organizations--l9",
+      "conceptId": "aws-control-tower",
+      "format": "lightning",
+      "prompt": "Governed multi-account landing zone with the least operational effort → ?",
+      "promptEs": "Landing zone multicuenta gobernada con el menor esfuerzo operativo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Control Tower"
+        },
+        {
+          "id": "B",
+          "text": "Organizations with hand-written SCPs"
+        },
+        {
+          "id": "C",
+          "text": "AWS Service Catalog alone"
+        },
+        {
+          "id": "D",
+          "text": "IAM Identity Center alone"
+        }
+      ],
+      "answer": "A",
+      "why": "Control Tower orquesta Organizations, Service Catalog e IAM Identity Center para montar y gobernar la landing zone. Usar cada pieza por separado implica mucho más trabajo manual."
+    },
+    {
+      "id": "organizations--l10",
+      "conceptId": "aws-control-tower",
+      "format": "lightning",
+      "prompt": "Provision new accounts from approved templates, automatically enrolled in governance → ?",
+      "promptEs": "Crear cuentas nuevas desde plantillas aprobadas, inscritas automáticamente en el gobierno → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS RAM resource share"
+        },
+        {
+          "id": "B",
+          "text": "Control Tower Account Factory"
+        },
+        {
+          "id": "C",
+          "text": "CloudFormation template alone"
+        },
+        {
+          "id": "D",
+          "text": "IAM Identity Center permission sets"
+        }
+      ],
+      "answer": "B",
+      "why": "Account Factory aprovisiona cuentas con plantillas configurables y las inscribe con sus controles. Una plantilla de CloudFormation sola no gestiona la inscripción ni los controles."
+    },
+    {
+      "id": "organizations--l11",
+      "conceptId": "aws-control-tower",
+      "format": "lightning",
+      "prompt": "See noncompliant resources and enabled controls by account and OU → ?",
+      "promptEs": "Ver recursos que no cumplen y controles activos por cuenta y por OU → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Cost Explorer"
+        },
+        {
+          "id": "B",
+          "text": "IAM Access Analyzer"
+        },
+        {
+          "id": "C",
+          "text": "AWS Artifact"
+        },
+        {
+          "id": "D",
+          "text": "Control Tower dashboard"
+        }
+      ],
+      "answer": "D",
+      "why": "El dashboard de Control Tower muestra cuentas, controles activos y recursos no conformes, organizados por cuenta y OU. AWS Artifact entrega informes de cumplimiento de AWS, no el estado de tus cuentas."
+    },
+    {
+      "id": "organizations--l12",
+      "conceptId": "aws-ram-resource-sharing",
+      "format": "lightning",
+      "prompt": "App accounts deploy their own resources into subnets of one central VPC → ?",
+      "promptEs": "Cuentas de aplicaciones despliegan sus recursos en subnets de una VPC central → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "VPC peering between accounts"
+        },
+        {
+          "id": "B",
+          "text": "Share subnets with AWS RAM"
+        },
+        {
+          "id": "C",
+          "text": "One Transit Gateway per account"
+        },
+        {
+          "id": "D",
+          "text": "AWS PrivateLink endpoints"
+        }
+      ],
+      "answer": "B",
+      "why": "Con AWS RAM el dueño comparte subnets con cuentas de su organización, que despliegan ahí sus propios recursos. VPC peering conecta VPCs distintas; no comparte subnets."
+    },
+    {
+      "id": "organizations--l13",
+      "conceptId": "aws-ram-resource-sharing",
+      "format": "thisorthat",
+      "prompt": "Share one resource with an entire OU without listing account IDs → ?",
+      "promptEs": "Compartir un recurso con toda una OU sin enumerar IDs de cuenta → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Resource policy naming each account"
+        },
+        {
+          "id": "B",
+          "text": "AWS RAM share targeting the OU"
+        }
+      ],
+      "answer": "B",
+      "why": "AWS RAM puede usar una organización u OU como destino, sin copiar el recurso. Aun así, la cuenta consumidora debe dar permisos IAM a sus roles."
+    },
+    {
+      "id": "organizations--l14",
+      "conceptId": "governance-service-catalog-license-manager",
+      "format": "lightning",
+      "prompt": "Users self-provision only approved products with restricted instance types → ?",
+      "promptEs": "Usuarios se autoaprovisionan solo productos aprobados con tipos de instancia restringidos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS License Manager"
+        },
+        {
+          "id": "B",
+          "text": "AWS Config"
+        },
+        {
+          "id": "C",
+          "text": "AWS Service Catalog"
+        },
+        {
+          "id": "D",
+          "text": "AWS RAM"
+        }
+      ],
+      "answer": "C",
+      "why": "Service Catalog organiza productos aprobados en portfolios con constraints, y los usuarios los lanzan sin acceso directo a los servicios. License Manager controla licencias, no productos."
+    },
+    {
+      "id": "organizations--l15",
+      "conceptId": "governance-service-catalog-license-manager",
+      "format": "thisorthat",
+      "prompt": "Track BYOL license consumption across accounts and prevent overages → ?",
+      "promptEs": "Rastrear el consumo de licencias BYOL entre cuentas y evitar excesos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS License Manager"
+        },
+        {
+          "id": "B",
+          "text": "AWS Service Catalog"
+        }
+      ],
+      "answer": "A",
+      "why": "License Manager da visibilidad de licencias entre cuentas y Regions, con límites hard o soft por reglas. Un catálogo aprobado no controla el consumo de licencias."
+    }
+  ],
+  "audited": true
+}

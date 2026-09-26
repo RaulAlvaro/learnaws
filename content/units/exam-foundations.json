@@ -1,0 +1,1024 @@
+{
+  "unitId": "exam-foundations",
+  "overview": {
+    "title": "Fundamentos del examen",
+    "hook": "Dónde vive AWS, quién protege qué, y cómo leer las pistas del examen.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "users",
+          "label": "Usuarios",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "edge",
+          "label": "Edge location",
+          "kind": "zone",
+          "x": 30,
+          "y": 50
+        },
+        {
+          "id": "region",
+          "label": "Region",
+          "kind": "zone",
+          "x": 55,
+          "y": 15
+        },
+        {
+          "id": "aza",
+          "label": "AZ A",
+          "kind": "zone",
+          "x": 55,
+          "y": 50
+        },
+        {
+          "id": "azb",
+          "label": "AZ B",
+          "kind": "zone",
+          "x": 55,
+          "y": 85
+        },
+        {
+          "id": "wa",
+          "label": "Well-Architected",
+          "kind": "service",
+          "service": "AWS Well-Architected Tool",
+          "x": 88,
+          "y": 30
+        },
+        {
+          "id": "cues",
+          "label": "Pistas del examen",
+          "kind": "note",
+          "x": 88,
+          "y": 70
+        }
+      ],
+      "edges": [
+        {
+          "from": "users",
+          "to": "edge",
+          "label": "cerca del usuario"
+        },
+        {
+          "from": "edge",
+          "to": "aza",
+          "label": "red de AWS"
+        },
+        {
+          "from": "region",
+          "to": "aza",
+          "label": "contiene"
+        },
+        {
+          "from": "region",
+          "to": "azb",
+          "label": "contiene"
+        },
+        {
+          "from": "wa",
+          "to": "cues",
+          "label": "pilares"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Casi toda pregunta del examen esconde otra: ¿dónde corre esto? AWS se divide en Regions independientes, y eliges una según residencia de datos, latencia y servicios disponibles. En general, lo regional no aparece en otra Region sin replicarlo, salvo recursos globales y excepciones documentadas.",
+        "show": [
+          "region"
+        ],
+        "focus": "region"
+      },
+      {
+        "narration": "Dentro de cada Region hay varias Availability Zones físicamente separadas; cada AZ puede incluir uno o más centros de datos. Para seguir operando si falla una AZ, distribuye la aplicación y sus dependencias entre AZs y prevé la conmutación. Una falla regional requiere otra Region.",
+        "show": [
+          "region",
+          "aza",
+          "azb"
+        ],
+        "focus": "aza"
+      },
+      {
+        "narration": "Las edge locations son puntos de presencia muy cerca de tus usuarios. Servicios como CloudFront las usan para entregar contenido con baja latencia y meter el tráfico rápido en la red de AWS.",
+        "show": [
+          "users",
+          "edge",
+          "region",
+          "aza",
+          "azb"
+        ],
+        "focus": "edge"
+      },
+      {
+        "narration": "Luego está el shared responsibility model. AWS protege el hardware, el host y la virtualización; tú proteges el sistema operativo invitado de EC2, tus datos y la configuración de tus security groups. Cuanto más administrado es el servicio, menos te toca a ti.",
+        "show": [
+          "users",
+          "edge",
+          "region",
+          "aza",
+          "azb"
+        ],
+        "focus": "aza"
+      },
+      {
+        "narration": "El Well-Architected Framework tiene seis pilares: operational excellence, security, reliability, performance efficiency, cost optimization y sustainability. El examen describe un requisito y espera que reconozcas qué pilar está en juego, antes de pensar en servicios.",
+        "show": [
+          "users",
+          "edge",
+          "region",
+          "aza",
+          "azb",
+          "wa"
+        ],
+        "focus": "wa"
+      },
+      {
+        "narration": "Las preguntas traen palabras clave. Least operational overhead favorece un servicio administrado que cumpla la función, en lugar de scripts en EC2. Most cost-effective es la opción más barata que cumple todos los requisitos, no la más barata a secas.",
+        "show": [
+          "users",
+          "edge",
+          "region",
+          "aza",
+          "azb",
+          "wa",
+          "cues"
+        ],
+        "focus": "cues"
+      },
+      {
+        "narration": "Highly available te obliga a leer el límite de falla: una AZ o una Region completa. Most secure apunta a roles con credenciales temporales y permisos mínimos. Y el rendimiento se arregla donde está el cuello de botella: caché, edge o base de datos.",
+        "show": [
+          "users",
+          "edge",
+          "region",
+          "aza",
+          "azb",
+          "wa",
+          "cues"
+        ],
+        "focus": "cues"
+      }
+    ],
+    "keyPoints": [
+      "Multi-AZ cubre falla de AZ; falla regional exige otra Region.",
+      "Tú parchas el sistema operativo de EC2; AWS protege el host.",
+      "Least operational overhead: servicio administrado que cumple la función.",
+      "Most cost-effective: lo más barato que cumple todos los requisitos.",
+      "Most secure: roles temporales y solo los permisos necesarios."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Multi-AZ vs Multi-Region",
+        "difference": "Multi-AZ, con dependencias redundantes, cubre una falla de AZ; una falla regional exige otra Region."
+      },
+      {
+        "unitOrService": "Reliability vs Performance efficiency",
+        "difference": "Seguir funcionando tras una falla es reliability; responder más rápido es performance efficiency."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "exam-foundations--l3",
+      "conceptId": "global-infrastructure-regions-azs",
+      "format": "thisorthat",
+      "prompt": "Keep a usable copy of data if an entire Region fails → ?",
+      "promptEs": "Conservar una copia utilizable si falla una Region completa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Multi-AZ deployment in one Region"
+        },
+        {
+          "id": "B",
+          "text": "Replicate data to another Region"
+        }
+      ],
+      "answer": "B",
+      "why": "Multi-AZ protege contra la falla de una AZ, no de la Region entera. Para eso debes copiar o replicar explícitamente a otra Region."
+    },
+    {
+      "id": "exam-foundations--l5",
+      "conceptId": "shared-responsibility-model",
+      "format": "thisorthat",
+      "prompt": "Security patches for the EC2 guest operating system → whose job?",
+      "promptEs": "Parches de seguridad del sistema operativo invitado de EC2 → ¿de quién es la tarea?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The customer"
+        },
+        {
+          "id": "B",
+          "text": "AWS"
+        }
+      ],
+      "answer": "A",
+      "why": "AWS parcha el host y la virtualización, pero el sistema operativo invitado de EC2 y tus aplicaciones son responsabilidad tuya."
+    },
+    {
+      "id": "exam-foundations--l6",
+      "conceptId": "shared-responsibility-model",
+      "format": "lightning",
+      "prompt": "For EC2, which task belongs to AWS?",
+      "promptEs": "En EC2, ¿qué tarea le corresponde a AWS?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configuring security group rules"
+        },
+        {
+          "id": "B",
+          "text": "Patching the guest OS"
+        },
+        {
+          "id": "C",
+          "text": "Updating application software"
+        },
+        {
+          "id": "D",
+          "text": "Securing the host and hypervisor"
+        }
+      ],
+      "answer": "D",
+      "why": "AWS protege la infraestructura: host, capa de virtualización e instalaciones físicas. Los security groups los provee AWS, pero configurarlos es tu responsabilidad."
+    },
+    {
+      "id": "exam-foundations--l7",
+      "conceptId": "shared-responsibility-model",
+      "format": "lightning",
+      "prompt": "Moving a self-managed database from EC2 to Amazon RDS shifts which task to AWS?",
+      "promptEs": "Mover una base de datos autoadministrada de EC2 a Amazon RDS pasa ¿qué tarea a AWS?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Database engine patching"
+        },
+        {
+          "id": "B",
+          "text": "Writing the SQL queries"
+        },
+        {
+          "id": "C",
+          "text": "Granting database user permissions"
+        },
+        {
+          "id": "D",
+          "text": "Deciding which data to store"
+        }
+      ],
+      "answer": "A",
+      "why": "La responsabilidad cambia según el servicio: con RDS, AWS parcha el motor. Tus datos, consultas y permisos de usuarios siguen siendo tuyos."
+    },
+    {
+      "id": "exam-foundations--l8",
+      "conceptId": "well-architected-framework",
+      "format": "lightning",
+      "prompt": "Requirement: keep serving users after a component fails → which pillar?",
+      "promptEs": "Requisito: seguir atendiendo usuarios tras la falla de un componente → ¿qué pilar?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Performance efficiency"
+        },
+        {
+          "id": "B",
+          "text": "Operational excellence"
+        },
+        {
+          "id": "C",
+          "text": "Reliability"
+        },
+        {
+          "id": "D",
+          "text": "Cost optimization"
+        }
+      ],
+      "answer": "C",
+      "why": "Recuperarse y seguir operando ante fallas es reliability. Performance efficiency trata de velocidad y uso eficiente de recursos, no de sobrevivir fallas."
+    },
+    {
+      "id": "exam-foundations--l9",
+      "conceptId": "well-architected-framework",
+      "format": "thisorthat",
+      "prompt": "Reduce the workload's environmental impact → which pillar?",
+      "promptEs": "Reducir el impacto ambiental de la carga de trabajo → ¿qué pilar?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Sustainability"
+        },
+        {
+          "id": "B",
+          "text": "Cost optimization"
+        }
+      ],
+      "answer": "A",
+      "why": "Aunque un cambio pueda ahorrar dinero y energía a la vez, la métrica decisiva aquí es el impacto ambiental: eso es sustainability, no cost optimization."
+    },
+    {
+      "id": "exam-foundations--l10",
+      "conceptId": "well-architected-framework",
+      "format": "lightning",
+      "prompt": "Reduce response time during peak demand → which pillar?",
+      "promptEs": "Reducir el tiempo de respuesta en picos de demanda → ¿qué pilar?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Reliability"
+        },
+        {
+          "id": "B",
+          "text": "Sustainability"
+        },
+        {
+          "id": "C",
+          "text": "Performance efficiency"
+        },
+        {
+          "id": "D",
+          "text": "Operational excellence"
+        }
+      ],
+      "answer": "C",
+      "why": "Responder más rápido o con más throughput es performance efficiency. Reliability sería seguir funcionando después de una falla."
+    },
+    {
+      "id": "exam-foundations--l11",
+      "conceptId": "storage-types-object-file-block",
+      "format": "lightning",
+      "prompt": "Shared Linux file system mounted by many EC2 instances across AZs → ?",
+      "promptEs": "Sistema de archivos Linux compartido, montado por muchas EC2 en varias AZs → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EBS"
+        },
+        {
+          "id": "B",
+          "text": "Amazon S3"
+        },
+        {
+          "id": "C",
+          "text": "Amazon FSx for Windows File Server"
+        },
+        {
+          "id": "D",
+          "text": "Amazon EFS"
+        }
+      ],
+      "answer": "D",
+      "why": "EFS es un file system administrado y regional para Linux, con acceso compartido desde muchas instancias. EBS es un volumen de bloque dentro de una sola AZ."
+    },
+    {
+      "id": "exam-foundations--l12",
+      "conceptId": "storage-types-object-file-block",
+      "format": "lightning",
+      "prompt": "Persistent block volume attached to one EC2 instance → ?",
+      "promptEs": "Volumen de bloque persistente conectado a una instancia EC2 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EBS"
+        },
+        {
+          "id": "B",
+          "text": "Instance store"
+        },
+        {
+          "id": "C",
+          "text": "Amazon EFS"
+        },
+        {
+          "id": "D",
+          "text": "Amazon S3"
+        }
+      ],
+      "answer": "A",
+      "why": "EBS da volúmenes de bloque persistentes para EC2, replicados dentro de su AZ. El instance store es de bloque, pero no persiste al detener la instancia."
+    },
+    {
+      "id": "exam-foundations--l13",
+      "conceptId": "storage-types-object-file-block",
+      "format": "lightning",
+      "prompt": "Native Windows SMB file shares with NTFS and Active Directory → ?",
+      "promptEs": "Recursos compartidos Windows nativos por SMB con NTFS y Active Directory → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EFS"
+        },
+        {
+          "id": "B",
+          "text": "Amazon FSx for Windows File Server"
+        },
+        {
+          "id": "C",
+          "text": "Amazon EBS Multi-Attach"
+        },
+        {
+          "id": "D",
+          "text": "Amazon S3"
+        }
+      ],
+      "answer": "B",
+      "why": "SMB, NTFS y Active Directory son la firma de FSx for Windows File Server. EFS está pensado para cargas Linux."
+    },
+    {
+      "id": "exam-foundations--l15",
+      "conceptId": "managed-vs-self-managed-services",
+      "format": "lightning",
+      "prompt": "Relational database without operating database software on EC2 → ?",
+      "promptEs": "Base de datos relacional sin operar el software de base de datos en EC2 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "MySQL installed on EC2"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "C",
+          "text": "Amazon RDS"
+        },
+        {
+          "id": "D",
+          "text": "EC2 with automated backup scripts"
+        }
+      ],
+      "answer": "C",
+      "why": "RDS es la base relacional administrada. DynamoDB también es administrado, pero no es relacional: el servicio debe encajar con la función, no solo ser administrado."
+    },
+    {
+      "id": "exam-foundations--l16",
+      "conceptId": "managed-vs-self-managed-services",
+      "format": "lightning",
+      "prompt": "Event-driven processing with no worker servers to maintain → ?",
+      "promptEs": "Procesamiento por eventos sin servidores worker que mantener → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 Auto Scaling group"
+        },
+        {
+          "id": "B",
+          "text": "AWS Lambda"
+        },
+        {
+          "id": "C",
+          "text": "Cron jobs on EC2"
+        },
+        {
+          "id": "D",
+          "text": "ECS on EC2 instances"
+        }
+      ],
+      "answer": "B",
+      "why": "Lambda ejecuta código ante eventos sin servidores que administrar. Auto Scaling o ECS sobre EC2 automatizan, pero siguen dejándote instancias que operar."
+    },
+    {
+      "id": "exam-foundations--l17",
+      "conceptId": "managed-vs-self-managed-services",
+      "format": "thisorthat",
+      "prompt": "Requirement explicitly needs OS-level control of the server → ?",
+      "promptEs": "El requisito pide explícitamente control del sistema operativo del servidor → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EC2"
+        },
+        {
+          "id": "B",
+          "text": "AWS Lambda"
+        }
+      ],
+      "answer": "A",
+      "why": "Preferir lo administrado nunca anula un requisito explícito. Si piden control del servidor, EC2 es la respuesta aunque Lambda tenga menos operación."
+    },
+    {
+      "id": "exam-foundations--l18",
+      "conceptId": "managed-vs-self-managed-services",
+      "format": "lightning",
+      "prompt": "Minimize operations for a message queue between app tiers → ?",
+      "promptEs": "Minimizar la operación de una cola de mensajes entre capas de la app → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RabbitMQ on EC2"
+        },
+        {
+          "id": "B",
+          "text": "Kafka cluster on EC2"
+        },
+        {
+          "id": "C",
+          "text": "Redis lists on EC2"
+        },
+        {
+          "id": "D",
+          "text": "Amazon SQS"
+        }
+      ],
+      "answer": "D",
+      "why": "SQS es una cola totalmente administrada. Las otras opciones cumplen la función, pero te obligan a instalar, parchar y escalar software en EC2."
+    },
+    {
+      "id": "exam-foundations--l19",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "format": "lightning",
+      "prompt": "“LEAST operational overhead” usually points to → ?",
+      "promptEs": "“LEAST operational overhead” suele apuntar a → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Custom scripts on EC2"
+        },
+        {
+          "id": "B",
+          "text": "Purpose-built managed service"
+        },
+        {
+          "id": "C",
+          "text": "Open-source software on EC2"
+        },
+        {
+          "id": "D",
+          "text": "Bigger EC2 instances"
+        }
+      ],
+      "answer": "B",
+      "why": "La pregunta es quién mantiene la solución después. Un servicio administrado que cumple la función te quita esa carga; scripts y software propio siguen siendo tuyos."
+    },
+    {
+      "id": "exam-foundations--l20",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "format": "lightning",
+      "prompt": "Run containers with least operational overhead, no servers to manage → ?",
+      "promptEs": "Ejecutar contenedores con la menor carga operativa, sin servidores que administrar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon ECS on AWS Fargate"
+        },
+        {
+          "id": "B",
+          "text": "Amazon ECS on EC2"
+        },
+        {
+          "id": "C",
+          "text": "Self-managed Kubernetes on EC2"
+        },
+        {
+          "id": "D",
+          "text": "Docker installed on EC2"
+        }
+      ],
+      "answer": "A",
+      "why": "Fargate elimina la gestión de instancias para los contenedores. Todas las opciones con EC2 te dejan parches, capacidad y escalado de servidores."
+    },
+    {
+      "id": "exam-foundations--l21",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "format": "thisorthat",
+      "prompt": "Small team maintains cron scripts on EC2 to rotate database passwords → least overhead?",
+      "promptEs": "Un equipo pequeño mantiene scripts cron en EC2 para rotar contraseñas → ¿menor carga operativa?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Harden and document the cron scripts"
+        },
+        {
+          "id": "B",
+          "text": "AWS Secrets Manager automatic rotation"
+        }
+      ],
+      "answer": "B",
+      "why": "Los scripts automatizados no son libres de mantenimiento: el equipo sigue siendo dueño de ellos y del servidor. Secrets Manager hace la rotación como servicio administrado."
+    },
+    {
+      "id": "exam-foundations--l22",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "format": "lightning",
+      "prompt": "Least effort to renew TLS certificates on a load balancer → ?",
+      "promptEs": "Menor esfuerzo para renovar certificados TLS en un balanceador → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "OpenSSL renewal script on EC2"
+        },
+        {
+          "id": "B",
+          "text": "Manual certificate upload each year"
+        },
+        {
+          "id": "C",
+          "text": "AWS Certificate Manager (ACM)"
+        },
+        {
+          "id": "D",
+          "text": "Certificate cron job on EC2"
+        }
+      ],
+      "answer": "C",
+      "why": "ACM emite certificados que se integran con ELB y se renuevan automáticamente. Scripts y cargas manuales son trabajo operativo recurrente."
+    },
+    {
+      "id": "exam-foundations--l23",
+      "conceptId": "exam-cue-most-cost-effective",
+      "format": "lightning",
+      "prompt": "“MOST cost-effective” on the exam means → ?",
+      "promptEs": "“MOST cost-effective” en el examen significa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Absolute cheapest, even missing requirements"
+        },
+        {
+          "id": "B",
+          "text": "Highest performance per dollar"
+        },
+        {
+          "id": "C",
+          "text": "Most features for the price"
+        },
+        {
+          "id": "D",
+          "text": "Cheapest option meeting all requirements"
+        }
+      ],
+      "answer": "D",
+      "why": "Un diseño optimizado en costo cumple los requisitos funcionales al menor precio posible. Una opción barata que incumple un requisito queda descartada."
+    },
+    {
+      "id": "exam-foundations--l24",
+      "conceptId": "exam-cue-most-cost-effective",
+      "format": "thisorthat",
+      "prompt": "First step when answering a “most cost-effective” question?",
+      "promptEs": "¿Primer paso al responder una pregunta de “most cost-effective”?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Discard options that miss a requirement"
+        },
+        {
+          "id": "B",
+          "text": "Rank all options by monthly price"
+        }
+      ],
+      "answer": "A",
+      "why": "Primero eliminas lo que no cumple; recién después comparas costos. Si ordenas por precio primero, caes en la opción barata que no sirve."
+    },
+    {
+      "id": "exam-foundations--l25",
+      "conceptId": "exam-cue-most-cost-effective",
+      "format": "lightning",
+      "prompt": "Private subnets need Amazon S3 access at the lowest cost → ?",
+      "promptEs": "Subnets privadas necesitan acceso a Amazon S3 al menor costo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateway in each AZ"
+        },
+        {
+          "id": "B",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "id": "C",
+          "text": "Interface VPC endpoint for S3"
+        },
+        {
+          "id": "D",
+          "text": "Move instances to public subnets"
+        }
+      ],
+      "answer": "B",
+      "why": "El gateway endpoint para S3 no tiene cargo adicional. El NAT gateway y el interface endpoint cobran por hora y por datos procesados."
+    },
+    {
+      "id": "exam-foundations--l26",
+      "conceptId": "exam-cue-most-cost-effective",
+      "format": "lightning",
+      "prompt": "Only AZ-failure tolerance is required → most cost-effective design?",
+      "promptEs": "Solo se exige tolerar la falla de una AZ → ¿diseño más cost-effective?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Active-active across two Regions"
+        },
+        {
+          "id": "B",
+          "text": "Single AZ with larger instances"
+        },
+        {
+          "id": "C",
+          "text": "Multi-AZ within one Region"
+        },
+        {
+          "id": "D",
+          "text": "Multi-Region with Global Accelerator"
+        }
+      ],
+      "answer": "C",
+      "why": "Multi-AZ cumple exactamente el requisito. Multi-Region paga capacidad no pedida, y una sola AZ no tolera su propia falla."
+    },
+    {
+      "id": "exam-foundations--l27",
+      "conceptId": "exam-cue-high-availability-fault-tolerance",
+      "format": "thisorthat",
+      "prompt": "Three instances, all in one AZ: highly available against AZ failure?",
+      "promptEs": "Tres instancias, todas en una AZ: ¿alta disponibilidad ante falla de AZ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, spread them across AZs"
+        },
+        {
+          "id": "B",
+          "text": "Yes, three instances are enough"
+        }
+      ],
+      "answer": "A",
+      "why": "Varias instancias en la misma AZ comparten el mismo dominio de falla. Si cae la AZ, caen todas."
+    },
+    {
+      "id": "exam-foundations--l30",
+      "conceptId": "exam-cue-high-availability-fault-tolerance",
+      "format": "lightning",
+      "prompt": "Remove the single point of failure in a web tier → ?",
+      "promptEs": "Eliminar el punto único de falla de una capa web → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One larger EC2 instance"
+        },
+        {
+          "id": "B",
+          "text": "Elastic IP on one instance"
+        },
+        {
+          "id": "C",
+          "text": "Hourly EBS snapshots"
+        },
+        {
+          "id": "D",
+          "text": "ALB plus Auto Scaling across AZs"
+        }
+      ],
+      "answer": "D",
+      "why": "Un balanceador con instancias en varias AZs quita el punto único de falla. Una instancia sigue siendo una sola, aunque sea grande o tenga IP fija."
+    },
+    {
+      "id": "exam-foundations--l31",
+      "conceptId": "exam-cue-security-least-privilege",
+      "format": "lightning",
+      "prompt": "Most secure way for an app on EC2 to call Amazon S3 → ?",
+      "promptEs": "La forma más segura para que una app en EC2 llame a Amazon S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Access keys in a config file"
+        },
+        {
+          "id": "B",
+          "text": "IAM role via instance profile"
+        },
+        {
+          "id": "C",
+          "text": "Access keys in environment variables"
+        },
+        {
+          "id": "D",
+          "text": "Rotated IAM user access keys"
+        }
+      ],
+      "answer": "B",
+      "why": "Un IAM role entrega credenciales temporales a la instancia automáticamente. Rotar llaves de largo plazo no las vuelve preferibles cuando un role funciona."
+    },
+    {
+      "id": "exam-foundations--l33",
+      "conceptId": "exam-cue-security-least-privilege",
+      "format": "thisorthat",
+      "prompt": "Organization-wide guardrail with an SCP: what does it do?",
+      "promptEs": "Guardrail para toda la organización con una SCP: ¿qué hace?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Grants permissions to all accounts"
+        },
+        {
+          "id": "B",
+          "text": "Limits maximum permissions; grants nothing"
+        }
+      ],
+      "answer": "B",
+      "why": "Una SCP fija el techo de permisos en las cuentas, pero no otorga acceso. Sigues necesitando una política de identidad o de recurso que lo conceda."
+    },
+    {
+      "id": "exam-foundations--l34",
+      "conceptId": "exam-cue-security-least-privilege",
+      "format": "lightning",
+      "prompt": "Build a least-privilege policy from a role's actual CloudTrail activity → ?",
+      "promptEs": "Crear una política de mínimo privilegio a partir de la actividad real en CloudTrail → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM Access Analyzer policy generation"
+        },
+        {
+          "id": "B",
+          "text": "An AWS managed policy"
+        },
+        {
+          "id": "C",
+          "text": "A service control policy"
+        },
+        {
+          "id": "D",
+          "text": "AWS Trusted Advisor checks"
+        }
+      ],
+      "answer": "A",
+      "why": "IAM Access Analyzer genera políticas finas desde la actividad registrada en CloudTrail. Una AWS managed policy puede ser más amplia de lo necesario."
+    },
+    {
+      "id": "exam-foundations--l35",
+      "conceptId": "exam-cue-performance-latency",
+      "format": "lightning",
+      "prompt": "App slows down from repeated reads of the same database records → ?",
+      "promptEs": "La app se vuelve lenta por lecturas repetidas de los mismos registros → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon CloudFront distribution"
+        },
+        {
+          "id": "B",
+          "text": "Bigger application EC2 instances"
+        },
+        {
+          "id": "C",
+          "text": "In-memory cache with Amazon ElastiCache"
+        },
+        {
+          "id": "D",
+          "text": "AWS Global Accelerator"
+        }
+      ],
+      "answer": "C",
+      "why": "Lecturas repetidas se resuelven con caché cerca de la base de datos. El edge no ataca ese cuello de botella, y más cómputo tampoco."
+    },
+    {
+      "id": "exam-foundations--l36",
+      "conceptId": "exam-cue-performance-latency",
+      "format": "lightning",
+      "prompt": "Global users download the same shared content with high latency → ?",
+      "promptEs": "Usuarios globales descargan el mismo contenido compartido con alta latencia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "id": "B",
+          "text": "Amazon ElastiCache"
+        },
+        {
+          "id": "C",
+          "text": "Larger origin instance"
+        },
+        {
+          "id": "D",
+          "text": "RDS read replica"
+        }
+      ],
+      "answer": "A",
+      "why": "Usuarios lejanos pidiendo el mismo contenido apuntan a entrega en el edge. ElastiCache o réplicas atacan lecturas de base de datos, no la distancia."
+    },
+    {
+      "id": "exam-foundations--l37",
+      "conceptId": "exam-cue-performance-latency",
+      "format": "thisorthat",
+      "prompt": "Bottleneck is database reads → does adding web servers fix it?",
+      "promptEs": "El cuello de botella son las lecturas a la base → ¿agregar servidores web lo resuelve?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, scale out the web tier"
+        },
+        {
+          "id": "B",
+          "text": "No, fix the data access layer"
+        }
+      ],
+      "answer": "B",
+      "why": "Escalar cómputo no arregla un cuello de botella de acceso a datos. Hay que atacar la capa de datos: caché, réplicas o capacidad de la base."
+    },
+    {
+      "id": "exam-foundations--l38",
+      "conceptId": "global-infrastructure-regions-azs",
+      "format": "lightning",
+      "prompt": "Customer data must legally remain in Germany → first decision?",
+      "promptEs": "Los datos de clientes deben quedarse legalmente en Alemania → ¿primera decisión?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Nearest CloudFront edge location"
+        },
+        {
+          "id": "B",
+          "text": "Two AZs in us-east-1"
+        },
+        {
+          "id": "C",
+          "text": "Any Region with encryption enabled"
+        },
+        {
+          "id": "D",
+          "text": "A Region located in Germany"
+        }
+      ],
+      "answer": "D",
+      "why": "Elegir una Region en Alemania es la decisión base de residencia; luego verificas que cada servicio y su replicación la respeten. Cifrar no cambia dónde se guardan los datos."
+    },
+    {
+      "id": "exam-foundations--l39",
+      "conceptId": "global-infrastructure-regions-azs",
+      "format": "lightning",
+      "prompt": "Before deploying to a Region launched after March 20, 2019, you must → ?",
+      "promptEs": "Antes de desplegar en una Region lanzada después del 20 de marzo de 2019, debes → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Request a service quota increase"
+        },
+        {
+          "id": "B",
+          "text": "Opt in to enable the Region"
+        },
+        {
+          "id": "C",
+          "text": "Create a Direct Connect link"
+        },
+        {
+          "id": "D",
+          "text": "Deploy first to a default Region"
+        }
+      ],
+      "answer": "B",
+      "why": "Las Regions introducidas después del 20 de marzo de 2019 deben habilitarse (opt-in) en la cuenta antes de usarlas. Una cuota no sirve si la Region no está habilitada."
+    },
+    {
+      "id": "exam-foundations--l40",
+      "conceptId": "storage-types-object-file-block",
+      "format": "thisorthat",
+      "prompt": "Store and retrieve millions of images as objects, at any scale → ?",
+      "promptEs": "Guardar y recuperar millones de imágenes como objetos, a cualquier escala → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon S3"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EBS"
+        }
+      ],
+      "answer": "A",
+      "why": "S3 es almacenamiento de objetos que escala a cualquier cantidad de datos. EBS es almacenamiento de bloque para EC2, replicado dentro de una sola AZ."
+    },
+    {
+      "id": "exam-foundations--l41",
+      "conceptId": "exam-cue-security-least-privilege",
+      "format": "lightning",
+      "prompt": "Centralized workforce access across many AWS accounts → ?",
+      "promptEs": "Acceso centralizado de empleados a muchas cuentas AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM users in every account"
+        },
+        {
+          "id": "B",
+          "text": "Shared root user credentials"
+        },
+        {
+          "id": "C",
+          "text": "Long-term access keys per employee"
+        },
+        {
+          "id": "D",
+          "text": "AWS IAM Identity Center"
+        }
+      ],
+      "answer": "D",
+      "why": "IAM Identity Center centraliza el acceso de empleados a varias cuentas con credenciales temporales vía roles. Usuarios IAM en cada cuenta multiplican credenciales de largo plazo."
+    }
+  ],
+  "audited": true
+}

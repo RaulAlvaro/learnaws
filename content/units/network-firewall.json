@@ -1,0 +1,248 @@
+{
+  "unitId": "network-firewall",
+  "overview": {
+    "title": "Network Firewall & Firewall Manager",
+    "hook": "Inspección profunda del tráfico de tu VPC y reglas de firewall para toda la organización.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "wl",
+          "label": "Cargas (subnet)",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "rt",
+          "label": "Route table",
+          "kind": "note",
+          "x": 28,
+          "y": 82
+        },
+        {
+          "id": "nfw",
+          "label": "Network Firewall",
+          "kind": "service",
+          "service": "AWS Network Firewall",
+          "x": 40,
+          "y": 50
+        },
+        {
+          "id": "fm",
+          "label": "Firewall Manager",
+          "kind": "service",
+          "service": "AWS Firewall Manager",
+          "x": 40,
+          "y": 14
+        },
+        {
+          "id": "igw",
+          "label": "IGW / NAT",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 68,
+          "y": 50
+        },
+        {
+          "id": "net",
+          "label": "Internet",
+          "kind": "actor",
+          "x": 92,
+          "y": 50
+        }
+      ],
+      "edges": [
+        {
+          "from": "wl",
+          "to": "nfw",
+          "label": "tráfico"
+        },
+        {
+          "from": "rt",
+          "to": "nfw",
+          "label": "dirige"
+        },
+        {
+          "from": "nfw",
+          "to": "igw",
+          "label": "inspeccionado"
+        },
+        {
+          "from": "igw",
+          "to": "net"
+        },
+        {
+          "from": "fm",
+          "to": "nfw",
+          "label": "policy central"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Los security groups y las network ACLs filtran por direcciones, puertos y protocolos, pero no inspeccionan el contenido ni el estado completo de un flujo. Para eso está AWS Network Firewall, un firewall administrado y stateful con prevención de intrusiones.",
+        "show": [
+          "wl",
+          "nfw"
+        ],
+        "focus": "nfw"
+      },
+      {
+        "narration": "Sus reglas stateful entienden el flujo completo: filtran por dominio, aplican reglas IPS compatibles con Suricata y detectan HTTPS aunque viaje por otro puerto. También tiene reglas stateless, más simples, para decisiones rápidas.",
+        "show": [
+          "wl",
+          "nfw",
+          "igw",
+          "net"
+        ],
+        "focus": "nfw"
+      },
+      {
+        "narration": "Crear el firewall no basta: debes cambiar las route tables para que el tráfico pase por sus endpoints. Los endpoints viven en subnets propias, sin cargas de trabajo, porque no filtran el tráfico de su misma subnet.",
+        "show": [
+          "wl",
+          "nfw",
+          "igw",
+          "net",
+          "rt"
+        ],
+        "focus": "rt"
+      },
+      {
+        "narration": "Ahora imagina cien cuentas. AWS Firewall Manager, sobre Organizations, aplica de forma central policies de WAF, Shield Advanced, security groups, Network Firewall y DNS Firewall, por tipo de recurso o por tag, incluso en cuentas y recursos nuevos.",
+        "show": [
+          "wl",
+          "nfw",
+          "igw",
+          "net",
+          "rt",
+          "fm"
+        ],
+        "focus": "fm"
+      },
+      {
+        "narration": "Para no confundirte: WAF filtra solicitudes HTTP en CloudFront, ALB o API Gateway. Network Firewall inspecciona el tráfico cuya ruta pasa por sus endpoints en la VPC. Y Firewall Manager no filtra nada por sí mismo: administra las reglas de los demás en muchas cuentas.",
+        "show": [
+          "wl",
+          "nfw",
+          "igw",
+          "net",
+          "rt",
+          "fm"
+        ],
+        "focus": "fm"
+      }
+    ],
+    "keyPoints": [
+      "Network Firewall: inspección stateful e IPS del tráfico VPC.",
+      "Filtra dominios y detecta protocolos sin importar el puerto.",
+      "Sin cambiar route tables, nada pasa por el firewall.",
+      "Firewall Manager: policies centrales para toda la organización."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS WAF",
+        "difference": "WAF filtra HTTP en recursos web; Network Firewall inspecciona el tráfico cuya ruta pasa por sus endpoints en la VPC."
+      },
+      {
+        "unitOrService": "Security groups",
+        "difference": "Los security groups filtran por IP, puerto y protocolo; Network Firewall también inspecciona dominios, flujos e intrusiones."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "network-firewall--l1",
+      "conceptId": "network-firewall",
+      "format": "lightning",
+      "prompt": "Inspect VPC egress statefully and block known-bad domains with IPS rules → ?",
+      "promptEs": "Inspeccionar la salida de la VPC de forma stateful y bloquear dominios maliciosos con IPS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Network Firewall"
+        },
+        {
+          "id": "B",
+          "text": "AWS WAF web ACL"
+        },
+        {
+          "id": "C",
+          "text": "Security group outbound rules"
+        },
+        {
+          "id": "D",
+          "text": "AWS Shield Advanced"
+        }
+      ],
+      "answer": "A",
+      "why": "Network Firewall ofrece inspección stateful, filtrado por dominio y reglas IPS compatibles con Suricata. WAF solo protege recursos web, y los security groups no ven dominios."
+    },
+    {
+      "id": "network-firewall--l2",
+      "conceptId": "network-firewall",
+      "format": "thisorthat",
+      "prompt": "Network Firewall is deployed, but traffic isn't being inspected → fix?",
+      "promptEs": "Network Firewall está desplegado, pero el tráfico no se inspecciona → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach it to the instances' security groups"
+        },
+        {
+          "id": "B",
+          "text": "Route traffic through its endpoints"
+        }
+      ],
+      "answer": "B",
+      "why": "El firewall solo ve el tráfico que las route tables envían a sus endpoints. Además, las cargas no deben estar en la subnet del firewall."
+    },
+    {
+      "id": "network-firewall--l3",
+      "conceptId": "firewall-manager",
+      "format": "lightning",
+      "prompt": "Apply WAF rules to every CloudFront distribution in the organization, including new accounts → ?",
+      "promptEs": "Aplicar reglas WAF a toda distribución de CloudFront de la organización, incluidas cuentas nuevas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "WAF configured per distribution"
+        },
+        {
+          "id": "B",
+          "text": "AWS Config managed rule"
+        },
+        {
+          "id": "C",
+          "text": "AWS Firewall Manager policy"
+        },
+        {
+          "id": "D",
+          "text": "Control Tower Account Factory"
+        }
+      ],
+      "answer": "C",
+      "why": "Firewall Manager aplica y mantiene policies de WAF en toda la organización y cubre automáticamente cuentas y recursos nuevos. Configurar WAF recurso por recurso no escala."
+    },
+    {
+      "id": "network-firewall--l4",
+      "conceptId": "firewall-manager",
+      "format": "thisorthat",
+      "prompt": "Subscribe all in-scope organization accounts to Shield Advanced centrally → ?",
+      "promptEs": "Suscribir centralmente a Shield Advanced todas las cuentas de la organización en alcance → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Firewall Manager"
+        },
+        {
+          "id": "B",
+          "text": "AWS Network Firewall"
+        }
+      ],
+      "answer": "A",
+      "why": "Firewall Manager puede suscribir a Shield Advanced las cuentas en alcance, incluso las que se unen después. Network Firewall es un firewall de VPC, no un administrador central."
+    }
+  ],
+  "audited": true
+}

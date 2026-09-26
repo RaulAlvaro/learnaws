@@ -1,0 +1,485 @@
+{
+  "unitId": "aurora",
+  "overview": {
+    "title": "Amazon Aurora",
+    "hook": "Relacional compatible con MySQL y PostgreSQL, con almacenamiento compartido entre zonas.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "Aplicación",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "writer",
+          "label": "Writer",
+          "kind": "service",
+          "service": "Amazon Aurora",
+          "x": 35,
+          "y": 22
+        },
+        {
+          "id": "reader",
+          "label": "Aurora Replica",
+          "kind": "service",
+          "service": "Amazon Aurora",
+          "x": 35,
+          "y": 78
+        },
+        {
+          "id": "vol",
+          "label": "Volumen compartido",
+          "kind": "data",
+          "x": 63,
+          "y": 50
+        },
+        {
+          "id": "global",
+          "label": "Region secundaria",
+          "kind": "service",
+          "service": "Amazon Aurora",
+          "x": 90,
+          "y": 22
+        },
+        {
+          "id": "sv",
+          "label": "Serverless v2",
+          "kind": "note",
+          "x": 90,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "writer",
+          "label": "cluster endpoint"
+        },
+        {
+          "from": "app",
+          "to": "reader",
+          "label": "reader endpoint"
+        },
+        {
+          "from": "writer",
+          "to": "vol",
+          "label": "escribe"
+        },
+        {
+          "from": "reader",
+          "to": "vol",
+          "label": "lee"
+        },
+        {
+          "from": "vol",
+          "to": "global",
+          "label": "réplica < 1 s"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon Aurora es una base relacional compatible con MySQL o PostgreSQL, diseñada para la nube. Su idea clave es separar el cómputo del almacenamiento: las instancias no guardan los datos, los comparten.",
+        "show": [
+          "writer"
+        ],
+        "focus": "writer"
+      },
+      {
+        "narration": "Ese volumen de cluster se reparte entre varias zonas de disponibilidad y crece solo. Así, con una sola instancia tus datos ya son durables, pero si esa instancia cae, no hay otra lista para reemplazarla.",
+        "show": [
+          "writer",
+          "vol"
+        ],
+        "focus": "vol"
+      },
+      {
+        "narration": "Por eso agregas Aurora Replicas, hasta quince, que leen del mismo volumen. Atienden consultas de solo lectura y pueden asumir el rol de writer mediante failover. Esta doble función no es exclusiva de Aurora: RDS Multi-AZ DB clusters también tienen lectores promovibles.",
+        "show": [
+          "writer",
+          "vol",
+          "reader"
+        ],
+        "focus": "reader"
+      },
+      {
+        "narration": "Tu app no usa nombres de instancias. El cluster endpoint apunta al writer, el reader endpoint distribuye conexiones entre réplicas y un custom endpoint dirige conexiones, por ejemplo, a un grupo elegido para analítica.",
+        "show": [
+          "app",
+          "writer",
+          "vol",
+          "reader"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "Si la carga es impredecible o pasa horas inactiva, Aurora Serverless v2 ajusta la capacidad en ACUs entre un mínimo y un máximo que tú defines. Así no tienes que redimensionar instancias a mano.",
+        "show": [
+          "app",
+          "writer",
+          "vol",
+          "reader",
+          "sv"
+        ],
+        "focus": "sv"
+      },
+      {
+        "narration": "Para usuarios en varios continentes, Aurora Global Database replica a Regions secundarias de solo lectura, normalmente en menos de un segundo. Si cae la Region primaria haces failover; para un cambio planificado sin pérdida, switchover.",
+        "show": [
+          "app",
+          "writer",
+          "vol",
+          "reader",
+          "sv",
+          "global"
+        ],
+        "focus": "global"
+      },
+      {
+        "narration": "Dos extras: cloning crea una copia de prueba rápida con copy-on-write, y Backtrack rebobina Aurora MySQL en el mismo cluster. Y no la confundas con DynamoDB global tables, donde todas las Regions aceptan escrituras.",
+        "show": [
+          "app",
+          "writer",
+          "vol",
+          "reader",
+          "sv",
+          "global"
+        ],
+        "focus": "vol"
+      }
+    ],
+    "keyPoints": [
+      "Cómputo separado de un volumen compartido multi-AZ.",
+      "Hasta 15 Aurora Replicas: leen y pueden asumir el rol de writer mediante failover.",
+      "Reader endpoint distribuye conexiones entre réplicas; custom endpoint, entre un subconjunto.",
+      "Carga impredecible o intermitente → Aurora Serverless v2.",
+      "Global Database: un writer, Regions secundarias de lectura."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon RDS",
+        "difference": "Aurora usa un volumen de cluster compartido y admite hasta 15 Aurora Replicas. La combinación de lectores y failover no es exclusiva: RDS Multi-AZ DB clusters también tienen lectores promovibles."
+      },
+      {
+        "unitOrService": "DynamoDB global tables",
+        "difference": "NoSQL con escrituras en todas las Regions; Aurora Global tiene un único writer."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "aurora--l1",
+      "conceptId": "aurora-architecture",
+      "format": "lightning",
+      "prompt": "Existing PostgreSQL app; readers must share the writer's storage volume → ?",
+      "promptEs": "App PostgreSQL existente; los lectores deben compartir el volumen del writer → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon RDS for PostgreSQL"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DocumentDB"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Aurora PostgreSQL"
+        },
+        {
+          "id": "D",
+          "text": "Amazon DynamoDB"
+        }
+      ],
+      "answer": "C",
+      "why": "Solo Aurora separa las instancias de un volumen de cluster compartido. RDS for PostgreSQL es relacional, pero cada réplica tiene su propio almacenamiento."
+    },
+    {
+      "id": "aurora--l2",
+      "conceptId": "aurora-architecture",
+      "format": "thisorthat",
+      "prompt": "Single-instance Aurora cluster must survive writer failure with compute in another AZ → ?",
+      "promptEs": "Cluster Aurora de una instancia debe sobrevivir a la caída del writer con cómputo en otra AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Nothing; storage is already multi-AZ"
+        },
+        {
+          "id": "B",
+          "text": "Add an Aurora Replica in another AZ"
+        }
+      ],
+      "answer": "B",
+      "why": "El volumen ya es multi-AZ, pero sin réplica no hay cómputo al que hacer failover. Almacenamiento distribuido y réplica en otra AZ son cosas distintas."
+    },
+    {
+      "id": "aurora--l3",
+      "conceptId": "aurora-architecture",
+      "format": "lightning",
+      "prompt": "Maximum Aurora Replicas in one Aurora cluster → ?",
+      "promptEs": "Máximo de Aurora Replicas en un cluster Aurora → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "15"
+        },
+        {
+          "id": "B",
+          "text": "5"
+        },
+        {
+          "id": "C",
+          "text": "10"
+        },
+        {
+          "id": "D",
+          "text": "32"
+        }
+      ],
+      "answer": "A",
+      "why": "Un cluster Aurora tiene un writer y hasta 15 Aurora Replicas, todas sobre el mismo volumen compartido."
+    },
+    {
+      "id": "aurora--l4",
+      "conceptId": "aurora-architecture",
+      "format": "lightning",
+      "prompt": "Role of an Aurora Replica while the writer is healthy → ?",
+      "promptEs": "Función de una Aurora Replica mientras el writer está sano → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Accept application writes"
+        },
+        {
+          "id": "B",
+          "text": "Keep its own separate data copy"
+        },
+        {
+          "id": "C",
+          "text": "Cross-Region backup target"
+        },
+        {
+          "id": "D",
+          "text": "Serve read-only queries"
+        }
+      ],
+      "answer": "D",
+      "why": "Las réplicas atienden lecturas sobre el volumen compartido, sin copia propia. Solo aceptan escrituras si una de ellas se convierte en writer por failover."
+    },
+    {
+      "id": "aurora--l6",
+      "conceptId": "aurora-replicas-endpoints",
+      "format": "thisorthat",
+      "prompt": "Writes must keep reaching the primary after an Aurora failover → ?",
+      "promptEs": "Las escrituras deben seguir llegando a la primaria tras un failover de Aurora → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cluster endpoint"
+        },
+        {
+          "id": "B",
+          "text": "Instance endpoint"
+        }
+      ],
+      "answer": "A",
+      "why": "El cluster endpoint siempre apunta al writer actual, también después del failover. Un instance endpoint queda atado a una instancia concreta."
+    },
+    {
+      "id": "aurora--l7",
+      "conceptId": "aurora-replicas-endpoints",
+      "format": "lightning",
+      "prompt": "Number of Aurora readers should grow and shrink with read demand → ?",
+      "promptEs": "La cantidad de lectores Aurora debe crecer y reducirse según la demanda de lectura → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EC2 Auto Scaling"
+        },
+        {
+          "id": "B",
+          "text": "Amazon RDS Proxy"
+        },
+        {
+          "id": "C",
+          "text": "More Multi-AZ standbys"
+        },
+        {
+          "id": "D",
+          "text": "Aurora Auto Scaling"
+        }
+      ],
+      "answer": "D",
+      "why": "Aurora Auto Scaling agrega o quita réplicas según una política. No escala el writer, y EC2 Auto Scaling no gestiona instancias de base de datos."
+    },
+    {
+      "id": "aurora--l10",
+      "conceptId": "aurora-serverless",
+      "format": "lightning",
+      "prompt": "Aurora Serverless v2 never reaches the expected peak capacity. Likely cause → ?",
+      "promptEs": "Aurora Serverless v2 nunca alcanza la capacidad pico esperada. Causa probable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Minimum ACUs set too high"
+        },
+        {
+          "id": "B",
+          "text": "Reader endpoint misconfigured"
+        },
+        {
+          "id": "C",
+          "text": "Maximum ACUs set too low"
+        },
+        {
+          "id": "D",
+          "text": "Backtrack is enabled"
+        }
+      ],
+      "answer": "C",
+      "why": "Serverless v2 solo escala dentro del rango configurado. Un máximo bajo impide llegar al pico; un mínimo alto solo encarece las horas tranquilas."
+    },
+    {
+      "id": "aurora--l11",
+      "conceptId": "aurora-global-database",
+      "format": "lightning",
+      "prompt": "Relational app: local reads on several continents plus Region-outage recovery → ?",
+      "promptEs": "App relacional: lecturas locales en varios continentes y recuperación ante caída de Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RDS Multi-AZ deployment"
+        },
+        {
+          "id": "B",
+          "text": "Aurora Global Database"
+        },
+        {
+          "id": "C",
+          "text": "DynamoDB global tables"
+        },
+        {
+          "id": "D",
+          "text": "Aurora Replicas across AZs"
+        }
+      ],
+      "answer": "B",
+      "why": "Aurora Global Database da clusters secundarios de lectura en otras Regions y permite failover. Multi-AZ y las réplicas entre AZs no salen de una Region."
+    },
+    {
+      "id": "aurora--l12",
+      "conceptId": "aurora-global-database",
+      "format": "thisorthat",
+      "prompt": "Planned move of a healthy Aurora global primary to another Region, no data loss → ?",
+      "promptEs": "Mover de forma planificada el primario global sano de Aurora a otra Region, sin pérdida → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Global database switchover"
+        },
+        {
+          "id": "B",
+          "text": "Global database failover"
+        }
+      ],
+      "answer": "A",
+      "why": "Switchover es para mover un primario sano sin perder datos. Failover es para recuperarse de una caída de la Region primaria."
+    },
+    {
+      "id": "aurora--l13",
+      "conceptId": "aurora-global-database",
+      "format": "lightning",
+      "prompt": "Typical Aurora Global Database cross-Region replication latency → ?",
+      "promptEs": "Latencia típica de replicación entre Regions de Aurora Global Database → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Zero; fully synchronous"
+        },
+        {
+          "id": "B",
+          "text": "About five minutes"
+        },
+        {
+          "id": "C",
+          "text": "About one hour"
+        },
+        {
+          "id": "D",
+          "text": "Under one second"
+        }
+      ],
+      "answer": "D",
+      "why": "Usa infraestructura dedicada y suele replicar en menos de un segundo. Es típico, no síncrono: una caída no planificada puede perder datos recientes."
+    },
+    {
+      "id": "aurora--l14",
+      "conceptId": "aurora-global-database",
+      "format": "thisorthat",
+      "prompt": "Every Region must accept writes locally; NoSQL data model is fine → ?",
+      "promptEs": "Cada Region debe aceptar escrituras localmente; el modelo NoSQL sirve → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DynamoDB global tables"
+        },
+        {
+          "id": "B",
+          "text": "Aurora Global Database"
+        }
+      ],
+      "answer": "A",
+      "why": "Global tables es multi-activo: cualquier réplica acepta escrituras. En Aurora Global Database las secundarias son de lectura; write forwarding solo reenvía al primario."
+    },
+    {
+      "id": "aurora--l15",
+      "conceptId": "aurora-cloning-backtrack",
+      "format": "lightning",
+      "prompt": "Fast independent copy of production for testing, minimal initial storage → ?",
+      "promptEs": "Copia independiente y rápida de producción para pruebas, con mínimo almacenamiento inicial → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Snapshot restore"
+        },
+        {
+          "id": "B",
+          "text": "Aurora cloning"
+        },
+        {
+          "id": "C",
+          "text": "Point-in-time restore"
+        },
+        {
+          "id": "D",
+          "text": "Backtrack on production"
+        }
+      ],
+      "answer": "B",
+      "why": "El clon comparte páginas con el origen y solo usa almacenamiento nuevo al cambiar datos (copy-on-write). Los restores copian todo, y Backtrack no aísla las pruebas."
+    },
+    {
+      "id": "aurora--l16",
+      "conceptId": "aurora-cloning-backtrack",
+      "format": "thisorthat",
+      "prompt": "Undo an accidental DELETE in place on a Backtrack-enabled Aurora MySQL cluster → ?",
+      "promptEs": "Deshacer un DELETE accidental en el mismo cluster Aurora MySQL con Backtrack habilitado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Aurora cloning"
+        },
+        {
+          "id": "B",
+          "text": "Backtrack"
+        }
+      ],
+      "answer": "B",
+      "why": "Backtrack rebobina el cluster en sitio, pero debe habilitarse al crearlo y solo existe en Aurora MySQL. Un clon crea otro cluster, no rebobina el original."
+    }
+  ],
+  "audited": true
+}

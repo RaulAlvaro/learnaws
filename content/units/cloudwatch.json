@@ -1,0 +1,448 @@
+{
+  "unitId": "cloudwatch",
+  "overview": {
+    "title": "Amazon CloudWatch y X-Ray",
+    "hook": "Mide, alerta y rastrea tu aplicación sin entrar a los servidores.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "App / EC2",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "metrics",
+          "label": "Métricas",
+          "kind": "data",
+          "x": 30,
+          "y": 20
+        },
+        {
+          "id": "alarm",
+          "label": "Alarma",
+          "kind": "service",
+          "service": "Amazon CloudWatch",
+          "x": 57,
+          "y": 20
+        },
+        {
+          "id": "sns",
+          "label": "SNS / Auto Scaling",
+          "kind": "service",
+          "service": "Amazon SNS",
+          "x": 85,
+          "y": 20
+        },
+        {
+          "id": "logs",
+          "label": "Log groups",
+          "kind": "data",
+          "x": 30,
+          "y": 80
+        },
+        {
+          "id": "insights",
+          "label": "Logs Insights",
+          "kind": "note",
+          "x": 57,
+          "y": 80
+        },
+        {
+          "id": "xray",
+          "label": "X-Ray",
+          "kind": "service",
+          "service": "AWS X-Ray",
+          "x": 85,
+          "y": 50
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "metrics",
+          "label": "agent / custom"
+        },
+        {
+          "from": "metrics",
+          "to": "alarm",
+          "label": "umbral"
+        },
+        {
+          "from": "alarm",
+          "to": "sns",
+          "label": "acción"
+        },
+        {
+          "from": "app",
+          "to": "logs",
+          "label": "logs"
+        },
+        {
+          "from": "logs",
+          "to": "metrics",
+          "label": "metric filter"
+        },
+        {
+          "from": "logs",
+          "to": "insights",
+          "label": "consulta"
+        },
+        {
+          "from": "app",
+          "to": "xray",
+          "label": "trazas"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Cuando algo anda lento o falla en producción, necesitas ver qué pasa sin entrar a los servidores. Amazon CloudWatch es el centro de monitoreo de AWS: recibe métricas y logs, los muestra en dashboards y dispara alarmas.",
+        "show": [
+          "app",
+          "metrics"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "Muchos servicios envían métricas básicas solos, como la CPU de EC2. Pero la memoria y el uso del espacio en disco de una instancia no vienen incluidos: para eso instalas el CloudWatch agent. Tu app también puede publicar custom metrics, como compras completadas.",
+        "show": [
+          "app",
+          "metrics"
+        ],
+        "focus": "metrics"
+      },
+      {
+        "narration": "Una metric alarm compara una métrica con un umbral durante uno o más períodos configurados. Si se dispara, puede notificar por SNS o ejecutar acciones de EC2 y Auto Scaling. Una composite alarm combina alarmas para reducir ruido, pero no puede escalar.",
+        "show": [
+          "app",
+          "metrics",
+          "alarm",
+          "sns"
+        ],
+        "focus": "alarm"
+      },
+      {
+        "narration": "Los logs llegan a log groups y, por defecto, se guardan para siempre; si te piden que expiren, configura retention en cada log group. Para investigar un incidente, CloudWatch Logs Insights te deja consultarlos de forma interactiva.",
+        "show": [
+          "app",
+          "metrics",
+          "alarm",
+          "sns",
+          "logs",
+          "insights"
+        ],
+        "focus": "insights"
+      },
+      {
+        "narration": "Para alertar sobre un patrón en los logs, como una excepción que se repite, crea un metric filter. Convierte los eventos que coinciden en una métrica, y sobre esa métrica pones una alarma, sin tocar el código.",
+        "show": [
+          "app",
+          "metrics",
+          "alarm",
+          "sns",
+          "logs",
+          "insights"
+        ],
+        "focus": "logs"
+      },
+      {
+        "narration": "En microservicios, una métrica te dice que algo está lento, pero no dónde. AWS X-Ray muestra trazas de requests según el muestreo y la instrumentación disponible; su trace map ayuda a localizar latencia o errores en las llamadas registradas.",
+        "show": [
+          "app",
+          "metrics",
+          "alarm",
+          "sns",
+          "logs",
+          "insights",
+          "xray"
+        ],
+        "focus": "xray"
+      },
+      {
+        "narration": "No confundas: CloudTrail dice quién hizo una llamada a la API, AWS Config guarda el historial de configuración, y CloudWatch mide desempeño. Si piden Grafana o Prometheus gestionados, existen Amazon Managed Grafana y Amazon Managed Service for Prometheus.",
+        "show": [
+          "app",
+          "metrics",
+          "alarm",
+          "sns",
+          "logs",
+          "insights",
+          "xray"
+        ],
+        "focus": "alarm"
+      }
+    ],
+    "keyPoints": [
+      "Memoria y uso del espacio en disco de EC2: requieren el CloudWatch agent.",
+      "Metric alarm: SNS, acciones EC2 o Auto Scaling.",
+      "Composite alarm reduce ruido, pero no ejecuta Auto Scaling.",
+      "Logs sin expiración por defecto: configura retention.",
+      "Patrón en logs → metric filter → alarma."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS CloudTrail",
+        "difference": "Responde quién hizo una llamada a la API; CloudWatch mide desempeño y dispara alarmas."
+      },
+      {
+        "unitOrService": "AWS Config",
+        "difference": "Registra historial de configuración y cumplimiento, no métricas de rendimiento."
+      },
+      {
+        "unitOrService": "VPC Flow Logs",
+        "difference": "Capturan metadatos de tráfico IP; X-Ray muestra requests de aplicación y llamadas downstream."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "cloudwatch--l1",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "format": "lightning",
+      "prompt": "Scale an Auto Scaling group on EC2 memory usage → what do you need first?",
+      "promptEs": "Escalar un Auto Scaling group según el uso de memoria de EC2 → ¿qué necesitas primero?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2 detailed monitoring"
+        },
+        {
+          "id": "B",
+          "text": "CloudWatch agent"
+        },
+        {
+          "id": "C",
+          "text": "AWS X-Ray daemon"
+        },
+        {
+          "id": "D",
+          "text": "VPC Flow Logs"
+        }
+      ],
+      "answer": "B",
+      "why": "Para escalar según el uso de memoria, necesitas el CloudWatch agent: las métricas básicas de EC2 no incluyen memoria ni uso del espacio en disco. Detailed monitoring solo aumenta su frecuencia."
+    },
+    {
+      "id": "cloudwatch--l2",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "format": "thisorthat",
+      "prompt": "Alarm must directly trigger an EC2 Auto Scaling action → ?",
+      "promptEs": "La alarma debe disparar directamente una acción de EC2 Auto Scaling → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Metric alarm"
+        },
+        {
+          "id": "B",
+          "text": "Composite alarm"
+        }
+      ],
+      "answer": "A",
+      "why": "Las metric alarms pueden ejecutar acciones de EC2 y Auto Scaling. La composite alarm combina estados para reducir ruido y puede notificar, pero no escalar."
+    },
+    {
+      "id": "cloudwatch--l3",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "format": "lightning",
+      "prompt": "Page on-call when completed purchases drop below a threshold → ?",
+      "promptEs": "Avisar a guardia cuando las compras completadas caen bajo un umbral → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudTrail event history"
+        },
+        {
+          "id": "B",
+          "text": "AWS Config custom rule"
+        },
+        {
+          "id": "C",
+          "text": "Custom metric plus alarm"
+        },
+        {
+          "id": "D",
+          "text": "X-Ray trace map"
+        }
+      ],
+      "answer": "C",
+      "why": "Un KPI de negocio se publica como custom metric y una alarma notifica por SNS. CloudTrail y Config no miden indicadores de la aplicación."
+    },
+    {
+      "id": "cloudwatch--l4",
+      "conceptId": "cloudwatch-metrics-alarms",
+      "format": "lightning",
+      "prompt": "Monitoring account must see metrics and logs from many application accounts → ?",
+      "promptEs": "Una cuenta de monitoreo debe ver métricas y logs de muchas cuentas de aplicación → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Config multi-account aggregator"
+        },
+        {
+          "id": "B",
+          "text": "CloudTrail organization trail"
+        },
+        {
+          "id": "C",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "id": "D",
+          "text": "CloudWatch cross-account observability"
+        }
+      ],
+      "answer": "D",
+      "why": "Cross-account observability enlaza las cuentas de origen a una cuenta de monitoreo para ver métricas y logs y crear alarmas. El aggregator de Config junta configuración, no métricas."
+    },
+    {
+      "id": "cloudwatch--l5",
+      "conceptId": "cloudwatch-logs",
+      "format": "lightning",
+      "prompt": "Alert when a logged exception exceeds a threshold, no code changes → ?",
+      "promptEs": "Alertar cuando una excepción en los logs supera un umbral, sin cambiar código → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Manual Logs Insights queries"
+        },
+        {
+          "id": "B",
+          "text": "Metric filter with alarm"
+        },
+        {
+          "id": "C",
+          "text": "CloudTrail Insights"
+        },
+        {
+          "id": "D",
+          "text": "Export logs to S3"
+        }
+      ],
+      "answer": "B",
+      "why": "El metric filter convierte los eventos que coinciden en una métrica y la alarma vigila el umbral continuamente. Una consulta de Logs Insights no alerta por sí sola."
+    },
+    {
+      "id": "cloudwatch--l6",
+      "conceptId": "cloudwatch-logs",
+      "format": "thisorthat",
+      "prompt": "Default retention of a new CloudWatch Logs log group → ?",
+      "promptEs": "Retención por defecto de un log group nuevo de CloudWatch Logs → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Never expires"
+        },
+        {
+          "id": "B",
+          "text": "30 days"
+        }
+      ],
+      "answer": "A",
+      "why": "Los logs se guardan indefinidamente por defecto. Si la política exige que expiren, configura el retention period en cada log group."
+    },
+    {
+      "id": "cloudwatch--l7",
+      "conceptId": "cloudwatch-logs",
+      "format": "lightning",
+      "prompt": "Interactively search and analyze application logs during an incident → ?",
+      "promptEs": "Buscar y analizar logs de la aplicación de forma interactiva durante un incidente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudWatch Logs Insights"
+        },
+        {
+          "id": "B",
+          "text": "CloudWatch metric filter"
+        },
+        {
+          "id": "C",
+          "text": "CloudWatch composite alarm"
+        },
+        {
+          "id": "D",
+          "text": "AWS Config advanced query"
+        }
+      ],
+      "answer": "A",
+      "why": "Logs Insights ejecuta consultas interactivas sobre los logs que ya recolectas. El metric filter sirve para monitoreo continuo, no para investigar."
+    },
+    {
+      "id": "cloudwatch--l9",
+      "conceptId": "x-ray",
+      "format": "thisorthat",
+      "prompt": "Audit which IAM user made a DeleteTable API call → ?",
+      "promptEs": "Auditar qué usuario IAM hizo una llamada DeleteTable a la API → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS X-Ray"
+        },
+        {
+          "id": "B",
+          "text": "AWS CloudTrail"
+        }
+      ],
+      "answer": "B",
+      "why": "CloudTrail audita actividad de API: quién, qué y cuándo. X-Ray rastrea el camino y el desempeño de requests de tu aplicación."
+    },
+    {
+      "id": "cloudwatch--l10",
+      "conceptId": "x-ray",
+      "format": "lightning",
+      "prompt": "Visualize client, front end and backend services involved in page loads → ?",
+      "promptEs": "Visualizar cliente, front end y servicios backend que participan al cargar páginas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudWatch dashboard"
+        },
+        {
+          "id": "B",
+          "text": "VPC Reachability Analyzer"
+        },
+        {
+          "id": "C",
+          "text": "X-Ray trace map"
+        },
+        {
+          "id": "D",
+          "text": "CloudTrail Lake"
+        }
+      ],
+      "answer": "C",
+      "why": "El trace map de X-Ray dibuja el camino del request y marca dónde hay latencia o errores. Reachability Analyzer revisa rutas de red, no requests de aplicación."
+    },
+    {
+      "id": "cloudwatch--l11",
+      "conceptId": "x-ray",
+      "format": "lightning",
+      "prompt": "Lambda calls an internal service and an external API; find which instrumented call fails → ?",
+      "promptEs": "Una Lambda llama a un servicio interno y a una API externa; encontrar qué llamada instrumentada falla → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudWatch Logs Insights"
+        },
+        {
+          "id": "B",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "id": "C",
+          "text": "AWS X-Ray tracing"
+        },
+        {
+          "id": "D",
+          "text": "VPC Flow Logs"
+        }
+      ],
+      "answer": "C",
+      "why": "X-Ray traza los requests de Lambda y las llamadas downstream instrumentadas, mostrando dónde falla cada una. CloudTrail audita llamadas a la API de AWS, no el camino del request."
+    }
+  ],
+  "audited": true
+}

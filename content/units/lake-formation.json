@@ -1,0 +1,348 @@
+{
+  "unitId": "lake-formation",
+  "overview": {
+    "title": "AWS Lake Formation",
+    "hook": "Quién ve qué filas y columnas del data lake, y por dónde entran los datos.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "prod",
+          "label": "App en VPC",
+          "kind": "actor",
+          "x": 8,
+          "y": 25
+        },
+        {
+          "id": "vpce",
+          "label": "VPC endpoint",
+          "kind": "service",
+          "service": "AWS PrivateLink",
+          "x": 30,
+          "y": 25
+        },
+        {
+          "id": "kds",
+          "label": "Kinesis + KMS",
+          "kind": "service",
+          "service": "Amazon Kinesis Data Streams",
+          "x": 52,
+          "y": 25
+        },
+        {
+          "id": "s3",
+          "label": "Data lake S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 78,
+          "y": 25
+        },
+        {
+          "id": "lf",
+          "label": "Lake Formation",
+          "kind": "service",
+          "service": "AWS Lake Formation",
+          "x": 60,
+          "y": 75
+        },
+        {
+          "id": "analyst",
+          "label": "Analistas",
+          "kind": "actor",
+          "x": 88,
+          "y": 75
+        }
+      ],
+      "edges": [
+        {
+          "from": "prod",
+          "to": "vpce",
+          "label": "sin internet"
+        },
+        {
+          "from": "vpce",
+          "to": "kds",
+          "label": "PrivateLink"
+        },
+        {
+          "from": "kds",
+          "to": "s3",
+          "label": "ingesta"
+        },
+        {
+          "from": "lf",
+          "to": "s3",
+          "label": "gobierna"
+        },
+        {
+          "from": "analyst",
+          "to": "lf",
+          "label": "filas y columnas"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Ya tienes un data lake en S3, catalogado con Glue. El nuevo problema es quién puede ver qué. Con IAM y bucket policies controlas buckets y objetos, pero no qué filas o columnas de una tabla ve cada analista.",
+        "show": [
+          "s3"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "AWS Lake Formation centraliza los permisos del data lake: sobre las bases y tablas del Glue Data Catalog y sobre los datos en S3. Complementa el modelo de IAM, no lo reemplaza, y deja registro del acceso en CloudTrail.",
+        "show": [
+          "s3",
+          "lf"
+        ],
+        "focus": "lf"
+      },
+      {
+        "narration": "Su fuerte es el grano fino. Con data filters decides qué filas y columnas ve cada analista cuando consulta, por ejemplo desde Athena, y así ocultas una columna sensible. Con LF-Tags administras permisos sobre muchas tablas y columnas a la vez.",
+        "show": [
+          "s3",
+          "lf",
+          "analyst"
+        ],
+        "focus": "analyst"
+      },
+      {
+        "narration": "También comparte datasets gobernados con otras cuentas de AWS, conservando ese control fino. Y el hybrid access mode te deja adoptarlo poco a poco: unos usuarios con permisos de Lake Formation, otros todavía con su acceso por IAM.",
+        "show": [
+          "s3",
+          "lf",
+          "analyst"
+        ],
+        "focus": "lf"
+      },
+      {
+        "narration": "Ahora la puerta de entrada. Si un productor en una VPC sin internet ni NAT debe escribir en Kinesis, usa un interface VPC endpoint con PrivateLink. El tráfico no pasa por un internet gateway.",
+        "show": [
+          "s3",
+          "lf",
+          "analyst",
+          "prod",
+          "vpce",
+          "kds"
+        ],
+        "focus": "vpce"
+      },
+      {
+        "narration": "Cada control cubre un riesgo distinto. La endpoint policy limita a qué streams se llega por ese endpoint. Una IAM policy puede exigir que las peticiones usen ese endpoint. Y el cifrado del lado del servidor con KMS protege los registros en reposo.",
+        "show": [
+          "s3",
+          "lf",
+          "analyst",
+          "prod",
+          "vpce",
+          "kds"
+        ],
+        "focus": "kds"
+      },
+      {
+        "narration": "Trampas típicas: un crawler de Glue cataloga, pero no crea permisos. Una bucket policy no filtra filas. Y una ruta de red privada, por sí sola, no restringe a qué stream escribe el productor.",
+        "show": [
+          "s3",
+          "lf",
+          "analyst",
+          "prod",
+          "vpce",
+          "kds"
+        ],
+        "focus": "lf"
+      }
+    ],
+    "keyPoints": [
+      "Permisos por fila y columna: Lake Formation.",
+      "Lake Formation complementa a IAM; no lo reemplaza.",
+      "Compartir datos gobernados entre cuentas: Lake Formation.",
+      "VPC sin NAT hacia Kinesis: interface VPC endpoint.",
+      "Kinesis en reposo: cifrado del lado del servidor con KMS."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Glue Data Catalog",
+        "difference": "El catálogo guarda metadatos; Lake Formation gobierna quién accede a esos datos y con qué detalle."
+      },
+      {
+        "unitOrService": "Amazon S3 bucket policies",
+        "difference": "Controlan acceso a buckets y objetos, pero no filtran filas ni columnas de tablas."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "lake-formation--l1",
+      "conceptId": "lake-formation",
+      "format": "lightning",
+      "prompt": "Athena analysts must not see a sensitive column → ?",
+      "promptEs": "Los analistas de Athena no deben ver una columna sensible → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 bucket policy"
+        },
+        {
+          "id": "B",
+          "text": "Lake Formation data filter"
+        },
+        {
+          "id": "C",
+          "text": "Glue crawler exclusion"
+        },
+        {
+          "id": "D",
+          "text": "KMS key policy"
+        }
+      ],
+      "answer": "B",
+      "why": "Los data filters de Lake Formation restringen filas y columnas. Una bucket policy decide sobre objetos completos, y excluir en el crawler solo cambia qué se cataloga."
+    },
+    {
+      "id": "lake-formation--l2",
+      "conceptId": "lake-formation",
+      "format": "thisorthat",
+      "prompt": "Share governed tables with other accounts, keeping fine-grained access → ?",
+      "promptEs": "Compartir tablas gobernadas con otras cuentas manteniendo acceso de grano fino → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 bucket policy only"
+        },
+        {
+          "id": "B",
+          "text": "Lake Formation cross-account sharing"
+        }
+      ],
+      "answer": "B",
+      "why": "Lake Formation comparte entre cuentas metadatos y datos con permisos finos. Una bucket policy abre objetos, pero sin control centralizado por fila o columna."
+    },
+    {
+      "id": "lake-formation--l3",
+      "conceptId": "lake-formation",
+      "format": "lightning",
+      "prompt": "Simplify permissions across hundreds of tables and columns → ?",
+      "promptEs": "Simplificar permisos sobre cientos de tablas y columnas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 object tags"
+        },
+        {
+          "id": "B",
+          "text": "IAM user groups"
+        },
+        {
+          "id": "C",
+          "text": "Lake Formation LF-Tags"
+        },
+        {
+          "id": "D",
+          "text": "Glue job bookmarks"
+        }
+      ],
+      "answer": "C",
+      "why": "Las LF-Tags agrupan bases, tablas y columnas para dar permisos a escala. Las etiquetas de objetos S3 no se aplican a columnas del catálogo."
+    },
+    {
+      "id": "lake-formation--l4",
+      "conceptId": "lake-formation",
+      "format": "lightning",
+      "prompt": "Adopt Lake Formation for some users while others keep IAM access → ?",
+      "promptEs": "Adoptar Lake Formation para algunos usuarios mientras otros conservan su acceso por IAM → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Hybrid access mode"
+        },
+        {
+          "id": "B",
+          "text": "Separate data lake copy"
+        },
+        {
+          "id": "C",
+          "text": "S3 Access Points"
+        },
+        {
+          "id": "D",
+          "text": "Disable IAM permissions"
+        }
+      ],
+      "answer": "A",
+      "why": "Hybrid access mode permite migrar gradualmente sin interrumpir cargas existentes. Copiar el lago o desactivar IAM rompería o duplicaría el acceso actual."
+    },
+    {
+      "id": "lake-formation--l5",
+      "conceptId": "secure-ingestion-endpoints",
+      "format": "lightning",
+      "prompt": "VPC producers with no internet or NAT must write to Kinesis → ?",
+      "promptEs": "Productores en una VPC sin internet ni NAT deben escribir en Kinesis → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "Gateway VPC endpoint"
+        },
+        {
+          "id": "C",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "id": "D",
+          "text": "Internet gateway"
+        }
+      ],
+      "answer": "C",
+      "why": "Kinesis Data Streams usa interface VPC endpoints con PrivateLink. Los gateway endpoints son solo para S3 y DynamoDB, y NAT o internet gateway contradicen el requisito."
+    },
+    {
+      "id": "lake-formation--l6",
+      "conceptId": "secure-ingestion-endpoints",
+      "format": "thisorthat",
+      "prompt": "Encrypt Kinesis stream records at rest → ?",
+      "promptEs": "Cifrar en reposo los registros de un stream de Kinesis → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Server-side encryption with KMS"
+        },
+        {
+          "id": "B",
+          "text": "Interface VPC endpoint"
+        }
+      ],
+      "answer": "A",
+      "why": "El cifrado del lado del servidor con claves de KMS protege los datos en reposo. El endpoint protege la ruta de red, no cifra lo almacenado."
+    },
+    {
+      "id": "lake-formation--l7",
+      "conceptId": "secure-ingestion-endpoints",
+      "format": "lightning",
+      "prompt": "Every request to a Kinesis stream must come through one VPC endpoint → ?",
+      "promptEs": "Toda petición a un stream de Kinesis debe llegar por un VPC endpoint concreto → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Security group on the stream"
+        },
+        {
+          "id": "B",
+          "text": "Endpoint policy alone"
+        },
+        {
+          "id": "C",
+          "text": "KMS key policy"
+        },
+        {
+          "id": "D",
+          "text": "IAM policy with endpoint condition"
+        }
+      ],
+      "answer": "D",
+      "why": "Una IAM policy con condición sobre el endpoint obliga a usarlo. La endpoint policy solo limita qué se alcanza a través de él, no impide otras rutas."
+    }
+  ],
+  "audited": true
+}

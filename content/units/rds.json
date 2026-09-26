@@ -1,0 +1,768 @@
+{
+  "unitId": "rds",
+  "overview": {
+    "title": "Amazon RDS",
+    "hook": "Tu base relacional de siempre, pero AWS se encarga de parches, backups y failover.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "App / Lambda",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "proxy",
+          "label": "RDS Proxy",
+          "kind": "service",
+          "service": "Amazon RDS Proxy",
+          "x": 30,
+          "y": 50
+        },
+        {
+          "id": "primary",
+          "label": "Primaria (AZ-a)",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 55,
+          "y": 25
+        },
+        {
+          "id": "standby",
+          "label": "Standby (AZ-b)",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 55,
+          "y": 78
+        },
+        {
+          "id": "replica",
+          "label": "Read replica",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 88,
+          "y": 25
+        },
+        {
+          "id": "backup",
+          "label": "Backups/snapshots",
+          "kind": "data",
+          "x": 88,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "proxy",
+          "label": "conexiones"
+        },
+        {
+          "from": "proxy",
+          "to": "primary",
+          "label": "pool"
+        },
+        {
+          "from": "primary",
+          "to": "standby",
+          "label": "síncrona"
+        },
+        {
+          "from": "primary",
+          "to": "replica",
+          "label": "asíncrona"
+        },
+        {
+          "from": "primary",
+          "to": "backup",
+          "label": "backups + logs"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon RDS es una base relacional gestionada. Eliges el motor, como MySQL, PostgreSQL, Oracle o SQL Server, y AWS se encarga de parches, backups y recuperación. No tienes acceso al sistema operativo; si lo necesitas, existe RDS Custom.",
+        "show": [
+          "primary"
+        ],
+        "focus": "primary"
+      },
+      {
+        "narration": "Debajo hay almacenamiento en bloque. gp3 sirve para muchas cargas; para OLTP que exige IOPS sostenidas y baja latencia, elige Provisioned IOPS io2. io2 Block Express ofrece latencia media submilisegundo en instancias RDS basadas en AWS Nitro System. La clase de instancia también limita las IOPS.",
+        "show": [
+          "primary"
+        ],
+        "focus": "primary"
+      },
+      {
+        "narration": "Para alta disponibilidad activas Multi-AZ: RDS mantiene una standby síncrona en otra zona. Si la primaria cae, hace failover automático y el endpoint no cambia. Esa standby clásica no atiende lecturas, solo espera su turno.",
+        "show": [
+          "primary",
+          "standby"
+        ],
+        "focus": "standby"
+      },
+      {
+        "narration": "Para escalar lecturas agregas read replicas, copiadas de forma asíncrona, así que pueden ir un poco atrasadas. Pueden vivir en otra Region y promoverse a mano para disaster recovery, pero no dan failover automático.",
+        "show": [
+          "primary",
+          "standby",
+          "replica"
+        ],
+        "focus": "replica"
+      },
+      {
+        "narration": "Los backups automáticos permiten point-in-time recovery dentro de la retención, hasta 35 días. Al restaurar a un punto en el tiempo, RDS crea una instancia nueva; el backup no la crea por sí solo. Los snapshots manuales sobreviven al borrado de la base y puedes copiarlos a otra Region.",
+        "show": [
+          "primary",
+          "standby",
+          "replica",
+          "backup"
+        ],
+        "focus": "backup"
+      },
+      {
+        "narration": "Si miles de funciones Lambda abren conexiones cortas, la base se ahoga. RDS Proxy agrupa y reutiliza conexiones, las conserva durante un failover y permite que los clientes se autentiquen con IAM.",
+        "show": [
+          "app",
+          "proxy",
+          "primary",
+          "standby",
+          "replica",
+          "backup"
+        ],
+        "focus": "proxy"
+      },
+      {
+        "narration": "El cifrado en reposo con KMS se elige al crear la base; para cifrar una existente, copias un snapshot cifrado y restauras. Y no confundas: Multi-AZ es disponibilidad; las read replicas escalan las lecturas.",
+        "show": [
+          "app",
+          "proxy",
+          "primary",
+          "standby",
+          "replica",
+          "backup"
+        ],
+        "focus": "primary"
+      }
+    ],
+    "keyPoints": [
+      "Multi-AZ: failover automático; la standby clásica no lee.",
+      "Read replicas: escalar lecturas, asíncronas, promoción manual.",
+      "PITR hasta 35 días; la restauración crea una instancia nueva.",
+      "Snapshots manuales sobreviven al borrado.",
+      "io2 Block Express: latencia media submilisegundo en instancias basadas en AWS Nitro System.",
+      "Cifrar una base existente: copia cifrada del snapshot.",
+      "Muchas conexiones cortas de Lambda → RDS Proxy."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon Aurora",
+        "difference": "Solo MySQL/PostgreSQL con volumen compartido; RDS también soporta Oracle, SQL Server y Db2."
+      },
+      {
+        "unitOrService": "Amazon RDS Custom",
+        "difference": "Da acceso al sistema operativo del host; RDS estándar no."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "rds--l1",
+      "conceptId": "rds-fundamentals",
+      "format": "lightning",
+      "prompt": "Keep the Oracle engine, offload patching and backups to AWS → ?",
+      "promptEs": "Conservar el motor Oracle y delegar parches y backups a AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Oracle on Amazon EC2"
+        },
+        {
+          "id": "B",
+          "text": "Amazon RDS for Oracle"
+        },
+        {
+          "id": "C",
+          "text": "Aurora PostgreSQL"
+        },
+        {
+          "id": "D",
+          "text": "Amazon DynamoDB"
+        }
+      ],
+      "answer": "B",
+      "why": "RDS soporta Oracle y gestiona parches, backups y recuperación. En EC2 tú haces esa administración, y Aurora o DynamoDB no conservan el motor Oracle."
+    },
+    {
+      "id": "rds--l2",
+      "conceptId": "rds-fundamentals",
+      "format": "thisorthat",
+      "prompt": "Managed SQL Server, but the team must customize the host operating system → ?",
+      "promptEs": "SQL Server gestionado, pero el equipo debe modificar el sistema operativo del host → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon RDS Custom"
+        },
+        {
+          "id": "B",
+          "text": "Amazon RDS for SQL Server"
+        }
+      ],
+      "answer": "A",
+      "why": "RDS estándar no da acceso al sistema operativo. RDS Custom mantiene el enfoque gestionado y permite ese acceso al host."
+    },
+    {
+      "id": "rds--l3",
+      "conceptId": "rds-fundamentals",
+      "format": "lightning",
+      "prompt": "RDS instance is CPU-bound; need more compute, no engine or app change → ?",
+      "promptEs": "Instancia RDS al límite de CPU; más cómputo sin cambiar motor ni app → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Larger DB instance class"
+        },
+        {
+          "id": "B",
+          "text": "Enable Multi-AZ"
+        },
+        {
+          "id": "C",
+          "text": "Migrate to Amazon DynamoDB"
+        },
+        {
+          "id": "D",
+          "text": "Add a read replica"
+        }
+      ],
+      "answer": "A",
+      "why": "Cambiar la clase de instancia da más cómputo con el mismo motor. La standby de Multi-AZ no atiende tráfico, y una réplica solo ayuda si le envías lecturas."
+    },
+    {
+      "id": "rds--l4",
+      "conceptId": "rds-fundamentals",
+      "format": "thisorthat",
+      "prompt": "On Amazon RDS, who tunes slow application SQL queries?",
+      "promptEs": "En Amazon RDS, ¿quién optimiza las consultas SQL lentas de la aplicación?",
+      "options": [
+        {
+          "id": "A",
+          "text": "You, the customer"
+        },
+        {
+          "id": "B",
+          "text": "AWS, as part of management"
+        }
+      ],
+      "answer": "A",
+      "why": "RDS gestiona parches, backups y recuperación, pero el ajuste de consultas sigue siendo tu responsabilidad."
+    },
+    {
+      "id": "rds--l5",
+      "conceptId": "mysql-vs-postgresql-engine",
+      "format": "lightning",
+      "prompt": "App relies on a supported PostgreSQL extension; managed database, no host access needed → ?",
+      "promptEs": "La app depende de una extensión PostgreSQL soportada; base gestionada, sin acceso al host → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon RDS for MySQL"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DocumentDB"
+        },
+        {
+          "id": "C",
+          "text": "Amazon RDS for PostgreSQL"
+        },
+        {
+          "id": "D",
+          "text": "PostgreSQL on Amazon EC2"
+        }
+      ],
+      "answer": "C",
+      "why": "RDS for PostgreSQL ofrece extensiones soportadas sin administrar el host. Verifica que la extensión esté soportada; MySQL cambia de motor y EC2 suma administración."
+    },
+    {
+      "id": "rds--l6",
+      "conceptId": "mysql-vs-postgresql-engine",
+      "format": "thisorthat",
+      "prompt": "Keep existing MySQL clients and utilities, managed failover across AZs → ?",
+      "promptEs": "Conservar clientes y utilidades MySQL existentes, con failover gestionado entre AZs → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RDS for PostgreSQL Multi-AZ"
+        },
+        {
+          "id": "B",
+          "text": "RDS for MySQL Multi-AZ"
+        }
+      ],
+      "answer": "B",
+      "why": "La compatibilidad con MySQL decide el motor; ambos soportan Multi-AZ, así que cambiar a PostgreSQL rompe la app sin ganar nada."
+    },
+    {
+      "id": "rds--l8",
+      "conceptId": "rds-storage-piops",
+      "format": "thisorthat",
+      "prompt": "RDS has plenty of provisioned IOPS but hits the instance's IOPS ceiling → fix?",
+      "promptEs": "RDS tiene IOPS aprovisionadas de sobra pero choca con el techo de IOPS de la instancia → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move to a larger instance class"
+        },
+        {
+          "id": "B",
+          "text": "Provision even more storage IOPS"
+        }
+      ],
+      "answer": "A",
+      "why": "Las IOPS aprovisionadas no superan el máximo de la clase de instancia. Pagar más IOPS de disco no quita ese techo; hay que subir de clase."
+    },
+    {
+      "id": "rds--l10",
+      "conceptId": "rds-multi-az",
+      "format": "lightning",
+      "prompt": "Automatic failover to another AZ, application keeps the same endpoint → ?",
+      "promptEs": "Failover automático a otra AZ, la aplicación mantiene el mismo endpoint → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Same-Region read replica"
+        },
+        {
+          "id": "B",
+          "text": "Cross-Region read replica"
+        },
+        {
+          "id": "C",
+          "text": "Automated backups"
+        },
+        {
+          "id": "D",
+          "text": "Multi-AZ deployment"
+        }
+      ],
+      "answer": "D",
+      "why": "Multi-AZ mantiene una standby síncrona y hace failover automático sin cambiar el endpoint. Las read replicas requieren promoción manual."
+    },
+    {
+      "id": "rds--l11",
+      "conceptId": "rds-multi-az",
+      "format": "thisorthat",
+      "prompt": "Can the standby of a Multi-AZ DB instance deployment serve reporting reads?",
+      "promptEs": "¿La standby de un Multi-AZ DB instance deployment puede atender lecturas de reportes?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, failover only"
+        },
+        {
+          "id": "B",
+          "text": "Yes, it is readable"
+        }
+      ],
+      "answer": "A",
+      "why": "La standby clásica solo existe para failover y no acepta lecturas. Para leer necesitas read replicas o un Multi-AZ DB cluster."
+    },
+    {
+      "id": "rds--l12",
+      "conceptId": "rds-multi-az",
+      "format": "lightning",
+      "prompt": "One writer plus readable failover targets in three AZs, same Region → ?",
+      "promptEs": "Un writer más destinos de failover que aceptan lecturas en tres AZs, misma Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Multi-AZ DB instance deployment"
+        },
+        {
+          "id": "B",
+          "text": "Multi-AZ DB cluster"
+        },
+        {
+          "id": "C",
+          "text": "Cross-Region read replicas"
+        },
+        {
+          "id": "D",
+          "text": "Aurora Global Database"
+        }
+      ],
+      "answer": "B",
+      "why": "El Multi-AZ DB cluster tiene un writer y dos lectores en tres AZs que sirven lecturas y son destino de failover. El DB instance deployment tiene una standby no legible."
+    },
+    {
+      "id": "rds--l13",
+      "conceptId": "rds-multi-az",
+      "format": "lightning",
+      "prompt": "RDS Multi-AZ DB cluster: how are commits replicated to readers?",
+      "promptEs": "RDS Multi-AZ DB cluster: ¿cómo se replican los commits a los lectores?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Asynchronous, no acknowledgment"
+        },
+        {
+          "id": "B",
+          "text": "Synchronous to every reader"
+        },
+        {
+          "id": "C",
+          "text": "Semisynchronous, one reader acks"
+        },
+        {
+          "id": "D",
+          "text": "Via hourly snapshots"
+        }
+      ],
+      "answer": "C",
+      "why": "Basta la confirmación de al menos un lector para el commit: es semisíncrono. Por eso los lectores pueden tener replica lag, visible en la métrica ReplicaLag."
+    },
+    {
+      "id": "rds--l14",
+      "conceptId": "rds-read-replicas",
+      "format": "lightning",
+      "prompt": "Reporting queries slow production RDS; slightly stale data is acceptable → ?",
+      "promptEs": "Consultas de reportes ralentizan RDS en producción; datos algo atrasados son aceptables → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Read replica for reports"
+        },
+        {
+          "id": "B",
+          "text": "Point reports at Multi-AZ standby"
+        },
+        {
+          "id": "C",
+          "text": "RDS Proxy"
+        },
+        {
+          "id": "D",
+          "text": "Automated backups"
+        }
+      ],
+      "answer": "A",
+      "why": "Una read replica asíncrona descarga los reportes de la primaria y tolera datos algo atrasados. La standby clásica de Multi-AZ no acepta lecturas."
+    },
+    {
+      "id": "rds--l15",
+      "conceptId": "rds-read-replicas",
+      "format": "thisorthat",
+      "prompt": "DR copy in another Region; manual promotion and some lag acceptable → ?",
+      "promptEs": "Copia para DR en otra Region; promoción manual y algo de retraso aceptables → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cross-Region read replica"
+        },
+        {
+          "id": "B",
+          "text": "Multi-AZ deployment"
+        }
+      ],
+      "answer": "A",
+      "why": "Multi-AZ se queda dentro de una Region. Una read replica cross-Region vive en otra Region y puede promoverse a instancia independiente."
+    },
+    {
+      "id": "rds--l16",
+      "conceptId": "rds-read-replicas",
+      "format": "lightning",
+      "prompt": "Why might an RDS read replica return slightly outdated data?",
+      "promptEs": "¿Por qué una read replica de RDS puede devolver datos algo desactualizados?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Synchronous replication delays"
+        },
+        {
+          "id": "B",
+          "text": "Snapshot-based copying"
+        },
+        {
+          "id": "C",
+          "text": "DNS caching"
+        },
+        {
+          "id": "D",
+          "text": "Asynchronous replication"
+        }
+      ],
+      "answer": "D",
+      "why": "Las read replicas se actualizan de forma asíncrona, así que pueden ir detrás de la primaria. Si exigen ver cada commit al instante, lee de la primaria."
+    },
+    {
+      "id": "rds--l17",
+      "conceptId": "rds-read-replicas",
+      "format": "thisorthat",
+      "prompt": "Read demand grows on RDS; who adds read replicas?",
+      "promptEs": "Crece la demanda de lectura en RDS; ¿quién agrega read replicas?",
+      "options": [
+        {
+          "id": "A",
+          "text": "You add them"
+        },
+        {
+          "id": "B",
+          "text": "RDS adds them automatically"
+        }
+      ],
+      "answer": "A",
+      "why": "RDS no agrega ni quita read replicas según la demanda; tú las creas y diriges las lecturas hacia ellas. El auto scaling de réplicas es cosa de Aurora."
+    },
+    {
+      "id": "rds--l18",
+      "conceptId": "rds-backups-pitr",
+      "format": "lightning",
+      "prompt": "Restore RDS to 10:42, just before a bad UPDATE → ?",
+      "promptEs": "Restaurar RDS a las 10:42, justo antes de un UPDATE erróneo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Promote a read replica"
+        },
+        {
+          "id": "B",
+          "text": "Point-in-time restore"
+        },
+        {
+          "id": "C",
+          "text": "Multi-AZ failover"
+        },
+        {
+          "id": "D",
+          "text": "Restore last night's manual snapshot"
+        }
+      ],
+      "answer": "B",
+      "why": "PITR usa backups automáticos y logs para volver a un momento exacto y crea una instancia nueva. Réplicas y standby ya copiaron el UPDATE erróneo."
+    },
+    {
+      "id": "rds--l19",
+      "conceptId": "rds-backups-pitr",
+      "format": "thisorthat",
+      "prompt": "Recovery copy must survive deletion of the DB instance → ?",
+      "promptEs": "La copia de recuperación debe sobrevivir al borrado de la instancia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Automated backups"
+        },
+        {
+          "id": "B",
+          "text": "Manual DB snapshot"
+        }
+      ],
+      "answer": "B",
+      "why": "Los snapshots manuales no se borran con la instancia. Los backups automáticos se eliminan al borrarla, salvo que elijas retenerlos."
+    },
+    {
+      "id": "rds--l20",
+      "conceptId": "rds-backups-pitr",
+      "format": "lightning",
+      "prompt": "Maximum RDS automated backup retention for point-in-time recovery → ?",
+      "promptEs": "Retención máxima de backups automáticos de RDS para point-in-time recovery → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "7 days"
+        },
+        {
+          "id": "B",
+          "text": "14 days"
+        },
+        {
+          "id": "C",
+          "text": "35 days"
+        },
+        {
+          "id": "D",
+          "text": "90 days"
+        }
+      ],
+      "answer": "C",
+      "why": "La retención llega a 35 días. Para guardar más tiempo, usa snapshots manuales, que no expiran solos."
+    },
+    {
+      "id": "rds--l21",
+      "conceptId": "rds-encryption-security",
+      "format": "lightning",
+      "prompt": "Encrypt an existing unencrypted RDS database at rest → ?",
+      "promptEs": "Cifrar en reposo una base RDS existente sin cifrar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable encryption in place"
+        },
+        {
+          "id": "B",
+          "text": "Force SSL/TLS connections"
+        },
+        {
+          "id": "C",
+          "text": "Enable IAM database authentication"
+        },
+        {
+          "id": "D",
+          "text": "Encrypted snapshot copy, then restore"
+        }
+      ],
+      "answer": "D",
+      "why": "El cifrado se elige al crear la instancia. Para una existente, copias el snapshot con cifrado y restauras. SSL/TLS protege el tránsito, no el disco."
+    },
+    {
+      "id": "rds--l22",
+      "conceptId": "rds-encryption-security",
+      "format": "thisorthat",
+      "prompt": "App must connect to RDS PostgreSQL without storing database passwords → ?",
+      "promptEs": "La app debe conectarse a RDS PostgreSQL sin guardar contraseñas de la base → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Force SSL/TLS connections"
+        },
+        {
+          "id": "B",
+          "text": "IAM database authentication"
+        }
+      ],
+      "answer": "B",
+      "why": "IAM database authentication usa tokens temporales de 15 minutos en lugar de contraseñas. SSL/TLS cifra la conexión, pero no elimina la contraseña."
+    },
+    {
+      "id": "rds--l23",
+      "conceptId": "rds-encryption-security",
+      "format": "lightning",
+      "prompt": "RDS encryption at rest keys come from → ?",
+      "promptEs": "Las claves del cifrado en reposo de RDS vienen de → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS KMS"
+        },
+        {
+          "id": "B",
+          "text": "AWS Secrets Manager"
+        },
+        {
+          "id": "C",
+          "text": "AWS Certificate Manager"
+        },
+        {
+          "id": "D",
+          "text": "IAM access keys"
+        }
+      ],
+      "answer": "A",
+      "why": "RDS cifra en reposo con una clave de AWS KMS, y eso incluye logs, backups y snapshots. Secrets Manager guarda credenciales; ACM gestiona certificados TLS."
+    },
+    {
+      "id": "rds--l24",
+      "conceptId": "rds-proxy",
+      "format": "lightning",
+      "prompt": "Thousands of Lambda invocations exhaust RDS connections → ?",
+      "promptEs": "Miles de invocaciones de Lambda agotan las conexiones de RDS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a read replica"
+        },
+        {
+          "id": "B",
+          "text": "Amazon ElastiCache"
+        },
+        {
+          "id": "C",
+          "text": "Amazon RDS Proxy"
+        },
+        {
+          "id": "D",
+          "text": "Enable Multi-AZ"
+        }
+      ],
+      "answer": "C",
+      "why": "RDS Proxy agrupa y reutiliza conexiones para que las ráfagas de Lambda no saturen la base. Una réplica o Multi-AZ no reducen el número de conexiones."
+    },
+    {
+      "id": "rds--l25",
+      "conceptId": "rds-proxy",
+      "format": "thisorthat",
+      "prompt": "RDS instance with read replicas: RDS Proxy target → ?",
+      "promptEs": "Instancia RDS con read replicas: ¿destino de RDS Proxy → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A read replica instance"
+        },
+        {
+          "id": "B",
+          "text": "The writer instance"
+        }
+      ],
+      "answer": "B",
+      "why": "En una configuración de replicación de RDS, el proxy se asocia al writer, no a una read replica. Además debe estar en la misma VPC que la base."
+    },
+    {
+      "id": "rds--l26",
+      "conceptId": "rds-proxy",
+      "format": "lightning",
+      "prompt": "Preserve application connections while RDS fails over to the standby → ?",
+      "promptEs": "Conservar las conexiones de la aplicación mientras RDS hace failover a la standby → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon RDS Proxy"
+        },
+        {
+          "id": "B",
+          "text": "Route 53 health checks"
+        },
+        {
+          "id": "C",
+          "text": "Cross-Region read replica"
+        },
+        {
+          "id": "D",
+          "text": "AWS Global Accelerator"
+        }
+      ],
+      "answer": "A",
+      "why": "RDS Proxy se reconecta solo a la standby y preserva las conexiones de la app. Sin proxy, la app debe reconectarse por su cuenta."
+    },
+    {
+      "id": "rds--l27",
+      "conceptId": "rds-proxy",
+      "format": "lightning",
+      "prompt": "RDS Proxy stores the database credentials it uses in → ?",
+      "promptEs": "RDS Proxy guarda las credenciales de la base que usa en → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS KMS"
+        },
+        {
+          "id": "B",
+          "text": "The Lambda environment variables"
+        },
+        {
+          "id": "C",
+          "text": "IAM Identity Center"
+        },
+        {
+          "id": "D",
+          "text": "AWS Secrets Manager"
+        }
+      ],
+      "answer": "D",
+      "why": "El proxy puede autenticarse ante la base con credenciales en Secrets Manager o con IAM, mientras los clientes usan IAM. KMS cifra, pero no almacena credenciales."
+    }
+  ],
+  "audited": true
+}

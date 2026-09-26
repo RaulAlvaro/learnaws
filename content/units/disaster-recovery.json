@@ -1,0 +1,686 @@
+{
+  "unitId": "disaster-recovery",
+  "overview": {
+    "title": "Estrategias de recuperación ante desastres",
+    "hook": "Cuántos datos puedes perder y cuánto puedes estar caído deciden todo.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "prim",
+          "label": "Region primaria",
+          "kind": "zone",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "r53",
+          "label": "Route 53",
+          "kind": "service",
+          "service": "Amazon Route 53",
+          "x": 30,
+          "y": 60
+        },
+        {
+          "id": "br",
+          "label": "Backup & restore",
+          "kind": "note",
+          "x": 58,
+          "y": 10
+        },
+        {
+          "id": "pl",
+          "label": "Pilot light",
+          "kind": "note",
+          "x": 58,
+          "y": 37
+        },
+        {
+          "id": "ws",
+          "label": "Warm standby",
+          "kind": "note",
+          "x": 58,
+          "y": 64
+        },
+        {
+          "id": "aa",
+          "label": "Active-active",
+          "kind": "note",
+          "x": 58,
+          "y": 91
+        },
+        {
+          "id": "obj",
+          "label": "Costo ↑ RTO ↓",
+          "kind": "data",
+          "x": 88,
+          "y": 50
+        }
+      ],
+      "edges": [
+        {
+          "from": "prim",
+          "to": "br",
+          "label": "copia de backups"
+        },
+        {
+          "from": "prim",
+          "to": "pl",
+          "label": "réplica continua"
+        },
+        {
+          "from": "prim",
+          "to": "r53",
+          "label": "health checks"
+        },
+        {
+          "from": "r53",
+          "to": "ws",
+          "label": "failover"
+        },
+        {
+          "from": "r53",
+          "to": "aa",
+          "label": "tráfico a ambas"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Un desastre es cualquier evento que impide que tu carga cumpla sus objetivos en su ubicación principal, como perder una Region entera. Antes de elegir una estrategia, el negocio define dos números: RPO y RTO.",
+        "show": [
+          "prim"
+        ],
+        "focus": "prim"
+      },
+      {
+        "narration": "RPO es cuántos datos recientes puedes perder: la antigüedad máxima del último recovery point. RTO es cuánto tiempo puedes estar caído hasta restaurar el servicio. Debes cumplir ambos y, entre los planes que cumplen, eliges el más barato.",
+        "show": [
+          "prim",
+          "obj"
+        ],
+        "focus": "obj"
+      },
+      {
+        "narration": "Backup and restore es lo más barato: copias backups a otra Region y, ante el desastre, restauras datos y redespliegas todo, idealmente con CloudFormation y AMIs copiadas. RPO y RTO de horas. Reconstruir servidores a mano suele tardar demasiado.",
+        "show": [
+          "prim",
+          "obj",
+          "br"
+        ],
+        "focus": "br"
+      },
+      {
+        "narration": "Pilot light mantiene los datos replicados en vivo, por ejemplo con una read replica de RDS en otra Region, pero los servidores de aplicación apagados o sin desplegar. En el failover los lanzas y promueves la réplica.",
+        "show": [
+          "prim",
+          "obj",
+          "br",
+          "pl"
+        ],
+        "focus": "pl"
+      },
+      {
+        "narration": "Warm standby ya tiene la aplicación completa corriendo en pequeño en la otra Region. Atiende requests de inmediato a capacidad reducida, y luego Auto Scaling la agranda. Route 53 con health checks mueve el tráfico hacia allá.",
+        "show": [
+          "prim",
+          "obj",
+          "br",
+          "pl",
+          "r53",
+          "ws"
+        ],
+        "focus": "ws"
+      },
+      {
+        "narration": "Multi-site active-active sirve usuarios desde varias Regions al mismo tiempo, por ejemplo con DynamoDB global tables y Route 53. La recuperación es casi inmediata, pero es lo más caro y complejo. Igual necesitas backups: la replicación también copia la corrupción.",
+        "show": [
+          "prim",
+          "obj",
+          "br",
+          "pl",
+          "r53",
+          "ws",
+          "aa"
+        ],
+        "focus": "aa"
+      },
+      {
+        "narration": "Para medir disponibilidad real, mira la función que usa el cliente, no solo la infraestructura. Si de noche casi no hay tráfico, un canary de CloudWatch Synthetics recorre el flujo como un cliente y detecta fallas antes que ellos.",
+        "show": [
+          "prim",
+          "obj",
+          "br",
+          "pl",
+          "r53",
+          "ws",
+          "aa"
+        ],
+        "focus": "obj"
+      }
+    ],
+    "keyPoints": [
+      "RPO: datos que puedes perder. RTO: tiempo que puedes estar caído.",
+      "Backup and restore: RPO/RTO de horas, lo más barato.",
+      "Pilot light: datos replicados, servidores apagados hasta el failover.",
+      "Warm standby: app completa pequeña, atiende de inmediato.",
+      "Active-active: todas las Regions sirven tráfico; lo más caro."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "MTTR",
+        "difference": "Promedia tiempos de recuperación de muchos incidentes; RTO es el máximo aceptable para un desastre."
+      },
+      {
+        "unitOrService": "Pilot light vs warm standby",
+        "difference": "Pilot light debe encender servidores antes de atender; warm standby ya atiende a capacidad reducida."
+      },
+      {
+        "unitOrService": "Hot standby",
+        "difference": "Segunda Region a plena capacidad pero sin tráfico normal; active-active sirve tráfico en ambas."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "disaster-recovery--l1",
+      "conceptId": "rpo-rto",
+      "format": "thisorthat",
+      "prompt": "Maximum acceptable data loss, measured as time since the last recovery point → ?",
+      "promptEs": "Pérdida máxima aceptable de datos, medida como tiempo desde el último recovery point → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RPO"
+        },
+        {
+          "id": "B",
+          "text": "RTO"
+        }
+      ],
+      "answer": "A",
+      "why": "RPO (Recovery Point Objective) limita cuántos datos recientes puedes perder. RTO limita cuánto tiempo puede estar caído el servicio."
+    },
+    {
+      "id": "disaster-recovery--l2",
+      "conceptId": "rpo-rto",
+      "format": "lightning",
+      "prompt": "Maximum acceptable delay from service interruption to restoration → ?",
+      "promptEs": "Demora máxima aceptable desde la interrupción hasta restaurar el servicio → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RPO"
+        },
+        {
+          "id": "B",
+          "text": "MTTR"
+        },
+        {
+          "id": "C",
+          "text": "SLA credit"
+        },
+        {
+          "id": "D",
+          "text": "RTO"
+        }
+      ],
+      "answer": "D",
+      "why": "RTO (Recovery Time Objective) es el tiempo máximo hasta restaurar el servicio. MTTR es un promedio medido, no un límite."
+    },
+    {
+      "id": "disaster-recovery--l3",
+      "conceptId": "rpo-rto",
+      "format": "lightning",
+      "prompt": "Average recovery time measured across many routine incidents → ?",
+      "promptEs": "Tiempo promedio de recuperación medido en muchos incidentes rutinarios → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RTO"
+        },
+        {
+          "id": "B",
+          "text": "RPO"
+        },
+        {
+          "id": "C",
+          "text": "MTTR"
+        },
+        {
+          "id": "D",
+          "text": "Availability percentage"
+        }
+      ],
+      "answer": "C",
+      "why": "MTTR promedia recuperaciones de muchos eventos. Un MTTR bajo no prueba que un plan de DR cumpla su RTO ante un desastre regional."
+    },
+    {
+      "id": "disaster-recovery--l4",
+      "conceptId": "rpo-rto",
+      "format": "lightning",
+      "prompt": "Drill: 40-minute-old recovery point, 65-minute restore. RPO 1 hour, RTO 90 minutes → ?",
+      "promptEs": "Simulacro: recovery point de 40 minutos, restauración en 65. RPO 1 hora, RTO 90 minutos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Fails RPO only"
+        },
+        {
+          "id": "B",
+          "text": "Meets both objectives"
+        },
+        {
+          "id": "C",
+          "text": "Fails RTO only"
+        },
+        {
+          "id": "D",
+          "text": "Fails both objectives"
+        }
+      ],
+      "answer": "B",
+      "why": "40 minutos de datos perdidos es menos que el RPO de 60, y 65 minutos caído es menos que el RTO de 90. Cumple ambos."
+    },
+    {
+      "id": "disaster-recovery--l5",
+      "conceptId": "dr-backup-restore",
+      "format": "lightning",
+      "prompt": "RPO and RTO of several hours acceptable; minimize ongoing DR spending → ?",
+      "promptEs": "RPO y RTO de varias horas aceptables; minimizar el gasto continuo en DR → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Pilot light"
+        },
+        {
+          "id": "B",
+          "text": "Warm standby"
+        },
+        {
+          "id": "C",
+          "text": "Backup and restore"
+        },
+        {
+          "id": "D",
+          "text": "Multi-site active-active"
+        }
+      ],
+      "answer": "C",
+      "why": "Si se toleran horas, no pagues por réplicas ni servidores encendidos: copia backups a otra Region y restaura cuando haga falta."
+    },
+    {
+      "id": "disaster-recovery--l6",
+      "conceptId": "dr-backup-restore",
+      "format": "lightning",
+      "prompt": "Backup-and-restore drill: rebuilding servers and network by hand took too long → fix?",
+      "promptEs": "Simulacro de backup and restore: reconstruir servidores y red a mano tardó demasiado → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Switch to multi-site active-active"
+        },
+        {
+          "id": "B",
+          "text": "Take backups more frequently"
+        },
+        {
+          "id": "C",
+          "text": "Use larger instance types"
+        },
+        {
+          "id": "D",
+          "text": "CloudFormation templates and copied AMIs"
+        }
+      ],
+      "answer": "D",
+      "why": "La infraestructura como código y las AMIs en la Region de recuperación aceleran el redespliegue sin cambiar de estrategia. Más backups mejoran el RPO, no el RTO."
+    },
+    {
+      "id": "disaster-recovery--l7",
+      "conceptId": "dr-backup-restore",
+      "format": "thisorthat",
+      "prompt": "Recover from corrupted records discovered hours after a faulty import → ?",
+      "promptEs": "Recuperarse de registros corruptos descubiertos horas después de una importación fallida → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Point-in-time backups"
+        },
+        {
+          "id": "B",
+          "text": "Continuous replication only"
+        }
+      ],
+      "answer": "A",
+      "why": "La replicación continua copia la corrupción al instante. Un backup point-in-time permite volver a un momento anterior al error."
+    },
+    {
+      "id": "disaster-recovery--l8",
+      "conceptId": "dr-backup-restore",
+      "format": "lightning",
+      "prompt": "Centrally schedule backups and copy them to the recovery Region → ?",
+      "promptEs": "Programar backups de forma centralizada y copiarlos a la Region de recuperación → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Backup"
+        },
+        {
+          "id": "B",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "AWS DMS"
+        }
+      ],
+      "answer": "A",
+      "why": "AWS Backup programa y supervisa backups de recursos compatibles y permite copiarlos entre Regions. Restore testing puede programar restauraciones de prueba, pero eso no equivale a un failover automático de producción."
+    },
+    {
+      "id": "disaster-recovery--l9",
+      "conceptId": "dr-pilot-light",
+      "format": "lightning",
+      "prompt": "Data replicated live to DR Region; app servers launched only at failover → ?",
+      "promptEs": "Datos replicados en vivo a la Region de DR; servidores de app se lanzan solo en el failover → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Backup and restore"
+        },
+        {
+          "id": "B",
+          "text": "Pilot light"
+        },
+        {
+          "id": "C",
+          "text": "Warm standby"
+        },
+        {
+          "id": "D",
+          "text": "Multi-site active-active"
+        }
+      ],
+      "answer": "B",
+      "why": "Pilot light mantiene encendido solo el núcleo de datos. Si solo hubiera backups sería backup and restore; si la app ya atendiera, warm standby."
+    },
+    {
+      "id": "disaster-recovery--l10",
+      "conceptId": "dr-pilot-light",
+      "format": "lightning",
+      "prompt": "Pilot light: continuously replicate an RDS database to the DR Region → ?",
+      "promptEs": "Pilot light: replicar continuamente una base RDS a la Region de DR → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RDS Multi-AZ standby"
+        },
+        {
+          "id": "B",
+          "text": "Daily cross-Region snapshot copy"
+        },
+        {
+          "id": "C",
+          "text": "Cross-Region RDS read replica"
+        },
+        {
+          "id": "D",
+          "text": "Amazon RDS Proxy"
+        }
+      ],
+      "answer": "C",
+      "why": "Una read replica cross-Region replica de forma asíncrona y continua. Multi-AZ se queda en la misma Region; las copias diarias dan un RPO de horas."
+    },
+    {
+      "id": "disaster-recovery--l13",
+      "conceptId": "dr-warm-standby",
+      "format": "lightning",
+      "prompt": "DR Region must take requests immediately at reduced capacity; no full duplicate → ?",
+      "promptEs": "La Region de DR debe atender de inmediato a capacidad reducida; sin duplicado completo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Pilot light"
+        },
+        {
+          "id": "B",
+          "text": "Multi-site active-active"
+        },
+        {
+          "id": "C",
+          "text": "Backup and restore"
+        },
+        {
+          "id": "D",
+          "text": "Warm standby"
+        }
+      ],
+      "answer": "D",
+      "why": "Warm standby mantiene una copia funcional completa de la aplicación en la Region de DR, pero a menor capacidad. Así puede atender solicitudes tras el failover sin esperar a desplegar servidores."
+    },
+    {
+      "id": "disaster-recovery--l14",
+      "conceptId": "dr-warm-standby",
+      "format": "lightning",
+      "prompt": "Warm standby after failover: expand DR capacity → ?",
+      "promptEs": "Warm standby tras el failover: ampliar la capacidad de DR → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Promote an RDS read replica"
+        },
+        {
+          "id": "B",
+          "text": "Restore from AWS Backup"
+        },
+        {
+          "id": "C",
+          "text": "Enable RDS Multi-AZ"
+        },
+        {
+          "id": "D",
+          "text": "Raise Auto Scaling desired capacity"
+        }
+      ],
+      "answer": "D",
+      "why": "Aumentas la capacidad deseada del Auto Scaling group en la Region de DR. Como escalar depende del control plane, mantén suficiente capacidad inicial."
+    },
+    {
+      "id": "disaster-recovery--l15",
+      "conceptId": "dr-warm-standby",
+      "format": "thisorthat",
+      "prompt": "Approved failover must reroute traffic without depending on a DNS configuration change → ?",
+      "promptEs": "Un failover aprobado debe redirigir tráfico sin depender de cambiar la configuración DNS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ARC routing controls"
+        },
+        {
+          "id": "B",
+          "text": "Manually edit Route 53 records"
+        }
+      ],
+      "answer": "A",
+      "why": "Las routing controls de Application Recovery Controller cambian el tráfico de Route 53 sin editar registros durante la crisis, tras una decisión revisada."
+    },
+    {
+      "id": "disaster-recovery--l16",
+      "conceptId": "dr-warm-standby",
+      "format": "lightning",
+      "prompt": "Warm standby cannot scale up during failover. Commonly overlooked in the DR Region → ?",
+      "promptEs": "El warm standby no puede escalar durante el failover. Lo que suele olvidarse en la Region de DR → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM password policy"
+        },
+        {
+          "id": "B",
+          "text": "S3 bucket versioning"
+        },
+        {
+          "id": "C",
+          "text": "Service quotas"
+        },
+        {
+          "id": "D",
+          "text": "CloudTrail trail"
+        }
+      ],
+      "answer": "C",
+      "why": "Las service quotas de la Region de DR deben permitir el aumento de capacidad. Si no, el Auto Scaling group no puede crecer cuando llega el tráfico."
+    },
+    {
+      "id": "disaster-recovery--l17",
+      "conceptId": "dr-multi-site-active-active",
+      "format": "lightning",
+      "prompt": "Users served from both Regions daily; near-zero recovery time; cost acceptable → ?",
+      "promptEs": "Usuarios atendidos desde ambas Regions a diario; recuperación casi inmediata; costo aceptable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Multi-site active-active"
+        },
+        {
+          "id": "B",
+          "text": "Warm standby"
+        },
+        {
+          "id": "C",
+          "text": "Pilot light"
+        },
+        {
+          "id": "D",
+          "text": "Backup and restore"
+        }
+      ],
+      "answer": "A",
+      "why": "Solo active-active sirve tráfico en todas las Regions en operación normal. Warm standby recibe tráfico solo tras el failover y debe escalar."
+    },
+    {
+      "id": "disaster-recovery--l18",
+      "conceptId": "dr-multi-site-active-active",
+      "format": "lightning",
+      "prompt": "Active-active NoSQL data with asynchronous cross-Region replication → ?",
+      "promptEs": "Datos NoSQL active-active con replicación asíncrona entre Regions → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DynamoDB Streams"
+        },
+        {
+          "id": "B",
+          "text": "DynamoDB global tables"
+        },
+        {
+          "id": "C",
+          "text": "DynamoDB Accelerator (DAX)"
+        },
+        {
+          "id": "D",
+          "text": "RDS Multi-AZ"
+        }
+      ],
+      "answer": "B",
+      "why": "Global tables replican continuamente entre Regions y permiten atender en cada una. Streams solo emite cambios; DAX es caché en una Region."
+    },
+    {
+      "id": "disaster-recovery--l19",
+      "conceptId": "dr-multi-site-active-active",
+      "format": "thisorthat",
+      "prompt": "Second Region at full capacity but receiving no normal traffic → ?",
+      "promptEs": "Segunda Region a plena capacidad, pero sin recibir tráfico normal → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Hot standby"
+        },
+        {
+          "id": "B",
+          "text": "Multi-site active-active"
+        }
+      ],
+      "answer": "A",
+      "why": "Active-active exige que todas las Regions sirvan tráfico en operación normal. Plena capacidad sin tráfico es hot standby, una forma de active/passive."
+    },
+    {
+      "id": "disaster-recovery--l20",
+      "conceptId": "dr-multi-site-active-active",
+      "format": "lightning",
+      "prompt": "Active-active: accidental deletion of shared data would replicate to both Regions → ?",
+      "promptEs": "Active-active: un borrado accidental de datos compartidos se replicaría a ambas Regions → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a third Region"
+        },
+        {
+          "id": "B",
+          "text": "Route 53 health checks"
+        },
+        {
+          "id": "C",
+          "text": "DynamoDB global tables"
+        },
+        {
+          "id": "D",
+          "text": "Point-in-time backups"
+        }
+      ],
+      "answer": "D",
+      "why": "La replicación propaga también los errores. Los backups point-in-time, probados con regularidad, permiten recuperar datos anteriores al borrado."
+    },
+    {
+      "id": "disaster-recovery--l21",
+      "conceptId": "business-metrics-availability",
+      "format": "lightning",
+      "prompt": "Prove checkout journey availability overnight, when almost no customers visit → ?",
+      "promptEs": "Probar la disponibilidad del flujo de compra de noche, cuando casi no hay clientes → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ALB request count metrics"
+        },
+        {
+          "id": "B",
+          "text": "AWS X-Ray traces"
+        },
+        {
+          "id": "C",
+          "text": "CloudWatch Synthetics canary"
+        },
+        {
+          "id": "D",
+          "text": "EC2 status checks"
+        }
+      ],
+      "answer": "C",
+      "why": "Un canary recorre el flujo como un cliente según un horario. Las métricas basadas en requests pueden marcar 100% disponible cuando simplemente no hubo tráfico."
+    },
+    {
+      "id": "disaster-recovery--l22",
+      "conceptId": "business-metrics-availability",
+      "format": "thisorthat",
+      "prompt": "Portal plus two hard dependencies, each at 99.99% → realistic end-to-end goal?",
+      "promptEs": "Portal más dos dependencias críticas, cada uno a 99.99% → ¿meta realista de punta a punta?",
+      "options": [
+        {
+          "id": "A",
+          "text": "99.99%"
+        },
+        {
+          "id": "B",
+          "text": "About 99.97%"
+        }
+      ],
+      "answer": "B",
+      "why": "Con dependencias críticas independientes, la disponibilidad teórica es el producto: 0.9999 al cubo, cerca de 99.97%. El total nunca supera al eslabón más débil."
+    }
+  ],
+  "audited": true
+}

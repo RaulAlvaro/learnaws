@@ -1,0 +1,216 @@
+{
+  "unitId": "redshift",
+  "overview": {
+    "title": "Amazon Redshift",
+    "hook": "El data warehouse de AWS para SQL analítico y reportes de BI.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "load",
+          "label": "Glue / COPY",
+          "kind": "service",
+          "service": "AWS Glue",
+          "x": 8,
+          "y": 30
+        },
+        {
+          "id": "rs",
+          "label": "Redshift",
+          "kind": "service",
+          "service": "Amazon Redshift",
+          "x": 38,
+          "y": 30
+        },
+        {
+          "id": "bi",
+          "label": "Analistas BI",
+          "kind": "actor",
+          "x": 88,
+          "y": 30
+        },
+        {
+          "id": "spectrum",
+          "label": "Redshift Spectrum",
+          "kind": "note",
+          "x": 62,
+          "y": 62
+        },
+        {
+          "id": "s3",
+          "label": "Archivos en S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 36,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "load",
+          "to": "rs",
+          "label": "carga tablas"
+        },
+        {
+          "from": "bi",
+          "to": "rs",
+          "label": "SQL"
+        },
+        {
+          "from": "rs",
+          "to": "spectrum",
+          "label": "consulta externa"
+        },
+        {
+          "from": "spectrum",
+          "to": "s3",
+          "label": "lee in situ"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Una base transaccional como RDS está pensada para muchas lecturas y escrituras pequeñas. Cuando quieres analizar años de ventas con SQL pesado y reportes de BI, necesitas un data warehouse. Amazon Redshift es ese warehouse administrado, a escala de petabytes.",
+        "show": [
+          "rs"
+        ],
+        "focus": "rs"
+      },
+      {
+        "narration": "Los datos se cargan en las tablas del warehouse, por ejemplo con jobs de Glue o con el comando COPY desde S3. Luego los analistas y las herramientas de BI lanzan sus consultas SQL contra Redshift.",
+        "show": [
+          "rs",
+          "load",
+          "bi"
+        ],
+        "focus": "bi"
+      },
+      {
+        "narration": "Primera elección del examen: Serverless o clúster provisionado. Si el uso es intermitente, Redshift Serverless aprovisiona y escala la capacidad sola, y no cobra el warehouse mientras está inactivo. Provisionado es para quien prefiere administrar sus recursos.",
+        "show": [
+          "rs",
+          "load",
+          "bi"
+        ],
+        "focus": "rs"
+      },
+      {
+        "narration": "Segunda elección: cargar o no cargar. Redshift Spectrum consulta archivos en S3 sin cargarlos en tablas; la mayor parte de los datos se queda en S3. Varios clústeres pueden consultar el mismo dataset de S3 sin hacer una copia para cada uno.",
+        "show": [
+          "rs",
+          "load",
+          "bi",
+          "spectrum",
+          "s3"
+        ],
+        "focus": "spectrum"
+      },
+      {
+        "narration": "No lo confundas. Athena es SQL ocasional sobre S3, sin warehouse. Glue prepara y cataloga datos. QuickSight crea dashboards y puede ejecutar consultas y cálculos en SPICE; un dashboard no implica Redshift. OpenSearch sirve para buscar en logs.",
+        "show": [
+          "rs",
+          "load",
+          "bi",
+          "spectrum",
+          "s3"
+        ],
+        "focus": "s3"
+      }
+    ],
+    "keyPoints": [
+      "Data warehouse administrado para SQL analítico y BI.",
+      "Uso intermitente, sin cobro inactivo: Redshift Serverless.",
+      "Consultar archivos en S3 sin cargarlos: Redshift Spectrum.",
+      "Varios clústeres, mismo dataset en S3, sin copias: Spectrum."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon Athena",
+        "difference": "Athena es SQL ad hoc serverless directo sobre S3, sin warehouse ni carga previa."
+      },
+      {
+        "unitOrService": "Amazon RDS",
+        "difference": "RDS atiende transacciones de una aplicación; Redshift analiza grandes volúmenes para BI."
+      },
+      {
+        "unitOrService": "Amazon QuickSight",
+        "difference": "QuickSight crea dashboards y puede ejecutar consultas y cálculos en SPICE; un dashboard no implica que las consultas corran en Redshift."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "redshift--l1",
+      "conceptId": "redshift",
+      "format": "lightning",
+      "prompt": "Managed petabyte-scale data warehouse for SQL BI reporting → ?",
+      "promptEs": "Data warehouse administrado a escala de petabytes para reportes de BI con SQL → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon RDS for PostgreSQL"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Redshift"
+        },
+        {
+          "id": "D",
+          "text": "Amazon OpenSearch Service"
+        }
+      ],
+      "answer": "C",
+      "why": "Redshift es el data warehouse administrado de AWS para análisis SQL y BI. RDS es una base transaccional, y OpenSearch se orienta a búsqueda y logs."
+    },
+    {
+      "id": "redshift--l2",
+      "conceptId": "redshift",
+      "format": "thisorthat",
+      "prompt": "Warehouse used in short bursts; no charges while idle → ?",
+      "promptEs": "Warehouse usado en ráfagas cortas; sin cargos mientras está inactivo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Redshift provisioned cluster"
+        },
+        {
+          "id": "B",
+          "text": "Redshift Serverless"
+        }
+      ],
+      "answer": "B",
+      "why": "Redshift Serverless escala sola y no cobra el warehouse inactivo. Un clúster provisionado sigue existiendo y lo administras tú aunque nadie consulte."
+    },
+    {
+      "id": "redshift--l4",
+      "conceptId": "redshift",
+      "format": "lightning",
+      "prompt": "Two Redshift clusters query one S3 dataset, no copy per cluster → ?",
+      "promptEs": "Dos clústeres de Redshift consultan un mismo dataset en S3, sin copia por clúster → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "COPY into each cluster"
+        },
+        {
+          "id": "B",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "id": "C",
+          "text": "Snapshot restore per cluster"
+        },
+        {
+          "id": "D",
+          "text": "Redshift Spectrum"
+        }
+      ],
+      "answer": "D",
+      "why": "Con Spectrum varios clústeres consultan a la vez el mismo dataset en S3. COPY o restaurar snapshots crearía una copia por clúster."
+    }
+  ],
+  "audited": true
+}

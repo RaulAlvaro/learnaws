@@ -1,0 +1,449 @@
+{
+  "unitId": "s3-data-protection",
+  "overview": {
+    "title": "Versionado, Object Lock y replicación",
+    "hook": "Tres herramientas distintas: recuperar versiones, proteger versiones concretas y copiar objetos a otro bucket.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "user",
+          "label": "Usuario / app",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "bkt",
+          "label": "Bucket versionado",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 38,
+          "y": 50
+        },
+        {
+          "id": "ver",
+          "label": "Versiones",
+          "kind": "data",
+          "x": 38,
+          "y": 14
+        },
+        {
+          "id": "lock",
+          "label": "Object Lock (WORM)",
+          "kind": "note",
+          "x": 38,
+          "y": 86
+        },
+        {
+          "id": "reg",
+          "label": "Otra Región",
+          "kind": "zone",
+          "x": 82,
+          "y": 18
+        },
+        {
+          "id": "dst",
+          "label": "Bucket destino",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 82,
+          "y": 50
+        }
+      ],
+      "edges": [
+        {
+          "from": "user",
+          "to": "bkt",
+          "label": "PUT / DELETE"
+        },
+        {
+          "from": "bkt",
+          "to": "ver",
+          "label": "guarda versiones"
+        },
+        {
+          "from": "lock",
+          "to": "bkt",
+          "label": "retención"
+        },
+        {
+          "from": "bkt",
+          "to": "dst",
+          "label": "CRR / SRR"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Si temes un error, un ataque o un desastre regional, S3 ofrece herramientas distintas. Para el examen, identifica qué necesitas: recuperar datos con Versioning, proteger versiones con Object Lock o copiarlas con Replication.",
+        "show": [
+          "user",
+          "bkt"
+        ],
+        "focus": "bkt"
+      },
+      {
+        "narration": "Con Versioning, sobrescribir crea una versión nueva. Un DELETE sin versionId agrega un delete marker; borrar una versión específica puede eliminarla permanentemente. Cada versión almacenada se cobra como objeto completo. Puedes expirar versiones antiguas con Lifecycle si no usas MFA Delete.",
+        "show": [
+          "user",
+          "bkt",
+          "ver"
+        ],
+        "focus": "ver"
+      },
+      {
+        "narration": "MFA Delete exige MFA para eliminar permanentemente una versión o cambiar el estado de Versioning, pero no para un DELETE que agrega un delete marker. Solo el usuario root del dueño del bucket puede activarlo mediante CLI o API; no es compatible con Lifecycle.",
+        "show": [
+          "user",
+          "bkt",
+          "ver"
+        ],
+        "focus": "ver"
+      },
+      {
+        "narration": "Object Lock protege versiones concretas, no impide agregar otra versión o un delete marker. En compliance mode, ni root puede borrar una versión protegida o acortar su retención. Governance mode admite bypass autorizado y explícito. Un legal hold no caduca.",
+        "show": [
+          "user",
+          "bkt",
+          "ver",
+          "lock"
+        ],
+        "focus": "lock"
+      },
+      {
+        "narration": "Replication copia objetos nuevos y actualizados de forma asíncrona a otro bucket: CRR entre Regiones y SRR dentro de una. Requiere Versioning. Si piden un SLA de quince minutos para objetos nuevos, usa S3 Replication Time Control.",
+        "show": [
+          "user",
+          "bkt",
+          "ver",
+          "lock",
+          "reg",
+          "dst"
+        ],
+        "focus": "dst"
+      },
+      {
+        "narration": "La replicación en vivo no copia objetos anteriores a la regla: para ellos usa S3 Batch Replication. Si necesitas que las escrituras realizadas durante un failover vuelvan al bucket original, configura reglas de replicación en ambos sentidos.",
+        "show": [
+          "user",
+          "bkt",
+          "ver",
+          "lock",
+          "reg",
+          "dst"
+        ],
+        "focus": "dst"
+      },
+      {
+        "narration": "Para el examen: recupera un borrado accidental con Versioning; protege una versión durante años con Object Lock en compliance mode; mantén una copia en otra Región con Cross-Region Replication. Object Lock no bloquea todo DELETE del objeto.",
+        "show": [
+          "user",
+          "bkt",
+          "ver",
+          "lock",
+          "reg",
+          "dst"
+        ],
+        "focus": "bkt"
+      }
+    ],
+    "keyPoints": [
+      "Versioning: un DELETE sin versionId agrega un delete marker; eliminar una versión específica puede ser permanente",
+      "MFA Delete: solo root lo activa, mediante CLI o API; no es compatible con Lifecycle",
+      "Object Lock protege versiones concretas, pero permite agregar nuevas versiones o delete markers",
+      "Compliance mode: ni root puede eliminar una versión protegida o acortar su retención",
+      "La replicación en vivo no copia objetos previos: usa S3 Batch Replication",
+      "S3 RTC: SLA para replicar el 99,99 % de objetos nuevos en 15 minutos; no aplica a Batch Replication"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "S3 Versioning vs Object Lock",
+        "difference": "Versioning permite recuperar versiones; Object Lock protege versiones concretas durante la retención, sin impedir nuevas versiones ni delete markers."
+      },
+      {
+        "unitOrService": "Governance vs compliance mode",
+        "difference": "Governance admite bypass con permiso y solicitud explícita; compliance no lo admite, ni para root."
+      },
+      {
+        "unitOrService": "Amazon Glacier Vault Lock",
+        "difference": "Bloquea la política de un vault del servicio Glacier original, no objetos en buckets S3."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "s3-data-protection--l1",
+      "conceptId": "s3-versioning-mfa-delete",
+      "format": "lightning",
+      "prompt": "Recover objects after accidental overwrites and deletes → ?",
+      "promptEs": "Recuperar objetos tras sobrescrituras y borrados accidentales → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Object Lock compliance"
+        },
+        {
+          "id": "B",
+          "text": "S3 Versioning"
+        },
+        {
+          "id": "C",
+          "text": "Same-Region Replication"
+        },
+        {
+          "id": "D",
+          "text": "S3 Lifecycle rules"
+        }
+      ],
+      "answer": "B",
+      "why": "Versioning guarda cada versión y convierte un borrado en delete marker. Object Lock impide borrar, pero no es la herramienta de recuperación básica."
+    },
+    {
+      "id": "s3-data-protection--l2",
+      "conceptId": "s3-versioning-mfa-delete",
+      "format": "lightning",
+      "prompt": "Require MFA to permanently delete object versions → ?",
+      "promptEs": "Exigir MFA para borrar versiones de objetos permanentemente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Object Lock governance mode"
+        },
+        {
+          "id": "B",
+          "text": "S3 Block Public Access"
+        },
+        {
+          "id": "C",
+          "text": "S3 Access Points"
+        },
+        {
+          "id": "D",
+          "text": "S3 MFA Delete"
+        }
+      ],
+      "answer": "D",
+      "why": "MFA Delete exige un código MFA para borrar versiones de forma permanente o cambiar el estado del versionado."
+    },
+    {
+      "id": "s3-data-protection--l3",
+      "conceptId": "s3-versioning-mfa-delete",
+      "format": "thisorthat",
+      "prompt": "Who can enable MFA Delete on a bucket?",
+      "promptEs": "¿Quién puede activar MFA Delete en un bucket?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM admin via the console"
+        },
+        {
+          "id": "B",
+          "text": "Root user via CLI or API"
+        }
+      ],
+      "answer": "B",
+      "why": "Solo el usuario root del dueño del bucket puede activar MFA Delete, y solo por CLI o API. La consola no lo permite."
+    },
+    {
+      "id": "s3-data-protection--l4",
+      "conceptId": "s3-versioning-mfa-delete",
+      "format": "lightning",
+      "prompt": "Ordinary DELETE on a versioning-enabled bucket results in → ?",
+      "promptEs": "Un DELETE normal en un bucket con versionado produce → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A delete marker"
+        },
+        {
+          "id": "B",
+          "text": "All versions removed"
+        },
+        {
+          "id": "C",
+          "text": "An MFA prompt"
+        },
+        {
+          "id": "D",
+          "text": "A move to Glacier"
+        }
+      ],
+      "answer": "A",
+      "why": "Sin indicar versión, el DELETE solo agrega un delete marker; las versiones previas siguen ahí. MFA Delete no aplica a este borrado normal."
+    },
+    {
+      "id": "s3-data-protection--l5",
+      "conceptId": "s3-object-lock-vault-lock",
+      "format": "lightning",
+      "prompt": "Nobody, not even root, may delete records for 7 years → ?",
+      "promptEs": "Nadie, ni siquiera root, puede borrar registros durante 7 años → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Object Lock governance mode"
+        },
+        {
+          "id": "B",
+          "text": "S3 MFA Delete"
+        },
+        {
+          "id": "C",
+          "text": "Object Lock compliance mode"
+        },
+        {
+          "id": "D",
+          "text": "S3 Versioning only"
+        }
+      ],
+      "answer": "C",
+      "why": "Compliance mode impide borrar o acortar la retención incluso a root. Governance mode permite bypass con permiso especial."
+    },
+    {
+      "id": "s3-data-protection--l6",
+      "conceptId": "s3-object-lock-vault-lock",
+      "format": "thisorthat",
+      "prompt": "WORM retention, but admins with special permission may override → ?",
+      "promptEs": "Retención WORM, pero admins con permiso especial pueden anularla → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Governance mode"
+        },
+        {
+          "id": "B",
+          "text": "Compliance mode"
+        }
+      ],
+      "answer": "A",
+      "why": "Governance mode se puede anular con s3:BypassGovernanceRetention y el header de bypass. Compliance mode no admite excepciones."
+    },
+    {
+      "id": "s3-data-protection--l7",
+      "conceptId": "s3-object-lock-vault-lock",
+      "format": "lightning",
+      "prompt": "Keep evidence locked until a lawsuit ends, no known end date → ?",
+      "promptEs": "Mantener evidencia bloqueada hasta que termine un juicio, sin fecha conocida → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Compliance retention period"
+        },
+        {
+          "id": "B",
+          "text": "Glacier Vault Lock"
+        },
+        {
+          "id": "C",
+          "text": "Object Lock legal hold"
+        },
+        {
+          "id": "D",
+          "text": "S3 Versioning"
+        }
+      ],
+      "answer": "C",
+      "why": "Un legal hold no tiene fecha de expiración y dura hasta que alguien autorizado lo quita. La retención exige una fecha fija."
+    },
+    {
+      "id": "s3-data-protection--l8",
+      "conceptId": "s3-replication",
+      "format": "lightning",
+      "prompt": "Automatically copy new objects to a bucket in another Region → ?",
+      "promptEs": "Copiar automáticamente objetos nuevos a un bucket en otra Región → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "id": "B",
+          "text": "S3 Same-Region Replication"
+        },
+        {
+          "id": "C",
+          "text": "S3 Versioning"
+        },
+        {
+          "id": "D",
+          "text": "S3 Batch Operations copy job"
+        }
+      ],
+      "answer": "A",
+      "why": "CRR replica en vivo hacia otra Región. SRR se queda en la misma Región y Versioning no crea una segunda copia."
+    },
+    {
+      "id": "s3-data-protection--l9",
+      "conceptId": "s3-replication",
+      "format": "lightning",
+      "prompt": "Replicate objects that existed before the replication rule → ?",
+      "promptEs": "Replicar objetos que ya existían antes de la regla de replicación → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Replication Time Control"
+        },
+        {
+          "id": "B",
+          "text": "A new live CRR rule"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "S3 Batch Replication"
+        }
+      ],
+      "answer": "D",
+      "why": "La replicación en vivo no copia objetos previos. S3 Batch Replication los copia bajo demanda y reintenta los que fallaron."
+    },
+    {
+      "id": "s3-data-protection--l10",
+      "conceptId": "s3-replication",
+      "format": "thisorthat",
+      "prompt": "Aggregate logs from several buckets into one bucket in the same Region → ?",
+      "promptEs": "Juntar logs de varios buckets en un bucket de la misma Región → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Same-Region Replication"
+        },
+        {
+          "id": "B",
+          "text": "Cross-Region Replication"
+        }
+      ],
+      "answer": "A",
+      "why": "SRR replica entre buckets de la misma Región, ideal para consolidar logs. CRR solo tiene sentido si el destino está en otra Región."
+    },
+    {
+      "id": "s3-data-protection--l11",
+      "conceptId": "s3-replication",
+      "format": "lightning",
+      "prompt": "SLA: 99.99% of new objects replicated within 15 minutes → ?",
+      "promptEs": "SLA: 99.99% de objetos nuevos replicados en 15 minutos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Batch Replication"
+        },
+        {
+          "id": "B",
+          "text": "S3 Replication Time Control"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "S3 Multi-Region Access Points"
+        }
+      ],
+      "answer": "B",
+      "why": "S3 RTC agrega un SLA de 15 minutos a la replicación en vivo. No aplica a Batch Replication."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,228 @@
+{
+  "unitId": "batch",
+  "overview": {
+    "title": "AWS Batch",
+    "hook": "Colas y scheduler administrados para miles de trabajos por lotes.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "jobs",
+          "label": "Jobs",
+          "kind": "data",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "batch",
+          "label": "Cola + scheduler",
+          "kind": "service",
+          "service": "AWS Batch",
+          "x": 35,
+          "y": 50
+        },
+        {
+          "id": "orch",
+          "label": "ECS o EKS",
+          "kind": "service",
+          "service": "Amazon ECS",
+          "x": 62,
+          "y": 50
+        },
+        {
+          "id": "ec2",
+          "label": "EC2 Spot/On-Demand",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 90,
+          "y": 25
+        },
+        {
+          "id": "fg",
+          "label": "Fargate",
+          "kind": "service",
+          "service": "AWS Fargate",
+          "x": 90,
+          "y": 75
+        }
+      ],
+      "edges": [
+        {
+          "from": "jobs",
+          "to": "batch",
+          "label": "submit"
+        },
+        {
+          "from": "batch",
+          "to": "orch",
+          "label": "programa"
+        },
+        {
+          "from": "orch",
+          "to": "ec2",
+          "label": "contenedores"
+        },
+        {
+          "from": "orch",
+          "to": "fg",
+          "label": "contenedores"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Imagina miles de simulaciones independientes que deben correr esta noche. Necesitas una cola, prioridades y alguien que pida y libere servidores. AWS Batch hace justo eso, sin que instales ni administres software de scheduling.",
+        "show": [
+          "jobs",
+          "batch"
+        ],
+        "focus": "batch"
+      },
+      {
+        "narration": "Envías jobs a una cola. Batch los retiene hasta que haya cómputo disponible, aprovisiona recursos según la demanda y reparte el trabajo. Los jobs corren como contenedores sobre Amazon ECS o Amazon EKS.",
+        "show": [
+          "jobs",
+          "batch",
+          "orch"
+        ],
+        "focus": "orch"
+      },
+      {
+        "narration": "El cómputo puede ser instancias EC2 o Fargate. Para bajar costos, los jobs que se pueden reintentar usan instancias Spot; lo crítico, On-Demand. Batch incluso puede encolar trabajos de SageMaker Training según prioridad.",
+        "show": [
+          "jobs",
+          "batch",
+          "orch",
+          "ec2",
+          "fg"
+        ],
+        "focus": "ec2"
+      },
+      {
+        "narration": "La trampa del examen: Fargate o Spot solo dan cómputo, no una cola ni un scheduler. Si el enunciado pide encolar y programar trabajos por lotes con poco esfuerzo, es Batch. Si es un evento corto, piensa en Lambda.",
+        "show": [
+          "jobs",
+          "batch",
+          "orch",
+          "ec2",
+          "fg"
+        ],
+        "focus": "batch"
+      }
+    ],
+    "keyPoints": [
+      "Batch: colas, scheduler y cómputo elástico administrados.",
+      "Los jobs corren como contenedores sobre ECS o EKS.",
+      "Cómputo en EC2 (Spot u On-Demand) o Fargate.",
+      "Fargate solo no te da colas ni scheduling."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Fargate",
+        "difference": "Fargate aporta cómputo sin servidores; Batch añade colas y scheduling, y puede usar Fargate."
+      },
+      {
+        "unitOrService": "AWS Lambda",
+        "difference": "Lambda responde a eventos cortos; Batch gestiona colas de muchos trabajos por lotes."
+      },
+      {
+        "unitOrService": "Amazon EKS",
+        "difference": "EKS orquesta Kubernetes; Batch puede correr jobs sobre EKS y encargarse de la cola."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "batch--l1",
+      "conceptId": "aws-batch",
+      "format": "lightning",
+      "prompt": "Thousands of independent simulations; need managed job queues and scheduling → ?",
+      "promptEs": "Miles de simulaciones independientes; necesitas colas y scheduling administrados → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Lambda"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EC2 Auto Scaling"
+        },
+        {
+          "id": "C",
+          "text": "AWS Batch"
+        },
+        {
+          "id": "D",
+          "text": "AWS Fargate alone"
+        }
+      ],
+      "answer": "C",
+      "why": "Batch encola, prioriza y programa jobs, y aprovisiona el cómputo. Fargate o Auto Scaling dan capacidad, pero no un scheduler de trabajos."
+    },
+    {
+      "id": "batch--l2",
+      "conceptId": "aws-batch",
+      "format": "thisorthat",
+      "prompt": "Need batch queues and scheduling; team wants serverless containers → ?",
+      "promptEs": "Necesitas colas y scheduling de lotes; el equipo quiere contenedores sin servidores → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Fargate tasks on their own"
+        },
+        {
+          "id": "B",
+          "text": "AWS Batch with Fargate resources"
+        }
+      ],
+      "answer": "B",
+      "why": "Fargate aporta el cómputo, pero no colas ni scheduling. Batch los añade y puede usar Fargate como recurso de cómputo."
+    },
+    {
+      "id": "batch--l3",
+      "conceptId": "aws-batch",
+      "format": "lightning",
+      "prompt": "Lowest-cost compute for retryable AWS Batch jobs → ?",
+      "promptEs": "Cómputo de menor costo para jobs de AWS Batch que se pueden reintentar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Spot Instances"
+        },
+        {
+          "id": "B",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "id": "C",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "id": "D",
+          "text": "On-Demand Instances"
+        }
+      ],
+      "answer": "A",
+      "why": "Los jobs reintentables toleran interrupciones, justo lo que exige Spot a cambio de su descuento. Batch soporta Spot y On-Demand en sus entornos de cómputo."
+    },
+    {
+      "id": "batch--l4",
+      "conceptId": "aws-batch",
+      "format": "thisorthat",
+      "prompt": "Existing EKS cluster; need managed batch job scheduling on it → ?",
+      "promptEs": "Ya tienes un cluster EKS; necesitas scheduling administrado de jobs por lotes en él → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace EKS with ECS first"
+        },
+        {
+          "id": "B",
+          "text": "AWS Batch on Amazon EKS"
+        }
+      ],
+      "answer": "B",
+      "why": "Batch puede ejecutar jobs sobre EKS, así que un flujo de Kubernetes existente no lo descarta. No hace falta migrar a ECS."
+    }
+  ],
+  "audited": true
+}

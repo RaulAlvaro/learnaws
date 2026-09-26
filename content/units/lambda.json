@@ -1,0 +1,497 @@
+{
+  "unitId": "lambda",
+  "overview": {
+    "title": "AWS Lambda",
+    "hook": "Tu código corre cuando llega un evento; tú no administras ningún servidor.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "src",
+          "label": "Evento (S3, API)",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "env",
+          "label": "Entornos ejecución",
+          "kind": "data",
+          "x": 40,
+          "y": 15
+        },
+        {
+          "id": "fn",
+          "label": "Función Lambda",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 40,
+          "y": 50
+        },
+        {
+          "id": "mem",
+          "label": "Memoria = CPU",
+          "kind": "note",
+          "x": 40,
+          "y": 85
+        },
+        {
+          "id": "vpc",
+          "label": "VPC privada",
+          "kind": "zone",
+          "x": 70,
+          "y": 50
+        },
+        {
+          "id": "rds",
+          "label": "RDS privado",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 92,
+          "y": 28
+        },
+        {
+          "id": "nat",
+          "label": "NAT gateway",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 92,
+          "y": 75
+        }
+      ],
+      "edges": [
+        {
+          "from": "src",
+          "to": "fn",
+          "label": "invoca"
+        },
+        {
+          "from": "fn",
+          "to": "env",
+          "label": "escala"
+        },
+        {
+          "from": "mem",
+          "to": "fn",
+          "label": "configura"
+        },
+        {
+          "from": "fn",
+          "to": "vpc",
+          "label": "ENI"
+        },
+        {
+          "from": "vpc",
+          "to": "rds",
+          "label": "SQL"
+        },
+        {
+          "from": "vpc",
+          "to": "nat",
+          "label": "salida a internet"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "AWS Lambda ejecuta tu código cuando ocurre un evento, como un archivo que llega a S3 o una llamada de API, sin que administres servidores. Con capacidad bajo demanda, pagas por las invocaciones y su duración; provisioned concurrency genera cargos adicionales incluso sin invocaciones.",
+        "show": [
+          "src",
+          "fn"
+        ],
+        "focus": "fn"
+      },
+      {
+        "narration": "Tiene límites que el examen adora. Una invocación estándar dura como máximo 15 minutos, y la memoria va de 128 MB hasta unos 10 GB. Si un solo trabajo continuo supera los 15 minutos, piensa en un contenedor, por ejemplo en Fargate.",
+        "show": [
+          "src",
+          "fn"
+        ],
+        "focus": "fn"
+      },
+      {
+        "narration": "La memoria también es tu perilla de rendimiento: al subirla, Lambda asigna CPU en proporción. Si una función es lenta por CPU, subir el timeout no ayuda; sube la memoria y mide, por ejemplo con Lambda Power Tuning.",
+        "show": [
+          "src",
+          "fn",
+          "mem"
+        ],
+        "focus": "mem"
+      },
+      {
+        "narration": "Ante más tráfico, Lambda crea más entornos de ejecución en paralelo. La concurrencia son las peticiones en curso, y la cuota regional por defecto es de mil, ampliable. Cada entorno nuevo implica un cold start, un arranque en frío más lento.",
+        "show": [
+          "src",
+          "fn",
+          "mem",
+          "env"
+        ],
+        "focus": "env"
+      },
+      {
+        "narration": "Dos controles se confunden mucho. Reserved concurrency aparta y a la vez limita la concurrencia de una función, sin costo extra, pero no la calienta. Provisioned concurrency preinicializa entornos para evitar cold starts, cuesta más y se configura en una versión o alias.",
+        "show": [
+          "src",
+          "fn",
+          "mem",
+          "env"
+        ],
+        "focus": "env"
+      },
+      {
+        "narration": "Para llegar a una base RDS privada, conectas la función a subnets privadas de tu VPC con security groups. Al hacerlo pierde su internet por defecto: si además necesita salir a internet, configura una ruta de salida, como un NAT gateway. Una subnet pública no basta.",
+        "show": [
+          "src",
+          "fn",
+          "mem",
+          "env",
+          "vpc",
+          "rds",
+          "nat"
+        ],
+        "focus": "vpc"
+      }
+    ],
+    "keyPoints": [
+      "Invocación estándar: máximo 15 minutos.",
+      "Más memoria = más CPU; de 128 MB a 10,240 MB.",
+      "Reserved garantiza y limita; provisioned evita cold starts y genera cargos incluso sin invocaciones.",
+      "Lambda en VPC necesita una ruta de salida para acceder a internet; NAT gateway es una opción."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Fargate",
+        "difference": "Si un trabajo continuo supera 15 minutos, una tarea de contenedor en Fargate encaja mejor."
+      },
+      {
+        "unitOrService": "AWS Batch",
+        "difference": "Batch gestiona colas y programación de muchos trabajos; Lambda responde a eventos cortos."
+      },
+      {
+        "unitOrService": "Provisioned vs reserved concurrency",
+        "difference": "Provisioned preinicializa entornos con costo; reserved solo aparta y limita concurrencia, sin calentar."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "lambda--l1",
+      "conceptId": "lambda-fundamentals",
+      "format": "lightning",
+      "prompt": "Run code whenever an object lands in S3, no servers to manage → ?",
+      "promptEs": "Ejecutar código cada vez que llega un objeto a S3, sin administrar servidores → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EC2 with a cron job"
+        },
+        {
+          "id": "B",
+          "text": "AWS Lambda"
+        },
+        {
+          "id": "C",
+          "text": "Amazon ECS on EC2"
+        },
+        {
+          "id": "D",
+          "text": "AWS Batch"
+        }
+      ],
+      "answer": "B",
+      "why": "Un manejador corto disparado por un evento de S3 es el caso típico de Lambda. ECS on EC2 o Batch agregan infraestructura o colas que no hacen falta."
+    },
+    {
+      "id": "lambda--l2",
+      "conceptId": "lambda-fundamentals",
+      "format": "thisorthat",
+      "prompt": "A single uninterrupted job runs about 40 minutes → ?",
+      "promptEs": "Un único trabajo sin interrupciones dura unos 40 minutos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Lambda function"
+        },
+        {
+          "id": "B",
+          "text": "AWS Fargate task"
+        }
+      ],
+      "answer": "B",
+      "why": "Una invocación estándar de Lambda dura como máximo 15 minutos. Empaquetarla como imagen de contenedor no cambia ese límite; una tarea en Fargate sí puede correr más."
+    },
+    {
+      "id": "lambda--l3",
+      "conceptId": "lambda-fundamentals",
+      "format": "lightning",
+      "prompt": "Maximum duration of a standard Lambda function invocation → ?",
+      "promptEs": "Duración máxima de una invocación estándar de una función Lambda → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "15 minutes"
+        },
+        {
+          "id": "B",
+          "text": "5 minutes"
+        },
+        {
+          "id": "C",
+          "text": "60 minutes"
+        },
+        {
+          "id": "D",
+          "text": "No limit"
+        }
+      ],
+      "answer": "A",
+      "why": "El timeout estándar máximo es 900 segundos, o sea 15 minutos. Si el enunciado supera ese tiempo, descarta Lambda para ese trabajo."
+    },
+    {
+      "id": "lambda--l4",
+      "conceptId": "lambda-fundamentals",
+      "format": "lightning",
+      "prompt": "Expected traffic will exceed the default Regional Lambda concurrency quota → ?",
+      "promptEs": "El tráfico esperado superará la cuota regional de concurrencia por defecto de Lambda → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase function memory"
+        },
+        {
+          "id": "B",
+          "text": "Configure provisioned concurrency"
+        },
+        {
+          "id": "C",
+          "text": "Request a quota increase"
+        },
+        {
+          "id": "D",
+          "text": "Attach the function to a VPC"
+        }
+      ],
+      "answer": "C",
+      "why": "La cuota por defecto es de 1,000 ejecuciones concurrentes por Region y se puede ampliar. Provisioned concurrency consume esa cuota; no la aumenta."
+    },
+    {
+      "id": "lambda--l5",
+      "conceptId": "lambda-memory-sizing",
+      "format": "lightning",
+      "prompt": "CPU-bound Lambda function misses its latency target → which setting?",
+      "promptEs": "Una función Lambda limitada por CPU no cumple su latencia objetivo → ¿qué ajuste?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase the timeout"
+        },
+        {
+          "id": "B",
+          "text": "Increase /tmp storage"
+        },
+        {
+          "id": "C",
+          "text": "Add reserved concurrency"
+        },
+        {
+          "id": "D",
+          "text": "Increase memory"
+        }
+      ],
+      "answer": "D",
+      "why": "Lambda asigna CPU en proporción a la memoria configurada. Subir el timeout o el /tmp no agrega CPU."
+    },
+    {
+      "id": "lambda--l6",
+      "conceptId": "lambda-memory-sizing",
+      "format": "lightning",
+      "prompt": "Test a function at several memory sizes and compare performance → ?",
+      "promptEs": "Probar una función con varios tamaños de memoria y comparar rendimiento → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS X-Ray"
+        },
+        {
+          "id": "B",
+          "text": "AWS Lambda Power Tuning"
+        },
+        {
+          "id": "C",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Inspector"
+        }
+      ],
+      "answer": "B",
+      "why": "Lambda Power Tuning ejecuta la función con distintas asignaciones de memoria y mide el resultado. X-Ray traza peticiones; Inspector busca vulnerabilidades."
+    },
+    {
+      "id": "lambda--l7",
+      "conceptId": "lambda-memory-sizing",
+      "format": "thisorthat",
+      "prompt": "Duration is high but memory use is low; function is CPU-bound → ?",
+      "promptEs": "La duración es alta pero el uso de memoria es bajo; la función está limitada por CPU → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Raise memory to get more CPU"
+        },
+        {
+          "id": "B",
+          "text": "Raise the function timeout"
+        }
+      ],
+      "answer": "A",
+      "why": "Aunque no use la memoria, subirla asigna más CPU y acorta la duración. El timeout solo permite correr más tiempo, no más rápido."
+    },
+    {
+      "id": "lambda--l8",
+      "conceptId": "lambda-concurrency",
+      "format": "lightning",
+      "prompt": "Cap a function's concurrent executions to protect a downstream database → ?",
+      "promptEs": "Limitar las ejecuciones concurrentes de una función para proteger una base de datos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Reserved concurrency"
+        },
+        {
+          "id": "B",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "id": "C",
+          "text": "Larger memory setting"
+        },
+        {
+          "id": "D",
+          "text": "Longer function timeout"
+        }
+      ],
+      "answer": "A",
+      "why": "Reserved concurrency es a la vez una reserva exclusiva y un tope, sin costo extra. Provisioned concurrency calienta entornos, pero no limita el máximo."
+    },
+    {
+      "id": "lambda--l9",
+      "conceptId": "lambda-concurrency",
+      "format": "thisorthat",
+      "prompt": "Interactive API suffers cold starts; latency justifies extra cost → ?",
+      "promptEs": "Una API interactiva sufre cold starts; la latencia justifica un costo extra → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "id": "B",
+          "text": "Reserved concurrency"
+        }
+      ],
+      "answer": "A",
+      "why": "Provisioned concurrency preinicializa entornos y evita cold starts, con cargo adicional. Reserved garantiza capacidad, pero un entorno reservado puede arrancar en frío."
+    },
+    {
+      "id": "lambda--l10",
+      "conceptId": "lambda-concurrency",
+      "format": "lightning",
+      "prompt": "Provisioned concurrency is configured, yet cold starts persist → likely cause?",
+      "promptEs": "Hay provisioned concurrency configurada y siguen los cold starts → ¿causa probable?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Memory setting is too low"
+        },
+        {
+          "id": "B",
+          "text": "Function is not in a VPC"
+        },
+        {
+          "id": "C",
+          "text": "Requests invoke $LATEST, not the alias"
+        },
+        {
+          "id": "D",
+          "text": "Reserved concurrency is not set"
+        }
+      ],
+      "answer": "C",
+      "why": "Provisioned concurrency se aplica a una versión o alias; las peticiones a $LATEST no usan esos entornos preparados. También hay cold starts si el tráfico excede lo provisionado."
+    },
+    {
+      "id": "lambda--l11",
+      "conceptId": "lambda-vpc-access",
+      "format": "lightning",
+      "prompt": "Lambda must query an RDS instance in private subnets → ?",
+      "promptEs": "Lambda debe consultar una instancia RDS en subnets privadas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an IAM policy for RDS"
+        },
+        {
+          "id": "B",
+          "text": "Move RDS to a public subnet"
+        },
+        {
+          "id": "C",
+          "text": "Enable a function URL"
+        },
+        {
+          "id": "D",
+          "text": "Attach the function to the VPC"
+        }
+      ],
+      "answer": "D",
+      "why": "Conectar la función a subnets y security groups de la VPC le da ruta de red hacia RDS. Un permiso IAM no crea esa ruta de red."
+    },
+    {
+      "id": "lambda--l12",
+      "conceptId": "lambda-vpc-access",
+      "format": "lightning",
+      "prompt": "VPC-attached Lambda function must also call an external internet API → ?",
+      "promptEs": "Una función Lambda conectada a la VPC también debe llamar una API externa en internet → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place it in a public subnet"
+        },
+        {
+          "id": "B",
+          "text": "Route through a NAT gateway"
+        },
+        {
+          "id": "C",
+          "text": "Assign it an Elastic IP"
+        },
+        {
+          "id": "D",
+          "text": "Add an execution role permission"
+        }
+      ],
+      "answer": "B",
+      "why": "Al conectarla a la VPC pierde su internet por defecto. Desde subnets privadas sale por un NAT gateway; en una subnet pública no recibe IP pública."
+    },
+    {
+      "id": "lambda--l13",
+      "conceptId": "lambda-vpc-access",
+      "format": "thisorthat",
+      "prompt": "VPC configuration fails: Lambda can't create network interfaces → fix?",
+      "promptEs": "Falla la configuración de VPC: Lambda no puede crear interfaces de red → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Grant ENI permissions to the role"
+        },
+        {
+          "id": "B",
+          "text": "Add a NAT gateway to the VPC"
+        }
+      ],
+      "answer": "A",
+      "why": "Lambda crea Hyperplane ENIs para acceder a la VPC y el execution role necesita permisos de interfaces de red. El NAT gateway solo resuelve la salida a internet."
+    }
+  ],
+  "audited": true
+}

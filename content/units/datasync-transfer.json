@@ -1,0 +1,304 @@
+{
+  "unitId": "datasync-transfer",
+  "overview": {
+    "title": "DataSync y Transfer Family",
+    "hook": "Mover datos por la red: tú sincronizas con DataSync, tus socios envían por SFTP.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "nas",
+          "label": "NAS local",
+          "kind": "actor",
+          "x": 10,
+          "y": 30
+        },
+        {
+          "id": "ds",
+          "label": "AWS DataSync",
+          "kind": "service",
+          "service": "AWS DataSync",
+          "x": 40,
+          "y": 30
+        },
+        {
+          "id": "efs",
+          "label": "EFS / FSx",
+          "kind": "service",
+          "service": "Amazon EFS",
+          "x": 76,
+          "y": 12
+        },
+        {
+          "id": "s3",
+          "label": "Amazon S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 76,
+          "y": 52
+        },
+        {
+          "id": "ptn",
+          "label": "Socio con SFTP",
+          "kind": "actor",
+          "x": 10,
+          "y": 84
+        },
+        {
+          "id": "tf",
+          "label": "Transfer Family",
+          "kind": "service",
+          "service": "AWS Transfer Family",
+          "x": 40,
+          "y": 84
+        }
+      ],
+      "edges": [
+        {
+          "from": "nas",
+          "to": "ds",
+          "label": "agente"
+        },
+        {
+          "from": "ds",
+          "to": "s3",
+          "label": "copia incremental"
+        },
+        {
+          "from": "ds",
+          "to": "efs",
+          "label": ""
+        },
+        {
+          "from": "ptn",
+          "to": "tf",
+          "label": "SFTP / FTPS / AS2"
+        },
+        {
+          "from": "tf",
+          "to": "s3",
+          "label": "guarda archivos"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Aquí hay dos servicios que mueven datos por la red, con propósitos distintos. DataSync copia datos entre sistemas de almacenamiento. Transfer Family abre una puerta SFTP para que otras personas te envíen archivos.",
+        "show": [
+          "nas",
+          "ds"
+        ],
+        "focus": "ds"
+      },
+      {
+        "narration": "Con DataSync instalas un agente junto a tu almacenamiento local, que puede ser NFS, SMB, HDFS u object storage, y copias hacia S3, EFS o FSx. Entre servicios de AWS en la misma cuenta no necesitas agente.",
+        "show": [
+          "nas",
+          "ds",
+          "s3",
+          "efs"
+        ],
+        "focus": "ds"
+      },
+      {
+        "narration": "Cada ejecución compara origen y destino, copia solo las diferencias y verifica la integridad. Puedes programarla, filtrar carpetas y limitar el ancho de banda para no saturar el enlace que comparte la oficina.",
+        "show": [
+          "nas",
+          "ds",
+          "s3",
+          "efs"
+        ],
+        "focus": "ds"
+      },
+      {
+        "narration": "Transfer Family ofrece endpoints administrados para que tus socios sigan usando sus clientes de transferencia. Con SFTP, FTPS o FTP, los archivos pueden llegar a S3 o EFS; con AS2, llegan a S3, no a EFS.",
+        "show": [
+          "nas",
+          "ds",
+          "s3",
+          "efs",
+          "ptn",
+          "tf"
+        ],
+        "focus": "tf"
+      },
+      {
+        "narration": "La pista del examen: si alguien externo necesita un endpoint con un protocolo de transferencia, es Transfer Family. Si tú necesitas migrar o sincronizar un file share, es DataSync. Y si la red no alcanza para el plazo, piensa en transporte físico.",
+        "show": [
+          "nas",
+          "ds",
+          "s3",
+          "efs",
+          "ptn",
+          "tf"
+        ],
+        "focus": "tf"
+      }
+    ],
+    "keyPoints": [
+      "DataSync: migración o sync programado, incremental y verificado",
+      "Agente para origen local; sin agente entre servicios AWS",
+      "DataSync limita ancho de banda para no saturar enlaces",
+      "Transfer Family: endpoints administrados para SFTP, FTPS, FTP y AS2",
+      "Transfer Family usa S3 o EFS; AS2 solo admite S3"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Snow Family",
+        "difference": "Transporte físico cuando la red no alcanza; DataSync transfiere por la red."
+      },
+      {
+        "unitOrService": "AWS Storage Gateway",
+        "difference": "Da acceso híbrido continuo con caché local; DataSync mueve o sincroniza datos."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "datasync-transfer--l1",
+      "conceptId": "datasync",
+      "format": "lightning",
+      "prompt": "Migrate an on-prem NFS share to S3 online, with integrity verification → ?",
+      "promptEs": "Migrar un share NFS local a S3 por la red, verificando integridad → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Transfer Family"
+        },
+        {
+          "id": "B",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "C",
+          "text": "AWS Snowball Edge"
+        },
+        {
+          "id": "D",
+          "text": "S3 File Gateway"
+        }
+      ],
+      "answer": "B",
+      "why": "DataSync copia desde NFS hacia S3 y verifica integridad. Transfer Family es un endpoint para clientes y Snowball es transporte físico."
+    },
+    {
+      "id": "datasync-transfer--l3",
+      "conceptId": "datasync",
+      "format": "thisorthat",
+      "prompt": "Keep an FSx for Windows standby in sync with an on-prem SMB share → ?",
+      "promptEs": "Mantener un standby en FSx for Windows sincronizado con un share SMB local → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Transfer Family"
+        },
+        {
+          "id": "B",
+          "text": "AWS DataSync"
+        }
+      ],
+      "answer": "B",
+      "why": "DataSync soporta SMB como origen y FSx for Windows como destino, con tareas programadas. Transfer Family no copia shares existentes."
+    },
+    {
+      "id": "datasync-transfer--l4",
+      "conceptId": "datasync",
+      "format": "lightning",
+      "prompt": "What must DataSync deploy to read on-premises storage?",
+      "promptEs": "¿Qué debe desplegar DataSync para leer almacenamiento local?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A DataSync agent"
+        },
+        {
+          "id": "B",
+          "text": "An AWS Direct Connect link"
+        },
+        {
+          "id": "C",
+          "text": "A Storage Gateway VM"
+        },
+        {
+          "id": "D",
+          "text": "A VPC peering connection"
+        }
+      ],
+      "answer": "A",
+      "why": "Las transferencias con almacenamiento local requieren un agente de DataSync. Entre servicios de AWS en la misma cuenta no hace falta."
+    },
+    {
+      "id": "datasync-transfer--l5",
+      "conceptId": "transfer-family",
+      "format": "lightning",
+      "prompt": "Partners keep their SFTP clients; files land in S3; no servers to run → ?",
+      "promptEs": "Los socios mantienen sus clientes SFTP; archivos en S3; sin servidores propios → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Self-managed SFTP server on EC2"
+        },
+        {
+          "id": "B",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "C",
+          "text": "AWS Transfer Family"
+        },
+        {
+          "id": "D",
+          "text": "S3 presigned URLs"
+        }
+      ],
+      "answer": "C",
+      "why": "Transfer Family da un endpoint SFTP administrado sobre S3. Un servidor en EC2 exige operarlo y DataSync no es un endpoint para socios."
+    },
+    {
+      "id": "datasync-transfer--l6",
+      "conceptId": "transfer-family",
+      "format": "thisorthat",
+      "prompt": "B2B partner integrations require the AS2 protocol → ?",
+      "promptEs": "Integraciones B2B con socios exigen el protocolo AS2 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Transfer Family"
+        },
+        {
+          "id": "B",
+          "text": "AWS DataSync"
+        }
+      ],
+      "answer": "A",
+      "why": "Transfer Family soporta AS2 administrado hacia S3. DataSync sincroniza almacenamiento y no expone endpoints AS2."
+    },
+    {
+      "id": "datasync-transfer--l7",
+      "conceptId": "transfer-family",
+      "format": "lightning",
+      "prompt": "Distributors require FTPS; files must reside in Amazon EFS → ?",
+      "promptEs": "Distribuidores exigen FTPS; los archivos deben quedar en Amazon EFS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Transfer Family FTP to EFS"
+        },
+        {
+          "id": "B",
+          "text": "Transfer Family SFTP to S3"
+        },
+        {
+          "id": "C",
+          "text": "Transfer Family FTPS to EFS"
+        },
+        {
+          "id": "D",
+          "text": "DataSync scheduled task to EFS"
+        }
+      ],
+      "answer": "C",
+      "why": "FTPS y FTP son protocolos distintos, y el destino debe ser EFS. Transfer Family con FTPS sobre EFS cumple ambos requisitos."
+    }
+  ],
+  "audited": true
+}

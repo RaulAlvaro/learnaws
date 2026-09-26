@@ -1,0 +1,364 @@
+{
+  "unitId": "transit-gateway",
+  "overview": {
+    "title": "VPC peering y Transit Gateway",
+    "hook": "Conectar VPCs: cables directos de a dos, o un hub central para todas.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "vpca",
+          "label": "VPC A",
+          "kind": "zone",
+          "x": 10,
+          "y": 25
+        },
+        {
+          "id": "vpcb",
+          "label": "VPC B",
+          "kind": "zone",
+          "x": 10,
+          "y": 75
+        },
+        {
+          "id": "tgw",
+          "label": "Transit Gateway",
+          "kind": "service",
+          "service": "AWS Transit Gateway",
+          "x": 50,
+          "y": 50
+        },
+        {
+          "id": "vpcc",
+          "label": "VPC C",
+          "kind": "zone",
+          "x": 88,
+          "y": 18
+        },
+        {
+          "id": "vpcd",
+          "label": "VPC D",
+          "kind": "zone",
+          "x": 88,
+          "y": 50
+        },
+        {
+          "id": "onprem",
+          "label": "On-premises",
+          "kind": "actor",
+          "x": 88,
+          "y": 82
+        }
+      ],
+      "edges": [
+        {
+          "from": "vpca",
+          "to": "vpcb",
+          "label": "peering 1 a 1"
+        },
+        {
+          "from": "vpca",
+          "to": "tgw",
+          "label": "attachment"
+        },
+        {
+          "from": "vpcc",
+          "to": "tgw",
+          "label": "attachment"
+        },
+        {
+          "from": "vpcd",
+          "to": "tgw",
+          "label": "attachment"
+        },
+        {
+          "from": "onprem",
+          "to": "tgw",
+          "label": "VPN / DX gateway"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Cuando tienes varias VPCs, tarde o temprano necesitan hablar entre sí con IPs privadas. Lo más simple es VPC peering: una conexión directa entre dos VPCs, incluso de otras cuentas u otras Regions.",
+        "show": [
+          "vpca",
+          "vpcb"
+        ],
+        "focus": "vpca"
+      },
+      {
+        "narration": "Crear un peering no cuesta nada, y el tráfico entre Regions viaja cifrado por la red de AWS, aunque la transferencia entre AZs o Regions sí se cobra. Pero tiene dos reglas duras: los CIDR no pueden solaparse y no es transitivo.",
+        "show": [
+          "vpca",
+          "vpcb"
+        ],
+        "focus": "vpcb"
+      },
+      {
+        "narration": "No transitivo significa que si A se conecta con B, y B con C, A todavía no llega a C. Con muchas VPCs terminas con una malla de conexiones que crece rapidísimo y cuesta administrar.",
+        "show": [
+          "vpca",
+          "vpcb",
+          "vpcc",
+          "vpcd"
+        ],
+        "focus": "vpcc"
+      },
+      {
+        "narration": "Transit Gateway resuelve eso con un hub central. Conectas VPCs, VPNs, Direct Connect gateways e incluso otros transit gateways como attachments, y el hub enruta entre todos ellos.",
+        "show": [
+          "vpca",
+          "vpcb",
+          "vpcc",
+          "vpcd",
+          "tgw",
+          "onprem"
+        ],
+        "focus": "tgw"
+      },
+      {
+        "narration": "Cada attachment se asocia a exactamente una route table del transit gateway, así que puedes separar redes, por ejemplo producción y desarrollo. Y ojo: cada VPC necesita además una ruta en su propia route table que apunte al transit gateway.",
+        "show": [
+          "vpca",
+          "vpcb",
+          "vpcc",
+          "vpcd",
+          "tgw",
+          "onprem"
+        ],
+        "focus": "tgw"
+      },
+      {
+        "narration": "La regla práctica: para pocas VPCs que necesitan conexión directa, peering es simple y barato. Para muchas VPCs con on-premises, o políticas de ruteo distintas por red, elige Transit Gateway, que cobra por attachment por hora y por tráfico procesado.",
+        "show": [
+          "vpca",
+          "vpcb",
+          "vpcc",
+          "vpcd",
+          "tgw",
+          "onprem"
+        ],
+        "focus": "onprem"
+      }
+    ],
+    "keyPoints": [
+      "Peering: dos VPCs, sin transitividad, sin CIDR solapados.",
+      "Peering funciona entre cuentas y entre Regions.",
+      "Transit Gateway: hub transitivo para VPCs, VPN y Direct Connect.",
+      "Route tables del TGW separan redes; la VPC necesita su ruta."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS PrivateLink",
+        "difference": "PrivateLink expone un solo servicio y tolera CIDR solapados; peering conecta redes completas."
+      },
+      {
+        "unitOrService": "AWS Site-to-Site VPN",
+        "difference": "La VPN es el túnel hacia on-premises; Transit Gateway es el hub donde ese túnel se conecta."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "transit-gateway--l1",
+      "conceptId": "vpc-peering",
+      "format": "lightning",
+      "prompt": "Two VPCs in separate accounts need private IP connectivity, no VPN or gateway → ?",
+      "promptEs": "Dos VPCs en cuentas distintas necesitan conectividad por IP privada, sin VPN ni gateway → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "VPC peering connection"
+        },
+        {
+          "id": "B",
+          "text": "AWS Site-to-Site VPN"
+        },
+        {
+          "id": "C",
+          "text": "AWS Client VPN"
+        },
+        {
+          "id": "D",
+          "text": "Internet gateway routing"
+        }
+      ],
+      "answer": "A",
+      "why": "VPC peering conecta dos VPCs directamente, también entre cuentas y Regions. Site-to-Site VPN conecta redes on-premises y Client VPN conecta usuarios."
+    },
+    {
+      "id": "transit-gateway--l2",
+      "conceptId": "vpc-peering",
+      "format": "thisorthat",
+      "prompt": "VPC A peers with B, and B peers with C. Can A reach C?",
+      "promptEs": "La VPC A tiene peering con B, y B con C. ¿A llega a C?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, traffic transits through B"
+        },
+        {
+          "id": "B",
+          "text": "No, A and C need their own peering"
+        }
+      ],
+      "answer": "B",
+      "why": "El peering no es transitivo. A y C necesitan su propia conexión, o un hub transitivo como Transit Gateway."
+    },
+    {
+      "id": "transit-gateway--l3",
+      "conceptId": "vpc-peering",
+      "format": "lightning",
+      "prompt": "Before choosing VPC peering, what must you verify?",
+      "promptEs": "Antes de elegir VPC peering, ¿qué debes verificar?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Both VPCs are in one AZ"
+        },
+        {
+          "id": "B",
+          "text": "Both VPCs belong to one account"
+        },
+        {
+          "id": "C",
+          "text": "The CIDR ranges don't overlap"
+        },
+        {
+          "id": "D",
+          "text": "Each VPC has a NAT gateway"
+        }
+      ],
+      "answer": "C",
+      "why": "Las VPCs con rangos CIDR solapados no se pueden conectar por peering. Cuentas o Regions distintas no son un problema."
+    },
+    {
+      "id": "transit-gateway--l4",
+      "conceptId": "vpc-peering",
+      "format": "lightning",
+      "prompt": "Inter-Region VPC peering traffic → ?",
+      "promptEs": "El tráfico de VPC peering entre Regions → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Crosses the public internet unencrypted"
+        },
+        {
+          "id": "B",
+          "text": "Requires an IPsec VPN tunnel"
+        },
+        {
+          "id": "C",
+          "text": "Has no data transfer charges"
+        },
+        {
+          "id": "D",
+          "text": "Stays on AWS backbone, encrypted"
+        }
+      ],
+      "answer": "D",
+      "why": "Viaja por la red troncal de AWS, sin internet público, y se cifra al salir de las instalaciones. Pero la transferencia entre Regions sí se cobra."
+    },
+    {
+      "id": "transit-gateway--l5",
+      "conceptId": "transit-gateway",
+      "format": "lightning",
+      "prompt": "Growing mesh of 30 VPCs plus on-premises networks needs a central hub → ?",
+      "promptEs": "Una malla creciente de 30 VPCs más redes on-premises necesita un hub central → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "More VPC peering connections"
+        },
+        {
+          "id": "B",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "id": "C",
+          "text": "PrivateLink endpoint services"
+        },
+        {
+          "id": "D",
+          "text": "Shared internet gateway"
+        }
+      ],
+      "answer": "B",
+      "why": "Transit Gateway es un hub transitivo para VPCs, VPNs y Direct Connect gateways. Más peerings solo agrandan la malla; PrivateLink expone servicios, no redes."
+    },
+    {
+      "id": "transit-gateway--l6",
+      "conceptId": "transit-gateway",
+      "format": "lightning",
+      "prompt": "Keep production and dev VPCs isolated on one transit gateway → ?",
+      "promptEs": "Mantener aisladas las VPCs de producción y desarrollo en un mismo transit gateway → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Security groups on the gateway"
+        },
+        {
+          "id": "B",
+          "text": "One default route table for all"
+        },
+        {
+          "id": "C",
+          "text": "Separate transit gateway route tables"
+        },
+        {
+          "id": "D",
+          "text": "Separate internet gateways per environment"
+        }
+      ],
+      "answer": "C",
+      "why": "Cada attachment se asocia a una route table del TGW; con tablas separadas defines qué redes se ven. No todo tiene que usar la tabla predeterminada."
+    },
+    {
+      "id": "transit-gateway--l7",
+      "conceptId": "transit-gateway",
+      "format": "thisorthat",
+      "prompt": "TGW route table is correct, but VPC traffic never reaches the transit gateway → fix?",
+      "promptEs": "La route table del TGW está bien, pero el tráfico de la VPC nunca llega al transit gateway → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a VPC route pointing to the TGW"
+        },
+        {
+          "id": "B",
+          "text": "Add another TGW route table"
+        }
+      ],
+      "answer": "A",
+      "why": "Una ruta en el transit gateway no reemplaza la ruta que la VPC necesita en su propia route table para enviar tráfico hacia el TGW."
+    },
+    {
+      "id": "transit-gateway--l8",
+      "conceptId": "transit-gateway",
+      "format": "lightning",
+      "prompt": "One on-premises VPN connection must reach many VPCs → ?",
+      "promptEs": "Una sola conexión VPN desde on-premises debe llegar a muchas VPCs → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Virtual private gateway per VPC"
+        },
+        {
+          "id": "B",
+          "text": "VPC peering to each VPC"
+        },
+        {
+          "id": "C",
+          "text": "AWS Client VPN endpoint"
+        },
+        {
+          "id": "D",
+          "text": "VPN attached to Transit Gateway"
+        }
+      ],
+      "answer": "D",
+      "why": "Un virtual private gateway se conecta a una sola VPC. Adjuntar la VPN a un transit gateway la vuelve la entrada para todas las VPCs conectadas."
+    }
+  ],
+  "audited": true
+}

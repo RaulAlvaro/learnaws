@@ -1,0 +1,369 @@
+{
+  "unitId": "eventbridge",
+  "overview": {
+    "title": "Amazon EventBridge",
+    "hook": "Un bus que lleva cada evento a quien le interesa, según reglas.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "aws",
+          "label": "Servicios AWS",
+          "kind": "actor",
+          "x": 8,
+          "y": 25
+        },
+        {
+          "id": "saas",
+          "label": "Apps y SaaS",
+          "kind": "actor",
+          "x": 8,
+          "y": 72
+        },
+        {
+          "id": "bus",
+          "label": "Event bus",
+          "kind": "service",
+          "service": "Amazon EventBridge",
+          "x": 42,
+          "y": 50
+        },
+        {
+          "id": "rule",
+          "label": "Reglas (patrón)",
+          "kind": "note",
+          "x": 42,
+          "y": 14
+        },
+        {
+          "id": "lambda",
+          "label": "Lambda",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 80,
+          "y": 25
+        },
+        {
+          "id": "sqs",
+          "label": "Cola SQS",
+          "kind": "service",
+          "service": "Amazon SQS",
+          "x": 80,
+          "y": 72
+        },
+        {
+          "id": "sched",
+          "label": "Scheduler",
+          "kind": "service",
+          "service": "Amazon EventBridge",
+          "x": 42,
+          "y": 88
+        }
+      ],
+      "edges": [
+        {
+          "from": "aws",
+          "to": "bus",
+          "label": "evento"
+        },
+        {
+          "from": "saas",
+          "to": "bus",
+          "label": "evento"
+        },
+        {
+          "from": "bus",
+          "to": "lambda",
+          "label": "regla A"
+        },
+        {
+          "from": "bus",
+          "to": "sqs",
+          "label": "regla B"
+        },
+        {
+          "from": "sched",
+          "to": "lambda",
+          "label": "cron / rate"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Un evento es un aviso de que algo pasó: se subió un archivo, se creó un pedido, cambió un envío. En una arquitectura orientada a eventos, el productor solo anuncia el hecho y no sabe quién va a reaccionar.",
+        "show": [
+          "aws",
+          "bus"
+        ],
+        "focus": "aws"
+      },
+      {
+        "narration": "Amazon EventBridge recibe y enruta eventos mediante event buses. Los eventos de servicios AWS llegan normalmente al default event bus; los de socios SaaS, a un partner event bus. Tus apps también pueden publicar eventos. Para reunirlos en un bus, configura su reenvío.",
+        "show": [
+          "aws",
+          "saas",
+          "bus"
+        ],
+        "focus": "bus"
+      },
+      {
+        "narration": "Las reglas son el corazón del bus. Cada regla tiene un patrón que mira el contenido del evento y, si coincide, lo envía a uno o varios targets, como Lambda o una cola SQS. Un equipo nuevo solo agrega su regla, sin tocar al productor.",
+        "show": [
+          "aws",
+          "saas",
+          "bus",
+          "rule",
+          "lambda",
+          "sqs"
+        ],
+        "focus": "rule"
+      },
+      {
+        "narration": "Todo esto es asíncrono, así que espera latencia variable y consistencia eventual. Si el consumidor es más lento que los eventos, pon una cola SQS en medio y deja que Lambda la consuma con un event source mapping, sin escribir código de polling.",
+        "show": [
+          "aws",
+          "saas",
+          "bus",
+          "rule",
+          "lambda",
+          "sqs"
+        ],
+        "focus": "sqs"
+      },
+      {
+        "narration": "EventBridge Pipes es distinto al bus: conecta una sola fuente con un solo destino, por ejemplo un DynamoDB stream hacia una app, y puede enriquecer los eventos por el camino. Si luego hay que repartir a muchos targets, el pipe entrega a un bus.",
+        "show": [
+          "aws",
+          "saas",
+          "bus",
+          "rule",
+          "lambda",
+          "sqs"
+        ],
+        "focus": "bus"
+      },
+      {
+        "narration": "Y si tienes un servidor que solo existe para correr tareas programadas, retíralo. EventBridge Scheduler invoca targets con expresiones cron o rate, y también hace invocaciones de una sola vez, sin servidores que mantener.",
+        "show": [
+          "aws",
+          "saas",
+          "bus",
+          "rule",
+          "lambda",
+          "sqs",
+          "sched"
+        ],
+        "focus": "sched"
+      },
+      {
+        "narration": "SNS empuja mensajes a suscriptores; Step Functions coordina pasos con estado. Si una Lambda escribe en el bucket S3 que la dispara, puede causar un bucle recursivo. Evítalo excluyendo los objetos de salida de la notificación.",
+        "show": [
+          "aws",
+          "saas",
+          "bus",
+          "rule",
+          "lambda",
+          "sqs",
+          "sched"
+        ],
+        "focus": "lambda"
+      }
+    ],
+    "keyPoints": [
+      "Event bus: muchas fuentes a muchos targets, filtrado por reglas.",
+      "Las reglas filtran por contenido; el productor ignora a los consumidores.",
+      "Pipes: una fuente, un target, con enriquecimiento opcional.",
+      "Scheduler: cron, rate o una sola vez; reemplaza servidores cron.",
+      "Asíncrono: latencia variable; no para latencia ultra baja constante."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon SNS",
+        "difference": "SNS empuja un mensaje a suscriptores; EventBridge enruta eventos de muchas fuentes con reglas de contenido."
+      },
+      {
+        "unitOrService": "AWS Step Functions",
+        "difference": "Step Functions coordina pasos y guarda estado; EventBridge solo entrega cada evento a sus targets."
+      },
+      {
+        "unitOrService": "Amazon MQ",
+        "difference": "Amazon MQ conserva protocolos de brokers existentes; EventBridge enruta eventos sin ese requisito de compatibilidad."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "eventbridge--l1",
+      "conceptId": "eventbridge",
+      "format": "lightning",
+      "prompt": "Route events from AWS services, a SaaS app, and custom apps to different teams → ?",
+      "promptEs": "Enrutar eventos de servicios AWS, una app SaaS y apps propias a distintos equipos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EventBridge Pipes"
+        },
+        {
+          "id": "B",
+          "text": "EventBridge event bus with rules"
+        },
+        {
+          "id": "C",
+          "text": "Amazon SQS standard queue"
+        },
+        {
+          "id": "D",
+          "text": "Step Functions Express workflow"
+        }
+      ],
+      "answer": "B",
+      "why": "Muchas fuentes hacia muchos consumidores con filtrado es justo el event bus con reglas. Un pipe conecta una sola fuente con un solo target."
+    },
+    {
+      "id": "eventbridge--l2",
+      "conceptId": "eventbridge",
+      "format": "thisorthat",
+      "prompt": "One DynamoDB stream to one application, enriched on the way → ?",
+      "promptEs": "Un DynamoDB stream hacia una sola aplicación, enriquecido en el camino → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EventBridge Pipes"
+        },
+        {
+          "id": "B",
+          "text": "EventBridge event bus"
+        }
+      ],
+      "answer": "A",
+      "why": "Pipes es integración punto a punto con enriquecimiento opcional. El bus sirve cuando hay que repartir a varios targets, que aquí no se pide."
+    },
+    {
+      "id": "eventbridge--l3",
+      "conceptId": "eventbridge",
+      "format": "lightning",
+      "prompt": "Retire a cron server; need nightly and one-time invocations → ?",
+      "promptEs": "Retirar un servidor cron; se necesitan invocaciones nocturnas y únicas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SQS delay queue"
+        },
+        {
+          "id": "B",
+          "text": "SNS topic with Lambda subscriber"
+        },
+        {
+          "id": "C",
+          "text": "EventBridge Scheduler"
+        },
+        {
+          "id": "D",
+          "text": "Crontab on a smaller EC2"
+        }
+      ],
+      "answer": "C",
+      "why": "EventBridge Scheduler es gestionado y soporta cron, rate e invocaciones de una sola vez. Un EC2 más pequeño sigue siendo un servidor que mantener."
+    },
+    {
+      "id": "eventbridge--l4",
+      "conceptId": "eventbridge",
+      "format": "lightning",
+      "prompt": "Enrich a DynamoDB stream, then route events to several apps → ?",
+      "promptEs": "Enriquecer un DynamoDB stream y luego enrutar eventos a varias apps → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Pipe directly to one app"
+        },
+        {
+          "id": "B",
+          "text": "SNS topic subscribed to the stream"
+        },
+        {
+          "id": "C",
+          "text": "Step Functions Standard workflow"
+        },
+        {
+          "id": "D",
+          "text": "Pipe with an event bus target"
+        }
+      ],
+      "answer": "D",
+      "why": "El pipe enriquece los eventos del stream y los entrega a un bus, que con sus reglas los reparte a varias apps. Un pipe solo no llega a muchos targets."
+    },
+    {
+      "id": "eventbridge--l5",
+      "conceptId": "event-driven-architecture",
+      "format": "lightning",
+      "prompt": "Consumers pick events by content; the producer must not know them → ?",
+      "promptEs": "Los consumidores eligen eventos por contenido; el productor no debe conocerlos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EventBridge rules with event patterns"
+        },
+        {
+          "id": "B",
+          "text": "Direct Lambda invocation per consumer"
+        },
+        {
+          "id": "C",
+          "text": "Shared DynamoDB table"
+        },
+        {
+          "id": "D",
+          "text": "SQS FIFO queue"
+        }
+      ],
+      "answer": "A",
+      "why": "Las reglas de EventBridge filtran por contenido y desacoplan productor y consumidores. Invocar Lambda directamente obliga al productor a conocer cada destino."
+    },
+    {
+      "id": "eventbridge--l6",
+      "conceptId": "event-driven-architecture",
+      "format": "thisorthat",
+      "prompt": "Lambda must consume an SQS queue without custom polling code → ?",
+      "promptEs": "Lambda debe consumir una cola SQS sin código de polling propio → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Scheduled Lambda that polls the queue"
+        },
+        {
+          "id": "B",
+          "text": "SQS event source mapping"
+        }
+      ],
+      "answer": "B",
+      "why": "Con un event source mapping, el servicio Lambda hace el polling de la cola e invoca tu función. La Lambda programada es polling que tú mismo mantienes."
+    },
+    {
+      "id": "eventbridge--l7",
+      "conceptId": "event-driven-architecture",
+      "format": "lightning",
+      "prompt": "Run a short task for each object uploaded to S3 → ?",
+      "promptEs": "Ejecutar una tarea corta por cada objeto subido a S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cron job listing the bucket"
+        },
+        {
+          "id": "B",
+          "text": "AWS Batch job queue"
+        },
+        {
+          "id": "C",
+          "text": "S3 event notification invoking Lambda"
+        },
+        {
+          "id": "D",
+          "text": "Kinesis Data Streams consumer"
+        }
+      ],
+      "answer": "C",
+      "why": "S3 puede invocar Lambda directamente al subir un objeto: orientado a eventos y sin servidores. Listar el bucket con cron es sondeo con retraso y más operación."
+    }
+  ],
+  "audited": true
+}

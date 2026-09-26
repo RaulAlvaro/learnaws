@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ConceptCard, type CardBody } from "@/components/concept-card";
+import { Discover } from "@/components/game/discover";
+import type { Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { QuestionView, type PublicQuestion } from "@/components/question-view";
 import { Bar, Button, Card } from "@/components/ui";
 
@@ -19,6 +21,7 @@ interface ConceptMeta {
 type Item =
   | { kind: "card"; reason: "new" | "relearn"; concept: ConceptMeta; card: { en: CardBody; es: CardBody; docs: string[] } | null; progress: Progress }
   | { kind: "question"; mode: string; question: PublicQuestion; concept: ConceptMeta | undefined; progress: Progress }
+  | { kind: "discover"; unit: ServiceUnit; island: Island | null; overview: UnitOverview | null; progress: Progress }
   | { kind: "done"; progress: Progress };
 
 async function fetchSession() {
@@ -80,6 +83,15 @@ export default function StudyPage() {
         </div>
         <Bar value={p.total ? (p.index / p.total) * 100 : 100} />
       </div>
+
+      {item.kind === "discover" &&
+        (item.overview ? (
+          <Discover key={item.unit.id} unit={item.unit} island={item.island} overview={item.overview} autoRead onDone={next} />
+        ) : (
+          <Card>
+            <Button onClick={next}>Continuar</Button>
+          </Card>
+        ))}
 
       {item.kind === "card" &&
         (item.card ? (

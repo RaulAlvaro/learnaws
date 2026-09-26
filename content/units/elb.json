@@ -1,0 +1,643 @@
+{
+  "unitId": "elb",
+  "overview": {
+    "title": "Elastic Load Balancing",
+    "hook": "ALB para HTTP, NLB para TCP/UDP y GWLB para inspección; Classic Load Balancer es heredado.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "users",
+          "label": "Clientes",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "alb",
+          "label": "ALB (Layer 7)",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 36,
+          "y": 18
+        },
+        {
+          "id": "nlb",
+          "label": "NLB (Layer 4)",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 36,
+          "y": 50
+        },
+        {
+          "id": "gwlb",
+          "label": "GWLB (Layer 3)",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 36,
+          "y": 82
+        },
+        {
+          "id": "acm",
+          "label": "ACM",
+          "kind": "service",
+          "service": "AWS Certificate Manager",
+          "x": 64,
+          "y": 8
+        },
+        {
+          "id": "tg",
+          "label": "Target groups",
+          "kind": "data",
+          "x": 70,
+          "y": 36
+        },
+        {
+          "id": "appl",
+          "label": "Firewalls / IDS",
+          "kind": "actor",
+          "x": 70,
+          "y": 82
+        }
+      ],
+      "edges": [
+        {
+          "from": "users",
+          "to": "alb",
+          "label": "HTTP/HTTPS"
+        },
+        {
+          "from": "users",
+          "to": "nlb",
+          "label": "TCP/UDP"
+        },
+        {
+          "from": "users",
+          "to": "gwlb",
+          "label": "paquetes IP"
+        },
+        {
+          "from": "acm",
+          "to": "alb",
+          "label": "certificado"
+        },
+        {
+          "from": "alb",
+          "to": "tg",
+          "label": "reglas path/host"
+        },
+        {
+          "from": "nlb",
+          "to": "tg",
+          "label": "IP fija por AZ"
+        },
+        {
+          "from": "gwlb",
+          "to": "appl",
+          "label": "GENEVE 6081"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Un load balancer reparte tráfico entre varios targets sanos. Elastic Load Balancing ofrece ALB, NLB, GWLB y el heredado Classic Load Balancer. En el examen, la elección suele depender del tipo de tráfico y del ruteo que necesitas.",
+        "show": [
+          "users"
+        ],
+        "focus": "users"
+      },
+      {
+        "narration": "El Application Load Balancer trabaja en Layer 7, con HTTP y HTTPS. Sus listener rules miran el path, el host o un header, y envían cada solicitud al target group que corresponda: instancias EC2, IPs, contenedores o funciones Lambda.",
+        "show": [
+          "users",
+          "alb",
+          "tg"
+        ],
+        "focus": "alb"
+      },
+      {
+        "narration": "Además, el ALB se integra con AWS WAF, puede autenticar usuarios antes de reenviar, y cada target group tiene su propio health check, así que monitoreas cada servicio por separado.",
+        "show": [
+          "users",
+          "alb",
+          "tg"
+        ],
+        "focus": "tg"
+      },
+      {
+        "narration": "El Network Load Balancer trabaja en Layer 4, con TCP y UDP, y maneja millones de solicitudes por segundo. Su gran carta es una IP estática por AZ, incluso un Elastic IP, ideal cuando un socio exige una allowlist de IPs fijas.",
+        "show": [
+          "users",
+          "alb",
+          "tg",
+          "nlb"
+        ],
+        "focus": "nlb"
+      },
+      {
+        "narration": "El Gateway Load Balancer inserta de forma transparente firewalls o sistemas IDS en el camino del tráfico y distribuye los flujos entre appliances sanos. Se comunica con ellos mediante GENEVE en el puerto 6081. Para escalar la flota de appliances, debes configurar su escalado por separado.",
+        "show": [
+          "users",
+          "alb",
+          "tg",
+          "nlb",
+          "gwlb",
+          "appl"
+        ],
+        "focus": "gwlb"
+      },
+      {
+        "narration": "Para HTTPS, el listener del ALB termina TLS con un certificado de ACM y una security policy, y descifra antes de enviar al target. Si los targets deben descifrar ellos mismos, usa un NLB con listener TCP en el 443.",
+        "show": [
+          "users",
+          "alb",
+          "tg",
+          "nlb",
+          "gwlb",
+          "appl",
+          "acm"
+        ],
+        "focus": "acm"
+      },
+      {
+        "narration": "Truco final: si necesitas IPs estáticas y además ruteo por path, pon un NLB delante de un ALB. Y revisa el cross-zone load balancing: viene activado en el ALB y desactivado por defecto en NLB y GWLB.",
+        "show": [
+          "users",
+          "alb",
+          "tg",
+          "nlb",
+          "gwlb",
+          "appl",
+          "acm"
+        ],
+        "focus": "nlb"
+      }
+    ],
+    "keyPoints": [
+      "ELB ofrece ALB, NLB, GWLB y el heredado Classic Load Balancer.",
+      "ALB: HTTP/HTTPS, ruteo por path, host o header.",
+      "NLB: TCP/UDP, IP estática por AZ, altísimo rendimiento.",
+      "GWLB: inspección transparente con appliances mediante GENEVE 6081; el escalado de la flota se configura aparte.",
+      "ALB HTTPS descifra; NLB TCP 443 deja pasar cifrado.",
+      "¿IP fija y ruteo HTTP? NLB delante de ALB."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Global Accelerator",
+        "difference": "Global Accelerator da IPs anycast globales hacia varias Regions; el NLB da IPs fijas dentro de una Region."
+      },
+      {
+        "unitOrService": "Amazon API Gateway",
+        "difference": "API Gateway administra APIs con throttling y auth; el ALB balancea tráfico HTTP entre targets."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "elb--l1",
+      "conceptId": "elb-types-overview",
+      "format": "lightning",
+      "prompt": "Real-time game servers need load balancing for UDP traffic → ?",
+      "promptEs": "Servidores de juegos en tiempo real necesitan balancear tráfico UDP → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Application Load Balancer"
+        },
+        {
+          "id": "B",
+          "text": "Network Load Balancer"
+        },
+        {
+          "id": "C",
+          "text": "Gateway Load Balancer"
+        },
+        {
+          "id": "D",
+          "text": "Amazon API Gateway"
+        }
+      ],
+      "answer": "B",
+      "why": "UDP es tráfico Layer 4, terreno del NLB. El ALB solo entiende HTTP/HTTPS, y el GWLB es para insertar appliances, no para una capa de aplicación."
+    },
+    {
+      "id": "elb--l2",
+      "conceptId": "elb-types-overview",
+      "format": "lightning",
+      "prompt": "Need a static IP per AZ and HTTP path-based routing → ?",
+      "promptEs": "Necesitas una IP estática por AZ y ruteo HTTP por path → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ALB with Elastic IPs attached"
+        },
+        {
+          "id": "B",
+          "text": "GWLB in front of the ALB"
+        },
+        {
+          "id": "C",
+          "text": "NLB forwarding to ALB target group"
+        },
+        {
+          "id": "D",
+          "text": "Two NLBs with path-based HTTP listeners"
+        }
+      ],
+      "answer": "C",
+      "why": "Un NLB puede reenviar a un target group de tipo ALB: das IPs estáticas por AZ sin perder el ruteo por path. El ALB no admite Elastic IPs."
+    },
+    {
+      "id": "elb--l3",
+      "conceptId": "elb-types-overview",
+      "format": "thisorthat",
+      "prompt": "Cross-zone load balancing on a new Network Load Balancer → default?",
+      "promptEs": "Cross-zone load balancing en un Network Load Balancer nuevo → ¿valor por defecto?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Disabled by default"
+        },
+        {
+          "id": "B",
+          "text": "Enabled by default"
+        }
+      ],
+      "answer": "A",
+      "why": "En NLB y GWLB viene desactivado; cada nodo solo envía a targets de su AZ. En el ALB viene activado a nivel del balanceador."
+    },
+    {
+      "id": "elb--l4",
+      "conceptId": "elb-types-overview",
+      "format": "lightning",
+      "prompt": "Each NLB node should send traffic to targets in all enabled AZs → ?",
+      "promptEs": "Cada nodo del NLB debe enviar tráfico a targets de todas las AZs habilitadas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Switch to a Gateway Load Balancer"
+        },
+        {
+          "id": "B",
+          "text": "Attach more Elastic IP addresses"
+        },
+        {
+          "id": "C",
+          "text": "Add an HTTPS listener"
+        },
+        {
+          "id": "D",
+          "text": "Enable cross-zone load balancing"
+        }
+      ],
+      "answer": "D",
+      "why": "Sin cross-zone, cada nodo del NLB solo reparte entre los targets de su propia AZ. Activarlo permite repartir entre todas las AZs habilitadas."
+    },
+    {
+      "id": "elb--l5",
+      "conceptId": "alb-routing",
+      "format": "lightning",
+      "prompt": "One entry point routes /orders and /catalog to separate services → ?",
+      "promptEs": "Un solo punto de entrada envía /orders y /catalog a servicios distintos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NLB with TCP listeners"
+        },
+        {
+          "id": "B",
+          "text": "ALB path-based listener rules"
+        },
+        {
+          "id": "C",
+          "text": "GWLB with appliance target groups"
+        },
+        {
+          "id": "D",
+          "text": "Route 53 weighted records"
+        }
+      ],
+      "answer": "B",
+      "why": "Las listener rules del ALB evalúan el path y envían a target groups distintos. El NLB no ve rutas HTTP y Route 53 decide por DNS, no por path."
+    },
+    {
+      "id": "elb--l6",
+      "conceptId": "alb-routing",
+      "format": "lightning",
+      "prompt": "Several hostnames share one HTTPS load balancer, each to its own fleet → ?",
+      "promptEs": "Varios nombres de host comparten un balanceador HTTPS, cada uno hacia su propia flota → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ALB host-header rules"
+        },
+        {
+          "id": "B",
+          "text": "ALB path-based rules"
+        },
+        {
+          "id": "C",
+          "text": "NLB with one target group each"
+        },
+        {
+          "id": "D",
+          "text": "One ALB default rule only"
+        }
+      ],
+      "answer": "A",
+      "why": "Si las solicitudes difieren por dominio, necesitas condiciones de host, no de path. Un NLB no puede elegir flota por el header host."
+    },
+    {
+      "id": "elb--l7",
+      "conceptId": "alb-routing",
+      "format": "thisorthat",
+      "prompt": "A Lambda function must be a load balancer target → ?",
+      "promptEs": "Una función Lambda debe ser target de un balanceador → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Application Load Balancer"
+        },
+        {
+          "id": "B",
+          "text": "Network Load Balancer"
+        }
+      ],
+      "answer": "A",
+      "why": "Los target groups del ALB pueden contener instancias EC2, direcciones IP o funciones Lambda. El NLB no registra Lambda como target."
+    },
+    {
+      "id": "elb--l8",
+      "conceptId": "alb-routing",
+      "format": "lightning",
+      "prompt": "Block SQL injection requests at the load balancer → ?",
+      "promptEs": "Bloquear solicitudes con SQL injection en el balanceador → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Security group on the ALB"
+        },
+        {
+          "id": "B",
+          "text": "Network ACL deny rule"
+        },
+        {
+          "id": "C",
+          "text": "AWS WAF web ACL on the ALB"
+        },
+        {
+          "id": "D",
+          "text": "Gateway Load Balancer listener rule"
+        }
+      ],
+      "answer": "C",
+      "why": "AWS WAF se integra con el ALB y permite o bloquea solicitudes HTTP con una web ACL. Security groups y NACLs solo ven IPs y puertos."
+    },
+    {
+      "id": "elb--l9",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "format": "lightning",
+      "prompt": "Partner firewall allowlists fixed IP addresses for your TCP service → ?",
+      "promptEs": "El firewall de un socio solo permite IPs fijas para tu servicio TCP → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Application Load Balancer"
+        },
+        {
+          "id": "B",
+          "text": "Gateway Load Balancer"
+        },
+        {
+          "id": "C",
+          "text": "NLB with Elastic IP per subnet"
+        },
+        {
+          "id": "D",
+          "text": "CloudFront distribution in front"
+        }
+      ],
+      "answer": "C",
+      "why": "El NLB tiene una IP estática por AZ y, si es internet-facing, puede usar un Elastic IP por subnet. El ALB no ofrece IPs fijas."
+    },
+    {
+      "id": "elb--l10",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "format": "lightning",
+      "prompt": "TCP service must handle millions of requests per second → load balancer?",
+      "promptEs": "Un servicio TCP debe manejar millones de solicitudes por segundo → ¿qué balanceador?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Gateway Load Balancer"
+        },
+        {
+          "id": "B",
+          "text": "Application Load Balancer"
+        },
+        {
+          "id": "C",
+          "text": "Classic Load Balancer"
+        },
+        {
+          "id": "D",
+          "text": "Network Load Balancer"
+        }
+      ],
+      "answer": "D",
+      "why": "El NLB opera en Layer 4 y puede manejar millones de solicitudes por segundo. El GWLB es para appliances, no para una capa TCP de aplicación."
+    },
+    {
+      "id": "elb--l11",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "format": "thisorthat",
+      "prompt": "NLB with static IPs, enabled in a single AZ → highly available?",
+      "promptEs": "Un NLB con IPs estáticas, habilitado en una sola AZ → ¿es altamente disponible?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, enable multiple AZs"
+        },
+        {
+          "id": "B",
+          "text": "Yes, static IPs suffice"
+        }
+      ],
+      "answer": "A",
+      "why": "Las IPs estáticas no protegen contra la falla de la única AZ. Habilita varias AZs con al menos un target en cada una."
+    },
+    {
+      "id": "elb--l12",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "format": "lightning",
+      "prompt": "NLB fault-tolerance best practice for each target group → ?",
+      "promptEs": "Buena práctica de tolerancia a fallas del NLB para cada target group → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "At least one target per enabled AZ"
+        },
+        {
+          "id": "B",
+          "text": "One Elastic IP shared by all AZs"
+        },
+        {
+          "id": "C",
+          "text": "All targets in the primary AZ"
+        },
+        {
+          "id": "D",
+          "text": "Disable health checks during peaks"
+        }
+      ],
+      "answer": "A",
+      "why": "Por defecto cada nodo envía solo a targets de su AZ; sin targets ahí, esa AZ no atiende. Pon al menos un target en cada AZ habilitada."
+    },
+    {
+      "id": "elb--l13",
+      "conceptId": "gateway-load-balancer",
+      "format": "lightning",
+      "prompt": "Insert and scale third-party virtual firewalls transparently in the traffic path → ?",
+      "promptEs": "Insertar y escalar firewalls virtuales de terceros de forma transparente en el tráfico → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Application Load Balancer"
+        },
+        {
+          "id": "B",
+          "text": "Network Load Balancer"
+        },
+        {
+          "id": "C",
+          "text": "AWS WAF"
+        },
+        {
+          "id": "D",
+          "text": "Gateway Load Balancer"
+        }
+      ],
+      "answer": "D",
+      "why": "Si necesitas insertar firewalls virtuales de terceros de forma transparente, Gateway Load Balancer dirige el tráfico a los appliances y distribuye los flujos entre ellos. El escalado automático de la flota requiere configuración adicional."
+    },
+    {
+      "id": "elb--l14",
+      "conceptId": "gateway-load-balancer",
+      "format": "thisorthat",
+      "prompt": "Gateway Load Balancer exchanges traffic with appliances using → ?",
+      "promptEs": "El Gateway Load Balancer intercambia tráfico con los appliances usando → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "VXLAN on port 4789"
+        },
+        {
+          "id": "B",
+          "text": "GENEVE on port 6081"
+        }
+      ],
+      "answer": "B",
+      "why": "El GWLB encapsula el tráfico hacia los appliances con GENEVE en el puerto 6081 y mantiene cada flujo en el mismo appliance."
+    },
+    {
+      "id": "elb--l15",
+      "conceptId": "gateway-load-balancer",
+      "format": "lightning",
+      "prompt": "After creating a GWLB endpoint in the app VPC, what sends traffic through it?",
+      "promptEs": "Tras crear un GWLB endpoint en la VPC de la app, ¿qué hace que el tráfico pase por él?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an ALB listener rule"
+        },
+        {
+          "id": "B",
+          "text": "Route tables pointing to the endpoint"
+        },
+        {
+          "id": "C",
+          "text": "Attach a security group to GWLB"
+        },
+        {
+          "id": "D",
+          "text": "Enable cross-zone load balancing"
+        }
+      ],
+      "answer": "B",
+      "why": "El endpoint por sí solo no redirige nada: las route tables deben dirigir el tráfico hacia él. Además, debe estar en una subnet distinta de los servidores."
+    },
+    {
+      "id": "elb--l16",
+      "conceptId": "elb-tls-termination-acm",
+      "format": "lightning",
+      "prompt": "Terminate client TLS at the load balancer with a managed certificate → ?",
+      "promptEs": "Terminar el TLS del cliente en el balanceador con un certificado administrado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NLB TCP listener on 443"
+        },
+        {
+          "id": "B",
+          "text": "GWLB with GENEVE encapsulation"
+        },
+        {
+          "id": "C",
+          "text": "ALB HTTPS listener, ACM certificate"
+        },
+        {
+          "id": "D",
+          "text": "Self-signed certificates on targets"
+        }
+      ],
+      "answer": "C",
+      "why": "El listener HTTPS del ALB usa un certificado, por ejemplo de ACM, y una security policy para terminar TLS. El NLB TCP en el 443 no descifra."
+    },
+    {
+      "id": "elb--l17",
+      "conceptId": "elb-tls-termination-acm",
+      "format": "thisorthat",
+      "prompt": "Encrypted traffic must reach targets without load-balancer decryption → ?",
+      "promptEs": "El tráfico cifrado debe llegar a los targets sin que el balanceador lo descifre → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ALB HTTPS listener"
+        },
+        {
+          "id": "B",
+          "text": "NLB TCP listener on 443"
+        }
+      ],
+      "answer": "B",
+      "why": "El listener HTTPS del ALB descifra la conexión del cliente; no es passthrough. El NLB con listener TCP en el 443 pasa el tráfico cifrado intacto."
+    },
+    {
+      "id": "elb--l18",
+      "conceptId": "elb-tls-termination-acm",
+      "format": "lightning",
+      "prompt": "One ALB HTTPS listener must present certificates for several domains → ?",
+      "promptEs": "Un listener HTTPS de ALB debe presentar certificados de varios dominios → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add certificates to the SNI list"
+        },
+        {
+          "id": "B",
+          "text": "Create one ALB per domain"
+        },
+        {
+          "id": "C",
+          "text": "Change the listener security policy"
+        },
+        {
+          "id": "D",
+          "text": "Switch to an NLB TCP listener"
+        }
+      ],
+      "answer": "A",
+      "why": "Agregas certificados a la lista del listener y el ALB elige por SNI; el certificado predeterminado también entra en esa lista. La security policy define cifrados, no dominios."
+    }
+  ],
+  "audited": true
+}

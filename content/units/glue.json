@@ -1,0 +1,435 @@
+{
+  "unitId": "glue",
+  "overview": {
+    "title": "AWS Glue, data lakes y AppFlow",
+    "hook": "Un lago de datos en S3 que alguien puede encontrar, limpiar y consultar.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "saas",
+          "label": "Apps SaaS",
+          "kind": "actor",
+          "x": 8,
+          "y": 20
+        },
+        {
+          "id": "appflow",
+          "label": "AppFlow",
+          "kind": "service",
+          "service": "Amazon AppFlow",
+          "x": 32,
+          "y": 20
+        },
+        {
+          "id": "s3",
+          "label": "Data lake S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 58,
+          "y": 45
+        },
+        {
+          "id": "glue",
+          "label": "Glue crawler + ETL",
+          "kind": "service",
+          "service": "AWS Glue",
+          "x": 32,
+          "y": 80
+        },
+        {
+          "id": "catalog",
+          "label": "Data Catalog",
+          "kind": "data",
+          "x": 66,
+          "y": 85
+        },
+        {
+          "id": "athena",
+          "label": "Athena",
+          "kind": "service",
+          "service": "Amazon Athena",
+          "x": 90,
+          "y": 45
+        }
+      ],
+      "edges": [
+        {
+          "from": "saas",
+          "to": "appflow",
+          "label": "flow programado"
+        },
+        {
+          "from": "appflow",
+          "to": "s3",
+          "label": "datos raw"
+        },
+        {
+          "from": "glue",
+          "to": "s3",
+          "label": "lee y escribe"
+        },
+        {
+          "from": "glue",
+          "to": "catalog",
+          "label": "esquemas"
+        },
+        {
+          "from": "catalog",
+          "to": "athena",
+          "label": "tablas"
+        },
+        {
+          "from": "s3",
+          "to": "athena",
+          "label": "lee in situ"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Un data lake es un lugar central, normalmente Amazon S3, donde guardas datos de todo tipo, crudos y procesados. El almacenamiento y el cómputo escalan por separado, y distintas herramientas consultan los mismos datos sin meterlos todos en un solo motor.",
+        "show": [
+          "s3"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "Los datos llegan de muchas fuentes. Si vienen de aplicaciones SaaS como Salesforce o Zendesk, Amazon AppFlow los mueve a S3 o a Redshift sin escribir código, a demanda o programado. Según el conector, puede usar AWS PrivateLink para transferencia privada.",
+        "show": [
+          "s3",
+          "saas",
+          "appflow"
+        ],
+        "focus": "appflow"
+      },
+      {
+        "narration": "Pero archivos sueltos no sirven si nadie sabe qué hay. Los crawlers de AWS Glue recorren S3, infieren el esquema y lo registran en el Glue Data Catalog. Ese catálogo guarda metadatos, como ubicación y columnas, no los datos en sí.",
+        "show": [
+          "s3",
+          "saas",
+          "appflow",
+          "glue",
+          "catalog"
+        ],
+        "focus": "catalog"
+      },
+      {
+        "narration": "Glue también ejecuta jobs de ETL serverless, basados en Spark, para limpiar y transformar: programados, a demanda o por evento. Un patrón típico es una zona raw con los originales y otra zona curada con la versión limpia.",
+        "show": [
+          "s3",
+          "saas",
+          "appflow",
+          "glue",
+          "catalog"
+        ],
+        "focus": "glue"
+      },
+      {
+        "narration": "El examen adora una transformación: pasar CSV o JSON a formatos columnares como Parquet u ORC, y particionar por los valores que más filtras. Así Athena lee menos datos. Para archivos existentes, usa Athena CTAS o un job de Glue.",
+        "show": [
+          "s3",
+          "saas",
+          "appflow",
+          "glue",
+          "catalog",
+          "athena"
+        ],
+        "focus": "athena"
+      },
+      {
+        "narration": "Si los datos llegan en streaming como JSON, Data Firehose puede convertirlos a Parquet u ORC antes de escribir en S3, usando un esquema del Data Catalog. Si llegan en CSV, primero necesitas una Lambda que los pase a JSON.",
+        "show": [
+          "s3",
+          "saas",
+          "appflow",
+          "glue",
+          "catalog",
+          "athena"
+        ],
+        "focus": "catalog"
+      },
+      {
+        "narration": "No confundas los papeles: el crawler descubre esquemas pero no limpia; Athena consulta pero no reemplaza un pipeline; y EMR ofrece tanto clústeres como EMR Serverless para procesamiento de big data. AWS Data Exchange, en cambio, sirve para suscribirte a datos de terceros.",
+        "show": [
+          "s3",
+          "saas",
+          "appflow",
+          "glue",
+          "catalog",
+          "athena"
+        ],
+        "focus": "glue"
+      }
+    ],
+    "keyPoints": [
+      "Data lake en S3: raw más curado, cómputo separado.",
+      "Crawler infiere esquemas y llena el Data Catalog.",
+      "El Data Catalog guarda metadatos, no los datos.",
+      "Glue ETL: Spark serverless para limpiar y transformar.",
+      "De SaaS a S3 o Redshift sin código: AppFlow."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon EMR",
+        "difference": "EMR ofrece clústeres para Spark o Hadoop y también EMR Serverless; Glue ofrece jobs ETL serverless."
+      },
+      {
+        "unitOrService": "Amazon Athena",
+        "difference": "Athena consulta con SQL; Glue descubre esquemas, cataloga y transforma los datos."
+      },
+      {
+        "unitOrService": "AWS DataSync",
+        "difference": "DataSync copia archivos de almacenamiento existente; AppFlow extrae datos de aplicaciones SaaS."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "glue--l1",
+      "conceptId": "appflow",
+      "format": "lightning",
+      "prompt": "Salesforce records into Redshift without writing integration code → ?",
+      "promptEs": "Registros de Salesforce hacia Redshift sin escribir código de integración → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "B",
+          "text": "Amazon AppFlow"
+        },
+        {
+          "id": "C",
+          "text": "AWS Glue crawler"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Data Firehose"
+        }
+      ],
+      "answer": "B",
+      "why": "AppFlow es el flujo administrado de SaaS a AWS, como Salesforce a Redshift. DataSync mueve archivos de almacenamiento y un crawler solo cataloga metadatos."
+    },
+    {
+      "id": "glue--l3",
+      "conceptId": "data-lake-s3-architecture",
+      "format": "lightning",
+      "prompt": "Keep raw data, share it with many analytics tools, scale storage separately → ?",
+      "promptEs": "Conservar datos crudos, compartirlos con varias herramientas y escalar almacenamiento aparte → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One large Redshift cluster"
+        },
+        {
+          "id": "B",
+          "text": "EBS volumes per team"
+        },
+        {
+          "id": "C",
+          "text": "Data lake on Amazon S3"
+        },
+        {
+          "id": "D",
+          "text": "One RDS database per source"
+        }
+      ],
+      "answer": "C",
+      "why": "Un data lake en S3 desacopla almacenamiento de cómputo y deja que varias herramientas consulten in situ. Meter todo en un motor ata el almacenamiento a su cómputo."
+    },
+    {
+      "id": "glue--l4",
+      "conceptId": "data-lake-s3-architecture",
+      "format": "thisorthat",
+      "prompt": "Must preserve original inputs and also publish cleaned datasets → ?",
+      "promptEs": "Hay que conservar las entradas originales y también publicar datos limpios → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep only transformed output"
+        },
+        {
+          "id": "B",
+          "text": "Raw and curated S3 zones"
+        }
+      ],
+      "answer": "B",
+      "why": "Separar zona raw y zona curada cumple ambos requisitos. Guardar solo la salida transformada pierde los originales que se pidió conservar."
+    },
+    {
+      "id": "glue--l5",
+      "conceptId": "data-lake-s3-architecture",
+      "format": "lightning",
+      "prompt": "Find and subscribe to third-party datasets for your data lake → ?",
+      "promptEs": "Encontrar y suscribirte a conjuntos de datos de terceros para tu data lake → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon AppFlow"
+        },
+        {
+          "id": "B",
+          "text": "AWS Glue Data Catalog"
+        },
+        {
+          "id": "C",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "D",
+          "text": "AWS Data Exchange"
+        }
+      ],
+      "answer": "D",
+      "why": "AWS Data Exchange es el catálogo de datos de terceros al que te suscribes. AppFlow conecta tus propias apps SaaS y el Data Catalog describe tus datos."
+    },
+    {
+      "id": "glue--l6",
+      "conceptId": "glue-etl-data-catalog",
+      "format": "lightning",
+      "prompt": "Automatically infer the schema of new files in S3 → ?",
+      "promptEs": "Inferir automáticamente el esquema de archivos nuevos en S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Glue ETL job"
+        },
+        {
+          "id": "B",
+          "text": "Athena CTAS query"
+        },
+        {
+          "id": "C",
+          "text": "S3 Inventory report"
+        },
+        {
+          "id": "D",
+          "text": "Glue crawler"
+        }
+      ],
+      "answer": "D",
+      "why": "Un crawler recorre la fuente, extrae metadatos y los registra en el Data Catalog. Un job ETL transforma datos, pero no es la herramienta de descubrimiento de esquemas."
+    },
+    {
+      "id": "glue--l8",
+      "conceptId": "glue-etl-data-catalog",
+      "format": "thisorthat",
+      "prompt": "What does the AWS Glue Data Catalog store?",
+      "promptEs": "¿Qué guarda el AWS Glue Data Catalog?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Metadata: location and schema"
+        },
+        {
+          "id": "B",
+          "text": "A copy of the records"
+        }
+      ],
+      "answer": "A",
+      "why": "El Data Catalog es un repositorio de metadatos: dónde están los datos y qué esquema tienen. Los registros siguen en su almacén original, como S3."
+    },
+    {
+      "id": "glue--l9",
+      "conceptId": "glue-etl-data-catalog",
+      "format": "lightning",
+      "prompt": "One metadata store shared by Athena, EMR and Redshift Spectrum → ?",
+      "promptEs": "Un solo almacén de metadatos compartido por Athena, EMR y Redshift Spectrum → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon S3 Inventory"
+        },
+        {
+          "id": "B",
+          "text": "Amazon DynamoDB table"
+        },
+        {
+          "id": "C",
+          "text": "AWS Glue Data Catalog"
+        },
+        {
+          "id": "D",
+          "text": "Amazon OpenSearch index"
+        }
+      ],
+      "answer": "C",
+      "why": "Athena, EMR y Redshift Spectrum pueden usar las tablas del Glue Data Catalog. S3 Inventory lista objetos, pero no define esquemas para consultar."
+    },
+    {
+      "id": "glue--l10",
+      "conceptId": "data-format-conversion",
+      "format": "lightning",
+      "prompt": "Reduce Athena data read from existing CSV files in S3 → ?",
+      "promptEs": "Reducir los datos que Athena lee de archivos CSV existentes en S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Convert to Parquet with CTAS"
+        },
+        {
+          "id": "B",
+          "text": "Enable S3 Transfer Acceleration"
+        },
+        {
+          "id": "C",
+          "text": "Run a Glue crawler"
+        },
+        {
+          "id": "D",
+          "text": "Move files to Glacier"
+        }
+      ],
+      "answer": "A",
+      "why": "Parquet es columnar y comprimido, así que Athena lee solo lo necesario. Un crawler crea el esquema, pero no reescribe los archivos en otro formato."
+    },
+    {
+      "id": "glue--l11",
+      "conceptId": "data-format-conversion",
+      "format": "lightning",
+      "prompt": "Streaming JSON must land in S3 as Parquet → ?",
+      "promptEs": "JSON en streaming debe llegar a S3 como Parquet → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Glue crawler on arrival"
+        },
+        {
+          "id": "B",
+          "text": "Firehose record format conversion"
+        },
+        {
+          "id": "C",
+          "text": "S3 Lifecycle rule"
+        },
+        {
+          "id": "D",
+          "text": "Kinesis enhanced fan-out"
+        }
+      ],
+      "answer": "B",
+      "why": "Firehose convierte JSON a Parquet u ORC antes de escribir en S3, usando un esquema del Data Catalog. Un crawler cataloga, pero no convierte formatos."
+    },
+    {
+      "id": "glue--l12",
+      "conceptId": "data-format-conversion",
+      "format": "thisorthat",
+      "prompt": "Firehose receives CSV but must write Parquet. What's needed first?",
+      "promptEs": "Firehose recibe CSV pero debe escribir Parquet. ¿Qué se necesita primero?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lambda transform to JSON"
+        },
+        {
+          "id": "B",
+          "text": "Nothing: direct CSV conversion"
+        }
+      ],
+      "answer": "A",
+      "why": "La conversión de formato de Firehose parte de JSON. Si la entrada es CSV, primero una Lambda debe transformarla a JSON."
+    }
+  ],
+  "audited": true
+}

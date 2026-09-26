@@ -1,0 +1,590 @@
+{
+  "unitId": "network-cost",
+  "overview": {
+    "title": "Costos de red y transferencia de datos",
+    "hook": "En AWS pagas por el camino que recorren tus datos.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "App privada",
+          "kind": "actor",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "nat",
+          "label": "NAT gateway",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 38,
+          "y": 22
+        },
+        {
+          "id": "ext",
+          "label": "Internet / API",
+          "kind": "actor",
+          "x": 68,
+          "y": 22
+        },
+        {
+          "id": "gwe",
+          "label": "Gateway endpoint",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 38,
+          "y": 78
+        },
+        {
+          "id": "s3",
+          "label": "S3 / DynamoDB",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 68,
+          "y": 78
+        },
+        {
+          "id": "cf",
+          "label": "CloudFront",
+          "kind": "service",
+          "service": "Amazon CloudFront",
+          "x": 92,
+          "y": 50
+        },
+        {
+          "id": "onprem",
+          "label": "On-prem: DX o VPN",
+          "kind": "service",
+          "service": "AWS Direct Connect",
+          "x": 10,
+          "y": 92
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "nat",
+          "label": "$ por GB"
+        },
+        {
+          "from": "nat",
+          "to": "ext",
+          "label": "egress"
+        },
+        {
+          "from": "app",
+          "to": "gwe",
+          "label": "sin costo extra"
+        },
+        {
+          "from": "gwe",
+          "to": "s3",
+          "label": "misma Region"
+        },
+        {
+          "from": "s3",
+          "to": "cf",
+          "label": "origen → edge"
+        },
+        {
+          "from": "onprem",
+          "to": "app",
+          "label": "híbrido"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "En AWS pagas por los datos según el camino que recorren. Entrar desde internet no tiene cargo de transferencia; salir a internet sí. Entre Availability Zones y entre Regions también puede haber cargos. Antes de optimizar, identifica el camino del tráfico.",
+        "show": [
+          "app",
+          "ext"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "Entre Regions, CUR muestra dos line items: se cobra la salida del origen, no la entrada al destino. Entre AZs, el tráfico facturable puede cobrarse al entrar y salir; verifica excepciones por servicio y tipo de transferencia. Acerca trabajos a sus datos.",
+        "show": [
+          "app",
+          "ext"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "Un error caro: servidores privados que suben terabytes a S3 pasando por un NAT gateway. El NAT cobra por hora y por cada gigabyte que procesa, aunque el destino sea un servicio de AWS en tu misma Region.",
+        "show": [
+          "app",
+          "ext",
+          "nat"
+        ],
+        "focus": "nat"
+      },
+      {
+        "narration": "La solución es un gateway endpoint para S3 o DynamoDB, sin costo adicional. Asócialo a la route table de cada subnet que lo use, y conserva la ruta por defecto al NAT para otros destinos, como una API externa.",
+        "show": [
+          "app",
+          "ext",
+          "nat",
+          "gwe",
+          "s3"
+        ],
+        "focus": "gwe"
+      },
+      {
+        "narration": "Para servir contenido popular a usuarios de todo el mundo, CloudFront lo cachea en edge locations. La transferencia desde un origen de AWS hacia CloudFront no se cobra, y un buen cache key con un max-age adecuado reduce las visitas al origen.",
+        "show": [
+          "app",
+          "ext",
+          "nat",
+          "gwe",
+          "s3",
+          "cf"
+        ],
+        "focus": "cf"
+      },
+      {
+        "narration": "Para conectar tu oficina, Site-to-Site VPN reutiliza tu internet actual y conviene con tráfico ocasional. Direct Connect usa una línea privada con desempeño más predecible, y conviene cuando el volumen sostenido paga el circuito.",
+        "show": [
+          "app",
+          "ext",
+          "nat",
+          "gwe",
+          "s3",
+          "cf",
+          "onprem"
+        ],
+        "focus": "onprem"
+      },
+      {
+        "narration": "Y en una carga que ya existe, no cambies la topología a ciegas: revisa VPC Flow Logs y los datos de costo, modela los caminos caros y cambia solo los que sobran, sin romper la disponibilidad.",
+        "show": [
+          "app",
+          "ext",
+          "nat",
+          "gwe",
+          "s3",
+          "cf",
+          "onprem"
+        ],
+        "focus": "app"
+      }
+    ],
+    "keyPoints": [
+      "Entrar desde internet no se cobra; salir a internet sí.",
+      "Inter-Region: se cobra la salida de la Region de origen.",
+      "Inter-AZ: verifica qué tráfico es facturable; hay excepciones según servicio y transferencia.",
+      "S3/DynamoDB desde subnet privada: gateway endpoint, no NAT.",
+      "Origen AWS hacia CloudFront: sin cargo de transferencia.",
+      "VPN para tráfico ocasional; Direct Connect para volumen sostenido."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "NAT gateway",
+        "difference": "Sirve cualquier destino saliente, pero cobra por hora y por GB procesado."
+      },
+      {
+        "unitOrService": "Interface VPC endpoint",
+        "difference": "Tiene cargos propios; para S3 y DynamoDB el gateway endpoint no tiene costo adicional."
+      },
+      {
+        "unitOrService": "AWS Global Accelerator",
+        "difference": "Acelera el camino de red hacia tu app, pero no cachea contenido como CloudFront."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "network-cost--l1",
+      "conceptId": "data-transfer-costs",
+      "format": "lightning",
+      "prompt": "Batch job with no placement constraints reads temp data from EC2 in another AZ → cut cost?",
+      "promptEs": "Un batch sin restricciones de ubicación lee datos temporales de un EC2 en otra AZ → ¿cómo bajar costo?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the job in that AZ"
+        },
+        {
+          "id": "B",
+          "text": "Route through a NAT gateway"
+        },
+        {
+          "id": "C",
+          "text": "Add a VPC peering connection"
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Transfer Acceleration"
+        }
+      ],
+      "answer": "A",
+      "why": "El tráfico entre AZs se cobra en ambos sentidos. Si el trabajo no tiene requisitos de disponibilidad que lo impidan, ponerlo junto a sus datos elimina esa transferencia."
+    },
+    {
+      "id": "network-cost--l2",
+      "conceptId": "data-transfer-costs",
+      "format": "thisorthat",
+      "prompt": "Inter-Region copy shows AWS-In-Bytes and AWS-Out-Bytes in CUR. What is charged?",
+      "promptEs": "Una copia entre Regions muestra AWS-In-Bytes y AWS-Out-Bytes en el CUR. ¿Qué se cobra?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Both directions"
+        },
+        {
+          "id": "B",
+          "text": "Transfer out of the source Region"
+        }
+      ],
+      "answer": "B",
+      "why": "Dos line items no significan dos cobros: la entrada a la Region destino no tiene cargo. Se cobra la salida desde la Region de origen."
+    },
+    {
+      "id": "network-cost--l3",
+      "conceptId": "data-transfer-costs",
+      "format": "lightning",
+      "prompt": "Separate CloudFront egress from other internet egress in the CUR → which field?",
+      "promptEs": "Separar el egress de CloudFront del resto del egress a internet en el CUR → ¿qué campo?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DataTransfer-Out-Bytes usage type"
+        },
+        {
+          "id": "B",
+          "text": "Availability Zone column"
+        },
+        {
+          "id": "C",
+          "text": "lineItem/ProductCode"
+        },
+        {
+          "id": "D",
+          "text": "Resource ID only"
+        }
+      ],
+      "answer": "C",
+      "why": "Los usage types de egress de CloudFront y del resto pueden parecerse. El product code AmazonCloudFront identifica esos registros de forma confiable."
+    },
+    {
+      "id": "network-cost--l4",
+      "conceptId": "data-transfer-costs",
+      "format": "lightning",
+      "prompt": "Data transfer from the internet into AWS → charge?",
+      "promptEs": "Transferencia de datos desde internet hacia AWS → ¿cargo?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No data transfer charge"
+        },
+        {
+          "id": "B",
+          "text": "Charged per GB inbound"
+        },
+        {
+          "id": "C",
+          "text": "Charged at inter-Region rate"
+        },
+        {
+          "id": "D",
+          "text": "Charged only above 1 TB"
+        }
+      ],
+      "answer": "A",
+      "why": "La entrada desde internet no tiene cargo de transferencia. Lo que se cobra es la salida a internet, la transferencia entre Regions y la mayoría del tráfico entre AZs."
+    },
+    {
+      "id": "network-cost--l5",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "format": "lightning",
+      "prompt": "Private-subnet uploads to same-Region S3 inflate NAT processing charges → ?",
+      "promptEs": "Subidas desde subnets privadas a S3 en la misma Region inflan los cargos del NAT → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a second NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "S3 gateway endpoint"
+        },
+        {
+          "id": "C",
+          "text": "Public IPs and internet gateway"
+        },
+        {
+          "id": "D",
+          "text": "S3 Transfer Acceleration"
+        }
+      ],
+      "answer": "B",
+      "why": "El gateway endpoint de S3 lleva ese tráfico sin pasar por el NAT y no tiene costo adicional. Otro NAT gateway solo suma cargos por hora y por GB."
+    },
+    {
+      "id": "network-cost--l6",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "format": "lightning",
+      "prompt": "DynamoDB gateway endpoint exists; one subnet still sends DynamoDB traffic via NAT → cheapest fix?",
+      "promptEs": "Existe un gateway endpoint de DynamoDB; una subnet aún envía ese tráfico por el NAT → ¿solución más barata?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Delete the NAT default route"
+        },
+        {
+          "id": "B",
+          "text": "Add a DynamoDB interface endpoint"
+        },
+        {
+          "id": "C",
+          "text": "Enable DynamoDB Accelerator (DAX)"
+        },
+        {
+          "id": "D",
+          "text": "Associate that subnet's route table"
+        }
+      ],
+      "answer": "D",
+      "why": "El endpoint solo aplica a las route tables asociadas. Borrar la ruta por defecto cortaría otros destinos que siguen necesitando el NAT."
+    },
+    {
+      "id": "network-cost--l7",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "format": "thisorthat",
+      "prompt": "S3 gateway endpoint added; workers still call an external payment API → default route?",
+      "promptEs": "Se agregó un gateway endpoint de S3; los workers aún llaman a una API de pagos externa → ¿ruta por defecto?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the NAT default route"
+        },
+        {
+          "id": "B",
+          "text": "Replace it with the endpoint"
+        }
+      ],
+      "answer": "A",
+      "why": "La ruta del endpoint gana para S3 en la Region, pero la ruta 0.0.0.0/0 al NAT sigue sirviendo a la API externa. Reemplazarla corta ese acceso."
+    },
+    {
+      "id": "network-cost--l8",
+      "conceptId": "nat-cost-vpc-endpoints",
+      "format": "lightning",
+      "prompt": "Private subnet has an S3 gateway endpoint and NAT default route; bucket in another Region → path?",
+      "promptEs": "La subnet privada tiene gateway endpoint de S3 y ruta por defecto al NAT; bucket en otra Region → ¿camino?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The gateway endpoint"
+        },
+        {
+          "id": "B",
+          "text": "A transit gateway automatically"
+        },
+        {
+          "id": "C",
+          "text": "The NAT default route"
+        },
+        {
+          "id": "D",
+          "text": "VPC peering automatically"
+        }
+      ],
+      "answer": "C",
+      "why": "El prefix list del gateway endpoint es de su propia Region. El tráfico a S3 en otra Region sigue la ruta por defecto hacia el NAT."
+    },
+    {
+      "id": "network-cost--l9",
+      "conceptId": "cdn-edge-caching-cost",
+      "format": "lightning",
+      "prompt": "Same S3 images downloaded repeatedly across continents; fewer origin requests → ?",
+      "promptEs": "Las mismas imágenes de S3 se descargan una y otra vez en varios continentes; menos requests al origen → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "id": "B",
+          "text": "CloudFront with S3 origin"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "AWS Global Accelerator"
+        }
+      ],
+      "answer": "B",
+      "why": "CloudFront cachea en edge locations cerca de los usuarios y reduce las visitas al origen. Global Accelerator y Transfer Acceleration aceleran la red, pero no cachean."
+    },
+    {
+      "id": "network-cost--l10",
+      "conceptId": "cdn-edge-caching-cost",
+      "format": "thisorthat",
+      "prompt": "Identical CSS gets cached separately per session cookie value → fix?",
+      "promptEs": "CSS idéntico se cachea por separado según el valor de la cookie de sesión → ¿solución?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Forward all cookies to the origin"
+        },
+        {
+          "id": "B",
+          "text": "CSS cache behavior ignoring cookies"
+        }
+      ],
+      "answer": "B",
+      "why": "Incluir cookies irrelevantes en el cache key fragmenta la caché. Un cache behavior aparte para el CSS, sin cookies, comparte una sola copia."
+    },
+    {
+      "id": "network-cost--l11",
+      "conceptId": "cdn-edge-caching-cost",
+      "format": "lightning",
+      "prompt": "Add a CloudFront caching layer that consolidates origin requests through one location → ?",
+      "promptEs": "Agregar una capa de caché de CloudFront que concentre los requests al origen en una ubicación → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lambda@Edge function"
+        },
+        {
+          "id": "B",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "C",
+          "text": "Route 53 latency routing"
+        },
+        {
+          "id": "D",
+          "text": "CloudFront Origin Shield"
+        }
+      ],
+      "answer": "D",
+      "why": "Origin Shield agrega una capa de caché y consolida los requests al origen. Complementa, no reemplaza, un buen cache key y un max-age adecuado."
+    },
+    {
+      "id": "network-cost--l12",
+      "conceptId": "hybrid-connectivity-cost",
+      "format": "lightning",
+      "prompt": "Irregular IPsec access to a VPC, reusing the existing internet link, lowest cost → ?",
+      "promptEs": "Acceso IPsec irregular a una VPC, reutilizando el internet actual, al menor costo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "id": "B",
+          "text": "Public internet endpoint"
+        },
+        {
+          "id": "C",
+          "text": "AWS Site-to-Site VPN"
+        },
+        {
+          "id": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": "C",
+      "why": "Site-to-Site VPN usa tu conexión y equipos existentes. Con tráfico ocasional, un circuito de Direct Connect no se paga solo; un endpoint público no extiende tu red privada."
+    },
+    {
+      "id": "network-cost--l13",
+      "conceptId": "hybrid-connectivity-cost",
+      "format": "thisorthat",
+      "prompt": "Steady high-volume transfers; bandwidth savings exceed circuit costs; predictable performance → ?",
+      "promptEs": "Transferencias sostenidas de alto volumen; el ahorro supera el costo del circuito; desempeño predecible → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Site-to-Site VPN"
+        },
+        {
+          "id": "B",
+          "text": "AWS Direct Connect"
+        }
+      ],
+      "answer": "B",
+      "why": "Direct Connect da una línea privada con desempeño más predecible y menor costo de ancho de banda. Conviene cuando ese ahorro supera los cargos recurrentes."
+    },
+    {
+      "id": "network-cost--l14",
+      "conceptId": "hybrid-connectivity-cost",
+      "format": "lightning",
+      "prompt": "VPN needing vendor protocols AWS doesn't offer; team accepts managing it fully → ?",
+      "promptEs": "VPN con protocolos de proveedores que AWS no ofrece; el equipo acepta gestionarla completa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Site-to-Site VPN"
+        },
+        {
+          "id": "B",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "id": "C",
+          "text": "AWS Client VPN"
+        },
+        {
+          "id": "D",
+          "text": "Software VPN on EC2"
+        }
+      ],
+      "answer": "D",
+      "why": "Una software VPN admite más proveedores y protocolos, pero la gestionas tú por completo. Site-to-Site VPN es gestionada por AWS, con opciones más acotadas."
+    },
+    {
+      "id": "network-cost--l15",
+      "conceptId": "network-optimization-review",
+      "format": "lightning",
+      "prompt": "Network spend rose; traffic sources unknown; connectivity must stay → first step?",
+      "promptEs": "Subió el gasto de red; no se conocen las fuentes del tráfico; la conectividad debe mantenerse → ¿primer paso?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Remove Transit Gateway attachments"
+        },
+        {
+          "id": "B",
+          "text": "Consolidate all VPCs into one"
+        },
+        {
+          "id": "C",
+          "text": "Analyze Flow Logs and cost data"
+        },
+        {
+          "id": "D",
+          "text": "Order a Direct Connect link"
+        }
+      ],
+      "answer": "C",
+      "why": "Primero modela el tráfico con VPC Flow Logs y datos de costo, y luego cambia solo los caminos que sobran. Quitar recursos a ciegas puede romper conectividad requerida."
+    },
+    {
+      "id": "network-cost--l16",
+      "conceptId": "network-optimization-review",
+      "format": "thisorthat",
+      "prompt": "Flow Logs show two chatty services in separate locations → evaluate first?",
+      "promptEs": "Flow Logs muestran dos servicios muy conversadores en ubicaciones separadas → ¿qué evaluar primero?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place them closer, respecting availability"
+        },
+        {
+          "id": "B",
+          "text": "Add more NAT gateways"
+        }
+      ],
+      "answer": "A",
+      "why": "Acercar componentes que se comunican mucho reduce transferencia evitable. Hazlo solo si no rompe los requisitos de disponibilidad de la carga."
+    }
+  ],
+  "audited": true
+}

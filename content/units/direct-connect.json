@@ -1,0 +1,417 @@
+{
+  "unitId": "direct-connect",
+  "overview": {
+    "title": "AWS Direct Connect",
+    "hook": "Un enlace privado desde tu data center hasta AWS, sin transitar por internet público.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "dc",
+          "label": "Data center",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "loc",
+          "label": "DX location",
+          "kind": "zone",
+          "x": 32,
+          "y": 50
+        },
+        {
+          "id": "vpn",
+          "label": "VPN de respaldo",
+          "kind": "service",
+          "service": "AWS Site-to-Site VPN",
+          "x": 32,
+          "y": 88
+        },
+        {
+          "id": "dxgw",
+          "label": "DX gateway",
+          "kind": "service",
+          "service": "Direct Connect gateway",
+          "x": 60,
+          "y": 28
+        },
+        {
+          "id": "s3",
+          "label": "Amazon S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 60,
+          "y": 78
+        },
+        {
+          "id": "vpc1",
+          "label": "VPC us-east-1",
+          "kind": "zone",
+          "x": 90,
+          "y": 15
+        },
+        {
+          "id": "vpc2",
+          "label": "VPC eu-west-1",
+          "kind": "zone",
+          "x": 90,
+          "y": 45
+        }
+      ],
+      "edges": [
+        {
+          "from": "dc",
+          "to": "loc",
+          "label": "enlace dedicado"
+        },
+        {
+          "from": "loc",
+          "to": "dxgw",
+          "label": "private VIF"
+        },
+        {
+          "from": "dxgw",
+          "to": "vpc1"
+        },
+        {
+          "from": "dxgw",
+          "to": "vpc2"
+        },
+        {
+          "from": "loc",
+          "to": "s3",
+          "label": "public VIF"
+        },
+        {
+          "from": "dc",
+          "to": "vpn",
+          "label": "IPsec backup"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Si tu data center mueve muchos datos a AWS todos los días, el tránsito por internet público puede ser impredecible. AWS Direct Connect ofrece un enlace privado hasta una Direct Connect location para obtener un rendimiento más consistente. Un proveedor de conectividad puede suministrar ese circuito.",
+        "show": [
+          "dc",
+          "loc"
+        ],
+        "focus": "loc"
+      },
+      {
+        "narration": "Tu enlace llega a una Direct Connect location. Sobre él creas virtual interfaces: una private VIF llega a tu VPC con IPs privadas, y una public VIF llega a servicios públicos como Amazon S3 con IPs públicas.",
+        "show": [
+          "dc",
+          "loc",
+          "dxgw",
+          "s3",
+          "vpc1"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "Con un Direct Connect gateway, una misma private VIF puede alcanzar VPCs en varias Regions y cuentas compatibles. El gateway tiene alta disponibilidad integrada, pero eso no sustituye enlaces físicos redundantes.",
+        "show": [
+          "dc",
+          "loc",
+          "dxgw",
+          "s3",
+          "vpc1",
+          "vpc2"
+        ],
+        "focus": "dxgw"
+      },
+      {
+        "narration": "Privado no significa cifrado. Si necesitas cifrado, puedes usar MACsec en conexiones compatibles o una VPN IPsec, incluida private IP VPN sobre Direct Connect. Una Site-to-Site VPN por internet público también puede respaldar el tráfico hacia la VPC si cae el enlace.",
+        "show": [
+          "dc",
+          "loc",
+          "dxgw",
+          "s3",
+          "vpc1",
+          "vpc2",
+          "vpn"
+        ],
+        "focus": "vpn"
+      },
+      {
+        "narration": "La resiliencia depende de dónde terminan tus enlaces. La máxima resiliencia usa conexiones separadas, en dispositivos separados y en más de una location. Dos dispositivos en una sola location no te protegen si falla esa location.",
+        "show": [
+          "dc",
+          "loc",
+          "dxgw",
+          "s3",
+          "vpc1",
+          "vpc2",
+          "vpn"
+        ],
+        "focus": "loc"
+      },
+      {
+        "narration": "Dimensiona por ancho de banda. Un puerto dedicado es de 1, 10, 100 o 400 Gbps y no se redimensiona: necesitas una conexión nueva. Si agregas túneles VPN con ECMP en Transit Gateway, necesitas ruteo dinámico.",
+        "show": [
+          "dc",
+          "loc",
+          "dxgw",
+          "s3",
+          "vpc1",
+          "vpc2",
+          "vpn"
+        ],
+        "focus": "dc"
+      },
+      {
+        "narration": "Direct Connect requiere establecer un circuito físico, así que no es inmediato. Si necesitas una conexión cifrada pronto, puedes empezar con Site-to-Site VPN por internet público. Si buscas rendimiento consistente para tráfico sostenido, considera Direct Connect; también admite private IP VPN para cifrar tráfico sobre el enlace.",
+        "show": [
+          "dc",
+          "loc",
+          "dxgw",
+          "s3",
+          "vpc1",
+          "vpc2",
+          "vpn"
+        ],
+        "focus": "vpn"
+      }
+    ],
+    "keyPoints": [
+      "Private VIF para la VPC; public VIF para servicios como S3.",
+      "DX gateway: una VIF hacia VPCs en varias Regions.",
+      "Direct Connect no está cifrado por defecto: MACsec o IPsec.",
+      "Máxima resiliencia: varias locations, dispositivos separados.",
+      "El puerto dedicado no se redimensiona: pide una conexión nueva."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Site-to-Site VPN",
+        "difference": "La VPN usa IPsec y puede funcionar por internet público o como private IP VPN sobre Direct Connect; Direct Connect aporta el enlace privado físico, pero no cifra por defecto."
+      },
+      {
+        "unitOrService": "AWS Transit Gateway",
+        "difference": "Transit Gateway enruta entre muchas redes; no reemplaza el enlace físico desde tu data center."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "direct-connect--l1",
+      "conceptId": "direct-connect",
+      "format": "lightning",
+      "prompt": "Sustained large transfers from a data center; consistent performance, bypass the internet → ?",
+      "promptEs": "Transferencias grandes y sostenidas desde un data center; rendimiento consistente y sin internet → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Site-to-Site VPN"
+        },
+        {
+          "id": "B",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "AWS Client VPN"
+        }
+      ],
+      "answer": "B",
+      "why": "Con AWS Direct Connect, puedes transferir grandes volúmenes de forma sostenida por una ruta privada que no atraviesa internet público, con rendimiento más consistente; un proveedor puede entregar el circuito."
+    },
+    {
+      "id": "direct-connect--l2",
+      "conceptId": "direct-connect",
+      "format": "lightning",
+      "prompt": "Reach Amazon S3 public endpoints over Direct Connect → ?",
+      "promptEs": "Llegar a los endpoints públicos de Amazon S3 a través de Direct Connect → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Private virtual interface"
+        },
+        {
+          "id": "B",
+          "text": "Gateway VPC endpoint"
+        },
+        {
+          "id": "C",
+          "text": "Transit virtual interface"
+        },
+        {
+          "id": "D",
+          "text": "Public virtual interface"
+        }
+      ],
+      "answer": "D",
+      "why": "La public VIF accede a servicios públicos de AWS como S3 con IPs públicas. La private VIF es la que llega a recursos de tu VPC con IPs privadas."
+    },
+    {
+      "id": "direct-connect--l3",
+      "conceptId": "direct-connect",
+      "format": "thisorthat",
+      "prompt": "Is Direct Connect traffic encrypted by default?",
+      "promptEs": "¿El tráfico de Direct Connect está cifrado por defecto?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, it's a private link"
+        },
+        {
+          "id": "B",
+          "text": "No, add MACsec or IPsec"
+        }
+      ],
+      "answer": "B",
+      "why": "Un camino privado no es cifrado por sí mismo. Puedes usar MACsec en conexiones compatibles o una VPN IPsec si el requisito pide cifrado."
+    },
+    {
+      "id": "direct-connect--l4",
+      "conceptId": "direct-connect",
+      "format": "lightning",
+      "prompt": "One Direct Connect private VIF must reach VPCs in several Regions → ?",
+      "promptEs": "Una sola private VIF de Direct Connect debe llegar a VPCs en varias Regions → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Direct Connect gateway"
+        },
+        {
+          "id": "B",
+          "text": "VPC peering from one VPC"
+        },
+        {
+          "id": "C",
+          "text": "Public virtual interface"
+        },
+        {
+          "id": "D",
+          "text": "Internet gateway in each VPC"
+        }
+      ],
+      "answer": "A",
+      "why": "El Direct Connect gateway extiende una private VIF a varios virtual private gateways en distintas cuentas y Regions. El peering no es transitivo."
+    },
+    {
+      "id": "direct-connect--l5",
+      "conceptId": "direct-connect-resiliency-encryption",
+      "format": "lightning",
+      "prompt": "Must survive device failure and a complete Direct Connect location failure → ?",
+      "promptEs": "Debe sobrevivir a la falla de un dispositivo y de una Direct Connect location completa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Two devices at one location"
+        },
+        {
+          "id": "B",
+          "text": "Link aggregation group, one location"
+        },
+        {
+          "id": "C",
+          "text": "Separate devices across multiple locations"
+        },
+        {
+          "id": "D",
+          "text": "Additional Direct Connect gateways per Region"
+        }
+      ],
+      "answer": "C",
+      "why": "El modelo de máxima resiliencia usa conexiones separadas, en dispositivos separados, en más de una location. Todo en una location comparte ese riesgo."
+    },
+    {
+      "id": "direct-connect--l6",
+      "conceptId": "direct-connect-resiliency-encryption",
+      "format": "thisorthat",
+      "prompt": "Single Direct Connect link → does adding a second DX gateway make it resilient?",
+      "promptEs": "Un solo enlace de Direct Connect → ¿agregar un segundo DX gateway lo vuelve resiliente?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, add redundant connections"
+        },
+        {
+          "id": "B",
+          "text": "Yes, gateways add redundancy"
+        }
+      ],
+      "answer": "A",
+      "why": "El Direct Connect gateway ya tiene alta disponibilidad integrada, pero no crea un segundo enlace físico. La resiliencia viene de conexiones redundantes."
+    },
+    {
+      "id": "direct-connect--l7",
+      "conceptId": "direct-connect-resiliency-encryption",
+      "format": "lightning",
+      "prompt": "Verify traffic moves to the redundant virtual interface when BGP peering drops → ?",
+      "promptEs": "Verificar que el tráfico pase a la virtual interface redundante cuando cae el BGP → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Delete the primary connection"
+        },
+        {
+          "id": "B",
+          "text": "Enable VPC Flow Logs"
+        },
+        {
+          "id": "C",
+          "text": "Add a second Direct Connect gateway"
+        },
+        {
+          "id": "D",
+          "text": "Resiliency Toolkit failover test"
+        }
+      ],
+      "answer": "D",
+      "why": "El Resiliency Toolkit prueba el failover bajando una sesión BGP y verificando el ruteo hacia la virtual interface redundante, sin borrar nada."
+    },
+    {
+      "id": "direct-connect--l8",
+      "conceptId": "network-bandwidth-sizing",
+      "format": "lightning",
+      "prompt": "Existing 1 Gbps dedicated connection must become 10 Gbps → ?",
+      "promptEs": "Una conexión dedicada existente de 1 Gbps debe pasar a 10 Gbps → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Resize the port in place"
+        },
+        {
+          "id": "B",
+          "text": "Add a second DX gateway"
+        },
+        {
+          "id": "C",
+          "text": "Order a new 10 Gbps connection"
+        },
+        {
+          "id": "D",
+          "text": "Enable ECMP on the existing port"
+        }
+      ],
+      "answer": "C",
+      "why": "La velocidad de un puerto dedicado no cambia después de solicitarlo. Para otra velocidad necesitas una conexión nueva."
+    },
+    {
+      "id": "direct-connect--l9",
+      "conceptId": "network-bandwidth-sizing",
+      "format": "thisorthat",
+      "prompt": "Aggregate bandwidth across VPN tunnels with ECMP on Transit Gateway → routing?",
+      "promptEs": "Sumar ancho de banda de varios túneles VPN con ECMP en Transit Gateway → ¿qué ruteo?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Dynamic routing (BGP)"
+        },
+        {
+          "id": "B",
+          "text": "Static routes on each tunnel"
+        }
+      ],
+      "answer": "A",
+      "why": "ECMP en VPN de Transit Gateway requiere ruteo dinámico; las conexiones con rutas estáticas no pueden usarlo. Cada túnel estándar llega a 1.25 Gbps."
+    }
+  ],
+  "audited": true
+}

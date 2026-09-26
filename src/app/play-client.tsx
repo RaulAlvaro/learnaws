@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ConceptCard, type CardBody } from "@/components/concept-card";
+import { Discover } from "@/components/game/discover";
 import { GameQuestion, type GameQuestionData } from "@/components/game/game-question";
+import type { Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { play, setSound, soundOn } from "@/lib/game/sfx";
 
 const ROUND_SIZE = 8;
@@ -28,6 +30,7 @@ interface ConceptMeta {
 }
 type Item =
   | { kind: "card"; reason: "new" | "relearn"; concept: ConceptMeta; card: { en: CardBody; es: CardBody; docs: string[] } | null }
+  | { kind: "discover"; unit: ServiceUnit; island: Island | null; overview: UnitOverview | null }
   | { kind: "question"; mode: string; question: GameQuestionData; concept?: ConceptMeta }
   | { kind: "done" };
 
@@ -62,6 +65,7 @@ export function PlayClient() {
   const [startLevel, setStartLevel] = useState(1);
   const [answeredCurrent, setAnsweredCurrent] = useState(false);
   const [itemSeq, setItemSeq] = useState(0);
+  const advancing = useRef(false);
   const [autoRead, setAutoRead] = usePref("autoRead", true);
   const [fs, setFs] = usePref("fs", 1);
   const [sfx, setSfx] = useState(() => soundOn());
@@ -100,12 +104,19 @@ export function PlayClient() {
   }
 
   async function next() {
-    await fetch("/api/session/advance", { method: "POST" });
-    const answered = results.length;
-    if (answered >= ROUND_SIZE) return finishRound();
-    const it = await loadItem();
-    // Session exhausted mid-round → close the round with what was played.
-    if (it.kind === "done" && answered > 0) await finishRound();
+    // Ignore double taps: advancing twice would skip an item.
+    if (advancing.current) return;
+    advancing.current = true;
+    try {
+      await fetch("/api/session/advance", { method: "POST" });
+      const answered = results.length;
+      if (answered >= ROUND_SIZE) return await finishRound();
+      const it = await loadItem();
+      // Session exhausted mid-round → close the round with what was played.
+      if (it.kind === "done" && answered > 0) await finishRound();
+    } finally {
+      advancing.current = false;
+    }
   }
 
   if (!state) return <p className="p-6 text-center text-muted">Cargando…</p>;
@@ -114,6 +125,10 @@ export function PlayClient() {
     return (
       <div className="space-y-4">
         <RoundHud results={results} onExit={() => (results.length ? finishRound() : setView("hub"))} />
+        {item?.kind === "discover" && item.overview && (
+          <Discover key={item.unit.id} unit={item.unit} island={item.island} overview={item.overview} autoRead={autoRead} onDone={next} />
+        )}
+        {item?.kind === "discover" && !item.overview && <SkipEffect onSkip={next} />}
         {item?.kind === "card" && item.card && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
             <div className="text-center text-sm font-semibold uppercase tracking-wide text-accent">
@@ -282,6 +297,15 @@ export function PlayClient() {
       <p className="text-center text-xs text-muted">XP de hoy: {state.todayXp} · total {state.totalXp}</p>
     </div>
   );
+}
+
+/** Defensive: an item without content is skipped. */
+function SkipEffect({ onSkip }: { onSkip: () => void }) {
+  useEffect(() => {
+    onSkip();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
 }
 
 function RoundHud({ results, onExit }: { results: { correct: boolean }[]; onExit: () => void }) {

@@ -1,0 +1,315 @@
+{
+  "unitId": "other-databases",
+  "overview": {
+    "title": "DocumentDB, Keyspaces y Neptune",
+    "hook": "Tres bases especializadas: MongoDB, Cassandra y grafos, sin administrar servidores.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "Tu aplicación",
+          "kind": "actor",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "doc",
+          "label": "DocumentDB",
+          "kind": "service",
+          "service": "Amazon DocumentDB",
+          "x": 50,
+          "y": 15
+        },
+        {
+          "id": "ks",
+          "label": "Keyspaces",
+          "kind": "service",
+          "service": "Amazon Keyspaces",
+          "x": 50,
+          "y": 50
+        },
+        {
+          "id": "nep",
+          "label": "Neptune",
+          "kind": "service",
+          "service": "Amazon Neptune",
+          "x": 50,
+          "y": 85
+        },
+        {
+          "id": "json",
+          "label": "Documentos JSON",
+          "kind": "data",
+          "x": 88,
+          "y": 15
+        },
+        {
+          "id": "wide",
+          "label": "Tablas wide-column",
+          "kind": "data",
+          "x": 88,
+          "y": 50
+        },
+        {
+          "id": "graph",
+          "label": "Nodos y relaciones",
+          "kind": "data",
+          "x": 88,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "doc",
+          "label": "drivers MongoDB"
+        },
+        {
+          "from": "app",
+          "to": "ks",
+          "label": "CQL"
+        },
+        {
+          "from": "app",
+          "to": "nep",
+          "label": "Gremlin / SPARQL"
+        },
+        {
+          "from": "doc",
+          "to": "json",
+          "label": "guarda"
+        },
+        {
+          "from": "ks",
+          "to": "wide",
+          "label": "guarda"
+        },
+        {
+          "from": "nep",
+          "to": "graph",
+          "label": "recorre"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Estas tres bases existen para un caso concreto: usar un modelo de datos especial sin administrar servidores. En el examen, la pista casi siempre es el código o el lenguaje de consulta que la app ya usa.",
+        "show": [
+          "app"
+        ],
+        "focus": "app"
+      },
+      {
+        "narration": "Amazon DocumentDB guarda documentos JSON y es compatible con MongoDB: tu app sigue usando los mismos drivers, código y herramientas. Escribes en una instancia primaria y escalas lecturas agregando réplicas.",
+        "show": [
+          "app",
+          "doc",
+          "json"
+        ],
+        "focus": "doc"
+      },
+      {
+        "narration": "Amazon Keyspaces es compatible con Apache Cassandra, una base wide-column que se consulta con CQL. Es serverless: no aprovisionas ni parcheas servidores, las tablas escalan con el tráfico y pagas solo lo que usas.",
+        "show": [
+          "app",
+          "doc",
+          "json",
+          "ks",
+          "wide"
+        ],
+        "focus": "ks"
+      },
+      {
+        "narration": "Amazon Neptune es una base de grafos. Guarda nodos y relaciones y te deja recorrerlas con Gremlin, openCypher o SPARQL. Piensa en redes sociales, detección de fraude, recomendaciones y knowledge graphs.",
+        "show": [
+          "app",
+          "doc",
+          "json",
+          "ks",
+          "wide",
+          "nep",
+          "graph"
+        ],
+        "focus": "nep"
+      },
+      {
+        "narration": "La trampa típica es DynamoDB. También guarda documentos y es serverless, pero no es compatible con MongoDB ni con Cassandra, y no recorre grafos. Si el enunciado exige conservar ese código, descártalo.",
+        "show": [
+          "app",
+          "doc",
+          "json",
+          "ks",
+          "wide",
+          "nep",
+          "graph"
+        ],
+        "focus": "app"
+      }
+    ],
+    "keyPoints": [
+      "Conservar código y drivers MongoDB → DocumentDB.",
+      "Cassandra o CQL, sin servidores → Keyspaces.",
+      "Relaciones conectadas, Gremlin o SPARQL → Neptune.",
+      "JSON por sí solo no exige DocumentDB."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon DynamoDB",
+        "difference": "NoSQL serverless por clave; no es compatible con MongoDB ni Cassandra ni recorre grafos."
+      },
+      {
+        "unitOrService": "Amazon Aurora",
+        "difference": "Relacional compatible con MySQL/PostgreSQL; no reemplaza APIs MongoDB ni consultas de grafos."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "other-databases--l1",
+      "conceptId": "documentdb",
+      "format": "lightning",
+      "prompt": "Migrate a MongoDB app, keep its drivers and code, fully managed → ?",
+      "promptEs": "Migrar una app MongoDB conservando drivers y código, totalmente gestionado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Keyspaces"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Neptune"
+        },
+        {
+          "id": "D",
+          "text": "Amazon DocumentDB"
+        }
+      ],
+      "answer": "D",
+      "why": "DocumentDB es compatible con MongoDB, así que la app usa el mismo código y drivers. DynamoDB obligaría a cambiar de interfaz; Keyspaces es para Cassandra."
+    },
+    {
+      "id": "other-databases--l2",
+      "conceptId": "documentdb",
+      "format": "thisorthat",
+      "prompt": "MongoDB-compatible workload needs millions of writes per second → ?",
+      "promptEs": "Carga compatible con MongoDB necesita millones de escrituras por segundo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "More instance-based replicas"
+        },
+        {
+          "id": "B",
+          "text": "DocumentDB elastic clusters"
+        }
+      ],
+      "answer": "B",
+      "why": "En clusters basados en instancias todas las escrituras pasan por la primaria; las réplicas solo escalan lecturas. Los elastic clusters escalan lecturas y escrituras."
+    },
+    {
+      "id": "other-databases--l3",
+      "conceptId": "keyspaces",
+      "format": "lightning",
+      "prompt": "Keep Apache Cassandra code and tools; no servers to provision or patch → ?",
+      "promptEs": "Conservar código y herramientas de Apache Cassandra; sin servidores que aprovisionar ni parchear → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Keyspaces"
+        },
+        {
+          "id": "B",
+          "text": "Cassandra on Amazon EC2"
+        },
+        {
+          "id": "C",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "D",
+          "text": "Amazon DocumentDB"
+        }
+      ],
+      "answer": "A",
+      "why": "Keyspaces es compatible con Cassandra y serverless. En EC2 conservas el código pero administras servidores; DynamoDB exige adaptar la aplicación."
+    },
+    {
+      "id": "other-databases--l4",
+      "conceptId": "keyspaces",
+      "format": "thisorthat",
+      "prompt": "Existing CQL queries must keep working after migration → ?",
+      "promptEs": "Las consultas CQL existentes deben seguir funcionando tras la migración → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Keyspaces"
+        }
+      ],
+      "answer": "B",
+      "why": "CQL es el lenguaje de Cassandra, y Keyspaces lo soporta. DynamoDB también es serverless, pero no entiende CQL."
+    },
+    {
+      "id": "other-databases--l5",
+      "conceptId": "neptune",
+      "format": "lightning",
+      "prompt": "Recommend friends-of-friends by traversing a social network → ?",
+      "promptEs": "Recomendar amigos de amigos recorriendo una red social → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Neptune"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Keyspaces"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Aurora MySQL"
+        }
+      ],
+      "answer": "B",
+      "why": "Recorrer relaciones entre personas es trabajo de una base de grafos: Neptune. DynamoDB y Keyspaces leen por clave, y Aurora no está optimizada para recorrer grafos."
+    },
+    {
+      "id": "other-databases--l6",
+      "conceptId": "neptune",
+      "format": "lightning",
+      "prompt": "Existing RDF knowledge graph queried with SPARQL, fully managed → ?",
+      "promptEs": "Knowledge graph RDF existente consultado con SPARQL, totalmente gestionado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DocumentDB"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Keyspaces"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Neptune"
+        },
+        {
+          "id": "D",
+          "text": "Amazon RDS for PostgreSQL"
+        }
+      ],
+      "answer": "C",
+      "why": "Neptune soporta RDF con SPARQL, además de Gremlin y openCypher para property graphs. Las otras opciones no conservan ese modelo de consulta."
+    }
+  ],
+  "audited": true
+}

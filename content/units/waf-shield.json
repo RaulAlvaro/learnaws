@@ -1,0 +1,397 @@
+{
+  "unitId": "waf-shield",
+  "overview": {
+    "title": "AWS WAF & Shield",
+    "hook": "Dos escudos: Shield contra inundaciones DDoS, WAF contra solicitudes HTTP maliciosas.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "users",
+          "label": "Usuarios y bots",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "r53",
+          "label": "Route 53",
+          "kind": "service",
+          "service": "Amazon Route 53",
+          "x": 32,
+          "y": 88
+        },
+        {
+          "id": "cf",
+          "label": "CloudFront",
+          "kind": "service",
+          "service": "Amazon CloudFront",
+          "x": 32,
+          "y": 50
+        },
+        {
+          "id": "shield",
+          "label": "Shield",
+          "kind": "service",
+          "service": "AWS Shield",
+          "x": 32,
+          "y": 12
+        },
+        {
+          "id": "waf",
+          "label": "AWS WAF",
+          "kind": "service",
+          "service": "AWS WAF",
+          "x": 58,
+          "y": 18
+        },
+        {
+          "id": "alb",
+          "label": "ALB",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 62,
+          "y": 58
+        },
+        {
+          "id": "app",
+          "label": "App + Auto Scaling",
+          "kind": "actor",
+          "x": 90,
+          "y": 58
+        }
+      ],
+      "edges": [
+        {
+          "from": "users",
+          "to": "r53",
+          "label": "DNS"
+        },
+        {
+          "from": "users",
+          "to": "cf",
+          "label": "HTTPS"
+        },
+        {
+          "from": "shield",
+          "to": "cf",
+          "label": "capas 3-4"
+        },
+        {
+          "from": "waf",
+          "to": "cf",
+          "label": "web ACL"
+        },
+        {
+          "from": "cf",
+          "to": "alb"
+        },
+        {
+          "from": "alb",
+          "to": "app"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Un ataque DDoS intenta tumbar tu aplicación inundándola de tráfico. Hay dos capas: la de infraestructura, capas 3 y 4, como SYN o UDP floods, y la de aplicación, capa 7, como miles de HTTP GET. Cada capa tiene su defensa.",
+        "show": [
+          "users",
+          "cf"
+        ],
+        "focus": "users"
+      },
+      {
+        "narration": "Contra la infraestructura, Shield Standard ya te protege: es automático y gratis para todos. Shield Advanced es de pago y suma defensa ante ataques mayores, alertas casi en tiempo real, créditos por costos de escalado y acceso al Shield Response Team.",
+        "show": [
+          "users",
+          "cf",
+          "shield"
+        ],
+        "focus": "shield"
+      },
+      {
+        "narration": "Contra la capa de aplicación está AWS WAF. Creas un web ACL con reglas que revisan cada solicitud HTTP: IP de origen, query strings, SQL injection o cross-site scripting. Una rate-based rule frena a quien envía demasiadas solicitudes.",
+        "show": [
+          "users",
+          "cf",
+          "shield",
+          "waf"
+        ],
+        "focus": "waf"
+      },
+      {
+        "narration": "WAF se asocia a recursos web concretos: CloudFront, Application Load Balancer, API Gateway o AppSync. No inspecciona tráfico genérico de la VPC; para eso existe Network Firewall.",
+        "show": [
+          "users",
+          "cf",
+          "shield",
+          "waf",
+          "alb",
+          "app"
+        ],
+        "focus": "alb"
+      },
+      {
+        "narration": "La arquitectura resistente combina capas. Route 53 y CloudFront absorben tráfico en el borde, WAF filtra solicitudes, Shield protege la infraestructura, y ELB con Auto Scaling reparten lo que queda. Solo escalar no filtra nada y encarece el ataque.",
+        "show": [
+          "users",
+          "cf",
+          "shield",
+          "waf",
+          "alb",
+          "app",
+          "r53"
+        ],
+        "focus": "cf"
+      },
+      {
+        "narration": "Una última pista: si la pregunta habla de aplicar WAF o Shield Advanced en muchas cuentas a la vez, incluidas las nuevas, la respuesta es Firewall Manager, que administra estas protecciones para toda la organización.",
+        "show": [
+          "users",
+          "cf",
+          "shield",
+          "waf",
+          "alb",
+          "app",
+          "r53"
+        ],
+        "focus": "waf"
+      }
+    ],
+    "keyPoints": [
+      "Shield Standard: automático, gratis, capas 3 y 4.",
+      "Shield Advanced: Response Team, alertas y protección de costos.",
+      "WAF: reglas de capa 7 dentro de un web ACL.",
+      "Rate-based rule frena HTTP floods por origen.",
+      "Defensa en capas: Route 53, CloudFront, WAF y Shield."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Network Firewall",
+        "difference": "Network Firewall inspecciona tráfico enrutado por la VPC; WAF filtra solicitudes HTTP a recursos web."
+      },
+      {
+        "unitOrService": "AWS Firewall Manager",
+        "difference": "Firewall Manager aplica WAF y Shield Advanced en toda la organización; no filtra tráfico por sí mismo."
+      },
+      {
+        "unitOrService": "Amazon GuardDuty",
+        "difference": "GuardDuty detecta amenazas y genera hallazgos; WAF bloquea solicitudes con reglas."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "waf-shield--l1",
+      "conceptId": "shield",
+      "format": "lightning",
+      "prompt": "Protection from common SYN and UDP floods at no additional cost → ?",
+      "promptEs": "Protección contra SYN y UDP floods comunes sin costo adicional → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Shield Standard"
+        },
+        {
+          "id": "B",
+          "text": "AWS Shield Advanced"
+        },
+        {
+          "id": "C",
+          "text": "AWS WAF rate-based rule"
+        },
+        {
+          "id": "D",
+          "text": "AWS Network Firewall"
+        }
+      ],
+      "answer": "A",
+      "why": "Shield Standard protege automáticamente a todos los clientes contra ataques comunes de capas 3 y 4. Contratar Shield Advanced solo para eso sería pagar de más."
+    },
+    {
+      "id": "waf-shield--l2",
+      "conceptId": "shield",
+      "format": "lightning",
+      "prompt": "Critical CloudFront site needs 24/7 DDoS experts and near real-time attack notifications → ?",
+      "promptEs": "Sitio crítico en CloudFront necesita expertos DDoS 24/7 y alertas casi en tiempo real → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Shield Standard"
+        },
+        {
+          "id": "B",
+          "text": "AWS Shield Advanced"
+        },
+        {
+          "id": "C",
+          "text": "AWS WAF managed rules"
+        },
+        {
+          "id": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": "B",
+      "why": "Shield Advanced da notificaciones casi en tiempo real y acceso al Shield Response Team, con plan Business o Enterprise Support. Shield Standard no incluye ninguna de las dos."
+    },
+    {
+      "id": "waf-shield--l3",
+      "conceptId": "shield",
+      "format": "thisorthat",
+      "prompt": "Request credits for scaling charges caused by a DDoS attack → ?",
+      "promptEs": "Pedir créditos por cargos de escalado causados por un ataque DDoS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Shield Advanced"
+        },
+        {
+          "id": "B",
+          "text": "AWS Shield Standard"
+        }
+      ],
+      "answer": "A",
+      "why": "La DDoS cost protection es exclusiva de Shield Advanced y aplica a recursos protegidos. Shield Standard protege gratis, pero no cubre costos."
+    },
+    {
+      "id": "waf-shield--l4",
+      "conceptId": "shield",
+      "format": "thisorthat",
+      "prompt": "HTTP GET flood against a CloudFront-served website → first control?",
+      "promptEs": "HTTP GET flood contra un sitio servido por CloudFront → ¿primer control?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rely on Shield Standard alone"
+        },
+        {
+          "id": "B",
+          "text": "AWS WAF web ACL"
+        }
+      ],
+      "answer": "B",
+      "why": "Un GET flood es un ataque de capa 7. Shield Standard cubre la infraestructura; WAF filtra y limita las solicitudes HTTP en CloudFront."
+    },
+    {
+      "id": "waf-shield--l6",
+      "conceptId": "waf",
+      "format": "lightning",
+      "prompt": "Limit how many checkout requests each client IP can send → ?",
+      "promptEs": "Limitar cuántas solicitudes de checkout puede enviar cada IP cliente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Security group inbound rule"
+        },
+        {
+          "id": "B",
+          "text": "Shield Advanced subscription"
+        },
+        {
+          "id": "C",
+          "text": "Network ACL deny rule"
+        },
+        {
+          "id": "D",
+          "text": "WAF rate-based rule"
+        }
+      ],
+      "answer": "D",
+      "why": "Una rate-based rule cuenta solicitudes por origen y limita a quien supera el umbral; con un scope-down statement la acotas solo al checkout."
+    },
+    {
+      "id": "waf-shield--l7",
+      "conceptId": "waf",
+      "format": "thisorthat",
+      "prompt": "Same rate-based rule used in two web ACLs → one shared request count?",
+      "promptEs": "La misma rate-based rule en dos web ACLs → ¿comparten un solo conteo?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, each is counted separately"
+        },
+        {
+          "id": "B",
+          "text": "Yes, they share one count"
+        }
+      ],
+      "answer": "A",
+      "why": "AWS WAF lleva el conteo de cada instancia de la regla por separado en cada web ACL. No hay un contador global compartido."
+    },
+    {
+      "id": "waf-shield--l9",
+      "conceptId": "ddos-resilient-architecture",
+      "format": "lightning",
+      "prompt": "Stay responsive during both infrastructure-layer and application-layer attacks → ?",
+      "promptEs": "Seguir respondiendo durante ataques de capa de infraestructura y de aplicación → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudFront, WAF and Shield together"
+        },
+        {
+          "id": "B",
+          "text": "Larger EC2 instances only"
+        },
+        {
+          "id": "C",
+          "text": "More Auto Scaling capacity only"
+        },
+        {
+          "id": "D",
+          "text": "Network ACL rules only"
+        }
+      ],
+      "answer": "A",
+      "why": "Una defensa en capas absorbe en el borde, filtra la capa 7 con WAF y protege la infraestructura con Shield. Solo agregar capacidad no filtra el tráfico del ataque."
+    },
+    {
+      "id": "waf-shield--l10",
+      "conceptId": "ddos-resilient-architecture",
+      "format": "thisorthat",
+      "prompt": "Attack traffic triggers costly scaling; requirement is to filter it → ?",
+      "promptEs": "El tráfico de ataque dispara escalado costoso; el requisito es filtrarlo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add more Auto Scaling capacity"
+        },
+        {
+          "id": "B",
+          "text": "Put CloudFront and WAF in front"
+        }
+      ],
+      "answer": "B",
+      "why": "Escalar en respuesta al ataque genera costos innecesarios y no filtra nada. CloudFront absorbe en el borde y WAF descarta las solicitudes maliciosas."
+    },
+    {
+      "id": "waf-shield--l11",
+      "conceptId": "ddos-resilient-architecture",
+      "format": "lightning",
+      "prompt": "Component of a DDoS-resilient design that absorbs traffic at edge locations → ?",
+      "promptEs": "Componente de un diseño resistente a DDoS que absorbe tráfico en edge locations → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "NAT gateway"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Inspector"
+        },
+        {
+          "id": "C",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "id": "D",
+          "text": "Amazon EBS snapshots"
+        }
+      ],
+      "answer": "C",
+      "why": "CloudFront, igual que Route 53, atiende desde la red de borde y absorbe tráfico lejos de tu origen. Inspector busca vulnerabilidades; no absorbe tráfico."
+    }
+  ],
+  "audited": true
+}

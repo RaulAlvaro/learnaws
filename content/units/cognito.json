@@ -1,0 +1,302 @@
+{
+  "unitId": "cognito",
+  "overview": {
+    "title": "Amazon Cognito",
+    "hook": "Login para los clientes de tu app y, si hace falta, credenciales de AWS.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "user",
+          "label": "Usuario de la app",
+          "kind": "actor",
+          "x": 8,
+          "y": 45
+        },
+        {
+          "id": "social",
+          "label": "Google / SAML",
+          "kind": "actor",
+          "x": 20,
+          "y": 85
+        },
+        {
+          "id": "up",
+          "label": "User pool",
+          "kind": "service",
+          "service": "Amazon Cognito",
+          "x": 38,
+          "y": 25
+        },
+        {
+          "id": "api",
+          "label": "Tu API",
+          "kind": "actor",
+          "x": 88,
+          "y": 25
+        },
+        {
+          "id": "ip",
+          "label": "Identity pool",
+          "kind": "service",
+          "service": "Amazon Cognito",
+          "x": 62,
+          "y": 72
+        },
+        {
+          "id": "s3",
+          "label": "S3 / DynamoDB",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 88,
+          "y": 72
+        }
+      ],
+      "edges": [
+        {
+          "from": "user",
+          "to": "up",
+          "label": "sign-in"
+        },
+        {
+          "from": "social",
+          "to": "up",
+          "label": "federa"
+        },
+        {
+          "from": "up",
+          "to": "api",
+          "label": "tokens JWT"
+        },
+        {
+          "from": "up",
+          "to": "ip",
+          "label": "token"
+        },
+        {
+          "from": "ip",
+          "to": "s3",
+          "label": "creds temporales"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon Cognito autentica a los usuarios de tu app, incluidos empleados si usan esa app. Tiene dos piezas que el examen mezcla a propósito: user pools, para el login, e identity pools, para obtener credenciales de AWS.",
+        "show": [
+          "user",
+          "up"
+        ],
+        "focus": "up"
+      },
+      {
+        "narration": "Un user pool es un directorio de usuarios con registro, inicio de sesión, MFA y recuperación de contraseña, con páginas listas llamadas managed login. Puede federar Google, SAML u OIDC, y con Lambda triggers personalizas el flujo.",
+        "show": [
+          "user",
+          "up",
+          "social"
+        ],
+        "focus": "social"
+      },
+      {
+        "narration": "Al entrar, el user pool entrega tokens JWT, y tu API los valida para autorizar solicitudes. Pero ojo: esos tokens no son credenciales de AWS. Con ellos solos no puedes firmar una llamada directa a S3 o DynamoDB.",
+        "show": [
+          "user",
+          "up",
+          "social",
+          "api"
+        ],
+        "focus": "api"
+      },
+      {
+        "narration": "Para eso está el identity pool. Recibe el token del user pool, o de otro proveedor, y lo cambia por credenciales temporales de AWS según un IAM role. Incluso puede dar acceso de invitado a usuarios que no iniciaron sesión.",
+        "show": [
+          "user",
+          "up",
+          "social",
+          "api",
+          "ip",
+          "s3"
+        ],
+        "focus": "ip"
+      },
+      {
+        "narration": "La regla rápida: registro y login en tu app, user pool. Acceso directo desde la app a S3 o DynamoDB, identity pool, a menudo junto al user pool. Si los empleados necesitan entrar a cuentas de AWS, usa IAM Identity Center.",
+        "show": [
+          "user",
+          "up",
+          "social",
+          "api",
+          "ip",
+          "s3"
+        ],
+        "focus": "up"
+      }
+    ],
+    "keyPoints": [
+      "User pool: registro, login y tokens para tu app.",
+      "Identity pool: credenciales temporales de AWS vía IAM role.",
+      "Los tokens del user pool no firman llamadas a AWS.",
+      "Identity pool admite invitados con un role muy acotado.",
+      "Empleados que acceden a cuentas de AWS: IAM Identity Center."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS IAM Identity Center",
+        "difference": "Identity Center es para empleados que acceden a cuentas de AWS; Cognito puede autenticar usuarios, incluidos empleados, en una app."
+      },
+      {
+        "unitOrService": "Federación SAML a IAM roles",
+        "difference": "Esa federación da acceso corporativo a una cuenta AWS; un user pool acepta SAML para login en tu app."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "cognito--l1",
+      "conceptId": "cognito-user-pools",
+      "format": "lightning",
+      "prompt": "Customer mobile app needs sign-up, sign-in and password reset pages → ?",
+      "promptEs": "Una app móvil para clientes necesita registro, inicio de sesión y recuperación de contraseña → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cognito user pool"
+        },
+        {
+          "id": "B",
+          "text": "Cognito identity pool"
+        },
+        {
+          "id": "C",
+          "text": "IAM Identity Center"
+        },
+        {
+          "id": "D",
+          "text": "One IAM user per customer"
+        }
+      ],
+      "answer": "A",
+      "why": "El user pool es el directorio de clientes con managed login para registro, MFA y recuperación de contraseña. El identity pool no autentica: entrega credenciales de AWS."
+    },
+    {
+      "id": "cognito--l2",
+      "conceptId": "cognito-user-pools",
+      "format": "thisorthat",
+      "prompt": "App users sign in with Google; the app just needs tokens → ?",
+      "promptEs": "Los usuarios entran con Google; la app solo necesita tokens → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cognito identity pool"
+        },
+        {
+          "id": "B",
+          "text": "Cognito user pool"
+        }
+      ],
+      "answer": "B",
+      "why": "El user pool federa proveedores sociales, SAML u OIDC y entrega tokens a la app. El identity pool solo hace falta si la app necesita credenciales de AWS."
+    },
+    {
+      "id": "cognito--l3",
+      "conceptId": "cognito-user-pools",
+      "format": "lightning",
+      "prompt": "Reject some sign-up requests using custom validation code → ?",
+      "promptEs": "Rechazar ciertas solicitudes de registro con código de validación propio → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM policy condition key"
+        },
+        {
+          "id": "B",
+          "text": "AWS WAF rate-based rule"
+        },
+        {
+          "id": "C",
+          "text": "User pool Lambda trigger"
+        },
+        {
+          "id": "D",
+          "text": "Identity pool role mapping"
+        }
+      ],
+      "answer": "C",
+      "why": "Los Lambda triggers del user pool personalizan el flujo, por ejemplo rechazando un registro antes de crearlo. WAF filtra tráfico HTTP, no aplica tu lógica de registro."
+    },
+    {
+      "id": "cognito--l5",
+      "conceptId": "cognito-identity-pools",
+      "format": "lightning",
+      "prompt": "Signed-in mobile users upload directly to S3 with temporary AWS credentials → ?",
+      "promptEs": "Usuarios autenticados de una app móvil suben directo a S3 con credenciales temporales → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cognito user pool alone"
+        },
+        {
+          "id": "B",
+          "text": "Access keys embedded in the app"
+        },
+        {
+          "id": "C",
+          "text": "Public-write bucket policy"
+        },
+        {
+          "id": "D",
+          "text": "Cognito identity pool"
+        }
+      ],
+      "answer": "D",
+      "why": "El identity pool cambia el token del user pool por credenciales temporales de un IAM role. El user pool solo no emite credenciales de AWS, y las claves embebidas son un riesgo."
+    },
+    {
+      "id": "cognito--l6",
+      "conceptId": "cognito-identity-pools",
+      "format": "thisorthat",
+      "prompt": "Guests who never sign in need limited read access to one S3 prefix → ?",
+      "promptEs": "Invitados que nunca inician sesión necesitan leer un prefijo de S3 de forma limitada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "User pool with self-service sign-up"
+        },
+        {
+          "id": "B",
+          "text": "Identity pool unauthenticated role"
+        }
+      ],
+      "answer": "B",
+      "why": "El identity pool puede dar credenciales a usuarios no autenticados mediante un IAM role muy acotado. Un user pool exige que el usuario se registre e inicie sesión."
+    },
+    {
+      "id": "cognito--l7",
+      "conceptId": "cognito-identity-pools",
+      "format": "lightning",
+      "prompt": "What decides which AWS resources identity-pool credentials can access?",
+      "promptEs": "¿Qué decide a qué recursos de AWS acceden las credenciales del identity pool?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM roles and their policies"
+        },
+        {
+          "id": "B",
+          "text": "User pool app client settings"
+        },
+        {
+          "id": "C",
+          "text": "Managed login page branding"
+        },
+        {
+          "id": "D",
+          "text": "The social provider's scopes"
+        }
+      ],
+      "answer": "A",
+      "why": "Las credenciales del identity pool pertenecen a un IAM role, y sus policies definen qué se puede tocar. Los claims pueden elegir el role o generar session tags."
+    }
+  ],
+  "audited": true
+}

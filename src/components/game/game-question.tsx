@@ -253,7 +253,7 @@ export function GameQuestion({
         </p>
       </motion.div>
 
-      <div className="grid gap-2.5">
+      <div className={`grid gap-2.5 ${options.length === 2 ? "grid-cols-2" : ""}`}>
         {options.map((o, i) => {
           const s = OPTION_STYLE[i] ?? OPTION_STYLE[0];
           const sel = selected.includes(o.id);
@@ -268,7 +268,7 @@ export function GameQuestion({
               whileTap={{ scale: 0.97 }}
               animate={phase === "revealed" && isCorrect ? { scale: [1, 1.04, 1] } : {}}
               transition={{ duration: 0.25 }}
-              className={`flex min-h-14 w-full items-stretch overflow-hidden rounded-2xl border-2 text-left transition ${
+              className={`flex ${options.length === 2 ? "min-h-32 flex-col" : "min-h-14"} w-full items-stretch overflow-hidden rounded-2xl border-2 text-left transition ${
                 phase === "revealed"
                   ? isCorrect
                     ? "border-good bg-good-bg"
@@ -282,7 +282,7 @@ export function GameQuestion({
                       : "border-border bg-surface"
               } ${dim ? "opacity-60" : ""}`}
             >
-              <span className={`flex w-12 shrink-0 items-center justify-center text-[1.3em] text-white ${s.bg}`} aria-hidden>
+              <span className={`flex ${options.length === 2 ? "h-10 w-full" : "w-12"} shrink-0 items-center justify-center text-[1.3em] text-white ${s.bg}`} aria-hidden>
                 {s.shape}
               </span>
               <span className="flex-1 px-3 py-3">

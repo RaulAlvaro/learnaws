@@ -1,7 +1,7 @@
 import "server-only";
 import { and, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { getContent, studyableConcepts } from "../content/load";
+import { getContent, isShortFormat, studyableConcepts } from "../content/load";
 import { bookingGate, estimateReadiness, type Evidence } from "../engine/readiness";
 import { monthlyCap, monthSpend } from "../ai/client";
 import { conceptRows, dayOf, getSettings } from "./store";
@@ -13,6 +13,7 @@ const DAY_MS = 86_400_000;
  * plus fresh questions on concepts not practised for ≥ 7 days.
  */
 export async function readinessEvidence(userId: string): Promise<Evidence[]> {
+  const { questions } = getContent();
   const since = new Date(Date.now() - 21 * DAY_MS);
   const fullMocks = await db
     .select({ id: schema.mocks.id })
@@ -22,6 +23,7 @@ export async function readinessEvidence(userId: string): Promise<Evidence[]> {
   const rows = await db
     .select({
       domain: schema.attempts.domain,
+      questionId: schema.attempts.questionId,
       correct: schema.attempts.correct,
       mode: schema.attempts.mode,
       mockId: schema.attempts.mockId,
@@ -36,6 +38,8 @@ export async function readinessEvidence(userId: string): Promise<Evidence[]> {
         (r.mode === "mock" && r.mockId != null && fullIds.includes(r.mockId)) ||
         (r.mode !== "diagnostic" && r.mode !== "pretest" && r.fresh && (r.gapDays ?? 0) >= 7),
     )
+    // Short recognition formats (lightning / this-or-that) are practice, not exam evidence.
+    .filter((r) => { const q = questions.get(r.questionId); return !!q && !isShortFormat(q); })
     .map((r) => ({ domain: r.domain, correct: r.correct }));
 }
 

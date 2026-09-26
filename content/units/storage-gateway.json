@@ -1,0 +1,423 @@
+{
+  "unitId": "storage-gateway",
+  "overview": {
+    "title": "AWS Storage Gateway",
+    "hook": "Un puente: tus servidores locales siguen igual, pero los datos viven en AWS.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "dc",
+          "label": "Centro de datos",
+          "kind": "zone",
+          "x": 12,
+          "y": 10
+        },
+        {
+          "id": "app",
+          "label": "Servidores locales",
+          "kind": "actor",
+          "x": 12,
+          "y": 48
+        },
+        {
+          "id": "bkp",
+          "label": "Software backup",
+          "kind": "actor",
+          "x": 12,
+          "y": 86
+        },
+        {
+          "id": "gw",
+          "label": "Storage Gateway",
+          "kind": "service",
+          "service": "AWS Storage Gateway",
+          "x": 46,
+          "y": 50
+        },
+        {
+          "id": "s3",
+          "label": "Amazon S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 84,
+          "y": 18
+        },
+        {
+          "id": "snap",
+          "label": "EBS snapshots",
+          "kind": "data",
+          "x": 84,
+          "y": 50
+        },
+        {
+          "id": "gl",
+          "label": "S3 Glacier",
+          "kind": "service",
+          "service": "Amazon S3 Glacier",
+          "x": 84,
+          "y": 84
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "gw",
+          "label": "NFS / SMB / iSCSI"
+        },
+        {
+          "from": "bkp",
+          "to": "gw",
+          "label": "cintas virtuales"
+        },
+        {
+          "from": "gw",
+          "to": "s3",
+          "label": "objetos"
+        },
+        {
+          "from": "gw",
+          "to": "snap",
+          "label": "snapshots"
+        },
+        {
+          "from": "gw",
+          "to": "gl",
+          "label": "archiva cintas"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Storage Gateway es un puente para empresas que aún tienen servidores locales. Instalas una máquina virtual en tu centro de datos; tus aplicaciones siguen usando sus protocolos de siempre, pero los datos terminan en AWS.",
+        "show": [
+          "dc",
+          "app",
+          "gw"
+        ],
+        "focus": "gw"
+      },
+      {
+        "narration": "El gateway guarda en caché local lo que usas seguido, así que esas lecturas son rápidas aunque el grueso de los datos viva en la nube. Hay tres tipos, y el examen los distingue por el protocolo que pide la aplicación.",
+        "show": [
+          "dc",
+          "app",
+          "gw"
+        ],
+        "focus": "gw"
+      },
+      {
+        "narration": "S3 File Gateway presenta file shares NFS o SMB. Cada archivo se guarda como un objeto en S3, así que otras aplicaciones en AWS pueden leerlo directamente, y puedes aplicarle lifecycle, versioning o replicación.",
+        "show": [
+          "dc",
+          "app",
+          "gw",
+          "s3"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "Volume Gateway presenta volúmenes de bloques por iSCSI. En modo cached, los datos principales viven en AWS y localmente solo queda lo frecuente. En modo stored, todo el dataset queda local y AWS recibe snapshots asíncronos como respaldo.",
+        "show": [
+          "dc",
+          "app",
+          "gw",
+          "s3",
+          "snap"
+        ],
+        "focus": "snap"
+      },
+      {
+        "narration": "Tape Gateway le muestra a tu software de backup una biblioteca de cintas virtuales. Así retiras las cintas físicas sin cambiar el flujo de respaldo, y las cintas archivadas pasan a S3 Glacier Flexible Retrieval o Deep Archive.",
+        "show": [
+          "dc",
+          "app",
+          "gw",
+          "s3",
+          "snap",
+          "bkp",
+          "gl"
+        ],
+        "focus": "gl"
+      },
+      {
+        "narration": "Un dato actual: AWS dejó de vender el appliance de hardware de Storage Gateway, así que hoy lo despliegas como máquina virtual local o en EC2. Y si solo necesitas mover datos una vez, eso es DataSync, no Storage Gateway.",
+        "show": [
+          "dc",
+          "app",
+          "gw",
+          "s3",
+          "snap",
+          "bkp",
+          "gl"
+        ],
+        "focus": "gw"
+      }
+    ],
+    "keyPoints": [
+      "NFS o SMB sobre objetos S3 → S3 File Gateway",
+      "iSCSI → Volume Gateway, cached o stored",
+      "Cached: datos en AWS; stored: todo local con snapshots",
+      "Cintas de backup → Tape Gateway hacia Glacier",
+      "Migración única → DataSync, no Storage Gateway"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS DataSync",
+        "difference": "DataSync migra o sincroniza datos; Storage Gateway da acceso híbrido continuo con caché local."
+      },
+      {
+        "unitOrService": "Amazon EFS",
+        "difference": "EFS es NFS dentro de AWS; File Gateway da NFS local respaldado por objetos S3."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "storage-gateway--l1",
+      "conceptId": "storage-gateway-file",
+      "format": "lightning",
+      "prompt": "On-prem app mounts NFS; files must land as S3 objects → ?",
+      "promptEs": "App local monta NFS; los archivos deben quedar como objetos en S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Volume Gateway cached"
+        },
+        {
+          "id": "B",
+          "text": "S3 File Gateway"
+        },
+        {
+          "id": "C",
+          "text": "Tape Gateway"
+        },
+        {
+          "id": "D",
+          "text": "Amazon EFS"
+        }
+      ],
+      "answer": "B",
+      "why": "S3 File Gateway presenta un share NFS y guarda cada archivo como objeto S3. Volume Gateway usa iSCSI y Tape Gateway, cintas virtuales."
+    },
+    {
+      "id": "storage-gateway--l2",
+      "conceptId": "storage-gateway-file",
+      "format": "lightning",
+      "prompt": "On-prem users need SMB shares whose data is stored in S3 → ?",
+      "promptEs": "Usuarios locales necesitan shares SMB cuyos datos se guarden en S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "FSx for Windows File Server"
+        },
+        {
+          "id": "B",
+          "text": "Volume Gateway stored"
+        },
+        {
+          "id": "C",
+          "text": "Tape Gateway"
+        },
+        {
+          "id": "D",
+          "text": "S3 File Gateway"
+        }
+      ],
+      "answer": "D",
+      "why": "S3 File Gateway ofrece SMB local respaldado por objetos S3. FSx for Windows también da SMB, pero no guarda los archivos como objetos S3."
+    },
+    {
+      "id": "storage-gateway--l3",
+      "conceptId": "storage-gateway-file",
+      "format": "thisorthat",
+      "prompt": "Local file shares; AWS analytics must read the same data as S3 objects → ?",
+      "promptEs": "Shares locales; analítica en AWS debe leer los mismos datos como objetos S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Volume Gateway cached"
+        },
+        {
+          "id": "B",
+          "text": "S3 File Gateway"
+        }
+      ],
+      "answer": "B",
+      "why": "File Gateway guarda archivos como objetos S3 legibles por otros servicios. Volume Gateway guarda bloques de volumen, no objetos utilizables."
+    },
+    {
+      "id": "storage-gateway--l4",
+      "conceptId": "storage-gateway-file",
+      "format": "lightning",
+      "prompt": "How does File Gateway keep frequently used files fast on premises?",
+      "promptEs": "¿Cómo mantiene File Gateway rápidos los archivos de uso frecuente en sitio?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Transparent local cache"
+        },
+        {
+          "id": "B",
+          "text": "AWS Direct Connect link"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "S3 Intelligent-Tiering"
+        }
+      ],
+      "answer": "A",
+      "why": "El gateway mantiene en caché local los datos usados con frecuencia. No necesita guardar todo el dataset en sitio."
+    },
+    {
+      "id": "storage-gateway--l5",
+      "conceptId": "storage-gateway-volume",
+      "format": "lightning",
+      "prompt": "iSCSI volumes; primary data in AWS, frequently used data cached locally → ?",
+      "promptEs": "Volúmenes iSCSI; datos principales en AWS y los frecuentes en caché local → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Volume Gateway stored"
+        },
+        {
+          "id": "B",
+          "text": "S3 File Gateway"
+        },
+        {
+          "id": "C",
+          "text": "Volume Gateway cached"
+        },
+        {
+          "id": "D",
+          "text": "Tape Gateway"
+        }
+      ],
+      "answer": "C",
+      "why": "Cached volumes guardan los datos en S3 y solo lo frecuente en local, reduciendo el almacenamiento propio. Stored mantiene todo en sitio."
+    },
+    {
+      "id": "storage-gateway--l6",
+      "conceptId": "storage-gateway-volume",
+      "format": "thisorthat",
+      "prompt": "Entire dataset must stay local; async point-in-time backups to AWS → ?",
+      "promptEs": "Todo el dataset debe quedar local; respaldos asíncronos a AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Volume Gateway stored"
+        },
+        {
+          "id": "B",
+          "text": "Volume Gateway cached"
+        }
+      ],
+      "answer": "A",
+      "why": "Stored volumes mantienen todos los datos en el gateway local y envían snapshots asíncronos a AWS. Cached deja localmente solo lo frecuente."
+    },
+    {
+      "id": "storage-gateway--l7",
+      "conceptId": "storage-gateway-volume",
+      "format": "lightning",
+      "prompt": "Recover Volume Gateway backups to run the workload in AWS → ?",
+      "promptEs": "Recuperar respaldos de Volume Gateway para ejecutar la carga en AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EFS Regional file system"
+        },
+        {
+          "id": "B",
+          "text": "S3 Glacier archive"
+        },
+        {
+          "id": "C",
+          "text": "EBS volume attached to EC2"
+        },
+        {
+          "id": "D",
+          "text": "FSx for Lustre"
+        }
+      ],
+      "answer": "C",
+      "why": "Los snapshots de Volume Gateway se restauran como volúmenes EBS para Amazon EC2, o de vuelta en el centro de datos."
+    },
+    {
+      "id": "storage-gateway--l8",
+      "conceptId": "storage-gateway-tape",
+      "format": "lightning",
+      "prompt": "Keep the backup software's tape workflow; retire the physical tape library → ?",
+      "promptEs": "Mantener el flujo de cintas del software de backup; retirar la biblioteca física → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Tape Gateway"
+        },
+        {
+          "id": "B",
+          "text": "S3 File Gateway"
+        },
+        {
+          "id": "C",
+          "text": "Volume Gateway stored"
+        },
+        {
+          "id": "D",
+          "text": "AWS DataSync"
+        }
+      ],
+      "answer": "A",
+      "why": "Tape Gateway presenta cintas virtuales al software de backup existente. Las otras opciones cambian la interfaz que ese software espera."
+    },
+    {
+      "id": "storage-gateway--l9",
+      "conceptId": "storage-gateway-tape",
+      "format": "thisorthat",
+      "prompt": "Archived virtual tapes, cheapest long-term storage → ?",
+      "promptEs": "Cintas virtuales archivadas, almacenamiento de largo plazo más barato → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Glacier Deep Archive"
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard-IA"
+        }
+      ],
+      "answer": "A",
+      "why": "Tape Gateway puede archivar cintas en Glacier Deep Archive, la opción más barata para retención larga. Standard-IA cuesta más."
+    },
+    {
+      "id": "storage-gateway--l10",
+      "conceptId": "storage-gateway-tape",
+      "format": "lightning",
+      "prompt": "Tape Gateway archives virtual tapes into which storage classes?",
+      "promptEs": "¿En qué storage classes archiva Tape Gateway las cintas virtuales?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Standard-IA or One Zone-IA"
+        },
+        {
+          "id": "B",
+          "text": "EBS st1 or sc1 volumes"
+        },
+        {
+          "id": "C",
+          "text": "EFS Infrequent Access or Archive"
+        },
+        {
+          "id": "D",
+          "text": "Glacier Flexible or Deep Archive"
+        }
+      ],
+      "answer": "D",
+      "why": "Las cintas archivadas pasan a S3 Glacier Flexible Retrieval o S3 Glacier Deep Archive, según cuánto puedes esperar al recuperarlas."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,651 @@
+{
+  "unitId": "cloudfront",
+  "overview": {
+    "title": "Amazon CloudFront",
+    "hook": "Tu contenido en caché cerca de cada usuario, con el origen protegido.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "viewers",
+          "label": "Usuarios globales",
+          "kind": "actor",
+          "x": 8,
+          "y": 45
+        },
+        {
+          "id": "fn",
+          "label": "Edge functions",
+          "kind": "note",
+          "x": 32,
+          "y": 12
+        },
+        {
+          "id": "edge",
+          "label": "CloudFront edge",
+          "kind": "service",
+          "service": "Amazon CloudFront",
+          "x": 32,
+          "y": 45
+        },
+        {
+          "id": "og",
+          "label": "Origin group",
+          "kind": "note",
+          "x": 58,
+          "y": 45
+        },
+        {
+          "id": "s3",
+          "label": "S3 privado (OAC)",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 86,
+          "y": 22
+        },
+        {
+          "id": "alb",
+          "label": "ALB / origen HTTP",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 86,
+          "y": 68
+        },
+        {
+          "id": "up",
+          "label": "Uploads lejanos",
+          "kind": "actor",
+          "x": 8,
+          "y": 88
+        }
+      ],
+      "edges": [
+        {
+          "from": "viewers",
+          "to": "edge",
+          "label": "HTTPS"
+        },
+        {
+          "from": "fn",
+          "to": "edge",
+          "label": "lógica en el edge"
+        },
+        {
+          "from": "edge",
+          "to": "og",
+          "label": "cache miss"
+        },
+        {
+          "from": "og",
+          "to": "s3",
+          "label": "primario"
+        },
+        {
+          "from": "og",
+          "to": "alb",
+          "label": "secundario"
+        },
+        {
+          "from": "up",
+          "to": "s3",
+          "label": "Transfer Acceleration"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Si tus usuarios están repartidos por el mundo, cada solicitud que cruza océanos hasta tu origen es lenta. Amazon CloudFront es una CDN: guarda copias de tu contenido en edge locations cercanas a los usuarios y las sirve desde ahí.",
+        "show": [
+          "viewers",
+          "edge"
+        ],
+        "focus": "edge"
+      },
+      {
+        "narration": "Una distribution define origins S3 o HTTP, incluso fuera de AWS. Un cache hit responde desde el edge; un miss puede resolverse en una regional edge cache u Origin Shield antes de llegar al origen. TTL predeterminado: 24 horas; ajústalo según la frescura requerida.",
+        "show": [
+          "viewers",
+          "edge",
+          "og",
+          "s3",
+          "alb"
+        ],
+        "focus": "og"
+      },
+      {
+        "narration": "Para un bucket S3 privado usas origin access control. CloudFront firma sus solicitudes, y la bucket policy permite s3:GetObject solo al service principal de CloudFront para esa distribution. Así nadie entra por la URL directa de S3.",
+        "show": [
+          "viewers",
+          "edge",
+          "og",
+          "s3",
+          "alb"
+        ],
+        "focus": "s3"
+      },
+      {
+        "narration": "Para contenido privado de pago usas signed URLs o signed cookies. Una signed URL protege un archivo individual o sirve a clientes sin cookies; las signed cookies cubren muchos archivos sin cambiar las URLs existentes.",
+        "show": [
+          "viewers",
+          "edge",
+          "og",
+          "s3",
+          "alb"
+        ],
+        "focus": "viewers"
+      },
+      {
+        "narration": "CloudFront también restringe por país con una allowlist o denylist que aplica a toda la distribution. Y con un origin group, si el primario devuelve ciertos errores en un GET, reintenta en el secundario.",
+        "show": [
+          "viewers",
+          "edge",
+          "og",
+          "s3",
+          "alb"
+        ],
+        "focus": "alb"
+      },
+      {
+        "narration": "Para lógica en el edge, CloudFront Functions hace cambios livianos en headers o URLs, a millones de solicitudes por segundo. Si necesitas llamadas de red, leer el body o más memoria, usa Lambda@Edge.",
+        "show": [
+          "viewers",
+          "edge",
+          "og",
+          "s3",
+          "alb",
+          "fn"
+        ],
+        "focus": "fn"
+      },
+      {
+        "narration": "Dos confusiones clásicas. Si el problema es subir archivos desde lejos a un bucket, eso es S3 Transfer Acceleration, no CloudFront. Y si necesitas IPs estáticas o tráfico TCP o UDP sin caché, eso es Global Accelerator.",
+        "show": [
+          "viewers",
+          "edge",
+          "og",
+          "s3",
+          "alb",
+          "fn",
+          "up"
+        ],
+        "focus": "up"
+      }
+    ],
+    "keyPoints": [
+      "CloudFront cachea HTTP(S) en edge locations; TTL por defecto 24 h.",
+      "OAC + bucket policy: S3 privado solo vía CloudFront.",
+      "Signed URL: un archivo; signed cookies: muchos archivos.",
+      "CloudFront Functions liviano; Lambda@Edge con red y body.",
+      "Subidas lejanas a un bucket: S3 Transfer Acceleration."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Global Accelerator",
+        "difference": "Global Accelerator no cachea: da IPs anycast fijas para TCP/UDP hacia endpoints regionales."
+      },
+      {
+        "unitOrService": "S3 presigned URLs",
+        "difference": "Un presigned URL da acceso temporal directo a S3; la signed URL controla acceso vía CloudFront."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "cloudfront--l1",
+      "conceptId": "cloudfront-fundamentals",
+      "format": "lightning",
+      "prompt": "Global viewers repeatedly request the same images; cut latency and origin load → ?",
+      "promptEs": "Usuarios globales piden las mismas imágenes una y otra vez; bajar latencia y carga del origen → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "id": "B",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "Amazon ElastiCache"
+        }
+      ],
+      "answer": "A",
+      "why": "CloudFront cachea contenido HTTP(S) en el edge y evita ir al origen en cada solicitud. Global Accelerator acelera la red, pero no cachea."
+    },
+    {
+      "id": "cloudfront--l3",
+      "conceptId": "cloudfront-fundamentals",
+      "format": "thisorthat",
+      "prompt": "Further reduce requests forwarded to the origin from many edge locations → ?",
+      "promptEs": "Reducir aún más las solicitudes que llegan al origen desde muchas edge locations → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudFront Origin Shield"
+        },
+        {
+          "id": "B",
+          "text": "S3 Transfer Acceleration"
+        }
+      ],
+      "answer": "A",
+      "why": "Origin Shield agrega una capa de caché centralizada que minimiza las solicitudes al origen. Transfer Acceleration acelera subidas a S3, no entrega en caché."
+    },
+    {
+      "id": "cloudfront--l4",
+      "conceptId": "cloudfront-fundamentals",
+      "format": "lightning",
+      "prompt": "Which can serve as a CloudFront origin?",
+      "promptEs": "¿Qué puede ser origen de CloudFront?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only S3 buckets"
+        },
+        {
+          "id": "B",
+          "text": "Only resources inside AWS"
+        },
+        {
+          "id": "C",
+          "text": "S3 or any HTTP server"
+        },
+        {
+          "id": "D",
+          "text": "Only EC2 in us-east-1"
+        }
+      ],
+      "answer": "C",
+      "why": "Un origen puede ser un bucket S3 o un servidor HTTP personalizado, en EC2 o incluso fuera de AWS, como un servidor on-premises."
+    },
+    {
+      "id": "cloudfront--l5",
+      "conceptId": "cloudfront-oac-s3",
+      "format": "lightning",
+      "prompt": "Serve a private S3 bucket only through CloudFront; block direct S3 URL access → ?",
+      "promptEs": "Servir un bucket S3 privado solo a través de CloudFront y bloquear la URL directa de S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Make the bucket public-read"
+        },
+        {
+          "id": "B",
+          "text": "OAC plus a bucket policy"
+        },
+        {
+          "id": "C",
+          "text": "S3 presigned URLs for viewers"
+        },
+        {
+          "id": "D",
+          "text": "S3 Transfer Acceleration endpoint"
+        }
+      ],
+      "answer": "B",
+      "why": "Con OAC CloudFront firma las solicitudes, y la bucket policy solo permite al service principal de CloudFront de esa distribution. El bucket sigue privado."
+    },
+    {
+      "id": "cloudfront--l6",
+      "conceptId": "cloudfront-oac-s3",
+      "format": "lightning",
+      "prompt": "Besides attaching OAC, what grants CloudFront read access to the private bucket?",
+      "promptEs": "Además de configurar OAC, ¿qué le da a CloudFront acceso de lectura al bucket privado?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Make the objects public"
+        },
+        {
+          "id": "B",
+          "text": "Switch the origin to a website endpoint"
+        },
+        {
+          "id": "C",
+          "text": "Bucket policy for CloudFront principal"
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Transfer Acceleration"
+        }
+      ],
+      "answer": "C",
+      "why": "OAC solo firma las solicitudes; la bucket policy debe otorgar s3:GetObject a cloudfront.amazonaws.com con AWS:SourceArn de la distribution."
+    },
+    {
+      "id": "cloudfront--l7",
+      "conceptId": "cloudfront-oac-s3",
+      "format": "lightning",
+      "prompt": "Private objects use SSE-KMS and are served through CloudFront with OAC → extra step?",
+      "promptEs": "Objetos privados con SSE-KMS se sirven vía CloudFront con OAC → ¿paso adicional?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Switch to legacy OAI"
+        },
+        {
+          "id": "B",
+          "text": "Disable bucket encryption"
+        },
+        {
+          "id": "C",
+          "text": "Use the S3 static website endpoint instead"
+        },
+        {
+          "id": "D",
+          "text": "KMS key policy allowing the distribution"
+        }
+      ],
+      "answer": "D",
+      "why": "Con SSE-KMS, la key policy de KMS también debe permitir que la distribution use la llave. OAI es la opción heredada y no soporta SSE-KMS."
+    },
+    {
+      "id": "cloudfront--l8",
+      "conceptId": "cloudfront-oac-s3",
+      "format": "thisorthat",
+      "prompt": "Origin is an S3 static website endpoint → can it use OAC?",
+      "promptEs": "El origen es un endpoint de sitio web estático de S3 → ¿puede usar OAC?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, OAC signs its requests"
+        },
+        {
+          "id": "B",
+          "text": "No, it's a custom origin"
+        }
+      ],
+      "answer": "B",
+      "why": "OAC requiere un bucket S3 regular como origen. El website endpoint se trata como custom origin y no admite OAC."
+    },
+    {
+      "id": "cloudfront--l9",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "format": "lightning",
+      "prompt": "Restrict one installer file via CloudFront; the download client can't handle cookies → ?",
+      "promptEs": "Restringir un archivo instalador vía CloudFront; el cliente de descarga no maneja cookies → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudFront signed URL"
+        },
+        {
+          "id": "B",
+          "text": "CloudFront signed cookies"
+        },
+        {
+          "id": "C",
+          "text": "Geographic restriction"
+        },
+        {
+          "id": "D",
+          "text": "Origin access control"
+        }
+      ],
+      "answer": "A",
+      "why": "Una signed URL sirve para un archivo individual o para clientes que no usan cookies. OAC protege el origen, no controla qué usuario descarga."
+    },
+    {
+      "id": "cloudfront--l10",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "format": "lightning",
+      "prompt": "Many premium video segment files; existing URLs must stay unchanged → ?",
+      "promptEs": "Muchos archivos de video premium; las URLs existentes no deben cambiar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A new signed URL for every file"
+        },
+        {
+          "id": "B",
+          "text": "Origin access control"
+        },
+        {
+          "id": "C",
+          "text": "S3 presigned URLs"
+        },
+        {
+          "id": "D",
+          "text": "CloudFront signed cookies"
+        }
+      ],
+      "answer": "D",
+      "why": "Las signed cookies cubren muchos archivos restringidos sin modificar sus URLs. Las signed URLs cambian cada URL."
+    },
+    {
+      "id": "cloudfront--l11",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "format": "thisorthat",
+      "prompt": "A request carries both a signed URL and a signed cookie → what's evaluated?",
+      "promptEs": "Una solicitud trae una signed URL y una signed cookie → ¿qué se evalúa?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only the signed URL"
+        },
+        {
+          "id": "B",
+          "text": "Only the signed cookie"
+        }
+      ],
+      "answer": "A",
+      "why": "La signed URL tiene precedencia: si el visitante usa una signed URL, CloudFront decide el acceso solo con ella y no mira la cookie."
+    },
+    {
+      "id": "cloudfront--l12",
+      "conceptId": "cloudfront-geo-restriction-https",
+      "format": "lightning",
+      "prompt": "Allow only approved countries to access every file in a distribution → ?",
+      "promptEs": "Permitir solo países aprobados para todos los archivos de una distribution → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route 53 geolocation routing"
+        },
+        {
+          "id": "B",
+          "text": "Security group country rules"
+        },
+        {
+          "id": "C",
+          "text": "CloudFront geographic restrictions"
+        },
+        {
+          "id": "D",
+          "text": "Lambda@Edge on every origin response"
+        }
+      ],
+      "answer": "C",
+      "why": "Las restricciones geográficas usan allowlist o denylist de países para toda la distribution y responden 403. Route 53 geolocation elige destino, no bloquea."
+    },
+    {
+      "id": "cloudfront--l13",
+      "conceptId": "cloudfront-geo-restriction-https",
+      "format": "thisorthat",
+      "prompt": "Viewers are forced to HTTPS → is CloudFront-to-origin traffic encrypted too?",
+      "promptEs": "Los usuarios están forzados a HTTPS → ¿el tráfico de CloudFront al origen también va cifrado?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, automatically"
+        },
+        {
+          "id": "B",
+          "text": "No, configure origin HTTPS separately"
+        }
+      ],
+      "answer": "B",
+      "why": "La conexión del usuario y la del origen se configuran por separado. Exigir HTTPS al usuario no cifra el tramo hacia el origen."
+    },
+    {
+      "id": "cloudfront--l14",
+      "conceptId": "cloudfront-origin-failover",
+      "format": "lightning",
+      "prompt": "Retry GET requests on a secondary origin when the primary returns 503 → ?",
+      "promptEs": "Reintentar solicitudes GET en un origen secundario cuando el primario devuelve 503 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Origin group on the cache behavior"
+        },
+        {
+          "id": "B",
+          "text": "Second origin without an origin group"
+        },
+        {
+          "id": "C",
+          "text": "Route 53 weighted records"
+        },
+        {
+          "id": "D",
+          "text": "Longer default cache TTL"
+        }
+      ],
+      "answer": "A",
+      "why": "El failover de origen requiere un origin group asignado al cache behavior. Agregar un segundo origen solo no activa el failover."
+    },
+    {
+      "id": "cloudfront--l15",
+      "conceptId": "cloudfront-origin-failover",
+      "format": "thisorthat",
+      "prompt": "POST requests fail at the primary origin → does origin failover retry them?",
+      "promptEs": "Solicitudes POST fallan en el origen primario → ¿el origin failover las reintenta?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, every method fails over"
+        },
+        {
+          "id": "B",
+          "text": "No, only GET, HEAD, OPTIONS"
+        }
+      ],
+      "answer": "B",
+      "why": "El origin failover solo aplica a GET, HEAD y OPTIONS. POST y PUT no se reintentan en el secundario."
+    },
+    {
+      "id": "cloudfront--l16",
+      "conceptId": "cloudfront-functions-lambda-edge",
+      "format": "lightning",
+      "prompt": "Add a header to every viewer request, millions per second, minimal logic → ?",
+      "promptEs": "Agregar un header a cada solicitud del usuario, millones por segundo, lógica mínima → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lambda@Edge on origin request"
+        },
+        {
+          "id": "B",
+          "text": "Lambda behind an ALB"
+        },
+        {
+          "id": "C",
+          "text": "CloudFront Functions"
+        },
+        {
+          "id": "D",
+          "text": "Amazon API Gateway"
+        }
+      ],
+      "answer": "C",
+      "why": "CloudFront Functions es para lógica liviana en eventos del viewer y escala a millones de solicitudes por segundo. Lambda@Edge llega a 10,000 por segundo por Region."
+    },
+    {
+      "id": "cloudfront--l17",
+      "conceptId": "cloudfront-functions-lambda-edge",
+      "format": "thisorthat",
+      "prompt": "Edge logic must call an external authorization service → ?",
+      "promptEs": "La lógica en el edge debe llamar a un servicio externo de autorización → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudFront Functions"
+        },
+        {
+          "id": "B",
+          "text": "Lambda@Edge"
+        }
+      ],
+      "answer": "B",
+      "why": "CloudFront Functions no tiene acceso a red, ni al body, ni al sistema de archivos. Lambda@Edge sí puede hacer llamadas de red."
+    },
+    {
+      "id": "cloudfront--l18",
+      "conceptId": "s3-transfer-acceleration",
+      "format": "lightning",
+      "prompt": "Customers on several continents upload large files to one central S3 bucket → ?",
+      "promptEs": "Clientes en varios continentes suben archivos grandes a un solo bucket S3 central → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CloudFront distribution"
+        },
+        {
+          "id": "B",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "id": "C",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "id": "D",
+          "text": "S3 Transfer Acceleration"
+        }
+      ],
+      "answer": "D",
+      "why": "Transfer Acceleration mete las subidas en la red de AWS desde el edge más cercano hasta el bucket. CloudFront está pensado para entregar contenido en caché."
+    },
+    {
+      "id": "cloudfront--l19",
+      "conceptId": "s3-transfer-acceleration",
+      "format": "thisorthat",
+      "prompt": "Bucket name contains periods (my.data.bucket) → Transfer Acceleration?",
+      "promptEs": "El nombre del bucket tiene puntos (my.data.bucket) → ¿Transfer Acceleration?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Not supported for that bucket"
+        },
+        {
+          "id": "B",
+          "text": "Supported with path-style URLs"
+        }
+      ],
+      "answer": "A",
+      "why": "El nombre debe ser compatible con DNS y no tener puntos, y las solicitudes deben usar estilo virtual-hosted, no path-style."
+    },
+    {
+      "id": "cloudfront--l20",
+      "conceptId": "s3-transfer-acceleration",
+      "format": "lightning",
+      "prompt": "After enabling Transfer Acceleration, clients must send uploads to → ?",
+      "promptEs": "Después de activar Transfer Acceleration, los clientes deben enviar las subidas a → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The regular regional S3 endpoint"
+        },
+        {
+          "id": "B",
+          "text": "bucket-name.s3-accelerate.amazonaws.com"
+        },
+        {
+          "id": "C",
+          "text": "A CloudFront distribution domain"
+        },
+        {
+          "id": "D",
+          "text": "A path-style S3 URL"
+        }
+      ],
+      "answer": "B",
+      "why": "Activarlo no cambia las solicitudes al endpoint normal: hay que usar el endpoint s3-accelerate con estilo virtual-hosted. La mejora puede tardar hasta 20 minutos."
+    }
+  ],
+  "audited": true
+}

@@ -1,0 +1,363 @@
+{
+  "unitId": "fsx",
+  "overview": {
+    "title": "Amazon FSx",
+    "hook": "File systems conocidos, administrados por AWS: Windows, Lustre, NetApp ONTAP y OpenZFS.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "win",
+          "label": "Clientes Windows",
+          "kind": "actor",
+          "x": 8,
+          "y": 20
+        },
+        {
+          "id": "ad",
+          "label": "Active Directory",
+          "kind": "service",
+          "service": "AWS Directory Service",
+          "x": 8,
+          "y": 52
+        },
+        {
+          "id": "fsxw",
+          "label": "FSx for Windows",
+          "kind": "service",
+          "service": "Amazon FSx",
+          "x": 40,
+          "y": 20
+        },
+        {
+          "id": "hpc",
+          "label": "Cluster HPC / ML",
+          "kind": "actor",
+          "x": 8,
+          "y": 86
+        },
+        {
+          "id": "lus",
+          "label": "FSx for Lustre",
+          "kind": "service",
+          "service": "Amazon FSx",
+          "x": 40,
+          "y": 86
+        },
+        {
+          "id": "s3",
+          "label": "Amazon S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 74,
+          "y": 86
+        },
+        {
+          "id": "ontap",
+          "label": "ONTAP / OpenZFS",
+          "kind": "service",
+          "service": "Amazon FSx",
+          "x": 78,
+          "y": 30
+        }
+      ],
+      "edges": [
+        {
+          "from": "win",
+          "to": "fsxw",
+          "label": "SMB"
+        },
+        {
+          "from": "ad",
+          "to": "fsxw",
+          "label": "autentica"
+        },
+        {
+          "from": "hpc",
+          "to": "lus",
+          "label": "POSIX rápido"
+        },
+        {
+          "from": "lus",
+          "to": "s3",
+          "label": "vinculado a S3"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon FSx es una familia de file systems conocidos, administrados por AWS. La pista del examen casi siempre es el protocolo o el producto que la empresa ya usa: Windows, Lustre, NetApp ONTAP u OpenZFS.",
+        "show": [
+          "fsxw"
+        ],
+        "focus": "fsxw"
+      },
+      {
+        "narration": "FSx for Windows File Server entrega recursos compartidos SMB con permisos de Windows y autenticación con Active Directory. Si una aplicación Windows necesita su file share tal como está, esta es la respuesta, no EFS.",
+        "show": [
+          "fsxw",
+          "win",
+          "ad"
+        ],
+        "focus": "fsxw"
+      },
+      {
+        "narration": "Para Windows eliges Single-AZ o Multi-AZ. Multi-AZ mantiene un servidor standby en otra zona y hace failover automático. Single-AZ protege contra fallas de componentes, pero no contra la caída de la zona.",
+        "show": [
+          "fsxw",
+          "win",
+          "ad"
+        ],
+        "focus": "fsxw"
+      },
+      {
+        "narration": "FSx for Lustre es velocidad pura para HPC y machine learning en Linux, con latencia sub-milisegundo. Se vincula a un bucket S3, presenta sus objetos como archivos y puede escribir los resultados de vuelta a S3.",
+        "show": [
+          "fsxw",
+          "win",
+          "ad",
+          "hpc",
+          "lus",
+          "s3"
+        ],
+        "focus": "lus"
+      },
+      {
+        "narration": "Dentro de Lustre eliges scratch o persistent. Scratch es para procesamiento temporal y no replica: si falla un servidor, pierdes esos datos. Persistent replica y reemplaza servidores, para datos que deben sobrevivir.",
+        "show": [
+          "fsxw",
+          "win",
+          "ad",
+          "hpc",
+          "lus",
+          "s3"
+        ],
+        "focus": "lus"
+      },
+      {
+        "narration": "Si migras un entorno NetApp, elige FSx for NetApp ONTAP: ofrece NFS, SMB e iSCSI desde el mismo file system. Si necesitas migrar un entorno OpenZFS, elige FSx for OpenZFS, con acceso NFS, snapshots y clones.",
+        "show": [
+          "fsxw",
+          "win",
+          "ad",
+          "hpc",
+          "lus",
+          "s3",
+          "ontap"
+        ],
+        "focus": "ontap"
+      }
+    ],
+    "keyPoints": [
+      "Windows + SMB + Active Directory → FSx for Windows",
+      "Multi-AZ para sobrevivir a la caída de una AZ",
+      "HPC o ML sobre datos en S3 → FSx for Lustre",
+      "Scratch: temporal, sin réplica; Persistent: replicado",
+      "NetApp o NFS+SMB+iSCSI → ONTAP; requisito de OpenZFS → OpenZFS"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon EFS",
+        "difference": "EFS es NFS elástico general para Linux; FSx ofrece file systems específicos como Windows o Lustre."
+      },
+      {
+        "unitOrService": "Amazon S3",
+        "difference": "S3 guarda objetos; FSx for Lustre presenta esos objetos como archivos para HPC."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "fsx--l1",
+      "conceptId": "fsx-windows-file-server",
+      "format": "lightning",
+      "prompt": "Windows app needs SMB shares, Active Directory auth and NTFS ACLs → ?",
+      "promptEs": "App Windows necesita shares SMB, autenticación con Active Directory y ACLs NTFS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon EFS Regional file system"
+        },
+        {
+          "id": "B",
+          "text": "FSx for Windows File Server"
+        },
+        {
+          "id": "C",
+          "text": "FSx for Lustre"
+        },
+        {
+          "id": "D",
+          "text": "Amazon S3"
+        }
+      ],
+      "answer": "B",
+      "why": "FSx for Windows entrega SMB nativo con Active Directory y ACLs de Windows. EFS usa NFS y no soporta instancias Windows."
+    },
+    {
+      "id": "fsx--l2",
+      "conceptId": "fsx-windows-file-server",
+      "format": "thisorthat",
+      "prompt": "Windows file share must survive an AZ failure → ?",
+      "promptEs": "Un file share Windows debe sobrevivir a la caída de una AZ → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "FSx for Windows Single-AZ"
+        },
+        {
+          "id": "B",
+          "text": "FSx for Windows Multi-AZ"
+        }
+      ],
+      "answer": "B",
+      "why": "Multi-AZ mantiene un standby en otra zona con failover automático. Single-AZ solo cubre fallas de componentes dentro de la zona."
+    },
+    {
+      "id": "fsx--l3",
+      "conceptId": "fsx-windows-file-server",
+      "format": "lightning",
+      "prompt": "FSx for Windows home directories; lowest cost over latency → ?",
+      "promptEs": "Carpetas personales en FSx for Windows; menor costo antes que latencia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SSD storage type"
+        },
+        {
+          "id": "B",
+          "text": "EFS Infrequent Access"
+        },
+        {
+          "id": "C",
+          "text": "EBS sc1 volume"
+        },
+        {
+          "id": "D",
+          "text": "HDD storage type"
+        }
+      ],
+      "answer": "D",
+      "why": "HDD sirve para carpetas personales y shares departamentales a menor costo. SSD es para cargas sensibles a la latencia."
+    },
+    {
+      "id": "fsx--l4",
+      "conceptId": "fsx-lustre",
+      "format": "lightning",
+      "prompt": "Linux HPC cluster needs sub-millisecond file access to an S3 dataset → ?",
+      "promptEs": "Cluster HPC Linux necesita acceso sub-milisegundo a archivos de un dataset en S3 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "FSx for Lustre"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EFS"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "FSx for Windows File Server"
+        }
+      ],
+      "answer": "A",
+      "why": "FSx for Lustre se vincula a S3, presenta los objetos como archivos y da latencia sub-milisegundo. EFS no está orientado a HPC."
+    },
+    {
+      "id": "fsx--l5",
+      "conceptId": "fsx-lustre",
+      "format": "thisorthat",
+      "prompt": "Short-term processing; losing data if a file server fails is acceptable → ?",
+      "promptEs": "Procesamiento temporal; se acepta perder datos si falla un servidor → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lustre scratch"
+        },
+        {
+          "id": "B",
+          "text": "Lustre persistent"
+        }
+      ],
+      "answer": "A",
+      "why": "Scratch no replica y es para trabajos temporales. Persistent replica los datos, pero aquí no hace falta pagar por eso."
+    },
+    {
+      "id": "fsx--l6",
+      "conceptId": "fsx-lustre",
+      "format": "lightning",
+      "prompt": "Lustre working data must survive file-server failures → ?",
+      "promptEs": "Los datos de trabajo en Lustre deben sobrevivir a fallas de un servidor → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Scratch deployment type"
+        },
+        {
+          "id": "B",
+          "text": "EC2 instance store"
+        },
+        {
+          "id": "C",
+          "text": "Persistent deployment"
+        },
+        {
+          "id": "D",
+          "text": "EFS One Zone"
+        }
+      ],
+      "answer": "C",
+      "why": "Persistent replica los datos y reemplaza servidores que fallan. Scratch pierde los datos si falla un servidor."
+    },
+    {
+      "id": "fsx--l7",
+      "conceptId": "fsx-ontap-openzfs",
+      "format": "lightning",
+      "prompt": "Migrate NetApp; need NFS, SMB and iSCSI from one file system → ?",
+      "promptEs": "Migrar NetApp; se necesita NFS, SMB e iSCSI desde un file system → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "FSx for OpenZFS"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EFS"
+        },
+        {
+          "id": "C",
+          "text": "FSx for NetApp ONTAP"
+        },
+        {
+          "id": "D",
+          "text": "FSx for Windows File Server"
+        }
+      ],
+      "answer": "C",
+      "why": "FSx for ONTAP ofrece NFS, SMB e iSCSI y herramientas NetApp. OpenZFS solo da NFS y Windows File Server solo SMB."
+    },
+    {
+      "id": "fsx--l8",
+      "conceptId": "fsx-ontap-openzfs",
+      "format": "thisorthat",
+      "prompt": "Replace an on-premises ZFS server, keep snapshots and clones → ?",
+      "promptEs": "Reemplazar un servidor ZFS local conservando snapshots y clones → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "FSx for OpenZFS"
+        },
+        {
+          "id": "B",
+          "text": "FSx for NetApp ONTAP"
+        }
+      ],
+      "answer": "A",
+      "why": "Ambos tienen snapshots y clones; lo que decide es migrar desde ZFS. FSx for OpenZFS mantiene esas capacidades por NFS."
+    }
+  ],
+  "audited": true
+}

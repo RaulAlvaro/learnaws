@@ -1,0 +1,651 @@
+{
+  "unitId": "kms",
+  "overview": {
+    "title": "AWS KMS & CloudHSM",
+    "hook": "Las llaves que cifran tus datos, guardadas y controladas sin que salgan de AWS.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "App / servicio",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "kms",
+          "label": "KMS key",
+          "kind": "service",
+          "service": "AWS Key Management Service",
+          "x": 36,
+          "y": 22
+        },
+        {
+          "id": "pol",
+          "label": "Key policy",
+          "kind": "note",
+          "x": 36,
+          "y": 78
+        },
+        {
+          "id": "dk",
+          "label": "Data key",
+          "kind": "data",
+          "x": 62,
+          "y": 50
+        },
+        {
+          "id": "data",
+          "label": "Datos cifrados",
+          "kind": "data",
+          "x": 88,
+          "y": 50
+        },
+        {
+          "id": "rep",
+          "label": "Réplica Region B",
+          "kind": "service",
+          "service": "AWS Key Management Service",
+          "x": 88,
+          "y": 15
+        },
+        {
+          "id": "hsm",
+          "label": "CloudHSM",
+          "kind": "service",
+          "service": "AWS CloudHSM",
+          "x": 88,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "kms",
+          "label": "GenerateDataKey"
+        },
+        {
+          "from": "pol",
+          "to": "kms",
+          "label": "quién la usa"
+        },
+        {
+          "from": "kms",
+          "to": "dk",
+          "label": "protege"
+        },
+        {
+          "from": "dk",
+          "to": "data",
+          "label": "cifra local"
+        },
+        {
+          "from": "kms",
+          "to": "rep",
+          "label": "misma material"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Cifrar en reposo protege los datos guardados; cifrar en tránsito, con TLS, protege lo que viaja por la red. Uno no cubre al otro. Para el reposo, el servicio central es AWS KMS, que guarda y usa tus llaves sin que salgan de él.",
+        "show": [
+          "app",
+          "kms"
+        ],
+        "focus": "kms"
+      },
+      {
+        "narration": "Hay tres tipos de llave. AWS owned: invisible y sin costo. AWS managed: la ves en tu cuenta y en CloudTrail, pero no editas su policy. Customer managed: tú controlas policy, rotación y borrado, y es la que permite compartir con otras cuentas.",
+        "show": [
+          "app",
+          "kms"
+        ],
+        "focus": "kms"
+      },
+      {
+        "narration": "KMS no cifra archivos grandes directamente. Se usa envelope encryption: GenerateDataKey te da una data key en claro y otra cifrada. Cifras los datos localmente, borras la copia en claro y guardas la cifrada junto a los datos.",
+        "show": [
+          "app",
+          "kms",
+          "dk",
+          "data"
+        ],
+        "focus": "dk"
+      },
+      {
+        "narration": "Quién puede usar la llave lo decide la key policy, la única policy de cada KMS key. Si la key policy no lo permite, ningún allow de IAM alcanza. Entre cuentas, la key policy nombra a la cuenta externa y esa cuenta delega con IAM.",
+        "show": [
+          "app",
+          "kms",
+          "dk",
+          "data",
+          "pol"
+        ],
+        "focus": "pol"
+      },
+      {
+        "narration": "Customer managed keys simétricas con material generado por AWS KMS rotan automáticamente cada 365 días por defecto, con periodo ajustable; el cifrado previo sigue descifrándose. Las de material importado no rotan automáticamente. AWS managed keys rotan anualmente sin ajustes. Multi-Region keys comparten material entre Regions.",
+        "show": [
+          "app",
+          "kms",
+          "dk",
+          "data",
+          "pol",
+          "rep"
+        ],
+        "focus": "rep"
+      },
+      {
+        "narration": "Si piden un HSM de un solo inquilino, validado FIPS 140 Level 3, con control directo de las llaves y usuarios fuera de IAM, la respuesta es CloudHSM. Si solo necesitas llaves administradas, KMS es mucho más simple.",
+        "show": [
+          "app",
+          "kms",
+          "dk",
+          "data",
+          "pol",
+          "rep",
+          "hsm"
+        ],
+        "focus": "hsm"
+      }
+    ],
+    "keyPoints": [
+      "Reposo con KMS; tránsito con TLS y certificados ACM.",
+      "Customer managed key: controlas policy, rotación y compartir.",
+      "Envelope encryption: data key local, guardada cifrada.",
+      "Sin allow en la key policy, IAM no alcanza.",
+      "Rotación automática ajustable solo para customer managed keys simétricas con material generado por AWS KMS; AWS managed keys rotan anualmente sin ajustes.",
+      "CloudHSM: HSM dedicado, FIPS Level 3, control total."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Secrets Manager",
+        "difference": "Secrets Manager guarda y rota secretos de la app; KMS guarda las llaves que cifran datos."
+      },
+      {
+        "unitOrService": "AWS Certificate Manager",
+        "difference": "ACM gestiona certificados TLS para datos en tránsito; KMS gestiona llaves para datos en reposo."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "kms--l1",
+      "conceptId": "encryption-at-rest-vs-in-transit",
+      "format": "lightning",
+      "prompt": "Records stored in S3 and EBS must be encrypted at rest → ?",
+      "promptEs": "Los registros guardados en S3 y EBS deben cifrarse en reposo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS KMS encryption"
+        },
+        {
+          "id": "B",
+          "text": "TLS with an ACM certificate"
+        },
+        {
+          "id": "C",
+          "text": "HTTPS-only bucket policy"
+        },
+        {
+          "id": "D",
+          "text": "Private VPC endpoint"
+        }
+      ],
+      "answer": "A",
+      "why": "KMS es el mecanismo típico de cifrado en reposo para datos guardados. TLS y HTTPS protegen la conexión, pero no cifran lo que queda almacenado."
+    },
+    {
+      "id": "kms--l2",
+      "conceptId": "encryption-at-rest-vs-in-transit",
+      "format": "thisorthat",
+      "prompt": "Protect data traveling between browsers and your public endpoint → ?",
+      "promptEs": "Proteger los datos que viajan entre navegadores y tu endpoint público → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Server-side KMS encryption at rest"
+        },
+        {
+          "id": "B",
+          "text": "TLS with an ACM certificate"
+        }
+      ],
+      "answer": "B",
+      "why": "Los datos en tránsito se protegen con TLS, usando por ejemplo un certificado de ACM. Cifrar en reposo no protege la conexión."
+    },
+    {
+      "id": "kms--l3",
+      "conceptId": "encryption-at-rest-vs-in-transit",
+      "format": "thisorthat",
+      "prompt": "Data must be encrypted before it ever leaves the user's device → ?",
+      "promptEs": "Los datos deben cifrarse antes de salir del dispositivo del usuario → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Client-side encryption"
+        },
+        {
+          "id": "B",
+          "text": "Server-side encryption with KMS"
+        }
+      ],
+      "answer": "A",
+      "why": "El cifrado del lado del cliente actúa antes de enviar los datos. El cifrado del lado del servidor ocurre después de que llegan a AWS, demasiado tarde para ese requisito."
+    },
+    {
+      "id": "kms--l4",
+      "conceptId": "kms-key-types",
+      "format": "lightning",
+      "prompt": "Security team must edit the key policy and be able to disable the key → ?",
+      "promptEs": "El equipo de seguridad debe editar la key policy y poder deshabilitar la llave → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS owned key"
+        },
+        {
+          "id": "B",
+          "text": "AWS managed key"
+        },
+        {
+          "id": "C",
+          "text": "Customer managed key"
+        },
+        {
+          "id": "D",
+          "text": "Default SSE-S3 encryption"
+        }
+      ],
+      "answer": "C",
+      "why": "Solo la customer managed key te deja editar su policy y controlar su ciclo de vida. La AWS managed key tiene una policy visible pero no editable."
+    },
+    {
+      "id": "kms--l5",
+      "conceptId": "kms-key-types",
+      "format": "thisorthat",
+      "prompt": "Share encrypted snapshots with another AWS account → key type?",
+      "promptEs": "Compartir snapshots cifrados con otra cuenta de AWS → ¿tipo de llave?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Customer managed key"
+        },
+        {
+          "id": "B",
+          "text": "AWS managed key"
+        }
+      ],
+      "answer": "A",
+      "why": "Las AWS managed keys solo pueden usarlas principals de su propia cuenta. Para compartir recursos cifrados, necesitas una customer managed key con la otra cuenta en su policy."
+    },
+    {
+      "id": "kms--l6",
+      "conceptId": "kms-key-types",
+      "format": "lightning",
+      "prompt": "Encryption by default, no key administration and no customer key charges → ?",
+      "promptEs": "Cifrado por defecto, sin administrar llaves y sin cargos por llave → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS owned key"
+        },
+        {
+          "id": "B",
+          "text": "Customer managed key"
+        },
+        {
+          "id": "C",
+          "text": "AWS CloudHSM key"
+        },
+        {
+          "id": "D",
+          "text": "Multi-Region key"
+        }
+      ],
+      "answer": "A",
+      "why": "Las AWS owned keys viven en una cuenta de AWS y no generan cargos de llave al cliente. A cambio, no ves su policy ni su uso en CloudTrail."
+    },
+    {
+      "id": "kms--l7",
+      "conceptId": "kms-key-types",
+      "format": "lightning",
+      "prompt": "Audit key usage in CloudTrail without managing the key's policy or lifecycle → ?",
+      "promptEs": "Auditar el uso de la llave en CloudTrail sin administrar su policy ni ciclo de vida → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS owned key"
+        },
+        {
+          "id": "B",
+          "text": "Customer managed key"
+        },
+        {
+          "id": "C",
+          "text": "AWS CloudHSM key"
+        },
+        {
+          "id": "D",
+          "text": "AWS managed key"
+        }
+      ],
+      "answer": "D",
+      "why": "La AWS managed key está en tu cuenta y su uso aparece en CloudTrail, pero AWS la administra. La AWS owned key no deja auditar su actividad."
+    },
+    {
+      "id": "kms--l8",
+      "conceptId": "kms-envelope-encryption",
+      "format": "lightning",
+      "prompt": "Encrypt multi-gigabyte files efficiently under a KMS key → ?",
+      "promptEs": "Cifrar archivos de varios gigabytes de forma eficiente con una KMS key → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Call kms:Encrypt on every whole file"
+        },
+        {
+          "id": "B",
+          "text": "Envelope encryption with data keys"
+        },
+        {
+          "id": "C",
+          "text": "Request a higher KMS quota"
+        },
+        {
+          "id": "D",
+          "text": "Store the files inside CloudHSM"
+        }
+      ],
+      "answer": "B",
+      "why": "Con envelope encryption cifras localmente con una data key y solo esa llave pasa por KMS. Así evitas enviar datos grandes a KMS y sus cuotas por segundo."
+    },
+    {
+      "id": "kms--l9",
+      "conceptId": "kms-envelope-encryption",
+      "format": "lightning",
+      "prompt": "KMS API returning both plaintext and encrypted copies of a data key → ?",
+      "promptEs": "API de KMS que devuelve una data key en claro y otra cifrada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "GenerateDataKeyWithoutPlaintext"
+        },
+        {
+          "id": "B",
+          "text": "Encrypt"
+        },
+        {
+          "id": "C",
+          "text": "ReEncrypt"
+        },
+        {
+          "id": "D",
+          "text": "GenerateDataKey"
+        }
+      ],
+      "answer": "D",
+      "why": "GenerateDataKey devuelve ambas copias para cifrar de inmediato. La variante WithoutPlaintext solo entrega la copia cifrada, útil cuando cifrarás más tarde."
+    },
+    {
+      "id": "kms--l10",
+      "conceptId": "kms-envelope-encryption",
+      "format": "thisorthat",
+      "prompt": "Envelope encryption done. What do you store beside the ciphertext?",
+      "promptEs": "Terminaste el envelope encryption. ¿Qué guardas junto a los datos cifrados?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The encrypted data key"
+        },
+        {
+          "id": "B",
+          "text": "The plaintext data key"
+        }
+      ],
+      "answer": "A",
+      "why": "Guardas la data key cifrada y, para leer, llamas a KMS Decrypt sobre ella. La copia en claro se borra de memoria cuanto antes; KMS no guarda data keys."
+    },
+    {
+      "id": "kms--l11",
+      "conceptId": "kms-key-policies-grants",
+      "format": "lightning",
+      "prompt": "Role's IAM policy allows kms:Decrypt, yet decryption is denied → check?",
+      "promptEs": "La IAM policy del role permite kms:Decrypt, pero el descifrado se rechaza → ¿qué revisas?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The role's trust policy"
+        },
+        {
+          "id": "B",
+          "text": "The S3 bucket ACL"
+        },
+        {
+          "id": "C",
+          "text": "The KMS key policy"
+        },
+        {
+          "id": "D",
+          "text": "The key rotation setting"
+        }
+      ],
+      "answer": "C",
+      "why": "La key policy es el control principal de una KMS key: un allow de IAM no sirve si la key policy no lo habilita. La trust policy solo decide quién asume el role."
+    },
+    {
+      "id": "kms--l12",
+      "conceptId": "kms-key-policies-grants",
+      "format": "thisorthat",
+      "prompt": "Cross-account KMS encrypt call → identify the key by?",
+      "promptEs": "Llamada de cifrado a una KMS key de otra cuenta → ¿cómo identificas la llave?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Key ID or alias name"
+        },
+        {
+          "id": "B",
+          "text": "Key ARN or alias ARN"
+        }
+      ],
+      "answer": "B",
+      "why": "Un key ID o alias a secas se interpreta como una llave de la cuenta que llama. Para una llave de otra cuenta, usa el key ARN o el alias ARN."
+    },
+    {
+      "id": "kms--l13",
+      "conceptId": "kms-key-policies-grants",
+      "format": "lightning",
+      "prompt": "Key policy allows an external account, but its role still can't decrypt → missing?",
+      "promptEs": "La key policy permite una cuenta externa, pero su role aún no puede descifrar → ¿qué falta?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM policy in the external account"
+        },
+        {
+          "id": "B",
+          "text": "Automatic rotation of the key"
+        },
+        {
+          "id": "C",
+          "text": "Multi-Region replica in their Region"
+        },
+        {
+          "id": "D",
+          "text": "An SCP allowing all KMS actions"
+        }
+      ],
+      "answer": "A",
+      "why": "Nombrar la cuenta en la key policy no da acceso a cada identidad. La cuenta externa debe delegar kms:Decrypt a su role con una IAM policy."
+    },
+    {
+      "id": "kms--l15",
+      "conceptId": "kms-key-rotation",
+      "format": "thisorthat",
+      "prompt": "After a KMS key rotates, can older ciphertext still be decrypted?",
+      "promptEs": "Después de rotar una KMS key, ¿se puede descifrar lo cifrado antes?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, re-encrypt all data first"
+        },
+        {
+          "id": "B",
+          "text": "Yes, older key material is kept"
+        }
+      ],
+      "answer": "B",
+      "why": "La rotación cambia la key material, no la KMS key lógica. KMS conserva la material anterior y elige la correcta al descifrar, sin que re-cifres nada."
+    },
+    {
+      "id": "kms--l16",
+      "conceptId": "kms-key-rotation",
+      "format": "lightning",
+      "prompt": "Symmetric key with imported material must be rotated right now → ?",
+      "promptEs": "Una llave simétrica con key material importada debe rotarse ya → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Automatic rotation"
+        },
+        {
+          "id": "B",
+          "text": "On-demand rotation"
+        },
+        {
+          "id": "C",
+          "text": "Multi-Region replica"
+        },
+        {
+          "id": "D",
+          "text": "Rotate the data keys"
+        }
+      ],
+      "answer": "B",
+      "why": "La rotación automática no admite key material importada, pero la on-demand sí la admite en llaves simétricas elegibles. Además, es inmediata."
+    },
+    {
+      "id": "kms--l17",
+      "conceptId": "kms-multi-region-keys",
+      "format": "lightning",
+      "prompt": "Decrypt client-side encrypted backups in a DR Region, no cross-Region KMS call → ?",
+      "promptEs": "Descifrar backups cifrados en el cliente en una Region de DR, sin llamar a KMS de otra Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Separate single-Region keys per Region"
+        },
+        {
+          "id": "B",
+          "text": "AWS managed key in each Region"
+        },
+        {
+          "id": "C",
+          "text": "CloudHSM custom key store"
+        },
+        {
+          "id": "D",
+          "text": "Multi-Region primary and replica keys"
+        }
+      ],
+      "answer": "D",
+      "why": "Las multi-Region keys relacionadas comparten key material y key ID, así que la réplica descifra lo de la primaria. Llaves separadas no son intercambiables; las AWS managed son siempre single-Region."
+    },
+    {
+      "id": "kms--l18",
+      "conceptId": "kms-multi-region-keys",
+      "format": "thisorthat",
+      "prompt": "Can an existing single-Region KMS key be converted to multi-Region?",
+      "promptEs": "¿Se puede convertir una KMS key single-Region existente en multi-Region?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, create new keys and re-encrypt"
+        },
+        {
+          "id": "B",
+          "text": "Yes, enable replication on it"
+        }
+      ],
+      "answer": "A",
+      "why": "No se puede convertir. Creas una primary multi-Region, creas réplicas explícitamente en cada Region y vuelves a cifrar los datos existentes bajo las nuevas llaves."
+    },
+    {
+      "id": "kms--l19",
+      "conceptId": "cloudhsm",
+      "format": "lightning",
+      "prompt": "Single-tenant HSMs, FIPS 140-3 Level 3, keys under your exclusive control → ?",
+      "promptEs": "HSMs de un solo inquilino, FIPS 140-3 Level 3, llaves bajo tu control exclusivo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "KMS customer managed key"
+        },
+        {
+          "id": "B",
+          "text": "AWS CloudHSM"
+        },
+        {
+          "id": "C",
+          "text": "AWS Secrets Manager"
+        },
+        {
+          "id": "D",
+          "text": "KMS multi-Region key"
+        }
+      ],
+      "answer": "B",
+      "why": "CloudHSM ofrece HSMs dedicados; en modo FIPS usa HSMs validados Level 3. Una customer managed key de KMS da control de la policy, pero no un HSM de un solo inquilino."
+    },
+    {
+      "id": "kms--l20",
+      "conceptId": "cloudhsm",
+      "format": "lightning",
+      "prompt": "Migrate an on-premises PKCS #11 cryptographic workload to AWS → ?",
+      "promptEs": "Migrar a AWS una carga criptográfica on-premises basada en PKCS #11 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS KMS"
+        },
+        {
+          "id": "B",
+          "text": "AWS Private CA"
+        },
+        {
+          "id": "C",
+          "text": "AWS CloudHSM"
+        },
+        {
+          "id": "D",
+          "text": "AWS Secrets Manager"
+        }
+      ],
+      "answer": "C",
+      "why": "CloudHSM soporta PKCS #11 y te da control directo del HSM y sus usuarios. KMS es un servicio administrado que no expone esa interfaz de HSM."
+    },
+    {
+      "id": "kms--l21",
+      "conceptId": "cloudhsm",
+      "format": "thisorthat",
+      "prompt": "Need managed encryption keys; explicitly no wish to operate HSMs → ?",
+      "promptEs": "Necesitas llaves de cifrado administradas; no quieres operar HSMs → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS CloudHSM"
+        },
+        {
+          "id": "B",
+          "text": "AWS KMS"
+        }
+      ],
+      "answer": "B",
+      "why": "KMS administra la creación y el control de llaves sin que operes HSMs. CloudHSM te da más control, pero también gestionas sus usuarios fuera de IAM."
+    }
+  ],
+  "audited": true
+}

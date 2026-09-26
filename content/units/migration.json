@@ -1,0 +1,430 @@
+{
+  "unitId": "migration",
+  "overview": {
+    "title": "Servicios de migración y DR",
+    "hook": "¿Mueves servidores, mueves una base de datos, o solo te preparas?",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "onprem",
+          "label": "Data center",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "mgn",
+          "label": "MGN",
+          "kind": "service",
+          "service": "AWS Application Migration Service",
+          "x": 40,
+          "y": 15
+        },
+        {
+          "id": "drs",
+          "label": "DRS",
+          "kind": "service",
+          "service": "AWS Elastic Disaster Recovery",
+          "x": 40,
+          "y": 50
+        },
+        {
+          "id": "dms",
+          "label": "DMS + SCT",
+          "kind": "service",
+          "service": "AWS DMS",
+          "x": 40,
+          "y": 85
+        },
+        {
+          "id": "ec2",
+          "label": "EC2 (rehost)",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 78,
+          "y": 15
+        },
+        {
+          "id": "stage",
+          "label": "Staging area",
+          "kind": "data",
+          "x": 78,
+          "y": 50
+        },
+        {
+          "id": "rds",
+          "label": "RDS / Aurora",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 78,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "onprem",
+          "to": "mgn",
+          "label": "réplica de bloques"
+        },
+        {
+          "from": "mgn",
+          "to": "ec2",
+          "label": "cutover"
+        },
+        {
+          "from": "onprem",
+          "to": "drs",
+          "label": "réplica continua"
+        },
+        {
+          "from": "drs",
+          "to": "stage",
+          "label": "cómputo mínimo"
+        },
+        {
+          "from": "onprem",
+          "to": "dms",
+          "label": "full load + CDC"
+        },
+        {
+          "from": "dms",
+          "to": "rds",
+          "label": "datos"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Llevar cargas a AWS no se resuelve con un solo servicio: depende de qué mueves y para qué. Hazte tres preguntas: ¿muevo servidores completos, muevo solo una base de datos, o quiero una copia lista para recuperarme sin migrar?",
+        "show": [
+          "onprem"
+        ],
+        "focus": "onprem"
+      },
+      {
+        "narration": "AWS Application Migration Service, o MGN, hace lift-and-shift: replica tus servidores físicos o virtuales bloque a bloque mientras siguen en producción, y en un cutover de minutos los lanza como instancias EC2, sin reescribir la aplicación.",
+        "show": [
+          "onprem",
+          "mgn",
+          "ec2"
+        ],
+        "focus": "mgn"
+      },
+      {
+        "narration": "Para migrar muchos servidores, MGN usa templates con valores por defecto, overrides para los servidores especiales, y agrupa servidores en applications y waves para hacer el cutover de cada grupo al mismo tiempo.",
+        "show": [
+          "onprem",
+          "mgn",
+          "ec2"
+        ],
+        "focus": "ec2"
+      },
+      {
+        "narration": "AWS Elastic Disaster Recovery, o DRS, replica de forma parecida, pero con otro objetivo: no migras, te preparas. Replica a una staging area barata con cómputo mínimo, lanza instancias solo en un drill o un desastre, y luego permite failback.",
+        "show": [
+          "onprem",
+          "mgn",
+          "ec2",
+          "drs",
+          "stage"
+        ],
+        "focus": "drs"
+      },
+      {
+        "narration": "Para bases de datos usas AWS DMS: primero un full load de los datos existentes y luego CDC, que replica los cambios en curso hasta el cutover. Ojo: si solo configuras CDC, las filas que ya existían no se copian.",
+        "show": [
+          "onprem",
+          "mgn",
+          "ec2",
+          "drs",
+          "stage",
+          "dms",
+          "rds"
+        ],
+        "focus": "dms"
+      },
+      {
+        "narration": "Si cambias de motor, por ejemplo de SQL Server a Aurora PostgreSQL, primero conviertes el schema con DMS Schema Conversion o AWS SCT, y después DMS mueve los datos. Si el motor es el mismo, no necesitas conversión.",
+        "show": [
+          "onprem",
+          "mgn",
+          "ec2",
+          "drs",
+          "stage",
+          "dms",
+          "rds"
+        ],
+        "focus": "rds"
+      }
+    ],
+    "keyPoints": [
+      "MGN: rehost de servidores completos a EC2, cutover en minutos.",
+      "DRS: réplica a staging barata; recuperación en minutos y failback.",
+      "DMS: full load más CDC para minimizar la caída.",
+      "Cambio de motor: Schema Conversion o SCT, luego DMS."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "MGN vs DRS",
+        "difference": "Ambos replican servidores; MGN termina en un cutover definitivo, DRS mantiene una copia para recuperarte."
+      },
+      {
+        "unitOrService": "AWS DMS vs MGN",
+        "difference": "DMS mueve datos de una base; MGN mueve el servidor completo con su aplicación."
+      },
+      {
+        "unitOrService": "Schema Conversion vs DMS",
+        "difference": "La conversión adapta el schema, no mueve datos; DMS mueve los datos."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "migration--l1",
+      "conceptId": "database-migration-dms-sct",
+      "format": "lightning",
+      "prompt": "SQL Server to Aurora PostgreSQL: assess and convert schema and stored procedures → ?",
+      "promptEs": "SQL Server a Aurora PostgreSQL: evaluar y convertir schema y stored procedures → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS DMS full load"
+        },
+        {
+          "id": "B",
+          "text": "DMS Schema Conversion"
+        },
+        {
+          "id": "C",
+          "text": "Application Migration Service"
+        },
+        {
+          "id": "D",
+          "text": "AWS DataSync"
+        }
+      ],
+      "answer": "B",
+      "why": "Un cambio de motor requiere convertir el schema; DMS Schema Conversion evalúa qué se convierte solo y qué requiere trabajo manual. El full load mueve datos, no adapta objetos."
+    },
+    {
+      "id": "migration--l2",
+      "conceptId": "database-migration-dms-sct",
+      "format": "lightning",
+      "prompt": "MySQL to RDS for MySQL, empty target, updates continue during copy → ?",
+      "promptEs": "MySQL a RDS for MySQL, destino vacío, las actualizaciones siguen durante la copia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DMS full load plus CDC"
+        },
+        {
+          "id": "B",
+          "text": "DMS CDC-only task"
+        },
+        {
+          "id": "C",
+          "text": "MGN server replication"
+        },
+        {
+          "id": "D",
+          "text": "Elastic Disaster Recovery"
+        }
+      ],
+      "answer": "A",
+      "why": "El full load copia las filas existentes y CDC mantiene el destino al día hasta el cutover. Mismo motor, así que no hace falta convertir schema."
+    },
+    {
+      "id": "migration--l3",
+      "conceptId": "database-migration-dms-sct",
+      "format": "thisorthat",
+      "prompt": "Empty target, DMS task set to ongoing replication only → what happens to existing rows?",
+      "promptEs": "Destino vacío, tarea de DMS solo con replicación continua → ¿qué pasa con las filas existentes?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Not copied; add a full load"
+        },
+        {
+          "id": "B",
+          "text": "Copied automatically first"
+        }
+      ],
+      "answer": "A",
+      "why": "CDC solo replica cambios nuevos. Si el destino arranca vacío, necesitas un full load inicial para las filas existentes."
+    },
+    {
+      "id": "migration--l4",
+      "conceptId": "database-migration-dms-sct",
+      "format": "lightning",
+      "prompt": "Schema conversion that is fully managed and web-based, nothing to install → ?",
+      "promptEs": "Conversión de schema totalmente gestionada y web, sin instalar nada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS SCT"
+        },
+        {
+          "id": "B",
+          "text": "DMS Schema Conversion"
+        },
+        {
+          "id": "C",
+          "text": "AWS DMS full load task"
+        },
+        {
+          "id": "D",
+          "text": "Application Migration Service"
+        }
+      ],
+      "answer": "B",
+      "why": "DMS Schema Conversion es gestionado y se usa desde la web. AWS SCT convierte schemas también, pero se descarga y ejecuta localmente; el full load mueve datos, no schemas."
+    },
+    {
+      "id": "migration--l5",
+      "conceptId": "elastic-disaster-recovery",
+      "format": "lightning",
+      "prompt": "Keep production on premises; recover servers on AWS within minutes, minimal standby compute → ?",
+      "promptEs": "Producción sigue on-premises; recuperar servidores en AWS en minutos, con cómputo mínimo en espera → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Application Migration Service"
+        },
+        {
+          "id": "B",
+          "text": "AWS DMS"
+        },
+        {
+          "id": "C",
+          "text": "AWS Elastic Disaster Recovery"
+        },
+        {
+          "id": "D",
+          "text": "Full-size EC2 standby fleet"
+        }
+      ],
+      "answer": "C",
+      "why": "DRS replica a una staging area barata y lanza instancias solo al recuperar. MGN es para migrar definitivamente; una flota completa encendida incumple lo de cómputo mínimo."
+    },
+    {
+      "id": "migration--l6",
+      "conceptId": "elastic-disaster-recovery",
+      "format": "thisorthat",
+      "prompt": "Ongoing DR with non-disruptive drills and failback, no permanent move → ?",
+      "promptEs": "DR continuo con drills sin interrupción y failback, sin mudanza definitiva → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Elastic Disaster Recovery"
+        },
+        {
+          "id": "B",
+          "text": "Application Migration Service"
+        }
+      ],
+      "answer": "A",
+      "why": "DRS está pensado para recuperación continua: drills, recuperación y failback al sitio primario. MGN termina en un cutover definitivo."
+    },
+    {
+      "id": "migration--l7",
+      "conceptId": "elastic-disaster-recovery",
+      "format": "lightning",
+      "prompt": "Where does DRS keep replicated servers during normal operation?",
+      "promptEs": "¿Dónde mantiene DRS los servidores replicados durante la operación normal?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Low-cost staging area subnet"
+        },
+        {
+          "id": "B",
+          "text": "Full-size running EC2 instances"
+        },
+        {
+          "id": "C",
+          "text": "S3 Glacier Deep Archive"
+        },
+        {
+          "id": "D",
+          "text": "A second on-premises site"
+        }
+      ],
+      "answer": "A",
+      "why": "La staging area usa almacenamiento económico y cómputo mínimo. Las instancias de recuperación se lanzan en minutos solo para un drill o un desastre."
+    },
+    {
+      "id": "migration--l8",
+      "conceptId": "application-migration-service",
+      "format": "lightning",
+      "prompt": "Lift-and-shift physical and VMware servers to EC2 with a short cutover → ?",
+      "promptEs": "Lift-and-shift de servidores físicos y VMware a EC2 con un cutover corto → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS DMS"
+        },
+        {
+          "id": "B",
+          "text": "Elastic Disaster Recovery"
+        },
+        {
+          "id": "C",
+          "text": "Application Migration Service"
+        },
+        {
+          "id": "D",
+          "text": "AWS DataSync"
+        }
+      ],
+      "answer": "C",
+      "why": "MGN replica los servidores completos bloque a bloque y los lanza en EC2 al hacer el cutover. DMS solo mueve bases de datos."
+    },
+    {
+      "id": "migration--l9",
+      "conceptId": "application-migration-service",
+      "format": "thisorthat",
+      "prompt": "MGN: cut over groups of related servers together on scheduled weekends → ?",
+      "promptEs": "MGN: hacer cutover de grupos de servidores relacionados juntos en fines de semana programados → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Per-server launch templates"
+        },
+        {
+          "id": "B",
+          "text": "Applications and waves"
+        }
+      ],
+      "answer": "B",
+      "why": "MGN agrupa servidores en applications y applications en waves para acciones masivas como launch y cutover. Los templates fijan configuración, no coordinan grupos."
+    },
+    {
+      "id": "migration--l10",
+      "conceptId": "application-migration-service",
+      "format": "lightning",
+      "prompt": "Most servers share MGN defaults; a few need different launch settings → ?",
+      "promptEs": "La mayoría de servidores comparte los defaults de MGN; unos pocos necesitan otra configuración de lanzamiento → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Refactor those applications first"
+        },
+        {
+          "id": "B",
+          "text": "Move them to a separate account"
+        },
+        {
+          "id": "C",
+          "text": "Use Elastic Disaster Recovery instead"
+        },
+        {
+          "id": "D",
+          "text": "Override settings on those servers"
+        }
+      ],
+      "answer": "D",
+      "why": "Los templates de MGN dan defaults para servidores nuevos y cada servidor admite overrides. MGN es rehost: no exige refactorizar antes de migrar."
+    }
+  ],
+  "audited": true
+}

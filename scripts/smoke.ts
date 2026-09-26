@@ -93,7 +93,7 @@ async function main() {
   const seenPerConcept = new Map<string, string[]>();
   let steps = 0;
   while (item.kind !== "done" && steps++ < 200) {
-    if (item.kind === "card") {
+    if (item.kind === "card" || item.kind === "discover") {
       await session.advance(U);
     } else {
       const q = item.question;

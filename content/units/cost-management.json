@@ -1,0 +1,575 @@
+{
+  "unitId": "cost-management",
+  "overview": {
+    "title": "Facturación, presupuestos y Trusted Advisor",
+    "hook": "Ver, alertar, analizar a detalle o revisar: cada verbo tiene su herramienta.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "tags",
+          "label": "Cost alloc. tags",
+          "kind": "note",
+          "x": 8,
+          "y": 15
+        },
+        {
+          "id": "usage",
+          "label": "Uso y costos",
+          "kind": "data",
+          "x": 8,
+          "y": 55
+        },
+        {
+          "id": "ce",
+          "label": "Cost Explorer",
+          "kind": "service",
+          "service": "AWS Cost Explorer",
+          "x": 38,
+          "y": 15
+        },
+        {
+          "id": "budgets",
+          "label": "AWS Budgets",
+          "kind": "service",
+          "service": "AWS Budgets",
+          "x": 38,
+          "y": 50
+        },
+        {
+          "id": "cur",
+          "label": "CUR → S3",
+          "kind": "service",
+          "service": "AWS Cost and Usage Report",
+          "x": 38,
+          "y": 85
+        },
+        {
+          "id": "ta",
+          "label": "Trusted Advisor",
+          "kind": "service",
+          "service": "AWS Trusted Advisor",
+          "x": 75,
+          "y": 30
+        },
+        {
+          "id": "quotas",
+          "label": "Service Quotas",
+          "kind": "service",
+          "service": "Service Quotas",
+          "x": 75,
+          "y": 75
+        }
+      ],
+      "edges": [
+        {
+          "from": "tags",
+          "to": "usage",
+          "label": "atribuye"
+        },
+        {
+          "from": "usage",
+          "to": "ce",
+          "label": "ver / pronosticar"
+        },
+        {
+          "from": "usage",
+          "to": "budgets",
+          "label": "umbral → alerta"
+        },
+        {
+          "from": "usage",
+          "to": "cur",
+          "label": "line items"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Esta unidad junta las herramientas para entender y controlar la factura de AWS, y para revisar tu cuenta. La clave del examen es distinguir el verbo: ver, alertar, analizar a detalle, o revisar buenas prácticas.",
+        "show": [
+          "usage"
+        ],
+        "focus": "usage"
+      },
+      {
+        "narration": "Para ver, está AWS Cost Explorer: gráficos de gasto con hasta 13 meses de historia, o hasta 38 meses al habilitar datos multianuales. También ofrece pronósticos de hasta 18 meses y recomendaciones de compra de Reserved Instances. Explora tendencias, pero no envía alertas.",
+        "show": [
+          "usage",
+          "ce"
+        ],
+        "focus": "ce"
+      },
+      {
+        "narration": "Para alertar, está AWS Budgets: defines un umbral de costo, uso, o cobertura de RI y Savings Plans, y notifica por email o SNS, incluso sobre gasto pronosticado. Una budget action puede aplicar un SCP. No es un tope en tiempo real.",
+        "show": [
+          "usage",
+          "ce",
+          "budgets"
+        ],
+        "focus": "budgets"
+      },
+      {
+        "narration": "Para analizar a detalle, el Cost and Usage Report entrega line items por hora, producto, tipo de uso y operación a tu bucket de S3, listos para consultar con Athena o visualizar con Amazon QuickSight.",
+        "show": [
+          "usage",
+          "ce",
+          "budgets",
+          "cur"
+        ],
+        "focus": "cur"
+      },
+      {
+        "narration": "Para repartir costos por equipo o proyecto, aplica tags y actívalos como cost allocation tags en Billing; sin activarlos no aparecen. Con AWS Organizations, consolidated billing da un solo pagador y comparte descuentos por volumen.",
+        "show": [
+          "usage",
+          "ce",
+          "budgets",
+          "cur",
+          "tags"
+        ],
+        "focus": "tags"
+      },
+      {
+        "narration": "Para revisar la cuenta, Trusted Advisor inspecciona costo, seguridad, disponibilidad, desempeño y límites de servicio. El AWS Health Dashboard, en cambio, te avisa de eventos de AWS que pueden afectar tus recursos, sin configurar nada.",
+        "show": [
+          "usage",
+          "ce",
+          "budgets",
+          "cur",
+          "tags",
+          "ta"
+        ],
+        "focus": "ta"
+      },
+      {
+        "narration": "Y antes de un failover, revisa Service Quotas en la cuenta y Region de recuperación. Las quotas suelen ser por Region, algunas no se pueden aumentar, y un aumento pedido en plena emergencia no llega a tiempo.",
+        "show": [
+          "usage",
+          "ce",
+          "budgets",
+          "cur",
+          "tags",
+          "ta",
+          "quotas"
+        ],
+        "focus": "quotas"
+      }
+    ],
+    "keyPoints": [
+      "Cost Explorer: ver y pronosticar gasto; recomendaciones de RI.",
+      "Budgets: umbral → email, SNS o acción, como un SCP.",
+      "CUR: line items detallados en S3 para Athena.",
+      "Los cost allocation tags deben activarse en Billing.",
+      "Quotas por Region: auméntalas antes del failover."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Cost Explorer vs Budgets",
+        "difference": "Cost Explorer explora y pronostica; Budgets alerta o actúa cuando se cruza un umbral."
+      },
+      {
+        "unitOrService": "Trusted Advisor vs Health Dashboard",
+        "difference": "Trusted Advisor revisa buenas prácticas de tu cuenta; Health informa eventos de AWS que te afectan."
+      },
+      {
+        "unitOrService": "AWS Compute Optimizer",
+        "difference": "Recomienda tamaños según utilización; Trusted Advisor hace chequeos más amplios de costo, seguridad y disponibilidad."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "cost-management--l1",
+      "conceptId": "service-quotas-throttling",
+      "format": "lightning",
+      "prompt": "DR Region automation must launch many more resources at failover → prepare how?",
+      "promptEs": "La automatización en la Region de DR debe lanzar muchos más recursos en el failover → ¿cómo prepararse?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Request increases during the outage"
+        },
+        {
+          "id": "B",
+          "text": "Rely on primary Region quotas"
+        },
+        {
+          "id": "C",
+          "text": "Raise DR Region quotas in advance"
+        },
+        {
+          "id": "D",
+          "text": "Add SDK retries only"
+        }
+      ],
+      "answer": "C",
+      "why": "Las quotas suelen ser por Region y un aumento puede tardar o aprobarse parcialmente. Revísalas y pídelas antes; los reintentos no suben ninguna quota."
+    },
+    {
+      "id": "cost-management--l2",
+      "conceptId": "service-quotas-throttling",
+      "format": "thisorthat",
+      "prompt": "Needed quota is non-adjustable and the recovery plan exceeds it → ?",
+      "promptEs": "La quota necesaria no es ajustable y el plan de recuperación la excede → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Redesign the plan within the quota"
+        },
+        {
+          "id": "B",
+          "text": "Request an increase from Support"
+        }
+      ],
+      "answer": "A",
+      "why": "Una quota marcada como no ajustable no se puede aumentar. El plan debe rediseñarse para caber dentro del valor aplicado y probarse de nuevo."
+    },
+    {
+      "id": "cost-management--l3",
+      "conceptId": "service-quotas-throttling",
+      "format": "lightning",
+      "prompt": "Bursty provisioning API calls get throttled by operation quotas → ?",
+      "promptEs": "Ráfagas de llamadas de aprovisionamiento a la API son limitadas por quotas de operación → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create more IAM roles"
+        },
+        {
+          "id": "B",
+          "text": "Use larger instance types"
+        },
+        {
+          "id": "C",
+          "text": "Enable detailed monitoring"
+        },
+        {
+          "id": "D",
+          "text": "Pace calls with SDK retries"
+        }
+      ],
+      "answer": "D",
+      "why": "Diseña el volumen de llamadas según la quota de operación y usa el manejo de errores y retries de los SDK. Los reintentos no aumentan la quota."
+    },
+    {
+      "id": "cost-management--l4",
+      "conceptId": "health-dashboard-trusted-advisor",
+      "format": "lightning",
+      "prompt": "Learn about upcoming AWS activity that could affect your resources, no setup → ?",
+      "promptEs": "Enterarte de actividad próxima de AWS que puede afectar tus recursos, sin configurar nada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Trusted Advisor"
+        },
+        {
+          "id": "B",
+          "text": "AWS Cost Explorer"
+        },
+        {
+          "id": "C",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "id": "D",
+          "text": "AWS Health Dashboard"
+        }
+      ],
+      "answer": "D",
+      "why": "El Health Dashboard muestra eventos y actividades planificadas de AWS que afectan tus recursos, sin configuración ni costo. Trusted Advisor revisa buenas prácticas, no eventos."
+    },
+    {
+      "id": "cost-management--l5",
+      "conceptId": "health-dashboard-trusted-advisor",
+      "format": "lightning",
+      "prompt": "One service checks for waste, security gaps and availability improvements → ?",
+      "promptEs": "Un servicio que revisa desperdicio, brechas de seguridad y mejoras de disponibilidad → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Trusted Advisor"
+        },
+        {
+          "id": "B",
+          "text": "AWS Health Dashboard"
+        },
+        {
+          "id": "C",
+          "text": "AWS Compute Optimizer"
+        },
+        {
+          "id": "D",
+          "text": "AWS Cost Explorer"
+        }
+      ],
+      "answer": "A",
+      "why": "AWS Trusted Advisor inspecciona tu entorno y recomienda mejoras de costos, seguridad y disponibilidad. AWS Compute Optimizer se centra en recursos; AWS Cost Explorer analiza gastos."
+    },
+    {
+      "id": "cost-management--l6",
+      "conceptId": "health-dashboard-trusted-advisor",
+      "format": "thisorthat",
+      "prompt": "With Basic Support, which Trusted Advisor checks do you get in full?",
+      "promptEs": "Con Basic Support, ¿qué checks de Trusted Advisor obtienes completas?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Every check category"
+        },
+        {
+          "id": "B",
+          "text": "Service Limits checks"
+        }
+      ],
+      "answer": "B",
+      "why": "Basic Support incluye todas las checks de Service Limits y solo algunas de Security y Fault tolerance. Todas las checks requieren planes superiores, como Enterprise Support."
+    },
+    {
+      "id": "cost-management--l7",
+      "conceptId": "cost-explorer",
+      "format": "lightning",
+      "prompt": "Visualize recent cost trends and forecast the next 12 months → ?",
+      "promptEs": "Visualizar tendencias recientes de costo y pronosticar los próximos 12 meses → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Budgets"
+        },
+        {
+          "id": "B",
+          "text": "Cost and Usage Report"
+        },
+        {
+          "id": "C",
+          "text": "AWS Cost Explorer"
+        },
+        {
+          "id": "D",
+          "text": "AWS Trusted Advisor"
+        }
+      ],
+      "answer": "C",
+      "why": "Cost Explorer grafica el gasto y pronostica hasta 18 meses, sin configurar nada. Budgets alerta sobre umbrales; el CUR entrega archivos detallados para análisis propio."
+    },
+    {
+      "id": "cost-management--l8",
+      "conceptId": "cost-explorer",
+      "format": "lightning",
+      "prompt": "Which Reserved Instances should we purchase, based on past usage → ?",
+      "promptEs": "¿Qué Reserved Instances deberíamos comprar según el uso pasado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Cost Explorer"
+        },
+        {
+          "id": "B",
+          "text": "AWS Compute Optimizer"
+        },
+        {
+          "id": "C",
+          "text": "AWS Budgets"
+        },
+        {
+          "id": "D",
+          "text": "Service Quotas"
+        }
+      ],
+      "answer": "A",
+      "why": "Cost Explorer da recomendaciones de compra de Reserved Instances. Compute Optimizer recomienda cambiar el tamaño de un recurso, que es otra decisión."
+    },
+    {
+      "id": "cost-management--l10",
+      "conceptId": "aws-budgets",
+      "format": "lightning",
+      "prompt": "Email before the month's forecasted spend exceeds a fixed target → ?",
+      "promptEs": "Recibir un email antes de que el gasto pronosticado del mes supere una meta fija → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cost Explorer forecast view"
+        },
+        {
+          "id": "B",
+          "text": "Cost and Usage Report"
+        },
+        {
+          "id": "C",
+          "text": "Cost allocation tags"
+        },
+        {
+          "id": "D",
+          "text": "AWS Budgets cost budget"
+        }
+      ],
+      "answer": "D",
+      "why": "Budgets notifica sobre montos reales o pronosticados. El forecast de Cost Explorer sirve para planear, pero no envía alertas al cruzar un umbral."
+    },
+    {
+      "id": "cost-management--l11",
+      "conceptId": "aws-budgets",
+      "format": "thisorthat",
+      "prompt": "Alert when the share of instance hours covered by RIs drops below target → ?",
+      "promptEs": "Alertar cuando baja la proporción de horas de instancia cubiertas por RIs → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "RI utilization budget"
+        },
+        {
+          "id": "B",
+          "text": "RI coverage budget"
+        }
+      ],
+      "answer": "B",
+      "why": "Coverage mide cuánto uso elegible cubren tus reservas; utilization mide cuánto usas la reserva que ya compraste. Pueden estar al 100% de uso y aun así cubrir poco."
+    },
+    {
+      "id": "cost-management--l12",
+      "conceptId": "aws-budgets",
+      "format": "lightning",
+      "prompt": "At a cost threshold, automatically block new provisioning in a member account → ?",
+      "promptEs": "Al llegar a un umbral de costo, bloquear automáticamente nuevo aprovisionamiento en una cuenta miembro → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Trusted Advisor cost check"
+        },
+        {
+          "id": "B",
+          "text": "Lower the Service Quotas"
+        },
+        {
+          "id": "C",
+          "text": "Cost Explorer anomaly view"
+        },
+        {
+          "id": "D",
+          "text": "Budget action applying an SCP"
+        }
+      ],
+      "answer": "D",
+      "why": "Una budget action desde la management account puede aplicar un SCP a la cuenta miembro. Ojo: no puede apuntar a instancias EC2 o RDS de otra cuenta."
+    },
+    {
+      "id": "cost-management--l13",
+      "conceptId": "cost-and-usage-report",
+      "format": "lightning",
+      "prompt": "Hourly billing line items delivered to S3 for custom Athena queries → ?",
+      "promptEs": "Line items de facturación por hora entregados a S3 para consultas propias con Athena → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Cost Explorer"
+        },
+        {
+          "id": "B",
+          "text": "Cost and Usage Report"
+        },
+        {
+          "id": "C",
+          "text": "AWS Budgets"
+        },
+        {
+          "id": "D",
+          "text": "Billing dashboard"
+        }
+      ],
+      "answer": "B",
+      "why": "El CUR es el conjunto de datos de costo más completo, entregado a tu bucket de S3. Cost Explorer es visual y no produce archivos para Athena."
+    },
+    {
+      "id": "cost-management--l14",
+      "conceptId": "cost-and-usage-report",
+      "format": "thisorthat",
+      "prompt": "CUR configured with hourly granularity means → ?",
+      "promptEs": "Un CUR con granularidad por hora significa → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Costs broken down per hour"
+        },
+        {
+          "id": "B",
+          "text": "New files delivered every hour"
+        }
+      ],
+      "answer": "A",
+      "why": "La granularidad describe el desglose del costo, no la frecuencia de entrega. El reporte se actualiza al menos una vez al día."
+    },
+    {
+      "id": "cost-management--l15",
+      "conceptId": "cost-allocation-tags",
+      "format": "lightning",
+      "prompt": "Project tags exist on resources, but Cost Explorer cannot filter by them → ?",
+      "promptEs": "Los recursos tienen tags de proyecto, pero Cost Explorer no puede filtrar por ellos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a Cost and Usage Report"
+        },
+        {
+          "id": "B",
+          "text": "Create a budget per project"
+        },
+        {
+          "id": "C",
+          "text": "Activate them as cost allocation tags"
+        },
+        {
+          "id": "D",
+          "text": "Retag every resource"
+        }
+      ],
+      "answer": "C",
+      "why": "Aplicar un tag no lo activa para costos. Debes activarlo como cost allocation tag en Billing and Cost Management para verlo en Cost Explorer."
+    },
+    {
+      "id": "cost-management--l16",
+      "conceptId": "cost-allocation-tags",
+      "format": "lightning",
+      "prompt": "Several standalone accounts need one payer and shared volume discounts → ?",
+      "promptEs": "Varias cuentas independientes necesitan un solo pagador y descuentos por volumen compartidos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cost allocation tags"
+        },
+        {
+          "id": "B",
+          "text": "AWS Budgets per account"
+        },
+        {
+          "id": "C",
+          "text": "Organizations consolidated billing"
+        },
+        {
+          "id": "D",
+          "text": "Separate Savings Plans per account"
+        }
+      ],
+      "answer": "C",
+      "why": "Consolidated billing une el pago y combina el uso para compartir descuentos por volumen, RIs y Savings Plans. Los tags atribuyen costos, pero no consolidan pagos."
+    },
+    {
+      "id": "cost-management--l17",
+      "conceptId": "cost-allocation-tags",
+      "format": "thisorthat",
+      "prompt": "In an organization, who can activate cost allocation tags?",
+      "promptEs": "En una organización, ¿quién puede activar cost allocation tags?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Any member account"
+        },
+        {
+          "id": "B",
+          "text": "The management account"
+        }
+      ],
+      "answer": "B",
+      "why": "Solo la management account, o una cuenta independiente, accede al administrador de cost allocation tags en la consola de Billing."
+    }
+  ],
+  "audited": true
+}

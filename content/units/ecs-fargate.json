@@ -1,0 +1,383 @@
+{
+  "unitId": "ecs-fargate",
+  "overview": {
+    "title": "Amazon ECS y AWS Fargate",
+    "hook": "Empaqueta tu app en contenedores; ECS los orquesta y Fargate evita administrar servidores.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "img",
+          "label": "Imagen + deps",
+          "kind": "data",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "ecr",
+          "label": "ECR",
+          "kind": "service",
+          "service": "Amazon ECR",
+          "x": 30,
+          "y": 50
+        },
+        {
+          "id": "ecs",
+          "label": "ECS service",
+          "kind": "service",
+          "service": "Amazon ECS",
+          "x": 55,
+          "y": 50
+        },
+        {
+          "id": "fg",
+          "label": "Fargate",
+          "kind": "service",
+          "service": "AWS Fargate",
+          "x": 85,
+          "y": 22
+        },
+        {
+          "id": "ec2",
+          "label": "Instancias EC2",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 85,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "img",
+          "to": "ecr",
+          "label": "push"
+        },
+        {
+          "from": "ecr",
+          "to": "ecs",
+          "label": "pull"
+        },
+        {
+          "from": "ecs",
+          "to": "fg",
+          "label": "sin servidores"
+        },
+        {
+          "from": "ecs",
+          "to": "ec2",
+          "label": "en tus hosts"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Un contenedor empaqueta tu app con sus dependencias, así corre igual en cualquier host compatible. A diferencia de una máquina virtual, varios contenedores comparten el sistema operativo del host y siguen aislados. Y no necesitas partir tu app en microservicios para contenerizarla.",
+        "show": [
+          "img"
+        ],
+        "focus": "img"
+      },
+      {
+        "narration": "Guardas las imágenes en Amazon ECR, el registro de contenedores de AWS. Amazon ECS es el orquestador: decide dónde corren las tareas, y un ECS service mantiene el número deseado de tareas, reemplazando las que se detienen.",
+        "show": [
+          "img",
+          "ecr",
+          "ecs"
+        ],
+        "focus": "ecs"
+      },
+      {
+        "narration": "La gran decisión es dónde corren esas tareas. Con Fargate, AWS pone la capacidad: no hay servidores que parchar, solo defines CPU, memoria, red y rol de IAM de cada tarea. Es la opción con menor carga operativa.",
+        "show": [
+          "img",
+          "ecr",
+          "ecs",
+          "fg"
+        ],
+        "focus": "fg"
+      },
+      {
+        "narration": "Con ECS on EC2 administras tú las instancias. Elígelo cuando el enunciado exige control directo: una AMI personalizada, capacidades privilegiadas o capacity reservations. Que la app corra todo el día no es razón para descartar Fargate.",
+        "show": [
+          "img",
+          "ecr",
+          "ecs",
+          "fg",
+          "ec2"
+        ],
+        "focus": "ec2"
+      },
+      {
+        "narration": "Detalles que caen en el examen: con Fargate, el target group del load balancer usa tipo ip. Fargate Spot sirve para tareas que toleran interrupción. El almacenamiento efímero se borra al parar la tarea; para persistir, usa Amazon EFS. Y Fargate no ofrece GPU.",
+        "show": [
+          "img",
+          "ecr",
+          "ecs",
+          "fg",
+          "ec2"
+        ],
+        "focus": "fg"
+      }
+    ],
+    "keyPoints": [
+      "Contenedores comparten el SO del host; las VMs usan hypervisor.",
+      "ECR guarda imágenes; ECS las orquesta y mantiene tareas.",
+      "Fargate: sin servidores. EC2: AMI propia o privilegios.",
+      "Fargate: target type ip, sin GPU, EFS para persistir."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon EKS",
+        "difference": "Elige EKS cuando se exige Kubernetes; si no, ECS es la orquestación más simple de AWS."
+      },
+      {
+        "unitOrService": "AWS Lambda",
+        "difference": "Lambda también admite imágenes de contenedor. Elige según los requisitos de ejecución: funciones activadas por eventos con Lambda, o tareas y servicios de contenedores con ECS."
+      },
+      {
+        "unitOrService": "AWS Batch",
+        "difference": "Batch agrega colas y programación de trabajos; Fargate solo aporta cómputo para contenedores."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ecs-fargate--l2",
+      "conceptId": "containers-when-to-use",
+      "format": "thisorthat",
+      "prompt": "Many isolated workloads sharing one host OS, without a VM each → ?",
+      "promptEs": "Muchas cargas aisladas que comparten un SO de host, sin una VM para cada una → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Containers"
+        },
+        {
+          "id": "B",
+          "text": "One virtual machine per workload"
+        }
+      ],
+      "answer": "A",
+      "why": "Los contenedores usan virtualización a nivel de sistema operativo y comparten el host sin perder aislamiento. Las VMs virtualizan hardware con un hypervisor."
+    },
+    {
+      "id": "ecs-fargate--l3",
+      "conceptId": "containers-when-to-use",
+      "format": "lightning",
+      "prompt": "Move a legacy monolith to managed containers without refactoring → ?",
+      "promptEs": "Llevar un monolito heredado a contenedores administrados sin refactorizar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Split into microservices first"
+        },
+        {
+          "id": "B",
+          "text": "Rewrite it as Lambda functions"
+        },
+        {
+          "id": "C",
+          "text": "Lift it to a larger EC2 instance"
+        },
+        {
+          "id": "D",
+          "text": "Package as an image, run on ECS"
+        }
+      ],
+      "answer": "D",
+      "why": "Contenerizar no exige partir la app en microservicios. Reescribirla como funciones es otra migración, y una EC2 más grande no es un contenedor administrado."
+    },
+    {
+      "id": "ecs-fargate--l4",
+      "conceptId": "amazon-ecs-launch-types",
+      "format": "lightning",
+      "prompt": "Containers with variable traffic, no servers to manage → ECS capacity?",
+      "promptEs": "Contenedores con tráfico variable, sin servidores que administrar → ¿capacidad de ECS?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ECS on EC2 instances"
+        },
+        {
+          "id": "B",
+          "text": "ECS Anywhere"
+        },
+        {
+          "id": "C",
+          "text": "AWS Fargate"
+        },
+        {
+          "id": "D",
+          "text": "EC2 Auto Scaling group"
+        }
+      ],
+      "answer": "C",
+      "why": "Fargate es serverless: pagas los recursos de cada tarea sin administrar instancias. Con ECS on EC2 tú eliges, configuras y mantienes los hosts."
+    },
+    {
+      "id": "ecs-fargate--l5",
+      "conceptId": "amazon-ecs-launch-types",
+      "format": "thisorthat",
+      "prompt": "ECS tasks require a custom AMI and privileged containers → ?",
+      "promptEs": "Las tareas de ECS requieren una AMI personalizada y contenedores privilegiados → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Fargate capacity"
+        },
+        {
+          "id": "B",
+          "text": "ECS on EC2 instances"
+        }
+      ],
+      "answer": "B",
+      "why": "Una AMI propia y capacidades privilegiadas exigen controlar las instancias, algo que Fargate no permite. ECS on EC2 te da ese control."
+    },
+    {
+      "id": "ecs-fargate--l6",
+      "conceptId": "amazon-ecs-launch-types",
+      "format": "lightning",
+      "prompt": "Need EC2 capabilities like GPUs, but AWS should patch and scale hosts → ?",
+      "promptEs": "Necesitas capacidades de EC2 como GPU, pero AWS debe parchar y escalar los hosts → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon ECS Managed Instances"
+        },
+        {
+          "id": "B",
+          "text": "ECS on self-managed EC2"
+        },
+        {
+          "id": "C",
+          "text": "AWS Fargate"
+        },
+        {
+          "id": "D",
+          "text": "AWS Batch"
+        }
+      ],
+      "answer": "A",
+      "why": "ECS Managed Instances da capacidades de EC2, incluida GPU, mientras AWS aprovisiona, parcha y escala. Fargate no soporta GPU y ECS on EC2 deja los hosts a tu cargo."
+    },
+    {
+      "id": "ecs-fargate--l7",
+      "conceptId": "amazon-ecs-launch-types",
+      "format": "lightning",
+      "prompt": "Keep six tasks running continuously, replacing any that stop → ?",
+      "promptEs": "Mantener seis tareas corriendo siempre, reemplazando las que se detengan → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Standalone ECS task"
+        },
+        {
+          "id": "B",
+          "text": "ECS scheduled task"
+        },
+        {
+          "id": "C",
+          "text": "New task definition revision"
+        },
+        {
+          "id": "D",
+          "text": "ECS service"
+        }
+      ],
+      "answer": "D",
+      "why": "Un ECS service mantiene el número deseado de tareas y reemplaza las que se detienen, en Fargate o en EC2. Una tarea suelta no se reemplaza sola."
+    },
+    {
+      "id": "ecs-fargate--l8",
+      "conceptId": "fargate-serverless-containers",
+      "format": "lightning",
+      "prompt": "ALB target group for an ECS service on Fargate → target type?",
+      "promptEs": "Target group del ALB para un servicio ECS en Fargate → ¿tipo de target?",
+      "options": [
+        {
+          "id": "A",
+          "text": "instance"
+        },
+        {
+          "id": "B",
+          "text": "ip"
+        },
+        {
+          "id": "C",
+          "text": "lambda"
+        },
+        {
+          "id": "D",
+          "text": "alb"
+        }
+      ],
+      "answer": "B",
+      "why": "Cada tarea de Fargate tiene su propia interfaz de red, así que el target group usa tipo ip. No hay instancia que registrar."
+    },
+    {
+      "id": "ecs-fargate--l9",
+      "conceptId": "fargate-serverless-containers",
+      "format": "lightning",
+      "prompt": "Interruption-tolerant ECS tasks at lower cost, no servers → ?",
+      "promptEs": "Tareas de ECS que toleran interrupciones, a menor costo y sin servidores → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Fargate Spot"
+        },
+        {
+          "id": "B",
+          "text": "Fargate On-Demand"
+        },
+        {
+          "id": "C",
+          "text": "EC2 Dedicated Instances"
+        },
+        {
+          "id": "D",
+          "text": "ECS on EC2 Reserved Instances"
+        }
+      ],
+      "answer": "A",
+      "why": "Fargate Spot usa capacidad sobrante con aviso de dos minutos antes de recuperarla. Sirve solo para tareas que toleran interrupciones."
+    },
+    {
+      "id": "ecs-fargate--l10",
+      "conceptId": "fargate-serverless-containers",
+      "format": "thisorthat",
+      "prompt": "Fargate task data must survive after the task stops → ?",
+      "promptEs": "Los datos de una tarea de Fargate deben sobrevivir cuando la tarea se detiene → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase ephemeral storage"
+        },
+        {
+          "id": "B",
+          "text": "Mount an Amazon EFS file system"
+        }
+      ],
+      "answer": "B",
+      "why": "El almacenamiento efímero de Fargate se borra al detenerse la tarea, sin importar su tamaño. Amazon EFS da almacenamiento persistente."
+    },
+    {
+      "id": "ecs-fargate--l11",
+      "conceptId": "fargate-serverless-containers",
+      "format": "thisorthat",
+      "prompt": "Container workload requires a GPU → ?",
+      "promptEs": "La carga de contenedores requiere una GPU → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EC2-backed capacity"
+        },
+        {
+          "id": "B",
+          "text": "AWS Fargate capacity"
+        }
+      ],
+      "answer": "A",
+      "why": "Fargate no soporta cargas con GPU. Necesitas capacidad basada en EC2, ya sea administrada por ti o con ECS Managed Instances."
+    }
+  ],
+  "audited": true
+}

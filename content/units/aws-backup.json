@@ -1,0 +1,426 @@
+{
+  "unitId": "aws-backup",
+  "overview": {
+    "title": "AWS Backup",
+    "hook": "Un solo lugar para programar, retener y copiar backups de muchos servicios.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "res",
+          "label": "Recursos con tag",
+          "kind": "data",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "plan",
+          "label": "Backup plan",
+          "kind": "service",
+          "service": "AWS Backup",
+          "x": 36,
+          "y": 50
+        },
+        {
+          "id": "org",
+          "label": "Organizations",
+          "kind": "service",
+          "service": "AWS Organizations",
+          "x": 36,
+          "y": 12
+        },
+        {
+          "id": "vault",
+          "label": "Backup vault",
+          "kind": "data",
+          "x": 64,
+          "y": 50
+        },
+        {
+          "id": "copy",
+          "label": "Otra Region/cuenta",
+          "kind": "zone",
+          "x": 90,
+          "y": 22
+        },
+        {
+          "id": "cold",
+          "label": "Cold storage",
+          "kind": "data",
+          "x": 90,
+          "y": 80
+        }
+      ],
+      "edges": [
+        {
+          "from": "org",
+          "to": "plan",
+          "label": "backup policies"
+        },
+        {
+          "from": "res",
+          "to": "plan",
+          "label": "asignación por tag"
+        },
+        {
+          "from": "plan",
+          "to": "vault",
+          "label": "recovery points"
+        },
+        {
+          "from": "vault",
+          "to": "copy",
+          "label": "copia programada"
+        },
+        {
+          "from": "vault",
+          "to": "cold",
+          "label": "lifecycle"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Imagina tener backups de EBS, RDS, EFS y DynamoDB, cada uno con su propio script y su propio horario. AWS Backup centraliza todo eso: un solo lugar para programar, retener, copiar y monitorear backups de muchos servicios.",
+        "show": [
+          "res",
+          "plan"
+        ],
+        "focus": "plan"
+      },
+      {
+        "narration": "La pieza central es el backup plan: define cada cuánto respaldar y cuánto tiempo retener. Lo asignas a los recursos por tag, así que cualquier recurso nuevo con el tag correcto queda protegido sin trabajo extra.",
+        "show": [
+          "res",
+          "plan"
+        ],
+        "focus": "res"
+      },
+      {
+        "narration": "Cada backup genera un recovery point que se guarda en un backup vault. El mismo plan puede copiarlo automáticamente a otra Region o a otra cuenta, que es justo lo que pide un plan de recuperación ante desastres.",
+        "show": [
+          "res",
+          "plan",
+          "vault",
+          "copy"
+        ],
+        "focus": "copy"
+      },
+      {
+        "narration": "Si tienes muchas cuentas, AWS Organizations te deja aplicar backup policies a todas desde un solo lugar. Así no mantienes automatización separada por cuenta ni por servicio.",
+        "show": [
+          "res",
+          "plan",
+          "vault",
+          "copy",
+          "org"
+        ],
+        "focus": "org"
+      },
+      {
+        "narration": "Cuando el cumplimiento exige que nadie borre backups antes de tiempo, activas Vault Lock. En Compliance mode, pasado el grace time, ni un administrador puede quitarlo. En Governance mode, un usuario con permisos IAM suficientes sí puede.",
+        "show": [
+          "res",
+          "plan",
+          "vault",
+          "copy",
+          "org"
+        ],
+        "focus": "vault"
+      },
+      {
+        "narration": "El lifecycle del plan mueve backups elegibles de warm a cold storage. Para objetos en S3 usas S3 Lifecycle: transition cambia la storage class y tiene un costo por solicitud; el ahorro depende del acceso y la retención. Expiration borra objetos.",
+        "show": [
+          "res",
+          "plan",
+          "vault",
+          "copy",
+          "org",
+          "cold"
+        ],
+        "focus": "cold"
+      },
+      {
+        "narration": "Ojo con los parecidos: Data Lifecycle Manager o los backups automáticos de RDS protegen un solo servicio. Y AWS Backup no gobierna backups creados fuera de él, así que mantener ambos puede duplicar costos.",
+        "show": [
+          "res",
+          "plan",
+          "vault",
+          "copy",
+          "org",
+          "cold"
+        ],
+        "focus": "plan"
+      }
+    ],
+    "keyPoints": [
+      "Backup plan asignado por tag protege recursos nuevos automáticamente.",
+      "Copias programadas cross-Region y cross-account para DR.",
+      "Vault Lock Compliance: irrevocable tras el grace time.",
+      "Lifecycle mueve backups elegibles de warm a cold storage.",
+      "S3 Lifecycle: transition cambia clase (cobra solicitudes); expiration borra."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "EBS Data Lifecycle Manager",
+        "difference": "Programa snapshots o AMIs solo de EBS; AWS Backup centraliza planes entre varios servicios y cuentas."
+      },
+      {
+        "unitOrService": "RDS automated backups",
+        "difference": "Protegen solo RDS; no dan una política única para RDS y otros recursos."
+      },
+      {
+        "unitOrService": "Amazon S3 Glacier",
+        "difference": "Es almacenamiento de archivo para objetos; AWS Backup programa y gobierna backups de recursos."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "aws-backup--l1",
+      "conceptId": "aws-backup",
+      "format": "lightning",
+      "prompt": "One backup schedule for EBS, EFS and RDS across all Organization accounts → ?",
+      "promptEs": "Un solo programa de backups para EBS, EFS y RDS en todas las cuentas de la Organization → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EBS Data Lifecycle Manager"
+        },
+        {
+          "id": "B",
+          "text": "RDS automated backups"
+        },
+        {
+          "id": "C",
+          "text": "AWS Backup organization policies"
+        },
+        {
+          "id": "D",
+          "text": "S3 Cross-Region Replication"
+        }
+      ],
+      "answer": "C",
+      "why": "AWS Backup aplica planes a varios tipos de recurso y, con Organizations, a muchas cuentas. DLM y los backups de RDS cubren un solo servicio."
+    },
+    {
+      "id": "aws-backup--l5",
+      "conceptId": "data-retention-policies",
+      "format": "lightning",
+      "prompt": "Delete S3 logs automatically after 14-day retention; no archive needed → ?",
+      "promptEs": "Borrar logs en S3 automáticamente tras 14 días de retención; sin archivo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Lifecycle transition to Glacier"
+        },
+        {
+          "id": "B",
+          "text": "S3 Object Lock retention period"
+        },
+        {
+          "id": "C",
+          "text": "Bucket policy denying reads"
+        },
+        {
+          "id": "D",
+          "text": "S3 Lifecycle expiration action"
+        }
+      ],
+      "answer": "D",
+      "why": "La expiración borra al cumplirse el plazo. Una transición previa cobra solicitudes sin beneficio para datos de vida corta; Object Lock impide borrar, no borra."
+    },
+    {
+      "id": "aws-backup--l6",
+      "conceptId": "data-retention-policies",
+      "format": "thisorthat",
+      "prompt": "Move S3 records to a cheaper storage class once access drops → ?",
+      "promptEs": "Mover registros en S3 a una clase más barata cuando baja el acceso → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lifecycle transition action"
+        },
+        {
+          "id": "B",
+          "text": "Lifecycle expiration action"
+        }
+      ],
+      "answer": "A",
+      "why": "La transición cambia la storage class; la expiración elimina el objeto. Para retener y archivar, combinas transición primero y expiración al final."
+    },
+    {
+      "id": "aws-backup--l7",
+      "conceptId": "data-retention-policies",
+      "format": "lightning",
+      "prompt": "Same bucket: temp output deleted at 60 days, study records kept longer → ?",
+      "promptEs": "Mismo bucket: salida temporal se borra a los 60 días, estudios se retienen más → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Lifecycle expiration rules per object group"
+        },
+        {
+          "id": "B",
+          "text": "One bucket-wide 60-day expiration rule"
+        },
+        {
+          "id": "C",
+          "text": "Bucket policy denying DeleteObject"
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Versioning only"
+        }
+      ],
+      "answer": "A",
+      "why": "Cada clase de datos tiene su retención, así que usas reglas separadas por prefijo o tag. Una regla única borraría los estudios antes de tiempo."
+    },
+    {
+      "id": "aws-backup--l8",
+      "conceptId": "backup-archival-selection",
+      "format": "lightning",
+      "prompt": "Recent backups for restores; old backups kept long but rarely needed, cheapest → ?",
+      "promptEs": "Backups recientes para restaurar; los viejos se retienen mucho pero casi no se usan, lo más barato → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Shorten retention to delete old backups"
+        },
+        {
+          "id": "B",
+          "text": "Backup lifecycle from warm to cold"
+        },
+        {
+          "id": "C",
+          "text": "Copy backups to another Region"
+        },
+        {
+          "id": "D",
+          "text": "Increase backup frequency"
+        }
+      ],
+      "answer": "B",
+      "why": "El lifecycle del backup plan mueve los backups elegibles a cold storage y mantiene la gestión centralizada. Borrar incumple la retención exigida."
+    },
+    {
+      "id": "aws-backup--l9",
+      "conceptId": "backup-archival-selection",
+      "format": "thisorthat",
+      "prompt": "Schedule and monitor protection for EBS-backed EC2 and EFS in one place → ?",
+      "promptEs": "Programar y monitorear la protección de EC2 con EBS y de EFS en un solo lugar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Backup plans"
+        },
+        {
+          "id": "B",
+          "text": "Export data to S3 Glacier"
+        }
+      ],
+      "answer": "A",
+      "why": "Un archivo de datos exportados no reemplaza un plan que respalda y restaura los recursos de origen. AWS Backup programa y monitorea los jobs en un solo lugar."
+    },
+    {
+      "id": "aws-backup--l10",
+      "conceptId": "backup-archival-selection",
+      "format": "lightning",
+      "prompt": "Include Storage Gateway volumes in the central backup plan → ?",
+      "promptEs": "Incluir volúmenes de Storage Gateway en el plan central de backups → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "B",
+          "text": "AWS Transfer Family"
+        },
+        {
+          "id": "C",
+          "text": "S3 Replication"
+        },
+        {
+          "id": "D",
+          "text": "AWS Backup"
+        }
+      ],
+      "answer": "D",
+      "why": "AWS Backup puede respaldar y restaurar volúmenes de Storage Gateway dentro del mismo plan. DataSync y Transfer Family mueven archivos, no gestionan backups."
+    },
+    {
+      "id": "aws-backup--l11",
+      "conceptId": "aws-backup",
+      "format": "thisorthat",
+      "prompt": "Once the grace time expires, not even full admins may remove the vault lock → ?",
+      "promptEs": "Una vez vencido el grace time, ni administradores con todos los permisos pueden quitar el vault lock → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Vault Lock in Governance mode"
+        },
+        {
+          "id": "B",
+          "text": "Vault Lock in Compliance mode"
+        }
+      ],
+      "answer": "B",
+      "why": "En Compliance mode, pasado el grace time, el lock no se puede quitar. Governance mode lo puede gestionar cualquier usuario con permisos IAM suficientes."
+    },
+    {
+      "id": "aws-backup--l12",
+      "conceptId": "aws-backup",
+      "format": "lightning",
+      "prompt": "Scheduled cross-Region copies for EBS, EFS and RDS from one managed plan → ?",
+      "promptEs": "Copias programadas a otra Region para EBS, EFS y RDS desde un solo plan gestionado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EBS Data Lifecycle Manager"
+        },
+        {
+          "id": "B",
+          "text": "RDS automated backup replication"
+        },
+        {
+          "id": "C",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "id": "D",
+          "text": "AWS Backup plan with copy"
+        }
+      ],
+      "answer": "D",
+      "why": "Un backup plan de AWS Backup puede copiar recovery points de varios servicios a otra Region según un horario. DLM cubre solo EBS y la replicación de RDS solo RDS."
+    },
+    {
+      "id": "aws-backup--l13",
+      "conceptId": "aws-backup",
+      "format": "lightning",
+      "prompt": "New EBS, EFS and DynamoDB resources tagged by protection class get backups automatically → ?",
+      "promptEs": "Recursos nuevos de EBS, EFS y DynamoDB con tag de clase de protección reciben backups automáticamente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EBS Data Lifecycle Manager policy"
+        },
+        {
+          "id": "B",
+          "text": "AWS Backup plan assigned by tag"
+        },
+        {
+          "id": "C",
+          "text": "DynamoDB point-in-time recovery"
+        },
+        {
+          "id": "D",
+          "text": "AWS Config conformance pack"
+        }
+      ],
+      "answer": "B",
+      "why": "AWS Backup asigna recursos de varios servicios a un plan por tag, sin un programa por servicio. DLM solo cubre EBS y PITR solo DynamoDB."
+    }
+  ],
+  "audited": true
+}

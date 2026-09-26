@@ -35,6 +35,11 @@ export const GET = handle(async (req: Request) => {
     } else if (kind === "card") {
       const c = content.get(id)?.card[lang];
       if (c) text = [c.tldr, ...c.keyFacts, ...c.gotchas].join(". ");
+    } else if (kind === "unit") {
+      // unit:<unitId>:<segmentIndex>  or  unit:<unitId>:summary
+      const [, unitId, seg] = ref.split(":");
+      const ov = getContent().unitContent.get(unitId)?.overview;
+      if (ov) text = seg === "summary" ? ov.keyPoints.join(". ") : ov.segments[Number(seg)]?.narration;
     } else if (kind === "recall") {
       const r = recall.get(id);
       if (r) text = lang === "es" ? r.promptEs : r.prompt;

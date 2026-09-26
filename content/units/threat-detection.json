@@ -1,0 +1,450 @@
+{
+  "unitId": "threat-detection",
+  "overview": {
+    "title": "GuardDuty, Inspector, Detective y Security Hub",
+    "hook": "Cuatro servicios parecidos, cuatro preguntas distintas: detectar, escanear, investigar, consolidar.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "logs",
+          "label": "Logs de la cuenta",
+          "kind": "data",
+          "x": 8,
+          "y": 25
+        },
+        {
+          "id": "work",
+          "label": "EC2 / ECR / Lambda",
+          "kind": "data",
+          "x": 8,
+          "y": 78
+        },
+        {
+          "id": "gd",
+          "label": "GuardDuty",
+          "kind": "service",
+          "service": "Amazon GuardDuty",
+          "x": 34,
+          "y": 25
+        },
+        {
+          "id": "insp",
+          "label": "Inspector",
+          "kind": "service",
+          "service": "Amazon Inspector",
+          "x": 34,
+          "y": 78
+        },
+        {
+          "id": "det",
+          "label": "Detective",
+          "kind": "service",
+          "service": "Amazon Detective",
+          "x": 64,
+          "y": 15
+        },
+        {
+          "id": "sh",
+          "label": "Security Hub",
+          "kind": "service",
+          "service": "AWS Security Hub",
+          "x": 64,
+          "y": 55
+        },
+        {
+          "id": "eb",
+          "label": "EventBridge",
+          "kind": "service",
+          "service": "Amazon EventBridge",
+          "x": 92,
+          "y": 55
+        }
+      ],
+      "edges": [
+        {
+          "from": "logs",
+          "to": "gd",
+          "label": "analiza"
+        },
+        {
+          "from": "work",
+          "to": "insp",
+          "label": "escanea"
+        },
+        {
+          "from": "gd",
+          "to": "det",
+          "label": "investigar"
+        },
+        {
+          "from": "gd",
+          "to": "sh",
+          "label": "hallazgos"
+        },
+        {
+          "from": "insp",
+          "to": "sh",
+          "label": "hallazgos"
+        },
+        {
+          "from": "sh",
+          "to": "eb",
+          "label": "respuesta"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Estos cuatro servicios responden preguntas distintas. Amazon GuardDuty responde: ¿hay actividad maliciosa? Analiza CloudTrail management events, VPC flow logs y DNS logs con threat intelligence y machine learning.",
+        "show": [
+          "logs",
+          "gd"
+        ],
+        "focus": "gd"
+      },
+      {
+        "narration": "Basta con activarlo; no configuras esas fuentes aparte. Detecta credenciales comprometidas o minería de criptomonedas en EC2, por ejemplo. También ofrece planes opcionales, como S3 Protection, RDS Protection y Malware Protection for EC2.",
+        "show": [
+          "logs",
+          "gd"
+        ],
+        "focus": "gd"
+      },
+      {
+        "narration": "Amazon Inspector responde: ¿hay vulnerabilidades en mis cargas de trabajo? Descubre automáticamente recursos compatibles, como instancias EC2, imágenes en ECR, funciones Lambda y repositorios de código. Busca vulnerabilidades, reporta exposición de red no intencionada y vuelve a escanear cuando algo cambia.",
+        "show": [
+          "logs",
+          "gd",
+          "work",
+          "insp"
+        ],
+        "focus": "insp"
+      },
+      {
+        "narration": "Amazon Detective responde: ¿qué pasó exactamente y hasta dónde llegó? Puedes partir de un hallazgo de GuardDuty y usar su behavior graph, con hasta un año de datos históricos, para investigar la causa raíz. No sustituye la detección de GuardDuty.",
+        "show": [
+          "logs",
+          "gd",
+          "work",
+          "insp",
+          "det"
+        ],
+        "focus": "det"
+      },
+      {
+        "narration": "AWS Security Hub CSPM reúne hallazgos de GuardDuty, Inspector, Macie y terceros, y comprueba estándares como CIS. AWS Config debe registrar recursos para la mayoría de los hallazgos de controles, pero no para consolidar hallazgos de otros servicios. Se activa por Region.",
+        "show": [
+          "logs",
+          "gd",
+          "work",
+          "insp",
+          "det",
+          "sh"
+        ],
+        "focus": "sh"
+      },
+      {
+        "narration": "Puedes usar EventBridge para recibir eventos y automatizar notificaciones o respuestas. Resumen para el examen: amenazas, GuardDuty; vulnerabilidades, Inspector; investigación de causa raíz, Detective; vista consolidada y estándares, Security Hub CSPM.",
+        "show": [
+          "logs",
+          "gd",
+          "work",
+          "insp",
+          "det",
+          "sh",
+          "eb"
+        ],
+        "focus": "eb"
+      }
+    ],
+    "keyPoints": [
+      "GuardDuty detecta actividad maliciosa a partir de fuentes de datos de la cuenta.",
+      "Inspector busca vulnerabilidades en EC2, ECR, Lambda y repositorios de código compatibles.",
+      "Detective ayuda a investigar la causa raíz de un hallazgo.",
+      "Security Hub CSPM consolida hallazgos y comprueba estándares; AWS Config debe registrar recursos para la mayoría de los hallazgos de controles.",
+      "EventBridge permite automatizar notificaciones y respuestas a eventos."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon Macie",
+        "difference": "Macie busca datos sensibles en S3; GuardDuty busca actividad maliciosa en la cuenta."
+      },
+      {
+        "unitOrService": "AWS Config",
+        "difference": "Config evalúa la configuración de recursos; Inspector busca vulnerabilidades en las cargas de trabajo."
+      },
+      {
+        "unitOrService": "AWS Network Firewall",
+        "difference": "Inspector reporta exposición de red; Network Firewall filtra el tráfico de la VPC."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "threat-detection--l1",
+      "conceptId": "guardduty",
+      "format": "lightning",
+      "prompt": "Detect compromised credentials and cryptomining on EC2 instances → ?",
+      "promptEs": "Detectar credenciales comprometidas y minería de criptomonedas en instancias EC2 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Inspector"
+        },
+        {
+          "id": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Macie"
+        },
+        {
+          "id": "D",
+          "text": "AWS Config"
+        }
+      ],
+      "answer": "B",
+      "why": "GuardDuty detecta actividad maliciosa usando threat intelligence y machine learning sobre logs de la cuenta. Inspector busca vulnerabilidades, no ataques en curso."
+    },
+    {
+      "id": "threat-detection--l2",
+      "conceptId": "guardduty",
+      "format": "thisorthat",
+      "prompt": "Enabling GuardDuty: must you first turn on VPC flow logs and DNS logs?",
+      "promptEs": "Al activar GuardDuty, ¿debes encender antes VPC flow logs y DNS logs?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No, it ingests them automatically"
+        },
+        {
+          "id": "B",
+          "text": "Yes, enable each source first"
+        }
+      ],
+      "answer": "A",
+      "why": "Al activarlo, GuardDuty empieza a ingerir sus fuentes básicas: management events de CloudTrail, VPC flow logs y DNS logs. No necesitas habilitarlas por separado."
+    },
+    {
+      "id": "threat-detection--l3",
+      "conceptId": "guardduty",
+      "format": "lightning",
+      "prompt": "Detect suspicious login activity against Aurora databases → ?",
+      "promptEs": "Detectar actividad de inicio de sesión sospechosa contra bases Aurora → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Inspector Lambda scanning"
+        },
+        {
+          "id": "B",
+          "text": "Macie discovery job"
+        },
+        {
+          "id": "C",
+          "text": "GuardDuty RDS Protection"
+        },
+        {
+          "id": "D",
+          "text": "GuardDuty Malware Protection for EC2"
+        }
+      ],
+      "answer": "C",
+      "why": "RDS Protection analiza la actividad de login en RDS y Aurora compatibles. Malware Protection para EC2 escanea volúmenes EBS; son planes distintos."
+    },
+    {
+      "id": "threat-detection--l4",
+      "conceptId": "guardduty",
+      "format": "lightning",
+      "prompt": "Notify the team in near real time when a GuardDuty finding changes → ?",
+      "promptEs": "Avisar al equipo casi en tiempo real cuando cambia un hallazgo de GuardDuty → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Config rule"
+        },
+        {
+          "id": "B",
+          "text": "CloudTrail Event history"
+        },
+        {
+          "id": "C",
+          "text": "Detective finding group"
+        },
+        {
+          "id": "D",
+          "text": "EventBridge rule to SNS"
+        }
+      ],
+      "answer": "D",
+      "why": "GuardDuty genera eventos por cambios en sus hallazgos, y EventBridge los enruta a un destino como SNS. Detective sirve para investigar, no para notificar."
+    },
+    {
+      "id": "threat-detection--l5",
+      "conceptId": "inspector",
+      "format": "lightning",
+      "prompt": "A newly published CVE may affect running EC2 instances and ECR images → ?",
+      "promptEs": "Un CVE recién publicado podría afectar instancias EC2 e imágenes de ECR → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Inspector"
+        },
+        {
+          "id": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Detective"
+        },
+        {
+          "id": "D",
+          "text": "AWS Shield Advanced"
+        }
+      ],
+      "answer": "A",
+      "why": "Inspector escanea continuamente EC2, ECR y Lambda, y vuelve a escanear cuando se publica un CVE relevante. GuardDuty detecta amenazas, no paquetes vulnerables."
+    },
+    {
+      "id": "threat-detection--l6",
+      "conceptId": "inspector",
+      "format": "thisorthat",
+      "prompt": "Find vulnerable software packages in Lambda functions → ?",
+      "promptEs": "Encontrar paquetes de software vulnerables en funciones Lambda → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Inspector"
+        }
+      ],
+      "answer": "B",
+      "why": "Inspector escanea funciones Lambda en busca de vulnerabilidades de software. GuardDuty analiza actividad sospechosa, que es otro requisito."
+    },
+    {
+      "id": "threat-detection--l7",
+      "conceptId": "inspector",
+      "format": "lightning",
+      "prompt": "How does Amazon Inspector schedule scans of eligible resources?",
+      "promptEs": "¿Cómo programa Amazon Inspector los escaneos de los recursos elegibles?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A weekly cron job you define"
+        },
+        {
+          "id": "B",
+          "text": "Automatic discovery and continual rescans"
+        },
+        {
+          "id": "C",
+          "text": "Manual assessment runs only"
+        },
+        {
+          "id": "D",
+          "text": "Only when an instance launches"
+        }
+      ],
+      "answer": "B",
+      "why": "Inspector descubre solo los recursos elegibles y los reescanea ante cambios, como parches o CVEs nuevos. No programas evaluaciones manualmente."
+    },
+    {
+      "id": "threat-detection--l8",
+      "conceptId": "detective",
+      "format": "lightning",
+      "prompt": "Find the root cause and scope of a high-severity GuardDuty finding → ?",
+      "promptEs": "Encontrar la causa raíz y el alcance de un hallazgo grave de GuardDuty → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Inspector"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Detective"
+        },
+        {
+          "id": "D",
+          "text": "Amazon Macie"
+        }
+      ],
+      "answer": "C",
+      "why": "Detective usa un behavior graph y finding groups para relacionar actividad y hallar la causa raíz. Security Hub agrupa hallazgos, pero no hace esa investigación."
+    },
+    {
+      "id": "threat-detection--l9",
+      "conceptId": "detective",
+      "format": "thisorthat",
+      "prompt": "Examine an IAM role's linked activity for indicators of compromise → ?",
+      "promptEs": "Examinar la actividad relacionada de un IAM role buscando indicadores de compromiso → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Inspector scan"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Detective Investigation"
+        }
+      ],
+      "answer": "B",
+      "why": "Detective Investigation analiza IAM users y roles en busca de indicadores de compromiso. Inspector escanea software de cargas de trabajo, no identidades."
+    },
+    {
+      "id": "threat-detection--l10",
+      "conceptId": "security-hub",
+      "format": "lightning",
+      "prompt": "One view of GuardDuty, Inspector and Macie findings, plus security standards checks → ?",
+      "promptEs": "Una vista de hallazgos de GuardDuty, Inspector y Macie, más revisión de estándares → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Detective"
+        },
+        {
+          "id": "C",
+          "text": "AWS Firewall Manager"
+        },
+        {
+          "id": "D",
+          "text": "AWS CloudTrail Lake"
+        }
+      ],
+      "answer": "A",
+      "why": "Security Hub consolida hallazgos de varios servicios y ejecuta controles contra estándares como CIS. Firewall Manager aplica policies; no consolida hallazgos."
+    },
+    {
+      "id": "threat-detection--l11",
+      "conceptId": "security-hub",
+      "format": "thisorthat",
+      "prompt": "Security Hub is enabled but shows almost no control findings → missing prerequisite?",
+      "promptEs": "Security Hub está activo pero casi no muestra control findings → ¿qué requisito falta?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Config recording resources"
+        },
+        {
+          "id": "B",
+          "text": "Amazon Detective enabled"
+        }
+      ],
+      "answer": "A",
+      "why": "La mayoría de los control findings dependen de que AWS Config esté activo y grabando recursos. También revisa que Security Hub esté activo en cada Region necesaria."
+    }
+  ],
+  "audited": true
+}

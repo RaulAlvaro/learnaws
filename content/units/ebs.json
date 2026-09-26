@@ -1,0 +1,535 @@
+{
+  "unitId": "ebs",
+  "overview": {
+    "title": "Amazon EBS e instance store",
+    "hook": "El disco de tu instancia EC2: persistente por red, o efímero y local.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "az",
+          "label": "Una AZ",
+          "kind": "zone",
+          "x": 30,
+          "y": 10
+        },
+        {
+          "id": "ec2",
+          "label": "Instancia EC2",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 14,
+          "y": 50
+        },
+        {
+          "id": "ist",
+          "label": "Instance store",
+          "kind": "data",
+          "x": 14,
+          "y": 88
+        },
+        {
+          "id": "ebs",
+          "label": "Volumen EBS",
+          "kind": "service",
+          "service": "Amazon EBS",
+          "x": 46,
+          "y": 50
+        },
+        {
+          "id": "kms",
+          "label": "AWS KMS",
+          "kind": "service",
+          "service": "AWS KMS",
+          "x": 46,
+          "y": 88
+        },
+        {
+          "id": "snap",
+          "label": "Snapshot",
+          "kind": "data",
+          "x": 78,
+          "y": 50
+        },
+        {
+          "id": "dlm",
+          "label": "DLM",
+          "kind": "service",
+          "service": "Amazon Data Lifecycle Manager",
+          "x": 78,
+          "y": 14
+        }
+      ],
+      "edges": [
+        {
+          "from": "ec2",
+          "to": "ebs",
+          "label": "por la red"
+        },
+        {
+          "from": "ec2",
+          "to": "ist",
+          "label": "disco local"
+        },
+        {
+          "from": "kms",
+          "to": "ebs",
+          "label": "cifra"
+        },
+        {
+          "from": "ebs",
+          "to": "snap",
+          "label": "incremental"
+        },
+        {
+          "from": "dlm",
+          "to": "snap",
+          "label": "programa y retiene"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Amazon EBS es un disco de red para tu instancia EC2: almacenamiento en bloques, como un disco duro. Vive en una sola Availability Zone y los datos persisten aunque detengas la instancia.",
+        "show": [
+          "az",
+          "ec2",
+          "ebs"
+        ],
+        "focus": "ebs"
+      },
+      {
+        "narration": "Eliges el tipo según el patrón de lectura y escritura. gp3 es el SSD de uso general y sirve como disco de arranque. io2 Block Express es para bases de datos que necesitan más de 80,000 IOPS o latencia mínima.",
+        "show": [
+          "az",
+          "ec2",
+          "ebs"
+        ],
+        "focus": "ebs"
+      },
+      {
+        "narration": "Los HDD son para lecturas secuenciales grandes, no para I/O pequeño y aleatorio, y no pueden ser disco de arranque. st1 da throughput alto para logs o big data; sc1 es el más barato, para datos fríos.",
+        "show": [
+          "az",
+          "ec2",
+          "ebs"
+        ],
+        "focus": "ebs"
+      },
+      {
+        "narration": "El rendimiento tiene dos extremos: el volumen y la instancia. Si la instancia tiene menos ancho de banda EBS, provisionar más IOPS no ayuda. Con Elastic Volumes agrandas o cambias el tipo sin detenerla, y luego extiendes el file system.",
+        "show": [
+          "az",
+          "ec2",
+          "ebs"
+        ],
+        "focus": "ec2"
+      },
+      {
+        "narration": "AWS no respalda tus volúmenes por ti. Un snapshot es una copia incremental que se guarda a nivel de Región, así que puedes restaurarlo en otra AZ. Data Lifecycle Manager programa su creación, retención y borrado.",
+        "show": [
+          "az",
+          "ec2",
+          "ebs",
+          "snap",
+          "dlm"
+        ],
+        "focus": "snap"
+      },
+      {
+        "narration": "El cifrado usa llaves de KMS, y encryption by default cifra todos los volúmenes nuevos. Un volumen existente sin cifrar no se cifra en sitio: tomas un snapshot y creas un volumen nuevo cifrado a partir de él.",
+        "show": [
+          "az",
+          "ec2",
+          "ebs",
+          "snap",
+          "dlm",
+          "kms"
+        ],
+        "focus": "kms"
+      },
+      {
+        "narration": "Y está el instance store: discos físicos del host, muy rápidos e incluidos en el precio, pero efímeros. Si la instancia se detiene o termina, los datos se pierden. Úsalo solo para caché o datos que puedes reconstruir.",
+        "show": [
+          "az",
+          "ec2",
+          "ebs",
+          "snap",
+          "dlm",
+          "kms",
+          "ist"
+        ],
+        "focus": "ist"
+      }
+    ],
+    "keyPoints": [
+      "gp3 general y boot; io2 Block Express para IOPS extremas",
+      "st1 throughput; sc1 más barato; ninguno sirve de boot",
+      "Snapshots incrementales, restaurables en cualquier AZ de la Región",
+      "Sin cifrar → snapshot → volumen nuevo cifrado",
+      "Instance store: rápido pero efímero, solo datos reconstruibles"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon EFS",
+        "difference": "EFS es un file system compartido por muchas instancias; un volumen EBS normalmente sirve a una."
+      },
+      {
+        "unitOrService": "EC2 instance store",
+        "difference": "Instance store pierde los datos al detener la instancia; EBS los conserva."
+      },
+      {
+        "unitOrService": "AWS Backup",
+        "difference": "Centraliza respaldos de muchos servicios; DLM se enfoca en snapshots y AMIs de EBS."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ebs--l1",
+      "conceptId": "ebs-volume-types",
+      "format": "lightning",
+      "prompt": "Cost-effective SSD boot volume for a general-purpose workload → ?",
+      "promptEs": "Disco de arranque SSD económico para una carga de uso general → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "io2 Block Express"
+        },
+        {
+          "id": "B",
+          "text": "gp3"
+        },
+        {
+          "id": "C",
+          "text": "st1"
+        },
+        {
+          "id": "D",
+          "text": "sc1"
+        }
+      ],
+      "answer": "B",
+      "why": "gp3 es el SSD general y puede ser boot. st1 y sc1 no pueden arrancar, e io2 cuesta más sin requisito que lo justifique."
+    },
+    {
+      "id": "ebs--l2",
+      "conceptId": "ebs-volume-types",
+      "format": "lightning",
+      "prompt": "Database needs 150,000 sustained IOPS on one volume → ?",
+      "promptEs": "Una base de datos necesita 150,000 IOPS sostenidas en un volumen → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "gp3"
+        },
+        {
+          "id": "B",
+          "text": "st1 Throughput Optimized"
+        },
+        {
+          "id": "C",
+          "text": "sc1"
+        },
+        {
+          "id": "D",
+          "text": "io2 Block Express"
+        }
+      ],
+      "answer": "D",
+      "why": "gp3 llega hasta 80,000 IOPS; io2 Block Express llega hasta 256,000 con latencia sub-milisegundo."
+    },
+    {
+      "id": "ebs--l3",
+      "conceptId": "ebs-volume-types",
+      "format": "thisorthat",
+      "prompt": "HDD required; sequential log processing at 350 MiB/s per volume → ?",
+      "promptEs": "Debe ser HDD; procesamiento secuencial de logs a 350 MiB/s por volumen → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "sc1 Cold HDD"
+        },
+        {
+          "id": "B",
+          "text": "st1 Throughput Optimized"
+        }
+      ],
+      "answer": "B",
+      "why": "st1 llega a 500 MiB/s y está hecho para logs y big data. sc1 tiene un tope de 250 MiB/s, insuficiente aquí."
+    },
+    {
+      "id": "ebs--l4",
+      "conceptId": "ebs-volume-types",
+      "format": "lightning",
+      "prompt": "Rarely accessed, throughput-oriented data at the lowest EBS cost → ?",
+      "promptEs": "Datos de acceso poco frecuente y secuencial al menor costo de EBS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "sc1"
+        },
+        {
+          "id": "B",
+          "text": "st1"
+        },
+        {
+          "id": "C",
+          "text": "gp3"
+        },
+        {
+          "id": "D",
+          "text": "io2"
+        }
+      ],
+      "answer": "A",
+      "why": "sc1 (Cold HDD) es el volumen EBS más barato para datos fríos de throughput. st1 prioriza más throughput a mayor costo."
+    },
+    {
+      "id": "ebs--l5",
+      "conceptId": "ebs-performance-sizing",
+      "format": "lightning",
+      "prompt": "Volumes provide enough throughput, but the instance caps EBS bandwidth → ?",
+      "promptEs": "Los volúmenes dan throughput suficiente, pero la instancia limita el ancho de banda EBS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add more gp3 volumes"
+        },
+        {
+          "id": "B",
+          "text": "Convert every volume to io2 Block Express"
+        },
+        {
+          "id": "C",
+          "text": "Larger instance with more EBS bandwidth"
+        },
+        {
+          "id": "D",
+          "text": "Enable EBS Multi-Attach"
+        }
+      ],
+      "answer": "C",
+      "why": "El rendimiento efectivo es el menor entre la instancia y los volúmenes. Si el límite está en la instancia, agregar volúmenes no ayuda."
+    },
+    {
+      "id": "ebs--l7",
+      "conceptId": "ebs-snapshots-dlm",
+      "format": "lightning",
+      "prompt": "Scheduled snapshots of tagged EBS volumes with automatic retention → ?",
+      "promptEs": "Snapshots programados de volúmenes EBS con tags y retención automática → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "EBS Multi-Attach"
+        },
+        {
+          "id": "B",
+          "text": "RDS automated backups"
+        },
+        {
+          "id": "C",
+          "text": "Amazon Data Lifecycle Manager"
+        },
+        {
+          "id": "D",
+          "text": "S3 Lifecycle rules on snapshots"
+        }
+      ],
+      "answer": "C",
+      "why": "DLM automatiza creación, retención y borrado de snapshots y AMIs de EBS. AWS no respalda los volúmenes automáticamente."
+    },
+    {
+      "id": "ebs--l8",
+      "conceptId": "ebs-snapshots-dlm",
+      "format": "thisorthat",
+      "prompt": "Restore an EBS volume in another AZ of the same Region → ?",
+      "promptEs": "Restaurar un volumen EBS en otra AZ de la misma Región → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create volume from existing snapshot"
+        },
+        {
+          "id": "B",
+          "text": "Copy snapshot to another Region"
+        }
+      ],
+      "answer": "A",
+      "why": "Los snapshots se replican entre las AZ de su Región y restauran un volumen en cualquiera de ellas. Copiar a otra Región sobra."
+    },
+    {
+      "id": "ebs--l9",
+      "conceptId": "ebs-snapshots-dlm",
+      "format": "lightning",
+      "prompt": "After the first snapshot, later EBS snapshots store → ?",
+      "promptEs": "Después del primer snapshot, los siguientes snapshots de EBS guardan → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only changed blocks"
+        },
+        {
+          "id": "B",
+          "text": "A full volume copy"
+        },
+        {
+          "id": "C",
+          "text": "Only file metadata"
+        },
+        {
+          "id": "D",
+          "text": "Only the boot sector"
+        }
+      ],
+      "answer": "A",
+      "why": "Los snapshots son incrementales: guardan los bloques cambiados desde el anterior. Borrar uno no elimina datos que otros aún usan."
+    },
+    {
+      "id": "ebs--l10",
+      "conceptId": "ebs-encryption",
+      "format": "lightning",
+      "prompt": "Ensure every new EBS volume is encrypted with least effort → ?",
+      "promptEs": "Asegurar que todo volumen EBS nuevo quede cifrado con mínimo esfuerzo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Encrypt each volume manually at launch"
+        },
+        {
+          "id": "B",
+          "text": "Use instance store instead"
+        },
+        {
+          "id": "C",
+          "text": "Enable S3 default encryption"
+        },
+        {
+          "id": "D",
+          "text": "Enable EBS encryption by default"
+        }
+      ],
+      "answer": "D",
+      "why": "Encryption by default cifra automáticamente cada volumen nuevo con la llave KMS por defecto. No cifra volúmenes que ya existen."
+    },
+    {
+      "id": "ebs--l11",
+      "conceptId": "ebs-encryption",
+      "format": "lightning",
+      "prompt": "Encrypt an existing unencrypted EBS volume → ?",
+      "promptEs": "Cifrar un volumen EBS existente que no está cifrado → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Turn on encryption in place"
+        },
+        {
+          "id": "B",
+          "text": "Snapshot, then create encrypted volume"
+        },
+        {
+          "id": "C",
+          "text": "Enable encryption by default"
+        },
+        {
+          "id": "D",
+          "text": "Change volume type with Elastic Volumes"
+        }
+      ],
+      "answer": "B",
+      "why": "Un volumen existente no se cifra en sitio. Tomas un snapshot y creas un volumen nuevo cifrado desde él."
+    },
+    {
+      "id": "ebs--l12",
+      "conceptId": "ebs-encryption",
+      "format": "thisorthat",
+      "prompt": "Need an EBS snapshot under a different KMS key → ?",
+      "promptEs": "Necesitas un snapshot de EBS con otra llave KMS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Change the snapshot's key in place"
+        },
+        {
+          "id": "B",
+          "text": "Copy snapshot with the new key"
+        }
+      ],
+      "answer": "B",
+      "why": "La llave de un snapshot no se cambia en sitio. Al copiarlo puedes elegir otra llave KMS para la copia."
+    },
+    {
+      "id": "ebs--l13",
+      "conceptId": "instance-store",
+      "format": "lightning",
+      "prompt": "Rebuildable scratch data, fastest local I/O, included in instance price → ?",
+      "promptEs": "Datos temporales reconstruibles, I/O local más rápido, incluido en el precio → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "gp3 EBS volume"
+        },
+        {
+          "id": "B",
+          "text": "Amazon EFS"
+        },
+        {
+          "id": "C",
+          "text": "io2 Block Express volume"
+        },
+        {
+          "id": "D",
+          "text": "EC2 instance store"
+        }
+      ],
+      "answer": "D",
+      "why": "Instance store son discos del host, sin costo extra. Sirve para datos que puedes reconstruir porque es efímero."
+    },
+    {
+      "id": "ebs--l14",
+      "conceptId": "instance-store",
+      "format": "thisorthat",
+      "prompt": "Checkpoint files must survive an instance stop → ?",
+      "promptEs": "Archivos de checkpoint deben sobrevivir a detener la instancia → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Instance store"
+        },
+        {
+          "id": "B",
+          "text": "EBS volume"
+        }
+      ],
+      "answer": "B",
+      "why": "EBS persiste aunque la instancia se detenga. Instance store es temporal y pierde los datos."
+    },
+    {
+      "id": "ebs--l15",
+      "conceptId": "instance-store",
+      "format": "lightning",
+      "prompt": "Instance stops. What happens to its instance store data?",
+      "promptEs": "La instancia se detiene. ¿Qué pasa con sus datos en instance store?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Saved to a snapshot"
+        },
+        {
+          "id": "B",
+          "text": "The data is lost"
+        },
+        {
+          "id": "C",
+          "text": "Moved to an EBS volume"
+        },
+        {
+          "id": "D",
+          "text": "Kept for 24 hours"
+        }
+      ],
+      "answer": "B",
+      "why": "Instance store es efímero: los datos se pierden al detener o terminar la instancia. Nunca guardes ahí la única copia."
+    }
+  ],
+  "audited": true
+}

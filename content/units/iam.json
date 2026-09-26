@@ -1,0 +1,795 @@
+{
+  "unitId": "iam",
+  "overview": {
+    "title": "AWS IAM",
+    "hook": "El portero de tu cuenta: decide quién puede hacer qué, sobre qué recurso.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "principal",
+          "label": "User / app",
+          "kind": "actor",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "role",
+          "label": "IAM role",
+          "kind": "data",
+          "x": 30,
+          "y": 82
+        },
+        {
+          "id": "idpol",
+          "label": "Identity policy",
+          "kind": "data",
+          "x": 30,
+          "y": 18
+        },
+        {
+          "id": "iam",
+          "label": "IAM evalúa",
+          "kind": "service",
+          "service": "AWS Identity and Access Management",
+          "x": 52,
+          "y": 50
+        },
+        {
+          "id": "respol",
+          "label": "Resource policy",
+          "kind": "data",
+          "x": 72,
+          "y": 18
+        },
+        {
+          "id": "limits",
+          "label": "Boundary / SCP",
+          "kind": "note",
+          "x": 72,
+          "y": 82
+        },
+        {
+          "id": "res",
+          "label": "Recurso (S3, SQS)",
+          "kind": "data",
+          "x": 92,
+          "y": 50
+        }
+      ],
+      "edges": [
+        {
+          "from": "principal",
+          "to": "role",
+          "label": "asume"
+        },
+        {
+          "from": "principal",
+          "to": "iam",
+          "label": "request"
+        },
+        {
+          "from": "idpol",
+          "to": "iam"
+        },
+        {
+          "from": "respol",
+          "to": "iam"
+        },
+        {
+          "from": "limits",
+          "to": "iam",
+          "label": "techo"
+        },
+        {
+          "from": "iam",
+          "to": "res",
+          "label": "allow / deny"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "IAM es el portero de tu cuenta de AWS: cada llamada a una API pasa por él y decide si se permite. La cuenta nace con un root user que lo puede todo; protégelo con MFA, sin access keys, y no lo uses a diario.",
+        "show": [
+          "principal",
+          "iam"
+        ],
+        "focus": "iam"
+      },
+      {
+        "narration": "Primero, quién pide. Un IAM user es una persona o app con credenciales de largo plazo. Un IAM group junta users para darles los mismos permisos. Un IAM role no tiene contraseña: alguien lo asume y recibe credenciales temporales.",
+        "show": [
+          "principal",
+          "iam",
+          "role"
+        ],
+        "focus": "role"
+      },
+      {
+        "narration": "Luego, qué puede hacer. Una identity-based policy es un JSON pegado a un user, group o role, con acciones, recursos y condiciones. Una resource-based policy, como una bucket policy o una queue policy, va pegada al recurso y dice quién puede entrar.",
+        "show": [
+          "principal",
+          "iam",
+          "role",
+          "idpol",
+          "respol",
+          "res"
+        ],
+        "focus": "idpol"
+      },
+      {
+        "narration": "Todo empieza en deny implícito; un explicit deny gana siempre. Dentro de una cuenta, un allow de identidad o recurso puede bastar. Para acceso directo entre cuentas hacen falta ambos allows. Si asumes un role, su trust policy permite asumirlo y su permissions policy define qué puede hacer.",
+        "show": [
+          "principal",
+          "iam",
+          "role",
+          "idpol",
+          "respol",
+          "res"
+        ],
+        "focus": "respol"
+      },
+      {
+        "narration": "Encima hay topes. Un permissions boundary limita los permisos de identity-based policies de un user o role; una SCP limita los principals de cuentas u OUs. Ninguno otorga permisos. El boundary no limita universalmente los allows de resource-based policies: depende del principal nombrado.",
+        "show": [
+          "principal",
+          "iam",
+          "role",
+          "idpol",
+          "respol",
+          "res",
+          "limits"
+        ],
+        "focus": "limits"
+      },
+      {
+        "narration": "La regla que más aparece en el examen: si una app necesita llamar a AWS, no guardes access keys. En EC2 usa un role mediante un instance profile; en ECS, un task role por tarea. Evitar credenciales de largo plazo casi siempre significa role.",
+        "show": [
+          "principal",
+          "iam",
+          "role",
+          "idpol",
+          "respol",
+          "res",
+          "limits"
+        ],
+        "focus": "role"
+      }
+    ],
+    "keyPoints": [
+      "Explicit deny siempre gana sobre cualquier allow.",
+      "Roles dan credenciales temporales; prefiérelos a access keys.",
+      "Acceso directo entre cuentas: allow en la identidad y en el recurso; asumir un role usa trust policy.",
+      "Boundaries y SCPs limitan permisos; nunca los otorgan. Un boundary no limita universalmente los allows de resource-based policies.",
+      "Root user: MFA, sin access keys, uso mínimo."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Organizations (SCP)",
+        "difference": "Una SCP pone techo a cuentas u OUs enteras; una IAM policy otorga permisos a identidades concretas."
+      },
+      {
+        "unitOrService": "AWS IAM Identity Center",
+        "difference": "Identity Center centraliza el acceso de empleados a muchas cuentas; IAM gestiona identidades dentro de una cuenta."
+      },
+      {
+        "unitOrService": "Amazon Cognito",
+        "difference": "Cognito autentica a los usuarios finales de tu app; IAM controla quién llama a las APIs de AWS."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "iam--l1",
+      "conceptId": "root-user-mfa-best-practices",
+      "format": "lightning",
+      "prompt": "Secure the root user of a brand-new AWS account → ?",
+      "promptEs": "Proteger el root user de una cuenta de AWS recién creada → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable MFA; create no root access keys"
+        },
+        {
+          "id": "B",
+          "text": "Create root access keys for automation"
+        },
+        {
+          "id": "C",
+          "text": "Share the root password with admins"
+        },
+        {
+          "id": "D",
+          "text": "Rotate root access keys every month"
+        }
+      ],
+      "answer": "A",
+      "why": "El root user tiene acceso total: se protege con MFA y AWS recomienda no crearle access keys. Rotar claves del root sigue dejando credenciales de largo plazo innecesarias."
+    },
+    {
+      "id": "iam--l2",
+      "conceptId": "root-user-mfa-best-practices",
+      "format": "thisorthat",
+      "prompt": "Root user has MFA; IAM users sign in without MFA. Are IAM users protected?",
+      "promptEs": "El root user tiene MFA; los IAM users entran sin MFA. ¿Están protegidos los IAM users?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes, root MFA covers every user"
+        },
+        {
+          "id": "B",
+          "text": "No, configure MFA per IAM user"
+        }
+      ],
+      "answer": "B",
+      "why": "La MFA del root solo protege las credenciales del root. Cada IAM user tiene su propia configuración de MFA y hay que activarla aparte."
+    },
+    {
+      "id": "iam--l3",
+      "conceptId": "root-user-mfa-best-practices",
+      "format": "lightning",
+      "prompt": "Everyday administration of an AWS account → which identity?",
+      "promptEs": "Administración diaria de una cuenta de AWS → ¿qué identidad?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Root user protected with MFA"
+        },
+        {
+          "id": "B",
+          "text": "Root user access keys"
+        },
+        {
+          "id": "C",
+          "text": "Admin role with temporary credentials"
+        },
+        {
+          "id": "D",
+          "text": "One shared IAM user for admins"
+        }
+      ],
+      "answer": "C",
+      "why": "El root se reserva para las pocas tareas que lo exigen, aunque tenga MFA. Para el día a día usa una identidad administrativa, idealmente con credenciales temporales de un role."
+    },
+    {
+      "id": "iam--l4",
+      "conceptId": "iam-users-groups-roles",
+      "format": "lightning",
+      "prompt": "Twelve existing IAM users need identical permissions, changed in one place → ?",
+      "promptEs": "Doce IAM users existentes necesitan los mismos permisos, modificables en un solo lugar → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One IAM role per user"
+        },
+        {
+          "id": "B",
+          "text": "IAM group with an attached policy"
+        },
+        {
+          "id": "C",
+          "text": "Inline policy on each user"
+        },
+        {
+          "id": "D",
+          "text": "Permissions boundary on each user"
+        }
+      ],
+      "answer": "B",
+      "why": "Un IAM group reúne IAM users y la policy adjunta al grupo se edita una sola vez. Las inline policies obligan a mantener copias, y un boundary no otorga permisos."
+    },
+    {
+      "id": "iam--l5",
+      "conceptId": "iam-users-groups-roles",
+      "format": "thisorthat",
+      "prompt": "Third-party client that cannot use roles or federation needs AWS access → ?",
+      "promptEs": "Un cliente de terceros que no puede usar roles ni federación necesita acceso a AWS → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM user with access keys"
+        },
+        {
+          "id": "B",
+          "text": "IAM role with temporary credentials"
+        }
+      ],
+      "answer": "A",
+      "why": "El IAM user con access keys de largo plazo es la excepción aceptada cuando el cliente no puede asumir roles ni usar federación. Si puede, el role siempre es preferible."
+    },
+    {
+      "id": "iam--l6",
+      "conceptId": "iam-users-groups-roles",
+      "format": "lightning",
+      "prompt": "Employees already use a corporate SAML IdP; avoid creating IAM users → ?",
+      "promptEs": "Los empleados ya usan un IdP SAML corporativo; evitar crear IAM users → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "One IAM user per employee"
+        },
+        {
+          "id": "B",
+          "text": "Add SAML identities to IAM groups"
+        },
+        {
+          "id": "C",
+          "text": "Share one IAM user per team"
+        },
+        {
+          "id": "D",
+          "text": "Federate the IdP to IAM roles"
+        }
+      ],
+      "answer": "D",
+      "why": "Las identidades federadas asumen IAM roles y reciben credenciales temporales. Un IAM group solo contiene IAM users, así que no puede incluir identidades SAML externas."
+    },
+    {
+      "id": "iam--l7",
+      "conceptId": "iam-users-groups-roles",
+      "format": "thisorthat",
+      "prompt": "Identity that is assumed and returns temporary credentials → ?",
+      "promptEs": "Identidad que se asume y devuelve credenciales temporales → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM group"
+        },
+        {
+          "id": "B",
+          "text": "IAM role"
+        }
+      ],
+      "answer": "B",
+      "why": "Un role no tiene contraseña ni access keys propias: quien lo asume recibe credenciales temporales. Un group solo agrupa IAM users y nadie puede asumirlo."
+    },
+    {
+      "id": "iam--l8",
+      "conceptId": "iam-identity-based-policies",
+      "format": "lightning",
+      "prompt": "Reusable least-privilege policy attached to several groups → ?",
+      "promptEs": "Policy reutilizable de mínimo privilegio adjunta a varios grupos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Broad AWS managed policy"
+        },
+        {
+          "id": "B",
+          "text": "Inline policy per group"
+        },
+        {
+          "id": "C",
+          "text": "Customer managed policy"
+        },
+        {
+          "id": "D",
+          "text": "Service control policy"
+        }
+      ],
+      "answer": "C",
+      "why": "Una customer managed policy se adjunta a varias identidades y la ajustas a tu caso. Una AWS managed policy suele ser demasiado amplia; una SCP no otorga permisos."
+    },
+    {
+      "id": "iam--l9",
+      "conceptId": "iam-identity-based-policies",
+      "format": "lightning",
+      "prompt": "Policy tied to one identity and deleted together with it → ?",
+      "promptEs": "Policy ligada a una sola identidad que se borra junto con ella → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Inline policy"
+        },
+        {
+          "id": "B",
+          "text": "Customer managed policy"
+        },
+        {
+          "id": "C",
+          "text": "AWS managed policy"
+        },
+        {
+          "id": "D",
+          "text": "Permissions boundary"
+        }
+      ],
+      "answer": "A",
+      "why": "La inline policy pertenece a una sola identidad y desaparece al borrarla. Las managed policies son objetos independientes que puedes adjuntar a muchas identidades."
+    },
+    {
+      "id": "iam--l10",
+      "conceptId": "iam-identity-based-policies",
+      "format": "lightning",
+      "prompt": "Generate a fine-grained policy from a role's real CloudTrail activity → ?",
+      "promptEs": "Generar una policy precisa a partir de la actividad real del role en CloudTrail → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS Config rules"
+        },
+        {
+          "id": "B",
+          "text": "IAM Access Analyzer"
+        },
+        {
+          "id": "C",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "id": "D",
+          "text": "AWS Trusted Advisor"
+        }
+      ],
+      "answer": "B",
+      "why": "IAM Access Analyzer genera policies de mínimo privilegio a partir de la actividad registrada en CloudTrail; luego la pruebas antes de desplegarla. GuardDuty detecta amenazas, no escribe policies."
+    },
+    {
+      "id": "iam--l11",
+      "conceptId": "iam-identity-based-policies",
+      "format": "thisorthat",
+      "prompt": "A role needs s3:GetObject on one bucket. What actually grants it?",
+      "promptEs": "Un role necesita s3:GetObject en un bucket. ¿Qué se lo otorga realmente?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Permissions boundary that includes it"
+        },
+        {
+          "id": "B",
+          "text": "Identity-based policy with Allow"
+        }
+      ],
+      "answer": "B",
+      "why": "Solo una policy que otorga, como la identity-based, concede la acción. Un permissions boundary únicamente define el máximo posible: sin un allow real, el role sigue sin permiso."
+    },
+    {
+      "id": "iam--l12",
+      "conceptId": "iam-policy-evaluation-logic",
+      "format": "lightning",
+      "prompt": "Identity policy allows s3:DeleteObject; bucket policy explicitly denies it → result?",
+      "promptEs": "La identity policy permite s3:DeleteObject; la bucket policy lo niega explícitamente → ¿resultado?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allowed, identity policy wins"
+        },
+        {
+          "id": "B",
+          "text": "Allowed inside the same account"
+        },
+        {
+          "id": "C",
+          "text": "Denied, explicit deny wins"
+        },
+        {
+          "id": "D",
+          "text": "Depends on policy creation order"
+        }
+      ],
+      "answer": "C",
+      "why": "Un explicit deny en cualquier policy aplicable anula cualquier allow, sin importar el tipo de policy ni el orden. Es la regla número uno de evaluación."
+    },
+    {
+      "id": "iam--l13",
+      "conceptId": "iam-policy-evaluation-logic",
+      "format": "thisorthat",
+      "prompt": "Same account: role's policy is silent, bucket policy allows that role → ?",
+      "promptEs": "Misma cuenta: la policy del role no dice nada y la bucket policy permite a ese role → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allowed, the policies form a union"
+        },
+        {
+          "id": "B",
+          "text": "Denied, both sides must allow"
+        }
+      ],
+      "answer": "A",
+      "why": "Dentro de una misma cuenta, identity y resource policies se suman: un allow en cualquiera basta si no hay explicit deny. Exigir ambos lados aplica al acceso entre cuentas."
+    },
+    {
+      "id": "iam--l14",
+      "conceptId": "iam-policy-evaluation-logic",
+      "format": "lightning",
+      "prompt": "No policy mentions the requested action → default decision?",
+      "promptEs": "Ninguna policy menciona la acción solicitada → ¿decisión por defecto?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Explicit deny"
+        },
+        {
+          "id": "B",
+          "text": "Implicit allow"
+        },
+        {
+          "id": "C",
+          "text": "Allowed for admins only"
+        },
+        {
+          "id": "D",
+          "text": "Implicit deny"
+        }
+      ],
+      "answer": "D",
+      "why": "IAM parte de un deny implícito: si nada lo permite, se rechaza. El explicit deny es distinto, porque lo escribes tú y anula cualquier allow."
+    },
+    {
+      "id": "iam--l15",
+      "conceptId": "iam-policy-conditions",
+      "format": "lightning",
+      "prompt": "Bucket policy: allow only principals from our organization, even as accounts change → ?",
+      "promptEs": "Bucket policy: permitir solo principals de nuestra organización, aunque cambien las cuentas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "aws:PrincipalOrgID"
+        },
+        {
+          "id": "B",
+          "text": "aws:PrincipalAccount"
+        },
+        {
+          "id": "C",
+          "text": "aws:SourceIp"
+        },
+        {
+          "id": "D",
+          "text": "aws:SourceVpce"
+        }
+      ],
+      "answer": "A",
+      "why": "aws:PrincipalOrgID compara el ID de la organización del solicitante, así sigue funcionando al agregar o quitar cuentas. aws:PrincipalAccount obligaría a mantener una lista de IDs."
+    },
+    {
+      "id": "iam--l16",
+      "conceptId": "iam-policy-conditions",
+      "format": "lightning",
+      "prompt": "Allow bucket access only through one specific VPC endpoint → condition key?",
+      "promptEs": "Permitir acceso al bucket solo a través de un VPC endpoint específico → ¿condition key?",
+      "options": [
+        {
+          "id": "A",
+          "text": "aws:SourceIp"
+        },
+        {
+          "id": "B",
+          "text": "aws:SourceVpce"
+        },
+        {
+          "id": "C",
+          "text": "aws:PrincipalOrgID"
+        },
+        {
+          "id": "D",
+          "text": "aws:RequestedRegion"
+        }
+      ],
+      "answer": "B",
+      "why": "aws:SourceVpce compara el ID del VPC endpoint por el que llega la solicitud. aws:SourceIp sirve para rangos de IP públicas, no para identificar un endpoint."
+    },
+    {
+      "id": "iam--l18",
+      "conceptId": "resource-based-policies",
+      "format": "lightning",
+      "prompt": "A partner account's role needs direct read access to your S3 bucket → add?",
+      "promptEs": "Un role de una cuenta socia necesita leer directamente tu bucket de S3 → ¿qué agregas?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SCP allowing the partner account"
+        },
+        {
+          "id": "B",
+          "text": "Permissions boundary on the bucket"
+        },
+        {
+          "id": "C",
+          "text": "IAM group containing the partner"
+        },
+        {
+          "id": "D",
+          "text": "Bucket policy allowing the partner role"
+        }
+      ],
+      "answer": "D",
+      "why": "La bucket policy es la resource-based policy que nombra al principal externo. Una SCP ni un boundary otorgan acceso, y un group no puede contener identidades de otra cuenta."
+    },
+    {
+      "id": "iam--l19",
+      "conceptId": "resource-based-policies",
+      "format": "thisorthat",
+      "prompt": "Bucket policy allows a partner role. What else does that role need?",
+      "promptEs": "La bucket policy permite a un role socio. ¿Qué más necesita ese role?",
+      "options": [
+        {
+          "id": "A",
+          "text": "An identity-based Allow in its account"
+        },
+        {
+          "id": "B",
+          "text": "Nothing, the bucket policy suffices"
+        }
+      ],
+      "answer": "A",
+      "why": "En acceso directo entre cuentas se necesitan dos allows: la resource-based policy en la cuenta del recurso y una identity-based policy en la cuenta del solicitante."
+    },
+    {
+      "id": "iam--l20",
+      "conceptId": "resource-based-policies",
+      "format": "lightning",
+      "prompt": "Which of these is a resource-based policy?",
+      "promptEs": "¿Cuál de estas es una resource-based policy?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Inline policy on a role"
+        },
+        {
+          "id": "B",
+          "text": "SQS queue policy"
+        },
+        {
+          "id": "C",
+          "text": "Permissions boundary"
+        },
+        {
+          "id": "D",
+          "text": "Service control policy"
+        }
+      ],
+      "answer": "B",
+      "why": "Las queue policies de SQS, las bucket policies de S3 y las key policies de KMS van pegadas al recurso. Una policy en un role sigue siendo identity-based aunque nombre un recurso."
+    },
+    {
+      "id": "iam--l21",
+      "conceptId": "resource-based-policies",
+      "format": "lightning",
+      "prompt": "Let a role in another account use your KMS key → which policy?",
+      "promptEs": "Permitir que un role de otra cuenta use tu KMS key → ¿qué policy?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The KMS key policy"
+        },
+        {
+          "id": "B",
+          "text": "The role's trust policy"
+        },
+        {
+          "id": "C",
+          "text": "An SCP on your account"
+        },
+        {
+          "id": "D",
+          "text": "A permissions boundary"
+        }
+      ],
+      "answer": "A",
+      "why": "La key policy es la resource-based policy de la KMS key y define qué principals externos pueden usarla. La trust policy del role solo controla quién asume ese role."
+    },
+    {
+      "id": "iam--l22",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "format": "lightning",
+      "prompt": "Application on EC2 must call S3 without storing access keys → ?",
+      "promptEs": "Una aplicación en EC2 debe llamar a S3 sin guardar access keys → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Access keys in environment variables"
+        },
+        {
+          "id": "B",
+          "text": "IAM role through an instance profile"
+        },
+        {
+          "id": "C",
+          "text": "IAM user per instance"
+        },
+        {
+          "id": "D",
+          "text": "Access keys in the AMI"
+        }
+      ],
+      "answer": "B",
+      "why": "El instance profile entrega al EC2 las credenciales temporales del role, y el SDK las obtiene solo. Cualquier opción con access keys vuelve a guardar credenciales de largo plazo."
+    },
+    {
+      "id": "iam--l23",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "format": "thisorthat",
+      "prompt": "Two ECS tasks on the same EC2 host need different permissions → ?",
+      "promptEs": "Dos tareas de ECS en el mismo host EC2 necesitan permisos distintos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A separate task role each"
+        },
+        {
+          "id": "B",
+          "text": "One shared EC2 instance role"
+        }
+      ],
+      "answer": "A",
+      "why": "Un EC2 solo tiene un role a la vez y todas sus apps lo comparten. Los task roles de ECS dan a cada tarea sus propios permisos, independientes del host."
+    },
+    {
+      "id": "iam--l24",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "format": "lightning",
+      "prompt": "Operator may launch EC2 instances, but only with one approved role → grant?",
+      "promptEs": "Un operador puede lanzar EC2, pero solo con un role aprobado → ¿qué le das?",
+      "options": [
+        {
+          "id": "A",
+          "text": "iam:PassRole on all roles"
+        },
+        {
+          "id": "B",
+          "text": "sts:AssumeRole on all roles"
+        },
+        {
+          "id": "C",
+          "text": "AdministratorAccess managed policy"
+        },
+        {
+          "id": "D",
+          "text": "iam:PassRole on that role only"
+        }
+      ],
+      "answer": "D",
+      "why": "Lanzar un EC2 con role exige permiso para pasar ese role. Limitar iam:PassRole al role aprobado evita que el operador adjunte roles con más privilegios."
+    },
+    {
+      "id": "iam--l25",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "format": "lightning",
+      "prompt": "Container that carries an IAM role into an EC2 instance → ?",
+      "promptEs": "Contenedor que lleva un IAM role hasta una instancia EC2 → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Launch template"
+        },
+        {
+          "id": "B",
+          "text": "Permission set"
+        },
+        {
+          "id": "C",
+          "text": "Instance profile"
+        },
+        {
+          "id": "D",
+          "text": "Trust policy"
+        }
+      ],
+      "answer": "C",
+      "why": "El instance profile contiene el role y lo expone a las apps del EC2. Si creas el role por CLI o API, el instance profile hay que crearlo aparte."
+    },
+    {
+      "id": "iam--l27",
+      "conceptId": "permissions-boundaries",
+      "format": "thisorthat",
+      "prompt": "Role's policy allows an action; its permissions boundary omits it → ?",
+      "promptEs": "La policy del role permite una acción; su permissions boundary no la incluye → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The action is denied"
+        },
+        {
+          "id": "B",
+          "text": "The action is allowed"
+        }
+      ],
+      "answer": "A",
+      "why": "El permiso efectivo es la intersección entre la identity-based policy y el boundary. Si el boundary no incluye la acción, ningún allow de la policy puede concederla."
+    }
+  ],
+  "audited": true
+}

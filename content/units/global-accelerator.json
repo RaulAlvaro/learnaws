@@ -1,0 +1,255 @@
+{
+  "unitId": "global-accelerator",
+  "overview": {
+    "title": "AWS Global Accelerator",
+    "hook": "Dos IPs fijas que meten a tus usuarios en la red de AWS.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "users",
+          "label": "Clientes globales",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "ips",
+          "label": "2 IPs anycast",
+          "kind": "data",
+          "x": 30,
+          "y": 50
+        },
+        {
+          "id": "ga",
+          "label": "Global Accelerator",
+          "kind": "service",
+          "service": "AWS Global Accelerator",
+          "x": 54,
+          "y": 50
+        },
+        {
+          "id": "r1",
+          "label": "Region A (NLB)",
+          "kind": "zone",
+          "x": 86,
+          "y": 25
+        },
+        {
+          "id": "r2",
+          "label": "Region B (ALB)",
+          "kind": "zone",
+          "x": 86,
+          "y": 75
+        },
+        {
+          "id": "dial",
+          "label": "Traffic dial",
+          "kind": "note",
+          "x": 54,
+          "y": 88
+        }
+      ],
+      "edges": [
+        {
+          "from": "users",
+          "to": "ips",
+          "label": "TCP / UDP"
+        },
+        {
+          "from": "ips",
+          "to": "ga",
+          "label": "edge más cercano"
+        },
+        {
+          "from": "ga",
+          "to": "r1",
+          "label": "red de AWS"
+        },
+        {
+          "from": "ga",
+          "to": "r2",
+          "label": "failover"
+        },
+        {
+          "from": "dial",
+          "to": "r2",
+          "label": "% aceptado"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Imagina un juego o una API con clientes en todos los continentes. Por internet, cada paquete salta entre muchas redes antes de llegar a tu Region. AWS Global Accelerator te da dos IPs estáticas anycast que entran a la red de AWS cerca del usuario.",
+        "show": [
+          "users",
+          "ips"
+        ],
+        "focus": "ips"
+      },
+      {
+        "narration": "Desde ahí, el tráfico viaja por la red global de AWS hasta endpoints regionales: Network Load Balancers, Application Load Balancers, instancias EC2 o Elastic IPs. Funciona con TCP y UDP, no solo con HTTP.",
+        "show": [
+          "users",
+          "ips",
+          "ga",
+          "r1"
+        ],
+        "focus": "ga"
+      },
+      {
+        "narration": "Global Accelerator vigila la salud de los endpoints y puede sacar uno no sano en menos de un minuto. Como las IPs no cambian, el failover no depende de que clientes y resolvers renueven su caché DNS.",
+        "show": [
+          "users",
+          "ips",
+          "ga",
+          "r1",
+          "r2"
+        ],
+        "focus": "r2"
+      },
+      {
+        "narration": "Con traffic dials controlas qué porcentaje de tráfico acepta el grupo de endpoints de cada Region, y con weights repartes dentro del grupo. Las IPs se mantienen mientras exista el accelerator, así que los firewalls de tus clientes las permiten una sola vez.",
+        "show": [
+          "users",
+          "ips",
+          "ga",
+          "r1",
+          "r2",
+          "dial"
+        ],
+        "focus": "dial"
+      },
+      {
+        "narration": "La confusión clásica es con CloudFront. CloudFront cachea contenido HTTP en el edge; Global Accelerator no cachea nada, solo acelera y enruta conexiones. Y para subidas a un bucket S3, la respuesta es S3 Transfer Acceleration.",
+        "show": [
+          "users",
+          "ips",
+          "ga",
+          "r1",
+          "r2",
+          "dial"
+        ],
+        "focus": "ga"
+      }
+    ],
+    "keyPoints": [
+      "Dos IPs estáticas anycast; ideales para allowlists de firewall.",
+      "TCP y UDP hacia NLB, ALB, EC2 o Elastic IP.",
+      "Failover regional sin esperar cachés DNS.",
+      "No cachea contenido: eso es CloudFront."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Amazon CloudFront",
+        "difference": "CloudFront cachea contenido HTTP(S) en el edge; Global Accelerator enruta conexiones TCP/UDP sin caché."
+      },
+      {
+        "unitOrService": "Route 53 failover",
+        "difference": "El failover DNS depende de cachés de clientes; Global Accelerator mantiene las mismas IPs y cambia el endpoint."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "global-accelerator--l1",
+      "conceptId": "global-accelerator",
+      "format": "lightning",
+      "prompt": "UDP game clients on several continents need better performance and fixed entry IPs → ?",
+      "promptEs": "Clientes de un juego UDP en varios continentes necesitan mejor rendimiento e IPs de entrada fijas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "id": "B",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "id": "C",
+          "text": "Route 53 latency routing"
+        },
+        {
+          "id": "D",
+          "text": "S3 Transfer Acceleration"
+        }
+      ],
+      "answer": "B",
+      "why": "Global Accelerator da dos IPs estáticas anycast y lleva TCP o UDP por la red de AWS. CloudFront está pensado para contenido HTTP(S) en caché."
+    },
+    {
+      "id": "global-accelerator--l2",
+      "conceptId": "global-accelerator",
+      "format": "lightning",
+      "prompt": "Regional failover must not depend on clients' cached DNS answers → ?",
+      "promptEs": "El failover regional no debe depender de respuestas DNS en caché de los clientes → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route 53 failover with low TTL"
+        },
+        {
+          "id": "B",
+          "text": "Route 53 weighted records"
+        },
+        {
+          "id": "C",
+          "text": "Global Accelerator with health checks"
+        },
+        {
+          "id": "D",
+          "text": "CloudFront with longer cache TTL"
+        }
+      ],
+      "answer": "C",
+      "why": "Las IPs de Global Accelerator no cambian; solo cambia el endpoint detrás. El failover por DNS puede verse afectado por clientes que guardan IPs mucho tiempo."
+    },
+    {
+      "id": "global-accelerator--l3",
+      "conceptId": "global-accelerator",
+      "format": "thisorthat",
+      "prompt": "Cache static web content at edge locations near viewers → ?",
+      "promptEs": "Cachear contenido web estático en edge locations cerca de los usuarios → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "id": "B",
+          "text": "AWS Global Accelerator"
+        }
+      ],
+      "answer": "A",
+      "why": "Global Accelerator no es una caché: acelera y enruta conexiones. Si el requisito decisivo es cachear contenido, la respuesta es CloudFront."
+    },
+    {
+      "id": "global-accelerator--l4",
+      "conceptId": "global-accelerator",
+      "format": "lightning",
+      "prompt": "Gradually reduce the percentage of traffic one Region's endpoint group accepts → ?",
+      "promptEs": "Reducir de a poco el porcentaje de tráfico que acepta el grupo de endpoints de una Region → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Endpoint weights within the group"
+        },
+        {
+          "id": "B",
+          "text": "Route 53 geolocation records"
+        },
+        {
+          "id": "C",
+          "text": "CloudFront cache behaviors"
+        },
+        {
+          "id": "D",
+          "text": "Traffic dial on the endpoint group"
+        }
+      ],
+      "answer": "D",
+      "why": "El traffic dial fija el porcentaje de tráfico que acepta un endpoint group regional. Los weights solo reparten proporciones entre endpoints dentro del mismo grupo."
+    }
+  ],
+  "audited": true
+}

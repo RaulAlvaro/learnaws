@@ -1,0 +1,423 @@
+{
+  "unitId": "api-gateway",
+  "overview": {
+    "title": "Amazon API Gateway",
+    "hook": "La puerta de entrada gestionada para las APIs de tu backend.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "client",
+          "label": "Cliente",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "cognito",
+          "label": "Cognito",
+          "kind": "service",
+          "service": "Amazon Cognito",
+          "x": 35,
+          "y": 14
+        },
+        {
+          "id": "apigw",
+          "label": "API Gateway",
+          "kind": "service",
+          "service": "Amazon API Gateway",
+          "x": 38,
+          "y": 50
+        },
+        {
+          "id": "cache",
+          "label": "Caché de stage",
+          "kind": "data",
+          "x": 38,
+          "y": 86
+        },
+        {
+          "id": "lambda",
+          "label": "Lambda",
+          "kind": "service",
+          "service": "AWS Lambda",
+          "x": 78,
+          "y": 28
+        },
+        {
+          "id": "http",
+          "label": "Backend HTTP",
+          "kind": "actor",
+          "x": 78,
+          "y": 72
+        }
+      ],
+      "edges": [
+        {
+          "from": "client",
+          "to": "apigw",
+          "label": "request"
+        },
+        {
+          "from": "cognito",
+          "to": "apigw",
+          "label": "authorizer"
+        },
+        {
+          "from": "apigw",
+          "to": "cache",
+          "label": "GET"
+        },
+        {
+          "from": "apigw",
+          "to": "lambda"
+        },
+        {
+          "from": "apigw",
+          "to": "http"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Tu app móvil o tu sitio web necesitan llamar a tu lógica de backend por internet. Exponer cada función directamente sería un caos de seguridad y control. Amazon API Gateway es la puerta de entrada gestionada: recibe las peticiones y las pasa al backend.",
+        "show": [
+          "client",
+          "apigw"
+        ],
+        "focus": "apigw"
+      },
+      {
+        "narration": "Detrás de la puerta puede haber funciones Lambda, otros servicios de AWS o un backend HTTP. API Gateway se encarga de escalar, autorizar, limitar el tráfico y, si quieres, cachear, sin servidores que administrar.",
+        "show": [
+          "client",
+          "apigw",
+          "lambda",
+          "http"
+        ],
+        "focus": "lambda"
+      },
+      {
+        "narration": "HTTP API es la opción más barata para una API RESTful simple, con autorización JWT. REST API cuesta más, pero trae API keys, usage plans, caché, validación de peticiones, AWS WAF y endpoints privados. WebSocket API mantiene una conexión bidireccional con estado.",
+        "show": [
+          "client",
+          "apigw",
+          "lambda",
+          "http"
+        ],
+        "focus": "apigw"
+      },
+      {
+        "narration": "En REST API, autoriza usuarios de Cognito con un Cognito user pool authorizer; en HTTP API, usa un JWT authorizer configurado para ese user pool. Para roles de AWS, usa IAM; para tokens de terceros o cabeceras propias, Lambda authorizer.",
+        "show": [
+          "client",
+          "apigw",
+          "lambda",
+          "http",
+          "cognito"
+        ],
+        "focus": "cognito"
+      },
+      {
+        "narration": "El throttling protege tu backend con un token bucket: rate es el ritmo de recarga y burst la capacidad. Al pasarse, el cliente recibe un error 429. Para límites y cuotas distintos por cliente, usa usage plans asociados a API keys.",
+        "show": [
+          "client",
+          "apigw",
+          "lambda",
+          "http",
+          "cognito"
+        ],
+        "focus": "apigw"
+      },
+      {
+        "narration": "Si muchos piden la misma respuesta, activa la caché del stage: cachea GET por defecto durante trescientos segundos, con un máximo de una hora. Primero provisiona el cache cluster del stage, e incluye en la clave de caché los parámetros que cambian la respuesta.",
+        "show": [
+          "client",
+          "apigw",
+          "lambda",
+          "http",
+          "cognito",
+          "cache"
+        ],
+        "focus": "cache"
+      },
+      {
+        "narration": "Un último detalle del examen: una private API es una REST API que solo se llama desde tu VPC mediante un interface VPC endpoint. Con una resource policy y aws:SourceVpce limitas qué endpoint puede entrar. Una API key no sustituye a la autorización.",
+        "show": [
+          "client",
+          "apigw",
+          "lambda",
+          "http",
+          "cognito",
+          "cache"
+        ],
+        "focus": "apigw"
+      }
+    ],
+    "keyPoints": [
+      "HTTP API: más barata, JWT; REST API: caché, keys, privada.",
+      "WebSocket API: conexión bidireccional con estado.",
+      "REST API: Cognito user pool authorizer; HTTP API: JWT authorizer para Cognito. IAM para roles; Lambda authorizer para lógica propia.",
+      "Usage plans + API keys: throttling y cuotas por cliente; error 429.",
+      "Caché de stage: GET por defecto, TTL 300 s, máximo 3600 s."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "Application Load Balancer",
+        "difference": "ALB reparte tráfico entre destinos; API Gateway añade autorización, API keys, usage plans y caché de APIs."
+      },
+      {
+        "unitOrService": "API keys",
+        "difference": "Las API keys identifican y limitan clientes en usage plans; no reemplazan un mecanismo de autorización."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "api-gateway--l1",
+      "conceptId": "api-gateway-fundamentals",
+      "format": "thisorthat",
+      "prompt": "Cheapest RESTful Lambda API with JWT auth; no caching or API keys → ?",
+      "promptEs": "API RESTful con Lambda lo más barata posible, con JWT; sin caché ni API keys → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "REST API"
+        },
+        {
+          "id": "B",
+          "text": "HTTP API"
+        }
+      ],
+      "answer": "B",
+      "why": "HTTP API soporta Lambda y JWT a menor precio. REST API solo se justifica si pides funciones exclusivas, como caché, API keys o endpoint privado."
+    },
+    {
+      "id": "api-gateway--l2",
+      "conceptId": "api-gateway-fundamentals",
+      "format": "lightning",
+      "prompt": "API needs response caching and request validation at the gateway → ?",
+      "promptEs": "La API necesita caché de respuestas y validación de peticiones en el gateway → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "REST API"
+        },
+        {
+          "id": "B",
+          "text": "HTTP API"
+        },
+        {
+          "id": "C",
+          "text": "WebSocket API"
+        },
+        {
+          "id": "D",
+          "text": "Application Load Balancer"
+        }
+      ],
+      "answer": "A",
+      "why": "Caché y validación de peticiones existen en REST API, no en HTTP API. Un ALB no ofrece ninguna de las dos funciones de API."
+    },
+    {
+      "id": "api-gateway--l3",
+      "conceptId": "api-gateway-fundamentals",
+      "format": "lightning",
+      "prompt": "Server pushes updates and client replies over one persistent connection → ?",
+      "promptEs": "El servidor envía novedades y el cliente responde por una misma conexión persistente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "HTTP API"
+        },
+        {
+          "id": "B",
+          "text": "REST API with caching"
+        },
+        {
+          "id": "C",
+          "text": "WebSocket API"
+        },
+        {
+          "id": "D",
+          "text": "SQS with long polling"
+        }
+      ],
+      "answer": "C",
+      "why": "WebSocket API mantiene una conexión full-duplex con estado y enruta mensajes por su contenido. REST y HTTP API son sin estado: petición y respuesta."
+    },
+    {
+      "id": "api-gateway--l4",
+      "conceptId": "api-gateway-fundamentals",
+      "format": "lightning",
+      "prompt": "API must be callable only from inside a VPC → ?",
+      "promptEs": "La API solo debe poder llamarse desde dentro de una VPC → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "HTTP API with private integration"
+        },
+        {
+          "id": "B",
+          "text": "Edge-optimized REST API"
+        },
+        {
+          "id": "C",
+          "text": "Regional HTTP API with IP policy"
+        },
+        {
+          "id": "D",
+          "text": "Private REST API"
+        }
+      ],
+      "answer": "D",
+      "why": "Solo REST API admite el tipo de endpoint privado, accesible por un interface VPC endpoint. Una private integration de HTTP API es hacia el backend, no hace privada la API."
+    },
+    {
+      "id": "api-gateway--l5",
+      "conceptId": "api-gateway-throttling-caching",
+      "format": "lightning",
+      "prompt": "Each partner needs its own request-rate limit and quota → ?",
+      "promptEs": "Cada socio necesita su propio límite de peticiones y cuota → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Stage-level throttling"
+        },
+        {
+          "id": "B",
+          "text": "Usage plans with API keys"
+        },
+        {
+          "id": "C",
+          "text": "Method-level throttling"
+        },
+        {
+          "id": "D",
+          "text": "Lambda reserved concurrency"
+        }
+      ],
+      "answer": "B",
+      "why": "Los usage plans identifican a cada cliente por su API key y le aplican límites y cuota propios. El throttling de stage o método es compartido por todos."
+    },
+    {
+      "id": "api-gateway--l6",
+      "conceptId": "api-gateway-throttling-caching",
+      "format": "lightning",
+      "prompt": "A throttled API Gateway client receives which HTTP status code?",
+      "promptEs": "¿Qué código HTTP recibe un cliente limitado por API Gateway?",
+      "options": [
+        {
+          "id": "A",
+          "text": "403 Forbidden"
+        },
+        {
+          "id": "B",
+          "text": "503 Service Unavailable"
+        },
+        {
+          "id": "C",
+          "text": "504 Gateway Timeout"
+        },
+        {
+          "id": "D",
+          "text": "429 Too Many Requests"
+        }
+      ],
+      "answer": "D",
+      "why": "Al agotarse el token bucket, API Gateway responde 429. Recuerda que rate y burst son objetivos best-effort, no techos garantizados."
+    },
+    {
+      "id": "api-gateway--l7",
+      "conceptId": "api-gateway-throttling-caching",
+      "format": "thisorthat",
+      "prompt": "Cut backend calls for repeated identical GET requests → ?",
+      "promptEs": "Reducir llamadas al backend por peticiones GET idénticas repetidas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Stage cache"
+        },
+        {
+          "id": "B",
+          "text": "Usage plan"
+        }
+      ],
+      "answer": "A",
+      "why": "La caché de stage reutiliza respuestas GET y evita llamar a la integración. Un usage plan limita clientes, pero no reutiliza respuestas."
+    },
+    {
+      "id": "api-gateway--l9",
+      "conceptId": "api-gateway-authorization",
+      "format": "lightning",
+      "prompt": "Internal AWS roles may invoke only specific API methods → ?",
+      "promptEs": "Roles internos de AWS solo pueden invocar ciertos métodos de la API → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IAM authorization with policies"
+        },
+        {
+          "id": "B",
+          "text": "Cognito user pool authorizer"
+        },
+        {
+          "id": "C",
+          "text": "API keys with usage plan"
+        },
+        {
+          "id": "D",
+          "text": "Source IP resource policy"
+        }
+      ],
+      "answer": "A",
+      "why": "Si quien llama son roles de AWS, las políticas IAM controlan la invocación de toda la API o de métodos concretos. Una política por IP no distingue roles."
+    },
+    {
+      "id": "api-gateway--l10",
+      "conceptId": "api-gateway-authorization",
+      "format": "thisorthat",
+      "prompt": "Third-party bearer token plus custom header checks decide access → ?",
+      "promptEs": "Un bearer token de terceros más validaciones de cabeceras deciden el acceso → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cognito user pool authorizer"
+        },
+        {
+          "id": "B",
+          "text": "Lambda authorizer"
+        }
+      ],
+      "answer": "B",
+      "why": "El Lambda authorizer evalúa con tu lógica el token y los parámetros de la petición. El authorizer de Cognito solo valida identidades de un user pool."
+    },
+    {
+      "id": "api-gateway--l11",
+      "conceptId": "api-gateway-authorization",
+      "format": "lightning",
+      "prompt": "Private REST API must accept calls from one specific VPC endpoint only → ?",
+      "promptEs": "Una private REST API debe aceptar llamadas solo de un VPC endpoint concreto → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "API key per VPC"
+        },
+        {
+          "id": "B",
+          "text": "Security group on API Gateway"
+        },
+        {
+          "id": "C",
+          "text": "Resource policy with aws:SourceVpce"
+        },
+        {
+          "id": "D",
+          "text": "Usage plan per endpoint"
+        }
+      ],
+      "answer": "C",
+      "why": "La resource policy de la API con la condición aws:SourceVpce restringe el endpoint permitido. API keys y usage plans miden uso, no controlan el origen de red."
+    }
+  ],
+  "audited": true
+}

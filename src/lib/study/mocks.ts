@@ -1,7 +1,7 @@
 import "server-only";
 import { and, desc, eq, gte, isNotNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { getContent } from "../content/load";
+import { getContent, isShortFormat } from "../content/load";
 import type { Question } from "../content/types";
 import { shuffle } from "../engine/planner";
 import { disabledQuestionIds, logStudy } from "./store";
@@ -47,7 +47,7 @@ async function usedInMocks(userId: string): Promise<Set<string>> {
 export async function startMock(userId: string, kind: "mini" | "full") {
   const { questions } = getContent();
   const disabled = await disabledQuestionIds(userId);
-  const all = [...questions.values()].filter((q) => !disabled.has(q.id));
+  const all = [...questions.values()].filter((q) => !disabled.has(q.id) && !isShortFormat(q));
   const seed = Date.now();
   let pool: Question[];
   if (kind === "full") {

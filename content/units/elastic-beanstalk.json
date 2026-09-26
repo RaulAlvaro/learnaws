@@ -1,0 +1,224 @@
+{
+  "unitId": "elastic-beanstalk",
+  "overview": {
+    "title": "AWS Elastic Beanstalk",
+    "hook": "Subes tu código web y Beanstalk arma la infraestructura en tu cuenta.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "code",
+          "label": "Tu código",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "eb",
+          "label": "Beanstalk",
+          "kind": "service",
+          "service": "AWS Elastic Beanstalk",
+          "x": 38,
+          "y": 50
+        },
+        {
+          "id": "elb",
+          "label": "Load balancer",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 70,
+          "y": 18
+        },
+        {
+          "id": "asg",
+          "label": "Auto Scaling",
+          "kind": "service",
+          "service": "Amazon EC2 Auto Scaling",
+          "x": 70,
+          "y": 50
+        },
+        {
+          "id": "ec2",
+          "label": "Instancias EC2",
+          "kind": "service",
+          "service": "Amazon EC2",
+          "x": 70,
+          "y": 82
+        },
+        {
+          "id": "acct",
+          "label": "Tu cuenta AWS",
+          "kind": "zone",
+          "x": 92,
+          "y": 50
+        },
+        {
+          "id": "eks",
+          "label": "Cluster en EKS",
+          "kind": "service",
+          "service": "Amazon EKS",
+          "x": 38,
+          "y": 85
+        }
+      ],
+      "edges": [
+        {
+          "from": "code",
+          "to": "eb",
+          "label": "sube"
+        },
+        {
+          "from": "eb",
+          "to": "elb",
+          "label": "crea"
+        },
+        {
+          "from": "eb",
+          "to": "asg",
+          "label": "crea"
+        },
+        {
+          "from": "asg",
+          "to": "ec2",
+          "label": "lanza"
+        },
+        {
+          "from": "eb",
+          "to": "eks",
+          "label": "modo Cluster"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Elastic Beanstalk es para cuando quieres subir tu aplicación web y que funcione. Entregas el código, en lenguajes como Java, .NET, Node.js o Python, o como imagen Docker, y Beanstalk gestiona el despliegue.",
+        "show": [
+          "code",
+          "eb"
+        ],
+        "focus": "eb"
+      },
+      {
+        "narration": "Beanstalk configura instancias, escalado y monitoreo de salud. En un entorno con balanceo, también crea un load balancer; en uno de instancia única, no. Los recursos viven en tu cuenta AWS, aunque no los configures pieza por pieza.",
+        "show": [
+          "code",
+          "eb",
+          "elb",
+          "asg",
+          "ec2",
+          "acct"
+        ],
+        "focus": "asg"
+      },
+      {
+        "narration": "Beanstalk no cobra extra: pagas solo los recursos que crea. El modo Standard corre directamente sobre EC2, conviene para pocas apps y soporta Windows. El modo Cluster corre sobre EKS, con despliegues más rápidos y mejor uso de recursos entre varios entornos.",
+        "show": [
+          "code",
+          "eb",
+          "elb",
+          "asg",
+          "ec2",
+          "acct",
+          "eks"
+        ],
+        "focus": "eks"
+      },
+      {
+        "narration": "En el examen, las pistas son subir un paquete de código y buscar mínimo esfuerzo operativo para una app web. Si piden correr contenedores sin administrar hosts, piensa en Fargate; si exigen gestionar Kubernetes directamente, en EKS.",
+        "show": [
+          "code",
+          "eb",
+          "elb",
+          "asg",
+          "ec2",
+          "acct",
+          "eks"
+        ],
+        "focus": "eb"
+      }
+    ],
+    "keyPoints": [
+      "Subes código; Beanstalk configura instancias, escalado y monitoreo.",
+      "Un entorno con balanceo tiene load balancer; uno de instancia única, no.",
+      "Sin costo extra: pagas los recursos subyacentes, que viven en tu cuenta.",
+      "Standard corre sobre EC2 y soporta Windows; Cluster corre sobre EKS."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS Fargate",
+        "difference": "Fargate corre contenedores sin administrar hosts; Beanstalk ofrece un flujo de despliegue de aplicaciones."
+      },
+      {
+        "unitOrService": "Amazon EKS",
+        "difference": "Beanstalk Cluster gestiona el entorno sobre EKS por ti; con EKS directo gestionas el clúster tú."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "elastic-beanstalk--l2",
+      "conceptId": "elastic-beanstalk",
+      "format": "thisorthat",
+      "prompt": "Deploy a Windows .NET web app without rebuilding it as a container → ?",
+      "promptEs": "Desplegar una app web .NET en Windows sin reconstruirla como contenedor → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Elastic Beanstalk Standard"
+        },
+        {
+          "id": "B",
+          "text": "Elastic Beanstalk Cluster"
+        }
+      ],
+      "answer": "A",
+      "why": "Standard corre directo sobre EC2 y soporta aplicaciones Windows. Cluster corre sobre EKS y trabaja con imágenes de contenedor."
+    },
+    {
+      "id": "elastic-beanstalk--l3",
+      "conceptId": "elastic-beanstalk",
+      "format": "lightning",
+      "prompt": "Extra charge for using Elastic Beanstalk itself → ?",
+      "promptEs": "Cargo adicional por usar Elastic Beanstalk en sí → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Per environment per hour"
+        },
+        {
+          "id": "B",
+          "text": "None; pay underlying resources"
+        },
+        {
+          "id": "C",
+          "text": "Per deployment"
+        },
+        {
+          "id": "D",
+          "text": "Per application version stored"
+        }
+      ],
+      "answer": "B",
+      "why": "Beanstalk no tiene cargo propio: pagas las instancias, load balancers y demás recursos que crea."
+    },
+    {
+      "id": "elastic-beanstalk--l4",
+      "conceptId": "elastic-beanstalk",
+      "format": "thisorthat",
+      "prompt": "Where do Beanstalk-created EC2 instances and load balancers live?",
+      "promptEs": "¿Dónde viven las instancias EC2 y load balancers que crea Beanstalk?",
+      "options": [
+        {
+          "id": "A",
+          "text": "In an AWS-owned service account"
+        },
+        {
+          "id": "B",
+          "text": "In your own AWS account"
+        }
+      ],
+      "answer": "B",
+      "why": "Beanstalk automatiza la creación, pero los recursos quedan en tu cuenta, visibles y facturados a ti."
+    }
+  ],
+  "audited": true
+}

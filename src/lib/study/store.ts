@@ -4,7 +4,7 @@ import { db, schema } from "@/db";
 import { deserializeCard, retrievability } from "../engine/scheduler";
 import type { MasteryState, Phase } from "../engine/mastery";
 import type { PlannerConcept, QueueItem } from "../engine/planner";
-import { getContent, studyableConcepts } from "../content/load";
+import { getContent, isShortFormat, studyableConcepts } from "../content/load";
 
 export const TZ = process.env.APP_TIMEZONE ?? "America/Lima";
 const DAY_MS = 86_400_000;
@@ -27,10 +27,13 @@ export interface Settings {
   startedAt: string;
 }
 
+/** Planner items plus the session-level "Descubrir" interstitial for a new service unit. */
+export type SessionItem = (QueueItem | { t: "discover"; unitId: string }) & { questionId?: string };
+
 export interface SessionState {
   day: string;
   kind: "diagnostic" | "normal" | "reviews-only";
-  queue: (QueueItem & { questionId?: string })[];
+  queue: SessionItem[];
   index: number;
   total: number;
   startedAt: string;
@@ -163,13 +166,23 @@ export async function disabledQuestionIds(userId: string): Promise<Set<string>> 
  * never the one shown last time; unseen questions first, then least recent.
  * Each review sees a different wording of the same concept.
  */
-export async function pickQuestion(userId: string, conceptId: string, exclude: string[] = []): Promise<string | null> {
+export type FormatPreference = "short" | "scenario" | "any";
+
+export async function pickQuestion(
+  userId: string,
+  conceptId: string,
+  exclude: string[] = [],
+  prefer: FormatPreference = "any",
+): Promise<string | null> {
   const { questionsByConcept } = getContent();
   const disabled = await disabledQuestionIds(userId);
   const row = await conceptRow(userId, conceptId);
-  const pool = (questionsByConcept.get(conceptId) ?? []).filter(
+  const all = (questionsByConcept.get(conceptId) ?? []).filter(
     (q) => !q.heldOut && !disabled.has(q.id) && !exclude.includes(q.id),
   );
+  // Short formats while learning, exam-style scenarios later (4C/ID: simple → whole task).
+  const preferred = prefer === "any" ? all : all.filter((q) => isShortFormat(q) === (prefer === "short"));
+  const pool = preferred.length ? preferred : all;
   if (!pool.length) return null;
   const last = await db
     .select({ questionId: schema.attempts.questionId, at: sql<Date>`max(${schema.attempts.createdAt})` })

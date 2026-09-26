@@ -1,0 +1,299 @@
+{
+  "unitId": "snow-family",
+  "overview": {
+    "title": "Snow y transferencia offline",
+    "hook": "Cuando la red no alcanza, los datos viajan en un dispositivo físico.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "calc",
+          "label": "Tiempo = bits/bps",
+          "kind": "note",
+          "x": 10,
+          "y": 14
+        },
+        {
+          "id": "data",
+          "label": "80 TB locales",
+          "kind": "data",
+          "x": 10,
+          "y": 55
+        },
+        {
+          "id": "link",
+          "label": "Enlace 100 Mbps",
+          "kind": "note",
+          "x": 46,
+          "y": 24
+        },
+        {
+          "id": "sb",
+          "label": "Snowball Edge",
+          "kind": "service",
+          "service": "AWS Snow Family",
+          "x": 46,
+          "y": 82
+        },
+        {
+          "id": "s3",
+          "label": "Amazon S3",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 86,
+          "y": 55
+        }
+      ],
+      "edges": [
+        {
+          "from": "data",
+          "to": "link",
+          "label": "online (DataSync)"
+        },
+        {
+          "from": "link",
+          "to": "s3",
+          "label": ""
+        },
+        {
+          "from": "data",
+          "to": "sb",
+          "label": "copia local"
+        },
+        {
+          "from": "sb",
+          "to": "s3",
+          "label": "envío físico"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "A veces la red es el cuello de botella. Si tienes decenas de terabytes y un enlace lento, subirlos por internet puede tardar meses. La alternativa es el transporte físico: AWS te envía un dispositivo, lo llenas y lo devuelves.",
+        "show": [
+          "data",
+          "s3"
+        ],
+        "focus": "data"
+      },
+      {
+        "narration": "Primero haz la cuenta: un terabyte son 8,000 gigabits, así que a 100 megabits por segundo sostenidos tarda unas 22 horas. Entonces 80 terabytes tardarían unos 74 días, sin contar interrupciones.",
+        "show": [
+          "data",
+          "s3",
+          "calc",
+          "link"
+        ],
+        "focus": "calc"
+      },
+      {
+        "narration": "Si la transferencia online cumple el plazo, suele ser lo más barato: DataSync por el enlace existente. Si no lo cumple, compara el tiempo total del dispositivo, incluyendo preparación y envío. Recuerda que DataSync no aumenta tu ancho de banda.",
+        "show": [
+          "data",
+          "s3",
+          "calc",
+          "link"
+        ],
+        "focus": "link"
+      },
+      {
+        "narration": "Snowball Edge Storage Optimized mueve unos 210 terabytes por dispositivo; para más, usas varios. Compute Optimized sirve para procesar datos en sitios desconectados, como un barco. Y no borres el origen hasta confirmar la importación en S3.",
+        "show": [
+          "data",
+          "s3",
+          "calc",
+          "link",
+          "sb"
+        ],
+        "focus": "sb"
+      },
+      {
+        "narration": "Dato actual importante: desde noviembre de 2025, Snowball Edge solo está disponible para clientes existentes; Snowcone y Snowmobile ya se retiraron. El examen aún puede preguntarlo, así que aprende cuándo encaja, sin asumir que cualquiera puede pedirlo hoy.",
+        "show": [
+          "data",
+          "s3",
+          "calc",
+          "link",
+          "sb"
+        ],
+        "focus": "sb"
+      },
+      {
+        "narration": "¿Y Direct Connect? Es una conexión dedicada, excelente para transferencias grandes y continuas, pero tarda semanas en instalarse. Para una migración única con plazo corto rara vez llega a tiempo; para envíos recurrentes, sí conviene.",
+        "show": [
+          "data",
+          "s3",
+          "calc",
+          "link",
+          "sb"
+        ],
+        "focus": "link"
+      }
+    ],
+    "keyPoints": [
+      "1 TB ≈ 8,000 Gb; a 100 Mbps ≈ 22 horas",
+      "Primero verifica el plazo, después compara costos",
+      "Storage Optimized: unos 210 TB por dispositivo",
+      "Compute Optimized: procesamiento en sitios desconectados",
+      "Snowball Edge: solo clientes existentes desde noviembre 2025"
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "AWS DataSync",
+        "difference": "Transfiere por tu enlace; conviene si la cuenta de tiempo cumple el plazo."
+      },
+      {
+        "unitOrService": "AWS Direct Connect",
+        "difference": "Enlace dedicado para volumen continuo; su instalación toma semanas."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "snow-family--l1",
+      "conceptId": "snow-family",
+      "format": "lightning",
+      "prompt": "Existing Snow customer: 150 TB, slow uplink, online would take months → ?",
+      "promptEs": "Cliente Snow existente: 150 TB, enlace lento, online tardaría meses → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS DataSync over the internet link"
+        },
+        {
+          "id": "B",
+          "text": "Snowball Edge Storage Optimized"
+        },
+        {
+          "id": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "id": "D",
+          "text": "AWS Transfer Family"
+        }
+      ],
+      "answer": "B",
+      "why": "Si la red no cumple el plazo, Snowball Edge Storage Optimized transporta los datos físicamente. DataSync y Transfer Acceleration siguen limitados por el enlace."
+    },
+    {
+      "id": "snow-family--l3",
+      "conceptId": "snow-family",
+      "format": "thisorthat",
+      "prompt": "Recurring nightly sync over a reliable network link → ?",
+      "promptEs": "Sincronización nocturna recurrente por un enlace de red confiable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS DataSync"
+        },
+        {
+          "id": "B",
+          "text": "Snowball Edge"
+        }
+      ],
+      "answer": "A",
+      "why": "Con red suficiente, DataSync programa copias incrementales. Enviar dispositivos no sirve para sincronizaciones recurrentes."
+    },
+    {
+      "id": "snow-family--l4",
+      "conceptId": "snow-family",
+      "format": "lightning",
+      "prompt": "Snowball import returned to AWS. When can you delete the source data?",
+      "promptEs": "Devolviste un Snowball de importación. ¿Cuándo puedes borrar los datos de origen?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Once the device ships out"
+        },
+        {
+          "id": "B",
+          "text": "Right after copying to device"
+        },
+        {
+          "id": "C",
+          "text": "When the device arrives"
+        },
+        {
+          "id": "D",
+          "text": "After S3 import is confirmed"
+        }
+      ],
+      "answer": "D",
+      "why": "Confirma primero que los datos se importaron correctamente a S3. Borrar antes te deja sin copia si algo falla."
+    },
+    {
+      "id": "snow-family--l5",
+      "conceptId": "data-transfer-time-math",
+      "format": "lightning",
+      "prompt": "1 TB at a sustained 100 Mbps takes roughly → ?",
+      "promptEs": "1 TB a 100 Mbps sostenidos tarda aproximadamente → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "22 hours"
+        },
+        {
+          "id": "B",
+          "text": "2 hours"
+        },
+        {
+          "id": "C",
+          "text": "3 days"
+        },
+        {
+          "id": "D",
+          "text": "9 days"
+        }
+      ],
+      "answer": "A",
+      "why": "1 TB son 8,000 Gb; 8,000 Gb entre 0.1 Gbps son 80,000 segundos, unas 22 horas."
+    },
+    {
+      "id": "snow-family--l7",
+      "conceptId": "data-transfer-time-math",
+      "format": "thisorthat",
+      "prompt": "2 TB, 200 Mbps link, 48-hour deadline, lowest cost → ?",
+      "promptEs": "2 TB, enlace de 200 Mbps, plazo de 48 horas, menor costo → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DataSync over existing link"
+        },
+        {
+          "id": "B",
+          "text": "Snowball Edge device"
+        }
+      ],
+      "answer": "A",
+      "why": "2 TB son 16,000 Gb; a 200 Mbps tardan unas 22 horas. Cumple el plazo por la red, sin esperar un dispositivo."
+    },
+    {
+      "id": "snow-family--l8",
+      "conceptId": "data-transfer-time-math",
+      "format": "lightning",
+      "prompt": "Recurring high-volume monthly transfers for years → ?",
+      "promptEs": "Transferencias mensuales de alto volumen durante años → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Snowball Edge every month"
+        },
+        {
+          "id": "B",
+          "text": "Tape Gateway shipments"
+        },
+        {
+          "id": "C",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "id": "D",
+          "text": "Transfer Family SFTP"
+        }
+      ],
+      "answer": "C",
+      "why": "Direct Connect es una conexión dedicada para transferencias grandes y continuas; su tiempo de instalación se amortiza con los años."
+    }
+  ],
+  "audited": true
+}

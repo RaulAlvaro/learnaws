@@ -1,0 +1,398 @@
+{
+  "unitId": "vpc-endpoints",
+  "overview": {
+    "title": "VPC endpoints y PrivateLink",
+    "hook": "Llegar a servicios de AWS desde subnets privadas sin tocar internet.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "ec2",
+          "label": "EC2 privada",
+          "kind": "actor",
+          "x": 8,
+          "y": 50
+        },
+        {
+          "id": "gwep",
+          "label": "Gateway endpoint",
+          "kind": "service",
+          "service": "Amazon VPC",
+          "x": 34,
+          "y": 22
+        },
+        {
+          "id": "s3",
+          "label": "S3 / DynamoDB",
+          "kind": "service",
+          "service": "Amazon S3",
+          "x": 62,
+          "y": 22
+        },
+        {
+          "id": "pol",
+          "label": "Bucket policy",
+          "kind": "note",
+          "x": 90,
+          "y": 22
+        },
+        {
+          "id": "ifep",
+          "label": "Interface endpoint",
+          "kind": "service",
+          "service": "AWS PrivateLink",
+          "x": 34,
+          "y": 78
+        },
+        {
+          "id": "nlb",
+          "label": "NLB proveedor",
+          "kind": "service",
+          "service": "Elastic Load Balancing",
+          "x": 62,
+          "y": 78
+        },
+        {
+          "id": "prov",
+          "label": "App proveedor",
+          "kind": "actor",
+          "x": 90,
+          "y": 78
+        }
+      ],
+      "edges": [
+        {
+          "from": "ec2",
+          "to": "gwep",
+          "label": "ruta prefix list"
+        },
+        {
+          "from": "gwep",
+          "to": "s3"
+        },
+        {
+          "from": "pol",
+          "to": "s3",
+          "label": "aws:SourceVpce"
+        },
+        {
+          "from": "ec2",
+          "to": "ifep",
+          "label": "IP privada (ENI)"
+        },
+        {
+          "from": "ifep",
+          "to": "nlb",
+          "label": "PrivateLink"
+        },
+        {
+          "from": "nlb",
+          "to": "prov"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Tus instancias privadas suelen necesitar servicios de AWS como S3, SQS o KMS. Sin endpoints, una opción habitual es salir por un NAT gateway hacia direcciones públicas. Un VPC endpoint ofrece acceso privado a un servicio específico.",
+        "show": [
+          "ec2"
+        ],
+        "focus": "ec2"
+      },
+      {
+        "narration": "Aquí comparas gateway e interface endpoints, aunque existen otros, como Gateway Load Balancer endpoints. El gateway endpoint solo sirve para S3 y DynamoDB, sin cargo adicional. Añade una ruta con el prefix list a las route tables elegidas; solo sus subnets lo usan.",
+        "show": [
+          "ec2",
+          "gwep",
+          "s3"
+        ],
+        "focus": "gwep"
+      },
+      {
+        "narration": "Para muchos otros servicios usas un interface endpoint, basado en AWS PrivateLink. Crea una interfaz de red con IP privada en cada subnet elegida, cobra por hora y por datos procesados, y su security group debe permitir el tráfico entrante esperado.",
+        "show": [
+          "ec2",
+          "gwep",
+          "s3",
+          "ifep"
+        ],
+        "focus": "ifep"
+      },
+      {
+        "narration": "Los gateway endpoints y algunos interface endpoints admiten endpoint policies; no todos los servicios PrivateLink de terceros las admiten. La policy predeterminada permite todo a través del endpoint, sin sustituir otros permisos. Una bucket policy con aws:SourceVpce puede exigir un endpoint específico.",
+        "show": [
+          "ec2",
+          "gwep",
+          "s3",
+          "ifep",
+          "pol"
+        ],
+        "focus": "pol"
+      },
+      {
+        "narration": "PrivateLink también sirve para publicar tu propio servicio. Pones un Network Load Balancer delante, creas un endpoint service, y cada consumidor crea un interface endpoint en su VPC. Funciona entre cuentas, sin peering, aunque los CIDR se solapen.",
+        "show": [
+          "ec2",
+          "gwep",
+          "s3",
+          "ifep",
+          "pol",
+          "nlb",
+          "prov"
+        ],
+        "focus": "nlb"
+      },
+      {
+        "narration": "Dos trampas. Un endpoint solo llega a servicios concretos: para una API de terceros con acceso solo público, puedes usar NAT; si ofrece conectividad privada, considera esa opción. aws:SourceVpc identifica la VPC, mientras que aws:SourceVpce identifica un endpoint específico.",
+        "show": [
+          "ec2",
+          "gwep",
+          "s3",
+          "ifep",
+          "pol",
+          "nlb",
+          "prov"
+        ],
+        "focus": "gwep"
+      }
+    ],
+    "keyPoints": [
+      "Gateway endpoint: solo S3 y DynamoDB, vía route table, sin cargo adicional.",
+      "Interface endpoint: IP privada en tu subnet; cobra por hora y datos.",
+      "No todos los interface endpoints admiten endpoint policies.",
+      "aws:SourceVpce en la bucket policy identifica un endpoint específico.",
+      "PrivateLink: NLB + endpoint service; tolera CIDR solapados."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "NAT gateway",
+        "difference": "El NAT gateway público da salida general a internet; el gateway endpoint solo llega a S3 y DynamoDB."
+      },
+      {
+        "unitOrService": "VPC peering",
+        "difference": "El peering conecta redes completas y no admite CIDR solapados; PrivateLink expone un servicio específico."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "vpc-endpoints--l1",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "format": "lightning",
+      "prompt": "Private subnet needs Amazon S3 access without NAT or extra endpoint charges → ?",
+      "promptEs": "Una subnet privada necesita acceso a Amazon S3 sin NAT ni cargos extra de endpoint → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Interface endpoint for S3"
+        },
+        {
+          "id": "B",
+          "text": "Gateway endpoint for S3"
+        },
+        {
+          "id": "C",
+          "text": "NAT gateway per AZ"
+        },
+        {
+          "id": "D",
+          "text": "Internet gateway route"
+        }
+      ],
+      "answer": "B",
+      "why": "El gateway endpoint para S3 no tiene cargo adicional y funciona por route table. El interface endpoint cobra por hora y por datos procesados."
+    },
+    {
+      "id": "vpc-endpoints--l2",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "format": "lightning",
+      "prompt": "Private access to Amazon SQS from a VPC without internet → ?",
+      "promptEs": "Acceso privado a Amazon SQS desde una VPC sin internet → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Gateway VPC endpoint"
+        },
+        {
+          "id": "B",
+          "text": "NAT gateway in each AZ"
+        },
+        {
+          "id": "C",
+          "text": "VPC peering with SQS"
+        },
+        {
+          "id": "D",
+          "text": "Interface VPC endpoint"
+        }
+      ],
+      "answer": "D",
+      "why": "Los gateway endpoints solo existen para S3 y DynamoDB. Para SQS y la mayoría de servicios usas un interface endpoint con PrivateLink."
+    },
+    {
+      "id": "vpc-endpoints--l3",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "format": "thisorthat",
+      "prompt": "Which endpoint type places private-IP network interfaces in your subnets?",
+      "promptEs": "¿Qué tipo de endpoint coloca interfaces de red con IP privada en tus subnets?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Interface endpoint"
+        },
+        {
+          "id": "B",
+          "text": "Gateway endpoint"
+        }
+      ],
+      "answer": "A",
+      "why": "El interface endpoint crea una ENI con IP privada por subnet. El gateway endpoint no crea interfaces: solo agrega una ruta con el prefix list."
+    },
+    {
+      "id": "vpc-endpoints--l5",
+      "conceptId": "vpc-endpoint-policies",
+      "format": "lightning",
+      "prompt": "Bucket must be reachable only through one specific VPC endpoint → ?",
+      "promptEs": "El bucket solo debe ser accesible a través de un VPC endpoint específico → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deny unless aws:SourceVpce matches"
+        },
+        {
+          "id": "B",
+          "text": "Bucket policy condition on aws:SourceVpc"
+        },
+        {
+          "id": "C",
+          "text": "Keep the default endpoint policy"
+        },
+        {
+          "id": "D",
+          "text": "Security group attached to the bucket"
+        }
+      ],
+      "answer": "A",
+      "why": "aws:SourceVpce con el ID del endpoint fija un endpoint concreto. aws:SourceVpc solo identifica la VPC, y la policy predeterminada permite todo."
+    },
+    {
+      "id": "vpc-endpoints--l6",
+      "conceptId": "vpc-endpoint-policies",
+      "format": "thisorthat",
+      "prompt": "VPC has several S3 endpoints; restrict the bucket to just one → condition key?",
+      "promptEs": "La VPC tiene varios endpoints de S3; restringir el bucket a uno solo → ¿qué condition key?",
+      "options": [
+        {
+          "id": "A",
+          "text": "aws:SourceVpc"
+        },
+        {
+          "id": "B",
+          "text": "aws:SourceVpce"
+        }
+      ],
+      "answer": "B",
+      "why": "aws:SourceVpc aceptaría cualquier endpoint de esa VPC. aws:SourceVpce identifica un endpoint por su ID, no por su ARN."
+    },
+    {
+      "id": "vpc-endpoints--l7",
+      "conceptId": "vpc-endpoint-policies",
+      "format": "lightning",
+      "prompt": "Instances may reach only approved S3 buckets through the endpoint → ?",
+      "promptEs": "Las instancias solo deben llegar a buckets aprobados a través del endpoint → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the default endpoint policy"
+        },
+        {
+          "id": "B",
+          "text": "Network ACL rules blocking other buckets"
+        },
+        {
+          "id": "C",
+          "text": "Endpoint policy with approved buckets"
+        },
+        {
+          "id": "D",
+          "text": "Remove the prefix list route"
+        }
+      ],
+      "answer": "C",
+      "why": "La endpoint policy controla qué recursos se alcanzan por ese endpoint. La predeterminada da acceso completo, y un NACL no distingue buckets."
+    },
+    {
+      "id": "vpc-endpoints--l8",
+      "conceptId": "privatelink-endpoint-services",
+      "format": "lightning",
+      "prompt": "Share your app privately with customer VPCs that have overlapping CIDRs → ?",
+      "promptEs": "Compartir tu app de forma privada con VPCs de clientes que tienen CIDR solapados → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "VPC peering with each customer"
+        },
+        {
+          "id": "B",
+          "text": "Transit Gateway attachments"
+        },
+        {
+          "id": "C",
+          "text": "PrivateLink endpoint service"
+        },
+        {
+          "id": "D",
+          "text": "Public NAT gateway"
+        }
+      ],
+      "answer": "C",
+      "why": "PrivateLink expone un servicio, no redes completas, así que tolera CIDR solapados. El peering no permite rangos solapados y un NAT solo da salida."
+    },
+    {
+      "id": "vpc-endpoints--l9",
+      "conceptId": "privatelink-endpoint-services",
+      "format": "lightning",
+      "prompt": "Provider creates a PrivateLink endpoint service → what fronts the application?",
+      "promptEs": "El proveedor crea un endpoint service de PrivateLink → ¿qué va delante de la aplicación?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon CloudFront distribution"
+        },
+        {
+          "id": "B",
+          "text": "Public NAT gateway"
+        },
+        {
+          "id": "C",
+          "text": "Internet gateway"
+        },
+        {
+          "id": "D",
+          "text": "Network Load Balancer"
+        }
+      ],
+      "answer": "D",
+      "why": "Para publicar esta aplicación mediante AWS PrivateLink, tú eliges un Network Load Balancer al crear el endpoint service. También existen endpoint services con Gateway Load Balancer, pero no son la opción adecuada aquí."
+    },
+    {
+      "id": "vpc-endpoints--l10",
+      "conceptId": "privatelink-endpoint-services",
+      "format": "thisorthat",
+      "prompt": "Consumer VPC connects to a provider's PrivateLink service by creating → ?",
+      "promptEs": "La VPC consumidora se conecta al servicio PrivateLink del proveedor creando → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "An endpoint service"
+        },
+        {
+          "id": "B",
+          "text": "An interface VPC endpoint"
+        }
+      ],
+      "answer": "B",
+      "why": "El proveedor publica el endpoint service; cada consumidor crea un interface endpoint en su VPC, con IP privada en cada subnet elegida."
+    }
+  ],
+  "audited": true
+}

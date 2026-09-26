@@ -18,6 +18,17 @@ export const GET = handle(async () => {
       progress,
     });
   }
+  if (item.kind === "discover") {
+    const { units, unitContent, islands } = getContent();
+    const unit = units.get(item.unitId);
+    return ok({
+      kind: "discover",
+      unit,
+      island: islands.find((i) => i.id === unit?.island) ?? null,
+      overview: unitContent.get(item.unitId)?.overview ?? null,
+      progress,
+    });
+  }
   if (item.kind === "question") {
     const concept = getContent().concepts.get(item.question.conceptId);
     return ok({ kind: "question", mode: item.mode, question: item.question, concept, progress });

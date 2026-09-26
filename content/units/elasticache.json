@@ -1,0 +1,342 @@
+{
+  "unitId": "elasticache",
+  "overview": {
+    "title": "Amazon ElastiCache",
+    "hook": "Una memoria rapidísima delante de tu base para no repetir lecturas costosas.",
+    "diagram": {
+      "nodes": [
+        {
+          "id": "app",
+          "label": "Aplicación",
+          "kind": "actor",
+          "x": 10,
+          "y": 50
+        },
+        {
+          "id": "cache",
+          "label": "ElastiCache",
+          "kind": "service",
+          "service": "Amazon ElastiCache",
+          "x": 45,
+          "y": 22
+        },
+        {
+          "id": "db",
+          "label": "Base de datos",
+          "kind": "service",
+          "service": "Amazon RDS",
+          "x": 45,
+          "y": 80
+        },
+        {
+          "id": "redis",
+          "label": "Valkey/Redis OSS",
+          "kind": "note",
+          "x": 85,
+          "y": 15
+        },
+        {
+          "id": "memc",
+          "label": "Memcached",
+          "kind": "note",
+          "x": 85,
+          "y": 55
+        }
+      ],
+      "edges": [
+        {
+          "from": "app",
+          "to": "cache",
+          "label": "1. GET (hit)"
+        },
+        {
+          "from": "app",
+          "to": "db",
+          "label": "2. miss: consulta"
+        },
+        {
+          "from": "cache",
+          "to": "redis",
+          "label": "motor"
+        },
+        {
+          "from": "cache",
+          "to": "memc",
+          "label": "motor"
+        }
+      ]
+    },
+    "segments": [
+      {
+        "narration": "Cuando tu base recibe una y otra vez las mismas lecturas, se vuelve lenta y cara. Amazon ElastiCache pone una caché en memoria delante de ella, con respuestas en microsegundos, para que la base descanse.",
+        "show": [
+          "app",
+          "db"
+        ],
+        "focus": "db"
+      },
+      {
+        "narration": "Con lazy loading la app pregunta primero a la caché. Si hay hit, responde al instante; si hay miss, lee la base y guarda el resultado. Solo se cachea lo que alguien pidió, pero puede quedar desactualizado.",
+        "show": [
+          "app",
+          "db",
+          "cache"
+        ],
+        "focus": "cache"
+      },
+      {
+        "narration": "Con write-through, cada vez que la app escribe en la base también actualiza la caché, así las lecturas ven datos recientes. Un TTL hace que la entrada expire; con lazy loading, una lectura posterior vuelve a cargarla.",
+        "show": [
+          "app",
+          "db",
+          "cache"
+        ],
+        "focus": "cache"
+      },
+      {
+        "narration": "Hay dos familias de motor. Valkey o Redis OSS ofrecen réplicas, failover Multi-AZ, backups, pub/sub y sorted sets, ideales para leaderboards y para sesiones que deben sobrevivir a la caída de una zona.",
+        "show": [
+          "app",
+          "db",
+          "cache",
+          "redis"
+        ],
+        "focus": "redis"
+      },
+      {
+        "narration": "Memcached es el motor simple: multihilo y reparte datos entre nodos, pero sin replicación ni failover. Úsalo para objetos desechables. Si el enunciado pide réplicas, failover o sorted sets, descarta Memcached.",
+        "show": [
+          "app",
+          "db",
+          "cache",
+          "redis",
+          "memc"
+        ],
+        "focus": "memc"
+      },
+      {
+        "narration": "No lo confundas con DAX, una caché exclusiva de DynamoDB, ni con CloudFront, que cachea contenido en el borde. Y si no quieres gestionar nodos ni réplicas, ElastiCache Serverless escala la capacidad por ti.",
+        "show": [
+          "app",
+          "db",
+          "cache",
+          "redis",
+          "memc"
+        ],
+        "focus": "cache"
+      }
+    ],
+    "keyPoints": [
+      "Lazy loading: cachea en el miss; puede quedar viejo.",
+      "Write-through: actualiza la caché en cada escritura.",
+      "TTL: la entrada expira; una lectura posterior puede recargarla con lazy loading.",
+      "Réplicas, failover, sorted sets → Valkey o Redis OSS.",
+      "Simple, multihilo, datos desechables → Memcached."
+    ],
+    "confusedWith": [
+      {
+        "unitOrService": "DynamoDB Accelerator (DAX)",
+        "difference": "Caché exclusiva de DynamoDB y compatible con su API; ElastiCache sirve cualquier base y sesiones."
+      },
+      {
+        "unitOrService": "Amazon CloudFront",
+        "difference": "Cachea contenido HTTP en el borde; ElastiCache cachea datos detrás de la aplicación."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "elasticache--l1",
+      "conceptId": "caching-strategies",
+      "format": "lightning",
+      "prompt": "Cache only records users actually request; first-request delay is acceptable → ?",
+      "promptEs": "Cachear solo los registros que los usuarios piden; demora en la primera petición aceptable → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Write-through"
+        },
+        {
+          "id": "B",
+          "text": "Lazy loading"
+        },
+        {
+          "id": "C",
+          "text": "Preload the entire table"
+        },
+        {
+          "id": "D",
+          "text": "Database read replica"
+        }
+      ],
+      "answer": "B",
+      "why": "Lazy loading llena la caché solo tras un miss, así que guarda únicamente lo pedido. Write-through cachearía también datos que nadie lee."
+    },
+    {
+      "id": "elasticache--l2",
+      "conceptId": "caching-strategies",
+      "format": "thisorthat",
+      "prompt": "Reads must see fresh data right after the app writes it → ?",
+      "promptEs": "Las lecturas deben ver datos frescos justo después de que la app escribe → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Write-through"
+        },
+        {
+          "id": "B",
+          "text": "Lazy loading only"
+        }
+      ],
+      "answer": "A",
+      "why": "Write-through actualiza la caché en cada escritura. Lazy loading solo no modifica una entrada existente cuando cambia el registro en la base."
+    },
+    {
+      "id": "elasticache--l4",
+      "conceptId": "elasticache-redis-valkey",
+      "format": "lightning",
+      "prompt": "Real-time gaming leaderboard that ranks players by score → ?",
+      "promptEs": "Leaderboard de juego en tiempo real que ordena jugadores por puntaje → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ElastiCache for Memcached"
+        },
+        {
+          "id": "B",
+          "text": "DynamoDB Accelerator (DAX)"
+        },
+        {
+          "id": "C",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "id": "D",
+          "text": "ElastiCache for Redis OSS"
+        }
+      ],
+      "answer": "D",
+      "why": "Los sorted sets de Redis OSS o Valkey resuelven rankings de forma nativa. Memcached no tiene sorted sets, y DAX solo acelera lecturas de DynamoDB."
+    },
+    {
+      "id": "elasticache--l5",
+      "conceptId": "elasticache-redis-valkey",
+      "format": "thisorthat",
+      "prompt": "Session cache must survive an Availability Zone failure → ?",
+      "promptEs": "La caché de sesiones debe sobrevivir a la caída de una Availability Zone → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Memcached cluster across nodes"
+        },
+        {
+          "id": "B",
+          "text": "Valkey with Multi-AZ replica"
+        }
+      ],
+      "answer": "B",
+      "why": "Valkey o Redis OSS replican a otra AZ y promueven la réplica si cae la primaria. Memcached reparte datos entre nodos, pero no replica ni hace failover."
+    },
+    {
+      "id": "elasticache--l6",
+      "conceptId": "elasticache-redis-valkey",
+      "format": "lightning",
+      "prompt": "Highly available cache, unpredictable demand, no node or replica management → ?",
+      "promptEs": "Caché de alta disponibilidad, demanda impredecible, sin gestionar nodos ni réplicas → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ElastiCache Serverless"
+        },
+        {
+          "id": "B",
+          "text": "Node-based Valkey cluster"
+        },
+        {
+          "id": "C",
+          "text": "Memcached on Amazon EC2"
+        },
+        {
+          "id": "D",
+          "text": "DynamoDB Accelerator (DAX)"
+        }
+      ],
+      "answer": "A",
+      "why": "ElastiCache Serverless escala la capacidad y mantiene réplicas por ti. Un cluster basado en nodos también da alta disponibilidad, pero tú eliges nodos y planificas capacidad."
+    },
+    {
+      "id": "elasticache--l8",
+      "conceptId": "elasticache-memcached",
+      "format": "lightning",
+      "prompt": "Simple disposable object cache on large multithreaded nodes, add or remove nodes → ?",
+      "promptEs": "Caché simple de objetos desechables en nodos grandes multihilo, agregando o quitando nodos → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Redis OSS, cluster mode disabled"
+        },
+        {
+          "id": "B",
+          "text": "DynamoDB Accelerator (DAX)"
+        },
+        {
+          "id": "C",
+          "text": "ElastiCache for Memcached"
+        },
+        {
+          "id": "D",
+          "text": "Aurora Replicas"
+        }
+      ],
+      "answer": "C",
+      "why": "Modelo simple, multihilo y escalar por nodos son las razones clásicas para Memcached. Como los datos son desechables, no hace falta replicación."
+    },
+    {
+      "id": "elasticache--l9",
+      "conceptId": "elasticache-memcached",
+      "format": "thisorthat",
+      "prompt": "ElastiCache for Memcached scales capacity by → ?",
+      "promptEs": "ElastiCache for Memcached escala su capacidad mediante → ?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Partitioning across nodes"
+        },
+        {
+          "id": "B",
+          "text": "Adding read replicas to nodes"
+        }
+      ],
+      "answer": "A",
+      "why": "Memcached reparte los datos entre nodos, pero no tiene read replicas. No confundas particionar con replicar."
+    },
+    {
+      "id": "elasticache--l10",
+      "conceptId": "elasticache-memcached",
+      "format": "lightning",
+      "prompt": "Which requirement rules out ElastiCache for Memcached?",
+      "promptEs": "¿Qué requisito descarta ElastiCache for Memcached?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Multithreaded nodes"
+        },
+        {
+          "id": "B",
+          "text": "Simple key-value model"
+        },
+        {
+          "id": "C",
+          "text": "Adding and removing nodes"
+        },
+        {
+          "id": "D",
+          "text": "Automatic failover to a replica"
+        }
+      ],
+      "answer": "D",
+      "why": "Memcached no ofrece replicación ni failover automático. Las otras tres son justamente sus fortalezas."
+    }
+  ],
+  "audited": true
+}
