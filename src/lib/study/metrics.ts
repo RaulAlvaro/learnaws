@@ -3,7 +3,7 @@ import { and, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getContent, studyableConcepts } from "../content/load";
 import { bookingGate, estimateReadiness, type Evidence } from "../engine/readiness";
-import { MONTHLY_CAP_USD, monthSpend } from "../ai/client";
+import { monthlyCap, monthSpend } from "../ai/client";
 import { conceptRows, dayOf, getSettings } from "./store";
 
 const DAY_MS = 86_400_000;
@@ -12,12 +12,12 @@ const DAY_MS = 86_400_000;
  * Honest evidence only: unaided, not in-session. Held-out full-mock answers,
  * plus fresh questions on concepts not practised for ≥ 7 days.
  */
-async function readinessEvidence(): Promise<Evidence[]> {
+export async function readinessEvidence(userId: string): Promise<Evidence[]> {
   const since = new Date(Date.now() - 21 * DAY_MS);
   const fullMocks = await db
     .select({ id: schema.mocks.id })
     .from(schema.mocks)
-    .where(and(eq(schema.mocks.kind, "full"), isNotNull(schema.mocks.finishedAt)));
+    .where(and(eq(schema.mocks.userId, userId), eq(schema.mocks.kind, "full"), isNotNull(schema.mocks.finishedAt)));
   const fullIds = fullMocks.map((m) => m.id);
   const rows = await db
     .select({
@@ -29,7 +29,7 @@ async function readinessEvidence(): Promise<Evidence[]> {
       gapDays: schema.attempts.gapDays,
     })
     .from(schema.attempts)
-    .where(and(gte(schema.attempts.createdAt, since), eq(schema.attempts.aided, false)));
+    .where(and(eq(schema.attempts.userId, userId), gte(schema.attempts.createdAt, since), eq(schema.attempts.aided, false)));
   return rows
     .filter(
       (r) =>
@@ -39,19 +39,24 @@ async function readinessEvidence(): Promise<Evidence[]> {
     .map((r) => ({ domain: r.domain, correct: r.correct }));
 }
 
-export async function dashboard() {
+export async function dashboard(userId: string) {
   const { syllabus } = getContent();
   const weights = Object.fromEntries(syllabus.domains.map((d) => [d.id, d.weight]));
   const now = new Date();
-  const settings = await getSettings();
-  const [evidence, rows, spend] = await Promise.all([readinessEvidence(), conceptRows(), monthSpend()]);
+  const settings = await getSettings(userId);
+  const [evidence, rows, spend, cap] = await Promise.all([
+    readinessEvidence(userId),
+    conceptRows(userId),
+    monthSpend(userId),
+    monthlyCap(userId),
+  ]);
   const readiness = estimateReadiness(evidence, weights);
 
   const since14 = new Date(now.getTime() - 14 * DAY_MS);
   const recent = await db
     .select()
     .from(schema.attempts)
-    .where(gte(schema.attempts.createdAt, since14));
+    .where(and(eq(schema.attempts.userId, userId), gte(schema.attempts.createdAt, since14)));
   const firstTries = recent.filter((a) => !a.aided);
 
   // Delayed retention: unaided answers on concepts untouched for ≥ 7 days.
@@ -106,7 +111,12 @@ export async function dashboard() {
 
   const dueNow = [...rows.values()].filter((r) => r.due && r.due <= now).length;
 
-  const days = await db.select().from(schema.studyDays).orderBy(desc(schema.studyDays.day)).limit(120);
+  const days = await db
+    .select()
+    .from(schema.studyDays)
+    .where(eq(schema.studyDays.userId, userId))
+    .orderBy(desc(schema.studyDays.day))
+    .limit(120);
   const studied = new Set(days.filter((d) => d.minutes >= 5).map((d) => d.day));
   let streak = 0;
   for (let t = now.getTime(); ; t -= DAY_MS) {
@@ -116,7 +126,10 @@ export async function dashboard() {
     if (streak > 365) break;
   }
 
-  const mocks = await db.select().from(schema.mocks).where(isNotNull(schema.mocks.finishedAt));
+  const mocks = await db
+    .select()
+    .from(schema.mocks)
+    .where(and(eq(schema.mocks.userId, userId), isNotNull(schema.mocks.finishedAt)));
   const gate = bookingGate(
     mocks.map((m) => ({
       kind: m.kind,
@@ -139,18 +152,19 @@ export async function dashboard() {
     dueNow,
     streak,
     gate,
-    spend: { month: spend, cap: MONTHLY_CAP_USD },
+    spend: { month: spend, cap },
     lastMocks: mocks.sort((a, b) => b.finishedAt!.getTime() - a.finishedAt!.getTime()).slice(0, 5),
   };
 }
 
-export async function errorLog(limit = 100) {
+export async function errorLog(userId: string, limit = 100) {
   const rows = await db
     .select()
     .from(schema.attempts)
     // Unanswered mock items count as wrong in the score but are not "errors" to study.
     .where(
       and(
+        eq(schema.attempts.userId, userId),
         eq(schema.attempts.correct, false),
         eq(schema.attempts.aided, false),
         sql`(jsonb_array_length(${schema.attempts.selected}) > 0 or ${schema.attempts.mode} = 'voice')`,
@@ -161,7 +175,7 @@ export async function errorLog(limit = 100) {
   const counts = await db
     .select({ category: schema.attempts.errorCategory, n: sql<number>`count(*)::int` })
     .from(schema.attempts)
-    .where(and(eq(schema.attempts.correct, false), isNotNull(schema.attempts.errorCategory)))
+    .where(and(eq(schema.attempts.userId, userId), eq(schema.attempts.correct, false), isNotNull(schema.attempts.errorCategory)))
     .groupBy(schema.attempts.errorCategory);
   return { rows, counts };
 }

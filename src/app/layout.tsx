@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
+import { Onboarding } from "@/components/onboarding";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <body className="min-h-full bg-bg font-sans text-fg">
           <Nav />
           <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-4 sm:pt-6">{children}</main>
+          <Onboarding />
         </body>
       </html>
     </ClerkProvider>

@@ -11,9 +11,9 @@ import { conceptRow, conceptRows, dayOf, gapDays, getSettings, logStudy, mastery
  * Hands-free queue: due concepts first, then concepts already introduced whose
  * recall is weakest. Only known concepts — voice is for retrieval, not first exposure.
  */
-export async function nextRecallPrompt(exclude: string[] = []): Promise<RecallPrompt | null> {
+export async function nextRecallPrompt(userId: string, exclude: string[] = []): Promise<RecallPrompt | null> {
   const { recallByConcept } = getContent();
-  const rows = await conceptRows();
+  const rows = await conceptRows(userId);
   const now = new Date();
   const known = [...rows.values()].filter(
     (r) => (r.phase === "reviewing" || r.phase === "graduated") && recallByConcept.get(r.conceptId)?.length,
@@ -28,6 +28,7 @@ export async function nextRecallPrompt(exclude: string[] = []): Promise<RecallPr
 }
 
 export async function recordRecall(opts: {
+  userId: string;
   prompt: RecallPrompt;
   transcript: string;
   score: number;
@@ -38,8 +39,14 @@ export async function recordRecall(opts: {
   const { prompt } = opts;
   const correct = opts.score === 2;
   const concept = getContent().concepts.get(prompt.conceptId);
-  const [gap, row, settings] = await Promise.all([gapDays(prompt.conceptId, now), conceptRow(prompt.conceptId), getSettings()]);
+  const { userId } = opts;
+  const [gap, row, settings] = await Promise.all([
+    gapDays(userId, prompt.conceptId, now),
+    conceptRow(userId, prompt.conceptId),
+    getSettings(userId),
+  ]);
   await db.insert(schema.attempts).values({
+    userId,
     questionId: prompt.id,
     conceptId: prompt.conceptId,
     domain: concept?.domain ?? "d1",
@@ -53,7 +60,7 @@ export async function recordRecall(opts: {
     transcript: opts.transcript,
     explanationScore: opts.score,
   });
-  await logStudy(Math.min(opts.timeMs, 5 * 60_000) / 60_000);
+  await logStudy(userId, Math.min(opts.timeMs, 5 * 60_000) / 60_000);
 
   // Free recall is harder than recognition: it moves FSRS and mastery, but never readiness.
   if (row?.fsrs) {
@@ -64,7 +71,7 @@ export async function recordRecall(opts: {
       hintLevel: 0,
     });
     const next = applyReviewAttempt(masteryOf(row), correct, dayOf(now));
-    await upsertConcept(prompt.conceptId, {
+    await upsertConcept(userId, prompt.conceptId, {
       fsrs: serializeCard(card),
       due: card.due,
       phase: next.phase,

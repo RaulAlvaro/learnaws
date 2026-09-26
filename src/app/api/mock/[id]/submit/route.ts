@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { requireUser } from "@/lib/auth";
 import { submitMock } from "@/lib/study/mocks";
 import { handle, ok } from "@/lib/http/json";
 
@@ -15,7 +16,8 @@ const Body = z.object({
 });
 
 export const POST = handle(async (req: Request, ctx: RouteContext<"/api/mock/[id]/submit">) => {
+  const userId = await requireUser();
   const id = Number((await ctx.params).id);
   const { answers, elapsedMs } = Body.parse(await req.json());
-  return ok(await submitMock(id, answers, elapsedMs));
+  return ok(await submitMock(userId, id, answers, elapsedMs));
 });

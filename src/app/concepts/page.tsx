@@ -1,4 +1,5 @@
 import { getContent } from "@/lib/content/load";
+import { requireUser } from "@/lib/auth";
 import { conceptRows } from "@/lib/study/store";
 import { Badge, Card, DOMAIN_ES } from "@/components/ui";
 
@@ -13,7 +14,7 @@ const PHASE: Record<string, { label: string; tone: "neutral" | "accent" | "warn"
 
 export default async function ConceptsPage() {
   const { syllabus, content } = getContent();
-  const rows = await conceptRows();
+  const rows = await conceptRows(await requireUser());
   return (
     <div className="space-y-4">
       <Card>

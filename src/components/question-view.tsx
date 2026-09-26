@@ -317,7 +317,16 @@ export function QuestionView({
         />
       )}
 
-      {error && <p className="break-words text-sm text-bad">{error}</p>}
+      {error && (
+        <p className="break-words text-sm text-bad">
+          {error}{" "}
+          {/API key/.test(error) && (
+            <a href="/settings#ia" className="underline">
+              Ir a Ajustes
+            </a>
+          )}
+        </p>
+      )}
     </div>
   );
 }

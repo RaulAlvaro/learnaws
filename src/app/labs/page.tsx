@@ -1,25 +1,37 @@
 import Link from "next/link";
 import { db, schema } from "@/db";
 import { and, eq, gte, sql } from "drizzle-orm";
+import { requireUser } from "@/lib/auth";
 import { getContent } from "@/lib/content/load";
 import { Badge, Card, DOMAIN_ES } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
 /** Labs are recommended where you fail most: concepts with ≥ 2 errors in the last 21 days. */
-async function strugglingConcepts(): Promise<Set<string>> {
+async function strugglingConcepts(userId: string): Promise<Set<string>> {
   const since = new Date(Date.now() - 21 * 86_400_000);
   const rows = await db
     .select({ conceptId: schema.attempts.conceptId, n: sql<number>`count(*)::int` })
     .from(schema.attempts)
-    .where(and(eq(schema.attempts.correct, false), eq(schema.attempts.aided, false), gte(schema.attempts.createdAt, since)))
+    .where(
+      and(
+        eq(schema.attempts.userId, userId),
+        eq(schema.attempts.correct, false),
+        eq(schema.attempts.aided, false),
+        gte(schema.attempts.createdAt, since),
+      ),
+    )
     .groupBy(schema.attempts.conceptId);
   return new Set(rows.filter((r) => r.n >= 2).map((r) => r.conceptId));
 }
 
 export default async function LabsPage() {
   const { labs } = getContent();
-  const [progress, struggling] = await Promise.all([db.select().from(schema.labProgress), strugglingConcepts()]);
+  const userId = await requireUser();
+  const [progress, struggling] = await Promise.all([
+    db.select().from(schema.labProgress).where(eq(schema.labProgress.userId, userId)),
+    strugglingConcepts(userId),
+  ]);
   const byId = new Map(progress.map((p) => [p.labId, p]));
   const lab0Done = !!byId.get(labs[0]?.id)?.completedAt;
 

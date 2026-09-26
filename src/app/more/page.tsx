@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import { isAdmin, requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui";
 
 const LINKS = [
@@ -10,10 +11,14 @@ const LINKS = [
   { href: "/settings", title: "Ajustes", desc: "Fecha meta, recordatorio diario, notificaciones y gasto de IA." },
 ];
 
-export default function MorePage() {
+export default async function MorePage() {
+  const admin = isAdmin(await requireUser());
+  const links = admin
+    ? [...LINKS, { href: "/admin", title: "Administración", desc: "Usuarios, progreso, feedback y preguntas reportadas." }]
+    : LINKS;
   return (
     <div className="space-y-3">
-      {LINKS.map((l) => (
+      {links.map((l) => (
         <Link key={l.href} href={l.href} className="block">
           <Card className="hover:bg-surface-2">
             <div className="font-medium">{l.title}</div>

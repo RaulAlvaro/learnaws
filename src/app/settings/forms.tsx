@@ -123,3 +123,165 @@ export function PushToggle({ vapidKey }: { vapidKey: string }) {
     </div>
   );
 }
+
+async function send(url: string, method: string, body?: unknown) {
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}
+
+export function ApiKeyForm({ last4 }: { last4: string | null }) {
+  const router = useRouter();
+  const [key, setKey] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function save() {
+    setBusy(true);
+    setMsg(null);
+    const r = await send("/api/me/key", "POST", { apiKey: key });
+    setBusy(false);
+    if (!r.ok) return setMsg(r.data.error ?? "No se pudo guardar");
+    setKey("");
+    setMsg("Guardada y validada ✓");
+    router.refresh();
+  }
+
+  async function remove() {
+    await send("/api/me/key", "DELETE");
+    router.refresh();
+  }
+
+  return (
+    <div className="space-y-2">
+      {last4 && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="rounded-md bg-surface-2 px-2 py-1 font-mono">sk-…{last4}</span>
+          <button onClick={remove} className="text-xs text-bad">
+            Borrar
+          </button>
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <input
+          type="password"
+          autoComplete="off"
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          placeholder={last4 ? "Reemplazar por otra key…" : "sk-…"}
+          className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm"
+        />
+        <Button onClick={save} disabled={busy || key.trim().length < 20}>
+          {busy ? "Validando…" : "Guardar"}
+        </Button>
+      </div>
+      {msg && <p className="text-sm text-muted">{msg}</p>}
+    </div>
+  );
+}
+
+export function CapForm({ initial }: { initial: number }) {
+  const router = useRouter();
+  const [cap, setCap] = useState(initial);
+  const [saved, setSaved] = useState(false);
+  return (
+    <label className="flex flex-wrap items-center gap-2 text-sm">
+      <span className="text-muted">Tope mensual (US$)</span>
+      <input
+        type="number"
+        min={0}
+        max={100}
+        step={1}
+        value={cap}
+        onChange={(e) => {
+          setCap(Number(e.target.value));
+          setSaved(false);
+        }}
+        className="w-24 rounded-lg border border-border bg-surface px-3 py-2"
+      />
+      <Button
+        variant="secondary"
+        onClick={async () => {
+          await send("/api/me", "PATCH", { aiMonthlyCapUsd: cap });
+          setSaved(true);
+          router.refresh();
+        }}
+      >
+        {saved ? "Guardado" : "Guardar"}
+      </Button>
+    </label>
+  );
+}
+
+export function ExamResultForm({
+  initial,
+}: {
+  initial: { date: string; passed: boolean; score: number | null } | null;
+}) {
+  const [date, setDate] = useState(initial?.date ?? new Date().toISOString().slice(0, 10));
+  const [passed, setPassed] = useState<boolean | null>(initial?.passed ?? null);
+  const [score, setScore] = useState(initial?.score?.toString() ?? "");
+  const [saved, setSaved] = useState(!!initial);
+  return (
+    <div className="space-y-2 text-sm">
+      <div className="flex flex-wrap gap-2">
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-border bg-surface px-3 py-2" />
+        <Button variant={passed === true ? "primary" : "secondary"} onClick={() => setPassed(true)}>
+          Aprobé
+        </Button>
+        <Button variant={passed === false ? "primary" : "secondary"} onClick={() => setPassed(false)}>
+          No aprobé
+        </Button>
+        <input
+          type="number"
+          min={100}
+          max={1000}
+          placeholder="Puntaje (100–1000)"
+          value={score}
+          onChange={(e) => setScore(e.target.value)}
+          className="w-40 rounded-lg border border-border bg-surface px-3 py-2"
+        />
+      </div>
+      <Button
+        disabled={passed === null}
+        onClick={async () => {
+          await send("/api/me", "PATCH", { examResult: { date, passed, score: score ? Number(score) : null } });
+          setSaved(true);
+        }}
+      >
+        {saved ? "Guardado ✓" : "Guardar resultado"}
+      </Button>
+    </div>
+  );
+}
+
+export function DeleteAccount() {
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm">
+      <input
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+        placeholder='Escribe "borrar" para confirmar'
+        className="rounded-lg border border-border bg-surface px-3 py-2"
+      />
+      <Button
+        variant="secondary"
+        className="text-bad"
+        disabled={confirm !== "borrar" || busy}
+        onClick={async () => {
+          setBusy(true);
+          await send("/api/me", "DELETE");
+          window.location.href = "/";
+        }}
+      >
+        Borrar mi cuenta y datos
+      </Button>
+    </div>
+  );
+}

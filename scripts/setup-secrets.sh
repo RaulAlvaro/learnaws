@@ -193,8 +193,9 @@ TOTAL_STAGES=5
 banner "learnaws · claves de OpenAI, Clerk y notificaciones"
 
 # ── 1. OpenAI ─────────────────────────────────────────────────────────────
-stage "OpenAI — API key"
-say "La app usa OpenAI para el tutor, la voz y generar el banco de preguntas."
+stage "OpenAI — API key del servidor"
+say "Esta key solo genera contenido compartido (banco de preguntas y audio cacheado)."
+say "Cada usuario usa su propia key para el tutor y la voz (Ajustes → IA en la app)."
 open_url "https://platform.openai.com/api-keys"
 step "Create new secret key → nombre: learnaws → Create secret key → copia la clave (sk-…)."
 ask_secret OPENAI_API_KEY "Pega la API key:"
@@ -222,17 +223,17 @@ write_env NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
 write_env CLERK_SECRET_KEY "$CLERK_SECRET_KEY"
 
 # ── 3. Your user ──────────────────────────────────────────────────────────
-stage "Clerk — tu usuario y cerrar registros"
+stage "Clerk — tu usuario administrador"
 step "En el dashboard de Clerk: Users → Create user → tu email (y contraseña si la pide) → Create."
 step "Abre el usuario y copia su User ID (empieza con user_)."
-ask ALLOWED_USER_ID "Pega tu User ID:"
-write_env ALLOWED_USER_ID "$ALLOWED_USER_ID"
-step "Luego cierra los registros: Configure → Restrictions → Sign-up mode → Restricted."
-note "Si no encuentras la opción, no pasa nada: la app igual rechaza a cualquier otro usuario."
+ask ADMIN_USER_IDS "Pega tu User ID (admin; varios separados por coma):"
+write_env ADMIN_USER_IDS "$ADMIN_USER_IDS"
+step "Registro abierto: Configure → Restrictions → Sign-up mode → Public."
+note "Si prefieres cerrar el registro más adelante, cámbialo a Restricted o Waitlist; no requiere tocar código."
 pause "Enter cuando termines"
 
 # ── 4. Push notifications ─────────────────────────────────────────────────
-stage "Notificaciones — claves VAPID"
+stage "Notificaciones y cifrado"
 if [[ -n "$(_existing NEXT_PUBLIC_VAPID_PUBLIC_KEY || true)" && -n "$(_existing VAPID_PRIVATE_KEY || true)" ]]; then
   say "Ya existen claves VAPID en $ENV_FILE; se reutilizan."
   NEXT_PUBLIC_VAPID_PUBLIC_KEY=$(_existing NEXT_PUBLIC_VAPID_PUBLIC_KEY)
@@ -247,13 +248,17 @@ fi
 write_env NEXT_PUBLIC_VAPID_PUBLIC_KEY "$NEXT_PUBLIC_VAPID_PUBLIC_KEY"
 write_env VAPID_PRIVATE_KEY "$VAPID_PRIVATE_KEY"
 write_env VAPID_SUBJECT "https://learnaws.crafter.run"
+if [[ -z "$(_existing ENCRYPTION_KEY || true)" ]]; then
+  write_env ENCRYPTION_KEY "$(node -e 'console.log(require("crypto").randomBytes(32).toString("base64"))')"
+fi
+note "ENCRYPTION_KEY cifra las API keys de los usuarios: no la cambies o tendrán que volver a cargarlas."
 
 # ── 5. Dokploy ────────────────────────────────────────────────────────────
 stage "Dokploy — subir las claves y desplegar"
 say "Se suben a la app learnaws en tu VPS (los valores no se imprimen)."
 if confirm "¿Subir las claves a Dokploy ahora?"; then
   tmp=$(mktemp)
-  for k in OPENAI_API_KEY NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY ALLOWED_USER_ID NEXT_PUBLIC_VAPID_PUBLIC_KEY VAPID_PRIVATE_KEY VAPID_SUBJECT; do
+  for k in OPENAI_API_KEY NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY ADMIN_USER_IDS NEXT_PUBLIC_VAPID_PUBLIC_KEY VAPID_PRIVATE_KEY VAPID_SUBJECT ENCRYPTION_KEY; do
     printf '%s=%s\n' "$k" "$(_existing "$k")" >> "$tmp"
   done
   if node scripts/dokploy-env.mjs "$tmp"; then :; else SKIPPED+=("Subir claves a Dokploy: node scripts/dokploy-env.mjs"); fi

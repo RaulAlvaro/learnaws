@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { requireUser } from "@/lib/auth";
 import { saveSettings } from "@/lib/study/store";
 import { handle, ok } from "@/lib/http/json";
 
@@ -9,6 +10,7 @@ const Body = z.object({
 });
 
 export const POST = handle(async (req: Request) => {
-  await saveSettings(Body.parse(await req.json()));
+  const userId = await requireUser();
+  await saveSettings(userId, Body.parse(await req.json()));
   return ok({ ok: true });
 });

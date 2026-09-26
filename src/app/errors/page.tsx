@@ -1,4 +1,5 @@
 import { getContent } from "@/lib/content/load";
+import { requireUser } from "@/lib/auth";
 import { errorLog } from "@/lib/study/metrics";
 import { Badge, Card, DOMAIN_ES } from "@/components/ui";
 
@@ -12,7 +13,7 @@ const CATEGORY: Record<string, { label: string; tip: string }> = {
 };
 
 export default async function ErrorsPage() {
-  const { rows, counts } = await errorLog();
+  const { rows, counts } = await errorLog(await requireUser());
   const { questions, concepts } = getContent();
   return (
     <div className="space-y-4">

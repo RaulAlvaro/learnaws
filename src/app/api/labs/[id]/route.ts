@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { db, schema } from "@/db";
+import { requireUser } from "@/lib/auth";
 import { handle, ok } from "@/lib/http/json";
 
 const Body = z.object({
@@ -10,9 +11,11 @@ const Body = z.object({
 });
 
 export const POST = handle(async (req: Request, ctx: RouteContext<"/api/labs/[id]">) => {
+  const userId = await requireUser();
   const labId = (await ctx.params).id;
   const b = Body.parse(await req.json());
   const values = {
+    userId,
     labId,
     doneSteps: b.doneSteps,
     answers: b.answers,
@@ -22,6 +25,6 @@ export const POST = handle(async (req: Request, ctx: RouteContext<"/api/labs/[id
   await db
     .insert(schema.labProgress)
     .values(values)
-    .onConflictDoUpdate({ target: schema.labProgress.labId, set: values });
+    .onConflictDoUpdate({ target: [schema.labProgress.userId, schema.labProgress.labId], set: values });
   return ok({ ok: true });
 });

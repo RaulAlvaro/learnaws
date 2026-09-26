@@ -1,6 +1,6 @@
 import "server-only";
 import { db, schema } from "@/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getContent } from "../content/load";
 import type { Question } from "../content/types";
 import { planSession, type QuestionMode } from "../engine/planner";
@@ -55,19 +55,19 @@ export function revealQuestion(q: Question) {
   };
 }
 
-export async function buildSession(budgetMin?: number): Promise<SessionState> {
-  const settings = await getSettings();
+export async function buildSession(userId: string, budgetMin?: number): Promise<SessionState> {
+  const settings = await getSettings(userId);
   const now = new Date();
   const target = new Date(settings.targetDate);
   const { syllabus } = getContent();
   const plan = planSession({
-    concepts: await plannerConcepts(now, target),
+    concepts: await plannerConcepts(userId, now, target),
     groups: syllabus.confusableGroups,
     domainWeights: Object.fromEntries(syllabus.domains.map((d) => [d.id, d.weight])),
     now,
     daysLeft: daysBetween(now, target),
     budgetMin: budgetMin ?? settings.dailyMinutes,
-    hasAnyAttempt: await hasAnyAttempt(),
+    hasAnyAttempt: await hasAnyAttempt(userId),
   });
   const session: SessionState = {
     day: dayOf(now),
@@ -77,15 +77,15 @@ export async function buildSession(budgetMin?: number): Promise<SessionState> {
     total: plan.queue.length,
     startedAt: now.toISOString(),
   };
-  await saveSession(session);
+  await saveSession(userId, session);
   return session;
 }
 
 /** Today's session; a new day starts a new plan. */
-export async function todaySession(): Promise<SessionState> {
-  const s = await getSession();
+export async function todaySession(userId: string): Promise<SessionState> {
+  const s = await getSession(userId);
   if (s && s.day === dayOf()) return s;
-  return buildSession();
+  return buildSession(userId);
 }
 
 export type CurrentItem =
@@ -93,8 +93,8 @@ export type CurrentItem =
   | { kind: "card"; conceptId: string; reason: "new" | "relearn"; session: SessionState }
   | { kind: "question"; mode: QuestionMode; question: PublicQuestion; session: SessionState };
 
-export async function currentItem(): Promise<CurrentItem> {
-  const session = await todaySession();
+export async function currentItem(userId: string): Promise<CurrentItem> {
+  const session = await todaySession(userId);
   const { questions } = getContent();
   while (session.index < session.queue.length) {
     const item = session.queue[session.index];
@@ -102,13 +102,14 @@ export async function currentItem(): Promise<CurrentItem> {
     if (!item.questionId) {
       const used = session.queue.filter((i) => i.t === "q" && i.questionId).map((i) => i.questionId!);
       // Prefer a wording not used yet today; small concepts fall back to the least recent one.
-      const qid = (await pickQuestion(item.conceptId, used)) ?? (await pickQuestion(item.conceptId));
+      const qid =
+        (await pickQuestion(userId, item.conceptId, used)) ?? (await pickQuestion(userId, item.conceptId));
       if (!qid) {
         session.index++;
         continue;
       }
       item.questionId = qid;
-      await saveSession(session);
+      await saveSession(userId, session);
     }
     const q = questions.get(item.questionId);
     if (!q) {
@@ -117,14 +118,14 @@ export async function currentItem(): Promise<CurrentItem> {
     }
     return { kind: "question", mode: item.mode, question: publicQuestion(q), session };
   }
-  await saveSession(session);
+  await saveSession(userId, session);
   return { kind: "done", session };
 }
 
-export async function advance() {
-  const s = await todaySession();
+export async function advance(userId: string) {
+  const s = await todaySession(userId);
   s.index = Math.min(s.index + 1, s.queue.length);
-  await saveSession(s);
+  await saveSession(userId, s);
 }
 
 /** Insert a follow-up item a few positions ahead (spacing within the session). */
@@ -151,12 +152,12 @@ export function isCorrect(q: Question, selected: string[]): boolean {
   return correct.length === sel.length && correct.every((id, i) => id === sel[i]);
 }
 
-export async function submitAnswer(input: AnswerInput) {
+export async function submitAnswer(userId: string, input: AnswerInput) {
   const { questions } = getContent();
   const q = questions.get(input.questionId);
   if (!q) throw new Error("Pregunta desconocida");
   const now = new Date();
-  const session = await todaySession();
+  const session = await todaySession(userId);
   const item = session.queue[session.index];
   const mode: QuestionMode =
     item && item.t === "q" && item.questionId === q.id ? item.mode : "review";
@@ -164,10 +165,11 @@ export async function submitAnswer(input: AnswerInput) {
   const hintLevel = input.hintLevel ?? 0;
   const aided = !!input.retryOf || hintLevel > 0;
 
-  const [fresh, gap] = await Promise.all([isFreshQuestion(q.id), gapDays(q.conceptId, now)]);
+  const [fresh, gap] = await Promise.all([isFreshQuestion(userId, q.id), gapDays(userId, q.conceptId, now)]);
   const [attempt] = await db
     .insert(schema.attempts)
     .values({
+      userId,
       questionId: q.id,
       conceptId: q.conceptId,
       domain: q.domain,
@@ -183,12 +185,12 @@ export async function submitAnswer(input: AnswerInput) {
       gapDays: gap,
     })
     .returning({ id: schema.attempts.id });
-  await logStudy(Math.min(input.timeMs, 5 * 60_000) / 60_000);
+  await logStudy(userId, Math.min(input.timeMs, 5 * 60_000) / 60_000);
 
   let needsSelfExplanation = false;
   if (!aided) {
-    needsSelfExplanation = await applyToSchedule(q, mode, correct, input, session, now);
-    await saveSession(session);
+    needsSelfExplanation = await applyToSchedule(userId, q, mode, correct, input, session, now);
+    await saveSession(userId, session);
   }
 
   return {
@@ -201,6 +203,7 @@ export async function submitAnswer(input: AnswerInput) {
 
 /** The only place where answers move a concept through its phases and FSRS schedule. */
 async function applyToSchedule(
+  userId: string,
   q: Question,
   mode: QuestionMode,
   correct: boolean,
@@ -208,9 +211,9 @@ async function applyToSchedule(
   session: SessionState,
   now: Date,
 ): Promise<boolean> {
-  const settings = await getSettings();
+  const settings = await getSettings(userId);
   const target = new Date(settings.targetDate);
-  const row = await conceptRow(q.conceptId);
+  const row = await conceptRow(userId, q.conceptId);
   const m = masteryOf(row);
   const unaided = isUnaidedCorrect(correct, input.hintLevel ?? 0);
   const base = { lastQuestionId: q.id };
@@ -219,11 +222,11 @@ async function applyToSchedule(
     case "diagnostic":
     case "pretest": {
       const pretest = !correct ? "wrong" : input.confidence === 3 ? "right-sure" : "right";
-      await upsertConcept(q.conceptId, { ...base, pretest });
+      await upsertConcept(userId, q.conceptId, { ...base, pretest });
       return false;
     }
     case "learn": {
-      const stats = await learnAttemptStats(q.conceptId);
+      const stats = await learnAttemptStats(userId, q.conceptId);
       const { state, finished } = applyLearnAttempt(
         { ...m, phase: m.phase === "unseen" ? "learning" : m.phase },
         unaided,
@@ -243,7 +246,7 @@ async function applyToSchedule(
         // Keep practising this concept later in the session, with other items in between.
         insertAhead(session, { t: "q", mode: "learn", conceptId: q.conceptId }, 2);
       }
-      await upsertConcept(q.conceptId, patch);
+      await upsertConcept(userId, q.conceptId, patch);
       // Explain your reasoning on the first correct answer of a new concept, or when guessing.
       return correct && (state.initialStreak === 1 || input.confidence === 1);
     }
@@ -264,7 +267,7 @@ async function applyToSchedule(
         timeMs: input.timeMs,
       });
       const next = applyReviewAttempt(m, unaided, dayOf(now));
-      await upsertConcept(q.conceptId, {
+      await upsertConcept(userId, q.conceptId, {
         ...base,
         fsrs: serializeCard(card),
         due: card.due,
@@ -282,9 +285,9 @@ async function applyToSchedule(
   }
 }
 
-export async function saveSelfExplanation(attemptId: number, text: string, score: number, feedback: string) {
+export async function saveSelfExplanation(userId: string, attemptId: number, text: string, score: number, feedback: string) {
   await db
     .update(schema.attempts)
     .set({ selfExplanation: text, explanationScore: score, explanationFeedback: feedback })
-    .where(eq(schema.attempts.id, attemptId));
+    .where(and(eq(schema.attempts.id, attemptId), eq(schema.attempts.userId, userId)));
 }

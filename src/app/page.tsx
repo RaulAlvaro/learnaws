@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireUser } from "@/lib/auth";
 import { dashboard } from "@/lib/study/metrics";
 import { Badge, Bar, Button, Card, DOMAIN_ES, Stat } from "@/components/ui";
 
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 const pct = (v: number | null | undefined, digits = 0) => (v == null ? "—" : `${v.toFixed(digits)}%`);
 
 export default async function Home() {
-  const d = await dashboard();
+  const d = await dashboard(await requireUser());
   const r = d.readiness;
 
   return (

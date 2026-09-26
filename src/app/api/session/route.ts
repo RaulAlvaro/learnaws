@@ -1,9 +1,11 @@
 import { getContent } from "@/lib/content/load";
+import { requireUser } from "@/lib/auth";
 import { currentItem } from "@/lib/study/session";
 import { handle, ok } from "@/lib/http/json";
 
 export const GET = handle(async () => {
-  const item = await currentItem();
+  const userId = await requireUser();
+  const item = await currentItem(userId);
   const { session } = item;
   const progress = { index: session.index, total: session.queue.length, kind: session.kind };
   if (item.kind === "card") {

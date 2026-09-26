@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
-import { assertBudget, MODELS, openai, recordUsage } from "./client";
+import { aiForUser, assertBudget, MODELS, recordUsage } from "./client";
 import type { ConceptContent, Question, RecallPrompt } from "../content/types";
 
 /**
@@ -30,14 +30,15 @@ const HINT_RULES: Record<number, string> = {
 };
 
 export async function hint(opts: {
+  userId: string;
   question: Question;
   content?: ConceptContent;
   selected: string[];
   level: 1 | 2 | 3;
   learnerMessage?: string;
 }) {
-  await assertBudget();
-  const res = await openai().responses.create({
+  await assertBudget(opts.userId);
+  const res = await (await aiForUser(opts.userId)).responses.create({
     model: MODELS.fast,
     instructions: `${SYSTEM_BASE}\nNUNCA reveles cuál es la opción correcta ni su letra.\n${HINT_RULES[opts.level]}`,
     input: `${questionContext(opts.question, opts.content)}\n\nEl alumno respondió: ${opts.selected.join(", ") || "(nada)"} (incorrecto).${
@@ -45,6 +46,7 @@ export async function hint(opts: {
     }`,
   });
   await recordUsage({
+    userId: opts.userId,
     purpose: "hint",
     model: MODELS.fast,
     inputTokens: res.usage?.input_tokens,
@@ -60,12 +62,13 @@ const Grade = z.object({
 
 /** Self-explanation check: "why is this right and the others wrong?" (Bisra et al. 2018). */
 export async function gradeExplanation(opts: {
+  userId: string;
   question: Question;
   content?: ConceptContent;
   explanation: string;
 }) {
-  await assertBudget();
-  const res = await openai().responses.parse({
+  await assertBudget(opts.userId);
+  const res = await (await aiForUser(opts.userId)).responses.parse({
     model: MODELS.fast,
     instructions: `${SYSTEM_BASE}
 Evalúa la autoexplicación del alumno sobre por qué la respuesta correcta lo es y por qué descartó las otras.
@@ -75,6 +78,7 @@ feedback: 1–2 frases; si falta algo, di exactamente qué dato o requisito falt
     text: { format: zodTextFormat(Grade, "grade") },
   });
   await recordUsage({
+    userId: opts.userId,
     purpose: "self-explanation",
     model: MODELS.fast,
     inputTokens: res.usage?.input_tokens,
@@ -91,10 +95,11 @@ const RecallGrade = z.object({
 });
 
 /** Grades a spoken free-recall answer against the stored ideal answer + rubric. */
-export async function gradeRecall(opts: { prompt: RecallPrompt; content?: ConceptContent; transcript: string }) {
-  await assertBudget();
+export async function gradeRecall(opts: {
+  userId: string; prompt: RecallPrompt; content?: ConceptContent; transcript: string }) {
+  await assertBudget(opts.userId);
   const facts = opts.content ? `\nHechos clave del concepto:\n- ${opts.content.card.en.keyFacts.join("\n- ")}` : "";
-  const res = await openai().responses.parse({
+  const res = await (await aiForUser(opts.userId)).responses.parse({
     model: MODELS.fast,
     instructions: `${SYSTEM_BASE}
 El alumno respondió en voz alta (transcripción automática: ignora muletillas y errores de transcripción; puede mezclar español e inglés).
@@ -107,6 +112,7 @@ missing: elementos de la rúbrica que faltaron (vacío si ninguno).`,
     text: { format: zodTextFormat(RecallGrade, "recall_grade") },
   });
   await recordUsage({
+    userId: opts.userId,
     purpose: "voice-grade",
     model: MODELS.fast,
     inputTokens: res.usage?.input_tokens,
@@ -122,6 +128,7 @@ const ErrorDiagnosis = z.object({
 
 /** Classifies a wrong answer for the error log. */
 export async function diagnoseError(opts: {
+  userId: string;
   question: Question;
   selected: string[];
   confidence: number;
@@ -129,8 +136,8 @@ export async function diagnoseError(opts: {
   if (opts.confidence === 3) {
     return { category: "overconfidence" as const, note: "Error con certeza alta: priorízalo en el repaso." };
   }
-  await assertBudget();
-  const res = await openai().responses.parse({
+  await assertBudget(opts.userId);
+  const res = await (await aiForUser(opts.userId)).responses.parse({
     model: MODELS.fast,
     instructions: `${SYSTEM_BASE}
 Clasifica el error del alumno:
@@ -142,6 +149,7 @@ note: una frase en español que diga qué mirar la próxima vez.`,
     text: { format: zodTextFormat(ErrorDiagnosis, "error_diagnosis") },
   });
   await recordUsage({
+    userId: opts.userId,
     purpose: "error-diagnosis",
     model: MODELS.fast,
     inputTokens: res.usage?.input_tokens,

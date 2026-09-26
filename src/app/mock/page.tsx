@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireUser } from "@/lib/auth";
 import { listMocks } from "@/lib/study/mocks";
 import { Badge, Card } from "@/components/ui";
 import { ExternalMockForm, StartMockButtons } from "./start";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 const KIND = { mini: "Mini (25 preg · 50 min)", full: "Completo (65 preg · 130 min)", external: "Externo" };
 
 export default async function MockPage() {
-  const mocks = await listMocks();
+  const mocks = await listMocks(await requireUser());
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
