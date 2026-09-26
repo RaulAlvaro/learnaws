@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DiagramNode, Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { play } from "@/lib/game/sfx";
+import { edgePath, hasGlyph, labelLines, layoutDiagram, LINE_H } from "@/lib/game/diagram-layout";
 import { GameIcon, type GameIconName } from "./icons";
 
 const KIND_STYLE: Record<DiagramNode["kind"], { fill: string; text: string; icon: GameIconName | null; iconClass?: string }> = {
@@ -12,54 +13,6 @@ const KIND_STYLE: Record<DiagramNode["kind"], { fill: string; text: string; icon
   data: { fill: "#dff5e9", text: "#1c1840", icon: "cardboard-box", iconClass: "text-green" },
   zone: { fill: "none", text: "#5e5a86", icon: null },
   note: { fill: "#efeefa", text: "#1c1840", icon: "light-bulb", iconClass: "text-amber" },
-}
-
-const W = 100;
-const H = 64;
-const NODE_W = 21;
-const NODE_H = 10;
-/** Box width grows with the label (plus room for the kind glyph). */
-const widthOf = (n: DiagramNode) => Math.min(36, Math.max(NODE_W, n.label.length * 1.8 + (KIND_STYLE[n.kind]?.icon ? 10 : 6)));
-
-/** Map percentage coordinates into the viewBox, then push overlapping boxes apart. */
-function relax(nodes: DiagramNode[]): Map<string, { cx: number; cy: number }> {
-  const p = nodes.map((n) => ({
-    id: n.id,
-    w: widthOf(n),
-    cx: (n.x / 100) * (W - widthOf(n)) + widthOf(n) / 2,
-    cy: (n.y / 100) * (H - NODE_H) + NODE_H / 2,
-  }));
-  const gapY = NODE_H + 1.5;
-  for (let iter = 0; iter < 60; iter++) {
-    let moved = false;
-    for (let i = 0; i < p.length; i++) {
-      for (let j = i + 1; j < p.length; j++) {
-        const dx = p[j].cx - p[i].cx;
-        const dy = p[j].cy - p[i].cy;
-        const ox = (p[i].w + p[j].w) / 2 + 1.5 - Math.abs(dx);
-        const oy = gapY - Math.abs(dy);
-        if (ox > 0 && oy > 0) {
-          moved = true;
-          // resolve along the axis needing the smaller push
-          if (ox < oy) {
-            const s = (dx >= 0 ? 1 : -1) * (ox / 2);
-            p[i].cx -= s;
-            p[j].cx += s;
-          } else {
-            const s = (dy >= 0 ? 1 : -1) * (oy / 2);
-            p[i].cy -= s;
-            p[j].cy += s;
-          }
-        }
-      }
-    }
-    for (const n of p) {
-      n.cx = Math.min(W - n.w / 2, Math.max(n.w / 2, n.cx));
-      n.cy = Math.min(H - NODE_H / 2, Math.max(NODE_H / 2, n.cy));
-    }
-    if (!moved) break;
-  }
-  return new Map(p.map((n) => [n.id, { cx: n.cx, cy: n.cy }]));
 }
 
 /**
@@ -72,15 +25,18 @@ export function Discover({
   overview,
   autoRead,
   onDone,
+  startAtSummary = false,
 }: {
   unit: ServiceUnit;
   island: Island | null;
   overview: UnitOverview;
   autoRead: boolean;
   onDone: () => void;
+  /** Dev preview only: open with the whole diagram revealed. */
+  startAtSummary?: boolean;
 }) {
   const [seg, setSeg] = useState(0);
-  const [summary, setSummary] = useState(false);
+  const [summary, setSummary] = useState(startAtSummary);
   const [showText, setShowText] = useState(!autoRead);
   const audio = useRef<HTMLAudioElement | null>(null);
   const last = overview.segments.length - 1;
@@ -103,9 +59,17 @@ export function Discover({
     return ids;
   }, [seg, summary, last, overview.segments]);
   const focus = summary ? undefined : overview.segments[seg]?.focus;
-  const byId = new Map(overview.diagram.nodes.map((n) => [n.id, n]));
-  const layout = useMemo(() => relax(overview.diagram.nodes), [overview.diagram.nodes]);
-  const pos = (n: DiagramNode) => layout.get(n.id)!;
+  const layout = useMemo(() => layoutDiagram(overview.diagram), [overview.diagram]);
+  const scroller = useRef<HTMLDivElement>(null);
+  // Keep the narrated node in view when the diagram is wider than the screen.
+  useEffect(() => {
+    const el = scroller.current;
+    const f = overview.segments[seg]?.focus;
+    const node = layout.nodes.find((n) => n.id === f) ?? layout.clusters.find((c) => c.id === f);
+    if (!el || !node || el.scrollWidth <= el.clientWidth) return;
+    const px = (node.x / layout.width) * el.scrollWidth;
+    el.scrollTo({ left: px - el.clientWidth / 2, behavior: "smooth" });
+  }, [seg, layout, overview.segments]);
 
   function next() {
     play("tap");
@@ -125,96 +89,122 @@ export function Discover({
       </div>
 
       <div className="chunk p-2">
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`Diagrama de ${overview.title}`}>
+        <div ref={scroller} className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${layout.width} ${layout.height}`}
+          className="mx-auto block h-auto"
+          // Never shrink text below ~11px: very wide diagrams scroll sideways instead.
+          style={{ width: `max(100%, ${Math.round(layout.width * (11 / 15))}px)`, maxWidth: layout.width * 1.25 }}
+          role="img"
+          aria-label={`Diagrama de ${overview.title}`}
+        >
           <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 z" fill="#1c1840" />
             </marker>
           </defs>
-          {overview.diagram.edges.map((e, i) => {
-            const a = byId.get(e.from);
-            const b = byId.get(e.to);
-            if (!a || !b || !visible.has(a.id) || !visible.has(b.id)) return null;
-            const p = pos(a);
-            const q = pos(b);
-            const dx = q.cx - p.cx;
-            const dy = q.cy - p.cy;
-            const len = Math.hypot(dx, dy) || 1;
-            const pad = Math.min(Math.max(widthOf(a), widthOf(b)) / 2, (NODE_H / 2) * (len / Math.max(Math.abs(dy), 0.01)));
-            const sx = p.cx + (dx / len) * Math.min(pad, len / 3);
-            const sy = p.cy + (dy / len) * Math.min(pad, len / 3);
-            const ex = q.cx - (dx / len) * Math.min(pad, len / 3);
-            const ey = q.cy - (dy / len) * Math.min(pad, len / 3);
+          {layout.clusters.map((c) =>
+            visible.has(c.id) ? (
+              <motion.g key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <rect
+                  x={c.x - c.w / 2}
+                  y={c.y - c.h / 2}
+                  width={c.w}
+                  height={c.h}
+                  rx={16}
+                  fill="#efeefa"
+                  stroke="#1c1840"
+                  strokeWidth={focus === c.id ? 3.5 : 2}
+                  strokeDasharray="7 5"
+                />
+                {/* container name as a tab sitting on the top border, so it never collides with children */}
+                <rect x={c.x + c.w / 2 - 12 - (c.node.label.length * 8.2 + 18)} y={c.y - c.h / 2 - 11} width={c.node.label.length * 8.2 + 18} height={22} rx={11} fill="#ffffff" stroke="#1c1840" strokeWidth={2} />
+                <text x={c.x + c.w / 2 - 12 - (c.node.label.length * 8.2 + 18) + 9} y={c.y - c.h / 2 + 4.5} fontSize={13} fontWeight={900} fill="#1c1840">
+                  {c.node.label}
+                </text>
+              </motion.g>
+            ) : null,
+          )}
+          {layout.edges.map((e, i) => {
+            if (!visible.has(e.from) || !visible.has(e.to)) return null;
             return (
               <motion.g key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-                <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="#1c1840" strokeWidth={0.7} markerEnd="url(#arrow)" />
-                {e.label && (
-                  <text
-                    x={(sx + ex) / 2}
-                    y={(sy + ey) / 2 - 1}
-                    textAnchor="middle"
-                    fontSize={2.5}
-                    fontWeight={800}
-                    fill="#5e5a86"
-                    stroke="#ffffff"
-                    strokeWidth={0.9}
-                    paintOrder="stroke"
-                  >
-                    {e.label}
-                  </text>
+                <path d={edgePath(e.points)} fill="none" stroke="#1c1840" strokeWidth={2.4} markerEnd="url(#arrow)" />
+                {e.label && e.labelAt && (
+                  <g>
+                    <rect
+                      x={e.labelAt.x - (e.label.length * 6.6 + 10) / 2}
+                      y={e.labelAt.y - 9}
+                      width={e.label.length * 6.6 + 10}
+                      height={18}
+                      rx={9}
+                      fill="#ffffff"
+                      stroke="#1c1840"
+                      strokeWidth={1.5}
+                    />
+                    <text x={e.labelAt.x} y={e.labelAt.y + 4} textAnchor="middle" fontSize={11.5} fontWeight={800} fill="#1c1840">
+                      {e.label}
+                    </text>
+                  </g>
                 )}
               </motion.g>
             );
           })}
-          {overview.diagram.nodes.map((n) => {
-            if (!visible.has(n.id)) return null;
+          {layout.nodes.map((ln) => {
+            if (!visible.has(ln.id)) return null;
+            const n = ln.node;
             const s = KIND_STYLE[n.kind] ?? KIND_STYLE.note;
-            const { cx, cy } = pos(n);
-            const nw = widthOf(n);
             const focused = focus === n.id;
-            const glyph = s.icon;
+            const x = ln.x - ln.w / 2;
+            const y = ln.y - ln.h / 2;
+            const glyph = hasGlyph(n) ? s.icon : null;
             return (
               <motion.g
                 key={n.id}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: focused ? 1.08 : 1 }}
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: focused ? 1.06 : 1 }}
                 transition={{ type: "spring", stiffness: 280, damping: 16 }}
-                style={{ transformOrigin: `${cx}px ${cy}px` }}
+                style={{ transformOrigin: `${ln.x}px ${ln.y}px` }}
               >
                 {focused && (
                   <motion.rect
-                    x={cx - nw / 2 - 1.4}
-                    y={cy - NODE_H / 2 - 1.4}
-                    width={nw + 2.8}
-                    height={NODE_H + 2.8}
-                    rx={3.8}
+                    x={x - 6}
+                    y={y - 6}
+                    width={ln.w + 12}
+                    height={ln.h + 12}
+                    rx={16}
                     fill="none"
                     stroke="#ffc933"
-                    strokeWidth={1.3}
-                    animate={{ opacity: [0.35, 1, 0.35] }}
+                    strokeWidth={5}
+                    animate={{ opacity: [0.4, 1, 0.4] }}
                     transition={{ duration: 1.3, repeat: Infinity }}
                   />
                 )}
-                {n.kind !== "zone" && <rect x={cx - nw / 2} y={cy - NODE_H / 2 + 1} width={nw} height={NODE_H} rx={2.8} fill="#1c1840" />}
+                {n.kind !== "zone" && <rect x={x} y={y + 4} width={ln.w} height={ln.h} rx={12} fill="#1c1840" />}
                 <rect
-                  x={cx - nw / 2}
-                  y={cy - NODE_H / 2}
-                  width={nw}
-                  height={NODE_H}
-                  rx={2.8}
+                  x={x}
+                  y={y}
+                  width={ln.w}
+                  height={ln.h}
+                  rx={12}
                   fill={s.fill}
                   stroke="#1c1840"
-                  strokeWidth={n.kind === "zone" ? 0.5 : 0.8}
-                  strokeDasharray={n.kind === "zone" ? "1.5 1" : undefined}
+                  strokeWidth={n.kind === "zone" ? 2 : 3}
+                  strokeDasharray={n.kind === "zone" ? "7 5" : undefined}
                 />
-                {glyph && <GameIcon name={glyph} x={cx - nw / 2 + 1.6} y={cy - 2.3} size={4.6} className={s.iconClass} />}
-                <text x={cx + (glyph ? 2.2 : 0)} y={cy + 1.1} textAnchor="middle" fontSize={3} fontWeight={900} fill={s.text}>
-                  {n.label}
+                {glyph && <GameIcon name={glyph} x={x + 12} y={ln.y - 10} size={20} className={s.iconClass} />}
+                <text x={ln.x + (glyph ? 12 : 0)} textAnchor="middle" fontSize={15} fontWeight={900} fill={s.text}>
+                  {labelLines(n.label).map((line, li, all) => (
+                    <tspan key={li} x={ln.x + (glyph ? 12 : 0)} y={ln.y + 5.5 - ((all.length - 1) * LINE_H) / 2 + li * LINE_H}>
+                      {line}
+                    </tspan>
+                  ))}
                 </text>
               </motion.g>
             );
           })}
         </svg>
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
