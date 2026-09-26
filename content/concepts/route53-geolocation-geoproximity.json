@@ -1,0 +1,371 @@
+{
+  "conceptId": "route53-geolocation-geoproximity",
+  "card": {
+    "en": {
+      "tldr": "Route 53 geolocation routing selects resources according to the location of the DNS query, such as a country or continent. Choose geoproximity routing when the decision depends on the locations of users and resources, and you need bias to expand or shrink a resource’s geographic catchment.",
+      "whenToUse": [
+        "Use geolocation when content or distribution rights differ by country or continent.",
+        "Use geolocation when an individual country needs a different endpoint from the rest of its continent.",
+        "Use geoproximity when users should generally reach the closest resource, but one resource should receive traffic from a larger or smaller surrounding area."
+      ],
+      "keyFacts": [
+        "Geolocation records can specify a continent, country, or US state; the smallest geographic region takes priority when records overlap.",
+        "A geolocation default record handles queries from unmapped IP addresses and locations without a matching record; without it, Route 53 returns no answer for those queries.",
+        "Geoproximity routes based on user and resource locations and sends traffic to the closest available resource.",
+        "A positive geoproximity bias expands a resource’s geographic catchment; a negative bias shrinks it.",
+        "Geoproximity rules identify AWS resources by Region or Local Zone Group and non-AWS resources by latitude and longitude."
+      ],
+      "gotchas": [
+        "Geolocation relies on IP-to-location mapping; even records covering every continent cannot identify every query.",
+        "Geoproximity bias adjusts geographic catchments, not a fixed percentage of traffic.",
+        "A nearby resource is not necessarily the right choice when the requirement is a specific country’s content or distribution rights."
+      ],
+      "confusedWith": [
+        {
+          "concept": "route53-latency-routing",
+          "difference": "Select latency-based routing for the lowest-latency Region, not a specified country’s content or a bias-adjusted geographic catchment."
+        },
+        {
+          "concept": "route53-weighted-routing",
+          "difference": "Weighted routing specifies a traffic split; geoproximity bias changes which geographic areas route to a resource."
+        },
+        {
+          "concept": "route53-failover-routing",
+          "difference": "Failover is for switching from a primary to a secondary endpoint after a health-check failure, not routine location-based selection."
+        }
+      ],
+      "examCues": [
+        "country-specific distribution rights",
+        "different content for one country within a continent",
+        "unmapped IP addresses need a fallback",
+        "expand the geographic area served by one resource"
+      ]
+    },
+    "es": {
+      "tldr": "Route 53 geolocation routing selecciona recursos según la ubicación de la consulta DNS, como un país o continente. Elige geoproximity routing cuando importen tanto la ubicación del usuario como la del recurso y necesites usar bias para ampliar o reducir el área geográfica atendida.",
+      "whenToUse": [
+        "Usa geolocation cuando el contenido o los derechos de distribución cambien por país o continente.",
+        "Usa geolocation cuando un país deba usar un endpoint distinto del resto de su continente.",
+        "Usa geoproximity cuando los usuarios deban llegar, en general, al recurso más cercano, pero quieras ampliar o reducir el área atendida por uno de ellos."
+      ],
+      "keyFacts": [
+        "Los registros de geolocation pueden especificar un continente, país o estado de EE. UU.; si se superponen, tiene prioridad la región geográfica más pequeña.",
+        "Un registro default de geolocation atiende consultas de direcciones IP no identificadas y ubicaciones sin registro coincidente; sin él, Route 53 no devuelve una respuesta para esas consultas.",
+        "Geoproximity enruta según la ubicación de los usuarios y los recursos, hacia el recurso disponible más cercano.",
+        "Un bias positivo amplía el área geográfica atendida por un recurso; uno negativo la reduce.",
+        "Las reglas de geoproximity identifican recursos de AWS por Region o Local Zone Group, y recursos externos a AWS por latitud y longitud."
+      ],
+      "gotchas": [
+        "Geolocation depende de la asociación entre IP y ubicación; ni siquiera los registros para todos los continentes identifican todas las consultas.",
+        "El bias de geoproximity modifica áreas geográficas, no un porcentaje fijo de tráfico.",
+        "El recurso cercano no necesariamente cumple un requisito de contenido o derechos de distribución para un país específico."
+      ],
+      "confusedWith": [
+        {
+          "concept": "route53-latency-routing",
+          "difference": "Elige latency-based routing para la Region de menor latencia, no para contenido de un país específico ni para un área geográfica ajustada con bias."
+        },
+        {
+          "concept": "route53-weighted-routing",
+          "difference": "Weighted routing define una distribución de tráfico; el bias de geoproximity cambia las áreas geográficas que se enrutan a un recurso."
+        },
+        {
+          "concept": "route53-failover-routing",
+          "difference": "Failover cambia del endpoint principal al secundario cuando falla un health check; no selecciona normalmente por ubicación."
+        }
+      ],
+      "examCues": [
+        "country-specific distribution rights",
+        "different content for one country within a continent",
+        "unmapped IP addresses need a fallback",
+        "expand the geographic area served by one resource"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geo.html",
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geoproximity.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route53-geolocation-geoproximity--541fba86",
+      "conceptId": "route53-geolocation-geoproximity",
+      "secondaryConcepts": [
+        "route53-weighted-routing",
+        "route53-latency-routing"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company serves a tracking application from resources in two AWS Regions. It wants users to generally reach the closest resource, but its operations team has spare capacity at one site and wants to expand the geographic area routed there without defining a fixed traffic percentage. Which Route 53 configuration meets these requirements MOST appropriately?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use geoproximity routing and apply a positive bias to the site with spare capacity.",
+          "correct": true,
+          "why": "Geoproximity considers user and resource locations, and positive bias expands the site's catchment."
+        },
+        {
+          "id": "B",
+          "text": "Use geolocation routing and assign whole continents to the site with spare capacity.",
+          "correct": false,
+          "why": "Continental assignments do not provide the requested distance-based catchment adjustment."
+        },
+        {
+          "id": "C",
+          "text": "Use weighted routing and increase the weight of the site with spare capacity.",
+          "correct": false,
+          "why": "Weights adjust the traffic split rather than expanding the site's geographic catchment."
+        },
+        {
+          "id": "D",
+          "text": "Use latency-based routing and rely on the lowest-latency Region for each user.",
+          "correct": false,
+          "why": "Lowest-latency selection does not provide a bias to expand one site's geographic catchment."
+        }
+      ],
+      "explanation": "The company needs location-based selection with an adjustable geographic boundary. Geoproximity routes toward the closest available resource, and positive bias expands the area from which a particular resource receives traffic. Weighted routing can change a traffic split, but it does not specify the requested change to a geographic catchment.",
+      "keywordCues": [
+        "generally reach the closest resource",
+        "expand the geographic area routed there",
+        "without defining a fixed traffic percentage"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geo.html",
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geoproximity.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística ofrece una aplicación de seguimiento desde recursos en dos AWS Regions. Quiere que los usuarios lleguen, en general, al recurso más cercano, pero un sitio tiene capacidad disponible y el equipo desea ampliar el área geográfica que se enruta hacia él sin definir un porcentaje fijo de tráfico. ¿Qué configuración de Route 53 cumple estos requisitos de la manera MOST apropiada?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar geoproximity routing y aplicar un bias positivo al sitio con capacidad disponible.",
+            "why": "Geoproximity considera las ubicaciones de usuarios y recursos, y un bias positivo amplía el área atendida por ese sitio."
+          },
+          {
+            "id": "B",
+            "text": "Usar geolocation routing y asignar continentes completos al sitio con capacidad disponible.",
+            "why": "Asignar continentes no proporciona el ajuste solicitado de un área basado en la distancia."
+          },
+          {
+            "id": "C",
+            "text": "Usar weighted routing y aumentar el peso del sitio con capacidad disponible.",
+            "why": "Los pesos ajustan la distribución del tráfico, no amplían el área geográfica atendida por el sitio."
+          },
+          {
+            "id": "D",
+            "text": "Usar latency-based routing y elegir la Region de menor latencia para cada usuario.",
+            "why": "Seleccionar la menor latencia no ofrece un bias para ampliar el área geográfica atendida por un sitio."
+          }
+        ],
+        "explanation": "La empresa necesita seleccionar por ubicación y poder ajustar el límite del área geográfica. Geoproximity enruta hacia el recurso disponible más cercano, y un bias positivo amplía el área desde la que un recurso recibe tráfico. Weighted routing puede cambiar la distribución del tráfico, pero no define el cambio solicitado para el área geográfica."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-geolocation-geoproximity--c3e11fb5",
+      "conceptId": "route53-geolocation-geoproximity",
+      "secondaryConcepts": [
+        "route53-latency-routing",
+        "route53-weighted-routing",
+        "route53-failover-routing"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A marketplace is configuring two separate DNS names. Its storefront must select country-specific catalogs and return a general catalog for queries with unmapped locations. Its delivery-status application should normally use the closest facility, but the team wants its non-AWS Johannesburg facility to serve a larger surrounding area. Which TWO Route 53 configurations meet these respective requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use country geolocation records and a default record for the storefront.",
+          "correct": true,
+          "why": "Country records select the catalogs, and the default responds to unmapped queries."
+        },
+        {
+          "id": "B",
+          "text": "Use latency-based records to select the lowest-latency endpoint for the storefront.",
+          "correct": false,
+          "why": "Lowest latency does not select the catalog assigned to each country."
+        },
+        {
+          "id": "C",
+          "text": "Use failover records to make Johannesburg the delivery-status secondary endpoint.",
+          "correct": false,
+          "why": "Failover does not provide routine closest-resource routing with an expanded catchment."
+        },
+        {
+          "id": "D",
+          "text": "Use geoproximity records with Johannesburg's coordinates and a positive bias for that facility.",
+          "correct": true,
+          "why": "A non-AWS resource can be specified by coordinates, and positive bias expands its catchment."
+        },
+        {
+          "id": "E",
+          "text": "Use weighted records to increase Johannesburg's traffic percentage for delivery status.",
+          "correct": false,
+          "why": "A weighted split does not expand the geographic area served by Johannesburg."
+        }
+      ],
+      "explanation": "The two DNS names have different location requirements. Geolocation country records with a default address the storefront’s country selection and unmapped queries. Geoproximity supports a non-AWS resource specified by latitude and longitude, with positive bias to expand the area routed to it. Weighted routing changes a traffic split, not the geographic boundary requested for the delivery-status application.",
+      "keywordCues": [
+        "two separate DNS names",
+        "country-specific catalogs",
+        "queries with unmapped locations",
+        "non-AWS Johannesburg facility",
+        "larger surrounding area"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geo.html",
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geoproximity.html"
+      ],
+      "es": {
+        "stem": "Un marketplace configura dos nombres DNS independientes. Su tienda debe seleccionar catálogos por país y devolver un catálogo general cuando no se pueda identificar la ubicación de una consulta. Su aplicación de estado de entregas debe usar normalmente la instalación más cercana, pero el equipo quiere que su instalación externa a AWS en Johannesburgo atienda un área circundante mayor. ¿Qué DOS configuraciones de Route 53 cumplen estos requisitos respectivos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar registros de geolocation por país y un registro default para la tienda.",
+            "why": "Los registros por país seleccionan los catálogos y el registro default responde las consultas sin ubicación identificable."
+          },
+          {
+            "id": "B",
+            "text": "Usar registros de latency-based routing para elegir el endpoint de menor latencia para la tienda.",
+            "why": "La menor latencia no selecciona el catálogo asignado a cada país."
+          },
+          {
+            "id": "C",
+            "text": "Usar registros de failover para establecer Johannesburgo como endpoint secundario del estado de entregas.",
+            "why": "Failover no proporciona el enrutamiento habitual al recurso más cercano con un área ampliada."
+          },
+          {
+            "id": "D",
+            "text": "Usar registros de geoproximity con las coordenadas de Johannesburgo y un bias positivo para esa instalación.",
+            "why": "Un recurso externo a AWS puede especificarse mediante coordenadas, y un bias positivo amplía el área que atiende."
+          },
+          {
+            "id": "E",
+            "text": "Usar registros de weighted routing para aumentar el porcentaje de tráfico de Johannesburgo para el estado de entregas.",
+            "why": "Una distribución por pesos no amplía el área geográfica atendida por Johannesburgo."
+          }
+        ],
+        "explanation": "Los dos nombres DNS tienen requisitos de ubicación diferentes. Los registros de geolocation por país, junto con un registro default, resuelven la selección de catálogos de la tienda y las consultas sin ubicación identificable. Geoproximity admite especificar un recurso externo a AWS mediante latitud y longitud, con un bias positivo para ampliar el área que se enruta hacia él. Weighted routing cambia la distribución del tráfico, no el límite geográfico solicitado para la aplicación de estado de entregas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-geolocation-geoproximity--4c72cf54",
+      "conceptId": "route53-geolocation-geoproximity",
+      "secondaryConcepts": [
+        "route53-latency-routing"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A film publisher has distribution rights for a trailer only in selected countries. Its public site must direct DNS queries from those countries to the trailer endpoint and send queries from other or unidentifiable locations to a general catalog endpoint. Which Route 53 configuration meets these requirements MOST appropriately?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use geolocation records for the licensed countries and omit a default record.",
+          "correct": false,
+          "why": "Queries from unidentifiable or unmatched locations would receive no answer instead of reaching the general catalog."
+        },
+        {
+          "id": "B",
+          "text": "Use geoproximity records with a positive bias for the trailer endpoint.",
+          "correct": false,
+          "why": "Bias expands a geographic catchment rather than matching the publisher’s list of licensed countries."
+        },
+        {
+          "id": "C",
+          "text": "Use latency-based routing to select whichever endpoint responds from the lowest-latency Region.",
+          "correct": false,
+          "why": "Lowest latency does not select the trailer endpoint according to the specified countries."
+        },
+        {
+          "id": "D",
+          "text": "Use geolocation records for the licensed countries and a default record for the general catalog.",
+          "correct": true,
+          "why": "Country records select the licensed endpoint, while the default handles unmatched and unmapped queries."
+        }
+      ],
+      "explanation": "The deciding requirements are country-specific distribution rights and a response for queries whose locations cannot be identified. Geolocation supports country records, and its default record covers both unmatched locations and unmapped IP addresses. Omitting the default would cause Route 53 to return no answer for those queries; geoproximity bias would not express the country list.",
+      "keywordCues": [
+        "only in selected countries",
+        "other or unidentifiable locations"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geo.html",
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geoproximity.html"
+      ],
+      "es": {
+        "stem": "Una distribuidora de películas tiene derechos para mostrar un tráiler solo en ciertos países. Su sitio público debe dirigir las consultas DNS de esos países al endpoint del tráiler y enviar las consultas de otras ubicaciones, o de ubicaciones no identificables, a un catálogo general. ¿Qué configuración de Route 53 cumple estos requisitos de la manera MOST apropiada?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar registros de geolocation para los países autorizados y omitir el registro default.",
+            "why": "Las consultas de ubicaciones no identificables o sin coincidencia no recibirían respuesta en lugar de llegar al catálogo general."
+          },
+          {
+            "id": "B",
+            "text": "Usar registros de geoproximity con un bias positivo para el endpoint del tráiler.",
+            "why": "El bias amplía un área geográfica en vez de hacer coincidir la lista de países autorizados."
+          },
+          {
+            "id": "C",
+            "text": "Usar latency-based routing para seleccionar el endpoint de la Region con menor latencia.",
+            "why": "La menor latencia no selecciona el endpoint del tráiler según los países especificados."
+          },
+          {
+            "id": "D",
+            "text": "Usar registros de geolocation para los países autorizados y un registro default para el catálogo general.",
+            "why": "Los registros por país seleccionan el endpoint autorizado, mientras que el registro default atiende las consultas sin coincidencia o ubicación identificable."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son los derechos de distribución por país y la necesidad de responder consultas cuya ubicación no puede identificarse. Geolocation admite registros por país, y su registro default cubre tanto ubicaciones sin coincidencia como direcciones IP sin ubicación identificable. Si omites el registro default, Route 53 no dará respuesta a esas consultas; geoproximity bias no representa la lista de países."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "route53-geolocation-geoproximity--r0",
+      "conceptId": "route53-geolocation-geoproximity",
+      "kind": "recall",
+      "prompt": "A site serves different catalogs by country. What Route 53 policy fits, and how should it handle queries with unmapped locations?",
+      "promptEs": "Un sitio ofrece catálogos distintos por país. ¿Qué política de Route 53 usarías y cómo atenderías consultas sin ubicación identificable?",
+      "idealAnswer": "Use geolocation routing with records for the relevant countries. Add a default record for unmapped IP addresses and locations without a matching record; otherwise, Route 53 returns no answer for those queries.",
+      "rubric": [
+        "Names geolocation routing.",
+        "Uses country records for catalog selection.",
+        "Explains the default record’s role for unmapped or unmatched queries."
+      ]
+    },
+    {
+      "id": "route53-geolocation-geoproximity--r1",
+      "conceptId": "route53-geolocation-geoproximity",
+      "kind": "why-not",
+      "prompt": "Why is weighted routing not the right substitute for geoproximity when expanding the area served by one facility?",
+      "promptEs": "¿Por qué weighted routing no sustituye a geoproximity cuando quieres ampliar el área atendida por una instalación?",
+      "idealAnswer": "Weighted routing adjusts a traffic split, not the geographic area routed to a resource. Geoproximity considers user and resource locations, and a positive bias expands that resource’s geographic catchment.",
+      "rubric": [
+        "Identifies weighted routing as a traffic-split approach.",
+        "Identifies geoproximity as location-based routing.",
+        "States that positive bias expands a resource’s geographic catchment."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,334 @@
+{
+  "conceptId": "ec2-amis-user-data",
+  "card": {
+    "en": {
+      "tldr": "An AMI provides the software and configuration used to launch EC2 instances; pre-bake shared software into an AMI when repeated boot-time installation would slow launches. Use user data for tasks that must run when each instance starts, and copy an AMI to another Region before launching from it there.",
+      "whenToUse": [
+        "Many instances need the same installed software and must launch without repeating a lengthy installation.",
+        "Instances need a small configuration task at launch while sharing the same base image.",
+        "A disaster recovery plan requires launching a matching EC2 configuration in another Region."
+      ],
+      "keyFacts": [
+        "An AMI is Region-specific and must be compatible with the chosen instance type.",
+        "You can create an AMI from an EC2 instance and copy an AMI to another Region.",
+        "User data can run configuration tasks after an instance starts; boot-time tasks add to launch time.",
+        "By default, Linux user data scripts run only during the first launch boot cycle.",
+        "An instance's user data attribute is not included when you create an AMI from that instance."
+      ],
+      "gotchas": [
+        "An AMI in one Region cannot be used directly to launch an instance in another; copy it first.",
+        "Creating an AMI does not preserve the source instance's user data attribute.",
+        "A user data script previously run on a Linux instance can remain as a file on disk; remove it before creating an AMI if it should not appear in new instances."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 user data",
+          "difference": "Use user data for launch-time tasks; pre-bake common software into an AMI when installing it at each boot would delay launches."
+        }
+      ],
+      "examCues": [
+        "many identical instances need faster launches",
+        "different configuration at each launch",
+        "launch the same image in a recovery Region",
+        "source instance user data must not be assumed to carry into an AMI"
+      ]
+    },
+    "es": {
+      "tldr": "Una AMI proporciona el software y la configuración para lanzar instancias EC2; incluye previamente el software común en una AMI cuando instalarlo durante cada arranque retrasaría los lanzamientos. Usa user data para tareas que deben ejecutarse al iniciar cada instancia y copia la AMI a otra Region antes de lanzar instancias allí.",
+      "whenToUse": [
+        "Muchas instancias necesitan el mismo software instalado y deben lanzarse sin repetir una instalación larga.",
+        "Las instancias comparten una imagen base, pero necesitan una tarea breve de configuración al lanzarse.",
+        "Un plan de recuperación ante desastres requiere lanzar la misma configuración de EC2 en otra Region."
+      ],
+      "keyFacts": [
+        "Una AMI es específica de una Region y debe ser compatible con el tipo de instancia elegido.",
+        "Puedes crear una AMI a partir de una instancia EC2 y copiar una AMI a otra Region.",
+        "User data puede ejecutar tareas de configuración después de que se inicie la instancia; las tareas de arranque aumentan el tiempo de lanzamiento.",
+        "Por defecto, los scripts de user data en Linux se ejecutan solo durante el primer ciclo de arranque del lanzamiento.",
+        "El atributo user data de una instancia no se incluye al crear una AMI a partir de ella."
+      ],
+      "gotchas": [
+        "No puedes usar directamente una AMI de una Region para lanzar una instancia en otra; primero debes copiarla.",
+        "Crear una AMI no conserva el atributo user data de la instancia de origen.",
+        "Un script de user data que se ejecutó en Linux puede permanecer como archivo en el disco; elimínalo antes de crear una AMI si no debe aparecer en las nuevas instancias."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 user data",
+          "difference": "Usa user data para tareas al lanzar una instancia; incluye el software común en una AMI cuando instalarlo en cada arranque retrasaría los lanzamientos."
+        }
+      ],
+      "examCues": [
+        "many identical instances need faster launches",
+        "different configuration at each launch",
+        "launch the same image in a recovery Region",
+        "source instance user data must not be assumed to carry into an AMI"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html",
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ec2-amis-user-data--30ff7f81",
+      "conceptId": "ec2-amis-user-data",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company has tested a configured EC2 AMI in its primary AWS Region. Its recovery plan calls for launching matching instances in a second Region after a regional disruption, without rebuilding the software there during recovery. Which approach meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Launch a base AMI in the recovery Region and install the software with user data during recovery.",
+          "correct": false,
+          "why": "This rebuilds the software at launch, contrary to the recovery requirement."
+        },
+        {
+          "id": "B",
+          "text": "Use the primary Region's AMI ID when launching instances in the recovery Region.",
+          "correct": false,
+          "why": "An AMI is Region-specific, so the primary Region's AMI cannot be launched directly in the second Region."
+        },
+        {
+          "id": "C",
+          "text": "Create another AMI from the primary instance and expect it to become available in both Regions.",
+          "correct": false,
+          "why": "Creating an AMI does not by itself make that image available in another Region."
+        },
+        {
+          "id": "D",
+          "text": "Copy the tested AMI to the recovery Region and launch instances from the regional copy.",
+          "correct": true,
+          "why": "An AMI copied to another Region can be used to launch instances in that Region."
+        }
+      ],
+      "explanation": "The company needs its tested image available in the recovery Region before it launches instances there. AMIs are Region-specific, and EC2 supports copying an AMI to another Region for launches in that Region. Reusing the original AMI ID does not cross the regional boundary. Installing everything through user data would also violate the requirement to avoid rebuilding software during recovery.",
+      "keywordCues": [
+        "second Region",
+        "without rebuilding the software there during recovery",
+        "configured EC2 AMI"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística probó una AMI configurada de EC2 en su AWS Region principal. Su plan de recuperación requiere lanzar instancias equivalentes en una segunda Region después de una interrupción regional, sin volver a instalar el software allí durante la recuperación. ¿Qué enfoque cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Lanzar una AMI base en la Region de recuperación e instalar el software con user data durante la recuperación.",
+            "why": "Esto vuelve a instalar el software al lanzar la instancia, en contra del requisito de recuperación."
+          },
+          {
+            "id": "B",
+            "text": "Usar el ID de la AMI de la Region principal para lanzar instancias en la Region de recuperación.",
+            "why": "Una AMI es específica de una Region, por lo que no puedes lanzarla directamente en la segunda Region."
+          },
+          {
+            "id": "C",
+            "text": "Crear otra AMI a partir de la instancia principal y esperar que esté disponible en ambas Regions.",
+            "why": "Crear una AMI no la pone automáticamente a disposición de otra Region."
+          },
+          {
+            "id": "D",
+            "text": "Copiar la AMI probada a la Region de recuperación y lanzar instancias desde la copia regional.",
+            "why": "Una AMI copiada a otra Region puede usarse para lanzar instancias allí."
+          }
+        ],
+        "explanation": "La empresa necesita que su imagen probada esté disponible en la Region de recuperación antes de lanzar instancias allí. Las AMIs son específicas de una Region, y EC2 permite copiar una AMI a otra para lanzar instancias en ella. Reutilizar el ID de la AMI original no cruza ese límite regional. Instalar todo mediante user data también incumpliría el requisito de no volver a instalar el software durante la recuperación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-amis-user-data--902902f9",
+      "conceptId": "ec2-amis-user-data",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company keeps no EC2 instances running in its recovery Region. After a regional failure, it must launch instances with its application packages already installed, but each new instance must also write a recovery-specific identifier at its first start. Which two actions meet these requirements without installing the packages during recovery? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Launch a base AMI in the recovery Region and install all application packages through user data.",
+          "correct": false,
+          "why": "This installs the packages during recovery instead of launching with them already installed."
+        },
+        {
+          "id": "B",
+          "text": "Copy the preconfigured application AMI to the recovery Region before it is needed.",
+          "correct": true,
+          "why": "The regional copy can launch instances with the application configuration already in the image."
+        },
+        {
+          "id": "C",
+          "text": "Launch the primary Region's application AMI directly in the recovery Region.",
+          "correct": false,
+          "why": "AMIs are Region-specific and cannot be launched directly from another Region."
+        },
+        {
+          "id": "D",
+          "text": "Provide a user data script that writes the recovery-specific identifier at each new instance's launch.",
+          "correct": true,
+          "why": "User data performs the instance-specific task when that instance first starts."
+        },
+        {
+          "id": "E",
+          "text": "Create an AMI from an instance whose user data writes the identifier, and rely on that user data in new instances.",
+          "correct": false,
+          "why": "The source instance's user data attribute is not included in the AMI."
+        }
+      ],
+      "explanation": "Two distinct needs drive the design: preinstalled application packages in the recovery Region and an identifier written by each new instance. Copying the configured AMI to that Region addresses the first need; supplying user data at launch addresses the second. An AMI cannot be launched directly across Regions, and creating one does not copy the source instance's user data attribute. Installing packages through user data during recovery violates the stated package requirement.",
+      "keywordCues": [
+        "recovery Region",
+        "application packages already installed",
+        "recovery-specific identifier at its first start",
+        "without installing the packages during recovery"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios no mantiene instancias EC2 en ejecución en su Region de recuperación. Después de una falla regional, debe lanzar instancias que ya tengan instalados los paquetes de la aplicación, pero cada instancia nueva también debe escribir un identificador específico de recuperación al iniciarse por primera vez. ¿Qué dos acciones cumplen estos requisitos sin instalar los paquetes durante la recuperación? (Elige dos).",
+        "options": [
+          {
+            "id": "A",
+            "text": "Lanzar una AMI base en la Region de recuperación e instalar todos los paquetes de la aplicación mediante user data.",
+            "why": "Esto instala los paquetes durante la recuperación en lugar de lanzar instancias que ya los tengan instalados."
+          },
+          {
+            "id": "B",
+            "text": "Copiar la AMI de la aplicación ya configurada a la Region de recuperación antes de necesitarla.",
+            "why": "La copia regional permite lanzar instancias con la configuración de la aplicación ya incluida en la imagen."
+          },
+          {
+            "id": "C",
+            "text": "Lanzar directamente en la Region de recuperación la AMI de la aplicación de la Region principal.",
+            "why": "Las AMIs son específicas de una Region y no pueden lanzarse directamente desde otra."
+          },
+          {
+            "id": "D",
+            "text": "Proporcionar un script en user data que escriba el identificador específico de recuperación al lanzar cada instancia nueva.",
+            "why": "User data realiza la tarea específica de cada instancia cuando esta se inicia por primera vez."
+          },
+          {
+            "id": "E",
+            "text": "Crear una AMI a partir de una instancia cuyo user data escribe el identificador y confiar en que ese user data esté en las instancias nuevas.",
+            "why": "El atributo user data de la instancia de origen no se incluye en la AMI."
+          }
+        ],
+        "explanation": "Dos necesidades determinan el diseño: paquetes de la aplicación ya instalados en la Region de recuperación y un identificador escrito por cada instancia nueva. Copiar la AMI configurada a esa Region resuelve la primera; proporcionar user data en el lanzamiento resuelve la segunda. No puedes lanzar directamente una AMI entre Regions, y crear una AMI no copia el atributo user data de la instancia de origen. Instalar paquetes mediante user data durante la recuperación incumple el requisito indicado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-amis-user-data--74d16535",
+      "conceptId": "ec2-amis-user-data",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research group launches Linux EC2 instances from one approved AMI. Each new instance must write a short, different experiment label into a local file when it first starts; the shared software image should remain unchanged. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Pass a user data shell script containing the experiment label when launching each instance.",
+          "correct": true,
+          "why": "User data can run a per-instance configuration task after launch without changing the shared AMI."
+        },
+        {
+          "id": "B",
+          "text": "Create a separate AMI for each experiment label and launch its instances from that image.",
+          "correct": false,
+          "why": "Maintaining a separate image for each small label adds work when one shared AMI suffices."
+        },
+        {
+          "id": "C",
+          "text": "Launch each instance, stop it, edit its user data, and restart it to write the label.",
+          "correct": false,
+          "why": "Updated Linux user data scripts do not run on restart by default."
+        },
+        {
+          "id": "D",
+          "text": "Set user data on the source instance, create an AMI, and launch all experiments from it.",
+          "correct": false,
+          "why": "The source instance's user data attribute is not included in its AMI and would not supply different labels."
+        }
+      ],
+      "explanation": "Each instance needs a different, short task at its initial launch, not a different software image. Passing a user data script at launch handles that task while preserving the shared AMI. A separate AMI per label adds image-management work. Editing user data after stopping an instance is not a substitute: Linux user data scripts run only on the first launch boot by default.",
+      "keywordCues": [
+        "short, different experiment label",
+        "when it first starts",
+        "shared software image should remain unchanged",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html"
+      ],
+      "es": {
+        "stem": "Un grupo de investigación lanza instancias EC2 con Linux desde una sola AMI aprobada. Cada instancia nueva debe escribir una etiqueta breve y diferente del experimento en un archivo local al iniciarse por primera vez; la imagen de software compartida debe permanecer igual. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Pasar un script de shell en user data con la etiqueta del experimento al lanzar cada instancia.",
+            "why": "User data puede ejecutar una tarea de configuración por instancia después del lanzamiento sin cambiar la AMI compartida."
+          },
+          {
+            "id": "B",
+            "text": "Crear una AMI distinta para cada etiqueta de experimento y lanzar sus instancias desde esa imagen.",
+            "why": "Mantener una imagen distinta por cada etiqueta pequeña agrega trabajo cuando basta una AMI compartida."
+          },
+          {
+            "id": "C",
+            "text": "Lanzar cada instancia, detenerla, editar su user data y reiniciarla para escribir la etiqueta.",
+            "why": "Por defecto, los scripts de user data actualizados en Linux no se ejecutan al reiniciar."
+          },
+          {
+            "id": "D",
+            "text": "Configurar user data en la instancia de origen, crear una AMI y lanzar desde ella todos los experimentos.",
+            "why": "El atributo user data de la instancia de origen no se incluye en su AMI y no proporcionaría etiquetas diferentes."
+          }
+        ],
+        "explanation": "Cada instancia necesita una tarea breve y diferente en su lanzamiento inicial, no una imagen de software distinta. Pasar un script en user data al lanzar la instancia resuelve esa tarea y conserva la AMI compartida. Crear una AMI por etiqueta agrega trabajo de administración de imágenes. Editar user data después de detener una instancia no la sustituye: por defecto, los scripts de user data en Linux solo se ejecutan durante el primer arranque del lanzamiento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ec2-amis-user-data--r0",
+      "conceptId": "ec2-amis-user-data",
+      "kind": "recall",
+      "prompt": "Replacement EC2 instances need identical large packages and a small per-instance label. How would you prepare the launches, and why?",
+      "promptEs": "Las instancias EC2 de reemplazo necesitan los mismos paquetes grandes y una etiqueta pequeña por instancia. ¿Cómo prepararías los lanzamientos y por qué?",
+      "idealAnswer": "Create an AMI from an instance with the shared packages installed so replacements do not reinstall them during boot. Pass the individual label through user data at each instance's launch.",
+      "rubric": [
+        "Pre-bake shared packages in an AMI.",
+        "Explain that installing packages through user data adds boot-time work.",
+        "Supply the per-instance label using user data at launch."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,361 @@
+{
+  "conceptId": "alb-routing",
+  "card": {
+    "en": {
+      "tldr": "An Application Load Balancer (ALB) handles HTTP and HTTPS traffic at Layer 7 and uses listener rules to send requests to target groups based on request content. Choose it when a scenario requires routing by path, host, or HTTP header, or needs load-balancer authentication or AWS WAF integration.",
+      "whenToUse": [
+        "One HTTP/HTTPS entry point must route paths or hostnames to different services.",
+        "Container, IP-address, or Lambda targets need application-level routing.",
+        "The load balancer must authenticate users before forwarding requests or work with AWS WAF."
+      ],
+      "keyFacts": [
+        "ALB listeners support HTTP and HTTPS; listener rules are evaluated in priority order, with the default rule performed last.",
+        "Rules can match URL paths, host headers, other HTTP headers, methods, query parameters, and source IP addresses.",
+        "Target groups can contain EC2 instances, IP addresses, or Lambda functions; container tasks can be registered with a target group.",
+        "Health checks are configured per target group, allowing services to be monitored independently.",
+        "An HTTPS listener can terminate client encryption at the ALB; AWS WAF can allow or block requests using a web ACL."
+      ],
+      "gotchas": [
+        "A Network Load Balancer (NLB) TCP listener can pass encrypted traffic to targets, but it cannot make decisions from HTTP paths or hosts.",
+        "An HTTPS listener on an ALB decrypts client requests; do not choose it when targets must perform the initial decryption.",
+        "A listener needs a default rule even when additional path- or host-based rules exist."
+      ],
+      "confusedWith": [
+        {
+          "concept": "nlb-static-ip-tcp-udp",
+          "difference": "Choose NLB for transport-level TCP/UDP needs or TCP pass-through, not HTTP content-based routing."
+        },
+        {
+          "concept": "gateway-load-balancer",
+          "difference": "Choose Gateway Load Balancer to insert virtual security appliances into traffic flows, not to route web requests among applications."
+        }
+      ],
+      "examCues": [
+        "route /orders and /catalog to separate services",
+        "multiple hostnames on one HTTPS entry point",
+        "authenticate users before forwarding requests",
+        "Lambda function as a load balancer target"
+      ]
+    },
+    "es": {
+      "tldr": "Un Application Load Balancer (ALB) maneja tráfico HTTP y HTTPS en Layer 7 y usa reglas del listener para enviar solicitudes a target groups según el contenido de cada solicitud. Elígelo cuando necesites enrutar por ruta, host o encabezado HTTP, o cuando el balanceador deba autenticar usuarios o integrarse con AWS WAF.",
+      "whenToUse": [
+        "Necesitas un solo punto de entrada HTTP/HTTPS que dirija rutas o nombres de host a distintos servicios.",
+        "Necesitas enrutamiento a nivel de aplicación para contenedores, direcciones IP o funciones Lambda.",
+        "El balanceador debe autenticar usuarios antes de reenviar solicitudes o funcionar con AWS WAF."
+      ],
+      "keyFacts": [
+        "Los listeners de ALB admiten HTTP y HTTPS; evalúan las reglas por prioridad y ejecutan la regla predeterminada al final.",
+        "Las reglas pueden evaluar rutas URL, encabezados host, otros encabezados HTTP, métodos, parámetros de consulta y direcciones IP de origen.",
+        "Los target groups pueden incluir instancias EC2, direcciones IP o funciones Lambda; las tareas de contenedores también pueden registrarse en un target group.",
+        "Configuras las comprobaciones de estado por target group, lo que permite monitorear cada servicio por separado.",
+        "Un listener HTTPS puede terminar el cifrado del cliente en el ALB; AWS WAF puede permitir o bloquear solicitudes mediante una web ACL."
+      ],
+      "gotchas": [
+        "Un listener TCP de Network Load Balancer (NLB) puede pasar tráfico cifrado a los targets, pero no puede decidir según rutas o hosts HTTP.",
+        "Un listener HTTPS de ALB descifra las solicitudes del cliente; no lo elijas si los targets deben realizar el descifrado inicial.",
+        "Todo listener necesita una regla predeterminada, incluso si tiene reglas adicionales basadas en rutas o hosts."
+      ],
+      "confusedWith": [
+        {
+          "concept": "nlb-static-ip-tcp-udp",
+          "difference": "Elige NLB para necesidades TCP/UDP a nivel de transporte o TCP pass-through, no para enrutar según contenido HTTP."
+        },
+        {
+          "concept": "gateway-load-balancer",
+          "difference": "Elige Gateway Load Balancer para insertar appliances virtuales de seguridad en el flujo de tráfico, no para repartir solicitudes web entre aplicaciones."
+        }
+      ],
+      "examCues": [
+        "route /orders and /catalog to separate services",
+        "multiple hostnames on one HTTPS entry point",
+        "authenticate users before forwarding requests",
+        "Lambda function as a load balancer target"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html",
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "alb-routing--bfa7d8c4",
+      "conceptId": "alb-routing",
+      "secondaryConcepts": [
+        "nlb-static-ip-tcp-udp",
+        "gateway-load-balancer"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A software provider serves two HTTPS applications from separate container services behind one load balancer. Requests with an X-Product header value of alpha must reach the alpha service, and requests with a value of beta must reach the beta service; the provider also wants independent target health checks. Which TWO configuration choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create ALB listener rules with HTTP header conditions for the two X-Product values.",
+          "correct": true,
+          "why": "ALB listener rules can use HTTP header conditions to select where requests go."
+        },
+        {
+          "id": "B",
+          "text": "Register both services in one ALB target group and use one health-check configuration.",
+          "correct": false,
+          "why": "A shared target group would not provide the requested independent health-check configurations."
+        },
+        {
+          "id": "C",
+          "text": "Register the services in separate ALB target groups and configure health checks for each group.",
+          "correct": true,
+          "why": "Separate ALB target groups support independent health checks for the services."
+        },
+        {
+          "id": "D",
+          "text": "Insert both services behind a Gateway Load Balancer and route by the X-Product header.",
+          "correct": false,
+          "why": "Gateway Load Balancer is for virtual appliances, not HTTP header-based service routing."
+        },
+        {
+          "id": "E",
+          "text": "Create NLB listener rules that inspect X-Product and forward to the matching service.",
+          "correct": false,
+          "why": "NLB does not provide HTTP header-based listener routing."
+        }
+      ],
+      "explanation": "The deciding constraints are routing by an HTTP header and checking the two services independently. ALB listener rules can match HTTP headers, and health checks are configured per target group, so separate groups satisfy the health requirement. One shared ALB target group loses that independence; NLB and Gateway Load Balancer do not supply the requested HTTP header routing.",
+      "keywordCues": [
+        "X-Product header value of alpha",
+        "value of beta",
+        "independent target health checks"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html",
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de software ofrece dos aplicaciones HTTPS desde servicios de contenedores separados detrás de un balanceador de carga. Las solicitudes con valor alpha en el encabezado X-Product deben llegar al servicio alpha y las de valor beta al servicio beta; además, el proveedor quiere comprobaciones de estado independientes para los targets. ¿Qué DOS opciones de configuración cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea reglas de listener de ALB con condiciones de encabezado HTTP para los dos valores de X-Product.",
+            "why": "Las reglas de listener de ALB pueden usar condiciones de encabezado HTTP para decidir adónde enviar las solicitudes."
+          },
+          {
+            "id": "B",
+            "text": "Registra ambos servicios en un solo target group de ALB y usa una configuración de comprobación de estado.",
+            "why": "Un target group compartido no ofrecería las configuraciones independientes de comprobación de estado solicitadas."
+          },
+          {
+            "id": "C",
+            "text": "Registra los servicios en target groups separados de ALB y configura comprobaciones de estado para cada grupo.",
+            "why": "Los target groups separados de ALB permiten comprobar el estado de cada servicio de manera independiente."
+          },
+          {
+            "id": "D",
+            "text": "Coloca ambos servicios detrás de un Gateway Load Balancer y enruta según el encabezado X-Product.",
+            "why": "Gateway Load Balancer sirve para appliances virtuales, no para enrutar servicios según encabezados HTTP."
+          },
+          {
+            "id": "E",
+            "text": "Crea reglas de listener de NLB que examinen X-Product y envíen las solicitudes al servicio correspondiente.",
+            "why": "NLB no proporciona enrutamiento de listeners según encabezados HTTP."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son enrutar según un encabezado HTTP y comprobar cada servicio de manera independiente. Las reglas de listener de ALB pueden evaluar encabezados HTTP y las comprobaciones de estado se configuran por target group; por eso, los grupos separados cumplen el requisito. Un target group compartido pierde esa independencia, y NLB y Gateway Load Balancer no proporcionan el enrutamiento por encabezado solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "alb-routing--7f82f6e7",
+      "conceptId": "alb-routing",
+      "secondaryConcepts": [
+        "nlb-static-ip-tcp-udp"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company hosts its public site and contributor portal on separate EC2 fleets. Both applications must share one HTTPS load balancer, but requests for news.example.com must reach the public fleet and requests for contributors.example.com must reach the portal fleet. Which design meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure an ALB with host-header rules that forward each hostname to its corresponding target group.",
+          "correct": true,
+          "why": "ALB host conditions distinguish the two domains and route them to separate fleets."
+        },
+        {
+          "id": "B",
+          "text": "Configure an ALB with a default rule that forwards both hostnames to one target group.",
+          "correct": false,
+          "why": "One shared target group does not separate the public and contributor fleets."
+        },
+        {
+          "id": "C",
+          "text": "Configure an NLB with separate target groups and choose a group using the HTTP host header.",
+          "correct": false,
+          "why": "NLB does not use HTTP host-header conditions to select target groups."
+        },
+        {
+          "id": "D",
+          "text": "Configure an ALB with path rules for /news and /contributors, forwarding to separate target groups.",
+          "correct": false,
+          "why": "Path rules do not distinguish requests that differ by hostname rather than URL path."
+        }
+      ],
+      "explanation": "The requests need to be separated by hostname, not by URL path. ALB listener rules support host conditions and can forward matching requests to different target groups. Path rules would solve a different routing problem, while an NLB cannot select a fleet from the HTTP host header.",
+      "keywordCues": [
+        "share one HTTPS load balancer",
+        "news.example.com",
+        "contributors.example.com"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html",
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios aloja su sitio público y su portal para colaboradores en distintos grupos de instancias EC2. Ambas aplicaciones deben compartir un balanceador de carga HTTPS, pero las solicitudes a news.example.com deben llegar al grupo público y las de contributors.example.com al grupo del portal. ¿Qué diseño cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura un ALB con reglas de encabezado host que envíen cada nombre de host a su target group correspondiente.",
+            "why": "Las condiciones de host de ALB distinguen los dos dominios y los dirigen a grupos separados."
+          },
+          {
+            "id": "B",
+            "text": "Configura un ALB con una regla predeterminada que envíe ambos nombres de host a un solo target group.",
+            "why": "Un target group compartido no separa el grupo público del grupo del portal."
+          },
+          {
+            "id": "C",
+            "text": "Configura un NLB con target groups separados y elige uno mediante el encabezado host de HTTP.",
+            "why": "NLB no usa condiciones del encabezado host de HTTP para seleccionar target groups."
+          },
+          {
+            "id": "D",
+            "text": "Configura un ALB con reglas de ruta para /news y /contributors que envíen las solicitudes a target groups separados.",
+            "why": "Las reglas de ruta no distinguen solicitudes que difieren por nombre de host y no por ruta URL."
+          }
+        ],
+        "explanation": "Las solicitudes deben separarse por nombre de host, no por ruta URL. Las reglas del listener de ALB admiten condiciones de host y pueden enviarlas a diferentes target groups. Las reglas de ruta resuelven otro problema, mientras que un NLB no puede elegir el grupo de destino según el encabezado host de HTTP."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "alb-routing--7faf03f9",
+      "conceptId": "alb-routing",
+      "secondaryConcepts": [
+        "nlb-static-ip-tcp-udp",
+        "gateway-load-balancer"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A travel company is retiring a small EC2 service that generates HTTP booking confirmations. It wants requests under /confirm to invoke a Lambda function while requests under /search continue to reach EC2 instances, all through the same HTTPS entry point. Which design meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an ALB with path rules forwarding /confirm to a Lambda target group and /search to an EC2 target group.",
+          "correct": true,
+          "why": "ALB supports both path-based routing and Lambda and EC2 targets."
+        },
+        {
+          "id": "B",
+          "text": "Use a Gateway Load Balancer with separate appliance groups for /confirm and /search.",
+          "correct": false,
+          "why": "Gateway Load Balancer is not designed to route HTTP paths to Lambda and EC2 applications."
+        },
+        {
+          "id": "C",
+          "text": "Use an NLB with separate target groups for the Lambda function and EC2 instances.",
+          "correct": false,
+          "why": "NLB cannot route requests by URL path or register Lambda as the described target."
+        },
+        {
+          "id": "D",
+          "text": "Use an ALB with one default action that forwards both paths to the Lambda function.",
+          "correct": false,
+          "why": "Sending both paths to Lambda would stop /search from reaching the EC2 instances."
+        }
+      ],
+      "explanation": "The design needs both URL-path decisions and a Lambda target alongside EC2 targets. An ALB supports path conditions and can forward to target groups containing the appropriate target types. A single default action sending everything to Lambda would break /search, while an NLB does not provide the required path-based routing.",
+      "keywordCues": [
+        "requests under /confirm to invoke a Lambda function",
+        "requests under /search continue to reach EC2 instances",
+        "the same HTTPS entry point"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html",
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html"
+      ],
+      "es": {
+        "stem": "Una empresa de viajes retira un pequeño servicio EC2 que genera confirmaciones de reservas por HTTP. Quiere que las solicitudes a /confirm invoquen una función Lambda, mientras que las solicitudes a /search sigan llegando a instancias EC2, todo mediante el mismo punto de entrada HTTPS. ¿Qué diseño cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un ALB con reglas de ruta que envíen /confirm a un target group de Lambda y /search a uno de EC2.",
+            "why": "ALB admite tanto enrutamiento basado en rutas como targets Lambda y EC2."
+          },
+          {
+            "id": "B",
+            "text": "Usa un Gateway Load Balancer con grupos de appliances separados para /confirm y /search.",
+            "why": "Gateway Load Balancer no está diseñado para enrutar rutas HTTP a aplicaciones Lambda y EC2."
+          },
+          {
+            "id": "C",
+            "text": "Usa un NLB con target groups separados para la función Lambda y las instancias EC2.",
+            "why": "NLB no puede enrutar según la ruta URL ni registrar Lambda como el target descrito."
+          },
+          {
+            "id": "D",
+            "text": "Usa un ALB con una sola acción predeterminada que envíe ambas rutas a la función Lambda.",
+            "why": "Enviar ambas rutas a Lambda impediría que /search llegara a las instancias EC2."
+          }
+        ],
+        "explanation": "El diseño necesita decidir según la ruta URL y admitir un target Lambda junto con targets EC2. Un ALB admite condiciones de ruta y puede reenviar solicitudes a target groups con los tipos de target adecuados. Una sola acción predeterminada que envíe todo a Lambda afectaría a /search, mientras que un NLB no ofrece el enrutamiento por ruta requerido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "alb-routing--r0",
+      "conceptId": "alb-routing",
+      "kind": "recall",
+      "prompt": "One HTTPS hostname serves container services on different URL paths. What load balancer configuration would you choose, and why?",
+      "promptEs": "Un nombre de host HTTPS atiende servicios de contenedores en distintas rutas URL. ¿Qué configuración de balanceador elegirías y por qué?",
+      "idealAnswer": "Choose an Application Load Balancer with an HTTPS listener, path-based rules, and a separate target group for each service. The ALB can inspect URL paths and send each request to the matching container service.",
+      "rubric": [
+        "Names Application Load Balancer.",
+        "Uses path-based listener rules.",
+        "Routes to separate target groups for the services."
+      ]
+    },
+    {
+      "id": "alb-routing--r1",
+      "conceptId": "alb-routing",
+      "kind": "why-not",
+      "prompt": "Why is an NLB with a TCP listener unsuitable when one hostname must route /api and /admin to different services?",
+      "promptEs": "¿Por qué un NLB con un listener TCP no sirve cuando un nombre de host debe dirigir /api y /admin a servicios distintos?",
+      "idealAnswer": "A TCP listener on an NLB handles transport-level traffic rather than choosing targets by HTTP URL path. An ALB can evaluate path conditions and forward /api and /admin to different target groups.",
+      "rubric": [
+        "Identifies the required URL-path decision.",
+        "Explains that an NLB TCP listener does not route by HTTP path.",
+        "Names ALB path rules and separate target groups as the fit."
+      ]
+    }
+  ]
+}

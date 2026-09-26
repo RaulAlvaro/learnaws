@@ -1,0 +1,440 @@
+{
+  "conceptId": "vpc-endpoints-gateway-vs-interface",
+  "card": {
+    "en": {
+      "tldr": "Use a gateway VPC endpoint for private VPC access to Amazon S3 or DynamoDB when you want to avoid NAT devices and additional endpoint charges. For other supported AWS services, choose an interface endpoint, which creates private-IP network interfaces and incurs hourly and data processing charges.",
+      "whenToUse": [
+        "Private-subnet workloads need S3 or DynamoDB access without a NAT device: associate their route tables with a gateway endpoint.",
+        "VPC workloads need private access to another AWS service that supports AWS PrivateLink: use an interface endpoint.",
+        "S3 requests arriving through an inbound Resolver endpoint need an interface endpoint with private DNS configured for inbound access."
+      ],
+      "keyFacts": [
+        "Gateway endpoints support S3 and DynamoDB and have no additional charge.",
+        "A gateway endpoint adds a service-prefix-list route to each selected route table; only subnets using associated route tables use that endpoint.",
+        "Gateway endpoint routes apply to the service in the current Region, not the same service in another Region.",
+        "An interface endpoint creates a private-IP endpoint network interface in each selected subnet and incurs hourly usage and data processing charges.",
+        "An interface endpoint's security group must allow the expected inbound traffic from VPC resources."
+      ],
+      "gotchas": [
+        "A gateway endpoint is not an interface endpoint: it does not create endpoint network interfaces or use AWS PrivateLink.",
+        "Creating a gateway endpoint without associating the workload subnet's route table does not route that subnet's service traffic through it.",
+        "For S3, enabling private DNS only for inbound traffic on an interface endpoint requires an S3 gateway endpoint.",
+        "A gateway endpoint cannot serve as a general private route to other AWS services."
+      ],
+      "confusedWith": [
+        {
+          "concept": "NAT gateway",
+          "difference": "Provides outbound access through an internet gateway; a gateway endpoint instead routes S3 or DynamoDB traffic directly through a service-specific route."
+        },
+        {
+          "concept": "Interface endpoint",
+          "difference": "Uses private-IP endpoint network interfaces and incurs hourly and data processing charges; a gateway endpoint uses route-table entries and has no additional charge."
+        },
+        {
+          "concept": "AWS PrivateLink endpoint service",
+          "difference": "An endpoint service exposes a service to consumers; an interface endpoint lets a VPC connect to a supported service."
+        }
+      ],
+      "examCues": [
+        "private subnet needs S3 without NAT charges",
+        "DynamoDB traffic through a route-table prefix list",
+        "private access to another AWS service",
+        "S3 private DNS only for inbound Resolver traffic"
+      ]
+    },
+    "es": {
+      "tldr": "Usa un gateway VPC endpoint para que una VPC acceda de forma privada a Amazon S3 o DynamoDB sin dispositivos NAT ni cargos adicionales por el endpoint. Para otros servicios de AWS compatibles, elige un interface endpoint: crea interfaces de red con IP privadas y genera cargos por hora y por procesamiento de datos.",
+      "whenToUse": [
+        "Si tus cargas en subredes privadas necesitan S3 o DynamoDB sin un dispositivo NAT, asocia sus tablas de rutas con un gateway endpoint.",
+        "Si tus cargas en una VPC necesitan acceso privado a otro servicio de AWS compatible con AWS PrivateLink, usa un interface endpoint.",
+        "Si las solicitudes a S3 llegan mediante un inbound Resolver endpoint y necesitan private DNS, configura un interface endpoint para tráfico entrante."
+      ],
+      "keyFacts": [
+        "Los gateway endpoints admiten S3 y DynamoDB y no tienen un cargo adicional.",
+        "Un gateway endpoint agrega una ruta hacia la prefix list del servicio a cada tabla de rutas seleccionada; solo las subredes que usan esas tablas utilizan el endpoint.",
+        "Las rutas de un gateway endpoint corresponden al servicio en la Region actual, no al mismo servicio en otra Region.",
+        "Un interface endpoint crea una endpoint network interface con IP privada en cada subred seleccionada y genera cargos por hora y por procesamiento de datos.",
+        "El security group del interface endpoint debe permitir el tráfico entrante esperado desde los recursos de la VPC."
+      ],
+      "gotchas": [
+        "Un gateway endpoint no es un interface endpoint: no crea endpoint network interfaces ni usa AWS PrivateLink.",
+        "Crear un gateway endpoint sin asociar la tabla de rutas de la subred de tu carga no dirige el tráfico de esa subred por el endpoint.",
+        "Para S3, habilitar private DNS solo para tráfico entrante en un interface endpoint requiere un S3 gateway endpoint.",
+        "Un gateway endpoint no proporciona una ruta privada general hacia otros servicios de AWS."
+      ],
+      "confusedWith": [
+        {
+          "concept": "NAT gateway",
+          "difference": "Da salida mediante un internet gateway; un gateway endpoint dirige el tráfico de S3 o DynamoDB mediante una ruta específica del servicio."
+        },
+        {
+          "concept": "Interface endpoint",
+          "difference": "Usa endpoint network interfaces con IP privadas y genera cargos por hora y por procesamiento de datos; un gateway endpoint usa entradas en tablas de rutas y no tiene cargo adicional."
+        },
+        {
+          "concept": "AWS PrivateLink endpoint service",
+          "difference": "Un endpoint service expone un servicio a consumidores; un interface endpoint permite que una VPC se conecte a un servicio compatible."
+        }
+      ],
+      "examCues": [
+        "private subnet needs S3 without NAT charges",
+        "DynamoDB traffic through a route-table prefix list",
+        "private access to another AWS service",
+        "S3 private DNS only for inbound Resolver traffic"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+      "https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "vpc-endpoints-gateway-vs-interface--321ba65e",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "secondaryConcepts": [
+        "nat-gateway-vs-nat-instance"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company runs image-processing instances in private subnets. The instances must upload files to an S3 bucket in the same Region, and the company does not want to deploy a NAT device or pay additional endpoint charges. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route the private subnets' S3 traffic through a NAT device in a public subnet.",
+          "correct": false,
+          "why": "This requires the NAT device that the company explicitly wants to avoid."
+        },
+        {
+          "id": "B",
+          "text": "Create an S3 gateway endpoint and associate it with the private subnets' route tables.",
+          "correct": true,
+          "why": "An S3 gateway endpoint provides the required route without a NAT device or additional endpoint charge."
+        },
+        {
+          "id": "C",
+          "text": "Create a DynamoDB gateway endpoint and associate it with the private subnets' route tables.",
+          "correct": false,
+          "why": "A DynamoDB gateway endpoint does not route traffic destined for S3."
+        },
+        {
+          "id": "D",
+          "text": "Create an S3 interface endpoint with network interfaces in the private subnets.",
+          "correct": false,
+          "why": "An S3 interface endpoint can provide private connectivity but incurs hourly and data processing charges."
+        }
+      ],
+      "explanation": "The deciding requirements are S3 access from private subnets, no NAT device, and no additional endpoint charge. An S3 gateway endpoint satisfies them when the instances' route tables are associated with it. An S3 interface endpoint also supports private S3 access, but its hourly and data processing charges make it a poorer fit.",
+      "keywordCues": [
+        "private subnets",
+        "S3 bucket in the same Region",
+        "does not want to deploy a NAT device",
+        "pay additional endpoint charges"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta instancias de procesamiento de imágenes en subredes privadas. Las instancias deben cargar archivos a un bucket de S3 en la misma Region, y la empresa no quiere implementar un dispositivo NAT ni pagar cargos adicionales por endpoints. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Dirige el tráfico a S3 de las subredes privadas mediante un dispositivo NAT en una subred pública.",
+            "why": "Esta opción requiere el dispositivo NAT que la empresa quiere evitar."
+          },
+          {
+            "id": "B",
+            "text": "Crea un S3 gateway endpoint y asócialo con las tablas de rutas de las subredes privadas.",
+            "why": "Un S3 gateway endpoint proporciona la ruta necesaria sin un dispositivo NAT ni cargos adicionales por el endpoint."
+          },
+          {
+            "id": "C",
+            "text": "Crea un DynamoDB gateway endpoint y asócialo con las tablas de rutas de las subredes privadas.",
+            "why": "Un DynamoDB gateway endpoint no dirige el tráfico destinado a S3."
+          },
+          {
+            "id": "D",
+            "text": "Crea un S3 interface endpoint con interfaces de red en las subredes privadas.",
+            "why": "Un S3 interface endpoint puede dar conectividad privada, pero genera cargos por hora y por procesamiento de datos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son acceder a S3 desde subredes privadas, sin un dispositivo NAT y sin cargos adicionales por el endpoint. Un S3 gateway endpoint los cumple si asocias las tablas de rutas de las instancias. Un S3 interface endpoint también permite acceso privado a S3, pero sus cargos por hora y por procesamiento de datos lo hacen menos adecuado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-endpoints-gateway-vs-interface--40dd042c",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization already uses an S3 gateway endpoint for workloads in its VPC. It is adding an inbound Resolver endpoint so clients connecting through its private network can resolve S3 names to private endpoint addresses, while VPC workloads continue using the gateway endpoint. Which S3 endpoint configuration meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the S3 gateway endpoint and add an S3 interface endpoint with private DNS enabled only for the inbound endpoint.",
+          "correct": true,
+          "why": "This combines gateway endpoint routing for VPC workloads with the documented S3 interface endpoint setting for inbound private DNS."
+        },
+        {
+          "id": "B",
+          "text": "Keep only the S3 gateway endpoint and associate additional VPC route tables with it.",
+          "correct": false,
+          "why": "Gateway endpoint route-table associations alone do not provide the requested S3 interface endpoint private DNS for inbound clients."
+        },
+        {
+          "id": "C",
+          "text": "Delete the S3 gateway endpoint and create an S3 interface endpoint with private DNS enabled only for the inbound endpoint.",
+          "correct": false,
+          "why": "The inbound-only private DNS setting requires an S3 gateway endpoint, so this configuration cannot be completed."
+        },
+        {
+          "id": "D",
+          "text": "Replace the S3 gateway endpoint with a DynamoDB gateway endpoint and retain the inbound Resolver endpoint.",
+          "correct": false,
+          "why": "A DynamoDB gateway endpoint cannot provide endpoint routing for S3."
+        }
+      ],
+      "explanation": "The organization needs private DNS for S3 requests arriving through an inbound Resolver endpoint while retaining gateway endpoint routing for VPC workloads. The S3 interface endpoint offers a private-DNS-only-for-inbound setting alongside the existing S3 gateway endpoint. Removing the gateway endpoint is a trap: selecting that inbound-only setting without an S3 gateway endpoint results in an error.",
+      "keywordCues": [
+        "already uses an S3 gateway endpoint",
+        "adding an inbound Resolver endpoint",
+        "private endpoint addresses",
+        "VPC workloads continue using the gateway endpoint"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación ya usa un S3 gateway endpoint para las cargas de su VPC. Agregará un inbound Resolver endpoint para que los clientes conectados por su red privada resuelvan los nombres de S3 a direcciones privadas del endpoint, mientras las cargas de la VPC siguen usando el gateway endpoint. ¿Qué configuración de endpoints de S3 cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conserva el S3 gateway endpoint y agrega un S3 interface endpoint con private DNS habilitado solo para el inbound endpoint.",
+            "why": "Esto combina las rutas del gateway endpoint para las cargas de la VPC con la configuración documentada de private DNS para tráfico entrante del S3 interface endpoint."
+          },
+          {
+            "id": "B",
+            "text": "Conserva solo el S3 gateway endpoint y asocia más tablas de rutas de la VPC.",
+            "why": "Las asociaciones de tablas de rutas del gateway endpoint no proporcionan por sí solas el private DNS del S3 interface endpoint que necesitan los clientes entrantes."
+          },
+          {
+            "id": "C",
+            "text": "Elimina el S3 gateway endpoint y crea un S3 interface endpoint con private DNS habilitado solo para el inbound endpoint.",
+            "why": "La configuración de private DNS solo para tráfico entrante requiere un S3 gateway endpoint, así que no podrás completar esta configuración."
+          },
+          {
+            "id": "D",
+            "text": "Reemplaza el S3 gateway endpoint por un DynamoDB gateway endpoint y conserva el inbound Resolver endpoint.",
+            "why": "Un DynamoDB gateway endpoint no proporciona rutas de endpoint para S3."
+          }
+        ],
+        "explanation": "La organización necesita private DNS para las solicitudes a S3 que llegan por un inbound Resolver endpoint y debe conservar las rutas del gateway endpoint para las cargas de la VPC. El S3 interface endpoint ofrece una configuración de private DNS solo para tráfico entrante junto con el S3 gateway endpoint existente. Eliminar el gateway endpoint es una trampa: seleccionar esa configuración sin un S3 gateway endpoint produce un error."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-endpoints-gateway-vs-interface--d3d5d739",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "secondaryConcepts": [
+        "privatelink-endpoint-services",
+        "nat-gateway-vs-nat-instance"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A healthcare application runs on EC2 instances in a private subnet. It must call an AWS service that supports AWS PrivateLink but is neither S3 nor DynamoDB; the VPC has no NAT device. Which solution provides the required private connectivity?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an interface endpoint for the target service and allow the application's traffic in its security group.",
+          "correct": true,
+          "why": "An interface endpoint connects to supported AWS PrivateLink services through private-IP network interfaces."
+        },
+        {
+          "id": "B",
+          "text": "Create an AWS PrivateLink endpoint service backed by a load balancer in the application VPC.",
+          "correct": false,
+          "why": "An endpoint service exposes a service to consumers rather than connecting this application to the target AWS service."
+        },
+        {
+          "id": "C",
+          "text": "Add a NAT device in a public subnet and route the application's outbound traffic through it.",
+          "correct": false,
+          "why": "A NAT device does not meet the requirement for private endpoint connectivity."
+        },
+        {
+          "id": "D",
+          "text": "Create a gateway endpoint for the target service and associate the subnet's route table.",
+          "correct": false,
+          "why": "Gateway endpoints are for S3 and DynamoDB, not this target service."
+        }
+      ],
+      "explanation": "The target is a supported AWS PrivateLink service other than S3 or DynamoDB, so a gateway endpoint is not suitable. An interface endpoint supplies private-IP network interfaces for the connection; its security group must allow the expected traffic. An endpoint service addresses the opposite direction of connectivity: exposing a service to consumers.",
+      "keywordCues": [
+        "supports AWS PrivateLink",
+        "neither S3 nor DynamoDB",
+        "no NAT device",
+        "private connectivity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de salud se ejecuta en instancias EC2 de una subred privada. Debe llamar a un servicio de AWS compatible con AWS PrivateLink que no es S3 ni DynamoDB; la VPC no tiene un dispositivo NAT. ¿Qué solución proporciona la conectividad privada necesaria?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un interface endpoint para el servicio de destino y permite el tráfico de la aplicación en su security group.",
+            "why": "Un interface endpoint se conecta a servicios compatibles con AWS PrivateLink mediante interfaces de red con IP privadas."
+          },
+          {
+            "id": "B",
+            "text": "Crea un AWS PrivateLink endpoint service respaldado por un load balancer en la VPC de la aplicación.",
+            "why": "Un endpoint service expone un servicio a consumidores; no conecta esta aplicación con el servicio de AWS de destino."
+          },
+          {
+            "id": "C",
+            "text": "Agrega un dispositivo NAT en una subred pública y dirige por él el tráfico saliente de la aplicación.",
+            "why": "Un dispositivo NAT no cumple el requisito de conectividad privada mediante un endpoint."
+          },
+          {
+            "id": "D",
+            "text": "Crea un gateway endpoint para el servicio de destino y asocia la tabla de rutas de la subred.",
+            "why": "Los gateway endpoints son para S3 y DynamoDB, no para este servicio."
+          }
+        ],
+        "explanation": "El destino es un servicio compatible con AWS PrivateLink que no es S3 ni DynamoDB, por lo que un gateway endpoint no sirve. Un interface endpoint proporciona interfaces de red con IP privadas para la conexión; su security group debe permitir el tráfico esperado. Un endpoint service resuelve la necesidad inversa: exponer un servicio a consumidores."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-endpoints-gateway-vs-interface--d2a31e06",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "secondaryConcepts": [
+        "nat-gateway-vs-nat-instance"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retailer created an S3 gateway endpoint for its VPC and selected the route table used by one private subnet. Instances in a second private subnet use a different route table and cannot reach S3; they have no NAT route. Both subnets must use the endpoint without introducing a NAT device. What should the retailer do?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Associate the second private subnet's route table with the existing S3 gateway endpoint.",
+          "correct": true,
+          "why": "The association adds the S3 endpoint route to the second subnet's route table."
+        },
+        {
+          "id": "B",
+          "text": "Create an S3 interface endpoint for the second private subnet.",
+          "correct": false,
+          "why": "This provides a different, charged endpoint type rather than making the second subnet use the existing gateway endpoint."
+        },
+        {
+          "id": "C",
+          "text": "Add a NAT device and a default route to it for the second private subnet.",
+          "correct": false,
+          "why": "This introduces the NAT device the retailer wants to avoid and does not make the subnet use the endpoint."
+        },
+        {
+          "id": "D",
+          "text": "Add a default route to the internet gateway in the second private subnet's route table.",
+          "correct": false,
+          "why": "A default internet-gateway route does not associate the second subnet's route table with the gateway endpoint."
+        }
+      ],
+      "explanation": "Gateway endpoint routing depends on the route tables selected for the endpoint. Associating the second subnet's route table adds the service-prefix-list route, so its instances can use the existing S3 gateway endpoint. A NAT route could provide another path to S3, but it fails the explicit requirement to avoid a NAT device.",
+      "keywordCues": [
+        "selected the route table used by one private subnet",
+        "second private subnet use a different route table",
+        "Both subnets must use the endpoint",
+        "without introducing a NAT device"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html"
+      ],
+      "es": {
+        "stem": "Una tienda creó un S3 gateway endpoint para su VPC y seleccionó la tabla de rutas de una subred privada. Las instancias de una segunda subred privada usan otra tabla de rutas y no pueden acceder a S3; tampoco tienen una ruta NAT. Ambas subredes deben usar el endpoint sin incorporar un dispositivo NAT. ¿Qué debe hacer la tienda?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asocia la tabla de rutas de la segunda subred privada con el S3 gateway endpoint existente.",
+            "why": "La asociación agrega la ruta del endpoint de S3 a la tabla de rutas de la segunda subred."
+          },
+          {
+            "id": "B",
+            "text": "Crea un S3 interface endpoint para la segunda subred privada.",
+            "why": "Esto proporciona otro tipo de endpoint con cargos, en lugar de hacer que la segunda subred use el gateway endpoint existente."
+          },
+          {
+            "id": "C",
+            "text": "Agrega un dispositivo NAT y una ruta predeterminada hacia él para la segunda subred privada.",
+            "why": "Esto incorpora el dispositivo NAT que la tienda quiere evitar y no hace que la subred use el endpoint."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una ruta predeterminada hacia el internet gateway en la tabla de rutas de la segunda subred privada.",
+            "why": "Una ruta predeterminada hacia el internet gateway no asocia esa tabla de rutas con el gateway endpoint."
+          }
+        ],
+        "explanation": "El enrutamiento de un gateway endpoint depende de las tablas de rutas seleccionadas para el endpoint. Al asociar la tabla de la segunda subred, se agrega la ruta hacia la prefix list del servicio y sus instancias pueden usar el S3 gateway endpoint existente. Una ruta NAT podría dar otra vía hacia S3, pero incumple el requisito explícito de evitar un dispositivo NAT."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "vpc-endpoints-gateway-vs-interface--r0",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "kind": "recall",
+      "prompt": "Private-subnet instances need S3 access without a NAT device or additional endpoint charges. Which endpoint should you choose, and what must you associate?",
+      "promptEs": "Tus instancias en subredes privadas necesitan S3 sin un dispositivo NAT ni cargos adicionales por el endpoint. ¿Qué endpoint eliges y qué debes asociar?",
+      "idealAnswer": "Choose an S3 gateway endpoint. Associate the route tables used by the instances' subnets so those tables receive the S3 endpoint route.",
+      "rubric": [
+        "Names an S3 gateway endpoint.",
+        "Specifies association of the workload subnets' route tables.",
+        "Notes that it avoids a NAT device and additional endpoint charges."
+      ]
+    },
+    {
+      "id": "vpc-endpoints-gateway-vs-interface--r1",
+      "conceptId": "vpc-endpoints-gateway-vs-interface",
+      "kind": "why-not",
+      "prompt": "Why is a NAT gateway not the best fit when private instances need only same-Region S3 access at minimal endpoint cost?",
+      "promptEs": "¿Por qué un NAT gateway no es la mejor opción si tus instancias privadas solo necesitan S3 en la misma Region con un costo mínimo de endpoint?",
+      "idealAnswer": "A NAT gateway provides an outbound path through an internet gateway rather than the service-specific endpoint route needed here. An S3 gateway endpoint gives the private subnets S3 access without a NAT device and has no additional endpoint charge.",
+      "rubric": [
+        "Explains that NAT provides an outbound path rather than a service-specific endpoint route.",
+        "Identifies the S3 gateway endpoint as the fit.",
+        "Mentions avoiding a NAT device and additional gateway endpoint charges."
+      ]
+    }
+  ]
+}

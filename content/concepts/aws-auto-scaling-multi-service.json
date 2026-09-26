@@ -1,0 +1,257 @@
+{
+  "conceptId": "aws-auto-scaling-multi-service",
+  "card": {
+    "en": {
+      "tldr": "Application Auto Scaling adjusts supported resources beyond EC2 Auto Scaling, including ECS services, DynamoDB provisioned capacity, Aurora replicas, and Spot Fleet requests. Choose target tracking when a supported resource should scale toward a CloudWatch metric target; choose an AWS Auto Scaling scaling plan when related resources need discovery and a shared scaling strategy.",
+      "whenToUse": [
+        "An ECS service’s desired task count must respond to changing demand.",
+        "Provisioned capacity for a DynamoDB table or global secondary index must adjust automatically.",
+        "An Aurora cluster needs its number of read replicas adjusted.",
+        "Related scalable resources need automatic discovery and scaling recommendations."
+      ],
+      "keyFacts": [
+        "Application Auto Scaling target tracking scales a resource based on a target value for a specific CloudWatch metric.",
+        "Application Auto Scaling also supports step, scheduled, and predictive scaling.",
+        "AWS Auto Scaling scaling plans can cover Aurora replicas, ECS desired task counts, DynamoDB provisioned capacity, Spot Fleet target capacity, and EC2 Auto Scaling groups.",
+        "Scaling plans use Application Auto Scaling and Amazon EC2 Auto Scaling to adjust capacity; they provide resource discovery and built-in scaling recommendations.",
+        "In scaling plans, predictive scaling is supported for Auto Scaling groups."
+      ],
+      "gotchas": [
+        "An EC2 Auto Scaling group adjusts EC2 instance capacity, not an ECS service’s desired task count or a DynamoDB index’s provisioned capacity.",
+        "Individual Application Auto Scaling policies do not provide the resource discovery and built-in recommendations described for scaling plans.",
+        "Scheduled scaling is a poor match when the requirement is to respond to unpredictable metric changes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EC2 Auto Scaling",
+          "difference": "It adjusts EC2 Auto Scaling group capacity; Application Auto Scaling handles supported resources such as ECS services and DynamoDB indexes."
+        },
+        {
+          "concept": "AWS Auto Scaling scaling plans",
+          "difference": "Scaling plans discover and coordinate related scalable resources; Application Auto Scaling policies can target an individual supported resource."
+        }
+      ],
+      "examCues": [
+        "ECS desired task count",
+        "DynamoDB global secondary index provisioned capacity",
+        "Aurora read replicas",
+        "discover related scalable resources",
+        "track a CloudWatch metric target"
+      ]
+    },
+    "es": {
+      "tldr": "Application Auto Scaling ajusta recursos compatibles más allá de EC2 Auto Scaling, incluidos servicios de ECS, capacidad aprovisionada de DynamoDB, réplicas de Aurora y solicitudes de Spot Fleet. Elige target tracking si un recurso debe seguir un objetivo de una métrica de CloudWatch; elige un scaling plan de AWS Auto Scaling si necesitas descubrir recursos relacionados y aplicarles una estrategia de escalado.",
+      "whenToUse": [
+        "Necesitas que el número deseado de tareas de un servicio de ECS responda a cambios de demanda.",
+        "Necesitas ajustar automáticamente la capacidad aprovisionada de una tabla o un global secondary index de DynamoDB.",
+        "Necesitas ajustar el número de réplicas de lectura de un clúster de Aurora.",
+        "Necesitas descubrimiento automático y recomendaciones de escalado para recursos relacionados."
+      ],
+      "keyFacts": [
+        "Target tracking de Application Auto Scaling escala un recurso según un valor objetivo de una métrica específica de CloudWatch.",
+        "Application Auto Scaling también admite step scaling, scheduled scaling y predictive scaling.",
+        "Los scaling plans de AWS Auto Scaling pueden incluir réplicas de Aurora, número deseado de tareas de ECS, capacidad aprovisionada de DynamoDB, capacidad objetivo de Spot Fleet y grupos de EC2 Auto Scaling.",
+        "Los scaling plans usan Application Auto Scaling y Amazon EC2 Auto Scaling para ajustar capacidad; ofrecen descubrimiento de recursos y recomendaciones de escalado.",
+        "En los scaling plans, predictive scaling es compatible con grupos de Auto Scaling."
+      ],
+      "gotchas": [
+        "Un grupo de EC2 Auto Scaling ajusta capacidad de instancias EC2, no el número deseado de tareas de ECS ni la capacidad aprovisionada de un índice de DynamoDB.",
+        "Las políticas individuales de Application Auto Scaling no aportan el descubrimiento de recursos ni las recomendaciones integradas que se describen para los scaling plans.",
+        "Scheduled scaling no encaja si debes responder a cambios impredecibles de una métrica."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EC2 Auto Scaling",
+          "difference": "Ajusta la capacidad de grupos de EC2 Auto Scaling; Application Auto Scaling maneja recursos compatibles como servicios de ECS e índices de DynamoDB."
+        },
+        {
+          "concept": "AWS Auto Scaling scaling plans",
+          "difference": "Los scaling plans descubren y coordinan recursos escalables relacionados; una política de Application Auto Scaling puede enfocarse en un recurso compatible."
+        }
+      ],
+      "examCues": [
+        "ECS desired task count",
+        "DynamoDB global secondary index provisioned capacity",
+        "Aurora read replicas",
+        "discover related scalable resources",
+        "track a CloudWatch metric target"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/autoscaling/application/userguide/what-is-application-auto-scaling.html",
+      "https://docs.aws.amazon.com/autoscaling/plans/userguide/what-is-a-scaling-plan.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aws-auto-scaling-multi-service--9bc75507",
+      "conceptId": "aws-auto-scaling-multi-service",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs an application with an ECS service, a provisioned-capacity DynamoDB table, and an Aurora cluster with read replicas. Its infrastructure team groups the related resources in a CloudFormation stack and wants automatic resource discovery plus recommendations for balancing performance and cost as demand changes. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure Application Auto Scaling scheduled scaling for the ECS service, DynamoDB table, and Aurora replicas.",
+          "correct": false,
+          "why": "Schedules do not provide the requested resource discovery and recommendations for changing demand."
+        },
+        {
+          "id": "B",
+          "text": "Configure separate Application Auto Scaling target tracking policies for each supported resource.",
+          "correct": false,
+          "why": "The individual policies can scale supported resources but do not provide the requested scaling-plan discovery and built-in recommendations."
+        },
+        {
+          "id": "C",
+          "text": "Configure target tracking on an EC2 Auto Scaling group for the application.",
+          "correct": false,
+          "why": "An EC2 Auto Scaling group adjusts EC2 capacity, not the ECS, DynamoDB, and Aurora resources that must be discovered and scaled."
+        },
+        {
+          "id": "D",
+          "text": "Create an AWS Auto Scaling scaling plan for the scalable resources in the CloudFormation stack.",
+          "correct": true,
+          "why": "A scaling plan can discover related resources in a stack and offers recommendations for a performance-and-cost scaling strategy."
+        }
+      ],
+      "explanation": "The deciding requirements are automatic discovery of related stack resources and recommendations that balance performance and cost. AWS Auto Scaling scaling plans provide both and can scale ECS desired task count, DynamoDB provisioned capacity, and Aurora read replicas. Separate Application Auto Scaling policies could adjust those resources, but they miss the requested plan-level discovery and recommendations.",
+      "keywordCues": [
+        "groups the related resources in a CloudFormation stack",
+        "automatic resource discovery",
+        "recommendations for balancing performance and cost"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/application/userguide/what-is-application-auto-scaling.html",
+        "https://docs.aws.amazon.com/autoscaling/plans/userguide/what-is-a-scaling-plan.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta una aplicación con un servicio de ECS, una tabla de DynamoDB con capacidad aprovisionada y un clúster de Aurora con réplicas de lectura. Su equipo de infraestructura agrupa los recursos relacionados en una pila de CloudFormation y quiere descubrimiento automático de recursos, además de recomendaciones para equilibrar rendimiento y costo cuando cambie la demanda. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar scheduled scaling de Application Auto Scaling para el servicio de ECS, la tabla de DynamoDB y las réplicas de Aurora.",
+            "why": "Los horarios no proporcionan el descubrimiento ni las recomendaciones solicitadas para una demanda cambiante."
+          },
+          {
+            "id": "B",
+            "text": "Configurar políticas individuales de target tracking de Application Auto Scaling para cada recurso compatible.",
+            "why": "Las políticas individuales pueden escalar recursos compatibles, pero no ofrecen el descubrimiento ni las recomendaciones integradas solicitadas."
+          },
+          {
+            "id": "C",
+            "text": "Configurar target tracking en un grupo de EC2 Auto Scaling para la aplicación.",
+            "why": "Un grupo de EC2 Auto Scaling ajusta la capacidad de EC2, no los recursos de ECS, DynamoDB y Aurora que se deben descubrir y escalar."
+          },
+          {
+            "id": "D",
+            "text": "Crear un scaling plan de AWS Auto Scaling para los recursos escalables de la pila de CloudFormation.",
+            "why": "Un scaling plan puede descubrir recursos relacionados en una pila y ofrecer recomendaciones para una estrategia que equilibre rendimiento y costo."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son descubrir automáticamente los recursos relacionados de la pila y obtener recomendaciones que equilibren rendimiento y costo. Los scaling plans de AWS Auto Scaling ofrecen ambas funciones y pueden escalar el número deseado de tareas de ECS, la capacidad aprovisionada de DynamoDB y las réplicas de lectura de Aurora. Las políticas individuales de Application Auto Scaling podrían ajustar esos recursos, pero no cumplen el requisito de descubrimiento y recomendaciones del scaling plan."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-auto-scaling-multi-service--4bc6c713",
+      "conceptId": "aws-auto-scaling-multi-service",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research portal uses an Aurora cluster for reports. Report traffic arrives at unpredictable times, and the team wants the number of Aurora read replicas to adjust automatically toward a target value for a CloudWatch metric. The writers and all other application resources must remain outside this scaling configuration. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Apply Application Auto Scaling target tracking to the portal’s DynamoDB provisioned read capacity.",
+          "correct": false,
+          "why": "This targets a different resource and cannot change the number of Aurora read replicas."
+        },
+        {
+          "id": "B",
+          "text": "Apply Application Auto Scaling target tracking to the Aurora read replicas.",
+          "correct": true,
+          "why": "Application Auto Scaling supports Aurora replicas and target tracking based on a CloudWatch metric target."
+        },
+        {
+          "id": "C",
+          "text": "Apply an EC2 Auto Scaling target tracking policy to the report application’s instances.",
+          "correct": false,
+          "why": "Scaling EC2 instances does not adjust the requested number of Aurora read replicas."
+        },
+        {
+          "id": "D",
+          "text": "Apply Application Auto Scaling scheduled scaling to the Aurora read replicas.",
+          "correct": false,
+          "why": "Scheduled scaling follows a schedule rather than the requested CloudWatch metric target during unpredictable traffic."
+        }
+      ],
+      "explanation": "The resource to scale is the number of Aurora read replicas, not compute instances or database write capacity. Application Auto Scaling supports Aurora replicas, and its target tracking mode uses a target value for a specific CloudWatch metric. Scheduled scaling can adjust a supported resource, but it does not satisfy the requirement to respond to unpredictable metric changes.",
+      "keywordCues": [
+        "unpredictable times",
+        "number of Aurora read replicas",
+        "target value for a CloudWatch metric",
+        "all other application resources must remain outside this scaling configuration"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/application/userguide/what-is-application-auto-scaling.html",
+        "https://docs.aws.amazon.com/autoscaling/plans/userguide/what-is-a-scaling-plan.html"
+      ],
+      "es": {
+        "stem": "Un portal de investigación usa un clúster de Aurora para generar informes. El tráfico de informes llega en momentos impredecibles, y el equipo quiere que el número de réplicas de lectura de Aurora se ajuste automáticamente hacia un valor objetivo de una métrica de CloudWatch. Los escritores y los demás recursos de la aplicación deben quedar fuera de esta configuración de escalado. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Aplicar target tracking de Application Auto Scaling a la capacidad de lectura aprovisionada de DynamoDB del portal.",
+            "why": "Esta opción se dirige a otro recurso y no puede cambiar el número de réplicas de lectura de Aurora."
+          },
+          {
+            "id": "B",
+            "text": "Aplicar target tracking de Application Auto Scaling a las réplicas de lectura de Aurora.",
+            "why": "Application Auto Scaling admite réplicas de Aurora y target tracking basado en un objetivo de una métrica de CloudWatch."
+          },
+          {
+            "id": "C",
+            "text": "Aplicar una política de target tracking de EC2 Auto Scaling a las instancias de la aplicación de informes.",
+            "why": "Escalar instancias EC2 no ajusta el número solicitado de réplicas de lectura de Aurora."
+          },
+          {
+            "id": "D",
+            "text": "Aplicar scheduled scaling de Application Auto Scaling a las réplicas de lectura de Aurora.",
+            "why": "Scheduled scaling sigue un horario, en lugar del objetivo de una métrica de CloudWatch durante tráfico impredecible."
+          }
+        ],
+        "explanation": "El recurso que se debe escalar es el número de réplicas de lectura de Aurora, no las instancias de cómputo ni la capacidad de escritura de la base de datos. Application Auto Scaling admite réplicas de Aurora, y target tracking usa un valor objetivo de una métrica específica de CloudWatch. Scheduled scaling puede ajustar un recurso compatible, pero no cumple el requisito de responder a cambios impredecibles de la métrica."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aws-auto-scaling-multi-service--r0",
+      "conceptId": "aws-auto-scaling-multi-service",
+      "kind": "recall",
+      "prompt": "A DynamoDB global secondary index has unpredictable lookup demand. What would you configure to scale its provisioned capacity, and why?",
+      "promptEs": "Un global secondary index de DynamoDB tiene demanda de búsquedas impredecible. ¿Qué configurarías para escalar su capacidad aprovisionada y por qué?",
+      "idealAnswer": "Configure Application Auto Scaling target tracking for the global secondary index’s provisioned capacity. It supports that resource and scales toward a target value for a specific CloudWatch metric, rather than relying on a schedule.",
+      "rubric": [
+        "Names Application Auto Scaling.",
+        "Targets the global secondary index’s provisioned capacity.",
+        "Selects target tracking because demand is unpredictable and scaling should follow a CloudWatch metric target."
+      ]
+    }
+  ]
+}

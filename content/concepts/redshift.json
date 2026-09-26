@@ -1,0 +1,455 @@
+{
+  "conceptId": "redshift",
+  "card": {
+    "en": {
+      "tldr": "Amazon Redshift is a managed data warehouse for SQL analysis and BI. Choose Redshift Serverless when warehouse demand is intermittent, or Redshift Spectrum when queries must include files in S3 without loading them into warehouse tables.",
+      "whenToUse": [
+        "A team needs a managed data warehouse for SQL-based reporting and BI.",
+        "Warehouse queries are intermittent, and the team wants capacity to scale automatically without idle warehouse charges.",
+        "Analysts need to query structured or semi-structured files in S3 without loading them into Redshift tables."
+      ],
+      "keyFacts": [
+        "Redshift is a fully managed, petabyte-scale data warehouse service.",
+        "Redshift Serverless provisions resources automatically, scales warehouse capacity, and does not charge when the warehouse is idle.",
+        "Redshift Spectrum queries files in S3 without loading them into Redshift tables; most of the data remains in S3.",
+        "Multiple Redshift clusters can query the same S3 dataset concurrently without a separate copy for each cluster.",
+        "Provisioned Redshift clusters are available when a team prefers to manage its Redshift resources manually."
+      ],
+      "gotchas": [
+        "An S3 file does not have to be loaded into a Redshift table for Spectrum to query it.",
+        "Intermittent warehouse use points to Redshift Serverless, not automatically to a provisioned cluster.",
+        "A request for BI dashboards alone does not establish a need for a Redshift data warehouse; identify where the analytical queries will run."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Athena",
+          "difference": "Athena fits ad-hoc SQL directly on S3; Redshift is the data warehouse choice, with Spectrum when warehouse queries also need S3 files."
+        },
+        {
+          "concept": "AWS Glue",
+          "difference": "Glue handles ETL and schema discovery; Redshift runs warehouse analysis, while Spectrum reads S3 files without loading them into warehouse tables."
+        },
+        {
+          "concept": "Amazon Quick",
+          "difference": "Quick provides BI dashboards and visualization; Redshift provides the data warehouse that can serve BI queries."
+        }
+      ],
+      "examCues": [
+        "managed data warehouse for BI",
+        "intermittent warehouse queries",
+        "no charges while the warehouse is idle",
+        "query S3 files without loading them",
+        "same S3 dataset queried by multiple Redshift clusters"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Redshift es un data warehouse administrado para análisis con SQL y BI. Elige Redshift Serverless si el uso del data warehouse es intermitente, o Redshift Spectrum si necesitas consultar archivos en S3 sin cargarlos en tablas del data warehouse.",
+      "whenToUse": [
+        "Necesitas un data warehouse administrado para reportes con SQL y BI.",
+        "Las consultas son intermitentes y quieres que la capacidad escale automáticamente sin cargos cuando el data warehouse está inactivo.",
+        "Necesitas consultar archivos estructurados o semiestructurados en S3 sin cargarlos en tablas de Redshift."
+      ],
+      "keyFacts": [
+        "Redshift es un servicio de data warehouse completamente administrado y de escala de petabytes.",
+        "Redshift Serverless aprovisiona recursos automáticamente, ajusta la capacidad y no genera cargos cuando el data warehouse está inactivo.",
+        "Redshift Spectrum consulta archivos en S3 sin cargarlos en tablas de Redshift; la mayor parte de los datos permanece en S3.",
+        "Varios clústeres de Redshift pueden consultar simultáneamente el mismo conjunto de datos en S3 sin crear una copia para cada uno.",
+        "Puedes usar clústeres de Redshift aprovisionados si prefieres administrar manualmente sus recursos."
+      ],
+      "gotchas": [
+        "No necesitas cargar un archivo de S3 en una tabla de Redshift para consultarlo con Spectrum.",
+        "Si el uso del data warehouse es intermitente, considera Redshift Serverless antes que un clúster aprovisionado.",
+        "Pedir dashboards de BI no implica, por sí solo, que necesites un data warehouse de Redshift; identifica dónde se ejecutarán las consultas analíticas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon Athena",
+          "difference": "Athena sirve para SQL ad-hoc directamente sobre S3; Redshift es la opción de data warehouse y Spectrum permite consultar archivos de S3 desde él."
+        },
+        {
+          "concept": "AWS Glue",
+          "difference": "Glue se usa para ETL y descubrimiento de esquemas; Redshift ejecuta análisis de data warehouse y Spectrum lee archivos de S3 sin cargarlos en sus tablas."
+        },
+        {
+          "concept": "Amazon Quick",
+          "difference": "Quick ofrece dashboards y visualizaciones de BI; Redshift proporciona el data warehouse que puede atender las consultas de BI."
+        }
+      ],
+      "examCues": [
+        "managed data warehouse for BI",
+        "intermittent warehouse queries",
+        "no charges while the warehouse is idle",
+        "query S3 files without loading them",
+        "same S3 dataset queried by multiple Redshift clusters"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html",
+      "https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "redshift--7e58350f",
+      "conceptId": "redshift",
+      "secondaryConcepts": [
+        "glue-etl-data-catalog",
+        "athena",
+        "emr"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An environmental agency already runs SQL reports in Amazon Redshift. It has received a large collection of structured observation files in Amazon S3 and wants to include those files in its Redshift queries without loading them into Redshift tables. Which solution meets these requirements with the LEAST data movement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Athena to query only the observation files in S3.",
+          "correct": false,
+          "why": "Athena can query S3, but this option does not include the files in the agency's existing Redshift queries."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon EMR to process the S3 observations into a separate reporting output.",
+          "correct": false,
+          "why": "A separate EMR output does not meet the requirement to query the S3 files from the existing Redshift workflow."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Glue ETL to load the S3 observations into Redshift tables before querying.",
+          "correct": false,
+          "why": "Loading the observations into Redshift tables violates the requirement to query without loading them."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon Redshift Spectrum to query the observation files in S3.",
+          "correct": true,
+          "why": "Spectrum queries S3 files without loading them into Redshift tables."
+        }
+      ],
+      "explanation": "The agency must query S3 files through its existing Redshift workflow without loading those files into warehouse tables. Redshift Spectrum is designed to query structured and semi-structured S3 files this way, with most data remaining in S3. Glue loading is a tempting approach, but it fails the explicit no-load requirement.",
+      "keywordCues": [
+        "already runs SQL reports in Amazon Redshift",
+        "without loading them into Redshift tables",
+        "LEAST data movement"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html",
+        "https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html"
+      ],
+      "es": {
+        "stem": "Una agencia ambiental ya ejecuta reportes SQL en Amazon Redshift. Recibió una gran colección de archivos estructurados de observaciones en Amazon S3 y quiere incluirlos en sus consultas de Redshift sin cargarlos en tablas de Redshift. ¿Qué solución cumple estos requisitos con el LEAST data movement?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon Athena para consultar únicamente los archivos de observaciones en S3.",
+            "why": "Athena puede consultar S3, pero esta opción no incorpora los archivos a las consultas de Redshift que ya usa la agencia."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon EMR para procesar las observaciones de S3 y generar reportes por separado.",
+            "why": "Un resultado independiente de EMR no cumple el requisito de consultar los archivos de S3 desde el flujo de Redshift existente."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS Glue ETL para cargar las observaciones de S3 en tablas de Redshift antes de consultarlas.",
+            "why": "Cargar las observaciones en tablas de Redshift incumple el requisito de consultarlas sin cargarlas."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon Redshift Spectrum para consultar los archivos de observaciones en S3.",
+            "why": "Spectrum consulta archivos de S3 sin cargarlos en tablas de Redshift."
+          }
+        ],
+        "explanation": "La agencia debe consultar archivos de S3 desde su flujo existente de Redshift sin cargarlos en tablas del data warehouse. Redshift Spectrum permite consultar de esa forma archivos estructurados y semiestructurados, mientras la mayor parte de los datos permanece en S3. Cargarlos con Glue parece razonable, pero incumple el requisito explícito de no cargarlos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "redshift--beece880",
+      "conceptId": "redshift",
+      "secondaryConcepts": [
+        "athena",
+        "quick-visualization"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A film distributor uses a data warehouse for SQL-based BI analysis, but its analysts work in short bursts around monthly releases. The team wants capacity provisioned and scaled automatically and does not want warehouse charges while the warehouse is idle. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon Redshift Serverless for the warehouse.",
+          "correct": true,
+          "why": "Redshift Serverless automatically provisions and scales warehouse capacity and does not charge when the warehouse is idle."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Quick as the data warehouse for the BI queries.",
+          "correct": false,
+          "why": "Quick provides BI visualization rather than the requested warehouse query capacity."
+        },
+        {
+          "id": "C",
+          "text": "Create an Amazon Redshift provisioned cluster and manage its resources manually.",
+          "correct": false,
+          "why": "Manual management conflicts with the request for automatically provisioned capacity and the least operational overhead."
+        },
+        {
+          "id": "D",
+          "text": "Run ad-hoc queries on S3 files with Amazon Athena instead of using a data warehouse.",
+          "correct": false,
+          "why": "This replaces the explicitly required data warehouse with an ad-hoc S3 query workflow."
+        }
+      ],
+      "explanation": "The workload needs a data warehouse, but demand arrives in bursts and the team wants automatic capacity management. Redshift Serverless provisions and scales resources automatically and does not incur charges while the warehouse is idle. A provisioned Redshift cluster remains a warehouse option, but manually managing its resources misses the operational requirement.",
+      "keywordCues": [
+        "short bursts around monthly releases",
+        "capacity provisioned and scaled automatically",
+        "does not want warehouse charges while the warehouse is idle",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html",
+        "https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html"
+      ],
+      "es": {
+        "stem": "Una distribuidora de cine usa un data warehouse para análisis de BI con SQL, pero sus analistas trabajan en períodos breves alrededor de los estrenos mensuales. El equipo quiere que la capacidad se aprovisione y escale automáticamente, y no quiere cargos del data warehouse mientras esté inactivo. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon Redshift Serverless para el data warehouse.",
+            "why": "Redshift Serverless aprovisiona y escala la capacidad automáticamente y no genera cargos cuando el data warehouse está inactivo."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon Quick como data warehouse para las consultas de BI.",
+            "why": "Quick ofrece visualizaciones de BI, no la capacidad de consulta del data warehouse solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Crear un clúster aprovisionado de Amazon Redshift y administrar sus recursos manualmente.",
+            "why": "La administración manual contradice la capacidad aprovisionada automáticamente y el requisito de least operational overhead."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar consultas ad-hoc sobre archivos en S3 con Amazon Athena en lugar de usar un data warehouse.",
+            "why": "Esta opción sustituye el data warehouse solicitado explícitamente por consultas ad-hoc sobre S3."
+          }
+        ],
+        "explanation": "Se necesita un data warehouse, pero la demanda llega por períodos breves y el equipo quiere administrar la capacidad automáticamente. Redshift Serverless aprovisiona y escala recursos automáticamente y no genera cargos mientras el data warehouse está inactivo. Un clúster aprovisionado también es un data warehouse, pero administrar sus recursos manualmente no cumple el requisito operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "redshift--29760f02",
+      "conceptId": "redshift",
+      "secondaryConcepts": [
+        "glue-etl-data-catalog",
+        "emr"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research consortium has two Amazon Redshift clusters that serve separate analyst teams. Both teams must query the same large dataset of semi-structured files in Amazon S3, and the consortium does not want to create a separate S3 data copy for each cluster. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create separate Amazon EMR processing outputs for the two analyst teams.",
+          "correct": false,
+          "why": "Separate processing outputs do not let both Redshift clusters query the same S3 dataset without copies."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Glue ETL to generate separate S3 datasets for the two clusters.",
+          "correct": false,
+          "why": "Generating separate datasets introduces the per-cluster copies the consortium wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Load a separate copy of the S3 dataset into tables on each Redshift cluster.",
+          "correct": false,
+          "why": "Separate loaded copies conflict with the stated requirement to avoid duplicating the dataset for each cluster."
+        },
+        {
+          "id": "D",
+          "text": "Use Redshift Spectrum from both clusters to query the shared S3 dataset.",
+          "correct": true,
+          "why": "Spectrum allows multiple Redshift clusters to query the same S3 dataset concurrently without a copy for each cluster."
+        }
+      ],
+      "explanation": "The decisive constraint is that both Redshift clusters must query one shared S3 dataset without per-cluster copies. Redshift Spectrum supports concurrent queries of the same S3 dataset from multiple clusters. Loading the data separately into each cluster would undermine that requirement.",
+      "keywordCues": [
+        "two Amazon Redshift clusters",
+        "same large dataset of semi-structured files in Amazon S3",
+        "does not want to create a separate S3 data copy for each cluster"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html",
+        "https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html"
+      ],
+      "es": {
+        "stem": "Un consorcio de investigación tiene dos clústeres de Amazon Redshift para distintos equipos de análisis. Ambos deben consultar el mismo conjunto grande de archivos semiestructurados en Amazon S3, y el consorcio no quiere crear una copia de los datos de S3 para cada clúster. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear resultados de procesamiento independientes con Amazon EMR para los dos equipos de análisis.",
+            "why": "Los resultados independientes no permiten que ambos clústeres de Redshift consulten el mismo conjunto de datos de S3 sin copias."
+          },
+          {
+            "id": "B",
+            "text": "Usar AWS Glue ETL para generar conjuntos de datos de S3 independientes para los dos clústeres.",
+            "why": "Generar conjuntos de datos independientes crea las copias por clúster que el consorcio quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Cargar una copia independiente del conjunto de datos de S3 en tablas de cada clúster de Redshift.",
+            "why": "Las copias cargadas por separado contradicen el requisito de no duplicar el conjunto de datos para cada clúster."
+          },
+          {
+            "id": "D",
+            "text": "Usar Redshift Spectrum desde ambos clústeres para consultar el conjunto de datos compartido en S3.",
+            "why": "Spectrum permite que varios clústeres de Redshift consulten simultáneamente el mismo conjunto de datos de S3 sin una copia para cada uno."
+          }
+        ],
+        "explanation": "La condición decisiva es que ambos clústeres de Redshift consulten un único conjunto de datos compartido en S3 sin copias por clúster. Redshift Spectrum permite consultas simultáneas de varios clústeres sobre el mismo conjunto de datos en S3. Cargar los datos por separado en cada clúster incumpliría ese requisito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "redshift--d3b60961",
+      "conceptId": "redshift",
+      "secondaryConcepts": [
+        "glue-etl-data-catalog",
+        "athena"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A nonprofit runs a SQL-based BI warehouse only during irregular funding reviews. Some reports must also query structured grant records stored in Amazon S3, but the nonprofit does not want to load those records into warehouse tables. It wants automatic warehouse capacity management and no warehouse charges while idle. Which two choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Load the S3 grant records into warehouse tables with AWS Glue ETL.",
+          "correct": false,
+          "why": "Loading the records into warehouse tables violates the explicit no-load requirement."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Athena for S3 queries and replace the BI warehouse entirely.",
+          "correct": false,
+          "why": "Replacing the warehouse does not meet the nonprofit's stated need for a SQL-based BI warehouse."
+        },
+        {
+          "id": "C",
+          "text": "Use a provisioned Redshift cluster with manually managed resources for the BI warehouse.",
+          "correct": false,
+          "why": "Manually managing provisioned resources does not meet the automatic capacity-management requirement."
+        },
+        {
+          "id": "D",
+          "text": "Use Redshift Spectrum to query the grant records in S3.",
+          "correct": true,
+          "why": "Spectrum queries structured S3 files without loading them into Redshift tables."
+        },
+        {
+          "id": "E",
+          "text": "Use Amazon Redshift Serverless for the BI warehouse.",
+          "correct": true,
+          "why": "Redshift Serverless manages capacity automatically and does not charge when the warehouse is idle."
+        }
+      ],
+      "explanation": "This scenario has two independent requirements: an intermittently used BI warehouse with automatic capacity management, and access to S3 records without loading them. Redshift Serverless addresses the warehouse usage pattern, while Spectrum addresses the S3 query requirement. Glue loading fails the no-load condition, and a manually managed provisioned cluster misses the capacity-management condition.",
+      "keywordCues": [
+        "only during irregular funding reviews",
+        "does not want to load those records into warehouse tables",
+        "automatic warehouse capacity management",
+        "no warehouse charges while idle"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html",
+        "https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html"
+      ],
+      "es": {
+        "stem": "Una organización sin fines de lucro usa un data warehouse de BI con SQL solo durante revisiones de financiamiento irregulares. Algunos reportes también deben consultar registros estructurados de subvenciones en Amazon S3, pero la organización no quiere cargarlos en tablas del data warehouse. Quiere administración automática de la capacidad y ningún cargo del data warehouse mientras esté inactivo. ¿Qué dos opciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Cargar los registros de S3 en tablas del data warehouse mediante AWS Glue ETL.",
+            "why": "Cargar los registros en tablas incumple el requisito explícito de no cargarlos."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon Athena para consultar S3 y reemplazar por completo el data warehouse de BI.",
+            "why": "Reemplazar el data warehouse no cumple la necesidad explícita de un data warehouse de BI con SQL."
+          },
+          {
+            "id": "C",
+            "text": "Usar un clúster aprovisionado de Redshift con recursos administrados manualmente para el data warehouse de BI.",
+            "why": "Administrar manualmente los recursos aprovisionados no cumple el requisito de administración automática de la capacidad."
+          },
+          {
+            "id": "D",
+            "text": "Usar Redshift Spectrum para consultar los registros de subvenciones en S3.",
+            "why": "Spectrum consulta archivos estructurados en S3 sin cargarlos en tablas de Redshift."
+          },
+          {
+            "id": "E",
+            "text": "Usar Amazon Redshift Serverless para el data warehouse de BI.",
+            "why": "Redshift Serverless administra la capacidad automáticamente y no genera cargos cuando el data warehouse está inactivo."
+          }
+        ],
+        "explanation": "Hay dos requisitos independientes: un data warehouse de BI de uso intermitente con administración automática de la capacidad y acceso a registros de S3 sin cargarlos. Redshift Serverless resuelve el patrón de uso del data warehouse y Spectrum permite consultar S3. Cargar los datos con Glue incumple el requisito de no cargarlos; un clúster administrado manualmente incumple el de administración automática."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "redshift--r0",
+      "conceptId": "redshift",
+      "kind": "recall",
+      "prompt": "A BI warehouse runs intermittently and must query S3 files without loading them. Which Redshift capabilities fit, and why?",
+      "promptEs": "Un data warehouse de BI funciona de forma intermitente y debe consultar archivos de S3 sin cargarlos. ¿Qué capacidades de Redshift elegirías y por qué?",
+      "idealAnswer": "Use Redshift Serverless for automatically managed warehouse capacity and no warehouse charges while it is idle. Use Redshift Spectrum to query the S3 files without loading them into Redshift tables.",
+      "rubric": [
+        "Names Redshift Serverless for intermittent warehouse use.",
+        "Explains automatic capacity management and no charges while the warehouse is idle.",
+        "Names Redshift Spectrum for querying S3 without loading files into Redshift tables."
+      ]
+    },
+    {
+      "id": "redshift--r1",
+      "conceptId": "redshift",
+      "kind": "why-not",
+      "prompt": "Why is Athena alone not the best fit when analysts must include S3 files in queries from an existing Redshift warehouse?",
+      "promptEs": "¿Por qué Athena por sí solo no encaja mejor si los analistas deben incluir archivos de S3 en las consultas de un data warehouse de Redshift existente?",
+      "idealAnswer": "Athena fits ad-hoc SQL queries on S3, but the requirement is to work through an existing Redshift warehouse. Redshift Spectrum lets that warehouse query S3 files without loading them into Redshift tables.",
+      "rubric": [
+        "Identifies Athena's ad-hoc SQL-on-S3 use case.",
+        "Recognizes the requirement to use the existing Redshift warehouse.",
+        "Names Spectrum and its ability to query S3 without loading data into Redshift tables."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,449 @@
+{
+  "conceptId": "fargate-serverless-containers",
+  "card": {
+    "en": {
+      "tldr": "AWS Fargate runs containers with Amazon ECS or Amazon EKS without requiring you to provision or manage EC2 hosts. Choose it when an existing container workload needs the least operational overhead; choose Fargate Spot for ECS tasks that can tolerate interruption.",
+      "whenToUse": [
+        "A team must run containers but does not want to manage EC2 instances or cluster capacity.",
+        "A containerized application needs task-level resource and network settings.",
+        "Interruption-tolerant ECS tasks need a lower-cost capacity option."
+      ],
+      "keyFacts": [
+        "Fargate works with both Amazon ECS and Amazon EKS; each ECS task or Kubernetes pod has a dedicated network interface.",
+        "For an ECS service on Fargate using a load balancer, the target group uses the ip target type, not instance.",
+        "Fargate Spot uses spare capacity for interruption-tolerant ECS tasks; AWS gives a two-minute warning when it needs the capacity back.",
+        "Fargate ephemeral storage is erased when the workload stops. Amazon EFS can provide persistent storage.",
+        "GPU workloads are not supported on Fargate; use Amazon EC2 when a GPU is required."
+      ],
+      "gotchas": [
+        "Fargate removes host management, not the need to specify task CPU, memory, networking, and IAM policies.",
+        "Fargate Spot is not a fit for tasks that cannot tolerate interruption.",
+        "Increasing ephemeral storage does not make data survive a stopped task."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon ECS on EC2",
+          "difference": "ECS on EC2 provides greater instance control but requires managing EC2 capacity; Fargate removes that work."
+        },
+        {
+          "concept": "Amazon EKS",
+          "difference": "EKS is Kubernetes orchestration and can also use Fargate; choosing Fargate does not require choosing Kubernetes."
+        },
+        {
+          "concept": "AWS Batch",
+          "difference": "Batch addresses managed scheduling for queued batch jobs; Fargate is the serverless compute option for containers."
+        }
+      ],
+      "examCues": [
+        "existing container images; no EC2 hosts",
+        "interruption-tolerant ECS tasks",
+        "persistent data after a Fargate task stops",
+        "Fargate service behind a load balancer"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Fargate ejecuta contenedores con Amazon ECS o Amazon EKS sin que tengas que aprovisionar ni administrar hosts EC2. Elígelo cuando una carga de trabajo en contenedores requiera least operational overhead; usa Fargate Spot para tareas de ECS que toleren interrupciones.",
+      "whenToUse": [
+        "Debes ejecutar contenedores sin administrar instancias EC2 ni la capacidad del clúster.",
+        "Una aplicación en contenedores necesita configurar recursos y red por tarea.",
+        "Las tareas de ECS toleran interrupciones y necesitan una opción de capacidad de menor costo."
+      ],
+      "keyFacts": [
+        "Fargate funciona con Amazon ECS y Amazon EKS; cada tarea de ECS o pod de Kubernetes tiene una interfaz de red dedicada.",
+        "Para un servicio ECS en Fargate con balanceador de carga, el target group usa el target type ip, no instance.",
+        "Fargate Spot usa capacidad disponible para tareas de ECS que toleran interrupciones; AWS avisa con dos minutos de anticipación cuando necesita recuperar la capacidad.",
+        "El almacenamiento efímero de Fargate se borra al detenerse la carga de trabajo. Amazon EFS puede proporcionar almacenamiento persistente.",
+        "Fargate no admite cargas de trabajo con GPU; usa Amazon EC2 si necesitas una GPU."
+      ],
+      "gotchas": [
+        "Fargate elimina la administración de hosts, pero todavía debes definir CPU, memoria, red y políticas de IAM para la tarea.",
+        "Fargate Spot no es adecuado si las tareas no toleran interrupciones.",
+        "Ampliar el almacenamiento efímero no conserva los datos después de detener una tarea."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon ECS on EC2",
+          "difference": "ECS on EC2 ofrece más control sobre las instancias, pero exige administrar capacidad EC2; Fargate elimina esa tarea."
+        },
+        {
+          "concept": "Amazon EKS",
+          "difference": "EKS proporciona orquestación de Kubernetes y también puede usar Fargate; elegir Fargate no te obliga a elegir Kubernetes."
+        },
+        {
+          "concept": "AWS Batch",
+          "difference": "Batch proporciona programación administrada de trabajos en cola; Fargate es una opción de cómputo serverless para contenedores."
+        }
+      ],
+      "examCues": [
+        "existing container images; no EC2 hosts",
+        "interruption-tolerant ECS tasks",
+        "persistent data after a Fargate task stops",
+        "Fargate service behind a load balancer"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html",
+      "https://aws.amazon.com/fargate/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "fargate-serverless-containers--d8857d2c",
+      "conceptId": "fargate-serverless-containers",
+      "secondaryConcepts": [
+        "amazon-ecs-launch-types"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retailer has packaged its checkout API into containers. The API must accept HTTPS traffic through a load balancer, remain available without planned capacity interruptions, and run without the team managing EC2 instances. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run an Amazon ECS service on EC2 instances and use an Application Load Balancer with an instance target group.",
+          "correct": false,
+          "why": "This can serve HTTPS traffic but requires the team to manage EC2 capacity."
+        },
+        {
+          "id": "B",
+          "text": "Run an Amazon ECS service on Fargate and use an Application Load Balancer with an instance target group.",
+          "correct": false,
+          "why": "Fargate tasks require an ip target group rather than an instance target group."
+        },
+        {
+          "id": "C",
+          "text": "Run an Amazon ECS service on Fargate Spot and use an Application Load Balancer with an ip target group.",
+          "correct": false,
+          "why": "Fargate Spot tasks can be interrupted when AWS needs the spare capacity back."
+        },
+        {
+          "id": "D",
+          "text": "Run an Amazon ECS service on Fargate and use an Application Load Balancer with an ip target group.",
+          "correct": true,
+          "why": "Fargate avoids EC2 host management, and an Application Load Balancer can route HTTPS traffic to Fargate tasks through ip targets."
+        }
+      ],
+      "explanation": "The deciding requirements are container hosting without EC2 management and an HTTPS-facing load balancer. An ECS service on Fargate removes host provisioning, and an Application Load Balancer supports HTTP/HTTPS traffic with ip targets for Fargate tasks. An instance target group is incompatible with this Fargate service. Fargate Spot misses the requirement to avoid planned capacity interruptions.",
+      "keywordCues": [
+        "packaged its checkout API into containers",
+        "accept HTTPS traffic through a load balancer",
+        "without planned capacity interruptions",
+        "without the team managing EC2 instances"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html",
+        "https://aws.amazon.com/fargate/faqs/"
+      ],
+      "es": {
+        "stem": "Una tienda minorista empaquetó su API de pagos en contenedores. La API debe recibir tráfico HTTPS mediante un balanceador de carga, mantenerse disponible sin interrupciones planificadas por capacidad y ejecutarse sin que el equipo administre instancias EC2. ¿Qué solución cumple estos requisitos con least operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar un servicio de Amazon ECS en instancias EC2 y usar un Application Load Balancer con un target group de tipo instance.",
+            "why": "Esta opción puede atender tráfico HTTPS, pero te exige administrar capacidad EC2."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar un servicio de Amazon ECS en Fargate y usar un Application Load Balancer con un target group de tipo instance.",
+            "why": "Las tareas de Fargate requieren un target group de tipo ip, no instance."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar un servicio de Amazon ECS en Fargate Spot y usar un Application Load Balancer con un target group de tipo ip.",
+            "why": "Las tareas de Fargate Spot pueden interrumpirse cuando AWS necesita recuperar la capacidad disponible."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar un servicio de Amazon ECS en Fargate y usar un Application Load Balancer con un target group de tipo ip.",
+            "why": "Fargate evita que administres hosts EC2, y un Application Load Balancer puede dirigir tráfico HTTPS a las tareas mediante targets ip."
+          }
+        ],
+        "explanation": "Lo decisivo es ejecutar contenedores sin administrar EC2 y recibir tráfico HTTPS mediante un balanceador. Un servicio ECS en Fargate elimina el aprovisionamiento de hosts, y un Application Load Balancer admite HTTPS con targets ip para estas tareas. Un target group de tipo instance no corresponde a este servicio en Fargate. Fargate Spot no cumple el requisito de evitar interrupciones planificadas por capacidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fargate-serverless-containers--1db91dc9",
+      "conceptId": "fargate-serverless-containers",
+      "secondaryConcepts": [
+        "amazon-ecs-launch-types",
+        "amazon-eks"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A design agency is moving a containerized rendering coordinator to AWS. Its shared project files must remain available after a task stops, and the team wants to avoid managing EC2 hosts or introducing Kubernetes. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the coordinator on Amazon ECS with Fargate and store project files on Amazon EFS.",
+          "correct": true,
+          "why": "Fargate avoids EC2 host management, and Amazon EFS provides persistent storage without introducing Kubernetes."
+        },
+        {
+          "id": "B",
+          "text": "Run the coordinator on Amazon ECS with EC2 capacity and store project files on Amazon EFS.",
+          "correct": false,
+          "why": "Amazon EFS provides persistence, but EC2 capacity introduces host management."
+        },
+        {
+          "id": "C",
+          "text": "Run the coordinator on Amazon ECS with Fargate and expand its ephemeral storage for project files.",
+          "correct": false,
+          "why": "Expanded ephemeral storage is still erased when the Fargate task stops."
+        },
+        {
+          "id": "D",
+          "text": "Run the coordinator on Amazon EKS with Fargate and keep project files in pod ephemeral storage.",
+          "correct": false,
+          "why": "Ephemeral storage does not meet the persistence requirement, and the team does not want Kubernetes."
+        }
+      ],
+      "explanation": "The project files must survive a stopped task, so Fargate ephemeral storage is insufficient even if expanded. Amazon EFS supplies persistent storage for Fargate workloads. ECS with Fargate also avoids both EC2 host management and the unwanted move to Kubernetes. ECS on EC2 with EFS solves persistence but misses the operational constraint.",
+      "keywordCues": [
+        "remain available after a task stops",
+        "avoid managing EC2 hosts",
+        "or introducing Kubernetes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html",
+        "https://aws.amazon.com/fargate/faqs/"
+      ],
+      "es": {
+        "stem": "Una agencia de diseño está trasladando a AWS un coordinador de renderizado en contenedores. Sus archivos de proyecto compartidos deben seguir disponibles después de que se detenga una tarea, y el equipo quiere evitar administrar hosts EC2 o introducir Kubernetes. ¿Qué solución cumple estos requisitos con least operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar el coordinador en Amazon ECS con Fargate y almacenar los archivos de proyecto en Amazon EFS.",
+            "why": "Fargate evita administrar hosts EC2, y Amazon EFS aporta persistencia sin introducir Kubernetes."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar el coordinador en Amazon ECS con capacidad EC2 y almacenar los archivos de proyecto en Amazon EFS.",
+            "why": "Amazon EFS aporta persistencia, pero la capacidad EC2 exige administrar hosts."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar el coordinador en Amazon ECS con Fargate y ampliar su almacenamiento efímero para los archivos de proyecto.",
+            "why": "El almacenamiento efímero ampliado también se borra al detenerse la tarea de Fargate."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar el coordinador en Amazon EKS con Fargate y mantener los archivos de proyecto en el almacenamiento efímero del pod.",
+            "why": "El almacenamiento efímero no cumple el requisito de persistencia y el equipo no quiere Kubernetes."
+          }
+        ],
+        "explanation": "Los archivos deben sobrevivir a la detención de una tarea; por eso, el almacenamiento efímero de Fargate no basta aunque lo amplíes. Amazon EFS proporciona almacenamiento persistente para cargas en Fargate. ECS con Fargate también evita administrar hosts EC2 e introducir Kubernetes. ECS en EC2 con EFS resuelve la persistencia, pero no cumple la restricción operativa."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fargate-serverless-containers--0e3259cf",
+      "conceptId": "fargate-serverless-containers",
+      "secondaryConcepts": [
+        "amazon-ecs-launch-types"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A sports venue has containerized a UDP telemetry receiver. It needs a load balancer in front of an Amazon ECS service, cannot manage EC2 hosts, and will deploy the tasks on Fargate platform version 1.4. Which configuration meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Network Load Balancer with an ip target group for the Fargate service.",
+          "correct": true,
+          "why": "A Network Load Balancer can route UDP to Fargate tasks on platform version 1.4, and Fargate requires ip targets."
+        },
+        {
+          "id": "B",
+          "text": "Use a Network Load Balancer with an instance target group for the Fargate service.",
+          "correct": false,
+          "why": "Although a Network Load Balancer supports UDP, the Fargate service needs ip rather than instance targets."
+        },
+        {
+          "id": "C",
+          "text": "Use an Application Load Balancer with an ip target group for the Fargate service.",
+          "correct": false,
+          "why": "An Application Load Balancer routes HTTP/HTTPS traffic, not the required UDP traffic."
+        },
+        {
+          "id": "D",
+          "text": "Use a Network Load Balancer with an ip target group, but run the ECS service on EC2 instances.",
+          "correct": false,
+          "why": "This provides UDP routing but violates the requirement not to manage EC2 hosts."
+        }
+      ],
+      "explanation": "UDP traffic points to a Network Load Balancer rather than an Application Load Balancer. Fargate services use ip target groups, and UDP routing through a Network Load Balancer is supported on Fargate platform version 1.4 or later. An instance target group misses the Fargate networking requirement. Running ECS on EC2 would reintroduce host management.",
+      "keywordCues": [
+        "UDP telemetry receiver",
+        "cannot manage EC2 hosts",
+        "Fargate platform version 1.4"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html",
+        "https://aws.amazon.com/fargate/faqs/"
+      ],
+      "es": {
+        "stem": "Un estadio colocó en contenedores un receptor de telemetría UDP. Necesita un balanceador de carga frente a un servicio de Amazon ECS, no puede administrar hosts EC2 y desplegará las tareas en Fargate platform version 1.4. ¿Qué configuración cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un Network Load Balancer con un target group de tipo ip para el servicio en Fargate.",
+            "why": "Un Network Load Balancer puede dirigir UDP a tareas de Fargate en platform version 1.4, y Fargate requiere targets ip."
+          },
+          {
+            "id": "B",
+            "text": "Usar un Network Load Balancer con un target group de tipo instance para el servicio en Fargate.",
+            "why": "Aunque un Network Load Balancer admite UDP, el servicio en Fargate necesita targets ip y no instance."
+          },
+          {
+            "id": "C",
+            "text": "Usar un Application Load Balancer con un target group de tipo ip para el servicio en Fargate.",
+            "why": "Un Application Load Balancer dirige tráfico HTTP/HTTPS, no el tráfico UDP requerido."
+          },
+          {
+            "id": "D",
+            "text": "Usar un Network Load Balancer con un target group de tipo ip, pero ejecutar el servicio ECS en instancias EC2.",
+            "why": "Esto permite dirigir tráfico UDP, pero incumple el requisito de no administrar hosts EC2."
+          }
+        ],
+        "explanation": "El tráfico UDP apunta a un Network Load Balancer y no a un Application Load Balancer. Los servicios en Fargate usan target groups de tipo ip; un Network Load Balancer admite UDP hacia tareas de Fargate desde platform version 1.4. Un target group de tipo instance no cumple el requisito de red de Fargate. Ejecutar ECS en EC2 volvería a exigir la administración de hosts."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "fargate-serverless-containers--0643cc1b",
+      "conceptId": "fargate-serverless-containers",
+      "secondaryConcepts": [
+        "amazon-ecs-launch-types"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A publisher operates two containerized ECS workloads: an overnight indexing task that can be retried after an interruption, and a customer-facing subscription service that must not depend on reclaimable spare capacity. The team will not manage EC2 hosts and wants the lowest-cost suitable capacity choice for each workload. Which TWO configurations meet these requirements MOST cost-effectively? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the overnight indexing tasks on ECS with EC2 Spot Instances.",
+          "correct": false,
+          "why": "This would require managing EC2 hosts, which the team has ruled out."
+        },
+        {
+          "id": "B",
+          "text": "Run the subscription service on standard Fargate capacity.",
+          "correct": true,
+          "why": "Standard Fargate avoids host management without placing the subscription service on reclaimable Fargate Spot capacity."
+        },
+        {
+          "id": "C",
+          "text": "Run the subscription service on Fargate Spot.",
+          "correct": false,
+          "why": "Fargate Spot depends on spare capacity that AWS can reclaim, contrary to the service requirement."
+        },
+        {
+          "id": "D",
+          "text": "Run the overnight indexing tasks on Fargate Spot.",
+          "correct": true,
+          "why": "The retryable ECS tasks can use discounted Fargate Spot capacity without EC2 host management."
+        },
+        {
+          "id": "E",
+          "text": "Run the overnight indexing tasks on standard Fargate capacity.",
+          "correct": false,
+          "why": "Standard Fargate avoids host management but forgoes the discounted Spot option suitable for these retryable tasks."
+        }
+      ],
+      "explanation": "The two workloads have different interruption requirements, but neither may require EC2 host management. Fargate Spot is the discounted fit for retryable ECS indexing tasks. Standard Fargate is the suitable choice for the subscription service because it does not rely on Fargate Spot spare capacity. EC2 Spot violates the operational constraint, while Spot for the subscription service violates its capacity constraint.",
+      "keywordCues": [
+        "can be retried after an interruption",
+        "must not depend on reclaimable spare capacity",
+        "will not manage EC2 hosts",
+        "lowest-cost suitable capacity choice"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html",
+        "https://aws.amazon.com/fargate/faqs/"
+      ],
+      "es": {
+        "stem": "Una editorial opera dos cargas de trabajo ECS en contenedores: una tarea nocturna de indexación que puede reintentarse después de una interrupción y un servicio de suscripciones para clientes que no debe depender de capacidad disponible recuperable. El equipo no administrará hosts EC2 y busca la opción de capacidad adecuada de menor costo para cada carga. ¿Qué DOS configuraciones cumplen estos requisitos de forma MOST cost-effective? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar las tareas nocturnas de indexación en ECS con EC2 Spot Instances.",
+            "why": "Esta opción exigiría administrar hosts EC2, algo que el equipo descartó."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar el servicio de suscripciones en capacidad estándar de Fargate.",
+            "why": "Fargate estándar evita administrar hosts sin colocar el servicio sobre capacidad recuperable de Fargate Spot."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar el servicio de suscripciones en Fargate Spot.",
+            "why": "Fargate Spot depende de capacidad disponible que AWS puede recuperar, lo que contradice el requisito del servicio."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar las tareas nocturnas de indexación en Fargate Spot.",
+            "why": "Las tareas de ECS que pueden reintentarse aprovechan Fargate Spot con descuento sin que administres hosts EC2."
+          },
+          {
+            "id": "E",
+            "text": "Ejecutar las tareas nocturnas de indexación en capacidad estándar de Fargate.",
+            "why": "Fargate estándar evita administrar hosts, pero desaprovecha la opción Spot con descuento adecuada para estas tareas."
+          }
+        ],
+        "explanation": "Las dos cargas tienen distintos requisitos de interrupción, pero ninguna debe exigir administrar hosts EC2. Fargate Spot es la opción con descuento para las tareas de indexación de ECS que pueden reintentarse. Fargate estándar es adecuado para el servicio de suscripciones porque no depende de la capacidad disponible de Fargate Spot. EC2 Spot incumple la restricción operativa, mientras que usar Spot para las suscripciones incumple su restricción de capacidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "fargate-serverless-containers--r0",
+      "conceptId": "fargate-serverless-containers",
+      "kind": "recall",
+      "prompt": "An ECS team has existing containers and refuses to manage EC2 hosts. What compute option fits, and when would its Spot option fit?",
+      "promptEs": "Un equipo de ECS ya tiene contenedores y no quiere administrar hosts EC2. ¿Qué opción de cómputo conviene y cuándo usarías su opción Spot?",
+      "idealAnswer": "Use AWS Fargate to run the ECS containers without provisioning or managing EC2 instances. Use Fargate Spot for ECS tasks that can tolerate interruption in exchange for discounted capacity.",
+      "rubric": [
+        "Names AWS Fargate for containers without EC2 host management.",
+        "Identifies Fargate Spot for interruption-tolerant ECS tasks.",
+        "Mentions the Spot cost advantage."
+      ]
+    },
+    {
+      "id": "fargate-serverless-containers--r1",
+      "conceptId": "fargate-serverless-containers",
+      "kind": "why-not",
+      "prompt": "Why is ECS on EC2 a poor fit for a container team requiring the least operational overhead and no host management?",
+      "promptEs": "¿Por qué ECS on EC2 no conviene a un equipo de contenedores que requiere least operational overhead y no quiere administrar hosts?",
+      "idealAnswer": "ECS on EC2 leaves the team responsible for EC2 capacity, which conflicts with its host-management constraint. ECS with Fargate runs the containers without requiring the team to provision or manage EC2 instances.",
+      "rubric": [
+        "States that ECS on EC2 entails EC2 capacity or host management.",
+        "Connects that burden to the stated operational requirement.",
+        "Contrasts it with ECS on Fargate."
+      ]
+    }
+  ]
+}

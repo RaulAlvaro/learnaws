@@ -1,0 +1,366 @@
+{
+  "conceptId": "route53-weighted-routing",
+  "card": {
+    "en": {
+      "tldr": "Route 53 weighted routing distributes DNS traffic among resources according to relative record weights. Choose it when a release or migration needs a controlled traffic share rather than routing by location, latency, or primary-site failure.",
+      "whenToUse": [
+        "Introduce a new version to a small share of traffic.",
+        "Gradually shift traffic between old and new resources.",
+        "Keep a resource out of normal routing with a zero weight while retaining it in a weighted record group."
+      ],
+      "keyFacts": [
+        "Weighted records for the resources have the same name and type.",
+        "Each record's traffic share is its weight divided by the total weight of the group.",
+        "Changing weights changes the traffic balance; a weight of zero stops normal traffic to that record.",
+        "If the weighted records have health checks, Route 53 considers nonzero-weight records first. It considers zero-weight records if all nonzero-weight records are unhealthy."
+      ],
+      "gotchas": [
+        "Weights are relative shares, not percentages assigned independently to each record.",
+        "A zero-weight record is not necessarily excluded when health checks are configured and every nonzero-weight record is unhealthy.",
+        "Weighted routing does not select a destination because it is the lowest-latency Region or the user's country."
+      ],
+      "confusedWith": [
+        {
+          "concept": "route53-failover-routing",
+          "difference": "Failover routing selects a secondary site when the primary fails; weighted routing controls relative traffic shares."
+        },
+        {
+          "concept": "route53-latency-routing",
+          "difference": "Latency-based routing selects by network latency, not a specified release share."
+        },
+        {
+          "concept": "route53-geolocation-geoproximity",
+          "difference": "Geolocation uses user location, and geoproximity uses distance and bias; neither is the direct choice for a weight-based split."
+        }
+      ],
+      "examCues": [
+        "send a small share to the new version",
+        "increase traffic to the replacement gradually",
+        "split traffic between two endpoints by relative weight",
+        "keep a zero-weight endpoint out of normal routing"
+      ]
+    },
+    "es": {
+      "tldr": "Route 53 weighted routing distribuye el tráfico DNS entre recursos según los pesos relativos de sus registros. Elígelo cuando un lanzamiento o una migración requiere controlar la proporción de tráfico, en vez de enrutar por ubicación, latencia o falla del sitio principal.",
+      "whenToUse": [
+        "Quieres enviar una pequeña parte del tráfico a una versión nueva.",
+        "Necesitas trasladar el tráfico gradualmente entre recursos antiguos y nuevos.",
+        "Quieres mantener un recurso fuera del enrutamiento normal con peso cero dentro de un grupo de registros ponderados."
+      ],
+      "keyFacts": [
+        "Los registros ponderados de los recursos tienen el mismo nombre y tipo.",
+        "La proporción de tráfico de cada registro es su peso dividido entre el peso total del grupo.",
+        "Cambiar los pesos modifica la distribución; un peso de cero detiene el tráfico normal hacia ese registro.",
+        "Si los registros ponderados tienen health checks, Route 53 considera primero los de peso distinto de cero. Considera los de peso cero si todos los anteriores están unhealthy."
+      ],
+      "gotchas": [
+        "Los pesos son proporciones relativas, no porcentajes independientes asignados a cada registro.",
+        "Un registro de peso cero no queda necesariamente excluido si hay health checks y todos los registros de peso distinto de cero están unhealthy.",
+        "Weighted routing no elige un destino por ser la Región de menor latencia ni por el país del usuario."
+      ],
+      "confusedWith": [
+        {
+          "concept": "route53-failover-routing",
+          "difference": "Failover routing elige un sitio secundario cuando falla el principal; weighted routing controla proporciones relativas de tráfico."
+        },
+        {
+          "concept": "route53-latency-routing",
+          "difference": "Latency-based routing elige según la latencia de red, no según una proporción definida para un lanzamiento."
+        },
+        {
+          "concept": "route53-geolocation-geoproximity",
+          "difference": "Geolocation usa la ubicación del usuario y geoproximity usa distancia y bias; ninguna es la opción directa para una distribución por pesos."
+        }
+      ],
+      "examCues": [
+        "send a small share to the new version",
+        "increase traffic to the replacement gradually",
+        "split traffic between two endpoints by relative weight",
+        "keep a zero-weight endpoint out of normal routing"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-weighted.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route53-weighted-routing--eb9d3999",
+      "conceptId": "route53-weighted-routing",
+      "secondaryConcepts": [
+        "route53-failover-routing",
+        "route53-latency-routing"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company has a Route 53 weighted record group for two active application endpoints, each with a positive weight and a health check. A third endpoint in the group has weight zero and its own health check. Both active endpoints become unhealthy, while the zero-weight endpoint remains healthy. Which result should the company expect?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route 53 continues answering with the two positive-weight records because their weights take precedence.",
+          "correct": false,
+          "why": "Route 53 does not continue favoring unhealthy positive-weight records when a healthy zero-weight record is available."
+        },
+        {
+          "id": "B",
+          "text": "Route 53 answers with the endpoint that has the lowest network latency.",
+          "correct": false,
+          "why": "These are weighted records, not latency-based records."
+        },
+        {
+          "id": "C",
+          "text": "Route 53 considers the healthy zero-weight record and can answer with it.",
+          "correct": true,
+          "why": "When every positive-weight record is unhealthy, Route 53 considers the zero-weight records."
+        },
+        {
+          "id": "D",
+          "text": "Route 53 excludes the zero-weight record under all health conditions.",
+          "correct": false,
+          "why": "A zero-weight record can be considered when all positive-weight records are unhealthy."
+        }
+      ],
+      "explanation": "The deciding conditions are that every positive-weight record is unhealthy and the zero-weight record is healthy. With health checks on the weighted records, Route 53 considers zero-weight records after all positive-weight records become unhealthy. Zero weight therefore keeps the third endpoint out of normal routing, but does not exclude it in this condition.",
+      "keywordCues": [
+        "each with a positive weight and a health check",
+        "weight zero and its own health check",
+        "Both active endpoints become unhealthy",
+        "zero-weight endpoint remains healthy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-weighted.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene un grupo de registros weighted de Route 53 para dos endpoints activos de una aplicación; cada uno tiene un peso positivo y un health check. Un tercer endpoint del grupo tiene peso cero y su propio health check. Los dos endpoints activos pasan a estar unhealthy, mientras el endpoint de peso cero sigue healthy. ¿Qué resultado debe esperar la empresa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Route 53 sigue respondiendo con los dos registros de peso positivo porque sus pesos tienen prioridad.",
+            "why": "Route 53 no sigue favoreciendo los registros de peso positivo unhealthy cuando hay disponible uno de peso cero healthy."
+          },
+          {
+            "id": "B",
+            "text": "Route 53 responde con el endpoint de menor latencia de red.",
+            "why": "Estos son registros weighted, no registros latency-based."
+          },
+          {
+            "id": "C",
+            "text": "Route 53 considera el registro de peso cero healthy y puede responder con él.",
+            "why": "Cuando todos los registros de peso positivo están unhealthy, Route 53 considera los registros de peso cero."
+          },
+          {
+            "id": "D",
+            "text": "Route 53 excluye el registro de peso cero bajo cualquier condición de salud.",
+            "why": "Se puede considerar un registro de peso cero cuando todos los registros de peso positivo están unhealthy."
+          }
+        ],
+        "explanation": "Las condiciones decisivas son que todos los registros de peso positivo están unhealthy y el de peso cero está healthy. Con health checks en los registros weighted, Route 53 considera los de peso cero después de que todos los de peso positivo pasan a estar unhealthy. Por eso, el peso cero mantiene al tercer endpoint fuera del enrutamiento normal, pero no lo excluye en esta situación."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-weighted-routing--5f031aa7",
+      "conceptId": "route53-weighted-routing",
+      "secondaryConcepts": [
+        "route53-failover-routing",
+        "route53-geolocation-geoproximity"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research portal has two production endpoints and a recovery endpoint under one domain name. It must share normal DNS traffic between the production endpoints, send no normal traffic to recovery, and avoid answering with recovery if its own health check reports it unhealthy. Which two configurations meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route production traffic by geolocation and assign recovery to an additional country.",
+          "correct": false,
+          "why": "Geolocation assigns traffic by user location rather than sharing normal traffic by weight while keeping recovery dark."
+        },
+        {
+          "id": "B",
+          "text": "Add a zero-weight recovery record without a health check.",
+          "correct": false,
+          "why": "An unchecked zero-weight record can be answered with when all positive-weight records are unhealthy, even if recovery itself is unhealthy."
+        },
+        {
+          "id": "C",
+          "text": "Add a same-name, same-type zero-weight recovery record with its own health check.",
+          "correct": true,
+          "why": "It stays out of normal weighted routing and can be considered when positive-weight records are unhealthy, subject to its health check."
+        },
+        {
+          "id": "D",
+          "text": "Create same-name, same-type weighted records for the production endpoints with positive weights and health checks.",
+          "correct": true,
+          "why": "These records provide the normal relative split and allow health-check status to affect their eligibility."
+        },
+        {
+          "id": "E",
+          "text": "Give the recovery record a small positive weight so it is ready for an outage.",
+          "correct": false,
+          "why": "A positive weight makes recovery eligible for normal traffic."
+        }
+      ],
+      "explanation": "The portal needs a normal weighted split plus a recovery record that stays dark while production is healthy. Positive-weight, health-checked production records provide the split; a zero-weight recovery record with its own health check satisfies the recovery conditions. A positive recovery weight admits normal traffic, while a zero-weight recovery record without a health check does not meet the requirement to avoid answering with unhealthy recovery.",
+      "keywordCues": [
+        "share normal DNS traffic between the production endpoints",
+        "send no normal traffic to recovery",
+        "avoid answering with recovery if its own health check reports it unhealthy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-weighted.html"
+      ],
+      "es": {
+        "stem": "Un portal de investigación tiene dos endpoints de producción y uno de recuperación bajo un mismo nombre de dominio. Debe distribuir el tráfico DNS normal entre los endpoints de producción, no enviar tráfico normal a recuperación y evitar responder con recuperación si su propio health check indica que está unhealthy. ¿Qué dos configuraciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Enrutar el tráfico de producción por geolocation y asignar recuperación a otro país.",
+            "why": "Geolocation asigna tráfico según la ubicación del usuario, en lugar de distribuirlo por peso y mantener recuperación sin tráfico normal."
+          },
+          {
+            "id": "B",
+            "text": "Agregar un registro de recuperación de peso cero sin health check.",
+            "why": "Se puede responder con un registro de peso cero sin health check cuando todos los de peso positivo están unhealthy, incluso si recuperación también está unhealthy."
+          },
+          {
+            "id": "C",
+            "text": "Agregar un registro de recuperación de peso cero, con el mismo nombre y tipo, y con su propio health check.",
+            "why": "Queda fuera del enrutamiento weighted normal y puede considerarse cuando los registros de peso positivo están unhealthy, sujeto a su health check."
+          },
+          {
+            "id": "D",
+            "text": "Crear registros weighted con el mismo nombre y tipo para los endpoints de producción, con pesos positivos y health checks.",
+            "why": "Estos registros proporcionan la distribución relativa normal y permiten que su estado de salud afecte su elegibilidad."
+          },
+          {
+            "id": "E",
+            "text": "Dar al registro de recuperación un peso positivo pequeño para que esté listo ante una interrupción.",
+            "why": "Un peso positivo hace que recuperación pueda recibir tráfico normal."
+          }
+        ],
+        "explanation": "El portal necesita una distribución weighted normal y un registro de recuperación que permanezca sin tráfico mientras producción está healthy. Los registros de producción con peso positivo y health checks proporcionan la distribución; el registro de recuperación con peso cero y su propio health check cumple las condiciones de recuperación. Un peso positivo permite tráfico normal hacia recuperación, mientras que un registro de peso cero sin health check no cumple el requisito de evitar respuestas con recuperación unhealthy."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-weighted-routing--491a2698",
+      "conceptId": "route53-weighted-routing",
+      "secondaryConcepts": [
+        "route53-latency-routing",
+        "route53-geolocation-geoproximity",
+        "route53-failover-routing"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is releasing a redesigned checkout service alongside its existing service. It wants to direct a small share of DNS traffic to the redesign, then increase that share without choosing destinations by customer location or network latency. Which Route 53 routing policy meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use weighted records for the two services and adjust their weights during the release.",
+          "correct": true,
+          "why": "Weighted records let the company assign relative traffic shares and change them gradually."
+        },
+        {
+          "id": "B",
+          "text": "Use geolocation records for the two services.",
+          "correct": false,
+          "why": "Geolocation routing chooses by user location rather than a controlled share of traffic."
+        },
+        {
+          "id": "C",
+          "text": "Use failover records with the existing service as primary.",
+          "correct": false,
+          "why": "Failover routing is for switching to a secondary destination when the primary fails, not a gradual split."
+        },
+        {
+          "id": "D",
+          "text": "Use latency-based records for the two services.",
+          "correct": false,
+          "why": "Latency-based routing chooses by latency rather than the release share the company wants to control."
+        }
+      ],
+      "explanation": "The deciding requirement is a controllable share for a gradual release. Route 53 weighted routing distributes traffic according to relative record weights, which the company can change as the release progresses. Latency-based and geolocation routing use different selection criteria, while failover routing does not provide the requested gradual split.",
+      "keywordCues": [
+        "small share of DNS traffic",
+        "increase that share",
+        "without choosing destinations by customer location or network latency"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-weighted.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos lanza un servicio de pago rediseñado junto al servicio actual. Quiere enviar una pequeña parte del tráfico DNS al nuevo servicio y luego aumentar esa proporción, sin elegir destinos por ubicación del cliente ni por latencia de red. ¿Qué política de enrutamiento de Route 53 cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar registros weighted para ambos servicios y ajustar sus pesos durante el lanzamiento.",
+            "why": "Los registros weighted permiten asignar proporciones relativas de tráfico y cambiarlas gradualmente."
+          },
+          {
+            "id": "B",
+            "text": "Usar registros geolocation para ambos servicios.",
+            "why": "Geolocation routing elige según la ubicación del usuario, no según una proporción controlada de tráfico."
+          },
+          {
+            "id": "C",
+            "text": "Usar registros failover con el servicio actual como primary.",
+            "why": "Failover routing sirve para cambiar a un destino secundario si falla el principal, no para una distribución gradual."
+          },
+          {
+            "id": "D",
+            "text": "Usar registros latency-based para ambos servicios.",
+            "why": "Latency-based routing elige según la latencia, no según la proporción que la empresa quiere controlar."
+          }
+        ],
+        "explanation": "El requisito decisivo es controlar la proporción de tráfico durante un lanzamiento gradual. Route 53 weighted routing distribuye el tráfico según los pesos relativos de los registros, que puedes modificar conforme avance el lanzamiento. Latency-based y geolocation routing usan otros criterios de selección, mientras que failover routing no proporciona la distribución gradual solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "route53-weighted-routing--r0",
+      "conceptId": "route53-weighted-routing",
+      "kind": "recall",
+      "prompt": "A new release should receive a small share of DNS traffic that grows over time. Which Route 53 policy fits, and why?",
+      "promptEs": "Una versión nueva debe recibir una pequeña parte del tráfico DNS que aumentará con el tiempo. ¿Qué política de Route 53 elegirías y por qué?",
+      "idealAnswer": "Use Route 53 weighted routing. Give the old and new endpoints same-name, same-type records with relative weights, then change the weights as the release expands.",
+      "rubric": [
+        "Names Route 53 weighted routing.",
+        "Explains that relative record weights control the traffic share.",
+        "Mentions changing weights to grow the new version's share."
+      ]
+    },
+    {
+      "id": "route53-weighted-routing--r1",
+      "conceptId": "route53-weighted-routing",
+      "kind": "why-not",
+      "prompt": "Why is Route 53 latency-based routing unsuitable when a migration requires a controlled traffic share for each endpoint?",
+      "promptEs": "¿Por qué Route 53 latency-based routing no sirve cuando una migración requiere controlar la proporción de tráfico de cada endpoint?",
+      "idealAnswer": "Latency-based routing chooses a destination based on network latency, not a specified traffic share. Weighted routing matches the migration because its relative record weights control how traffic is divided.",
+      "rubric": [
+        "Identifies latency as the selection criterion for latency-based routing.",
+        "States that it does not provide the requested weight-based share.",
+        "Contrasts it with weighted routing."
+      ]
+    }
+  ]
+}

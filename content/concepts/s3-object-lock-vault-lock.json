@@ -1,0 +1,365 @@
+{
+  "conceptId": "s3-object-lock-vault-lock",
+  "card": {
+    "en": {
+      "tldr": "S3 Object Lock protects individual object versions against deletion or overwrite using WORM retention. Choose compliance mode when no user, including the account root user, may shorten retention or delete a protected version; choose governance mode when authorized exceptions are required.",
+      "whenToUse": [
+        "Records must remain immutable for a required retention period, even from the root user.",
+        "An investigation requires protection that continues until an authorized user removes a legal hold.",
+        "Retention must continue for a specified duration after a future business event."
+      ],
+      "keyFacts": [
+        "S3 Object Lock works only in buckets with S3 Versioning enabled; retention and legal holds protect individual object versions.",
+        "Compliance-mode retention cannot be shortened, and a protected version cannot be overwritten or deleted during its retention period, even by the account root user.",
+        "Governance-mode retention can be overridden with s3:BypassGovernanceRetention permission and an explicit bypass request header.",
+        "A legal hold has no expiration date, is independent of retention, and remains until a user with the required permission removes it.",
+        "Variable retention can keep an event hold active and set the retain-until-date to the event-hold release time plus a specified duration.",
+        "Amazon Glacier Vault Lock applies an unchangeable compliance policy to a vault in the original standalone Amazon Glacier service, not to an S3 Glacier storage class."
+      ],
+      "gotchas": [
+        "Versioning retains versions but does not, by itself, enforce WORM retention.",
+        "Object Lock does not prevent a new version or a delete marker from being added above a protected version.",
+        "A legal hold can be removed by an authorized user; it is not a substitute for an unshortenable compliance-mode retention period.",
+        "For new archival storage, do not confuse the original standalone Amazon Glacier vault service with Amazon S3 Glacier storage classes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "s3-versioning-mfa-delete",
+          "difference": "Versioning helps recover earlier versions; Object Lock adds WORM protection to specified versions."
+        },
+        {
+          "concept": "s3-replication",
+          "difference": "Replication copies objects for needs such as disaster recovery; it is not the retention control that makes a version immutable."
+        }
+      ],
+      "examCues": [
+        "even the account root user cannot delete records",
+        "retain each record for a required period",
+        "keep evidence until the investigation ends",
+        "retention starts after account closure",
+        "lock a policy on an existing Amazon Glacier vault"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Object Lock protege versiones individuales de objetos contra eliminación o sobrescritura mediante retención WORM. Elige compliance mode si nadie, ni siquiera el usuario raíz de la cuenta, puede acortar la retención o eliminar una versión protegida; elige governance mode si se requieren excepciones autorizadas.",
+      "whenToUse": [
+        "Debes mantener registros inmutables durante un período obligatorio, incluso frente al usuario raíz.",
+        "Una investigación requiere protección que continúe hasta que un usuario autorizado retire un legal hold.",
+        "La retención debe continuar durante un plazo específico después de un evento futuro del negocio."
+      ],
+      "keyFacts": [
+        "S3 Object Lock solo funciona en buckets con S3 Versioning habilitado; la retención y los legal holds protegen versiones individuales.",
+        "En compliance mode no se puede acortar la retención ni sobrescribir o eliminar una versión protegida durante ese período, ni siquiera mediante el usuario raíz.",
+        "En governance mode se puede omitir la retención con el permiso s3:BypassGovernanceRetention y el encabezado explícito de omisión.",
+        "Un legal hold no tiene fecha de vencimiento, es independiente de la retención y permanece hasta que lo retire un usuario con el permiso necesario.",
+        "Variable retention puede mantener activo un event hold y fijar la fecha de fin de retención en el momento de liberarlo más la duración especificada.",
+        "Amazon Glacier Vault Lock aplica una política de cumplimiento que no puede modificarse a un vault del servicio independiente original Amazon Glacier, no a una clase de almacenamiento S3 Glacier."
+      ],
+      "gotchas": [
+        "Versioning conserva versiones, pero por sí solo no impone retención WORM.",
+        "Object Lock no impide que se agregue una versión nueva o un delete marker por encima de una versión protegida.",
+        "Un usuario autorizado puede retirar un legal hold; no sustituye un período de retención en compliance mode que no pueda acortarse.",
+        "Para almacenamiento de archivos nuevo, no confundas el servicio independiente original Amazon Glacier con las clases de almacenamiento Amazon S3 Glacier."
+      ],
+      "confusedWith": [
+        {
+          "concept": "s3-versioning-mfa-delete",
+          "difference": "Versioning permite recuperar versiones anteriores; Object Lock agrega protección WORM a versiones específicas."
+        },
+        {
+          "concept": "s3-replication",
+          "difference": "Replication copia objetos para necesidades como recuperación ante desastres; no es el control de retención que vuelve inmutable una versión."
+        }
+      ],
+      "examCues": [
+        "even the account root user cannot delete records",
+        "retain each record for a required period",
+        "keep evidence until the investigation ends",
+        "retention starts after account closure",
+        "lock a policy on an existing Amazon Glacier vault"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+      "https://docs.aws.amazon.com/amazonglacier/latest/dev/vault-lock.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-object-lock-vault-lock--cc9f176a",
+      "conceptId": "s3-object-lock-vault-lock",
+      "secondaryConcepts": [
+        "s3-versioning-mfa-delete",
+        "s3-replication"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A public records office stores finalized permits in Amazon S3. Each submitted version must be undeletable by any user for a required retention period, and versions involved in a lawsuit must remain protected even after that period expires, until an authorized employee ends the hold. Which TWO controls should the office apply to the submitted versions? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replicate the versions to another S3 bucket.",
+          "correct": false,
+          "why": "Replication supplies copies rather than an unshortenable retention period or a lawsuit-specific hold."
+        },
+        {
+          "id": "B",
+          "text": "Set S3 Object Lock retention in governance mode.",
+          "correct": false,
+          "why": "Authorized users can bypass governance-mode retention, so it does not meet the no-user-deletion requirement."
+        },
+        {
+          "id": "C",
+          "text": "Set S3 Object Lock retention in compliance mode.",
+          "correct": true,
+          "why": "Compliance mode prevents any user from deleting a protected version during the required retention period."
+        },
+        {
+          "id": "D",
+          "text": "Require MFA Delete for permanent deletion of versions.",
+          "correct": false,
+          "why": "MFA Delete does not provide the required protection against every user throughout the retention period."
+        },
+        {
+          "id": "E",
+          "text": "Place an S3 Object Lock legal hold on versions involved in a lawsuit.",
+          "correct": true,
+          "why": "A legal hold remains independently in effect after retention expires until an authorized user removes it."
+        }
+      ],
+      "explanation": "The office needs two distinct protections: an unshortenable period for every submitted version and an open-ended hold for lawsuit-related versions. Compliance-mode retention meets the first requirement, and an Object Lock legal hold meets the second. A legal hold is independent of the retention period, so its protection can continue after that period expires; governance mode does not meet the prohibition on deletion by any user.",
+      "keywordCues": [
+        "undeletable by any user for a required retention period",
+        "remain protected even after that period expires",
+        "until an authorized employee ends the hold"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+        "https://docs.aws.amazon.com/amazonglacier/latest/dev/vault-lock.html"
+      ],
+      "es": {
+        "stem": "Una oficina de registros públicos almacena permisos finalizados en Amazon S3. Ningún usuario debe poder eliminar cada versión enviada durante un período de retención obligatorio, y las versiones relacionadas con un litigio deben seguir protegidas incluso después de que venza ese período, hasta que un empleado autorizado termine el hold. ¿Qué DOS controles debe aplicar la oficina a las versiones enviadas? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Replicar las versiones a otro bucket de S3.",
+            "why": "Replication crea copias, pero no proporciona un período de retención que no pueda acortarse ni un hold específico para el litigio."
+          },
+          {
+            "id": "B",
+            "text": "Configurar retención de S3 Object Lock en governance mode.",
+            "why": "Los usuarios autorizados pueden omitir la retención en governance mode, por lo que no cumple el requisito de impedir la eliminación por cualquier usuario."
+          },
+          {
+            "id": "C",
+            "text": "Configurar retención de S3 Object Lock en compliance mode.",
+            "why": "Compliance mode impide que cualquier usuario elimine una versión protegida durante el período de retención obligatorio."
+          },
+          {
+            "id": "D",
+            "text": "Exigir MFA Delete para eliminar versiones de forma permanente.",
+            "why": "MFA Delete no proporciona la protección requerida frente a cualquier usuario durante todo el período de retención."
+          },
+          {
+            "id": "E",
+            "text": "Aplicar un legal hold de S3 Object Lock a las versiones relacionadas con un litigio.",
+            "why": "Un legal hold continúa vigente de manera independiente después de que venza la retención, hasta que lo retire un usuario autorizado."
+          }
+        ],
+        "explanation": "La oficina necesita dos protecciones distintas: un período que no pueda acortarse para cada versión enviada y un hold sin fecha de vencimiento para las versiones relacionadas con litigios. La retención en compliance mode cumple el primer requisito, y un legal hold de Object Lock cumple el segundo. El legal hold es independiente del período de retención, por lo que puede seguir protegiendo la versión después de su vencimiento; governance mode no impide la eliminación por cualquier usuario."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-object-lock-vault-lock--771e1d3c",
+      "conceptId": "s3-object-lock-vault-lock",
+      "secondaryConcepts": [
+        "s3-versioning-mfa-delete",
+        "s3-replication"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A clinical research organization writes signed study reports to Amazon S3. Its regulator requires each submitted version to remain available and unaltered for a defined retention period, even if an administrator or the account root user attempts to delete it. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Object Lock with governance-mode retention for the submitted versions.",
+          "correct": false,
+          "why": "An authorized user can bypass governance-mode retention, contrary to the requirement that no administrator can delete a protected version."
+        },
+        {
+          "id": "B",
+          "text": "Enable S3 Versioning and require MFA Delete for permanent version deletions.",
+          "correct": false,
+          "why": "Versioning and MFA Delete do not provide the required compliance-mode WORM retention."
+        },
+        {
+          "id": "C",
+          "text": "Replicate the submitted reports to an S3 bucket in another AWS Region.",
+          "correct": false,
+          "why": "A second copy does not make each submitted version undeletable for the required period."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Object Lock with compliance-mode retention for the submitted versions.",
+          "correct": true,
+          "why": "Compliance mode prevents every user, including the root user, from deleting or overwriting a protected version during retention."
+        }
+      ],
+      "explanation": "The deciding requirement is that even the account root user must be unable to delete a submitted version during its retention period. S3 Object Lock in compliance mode provides that protection for object versions. Governance mode permits an authorized bypass, while Versioning and replication address different protection needs.",
+      "keywordCues": [
+        "each submitted version",
+        "defined retention period",
+        "even if an administrator or the account root user attempts to delete it"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+        "https://docs.aws.amazon.com/amazonglacier/latest/dev/vault-lock.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación clínica guarda informes de estudios firmados en Amazon S3. El regulador exige que cada versión enviada permanezca disponible y sin cambios durante un período de retención definido, incluso si un administrador o el usuario raíz de la cuenta intenta eliminarla. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar S3 Object Lock con retención en governance mode para las versiones enviadas.",
+            "why": "Un usuario autorizado puede omitir la retención en governance mode, lo que incumple el requisito de impedir que un administrador elimine una versión protegida."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar S3 Versioning y exigir MFA Delete para eliminar versiones de forma permanente.",
+            "why": "Versioning y MFA Delete no proporcionan la retención WORM en compliance mode requerida."
+          },
+          {
+            "id": "C",
+            "text": "Replicar los informes enviados a un bucket de S3 en otra AWS Region.",
+            "why": "Una segunda copia no impide que se elimine cada versión enviada durante el período obligatorio."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Object Lock con retención en compliance mode para las versiones enviadas.",
+            "why": "Compliance mode impide que cualquier usuario, incluido el usuario raíz, elimine o sobrescriba una versión protegida durante la retención."
+          }
+        ],
+        "explanation": "El requisito decisivo es que ni siquiera el usuario raíz pueda eliminar una versión enviada durante su período de retención. S3 Object Lock en compliance mode protege las versiones de esa manera. Governance mode permite una omisión autorizada, mientras que Versioning y replication atienden otras necesidades de protección."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-object-lock-vault-lock--6e22fc1a",
+      "conceptId": "s3-object-lock-vault-lock",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company is an existing customer of the original standalone Amazon Glacier service and must keep using an established vault and its existing API integration. Auditors want a vault-wide WORM retention policy that cannot be edited after the company finalizes it. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a vault access policy that denies archive deletion.",
+          "correct": false,
+          "why": "A vault access policy is not the lockable compliance policy the auditors require."
+        },
+        {
+          "id": "B",
+          "text": "Attach a Vault Lock policy to the existing Amazon Glacier vault and complete the lock.",
+          "correct": true,
+          "why": "A completed Vault Lock makes the vault's compliance policy unchangeable and preserves the existing vault integration."
+        },
+        {
+          "id": "C",
+          "text": "Use S3 Object Lock compliance mode on an S3 Glacier storage class.",
+          "correct": false,
+          "why": "An S3 Glacier storage class is distinct from the company's existing standalone Amazon Glacier vault."
+        },
+        {
+          "id": "D",
+          "text": "Copy the archives to a versioned S3 bucket and enable MFA Delete.",
+          "correct": false,
+          "why": "Moving to S3 changes the required vault integration and does not lock a vault-wide WORM policy."
+        }
+      ],
+      "explanation": "The company must retain its original standalone Amazon Glacier vault, and the policy must become unchangeable. Amazon Glacier Vault Lock is designed to enforce compliance controls on that vault; after the lock is completed, its policy cannot be changed or deleted. A vault access policy is not lockable, and an S3 Glacier storage class is not the existing vault.",
+      "keywordCues": [
+        "existing customer of the original standalone Amazon Glacier service",
+        "keep using an established vault",
+        "vault-wide WORM retention policy that cannot be edited"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+        "https://docs.aws.amazon.com/amazonglacier/latest/dev/vault-lock.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios es cliente existente del servicio independiente original Amazon Glacier y debe seguir usando un vault establecido y su integración actual con la API. Los auditores quieren una política WORM de retención para todo el vault que no pueda editarse después de finalizarla. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar una vault access policy que deniegue la eliminación de archivos.",
+            "why": "Una vault access policy no es la política de cumplimiento bloqueable que exigen los auditores."
+          },
+          {
+            "id": "B",
+            "text": "Adjuntar una Vault Lock policy al vault existente de Amazon Glacier y completar el bloqueo.",
+            "why": "Al completar Vault Lock, la política de cumplimiento del vault deja de poder modificarse y se conserva la integración existente."
+          },
+          {
+            "id": "C",
+            "text": "Usar S3 Object Lock en compliance mode sobre una clase de almacenamiento S3 Glacier.",
+            "why": "Una clase de almacenamiento S3 Glacier es distinta del vault existente en el servicio independiente Amazon Glacier."
+          },
+          {
+            "id": "D",
+            "text": "Copiar los archivos a un bucket de S3 con Versioning y habilitar MFA Delete.",
+            "why": "Pasar a S3 cambia la integración obligatoria con el vault y no bloquea una política WORM para todo el vault."
+          }
+        ],
+        "explanation": "La empresa debe conservar su vault del servicio independiente original Amazon Glacier, y la política debe quedar inalterable. Amazon Glacier Vault Lock aplica controles de cumplimiento a ese vault; una vez completado el bloqueo, la política no puede cambiarse ni eliminarse. Una vault access policy no puede bloquearse, y una clase de almacenamiento S3 Glacier no es el vault existente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-object-lock-vault-lock--r0",
+      "conceptId": "s3-object-lock-vault-lock",
+      "kind": "recall",
+      "prompt": "Which S3 controls protect records from everyone during a fixed retention period and keep selected records protected afterward for an investigation?",
+      "promptEs": "¿Qué controles de S3 protegen los registros frente a cualquier usuario durante un período fijo y mantienen protegidos algunos después por una investigación?",
+      "idealAnswer": "Use S3 Object Lock compliance-mode retention on the record versions for the required period. Add legal holds to versions under investigation; those holds continue independently until an authorized user removes them.",
+      "rubric": [
+        "Names S3 Object Lock compliance mode for protection during required retention.",
+        "Names a legal hold for selected versions that need continued protection.",
+        "Explains that the legal hold remains independently until authorized removal."
+      ]
+    },
+    {
+      "id": "s3-object-lock-vault-lock--r1",
+      "conceptId": "s3-object-lock-vault-lock",
+      "kind": "why-not",
+      "prompt": "Why doesn't S3 Versioning with MFA Delete replace Object Lock compliance mode when even the root user must not delete retained records?",
+      "promptEs": "¿Por qué S3 Versioning con MFA Delete no reemplaza Object Lock en compliance mode si ni siquiera el usuario raíz puede eliminar registros retenidos?",
+      "idealAnswer": "Versioning preserves object versions, and MFA Delete adds a requirement to permanent deletion, but they do not establish an unshortenable WORM retention period. Object Lock compliance mode prevents any user, including the account root user, from deleting a protected version during its retention period.",
+      "rubric": [
+        "Distinguishes preservation of versions from WORM retention.",
+        "Identifies compliance mode as preventing deletion by the root user during retention.",
+        "Explains why MFA Delete does not meet the no-user-deletion requirement."
+      ]
+    }
+  ]
+}

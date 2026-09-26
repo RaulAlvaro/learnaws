@@ -1,0 +1,372 @@
+{
+  "conceptId": "s3-presigned-urls",
+  "card": {
+    "en": {
+      "tldr": "An S3 presigned URL grants time-limited access to a specific S3 object operation without giving the recipient AWS credentials or changing the bucket policy. Choose it when someone needs to upload or download a private object directly from S3 for a limited time.",
+      "whenToUse": [
+        "An external recipient needs temporary access to download one private S3 object.",
+        "A client without AWS credentials needs to upload an object directly to S3.",
+        "The application can generate a URL for a specific object key and HTTP method."
+      ],
+      "keyFacts": [
+        "The URL uses the permissions of the IAM principal that generated it; that principal must be allowed to perform the requested operation.",
+        "A presigned URL specifies a bucket, object key, HTTP method, and expiration interval.",
+        "The URL can be used multiple times until it expires. A PUT upload replaces an existing object with the same key.",
+        "A URL expires at its configured time or when its signing credentials expire, whichever comes first.",
+        "AWS CLI and SDKs can set an expiration as high as 7 days, but temporary credentials can shorten its effective lifetime."
+      ],
+      "gotchas": [
+        "A presigned URL is a bearer token: anyone who obtains it can use it while it remains valid.",
+        "Setting a longer URL expiration does not extend the lifetime of the role session that signed it.",
+        "An explicit bucket-policy deny can still prevent access through a presigned URL.",
+        "Expiration does not make a URL single-use."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 bucket policies",
+          "difference": "Bucket policies set resource-level access rules; a presigned URL grants temporary access to a specified object operation without updating the policy."
+        },
+        {
+          "concept": "S3 Access Points",
+          "difference": "Access Points provide separate access policies for applications or teams sharing a bucket, rather than issuing a temporary link to a recipient."
+        },
+        {
+          "concept": "CloudFront signed URLs/cookies",
+          "difference": "These restrict content served through CloudFront; an S3 presigned URL authorizes an operation directly against S3."
+        }
+      ],
+      "examCues": [
+        "temporary download of one private S3 object",
+        "upload directly to S3 without AWS credentials",
+        "do not make the bucket public",
+        "URL expires when the signing role session ends"
+      ]
+    },
+    "es": {
+      "tldr": "Una S3 presigned URL concede acceso por tiempo limitado a una operación sobre un objeto específico de S3, sin dar credenciales de AWS al destinatario ni cambiar la bucket policy. Elígela cuando alguien deba subir o descargar un objeto privado directamente desde S3 durante un periodo limitado.",
+      "whenToUse": [
+        "Un destinatario externo necesita descargar temporalmente un objeto privado de S3.",
+        "Un cliente sin credenciales de AWS necesita subir un objeto directamente a S3.",
+        "La aplicación puede generar una URL para una clave de objeto y un método HTTP específicos."
+      ],
+      "keyFacts": [
+        "La URL usa los permisos del principal de IAM que la genera; ese principal debe tener permiso para realizar la operación solicitada.",
+        "Una presigned URL especifica un bucket, una clave de objeto, un método HTTP y un intervalo de vencimiento.",
+        "La URL puede usarse varias veces hasta que venza. Una carga PUT reemplaza un objeto existente que tenga la misma clave.",
+        "La URL vence al llegar a la hora configurada o cuando vencen las credenciales con que se firmó, lo que ocurra primero.",
+        "AWS CLI y los SDK pueden configurar un vencimiento de hasta 7 días, pero las credenciales temporales pueden acortar su vigencia efectiva."
+      ],
+      "gotchas": [
+        "Una presigned URL funciona como un bearer token: cualquiera que la obtenga puede usarla mientras sea válida.",
+        "Configurar un vencimiento más largo para la URL no prolonga la sesión del rol que la firmó.",
+        "Un deny explícito en la bucket policy puede impedir el acceso incluso con una presigned URL.",
+        "El vencimiento no convierte la URL en una URL de un solo uso."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 bucket policies",
+          "difference": "Las bucket policies establecen reglas de acceso a recursos; una presigned URL concede acceso temporal a una operación sobre un objeto específico sin actualizar la política."
+        },
+        {
+          "concept": "S3 Access Points",
+          "difference": "Los Access Points ofrecen políticas de acceso separadas para aplicaciones o equipos que comparten un bucket, en lugar de emitir un enlace temporal a un destinatario."
+        },
+        {
+          "concept": "CloudFront signed URLs/cookies",
+          "difference": "Restringen contenido servido mediante CloudFront; una S3 presigned URL autoriza una operación directamente contra S3."
+        }
+      ],
+      "examCues": [
+        "temporary download of one private S3 object",
+        "upload directly to S3 without AWS credentials",
+        "do not make the bucket public",
+        "URL expires when the signing role session ends"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-presigned-urls--0ab80177",
+      "conceptId": "s3-presigned-urls",
+      "secondaryConcepts": [
+        "s3-access-points",
+        "s3-bucket-policies-block-public-access",
+        "cloudfront-signed-urls-cookies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research firm stores private report files in Amazon S3. Each external reviewer needs to download one assigned report for a short period, but reviewers must not receive AWS credentials and the firm does not want to change its bucket policy for each review. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Serve each report through CloudFront and issue a CloudFront signed URL to its reviewer.",
+          "correct": false,
+          "why": "A CloudFront signed URL controls content served through CloudFront, while this scenario calls for temporary access to objects directly in S3 without adding a distribution."
+        },
+        {
+          "id": "B",
+          "text": "Create an S3 Access Point for each reviewer and grant access to the assigned report.",
+          "correct": false,
+          "why": "An Access Point provides a separate access policy but does not itself issue the requested time-limited download link."
+        },
+        {
+          "id": "C",
+          "text": "Have an authorized application generate an S3 GET presigned URL for each assigned report.",
+          "correct": true,
+          "why": "A GET presigned URL grants temporary download access to the specified object without giving the reviewer AWS credentials or changing the bucket policy."
+        },
+        {
+          "id": "D",
+          "text": "Add a bucket-policy allow statement for each reviewer, then remove it after the review period.",
+          "correct": false,
+          "why": "Per-reviewer policy changes add operational work and do not meet the requirement to avoid changing the bucket policy for each review."
+        }
+      ],
+      "explanation": "The deciding requirements are temporary access to one private S3 object, no reviewer AWS credentials, and no per-review bucket-policy changes. An authorized application can generate a GET presigned URL for the report. An Access Point separates access policies but is not a temporary download link, and a CloudFront signed URL applies to content served through CloudFront.",
+      "keywordCues": [
+        "download one assigned report for a short period",
+        "must not receive AWS credentials",
+        "does not want to change its bucket policy for each review"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html"
+      ],
+      "es": {
+        "stem": "Una firma de investigación guarda archivos de informes privados en Amazon S3. Cada revisor externo necesita descargar un informe asignado durante un periodo corto, pero no debe recibir credenciales de AWS y la firma no quiere cambiar su bucket policy para cada revisión. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Sirve cada informe mediante CloudFront y emite una CloudFront signed URL para su revisor.",
+            "why": "Una CloudFront signed URL controla contenido servido mediante CloudFront, mientras que este caso pide acceso temporal a objetos directamente en S3 sin agregar una distribución."
+          },
+          {
+            "id": "B",
+            "text": "Crea un S3 Access Point para cada revisor y concede acceso al informe asignado.",
+            "why": "Un Access Point proporciona una política de acceso separada, pero por sí mismo no emite el enlace de descarga por tiempo limitado solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Haz que una aplicación autorizada genere una S3 GET presigned URL para cada informe asignado.",
+            "why": "Una GET presigned URL concede acceso temporal de descarga al objeto especificado sin dar credenciales de AWS al revisor ni cambiar la bucket policy."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una declaración allow a la bucket policy para cada revisor y elimínala al terminar el periodo de revisión.",
+            "why": "Los cambios de política por revisor agregan trabajo operativo y no cumplen el requisito de evitar cambios en la bucket policy para cada revisión."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son acceso temporal a un objeto privado de S3, ausencia de credenciales de AWS para los revisores y ningún cambio de bucket policy por revisión. Una aplicación autorizada puede generar una GET presigned URL para el informe. Un Access Point separa políticas de acceso, pero no es un enlace temporal de descarga; una CloudFront signed URL corresponde al contenido servido mediante CloudFront."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-presigned-urls--00188698",
+      "conceptId": "s3-presigned-urls",
+      "secondaryConcepts": [
+        "s3-bucket-policies-block-public-access",
+        "s3-access-points",
+        "cloudfront-signed-urls-cookies"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A design studio lets outside clients retrieve individual drafts from a private S3 bucket. Clients have no AWS credentials and must download directly from S3 using temporary links. Security also requires S3 to deny any presigned-URL request whose signature is more than 10 minutes old, even if the URL was configured to expire later. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Issue CloudFront signed URLs for the drafts.",
+          "correct": false,
+          "why": "CloudFront signed URLs apply to content served through CloudFront, not the required direct S3 downloads."
+        },
+        {
+          "id": "B",
+          "text": "Have an authorized principal generate a GET presigned URL for each requested draft.",
+          "correct": true,
+          "why": "A GET presigned URL provides temporary direct S3 download access to the specified draft without giving the client AWS credentials."
+        },
+        {
+          "id": "C",
+          "text": "Set each URL's configured expiration to 10 minutes without adding a signature-age policy.",
+          "correct": false,
+          "why": "A configured expiration on newly issued URLs does not enforce the requirement to deny any presigned request with an older signature, including URLs configured to expire later."
+        },
+        {
+          "id": "D",
+          "text": "Add a bucket-policy deny condition based on s3:signatureAge for signatures older than 10 minutes.",
+          "correct": true,
+          "why": "The s3:signatureAge condition can deny presigned-URL requests whose signatures exceed the allowed age."
+        },
+        {
+          "id": "E",
+          "text": "Create a separate S3 Access Point policy for each client.",
+          "correct": false,
+          "why": "An Access Point policy does not by itself supply a temporary link for a client without AWS credentials."
+        }
+      ],
+      "explanation": "The clients need direct, temporary access to individual S3 objects without AWS credentials, so the application should issue GET presigned URLs. The separate requirement to reject signatures older than 10 minutes calls for a bucket-policy deny using s3:signatureAge. Merely configuring new URLs to expire in 10 minutes does not enforce that policy against a URL configured with a later expiration, and CloudFront signed URLs do not meet the direct-S3 requirement.",
+      "keywordCues": [
+        "individual drafts from a private S3 bucket",
+        "no AWS credentials",
+        "download directly from S3 using temporary links",
+        "deny any presigned-URL request whose signature is more than 10 minutes old"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño permite que clientes externos descarguen borradores individuales de un bucket privado de S3. Los clientes no tienen credenciales de AWS y deben descargar directamente desde S3 mediante enlaces temporales. Seguridad también exige que S3 deniegue cualquier solicitud con presigned URL cuya firma tenga más de 10 minutos, aunque la URL tenga configurado un vencimiento posterior. ¿Qué DOS acciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Emite CloudFront signed URLs para los borradores.",
+            "why": "Las CloudFront signed URLs corresponden a contenido servido mediante CloudFront, no a las descargas directas desde S3 que se requieren."
+          },
+          {
+            "id": "B",
+            "text": "Haz que un principal autorizado genere una GET presigned URL para cada borrador solicitado.",
+            "why": "Una GET presigned URL ofrece acceso temporal de descarga directa desde S3 al borrador especificado sin dar credenciales de AWS al cliente."
+          },
+          {
+            "id": "C",
+            "text": "Configura el vencimiento de cada URL en 10 minutos sin agregar una política que controle la antigüedad de la firma.",
+            "why": "El vencimiento configurado en URL nuevas no impone el requisito de denegar cualquier solicitud presignada con una firma más antigua, incluidas las URL configuradas para vencer después."
+          },
+          {
+            "id": "D",
+            "text": "Agrega a la bucket policy una condición deny basada en s3:signatureAge para firmas de más de 10 minutos.",
+            "why": "La condición s3:signatureAge puede denegar solicitudes con presigned URL cuya firma supere la antigüedad permitida."
+          },
+          {
+            "id": "E",
+            "text": "Crea una política de S3 Access Point separada para cada cliente.",
+            "why": "Una política de Access Point no proporciona por sí misma un enlace temporal a un cliente sin credenciales de AWS."
+          }
+        ],
+        "explanation": "Los clientes necesitan acceso temporal y directo a objetos individuales de S3 sin credenciales de AWS, por lo que la aplicación debe emitir GET presigned URLs. El requisito separado de rechazar firmas de más de 10 minutos requiere un deny en la bucket policy mediante s3:signatureAge. Limitar el vencimiento de las URL nuevas a 10 minutos no impone esa política a una URL configurada para vencer después, y las CloudFront signed URLs no cumplen el requisito de acceso directo a S3."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-presigned-urls--a2624fa2",
+      "conceptId": "s3-presigned-urls",
+      "secondaryConcepts": [
+        "s3-bucket-policies-block-public-access",
+        "s3-access-points"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An insurance company asks customers to upload claim photos from a mobile app directly to a private S3 bucket. Customers do not have AWS credentials, and the application assigns a specific object key to each upload. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Issue each customer a temporary bucket-policy allow statement for uploads to the assigned key.",
+          "correct": false,
+          "why": "Changing the bucket policy for each customer adds overhead and does not replace the need for an appropriate way to authorize a customer without AWS credentials."
+        },
+        {
+          "id": "B",
+          "text": "Generate a PUT presigned URL for the assigned object key using a principal allowed to upload it.",
+          "correct": true,
+          "why": "A PUT presigned URL lets the customer upload the specified object without receiving AWS credentials."
+        },
+        {
+          "id": "C",
+          "text": "Create a separate S3 Access Point for each customer to use for the upload.",
+          "correct": false,
+          "why": "An Access Point separates access policies but does not itself provide a temporary upload authorization to a customer without AWS credentials."
+        },
+        {
+          "id": "D",
+          "text": "Generate a GET presigned URL for the assigned object key and send it to the customer.",
+          "correct": false,
+          "why": "A GET presigned URL authorizes a download, not the required upload."
+        }
+      ],
+      "explanation": "The customer must upload directly to a specific S3 key without AWS credentials. A principal with the necessary permission can generate a PUT presigned URL for that key. A GET presigned URL has the wrong HTTP method, while per-customer bucket-policy or Access Point management does not provide the requested low-overhead temporary upload link.",
+      "keywordCues": [
+        "upload claim photos",
+        "directly to a private S3 bucket",
+        "do not have AWS credentials",
+        "a specific object key"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html"
+      ],
+      "es": {
+        "stem": "Una aseguradora pide a sus clientes que suban fotos de siniestros desde una aplicación móvil directamente a un bucket privado de S3. Los clientes no tienen credenciales de AWS y la aplicación asigna una clave de objeto específica a cada carga. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Emite para cada cliente una declaración allow temporal en la bucket policy para subir archivos a la clave asignada.",
+            "why": "Cambiar la bucket policy para cada cliente agrega trabajo y no sustituye una forma adecuada de autorizar a un cliente sin credenciales de AWS."
+          },
+          {
+            "id": "B",
+            "text": "Genera una PUT presigned URL para la clave de objeto asignada mediante un principal autorizado para subir el archivo.",
+            "why": "Una PUT presigned URL permite al cliente subir el objeto especificado sin recibir credenciales de AWS."
+          },
+          {
+            "id": "C",
+            "text": "Crea un S3 Access Point separado para que cada cliente lo use al subir el archivo.",
+            "why": "Un Access Point separa políticas de acceso, pero por sí mismo no proporciona autorización temporal de carga a un cliente sin credenciales de AWS."
+          },
+          {
+            "id": "D",
+            "text": "Genera una GET presigned URL para la clave de objeto asignada y envíala al cliente.",
+            "why": "Una GET presigned URL autoriza una descarga, no la carga requerida."
+          }
+        ],
+        "explanation": "El cliente debe subir el archivo directamente a una clave específica de S3 sin credenciales de AWS. Un principal con el permiso necesario puede generar una PUT presigned URL para esa clave. Una GET presigned URL usa el método HTTP equivocado, mientras que administrar bucket policies o Access Points por cliente no proporciona el enlace temporal de carga solicitado con bajo trabajo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-presigned-urls--r0",
+      "conceptId": "s3-presigned-urls",
+      "kind": "recall",
+      "prompt": "How would you let a client without AWS credentials upload one file directly to a private S3 bucket for a limited time?",
+      "promptEs": "¿Cómo permitirías que un cliente sin credenciales de AWS suba un archivo directamente a un bucket privado de S3 por tiempo limitado?",
+      "idealAnswer": "Have a principal with permission to upload the object generate a PUT presigned URL for the intended bucket and key. The client uses that URL to upload without receiving AWS credentials.",
+      "rubric": [
+        "Identifies an S3 PUT presigned URL.",
+        "Specifies the intended bucket and object key.",
+        "Explains that the signing principal needs permission and the client does not need AWS credentials."
+      ]
+    },
+    {
+      "id": "s3-presigned-urls--r1",
+      "conceptId": "s3-presigned-urls",
+      "kind": "why-not",
+      "prompt": "Why isn't a CloudFront signed URL the direct fit for a temporary download from a private S3 object?",
+      "promptEs": "¿Por qué una CloudFront signed URL no es la opción directa para descargar temporalmente un objeto privado de S3?",
+      "idealAnswer": "A CloudFront signed URL restricts content served through CloudFront, not a download made directly from S3. For temporary direct access to one private S3 object, an authorized principal can generate an S3 GET presigned URL.",
+      "rubric": [
+        "Distinguishes CloudFront-served content from direct S3 access.",
+        "Names an S3 GET presigned URL for the direct download.",
+        "Notes that the URL must be generated by a principal permitted to download the object."
+      ]
+    }
+  ]
+}

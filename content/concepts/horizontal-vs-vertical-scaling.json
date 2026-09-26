@@ -1,0 +1,238 @@
+{
+  "conceptId": "horizontal-vs-vertical-scaling",
+  "card": {
+    "en": {
+      "tldr": "Horizontal scaling adds or removes instances; vertical scaling changes the capacity of an instance. For a stateless workload with changing demand, favor automated scale-out and scale-in. For a workload that must remain on one instance, consider resizing if a maintenance window is acceptable.",
+      "whenToUse": [
+        "Choose horizontal scaling when requests can be handled by interchangeable instances and demand fluctuates.",
+        "Choose horizontal scaling across multiple locations when the workload must remain available after an instance or location failure.",
+        "Consider vertical scaling when the component cannot run across multiple instances and a larger instance meets its needs."
+      ],
+      "keyFacts": [
+        "Amazon EC2 Auto Scaling can automatically provision or deprovision instances according to metrics and scaling policies.",
+        "Scale-out adds capacity; scale-in removes capacity when it is no longer needed.",
+        "A load balancer can distribute requests across instances in an Auto Scaling group.",
+        "Deploying across multiple fault-isolation boundaries reduces the impact of a failure.",
+        "Scheduled scaling suits predictable usage patterns; metric-based policies can respond to changing demand."
+      ],
+      "gotchas": [
+        "Adding instances does not help a component whose work cannot be shared among instances.",
+        "Making one instance larger does not provide another serving instance if that instance fails.",
+        "A permanently oversized fleet can meet peak demand but does not remove unneeded capacity when demand falls."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "stateless requests and unpredictable traffic",
+        "must remain available if one instance fails",
+        "single-instance component with a maintenance window",
+        "add capacity during spikes and remove it afterward"
+      ]
+    },
+    "es": {
+      "tldr": "El escalamiento horizontal agrega o elimina instancias; el vertical cambia la capacidad de una instancia. Para una carga sin estado cuya demanda varía, prefiere scale-out y scale-in automáticos. Si la carga debe permanecer en una sola instancia, considera cambiar su tamaño cuando se permita una ventana de mantenimiento.",
+      "whenToUse": [
+        "Elige escalamiento horizontal si cualquier instancia puede atender una solicitud y la demanda fluctúa.",
+        "Elige escalamiento horizontal en varias ubicaciones si la carga debe seguir disponible ante la falla de una instancia o ubicación.",
+        "Considera escalamiento vertical si el componente no puede distribuirse entre instancias y una instancia más grande cubre sus necesidades."
+      ],
+      "keyFacts": [
+        "Amazon EC2 Auto Scaling puede aprovisionar o retirar instancias automáticamente según métricas y políticas de escalamiento.",
+        "Scale-out agrega capacidad; scale-in la retira cuando ya no se necesita.",
+        "Un load balancer puede distribuir solicitudes entre las instancias de un Auto Scaling group.",
+        "Desplegar en varios límites de aislamiento reduce el impacto de una falla.",
+        "Scheduled scaling sirve para patrones predecibles; las políticas basadas en métricas pueden responder a cambios en la demanda."
+      ],
+      "gotchas": [
+        "Agregar instancias no ayuda si el trabajo del componente no puede distribuirse entre ellas.",
+        "Una instancia más grande no aporta otra instancia que atienda solicitudes si la primera falla.",
+        "Una flota sobredimensionada de forma permanente puede cubrir el pico, pero no retira capacidad innecesaria cuando baja la demanda."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "stateless requests and unpredictable traffic",
+        "must remain available if one instance fails",
+        "single-instance component with a maintenance window",
+        "add capacity during spikes and remove it afterward"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html",
+      "https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_adapt_to_changes_autoscale_adapt.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "horizontal-vs-vertical-scaling--e05dd4bd",
+      "conceptId": "horizontal-vs-vertical-scaling",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturing team runs a legacy calculation service on one EC2 instance. Its jobs depend on process state held locally, and the team cannot change the software to distribute a job across instances this quarter. Memory demand has risen steadily, and the team has an approved maintenance window. Which approach meets the immediate requirement with the LEAST application change?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Put multiple copies of the service behind an Application Load Balancer and route jobs to any copy.",
+          "correct": false,
+          "why": "Routing to another copy does not make the job's locally held process state available there."
+        },
+        {
+          "id": "B",
+          "text": "Use scheduled scaling to start more service instances during the daily calculation period.",
+          "correct": false,
+          "why": "A predictable schedule does not solve the software's inability to share a calculation job."
+        },
+        {
+          "id": "C",
+          "text": "Add instances to an EC2 Auto Scaling group and distribute each calculation job among them.",
+          "correct": false,
+          "why": "The current software cannot distribute a job or its local process state among instances."
+        },
+        {
+          "id": "D",
+          "text": "Move the service to an EC2 instance size with sufficient memory during the maintenance window.",
+          "correct": true,
+          "why": "Increasing the capacity of the one required instance addresses memory demand without distributing the job."
+        }
+      ],
+      "explanation": "The binding constraint is that the service must process a job with local state on one instance. Increasing that instance's memory capacity addresses the immediate need without rewriting the application, and the maintenance window accommodates the change. Adding instances—even behind a load balancer or on a schedule—does not make the existing job distributable.",
+      "keywordCues": [
+        "process state held locally",
+        "cannot change the software to distribute a job",
+        "Memory demand has risen steadily",
+        "approved maintenance window",
+        "LEAST application change"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_adapt_to_changes_autoscale_adapt.html"
+      ],
+      "es": {
+        "stem": "Un equipo de manufactura ejecuta un servicio de cálculos heredado en una instancia EC2. Sus trabajos dependen del estado del proceso almacenado localmente y el equipo no puede modificar el software para distribuir un trabajo entre instancias este trimestre. La demanda de memoria ha aumentado de forma sostenida y el equipo tiene una ventana de mantenimiento aprobada. ¿Qué enfoque cumple la necesidad inmediata con el LEAST application change?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Coloca varias copias del servicio detrás de un Application Load Balancer y envía trabajos a cualquiera de ellas.",
+            "why": "Enviar un trabajo a otra copia no pone a su disposición el estado del proceso almacenado localmente."
+          },
+          {
+            "id": "B",
+            "text": "Usa scheduled scaling para iniciar más instancias del servicio durante el período diario de cálculos.",
+            "why": "Un horario predecible no resuelve la incapacidad del software para distribuir un trabajo de cálculo."
+          },
+          {
+            "id": "C",
+            "text": "Agrega instancias a un EC2 Auto Scaling group y distribuye cada trabajo de cálculo entre ellas.",
+            "why": "El software actual no puede distribuir un trabajo ni su estado local entre instancias."
+          },
+          {
+            "id": "D",
+            "text": "Traslada el servicio a un tamaño de instancia EC2 con suficiente memoria durante la ventana de mantenimiento.",
+            "why": "Aumentar la capacidad de la única instancia requerida cubre la demanda de memoria sin distribuir el trabajo."
+          }
+        ],
+        "explanation": "La restricción decisiva es que el servicio debe procesar cada trabajo con estado local en una sola instancia. Aumentar la memoria de esa instancia cubre la necesidad inmediata sin modificar la aplicación, y la ventana de mantenimiento permite realizar el cambio. Agregar instancias, incluso detrás de un load balancer o según un horario, no permite distribuir el trabajo actual."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "horizontal-vs-vertical-scaling--9b76bc1b",
+      "conceptId": "horizontal-vs-vertical-scaling",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company processes independent thumbnail requests on EC2 instances. Demand varies sharply throughout the week, and requests can run on any instance. The company wants enough capacity during busy periods without paying for the same fleet size during quiet periods. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run one EC2 instance sized for the highest expected request volume.",
+          "correct": false,
+          "why": "Peak-sized capacity remains provisioned during quiet periods and leaves one serving instance."
+        },
+        {
+          "id": "B",
+          "text": "Increase each instance's size during busy periods while keeping the fleet count fixed.",
+          "correct": false,
+          "why": "Repeatedly changing instance sizes does not use automatic scale-out and scale-in to track variable demand."
+        },
+        {
+          "id": "C",
+          "text": "Use an EC2 Auto Scaling group with metric-based scale-out and scale-in policies.",
+          "correct": true,
+          "why": "The independent requests allow instances to be added during demand peaks and removed when demand falls."
+        },
+        {
+          "id": "D",
+          "text": "Keep a fixed fleet of EC2 instances sized for the highest expected request volume.",
+          "correct": false,
+          "why": "A fixed fleet retains peak capacity even when the request volume drops."
+        }
+      ],
+      "explanation": "Because requests are independent and can run on any instance, the workload can use horizontal scaling. Metric-based EC2 Auto Scaling adds capacity as demand rises and removes it when demand falls, supporting the cost requirement. A permanently peak-sized instance or fleet keeps excess capacity during quiet periods.",
+      "keywordCues": [
+        "independent thumbnail requests",
+        "Demand varies sharply",
+        "requests can run on any instance",
+        "without paying for the same fleet size during quiet periods",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/use-fault-isolation-to-protect-your-workload.html",
+        "https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_adapt_to_changes_autoscale_adapt.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios procesa solicitudes independientes para crear miniaturas en instancias EC2. La demanda varía mucho durante la semana y cualquier instancia puede atender una solicitud. La empresa quiere suficiente capacidad en los períodos de mayor actividad sin pagar por una flota del mismo tamaño en los períodos tranquilos. ¿Qué solución cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta una sola instancia EC2 dimensionada para el mayor volumen de solicitudes previsto.",
+            "why": "La capacidad para el pico permanece aprovisionada en períodos tranquilos y solo hay una instancia que atiende solicitudes."
+          },
+          {
+            "id": "B",
+            "text": "Aumenta el tamaño de cada instancia durante los períodos de mayor actividad sin cambiar la cantidad de instancias.",
+            "why": "Cambiar repetidamente los tamaños no utiliza scale-out y scale-in automáticos para seguir la demanda variable."
+          },
+          {
+            "id": "C",
+            "text": "Usa un EC2 Auto Scaling group con políticas de scale-out y scale-in basadas en métricas.",
+            "why": "Las solicitudes independientes permiten agregar instancias cuando aumenta la demanda y retirarlas cuando disminuye."
+          },
+          {
+            "id": "D",
+            "text": "Mantén una flota fija de instancias EC2 dimensionada para el mayor volumen de solicitudes previsto.",
+            "why": "La flota fija conserva la capacidad para el pico incluso cuando disminuye el volumen de solicitudes."
+          }
+        ],
+        "explanation": "Como las solicitudes son independientes y cualquier instancia puede atenderlas, la carga admite escalamiento horizontal. Amazon EC2 Auto Scaling basado en métricas agrega capacidad cuando aumenta la demanda y la retira cuando disminuye, lo que responde al requisito de costos. Una instancia o flota permanentemente dimensionada para el pico mantiene capacidad excedente en períodos tranquilos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "horizontal-vs-vertical-scaling--r0",
+      "conceptId": "horizontal-vs-vertical-scaling",
+      "kind": "recall",
+      "prompt": "Stateless EC2 workers face unpredictable traffic and must survive an instance failure. What scaling approach would you choose, and why?",
+      "promptEs": "Trabajadores EC2 sin estado enfrentan tráfico impredecible y deben resistir la falla de una instancia. ¿Qué enfoque de escalamiento eliges y por qué?",
+      "idealAnswer": "Use horizontal scaling with an EC2 Auto Scaling group, metric-based scale-out and scale-in, and a load balancer. Multiple serving instances can absorb changing demand and avoid depending on one instance.",
+      "rubric": [
+        "Chooses horizontal scaling with an EC2 Auto Scaling group.",
+        "Explains that metric-based policies add and remove instances as demand changes.",
+        "Connects multiple load-balanced instances to continued service after one instance fails."
+      ]
+    }
+  ]
+}

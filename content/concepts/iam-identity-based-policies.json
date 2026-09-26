@@ -1,0 +1,452 @@
+{
+  "conceptId": "iam-identity-based-policies",
+  "card": {
+    "en": {
+      "tldr": "An IAM identity-based policy grants an IAM user, group, or role permission to perform actions on resources, optionally under specified conditions. For least privilege, choose the required actions and resources rather than granting broad access or relying on a policy that only sets a permissions ceiling.",
+      "whenToUse": [
+        "A user, group, or workload role needs permission to perform specific tasks.",
+        "Several identities need the same reusable, narrowly scoped permissions.",
+        "An existing identity policy grants more access than the task requires."
+      ],
+      "keyFacts": [
+        "Identity-based policies are JSON documents attached to users, groups, or roles; they specify actions, resources, and optional conditions.",
+        "A customer managed policy can be attached to multiple identities and provides more precise control for a use case than a general AWS managed policy.",
+        "An inline policy belongs to one identity and is deleted with that identity.",
+        "IAM Access Analyzer can generate a fine-grained policy from access activity logged in AWS CloudTrail; test it before deployment.",
+        "A permissions boundary and an SCP limit permissions but do not grant them."
+      ],
+      "gotchas": [
+        "Attaching a broad AWS managed policy may work but may not provide least privilege for the workload.",
+        "A permissions boundary cannot replace an identity-based policy that grants the required actions.",
+        "A cross-account resource policy naming a principal is only half of the access arrangement; the principal also needs an identity-based policy."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Resource-based policy",
+          "difference": "It attaches to a resource and grants access to a specified principal; an identity-based policy attaches to a user, group, or role."
+        },
+        {
+          "concept": "Service control policy (SCP)",
+          "difference": "It caps permissions in an organization or OU but grants no permissions."
+        },
+        {
+          "concept": "Permissions boundary",
+          "difference": "It caps what identity-based policies can grant to a particular IAM user or role but grants no permissions itself."
+        }
+      ],
+      "examCues": [
+        "grant only the actions this role needs",
+        "restrict access to specified resources",
+        "reuse the same permissions across groups",
+        "refine a broad policy using access activity"
+      ]
+    },
+    "es": {
+      "tldr": "Una IAM identity-based policy concede a un usuario, grupo o rol de IAM permiso para realizar acciones sobre recursos, opcionalmente bajo condiciones específicas. Para aplicar least privilege, elige solo las acciones y los recursos necesarios; no dependas de una política que únicamente establezca un límite máximo.",
+      "whenToUse": [
+        "Un usuario, grupo o rol de una carga de trabajo necesita permisos para tareas específicas.",
+        "Varias identidades necesitan los mismos permisos reutilizables y delimitados.",
+        "Una política de identidad existente concede más acceso del necesario."
+      ],
+      "keyFacts": [
+        "Las identity-based policies son documentos JSON adjuntos a usuarios, grupos o roles; especifican acciones, recursos y condiciones opcionales.",
+        "Puedes adjuntar una customer managed policy a varias identidades y ajustarla mejor a un caso de uso que una AWS managed policy general.",
+        "Una inline policy pertenece a una sola identidad y se elimina junto con ella.",
+        "IAM Access Analyzer puede generar una política detallada a partir de la actividad registrada en AWS CloudTrail; pruébala antes de implementarla.",
+        "Una permissions boundary y una SCP limitan permisos, pero no los conceden."
+      ],
+      "gotchas": [
+        "Una AWS managed policy amplia puede funcionar, pero quizá no cumpla con least privilege para la carga de trabajo.",
+        "Una permissions boundary no sustituye a la identity-based policy que concede las acciones necesarias.",
+        "Una resource-based policy que nombra a un principal de otra cuenta es solo una parte de la configuración: el principal también necesita una identity-based policy."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Resource-based policy",
+          "difference": "Se adjunta a un recurso y concede acceso a un principal específico; una identity-based policy se adjunta a un usuario, grupo o rol."
+        },
+        {
+          "concept": "Service control policy (SCP)",
+          "difference": "Limita los permisos en una organización u OU, pero no concede permisos."
+        },
+        {
+          "concept": "Permissions boundary",
+          "difference": "Limita lo que las identity-based policies pueden conceder a un usuario o rol de IAM específico, pero no concede permisos por sí sola."
+        }
+      ],
+      "examCues": [
+        "grant only the actions this role needs",
+        "restrict access to specified resources",
+        "reuse the same permissions across groups",
+        "refine a broad policy using access activity"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "iam-identity-based-policies--374d17aa",
+      "conceptId": "iam-identity-based-policies",
+      "secondaryConcepts": [
+        "resource-based-policies",
+        "service-control-policies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab stores a dataset in an Amazon S3 bucket in its AWS account. An IAM role in a partner's separate AWS account needs access to only that dataset; the lab can update the bucket policy, and the partner can update the role's permissions. Which solution grants the required cross-account access with the MOST narrowly scoped permissions?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Grant the partner role access to the dataset in the bucket policy and in the role's identity-based policy.",
+          "correct": true,
+          "why": "The resource policy identifies the cross-account principal, and the role's identity-based policy grants its corresponding access."
+        },
+        {
+          "id": "B",
+          "text": "Allow the dataset in an SCP in the lab's account and an SCP in the partner's account.",
+          "correct": false,
+          "why": "SCPs limit permissions but do not grant access to the partner role or name it as an allowed bucket principal."
+        },
+        {
+          "id": "C",
+          "text": "Grant the partner role access to the dataset in its identity-based policy without changing the bucket policy.",
+          "correct": false,
+          "why": "The partner role's identity policy alone does not establish the resource-side cross-account permission described."
+        },
+        {
+          "id": "D",
+          "text": "Add the partner role to the bucket policy and make no changes to the partner role's identity-based policy.",
+          "correct": false,
+          "why": "For this cross-account access, the partner principal also needs an identity-based policy granting access."
+        }
+      ],
+      "explanation": "The accounts are separate, so the partner role needs both sides of this access arrangement. The lab's bucket policy can grant the specified cross-account principal access to the dataset, and the partner's identity-based policy must also grant the role access. Either policy alone misses a required side of the arrangement; SCPs grant no access.",
+      "keywordCues": [
+        "partner's separate AWS account",
+        "access to only that dataset",
+        "update the bucket policy",
+        "update the role's permissions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación almacena un conjunto de datos en un bucket de Amazon S3 de su cuenta de AWS. Un rol de IAM en otra cuenta de AWS, perteneciente a un socio, necesita acceder solo a ese conjunto de datos; el laboratorio puede actualizar la bucket policy y el socio puede actualizar los permisos del rol. ¿Qué solución concede el acceso entre cuentas requerido con los permisos MOST narrowly scoped?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Concede al rol del socio acceso al conjunto de datos tanto en la bucket policy como en la identity-based policy del rol.",
+            "why": "La política del recurso identifica al principal de otra cuenta y la identity-based policy del rol concede el acceso correspondiente."
+          },
+          {
+            "id": "B",
+            "text": "Permite el conjunto de datos mediante una SCP en la cuenta del laboratorio y otra SCP en la cuenta del socio.",
+            "why": "Las SCP limitan permisos, pero no conceden acceso al rol del socio ni lo identifican como principal autorizado del bucket."
+          },
+          {
+            "id": "C",
+            "text": "Concede al rol del socio acceso al conjunto de datos en su identity-based policy sin cambiar la bucket policy.",
+            "why": "La política de identidad del rol no establece por sí sola el permiso entre cuentas del lado del recurso."
+          },
+          {
+            "id": "D",
+            "text": "Agrega el rol del socio a la bucket policy y no cambies la identity-based policy del rol.",
+            "why": "Para este acceso entre cuentas, el principal del socio también necesita una identity-based policy que le conceda acceso."
+          }
+        ],
+        "explanation": "Como las cuentas son distintas, el rol del socio necesita ambos componentes de esta configuración de acceso. La bucket policy del laboratorio puede conceder acceso al conjunto de datos al principal de otra cuenta, y la identity-based policy del socio también debe conceder acceso al rol. Usar solo una de las dos políticas deja incompleta la configuración; las SCP no conceden acceso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-identity-based-policies--597b774f",
+      "conceptId": "iam-identity-based-policies",
+      "secondaryConcepts": [
+        "permissions-boundaries",
+        "resource-based-policies",
+        "service-control-policies"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A software company lets a platform team create IAM roles in one AWS account. The team must be able to grant each new role only the actions needed by its workload, but must not be able to give those roles permissions beyond a company-approved maximum. Which TWO policy measures meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach a resource-based policy to each new role that lists the maximum workload actions.",
+          "correct": false,
+          "why": "A role trust policy controls assumption of the role and does not serve as its maximum-permissions boundary."
+        },
+        {
+          "id": "B",
+          "text": "Use an SCP as the sole policy on the account to grant each new role its workload actions.",
+          "correct": false,
+          "why": "An SCP can limit account permissions but cannot grant actions to the new roles."
+        },
+        {
+          "id": "C",
+          "text": "Attach an identity-based policy to each new role granting only its workload's required actions.",
+          "correct": true,
+          "why": "The identity-based policy supplies the role's task-specific permission grants."
+        },
+        {
+          "id": "D",
+          "text": "Apply a permissions boundary to each new role containing the company-approved maximum permissions.",
+          "correct": true,
+          "why": "The boundary caps what the role's identity-based policy can grant without granting permissions itself."
+        },
+        {
+          "id": "E",
+          "text": "Attach a resource-based policy to each new role that lists the workload actions it may perform.",
+          "correct": false,
+          "why": "A role's resource-based trust policy determines who can assume it, not which workload actions its identity can perform."
+        }
+      ],
+      "explanation": "Each role needs a task-specific grant and a separate ceiling on what that grant can include. Its identity-based policy supplies the required workload actions, while a permissions boundary limits the maximum permissions those identity-based policies can grant. An SCP cannot act as the sole grant, and a role's resource-based trust policy addresses who can assume it rather than its workload permissions.",
+      "keywordCues": [
+        "create IAM roles in one AWS account",
+        "grant each new role only the actions needed",
+        "must not be able to give those roles permissions beyond a company-approved maximum"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Una empresa de software permite que su equipo de plataforma cree roles de IAM en una cuenta de AWS. El equipo debe poder conceder a cada rol nuevo solo las acciones que necesita su carga de trabajo, pero no debe poder otorgarle permisos superiores a un máximo aprobado por la empresa. ¿Qué DOS medidas de políticas cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Adjunta a cada rol nuevo una resource-based policy que enumere el máximo de acciones para la carga de trabajo.",
+            "why": "La trust policy del rol controla quién puede asumirlo y no funciona como su límite máximo de permisos."
+          },
+          {
+            "id": "B",
+            "text": "Usa una SCP como única política de la cuenta para conceder a cada rol nuevo las acciones de su carga de trabajo.",
+            "why": "Una SCP puede limitar los permisos de la cuenta, pero no conceder acciones a los roles nuevos."
+          },
+          {
+            "id": "C",
+            "text": "Adjunta a cada rol nuevo una identity-based policy que conceda solo las acciones necesarias para su carga de trabajo.",
+            "why": "La identity-based policy concede al rol los permisos específicos de su tarea."
+          },
+          {
+            "id": "D",
+            "text": "Aplica a cada rol nuevo una permissions boundary que contenga el máximo de permisos aprobado por la empresa.",
+            "why": "La permissions boundary limita lo que puede conceder la identity-based policy del rol, sin conceder permisos por sí sola."
+          },
+          {
+            "id": "E",
+            "text": "Adjunta a cada rol nuevo una resource-based policy que enumere las acciones que puede realizar la carga de trabajo.",
+            "why": "La trust policy de un rol determina quién puede asumirlo, no qué acciones puede realizar su identidad."
+          }
+        ],
+        "explanation": "Cada rol necesita permisos específicos para su tarea y un límite independiente para esos permisos. Su identity-based policy concede las acciones que necesita la carga de trabajo, mientras que una permissions boundary limita el máximo que esas políticas pueden conceder. Una SCP no puede ser la única fuente de permisos, y la trust policy de un rol determina quién puede asumirlo, no qué puede hacer la carga."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-identity-based-policies--01e584fa",
+      "conceptId": "iam-identity-based-policies",
+      "secondaryConcepts": [
+        "permissions-boundaries",
+        "service-control-policies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs a processing workload on Amazon EC2. The workload needs to read only its assigned objects in an Amazon S3 bucket, and the team does not want to distribute long-term credentials to the instances. Which solution meets these requirements with the MOST secure permissions?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an IAM role for the EC2 workload with an identity-based policy allowing only the required read actions on its assigned objects.",
+          "correct": true,
+          "why": "The role supplies temporary credentials, while its identity-based policy grants only the actions and resources needed."
+        },
+        {
+          "id": "B",
+          "text": "Attach a permissions boundary allowing reads of the assigned objects to the EC2 workload role.",
+          "correct": false,
+          "why": "A permissions boundary limits identity-based grants but does not itself grant the workload read access."
+        },
+        {
+          "id": "C",
+          "text": "Give the workload IAM user access keys and attach a policy allowing access to every object in the bucket.",
+          "correct": false,
+          "why": "Long-term IAM user credentials are unnecessary for an EC2 workload, and access to every object exceeds the stated need."
+        },
+        {
+          "id": "D",
+          "text": "Attach an SCP allowing reads of the assigned objects to the workload's AWS account.",
+          "correct": false,
+          "why": "An SCP sets a permissions ceiling for an account but does not grant the workload permission to read objects."
+        }
+      ],
+      "explanation": "The workload needs temporary credentials and narrowly scoped access to its assigned objects. An EC2 workload can use an IAM role, and an identity-based policy on that role can grant the required actions on the specified resources. A permissions boundary or SCP cannot supply the missing grant; IAM user access keys also fail the credential requirement.",
+      "keywordCues": [
+        "runs a processing workload on Amazon EC2",
+        "read only its assigned objects",
+        "does not want to distribute long-term credentials"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta una carga de procesamiento en Amazon EC2. La carga solo necesita leer los objetos que tiene asignados en un bucket de Amazon S3, y el equipo no quiere distribuir credenciales de larga duración a las instancias. ¿Qué solución cumple estos requisitos con los permisos MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un rol de IAM para la carga en EC2 con una identity-based policy que permita solo las acciones de lectura necesarias sobre los objetos asignados.",
+            "why": "El rol proporciona credenciales temporales y su identity-based policy concede solo las acciones y el acceso a los recursos necesarios."
+          },
+          {
+            "id": "B",
+            "text": "Adjunta al rol de la carga en EC2 una permissions boundary que permita leer los objetos asignados.",
+            "why": "Una permissions boundary limita los permisos concedidos por las identity-based policies, pero no concede acceso de lectura por sí sola."
+          },
+          {
+            "id": "C",
+            "text": "Entrega access keys de un usuario de IAM a la carga y adjunta una política que permita acceder a todos los objetos del bucket.",
+            "why": "La carga en EC2 no necesita credenciales de larga duración, y acceder a todos los objetos excede lo requerido."
+          },
+          {
+            "id": "D",
+            "text": "Adjunta a la cuenta de AWS de la carga una SCP que permita leer los objetos asignados.",
+            "why": "Una SCP establece un límite máximo de permisos para la cuenta, pero no concede a la carga permiso para leer objetos."
+          }
+        ],
+        "explanation": "La carga necesita credenciales temporales y acceso limitado a los objetos asignados. Una carga en EC2 puede usar un rol de IAM, cuya identity-based policy concede las acciones necesarias sobre los recursos específicos. Ni una permissions boundary ni una SCP conceden ese acceso; las access keys de un usuario de IAM tampoco cumplen el requisito de credenciales."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-identity-based-policies--24c63cda",
+      "conceptId": "iam-identity-based-policies",
+      "secondaryConcepts": [
+        "service-control-policies",
+        "permissions-boundaries"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A university has several IAM groups whose members perform the same limited set of administrative tasks. The university wants to maintain one policy document, attach it to each group, and grant no unrelated actions. Which approach meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an identical inline identity-based policy for each group with the required actions.",
+          "correct": false,
+          "why": "Inline policies are tied to individual identities, so this does not maintain one reusable policy document."
+        },
+        {
+          "id": "B",
+          "text": "Create one customer managed identity-based policy with the required actions and attach it to each group.",
+          "correct": true,
+          "why": "A customer managed policy can be reused across groups and tailored to the required actions."
+        },
+        {
+          "id": "C",
+          "text": "Attach a general AWS managed policy to each group and use an SCP to permit the required actions.",
+          "correct": false,
+          "why": "An SCP cannot grant actions, and a general AWS managed policy might grant more than this task requires."
+        },
+        {
+          "id": "D",
+          "text": "Create a permissions boundary with the required actions and apply it to each group.",
+          "correct": false,
+          "why": "Permissions boundaries apply to IAM users or roles, not groups, and do not grant permissions."
+        }
+      ],
+      "explanation": "The deciding requirements are one reusable document and permissions tailored to the groups' tasks. A customer managed identity-based policy can be attached to multiple groups and specify only the required actions. Inline policies would require separate documents, while an SCP or permissions boundary cannot replace the permission grant.",
+      "keywordCues": [
+        "several IAM groups",
+        "maintain one policy document",
+        "grant no unrelated actions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Una universidad tiene varios grupos de IAM cuyos miembros realizan el mismo conjunto limitado de tareas administrativas. Quiere mantener un solo documento de política, adjuntarlo a cada grupo y no conceder acciones ajenas a esas tareas. ¿Qué enfoque cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una inline identity-based policy idéntica para cada grupo con las acciones necesarias.",
+            "why": "Las inline policies pertenecen a identidades individuales, por lo que esta opción no mantiene un solo documento reutilizable."
+          },
+          {
+            "id": "B",
+            "text": "Crea una sola customer managed identity-based policy con las acciones necesarias y adjúntala a cada grupo.",
+            "why": "Puedes reutilizar una customer managed policy en varios grupos y ajustarla a las acciones necesarias."
+          },
+          {
+            "id": "C",
+            "text": "Adjunta una AWS managed policy general a cada grupo y usa una SCP para permitir las acciones necesarias.",
+            "why": "Una SCP no concede acciones, y la AWS managed policy general podría conceder más de lo necesario."
+          },
+          {
+            "id": "D",
+            "text": "Crea una permissions boundary con las acciones necesarias y aplícala a cada grupo.",
+            "why": "Las permissions boundaries se aplican a usuarios o roles de IAM, no a grupos, y no conceden permisos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son mantener un documento reutilizable y ajustar los permisos a las tareas de los grupos. Puedes adjuntar una customer managed identity-based policy a varios grupos y especificar solo las acciones necesarias. Las inline policies exigirían documentos separados, mientras que una SCP o una permissions boundary no sustituye la concesión de permisos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "iam-identity-based-policies--r0",
+      "conceptId": "iam-identity-based-policies",
+      "kind": "recall",
+      "prompt": "An EC2 workload needs to read only its assigned S3 objects. What identity and policy would you use, and why?",
+      "promptEs": "Una carga en EC2 solo necesita leer los objetos de S3 que tiene asignados. ¿Qué identidad y política usarías, y por qué?",
+      "idealAnswer": "Use an IAM role for the EC2 workload so it can use temporary credentials. Attach an identity-based policy granting only the required read actions on its assigned objects.",
+      "rubric": [
+        "Selects an IAM role for the workload.",
+        "Selects an identity-based policy attached to the role.",
+        "Limits the grant to required actions and assigned resources."
+      ]
+    },
+    {
+      "id": "iam-identity-based-policies--r1",
+      "conceptId": "iam-identity-based-policies",
+      "kind": "why-not",
+      "prompt": "Why can't a permissions boundary alone give a newly created IAM role the actions its workload needs?",
+      "promptEs": "¿Por qué una permissions boundary por sí sola no puede dar a un rol de IAM nuevo las acciones que necesita su carga de trabajo?",
+      "idealAnswer": "A permissions boundary sets the maximum permissions that identity-based policies can grant to the role; it does not grant permissions. The role also needs an identity-based policy allowing the workload's required actions.",
+      "rubric": [
+        "States that a permissions boundary is a maximum-permissions limit.",
+        "States that the boundary does not grant permissions.",
+        "Identifies an identity-based policy as the source of the required grant."
+      ]
+    }
+  ]
+}

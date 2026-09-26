@@ -1,0 +1,350 @@
+{
+  "conceptId": "cloudfront-signed-urls-cookies",
+  "card": {
+    "en": {
+      "tldr": "CloudFront signed URLs and signed cookies both control access to private content served through CloudFront. Choose a signed URL for an individual file or a client that cannot use cookies; choose signed cookies for multiple restricted files when existing URLs should stay unchanged.",
+      "whenToUse": [
+        "Use a signed URL for a restricted download of one file.",
+        "Use a signed URL when the viewer's client does not support cookies.",
+        "Use signed cookies for many restricted files, such as HLS video files, without changing their URLs."
+      ],
+      "keyFacts": [
+        "Signed URLs take precedence over signed cookies for the same file: if a viewer requests a file using a signed URL, CloudFront evaluates access based only on that URL.",
+        "If existing unsigned URLs contain Expires, Policy, Signature, Key-Pair-Id, or Hash-Algorithm as query parameters, neither signed URLs nor signed cookies can be used with those URLs as they are.",
+        "CloudFront signed URLs and signed cookies control access to content served through CloudFront."
+      ],
+      "gotchas": [
+        "Do not choose signed URLs for a collection of files when preserving every existing URL is a requirement.",
+        "A signed cookie does not override a signed URL supplied in the same file request.",
+        "Check existing query parameter names before selecting either CloudFront signing method."
+      ],
+      "confusedWith": [
+        {
+          "concept": "s3-presigned-urls",
+          "difference": "An S3 presigned URL grants temporary access to an S3 object; CloudFront signed URLs control access to content served through CloudFront."
+        },
+        {
+          "concept": "s3-bucket-policies-block-public-access",
+          "difference": "A bucket policy sets bucket access rules; it is not the viewer-facing choice between one restricted CloudFront file and many."
+        },
+        {
+          "concept": "s3-access-points",
+          "difference": "S3 Access Points separate access policies for applications or teams sharing a bucket, rather than controlling viewer access to CloudFront content."
+        }
+      ],
+      "examCues": [
+        "one restricted installation file through CloudFront",
+        "custom HTTP client does not support cookies",
+        "HLS files with unchanged URLs",
+        "signed URL and signed cookie on the same request"
+      ]
+    },
+    "es": {
+      "tldr": "Las signed URLs y las signed cookies de CloudFront controlan el acceso a contenido privado servido mediante CloudFront. Elige una signed URL para un archivo individual o un cliente que no admite cookies; elige signed cookies para varios archivos restringidos cuando debes conservar las URL existentes.",
+      "whenToUse": [
+        "Usa una signed URL para restringir la descarga de un solo archivo.",
+        "Usa una signed URL si el cliente del usuario no admite cookies.",
+        "Usa signed cookies para varios archivos restringidos, como los de un video HLS, sin cambiar sus URL."
+      ],
+      "keyFacts": [
+        "Las signed URLs tienen prioridad sobre las signed cookies para el mismo archivo: si el usuario solicita un archivo con una signed URL, CloudFront evalúa el acceso únicamente con esa URL.",
+        "Si las URL existentes sin firma contienen Expires, Policy, Signature, Key-Pair-Id o Hash-Algorithm como parámetros de consulta, no puedes usar signed URLs ni signed cookies con esas URL tal como están.",
+        "Las signed URLs y las signed cookies de CloudFront controlan el acceso al contenido servido mediante CloudFront."
+      ],
+      "gotchas": [
+        "No elijas signed URLs para un conjunto de archivos si debes conservar todas las URL existentes.",
+        "Una signed cookie no prevalece sobre una signed URL incluida en la solicitud del mismo archivo.",
+        "Revisa los nombres de los parámetros de consulta existentes antes de elegir cualquiera de los dos métodos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "s3-presigned-urls",
+          "difference": "Una S3 presigned URL concede acceso temporal a un objeto de S3; una CloudFront signed URL controla el acceso a contenido servido mediante CloudFront."
+        },
+        {
+          "concept": "s3-bucket-policies-block-public-access",
+          "difference": "Una bucket policy define reglas de acceso al bucket; no resuelve la elección de acceso para uno o varios archivos de CloudFront."
+        },
+        {
+          "concept": "s3-access-points",
+          "difference": "S3 Access Points separa las políticas de acceso de aplicaciones o equipos que comparten un bucket, en vez de controlar el acceso de los usuarios al contenido de CloudFront."
+        }
+      ],
+      "examCues": [
+        "one restricted installation file through CloudFront",
+        "custom HTTP client does not support cookies",
+        "HLS files with unchanged URLs",
+        "signed URL and signed cookie on the same request"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-choosing-signed-urls-cookies.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudfront-signed-urls-cookies--61faa177",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "secondaryConcepts": [
+        "s3-presigned-urls",
+        "s3-access-points"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A software vendor distributes one premium installer file through CloudFront after a customer completes a purchase. Its download client is a custom HTTP client that does not support cookies. Which solution meets the access requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an S3 Access Point for each purchaser to retrieve the installer.",
+          "correct": false,
+          "why": "Access Points separate access to a shared S3 bucket, not access to the installer through CloudFront."
+        },
+        {
+          "id": "B",
+          "text": "Issue a CloudFront signed URL for the installer to the client.",
+          "correct": true,
+          "why": "A signed URL fits both the single restricted file and the cookie-free client."
+        },
+        {
+          "id": "C",
+          "text": "Give the client an S3 presigned URL for the installer.",
+          "correct": false,
+          "why": "An S3 presigned URL provides access to an S3 object rather than controlling access through CloudFront."
+        },
+        {
+          "id": "D",
+          "text": "Issue CloudFront signed cookies to the client for the installer.",
+          "correct": false,
+          "why": "The download client cannot use the cookies required by this approach."
+        }
+      ],
+      "explanation": "The deciding requirements are delivery through CloudFront, a single installer, and a client that does not support cookies. CloudFront signed URLs are suited to individual files and cookie-free clients. Signed cookies fail the client constraint, while an S3 presigned URL addresses access to an S3 object instead of the specified CloudFront delivery.",
+      "keywordCues": [
+        "one premium installer file through CloudFront",
+        "custom HTTP client that does not support cookies"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-choosing-signed-urls-cookies.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de software distribuye un único instalador premium mediante CloudFront después de que un cliente completa la compra. Su cliente de descarga es un cliente HTTP personalizado que no admite cookies. ¿Qué solución cumple el requisito de acceso?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un S3 Access Point para cada comprador que descargue el instalador.",
+            "why": "Access Points separa el acceso a un bucket de S3 compartido, no el acceso al instalador mediante CloudFront."
+          },
+          {
+            "id": "B",
+            "text": "Entrega al cliente una CloudFront signed URL para el instalador.",
+            "why": "Una signed URL sirve tanto para el archivo individual restringido como para el cliente que no admite cookies."
+          },
+          {
+            "id": "C",
+            "text": "Entrega al cliente una S3 presigned URL para el instalador.",
+            "why": "Una S3 presigned URL da acceso a un objeto de S3, en vez de controlar el acceso mediante CloudFront."
+          },
+          {
+            "id": "D",
+            "text": "Entrega CloudFront signed cookies al cliente para el instalador.",
+            "why": "El cliente de descarga no puede usar las cookies que requiere este enfoque."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la entrega mediante CloudFront, un solo instalador y un cliente que no admite cookies. Las CloudFront signed URLs son adecuadas para archivos individuales y clientes sin soporte para cookies. Las signed cookies no cumplen la restricción del cliente, mientras que una S3 presigned URL aborda el acceso a un objeto de S3 y no la entrega especificada mediante CloudFront."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-signed-urls-cookies--1af6d8bb",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "secondaryConcepts": [
+        "s3-presigned-urls",
+        "s3-access-points"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A streaming publisher serves subscriber-only HLS video through CloudFront. Each video requires requests for multiple restricted files, and the publisher must keep the existing URLs used by its player. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create separate S3 Access Points for subscribers and non-subscribers.",
+          "correct": false,
+          "why": "Access Points organize bucket access policies, not viewer access to the existing CloudFront URLs."
+        },
+        {
+          "id": "B",
+          "text": "Generate an S3 presigned URL for each video file.",
+          "correct": false,
+          "why": "This grants access to S3 objects rather than preserving the CloudFront player URLs."
+        },
+        {
+          "id": "C",
+          "text": "Use CloudFront signed cookies for the video files.",
+          "correct": true,
+          "why": "Signed cookies support access to multiple restricted files without changing their URLs."
+        },
+        {
+          "id": "D",
+          "text": "Generate a CloudFront signed URL for each video file.",
+          "correct": false,
+          "why": "Signing each file's URL does not preserve the existing player URLs."
+        }
+      ],
+      "explanation": "The publisher needs access to many restricted HLS files while keeping the player's URLs unchanged. CloudFront signed cookies are the documented choice for that combination. Per-file signed URLs change the URLs, and S3 access mechanisms do not address the stated CloudFront viewer-access requirement.",
+      "keywordCues": [
+        "subscriber-only HLS video through CloudFront",
+        "multiple restricted files",
+        "keep the existing URLs"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-choosing-signed-urls-cookies.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de streaming sirve video HLS exclusivo para suscriptores mediante CloudFront. Cada video requiere solicitudes de varios archivos restringidos y la plataforma debe conservar las URL existentes que usa su reproductor. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea S3 Access Points separados para suscriptores y no suscriptores.",
+            "why": "Access Points organiza políticas de acceso al bucket, no el acceso de los usuarios a las URL existentes de CloudFront."
+          },
+          {
+            "id": "B",
+            "text": "Genera una S3 presigned URL para cada archivo de video.",
+            "why": "Esto concede acceso a objetos de S3 en vez de conservar las URL de CloudFront del reproductor."
+          },
+          {
+            "id": "C",
+            "text": "Usa CloudFront signed cookies para los archivos de video.",
+            "why": "Las signed cookies permiten acceder a varios archivos restringidos sin cambiar sus URL."
+          },
+          {
+            "id": "D",
+            "text": "Genera una CloudFront signed URL para cada archivo de video.",
+            "why": "Firmar la URL de cada archivo no conserva las URL existentes del reproductor."
+          }
+        ],
+        "explanation": "La plataforma necesita dar acceso a muchos archivos HLS restringidos sin cambiar las URL del reproductor. CloudFront signed cookies es la opción indicada para esa combinación. Las signed URLs por archivo cambian las URL, y los mecanismos de acceso a S3 no resuelven el requisito de acceso de usuarios mediante CloudFront."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-signed-urls-cookies--6cc4c4af",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "secondaryConcepts": [
+        "s3-bucket-policies-block-public-access",
+        "s3-access-points"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A news site uses CloudFront signed cookies to grant subscribers access to multiple articles. During a migration, some article links also include CloudFront signed URLs that no longer authorize access, and subscribers report that those links fail despite having valid signed cookies. The site can remove the signed-URL parameters from those links while retaining its cookie-based access flow. Which change restores the intended access?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the signed cookies with new signed cookies, leaving the article links unchanged.",
+          "correct": false,
+          "why": "CloudFront evaluates a request containing a signed URL based only on that URL, not the replacement cookies."
+        },
+        {
+          "id": "B",
+          "text": "Remove the signed-URL parameters from those links and continue using signed cookies.",
+          "correct": true,
+          "why": "Without a signed URL on the request, the signed URL no longer takes precedence over the cookie."
+        },
+        {
+          "id": "C",
+          "text": "Create an S3 Access Point for article requests, leaving the links unchanged.",
+          "correct": false,
+          "why": "An Access Point does not change how CloudFront evaluates the signed article links."
+        },
+        {
+          "id": "D",
+          "text": "Add a bucket policy permitting subscriber access, leaving the article links unchanged.",
+          "correct": false,
+          "why": "A bucket policy does not change CloudFront's precedence for signed URLs over signed cookies."
+        }
+      ],
+      "explanation": "The failing requests contain signed URLs that do not authorize access, even though subscribers have valid signed cookies. When both methods apply to the same file and a viewer requests it with a signed URL, CloudFront bases its decision only on the URL. Removing the signed-URL parameters allows the site to use its intended cookie-based flow; changing the cookies alone does not resolve the precedence problem.",
+      "keywordCues": [
+        "signed URLs that no longer authorize access",
+        "despite having valid signed cookies",
+        "remove the signed-URL parameters"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-choosing-signed-urls-cookies.html"
+      ],
+      "es": {
+        "stem": "Un sitio de noticias usa CloudFront signed cookies para dar a sus suscriptores acceso a varios artículos. Durante una migración, algunos enlaces también incluyen CloudFront signed URLs que ya no autorizan el acceso, y los suscriptores informan que esos enlaces fallan aunque tienen signed cookies válidas. El sitio puede quitar los parámetros de las signed URLs de esos enlaces y conservar su flujo de acceso basado en cookies. ¿Qué cambio restablece el acceso previsto?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplaza las signed cookies por otras nuevas y deja los enlaces sin cambios.",
+            "why": "CloudFront evalúa una solicitud que contiene una signed URL solo con base en esa URL, no en las cookies nuevas."
+          },
+          {
+            "id": "B",
+            "text": "Quita los parámetros de las signed URLs de esos enlaces y sigue usando signed cookies.",
+            "why": "Sin una signed URL en la solicitud, esta ya no tiene prioridad sobre la cookie."
+          },
+          {
+            "id": "C",
+            "text": "Crea un S3 Access Point para las solicitudes de artículos y deja los enlaces sin cambios.",
+            "why": "Un Access Point no cambia la forma en que CloudFront evalúa los enlaces firmados de los artículos."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una bucket policy que permita el acceso de suscriptores y deja los enlaces sin cambios.",
+            "why": "Una bucket policy no cambia la prioridad de las signed URLs sobre las signed cookies en CloudFront."
+          }
+        ],
+        "explanation": "Las solicitudes fallidas contienen signed URLs que no autorizan el acceso, aunque los suscriptores tienen signed cookies válidas. Cuando ambos métodos se aplican al mismo archivo y el usuario lo solicita con una signed URL, CloudFront decide únicamente según esa URL. Quitar sus parámetros permite usar el flujo previsto basado en cookies; cambiar solo las cookies no resuelve el problema de prioridad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudfront-signed-urls-cookies--r0",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "kind": "recall",
+      "prompt": "A CloudFront subscriber page loads many restricted files without changing their URLs. Which signing method fits, and why?",
+      "promptEs": "Una página para suscriptores en CloudFront carga muchos archivos restringidos sin cambiar sus URL. ¿Qué método de firma corresponde y por qué?",
+      "idealAnswer": "Use CloudFront signed cookies. They control access to multiple restricted files without requiring changes to the existing URLs.",
+      "rubric": [
+        "Names CloudFront signed cookies.",
+        "Connects the choice to multiple restricted files.",
+        "Notes that existing URLs can remain unchanged."
+      ]
+    },
+    {
+      "id": "cloudfront-signed-urls-cookies--r1",
+      "conceptId": "cloudfront-signed-urls-cookies",
+      "kind": "why-not",
+      "prompt": "Why not use an S3 presigned URL for a single restricted download that must be controlled through CloudFront?",
+      "promptEs": "¿Por qué no usarías una S3 presigned URL para una descarga restringida individual cuyo acceso debe controlarse mediante CloudFront?",
+      "idealAnswer": "An S3 presigned URL grants temporary access to an S3 object, rather than controlling access through CloudFront. For a single restricted file served through CloudFront, use a CloudFront signed URL.",
+      "rubric": [
+        "Identifies the S3 object-access purpose of an S3 presigned URL.",
+        "States that the requirement is access control through CloudFront.",
+        "Selects a CloudFront signed URL for the single file."
+      ]
+    }
+  ]
+}

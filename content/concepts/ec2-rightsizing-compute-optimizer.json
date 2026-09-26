@@ -1,0 +1,370 @@
+{
+  "conceptId": "ec2-rightsizing-compute-optimizer",
+  "card": {
+    "en": {
+      "tldr": "AWS Compute Optimizer analyzes resource configuration and CloudWatch utilization metrics to recommend right-sizing changes. Choose it when the decision is which resource size or configuration offers an appropriate price-performance trade-off, rather than simply how much the workload costs.",
+      "whenToUse": [
+        "Choose an EC2 instance size using utilization history and projected utilization.",
+        "Evaluate whether an EBS volume or Lambda function configuration should change.",
+        "Review recommendations for EC2 Auto Scaling groups or ECS services on AWS Fargate."
+      ],
+      "keyFacts": [
+        "You must opt in before Compute Optimizer analyzes resources; resources also need sufficient metric data for recommendations.",
+        "The default analysis uses the last 14 days of CloudWatch utilization metrics.",
+        "Enhanced infrastructure metrics is a paid feature that extends the lookback period to 93 days for selected resources.",
+        "Recommendation pages show suggested changes; resource details include utilization history and projected utilization graphs.",
+        "Compute Optimizer supports EC2 instances, Auto Scaling groups, EBS volumes, Lambda functions, and ECS services on AWS Fargate, among other resources."
+      ],
+      "gotchas": [
+        "A low average utilization figure alone does not establish that a smaller configuration will meet peak demand.",
+        "Compute Optimizer does not analyze resources until you opt in.",
+        "Do not assume the default 14-day window captures an important event that occurred earlier."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Cost Explorer",
+          "difference": "Cost Explorer focuses on spend analysis and can offer rightsizing recommendations; Compute Optimizer adds resource-specific utilization and projected-utilization views for evaluating changes."
+        },
+        {
+          "concept": "AWS Budgets",
+          "difference": "Budgets tracks thresholds and alerts or actions; it does not serve as the resource-utilization view for choosing a size."
+        },
+        {
+          "concept": "AWS Trusted Advisor",
+          "difference": "Trusted Advisor provides best-practice checks; Compute Optimizer provides resource-specific optimization recommendations and utilization graphs."
+        }
+      ],
+      "examCues": [
+        "choose an instance size from utilization data",
+        "compare projected utilization after resizing",
+        "right-size EBS volumes or Lambda functions",
+        "important workload peak occurred more than 14 days ago"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Compute Optimizer analiza la configuración de recursos y las métricas de uso de CloudWatch para recomendar cambios de tamaño. Elígelo cuando debas decidir qué tamaño o configuración ofrece una relación adecuada entre precio y rendimiento, no solo conocer el gasto.",
+      "whenToUse": [
+        "Elegir el tamaño de una instancia EC2 con datos históricos y proyecciones de uso.",
+        "Evaluar si debes cambiar la configuración de un volumen EBS o una función Lambda.",
+        "Revisar recomendaciones para grupos de EC2 Auto Scaling o servicios ECS en AWS Fargate."
+      ],
+      "keyFacts": [
+        "Debes activar Compute Optimizer para que analice recursos; estos también necesitan suficientes datos de métricas para recibir recomendaciones.",
+        "De forma predeterminada, analiza los últimos 14 días de métricas de uso de CloudWatch.",
+        "Enhanced infrastructure metrics es una función de pago que amplía a 93 días el período analizado para determinados recursos.",
+        "Las páginas de recomendaciones muestran cambios sugeridos; los detalles del recurso incluyen el historial y gráficos de uso proyectado.",
+        "Compute Optimizer admite instancias EC2, grupos de Auto Scaling, volúmenes EBS, funciones Lambda y servicios ECS en AWS Fargate, entre otros recursos."
+      ],
+      "gotchas": [
+        "Un promedio de uso bajo no demuestra por sí solo que una configuración menor soportará los picos.",
+        "Compute Optimizer no analiza tus recursos hasta que lo actives.",
+        "No supongas que el período predeterminado de 14 días incluye un evento importante ocurrido antes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Cost Explorer",
+          "difference": "Cost Explorer se centra en analizar gastos y también puede ofrecer recomendaciones de rightsizing; Compute Optimizer añade vistas de uso y uso proyectado por recurso para evaluar cambios."
+        },
+        {
+          "concept": "AWS Budgets",
+          "difference": "Budgets supervisa umbrales y genera alertas o acciones; no es la vista de uso por recurso para elegir un tamaño."
+        },
+        {
+          "concept": "AWS Trusted Advisor",
+          "difference": "Trusted Advisor ofrece verificaciones de prácticas recomendadas; Compute Optimizer ofrece recomendaciones de optimización por recurso y gráficos de uso."
+        }
+      ],
+      "examCues": [
+        "choose an instance size from utilization data",
+        "compare projected utilization after resizing",
+        "right-size EBS volumes or Lambda functions",
+        "important workload peak occurred more than 14 days ago"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ec2-rightsizing-compute-optimizer--18944f6d",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "secondaryConcepts": [
+        "cost-explorer",
+        "aws-budgets",
+        "cost-allocation-tags"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher runs a steady fleet of EC2 instances and wants to lower compute costs. Its architects need to compare candidate instance configurations against recent CPU, network, and disk utilization before changing the fleet. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Activate cost allocation tags and attribute each instance's charges to the publishing team.",
+          "correct": false,
+          "why": "Cost attribution identifies who incurs charges, not which configuration fits observed utilization."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS Cost Explorer to compare the fleet's historical spend and forecast its future spend.",
+          "correct": false,
+          "why": "Spend trends do not provide the requested comparison of candidate configurations against projected resource utilization."
+        },
+        {
+          "id": "C",
+          "text": "Opt in to AWS Compute Optimizer and review EC2 recommendations and utilization graphs.",
+          "correct": true,
+          "why": "Compute Optimizer analyzes EC2 utilization and presents recommendations with history and projected-utilization graphs."
+        },
+        {
+          "id": "D",
+          "text": "Create an AWS Budget for the fleet and configure an alert when spending crosses its threshold.",
+          "correct": false,
+          "why": "A spending alert does not evaluate whether a different instance configuration meets the workload's needs."
+        }
+      ],
+      "explanation": "The deciding requirement is to evaluate configuration changes using resource-utilization data. Compute Optimizer analyzes EC2 specifications and CloudWatch metrics, then provides recommendations and projected-utilization graphs. Cost Explorer can help analyze spending, but a spend forecast does not make the requested performance comparison.",
+      "keywordCues": [
+        "compare candidate instance configurations",
+        "recent CPU, network, and disk utilization",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html"
+      ],
+      "es": {
+        "stem": "Una editorial mantiene una flota estable de instancias EC2 y quiere reducir los costos de cómputo. Sus arquitectos necesitan comparar posibles configuraciones de instancia con el uso reciente de CPU, red y disco antes de cambiar la flota. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activa cost allocation tags y atribuye los cargos de cada instancia al equipo editorial.",
+            "why": "La atribución de costos identifica quién genera los cargos, no qué configuración corresponde al uso observado."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS Cost Explorer para comparar el gasto histórico de la flota y proyectar el gasto futuro.",
+            "why": "Las tendencias de gasto no ofrecen la comparación solicitada entre configuraciones y uso proyectado de los recursos."
+          },
+          {
+            "id": "C",
+            "text": "Activa AWS Compute Optimizer y revisa las recomendaciones para EC2 y los gráficos de uso.",
+            "why": "Compute Optimizer analiza el uso de EC2 y muestra recomendaciones con gráficos de uso histórico y proyectado."
+          },
+          {
+            "id": "D",
+            "text": "Crea un AWS Budget para la flota y configura una alerta cuando el gasto supere su umbral.",
+            "why": "Una alerta de gasto no evalúa si otra configuración de instancia satisface las necesidades de la carga."
+          }
+        ],
+        "explanation": "El requisito decisivo es evaluar cambios de configuración mediante datos de uso de recursos. Compute Optimizer analiza las características de EC2 y las métricas de CloudWatch, y muestra recomendaciones y gráficos de uso proyectado. Cost Explorer puede ayudarte a analizar gastos, pero una proyección de gasto no ofrece la comparación de rendimiento solicitada."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-rightsizing-compute-optimizer--de9e1dfe",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "secondaryConcepts": [
+        "aws-budgets",
+        "cost-and-usage-report",
+        "cost-allocation-tags"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company has opted in to AWS Compute Optimizer, and its Lambda functions have accumulated sufficient metrics. The team wants to reassess function memory configurations while considering the effect of a change on utilization and price-performance. Which approach meets these requirements MOST effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set an AWS Budget on Lambda spending and choose a memory setting when the budget alerts.",
+          "correct": false,
+          "why": "A budget alert tracks a spending threshold rather than evaluating a function configuration."
+        },
+        {
+          "id": "B",
+          "text": "Use cost allocation tags to separate Lambda charges by application before selecting memory.",
+          "correct": false,
+          "why": "Tags help attribute charges but do not assess the utilization effect of changing memory."
+        },
+        {
+          "id": "C",
+          "text": "Export AWS Cost and Usage Report line items and choose memory based only on total Lambda charges.",
+          "correct": false,
+          "why": "Billing line items alone do not provide the requested utilization-based configuration evaluation."
+        },
+        {
+          "id": "D",
+          "text": "Review Compute Optimizer's Lambda recommendations and utilization views before changing memory.",
+          "correct": true,
+          "why": "Compute Optimizer supports Lambda recommendations and shows utilization information for evaluating price-performance."
+        }
+      ],
+      "explanation": "The company needs a configuration decision informed by utilization, not merely a spending total. Compute Optimizer supports Lambda functions and provides recommendations and utilization views to help assess price-performance. A budget or billing export may expose costs, but neither option as proposed evaluates the effect of a memory change on utilization.",
+      "keywordCues": [
+        "Lambda functions have accumulated sufficient metrics",
+        "reassess function memory configurations",
+        "effect of a change on utilization and price-performance"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos activó AWS Compute Optimizer y sus funciones Lambda ya acumularon suficientes métricas. El equipo quiere reevaluar las configuraciones de memoria considerando el efecto de un cambio en el uso y la relación entre precio y rendimiento. ¿Qué enfoque cumple estos requisitos MOST effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura un AWS Budget para el gasto de Lambda y elige la memoria cuando llegue una alerta.",
+            "why": "Una alerta de presupuesto supervisa un umbral de gasto, no evalúa la configuración de una función."
+          },
+          {
+            "id": "B",
+            "text": "Usa cost allocation tags para separar los cargos de Lambda por aplicación antes de elegir la memoria.",
+            "why": "Las etiquetas ayudan a atribuir cargos, pero no evalúan el efecto de cambiar la memoria sobre el uso."
+          },
+          {
+            "id": "C",
+            "text": "Exporta los registros de AWS Cost and Usage Report y elige la memoria solo según los cargos totales de Lambda.",
+            "why": "Los registros de facturación por sí solos no ofrecen la evaluación de configuración basada en uso que se solicita."
+          },
+          {
+            "id": "D",
+            "text": "Revisa las recomendaciones y vistas de uso de Compute Optimizer para Lambda antes de cambiar la memoria.",
+            "why": "Compute Optimizer admite recomendaciones para Lambda y muestra información de uso para evaluar la relación entre precio y rendimiento."
+          }
+        ],
+        "explanation": "La empresa necesita una decisión de configuración basada en el uso, no solo un total de gastos. Compute Optimizer admite funciones Lambda y ofrece recomendaciones y vistas de uso para evaluar la relación entre precio y rendimiento. Un presupuesto o una exportación de facturación puede mostrar costos, pero ninguna de esas opciones, tal como se plantea, evalúa el efecto de cambiar la memoria sobre el uso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-rightsizing-compute-optimizer--897f56dd",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "secondaryConcepts": [
+        "aws-budgets",
+        "cost-allocation-tags",
+        "health-dashboard-trusted-advisor"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company wants to reduce costs for its EBS volumes and ECS services on AWS Fargate. It has not enabled resource-level optimization analysis, but both resource types have sufficient metrics. The team needs recommendations and utilization projections before deciding which configurations to change. Which two actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Review Compute Optimizer's EBS and ECS-on-Fargate recommendations and projected-utilization graphs.",
+          "correct": true,
+          "why": "Both resource types are supported, and the recommendations and graphs help evaluate configuration changes."
+        },
+        {
+          "id": "B",
+          "text": "Activate cost allocation tags for the volumes and ECS services.",
+          "correct": false,
+          "why": "Cost attribution does not generate the requested resource-level optimization analysis."
+        },
+        {
+          "id": "C",
+          "text": "Create AWS Budgets for EBS and Fargate spending thresholds.",
+          "correct": false,
+          "why": "Budget thresholds do not supply resource recommendations or utilization projections."
+        },
+        {
+          "id": "D",
+          "text": "Opt in to AWS Compute Optimizer for the account.",
+          "correct": true,
+          "why": "Opt-in is required before Compute Optimizer analyzes the company's resources."
+        },
+        {
+          "id": "E",
+          "text": "Review AWS Trusted Advisor best-practice checks for idle resources.",
+          "correct": false,
+          "why": "A best-practice check is not the requested recommendation and projected-utilization view for both resource types."
+        }
+      ],
+      "explanation": "The team needs to enable analysis and then inspect resource-specific recommendations with utilization projections. Compute Optimizer requires opt-in, supports both EBS volumes and ECS services on AWS Fargate, and provides projected-utilization graphs for recommendations. Budgets and tags address spending controls or attribution, while the proposed Trusted Advisor check does not provide the requested comparison for both resources.",
+      "keywordCues": [
+        "EBS volumes and ECS services on AWS Fargate",
+        "has not enabled resource-level optimization analysis",
+        "recommendations and utilization projections",
+        "Choose two."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios quiere reducir los costos de sus volúmenes EBS y servicios ECS en AWS Fargate. Todavía no activó el análisis de optimización por recurso, pero ambos tipos de recursos tienen suficientes métricas. El equipo necesita recomendaciones y proyecciones de uso antes de decidir qué configuraciones cambiar. ¿Qué dos acciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Revisa las recomendaciones y los gráficos de uso proyectado de Compute Optimizer para EBS y ECS en AWS Fargate.",
+            "why": "Ambos tipos de recursos son compatibles, y las recomendaciones y los gráficos ayudan a evaluar cambios de configuración."
+          },
+          {
+            "id": "B",
+            "text": "Activa cost allocation tags para los volúmenes y servicios ECS.",
+            "why": "La atribución de costos no genera el análisis de optimización por recurso solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Crea AWS Budgets con umbrales de gasto para EBS y Fargate.",
+            "why": "Los umbrales de presupuesto no proporcionan recomendaciones por recurso ni proyecciones de uso."
+          },
+          {
+            "id": "D",
+            "text": "Activa AWS Compute Optimizer para la cuenta.",
+            "why": "Debes activarlo antes de que Compute Optimizer analice los recursos de la empresa."
+          },
+          {
+            "id": "E",
+            "text": "Revisa las verificaciones de prácticas recomendadas de AWS Trusted Advisor para recursos inactivos.",
+            "why": "Una verificación de prácticas recomendadas no es la vista solicitada de recomendaciones y uso proyectado para ambos tipos de recursos."
+          }
+        ],
+        "explanation": "El equipo debe activar el análisis y luego examinar recomendaciones por recurso con proyecciones de uso. Compute Optimizer requiere activación, admite volúmenes EBS y servicios ECS en AWS Fargate, y ofrece gráficos de uso proyectado para sus recomendaciones. Budgets y las etiquetas tratan sobre controles o atribución de gastos, mientras que la verificación propuesta de Trusted Advisor no ofrece la comparación solicitada para ambos recursos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ec2-rightsizing-compute-optimizer--r0",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "kind": "recall",
+      "prompt": "A team wants to shrink EC2 instances without overlooking performance needs. Which service should it use, and what evidence should it review?",
+      "promptEs": "Un equipo quiere reducir el tamaño de instancias EC2 sin pasar por alto el rendimiento. ¿Qué servicio debe usar y qué datos debe revisar?",
+      "idealAnswer": "Opt in to AWS Compute Optimizer and review its EC2 recommendations. Compare utilization history and projected utilization for candidate configurations before selecting a change.",
+      "rubric": [
+        "Names AWS Compute Optimizer and notes opt-in if needed.",
+        "Uses EC2 recommendations rather than spending totals alone.",
+        "Mentions utilization history and projected utilization to assess performance."
+      ]
+    },
+    {
+      "id": "ec2-rightsizing-compute-optimizer--r1",
+      "conceptId": "ec2-rightsizing-compute-optimizer",
+      "kind": "why-not",
+      "prompt": "Why is a Cost Explorer spend forecast alone insufficient when choosing an EC2 size from utilization patterns?",
+      "promptEs": "¿Por qué una proyección de gastos de Cost Explorer por sí sola no basta para elegir un tamaño de EC2 según los patrones de uso?",
+      "idealAnswer": "A spend forecast addresses expected costs, not whether a proposed instance configuration fits observed utilization. Compute Optimizer provides resource-specific recommendations and utilization history and projections for that decision.",
+      "rubric": [
+        "Distinguishes a spend forecast from resource-utilization analysis.",
+        "Names Compute Optimizer for the configuration decision.",
+        "Mentions recommendations and utilization history or projections."
+      ]
+    }
+  ]
+}

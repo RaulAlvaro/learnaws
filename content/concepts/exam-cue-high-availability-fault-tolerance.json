@@ -1,0 +1,394 @@
+{
+  "conceptId": "exam-cue-high-availability-fault-tolerance",
+  "card": {
+    "en": {
+      "tldr": "Read the failure boundary before choosing a design. For a workload that must remain available when one Availability Zone fails, choose capacity across multiple AZs; if the requirement includes a Regional disruption, plan capacity and recovery across Regions.",
+      "whenToUse": [
+        "The scenario says “highly available” and identifies an Availability Zone failure as the risk.",
+        "The scenario requires service to continue during a Regional disruption.",
+        "A proposed design concentrates all serving capacity in one AZ."
+      ],
+      "keyFacts": [
+        "Single points of failure undermine reliability.",
+        "Automation and proven failure-recovery processes are reliability considerations.",
+        "The architecture must match the failure scope: an AZ failure and a Regional disruption call for different placement decisions.",
+        "Backups support recovery, but a backup-only design does not provide continuously serving redundant capacity."
+      ],
+      "gotchas": [
+        "Do not select multiple instances if every instance remains in the same AZ.",
+        "Do not treat a Multi-AZ design as meeting an explicit requirement to continue through a Regional disruption.",
+        "Do not equate the ability to restore from a backup with uninterrupted service."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "remain available if one Availability Zone fails",
+        "continue serving during a Regional disruption",
+        "no single point of failure",
+        "recovery after an outage is acceptable"
+      ]
+    },
+    "es": {
+      "tldr": "Identifica primero qué tipo de falla debe resistir la arquitectura. Si la carga debe seguir disponible cuando falla una Availability Zone, distribuye la capacidad entre varias AZ; si el requisito incluye una interrupción de una Region, planifica capacidad y recuperación entre Regions.",
+      "whenToUse": [
+        "El escenario dice “highly available” e identifica la falla de una Availability Zone como riesgo.",
+        "El servicio debe continuar durante una interrupción de una Region.",
+        "Una propuesta concentra toda la capacidad que atiende solicitudes en una sola AZ."
+      ],
+      "keyFacts": [
+        "Los puntos únicos de falla debilitan la confiabilidad.",
+        "La automatización y los procesos de recuperación probados son consideraciones de confiabilidad.",
+        "La arquitectura debe corresponder al alcance de la falla: una falla de AZ y una interrupción de Region exigen decisiones de distribución distintas.",
+        "Los backups ayudan a recuperar el servicio, pero por sí solos no aportan capacidad redundante que ya esté atendiendo solicitudes."
+      ],
+      "gotchas": [
+        "No elijas varias instancias si todas permanecen en la misma AZ.",
+        "No consideres que un diseño Multi-AZ cumple un requisito explícito de continuar durante una interrupción de una Region.",
+        "No confundas la posibilidad de restaurar un backup con un servicio ininterrumpido."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "remain available if one Availability Zone fails",
+        "continue serving during a Regional disruption",
+        "no single point of failure",
+        "recovery after an outage is acceptable"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "exam-cue-high-availability-fault-tolerance--8421ace8",
+      "conceptId": "exam-cue-high-availability-fault-tolerance",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A payments platform serves requests from capacity spread across multiple AZs in one Region. The business now requires transactions to continue during a Regional disruption and wants the response to be practiced rather than improvised. Which TWO actions address these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Establish and test the process that shifts service to the second Region.",
+          "correct": true,
+          "why": "A tested recovery process addresses the requirement for a practiced response."
+        },
+        {
+          "id": "B",
+          "text": "Retain backups and rely on restoration after the disruption ends.",
+          "correct": false,
+          "why": "Waiting to restore service conflicts with the requirement that transactions continue."
+        },
+        {
+          "id": "C",
+          "text": "Add another AZ to the current Regional deployment.",
+          "correct": false,
+          "why": "An additional AZ does not move serving capacity beyond the Regional failure boundary."
+        },
+        {
+          "id": "D",
+          "text": "Increase capacity in each AZ of the current Region.",
+          "correct": false,
+          "why": "Capacity in the affected Region cannot satisfy the Regional-continuity requirement."
+        },
+        {
+          "id": "E",
+          "text": "Prepare capacity to serve transactions in a second Region.",
+          "correct": true,
+          "why": "Capacity outside the disrupted Region addresses the new failure boundary."
+        }
+      ],
+      "explanation": "The existing Multi-AZ design addresses an AZ failure but leaves serving capacity within one Region. Capacity in a second Region addresses the specified Regional disruption, while a tested process addresses the requirement not to improvise the response. More AZs or capacity in the original Region do not cross the Regional failure boundary; restoration from backups alone does not keep transactions flowing.",
+      "keywordCues": [
+        "across multiple AZs in one Region",
+        "transactions to continue during a Regional disruption",
+        "response to be practiced rather than improvised"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de pagos atiende solicitudes con capacidad distribuida entre varias AZ de una Region. Ahora la empresa exige que las transacciones continúen durante una interrupción regional y quiere una respuesta practicada, no improvisada. ¿Qué DOS acciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Establecer y probar el proceso para trasladar el servicio a la segunda Region.",
+            "why": "Un proceso de recuperación probado cumple el requisito de contar con una respuesta practicada."
+          },
+          {
+            "id": "B",
+            "text": "Conservar backups y depender de una restauración cuando termine la interrupción.",
+            "why": "Esperar a restaurar el servicio contradice el requisito de que las transacciones continúen."
+          },
+          {
+            "id": "C",
+            "text": "Agregar otra AZ al despliegue de la Region actual.",
+            "why": "Otra AZ no traslada la capacidad fuera del alcance de una falla regional."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar la capacidad en cada AZ de la Region actual.",
+            "why": "La capacidad dentro de la Region afectada no cumple el requisito de continuidad regional."
+          },
+          {
+            "id": "E",
+            "text": "Preparar capacidad para atender transacciones en una segunda Region.",
+            "why": "La capacidad fuera de la Region interrumpida responde al nuevo alcance de la falla."
+          }
+        ],
+        "explanation": "El diseño Multi-AZ existente responde a una falla de AZ, pero toda la capacidad permanece en una Region. La capacidad en una segunda Region responde a la interrupción regional, y un proceso probado evita improvisar el cambio. Más AZ o capacidad en la Region original no superan ese límite; restaurar solo desde backups no mantiene las transacciones en curso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-high-availability-fault-tolerance--ea7b058c",
+      "conceptId": "exam-cue-high-availability-fault-tolerance",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is replacing a single application instance before its next sales event. The service must remain available if one Availability Zone fails, but the company has no requirement to survive a Regional disruption. Which design meets the availability requirement without adding a second-Region deployment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep one serving instance and automate its replacement in the same AZ.",
+          "correct": false,
+          "why": "Automated replacement in the affected AZ does not remove the AZ as a failure boundary."
+        },
+        {
+          "id": "B",
+          "text": "Run several application instances in one AZ and keep a backup for recovery.",
+          "correct": false,
+          "why": "All serving instances would be lost to the stated AZ failure."
+        },
+        {
+          "id": "C",
+          "text": "Run application capacity across multiple AZs and distribute requests across that capacity.",
+          "correct": true,
+          "why": "Serving capacity remains outside the failed AZ without requiring another Region."
+        },
+        {
+          "id": "D",
+          "text": "Keep the application in one AZ and schedule more frequent backups.",
+          "correct": false,
+          "why": "More frequent backups help recovery but do not provide serving capacity during the AZ failure."
+        }
+      ],
+      "explanation": "The deciding requirement is continued availability when an AZ fails, not protection against a Regional disruption. Distributing serving capacity across multiple AZs removes the stated single-AZ dependency. Extra instances, automation, or backups confined to one AZ do not meet that requirement.",
+      "keywordCues": [
+        "remain available if one Availability Zone fails",
+        "no requirement to survive a Regional disruption",
+        "without adding a second-Region deployment"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos reemplazará una sola instancia de su aplicación antes de su próximo evento de ventas. El servicio debe seguir disponible si falla una Availability Zone, pero la empresa no necesita resistir una interrupción de una Region. ¿Qué diseño cumple el requisito de disponibilidad sin agregar un despliegue en una segunda Region?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener una instancia que atienda solicitudes y automatizar su reemplazo en la misma AZ.",
+            "why": "Reemplazarla en la AZ afectada no elimina esa AZ como punto de falla."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar varias instancias de la aplicación en una sola AZ y conservar un backup para recuperarla.",
+            "why": "Todas las instancias que atienden solicitudes se perderían ante la falla de AZ indicada."
+          },
+          {
+            "id": "C",
+            "text": "Distribuir la capacidad de la aplicación entre varias AZ y repartir las solicitudes entre ellas.",
+            "why": "Quedaría capacidad disponible fuera de la AZ afectada sin necesitar otra Region."
+          },
+          {
+            "id": "D",
+            "text": "Mantener la aplicación en una AZ y programar backups más frecuentes.",
+            "why": "Los backups más frecuentes ayudan a recuperarla, pero no aportan capacidad para atender solicitudes durante la falla de AZ."
+          }
+        ],
+        "explanation": "El requisito decisivo es mantener el servicio disponible cuando falla una AZ, no resistir una interrupción de una Region. Distribuir la capacidad entre varias AZ elimina la dependencia de una sola AZ. Más instancias, automatización o backups limitados a una AZ no cumplen ese requisito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-high-availability-fault-tolerance--babe3b27",
+      "conceptId": "exam-cue-high-availability-fault-tolerance",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company runs a dispatch application across multiple Availability Zones in one AWS Region. Its new continuity policy requires dispatch to continue even if that entire Region becomes unavailable, rather than wait for a later restoration. Which architectural change meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add another AZ to the existing Regional deployment and test instance replacement.",
+          "correct": false,
+          "why": "Another AZ still leaves all serving capacity in the affected Region."
+        },
+        {
+          "id": "B",
+          "text": "Prepare serving capacity in another Region and a tested process to redirect service there.",
+          "correct": true,
+          "why": "Capacity outside the affected Region supports continued service when that Region is unavailable."
+        },
+        {
+          "id": "C",
+          "text": "Increase the number of application instances across the existing AZs.",
+          "correct": false,
+          "why": "Additional instances within the same Region do not address a Regional disruption."
+        },
+        {
+          "id": "D",
+          "text": "Keep the current deployment and retain more frequent backups for restoration.",
+          "correct": false,
+          "why": "Backups enable recovery but do not keep dispatch serving during the disruption."
+        }
+      ],
+      "explanation": "The new failure boundary is an entire Region, not an AZ. Serving capacity in another Region, together with a recovery process, addresses that boundary. More capacity or AZs in the original Region remain exposed to the stated event, while backups alone imply waiting for restoration.",
+      "keywordCues": [
+        "across multiple Availability Zones in one AWS Region",
+        "entire Region becomes unavailable",
+        "continue",
+        "rather than wait for a later restoration"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística ejecuta una aplicación de despacho en varias Availability Zones de una AWS Region. Su nueva política exige que el despacho continúe incluso si toda esa Region deja de estar disponible, en lugar de esperar una restauración posterior. ¿Qué cambio de arquitectura cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar otra AZ al despliegue de la Region actual y probar el reemplazo de instancias.",
+            "why": "La capacidad que atiende solicitudes seguiría dentro de la Region afectada."
+          },
+          {
+            "id": "B",
+            "text": "Preparar capacidad para atender solicitudes en otra Region y un proceso probado para dirigir allí el servicio.",
+            "why": "La capacidad fuera de la Region afectada permite continuar el servicio si esa Region deja de estar disponible."
+          },
+          {
+            "id": "C",
+            "text": "Aumentar la cantidad de instancias de la aplicación en las AZ existentes.",
+            "why": "Más instancias dentro de la misma Region no resuelven una interrupción regional."
+          },
+          {
+            "id": "D",
+            "text": "Conservar el despliegue actual y guardar backups más frecuentes para restaurarlo.",
+            "why": "Los backups permiten recuperarlo, pero no mantienen el despacho en funcionamiento durante la interrupción."
+          }
+        ],
+        "explanation": "Ahora el alcance de la falla es una Region completa, no una AZ. La capacidad en otra Region, junto con un proceso de recuperación, responde a ese riesgo. Más capacidad o más AZ en la Region original siguen expuestas; los backups por sí solos implican esperar una restauración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-high-availability-fault-tolerance--c84068e1",
+      "conceptId": "exam-cue-high-availability-fault-tolerance",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher serves a daily news application from one Availability Zone. Editors require readers to retain access during an AZ outage, but they can accept a planned recovery process for the less likely loss of an entire Region. Which approach meets these distinct requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Serve the application across multiple AZs in one Region and maintain a tested recovery process for a Regional loss.",
+          "correct": true,
+          "why": "It provides serving redundancy for the AZ outage while allowing recovery, rather than continuous service, after Regional loss."
+        },
+        {
+          "id": "B",
+          "text": "Operate continuously serving deployments in multiple Regions for both outage types.",
+          "correct": false,
+          "why": "Continuously serving multi-Region capacity exceeds the stated need to recover after a Regional loss."
+        },
+        {
+          "id": "C",
+          "text": "Serve the application from one AZ and use backups for both AZ and Regional outages.",
+          "correct": false,
+          "why": "Recovery from backups does not keep readers connected during the specified AZ outage."
+        },
+        {
+          "id": "D",
+          "text": "Add instances within the current AZ and establish a tested Regional recovery process.",
+          "correct": false,
+          "why": "The tested recovery process does not remove the single-AZ dependency for everyday service."
+        }
+      ],
+      "explanation": "The publisher sets different expectations for the two outage scopes: continued access for an AZ outage and recovery after a Regional loss. Multi-AZ serving capacity plus a tested Regional recovery process matches those expectations without requiring continuously serving multi-Region capacity. Backups or extra instances in a single AZ fail the immediate AZ-availability requirement.",
+      "keywordCues": [
+        "retain access during an AZ outage",
+        "accept a planned recovery process",
+        "loss of an entire Region",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una editorial ofrece una aplicación de noticias desde una sola Availability Zone. Los editores exigen que los lectores mantengan el acceso durante una falla de AZ, pero aceptan un proceso de recuperación planificado si se pierde una Region completa. ¿Qué enfoque cumple estos requisitos distintos de la forma MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Atender la aplicación desde varias AZ de una Region y mantener un proceso probado de recuperación ante la pérdida de la Region.",
+            "why": "Proporciona redundancia para la falla de AZ y permite recuperar el servicio, en vez de exigir continuidad, tras la pérdida de la Region."
+          },
+          {
+            "id": "B",
+            "text": "Operar despliegues que atiendan solicitudes continuamente en varias Regions para ambos tipos de falla.",
+            "why": "La capacidad activa continua en varias Regions excede el requisito de recuperación tras una pérdida regional."
+          },
+          {
+            "id": "C",
+            "text": "Atender la aplicación desde una AZ y usar backups tanto para fallas de AZ como de Region.",
+            "why": "Restaurar desde backups no mantiene conectados a los lectores durante la falla de AZ indicada."
+          },
+          {
+            "id": "D",
+            "text": "Agregar instancias en la AZ actual y establecer un proceso probado de recuperación regional.",
+            "why": "El proceso de recuperación no elimina la dependencia de una sola AZ para el servicio habitual."
+          }
+        ],
+        "explanation": "La editorial exige continuidad durante una falla de AZ, pero solo recuperación tras perder una Region. La capacidad en varias AZ y un proceso probado de recuperación regional corresponden a esas dos necesidades sin exigir capacidad activa continua en varias Regions. Los backups o las instancias adicionales en una sola AZ no cumplen el requisito de disponibilidad inmediata ante una falla de AZ."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "exam-cue-high-availability-fault-tolerance--r0",
+      "conceptId": "exam-cue-high-availability-fault-tolerance",
+      "kind": "recall",
+      "prompt": "A service must survive an AZ failure today and continue through a Regional disruption later. How should its serving capacity and recovery plan change?",
+      "promptEs": "Un servicio debe resistir hoy una falla de AZ y, más adelante, continuar durante una interrupción regional. ¿Cómo deben cambiar su capacidad y su plan de recuperación?",
+      "idealAnswer": "Spread serving capacity across multiple AZs to avoid dependence on one AZ. For continued service during a Regional disruption, prepare capacity in another Region and test the process for shifting service there.",
+      "rubric": [
+        "Uses capacity across multiple AZs for the AZ-failure requirement.",
+        "Uses capacity in another Region for the Regional-disruption requirement.",
+        "Includes a tested process for moving service during failure."
+      ]
+    }
+  ]
+}

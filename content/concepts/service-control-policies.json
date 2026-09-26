@@ -1,0 +1,357 @@
+{
+  "conceptId": "service-control-policies",
+  "card": {
+    "en": {
+      "tldr": "Service control policies (SCPs) set organization-wide permission guardrails for member accounts, including their root users. Choose an SCP when a rule must cap what accounts or OUs can do regardless of their IAM grants; use IAM or resource policies to grant access.",
+      "whenToUse": [
+        "Apply the same permission ceiling across multiple member accounts or an OU.",
+        "Prevent member-account administrators from overriding a restriction with broad IAM permissions.",
+        "Restrict the root user of a member account as well as its IAM users and roles."
+      ],
+      "keyFacts": [
+        "SCPs require an AWS Organizations organization with all features enabled; consolidated billing alone is insufficient.",
+        "SCPs grant no permissions. Users and roles still need appropriate permissions from IAM or resource policies.",
+        "A member account's permissions must be permitted at every level above it in the organization.",
+        "SCPs affect member accounts, including delegated administrator accounts and their root users, but not users or roles in the management account.",
+        "SCPs do not restrict service-linked roles or directly apply to principals from outside the organization."
+      ],
+      "gotchas": [
+        "An SCP that allows an action does not grant that action to a role with no IAM permissions.",
+        "AdministratorAccess in a member account does not override an applicable SCP restriction.",
+        "Do not expect an SCP to restrict management-account principals or service-linked roles.",
+        "Test an SCP with a small number of accounts before attaching it to the organization root."
+      ],
+      "confusedWith": [
+        {
+          "concept": "IAM identity-based policies",
+          "difference": "They grant permissions to users and roles; SCPs cap permissions across member accounts."
+        },
+        {
+          "concept": "Resource-based policies",
+          "difference": "They control access to a resource, including access by outside principals; an SCP does not directly restrict those outside principals."
+        },
+        {
+          "concept": "Permissions boundaries",
+          "difference": "They cap permissions for a specific IAM user or role; an SCP caps permissions for member accounts or OUs."
+        }
+      ],
+      "examCues": [
+        "guardrail across member accounts",
+        "member account root user",
+        "AdministratorAccess must not override the restriction",
+        "OU-wide permission ceiling"
+      ]
+    },
+    "es": {
+      "tldr": "Las service control policies (SCPs) establecen límites de permisos para las cuentas miembro de una organización, incluidos sus usuarios root. Elige una SCP cuando debas limitar lo que pueden hacer cuentas u OUs aunque IAM les otorgue permisos amplios; usa políticas de IAM o de recursos para otorgar acceso.",
+      "whenToUse": [
+        "Aplicar el mismo límite de permisos a varias cuentas miembro o a una OU.",
+        "Impedir que los administradores de cuentas miembro eludan una restricción mediante permisos amplios de IAM.",
+        "Restringir al usuario root de una cuenta miembro, además de sus usuarios y roles de IAM."
+      ],
+      "keyFacts": [
+        "Las SCPs requieren que la organización de AWS Organizations tenga habilitadas todas las funciones; consolidated billing por sí solo no basta.",
+        "Las SCPs no otorgan permisos. Los usuarios y roles aún necesitan permisos adecuados mediante políticas de IAM o de recursos.",
+        "Los permisos de una cuenta miembro deben estar permitidos en todos los niveles superiores de la organización.",
+        "Las SCPs afectan a las cuentas miembro, incluidas las cuentas de administradores delegados y sus usuarios root, pero no a los usuarios o roles de la cuenta de administración.",
+        "Las SCPs no restringen los service-linked roles ni se aplican directamente a entidades externas a la organización."
+      ],
+      "gotchas": [
+        "Una SCP que permite una acción no se la otorga a un rol sin permisos de IAM.",
+        "AdministratorAccess en una cuenta miembro no anula una restricción de una SCP aplicable.",
+        "No esperes que una SCP restrinja a las entidades de la cuenta de administración ni a los service-linked roles.",
+        "Prueba una SCP con pocas cuentas antes de adjuntarla a la raíz de la organización."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Políticas basadas en identidad de IAM",
+          "difference": "Otorgan permisos a usuarios y roles; las SCPs limitan permisos en cuentas miembro."
+        },
+        {
+          "concept": "Políticas basadas en recursos",
+          "difference": "Controlan el acceso a un recurso, incluso para entidades externas; una SCP no restringe directamente a esas entidades."
+        },
+        {
+          "concept": "Permissions boundaries",
+          "difference": "Limitan los permisos de un usuario o rol de IAM específico; una SCP limita permisos de cuentas miembro u OUs."
+        }
+      ],
+      "examCues": [
+        "guardrail across member accounts",
+        "member account root user",
+        "AdministratorAccess must not override the restriction",
+        "OU-wide permission ceiling"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "service-control-policies--8bee4c2c",
+      "conceptId": "service-control-policies",
+      "secondaryConcepts": [
+        "permissions-boundaries",
+        "iam-identity-based-policies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company has production accounts in an AWS Organizations OU. Its security team must prevent IAM administrators and the root users of those member accounts from performing a specified set of actions, even when an administrator attaches AdministratorAccess to a role. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach an SCP that denies the actions to the production OU.",
+          "correct": true,
+          "why": "An OU-level SCP caps permissions in its member accounts, including those of root users and roles with AdministratorAccess."
+        },
+        {
+          "id": "B",
+          "text": "Replace each administrator role's identity policy with one that omits the actions.",
+          "correct": false,
+          "why": "Changing those roles' identity policies does not establish a ceiling for root users or other identities in the accounts."
+        },
+        {
+          "id": "C",
+          "text": "Attach a permissions boundary that denies the actions to each administrator role.",
+          "correct": false,
+          "why": "A boundary on administrator roles does not restrict the member accounts' root users or every other role."
+        },
+        {
+          "id": "D",
+          "text": "Add deny statements to the resource policies of resources used by the production accounts.",
+          "correct": false,
+          "why": "Individual resource policies do not provide the requested account-wide guardrail for the specified actions."
+        }
+      ],
+      "explanation": "The deciding requirement is a common restriction that also applies to member-account root users. An SCP on the OU sets a permission ceiling that AdministratorAccess cannot override. A permissions boundary is scoped to particular IAM identities, so attaching one to administrator roles leaves root users outside that control.",
+      "keywordCues": [
+        "production accounts in an AWS Organizations OU",
+        "root users of those member accounts",
+        "AdministratorAccess"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene cuentas de producción en una OU de AWS Organizations. Su equipo de seguridad debe impedir que los administradores de IAM y los usuarios root de esas cuentas miembro realicen ciertas acciones, incluso si un administrador adjunta AdministratorAccess a un rol. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Adjuntar una SCP que deniegue las acciones a la OU de producción.",
+            "why": "Una SCP a nivel de OU limita los permisos de sus cuentas miembro, incluidos los de usuarios root y roles con AdministratorAccess."
+          },
+          {
+            "id": "B",
+            "text": "Reemplazar la política basada en identidad de cada rol de administrador por una que omita las acciones.",
+            "why": "Cambiar las políticas de esos roles no establece un límite para los usuarios root ni para otras identidades de las cuentas."
+          },
+          {
+            "id": "C",
+            "text": "Adjuntar una permissions boundary que deniegue las acciones a cada rol de administrador.",
+            "why": "Una boundary aplicada a roles de administrador no restringe a los usuarios root de las cuentas miembro ni a todos los demás roles."
+          },
+          {
+            "id": "D",
+            "text": "Agregar declaraciones Deny a las políticas de los recursos que usan las cuentas de producción.",
+            "why": "Las políticas de recursos individuales no proporcionan el guardrail para toda la cuenta que requieren esas acciones."
+          }
+        ],
+        "explanation": "El requisito decisivo es una restricción común que también afecte a los usuarios root de las cuentas miembro. Una SCP en la OU establece un límite de permisos que AdministratorAccess no puede anular. Una permissions boundary se aplica a identidades de IAM específicas, por lo que adjuntarla a roles de administrador deja fuera a los usuarios root."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "service-control-policies--34cc2a4b",
+      "conceptId": "service-control-policies",
+      "secondaryConcepts": [
+        "iam-identity-based-policies",
+        "permissions-boundaries"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research organization attaches an SCP that permits the actions needed by a new analytics team. The team's role in a member account has no IAM permission policy, and its first API request is denied. The team needs access only to its approved analytics resources. Which change meets this requirement with the LEAST additional access?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the account to an OU with fewer SCP restrictions.",
+          "correct": false,
+          "why": "Relaxing SCP restrictions does not provide the missing IAM permission grant."
+        },
+        {
+          "id": "B",
+          "text": "Attach a broader SCP to the member account that permits all AWS actions.",
+          "correct": false,
+          "why": "A broader SCP still would not grant permissions to the role."
+        },
+        {
+          "id": "C",
+          "text": "Attach a permissions boundary to the role that lists the required actions and resources.",
+          "correct": false,
+          "why": "A permissions boundary sets a maximum but does not grant permissions to a role without an IAM permission policy."
+        },
+        {
+          "id": "D",
+          "text": "Attach an identity-based policy to the role that grants the required actions on the approved resources.",
+          "correct": true,
+          "why": "The role needs an IAM permission grant, and the existing SCP must also permit the actions."
+        }
+      ],
+      "explanation": "The role has no IAM permission policy, and an SCP cannot grant access even when it permits an action. An identity-based policy grants the required actions on the approved resources while the SCP remains the organization guardrail. A broader SCP or a permissions boundary cannot substitute for the missing grant.",
+      "keywordCues": [
+        "SCP that permits the actions",
+        "has no IAM permission policy",
+        "only to its approved analytics resources"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación adjunta una SCP que permite las acciones necesarias para un nuevo equipo de análisis. El rol del equipo en una cuenta miembro no tiene ninguna política de permisos de IAM, y su primera solicitud de API es denegada. El equipo necesita acceso solo a sus recursos de análisis aprobados. ¿Qué cambio cumple este requisito con el LEAST additional access?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mover la cuenta a una OU con menos restricciones de SCP.",
+            "why": "Reducir las restricciones de SCP no proporciona el permiso de IAM que falta."
+          },
+          {
+            "id": "B",
+            "text": "Adjuntar a la cuenta miembro una SCP más amplia que permita todas las acciones de AWS.",
+            "why": "Una SCP más amplia tampoco otorgaría permisos al rol."
+          },
+          {
+            "id": "C",
+            "text": "Adjuntar al rol una permissions boundary que enumere las acciones y los recursos necesarios.",
+            "why": "Una permissions boundary establece un máximo, pero no otorga permisos a un rol sin una política de permisos de IAM."
+          },
+          {
+            "id": "D",
+            "text": "Adjuntar al rol una política basada en identidad que otorgue las acciones necesarias sobre los recursos aprobados.",
+            "why": "El rol necesita un permiso de IAM, y la SCP existente también debe permitir esas acciones."
+          }
+        ],
+        "explanation": "El rol no tiene una política de permisos de IAM, y una SCP no puede otorgar acceso aunque permita una acción. Una política basada en identidad otorga las acciones necesarias sobre los recursos aprobados, mientras la SCP sigue funcionando como guardrail de la organización. Ni una SCP más amplia ni una permissions boundary sustituyen el permiso que falta."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "service-control-policies--97abe350",
+      "conceptId": "service-control-policies",
+      "secondaryConcepts": [
+        "permissions-boundaries",
+        "resource-based-policies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A financial services company wants to stop IAM users and roles in every member account from performing an administrative action. It also wants to keep testing changes in small batches before applying them broadly. The organization currently has only consolidated billing features enabled. Which approach meets the requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach a permissions boundary to an IAM role in each member account and test each role.",
+          "correct": false,
+          "why": "Boundaries on selected roles do not establish a guardrail for all IAM users and roles in each account."
+        },
+        {
+          "id": "B",
+          "text": "Add a deny statement to each account's resource policies, then test selected resources.",
+          "correct": false,
+          "why": "Policies on individual resources do not provide the requested account-wide restriction on IAM users and roles."
+        },
+        {
+          "id": "C",
+          "text": "Enable all features, enable SCPs, and test the deny SCP on an OU by moving member accounts into it in small batches.",
+          "correct": true,
+          "why": "All features are required for SCPs, and a test OU supports incremental rollout of the account-wide guardrail."
+        },
+        {
+          "id": "D",
+          "text": "Attach a deny SCP to the organization root now, then test it in selected accounts.",
+          "correct": false,
+          "why": "SCPs are unavailable with consolidated billing features alone, and immediate root attachment skips the requested small-batch testing."
+        }
+      ],
+      "explanation": "SCPs are unavailable while the organization uses only consolidated billing features. After enabling all features and SCPs, the company can test a deny SCP on an OU by moving accounts into it in small batches. Attaching an SCP directly to the root before testing fails the rollout requirement and risks disrupting accounts broadly.",
+      "keywordCues": [
+        "every member account",
+        "testing changes in small batches",
+        "only consolidated billing features enabled"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+      ],
+      "es": {
+        "stem": "Una empresa de servicios financieros quiere impedir que los usuarios y roles de IAM de todas las cuentas miembro realicen una acción administrativa. También quiere probar los cambios en grupos pequeños antes de aplicarlos ampliamente. La organización tiene habilitadas solo las funciones de consolidated billing. ¿Qué enfoque cumple los requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Adjuntar una permissions boundary a un rol de IAM en cada cuenta miembro y probar cada rol.",
+            "why": "Las boundaries de roles seleccionados no establecen un guardrail para todos los usuarios y roles de IAM de cada cuenta."
+          },
+          {
+            "id": "B",
+            "text": "Agregar una declaración Deny a las políticas de recursos de cada cuenta y luego probar recursos seleccionados.",
+            "why": "Las políticas de recursos individuales no proporcionan la restricción requerida para los usuarios y roles de IAM de toda la cuenta."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar todas las funciones, habilitar las SCPs y probar la SCP con Deny en una OU moviendo allí cuentas miembro en grupos pequeños.",
+            "why": "Las SCPs requieren todas las funciones, y una OU de prueba permite implementar gradualmente el guardrail para las cuentas."
+          },
+          {
+            "id": "D",
+            "text": "Adjuntar ahora una SCP con Deny a la raíz de la organización y luego probarla en cuentas seleccionadas.",
+            "why": "Las SCPs no están disponibles solo con consolidated billing, y adjuntarla de inmediato a la raíz omite las pruebas en grupos pequeños."
+          }
+        ],
+        "explanation": "Las SCPs no están disponibles mientras la organización use solo las funciones de consolidated billing. Después de habilitar todas las funciones y las SCPs, la empresa puede probar una SCP con Deny en una OU moviendo cuentas en grupos pequeños. Adjuntarla directamente a la raíz antes de probarla incumple el requisito de implementación gradual y puede afectar ampliamente a las cuentas."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "service-control-policies--r0",
+      "conceptId": "service-control-policies",
+      "kind": "recall",
+      "prompt": "Administrators in several member accounts must not override a restriction, even with AdministratorAccess. Which control fits, and what else is needed for allowed actions?",
+      "promptEs": "Los administradores de varias cuentas miembro no deben poder anular una restricción, ni siquiera con AdministratorAccess. ¿Qué control usarías y qué más requieren las acciones permitidas?",
+      "idealAnswer": "Attach an SCP to the relevant OU or accounts to set the maximum available permissions. Users and roles still need permission grants from appropriate IAM or resource policies because an SCP grants nothing.",
+      "rubric": [
+        "Identifies an SCP applied to the relevant OU or member accounts.",
+        "Explains that AdministratorAccess cannot override an applicable SCP restriction.",
+        "States that an SCP grants nothing and access still requires appropriate permission grants."
+      ]
+    },
+    {
+      "id": "service-control-policies--r1",
+      "conceptId": "service-control-policies",
+      "kind": "why-not",
+      "prompt": "Why would a permissions boundary on administrator roles not replace an SCP when member-account root users must also be restricted?",
+      "promptEs": "¿Por qué una permissions boundary en los roles de administrador no sustituye a una SCP si también debes restringir a los usuarios root de cuentas miembro?",
+      "idealAnswer": "A permissions boundary caps permissions for specific IAM users or roles, not for a member account's root user. An applicable SCP sets a permission ceiling for the member account that includes its root user.",
+      "rubric": [
+        "Distinguishes the identity-specific scope of a permissions boundary.",
+        "Notes that a boundary on administrator roles does not restrict root users.",
+        "Identifies an SCP as the guardrail that includes member-account root users."
+      ]
+    }
+  ]
+}

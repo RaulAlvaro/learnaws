@@ -1,0 +1,408 @@
+{
+  "conceptId": "storage-types-object-file-block",
+  "card": {
+    "en": {
+      "tldr": "Choose storage by how the application accesses data: Amazon S3 for objects, Amazon EFS for a shared Linux file system, and Amazon EBS for a persistent block volume used by an EC2 instance. If the requirement is a native Windows file system with SMB, NTFS, and Active Directory integration, consider Amazon FSx for Windows File Server instead of EFS.",
+      "whenToUse": [
+        "Choose S3 when an application stores and retrieves objects rather than mounting a file system.",
+        "Choose EFS when multiple Linux-based workloads need a shared, standard file system interface.",
+        "Choose EBS when an EC2 workload needs a persistent, low-latency block volume."
+      ],
+      "keyFacts": [
+        "Amazon S3 is object storage that scales to store any amount of data.",
+        "Amazon EFS is a fully managed, elastic file system for Linux-based workloads and supports shared access from many EC2 instances.",
+        "EFS is a regional service that stores data within and across multiple Availability Zones.",
+        "Amazon EBS provides persistent block volumes for EC2; each volume is automatically replicated within its Availability Zone.",
+        "Amazon FSx for Windows File Server provides shared SMB storage with Windows NTFS and Active Directory integration."
+      ],
+      "gotchas": [
+        "An S3 object is not a replacement for a required mounted file system interface.",
+        "An EBS volume meets a block-device requirement, not a requirement for a regional shared file system.",
+        "Do not choose EFS merely because a workload needs files if it specifically requires native Windows NTFS and Active Directory integration."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon FSx for Windows File Server",
+          "difference": "Choose it for native Windows shared-file requirements such as SMB, NTFS, and Active Directory integration; EFS is aimed at Linux-based workloads."
+        }
+      ],
+      "examCues": [
+        "stores and retrieves objects",
+        "shared files across Linux instances",
+        "persistent block volume for EC2",
+        "native Windows SMB and NTFS"
+      ]
+    },
+    "es": {
+      "tldr": "Elige el almacenamiento según cómo accede la aplicación a los datos: Amazon S3 para objetos, Amazon EFS para un sistema de archivos compartido entre cargas Linux y Amazon EBS para un volumen de bloques persistente usado por una instancia EC2. Si se requiere un sistema de archivos nativo de Windows con SMB, NTFS e integración con Active Directory, considera Amazon FSx for Windows File Server en lugar de EFS.",
+      "whenToUse": [
+        "Elige S3 cuando la aplicación guarda y recupera objetos en vez de montar un sistema de archivos.",
+        "Elige EFS cuando varias cargas basadas en Linux necesitan una interfaz de sistema de archivos estándar y compartida.",
+        "Elige EBS cuando una carga en EC2 necesita un volumen de bloques persistente y de baja latencia."
+      ],
+      "keyFacts": [
+        "Amazon S3 es almacenamiento de objetos que puede escalar para guardar cualquier cantidad de datos.",
+        "Amazon EFS es un sistema de archivos elástico y totalmente administrado para cargas basadas en Linux; permite el acceso compartido desde muchas instancias EC2.",
+        "EFS es un servicio regional que almacena datos dentro de varias Availability Zones y entre ellas.",
+        "Amazon EBS proporciona volúmenes de bloques persistentes para EC2; cada volumen se replica automáticamente dentro de su Availability Zone.",
+        "Amazon FSx for Windows File Server proporciona almacenamiento SMB compartido con integración con Windows NTFS y Active Directory."
+      ],
+      "gotchas": [
+        "Un objeto de S3 no reemplaza una interfaz de sistema de archivos montado cuando esta es un requisito.",
+        "Un volumen EBS satisface la necesidad de un dispositivo de bloques, no la de un sistema de archivos regional compartido.",
+        "No elijas EFS solo porque una carga necesita archivos si requiere específicamente Windows NTFS nativo e integración con Active Directory."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon FSx for Windows File Server",
+          "difference": "Elígelo para requisitos de archivos compartidos nativos de Windows, como SMB, NTFS e integración con Active Directory; EFS está orientado a cargas basadas en Linux."
+        }
+      ],
+      "examCues": [
+        "stores and retrieves objects",
+        "shared files across Linux instances",
+        "persistent block volume for EC2",
+        "native Windows SMB and NTFS"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/storage-services.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "storage-types-object-file-block--a42d33f6",
+      "conceptId": "storage-types-object-file-block",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research team runs a Linux analysis application on EC2 instances in multiple Availability Zones. Each instance must open and update files in the same directory through the application's existing file system interface, and the team does not want to administer file servers. Which storage solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy Amazon FSx for Windows File Server for the application.",
+          "correct": false,
+          "why": "FSx for Windows File Server targets native Windows shared-file workloads rather than this Linux application."
+        },
+        {
+          "id": "B",
+          "text": "Mount a shared Amazon EFS file system from the instances.",
+          "correct": true,
+          "why": "EFS provides a fully managed, shared file system for Linux-based workloads across Availability Zones."
+        },
+        {
+          "id": "C",
+          "text": "Provision an Amazon EBS volume for each instance.",
+          "correct": false,
+          "why": "Separate EBS block volumes do not provide the same shared directory to the instances."
+        },
+        {
+          "id": "D",
+          "text": "Store the files as objects in Amazon S3.",
+          "correct": false,
+          "why": "S3 stores objects, but the application requires a shared file system interface."
+        }
+      ],
+      "explanation": "The deciding requirement is shared access through the Linux application's existing file system interface across Availability Zones. Amazon EFS provides that interface, supports shared access from EC2 instances, and is fully managed. S3 is object storage, so selecting it would not preserve the required file system access. Giving each instance an EBS volume would not create one shared directory.",
+      "keywordCues": [
+        "Linux analysis application",
+        "multiple Availability Zones",
+        "same directory",
+        "existing file system interface",
+        "does not want to administer file servers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/storage-services.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación ejecuta una aplicación de análisis basada en Linux en instancias EC2 de varias Availability Zones. Cada instancia debe abrir y actualizar archivos del mismo directorio mediante la interfaz de sistema de archivos que ya usa la aplicación, y el equipo no quiere administrar servidores de archivos. ¿Qué solución de almacenamiento cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar Amazon FSx for Windows File Server para la aplicación.",
+            "why": "FSx for Windows File Server está orientado a cargas de archivos compartidos nativas de Windows, no a esta aplicación Linux."
+          },
+          {
+            "id": "B",
+            "text": "Montar un sistema de archivos Amazon EFS compartido desde las instancias.",
+            "why": "EFS ofrece un sistema de archivos compartido y totalmente administrado para cargas basadas en Linux entre Availability Zones."
+          },
+          {
+            "id": "C",
+            "text": "Aprovisionar un volumen Amazon EBS para cada instancia.",
+            "why": "Los volúmenes de bloques EBS separados no proporcionan el mismo directorio compartido a las instancias."
+          },
+          {
+            "id": "D",
+            "text": "Guardar los archivos como objetos en Amazon S3.",
+            "why": "S3 almacena objetos, pero la aplicación necesita una interfaz de sistema de archivos compartido."
+          }
+        ],
+        "explanation": "El requisito decisivo es el acceso compartido mediante la interfaz de sistema de archivos existente de la aplicación Linux entre Availability Zones. Amazon EFS proporciona esa interfaz, permite el acceso compartido desde instancias EC2 y es totalmente administrado. S3 almacena objetos, por lo que no conservaría el acceso requerido al sistema de archivos. Dar un volumen EBS a cada instancia tampoco crearía un único directorio compartido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-types-object-file-block--d6aebd2c",
+      "conceptId": "storage-types-object-file-block",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturer is moving a processing service to one EC2 instance. The service expects a persistent block device for its working data and needs consistent, low-latency storage performance; it does not need to share the data with other instances. Which storage solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Mount an Amazon EFS file system on the instance.",
+          "correct": false,
+          "why": "EFS provides a file system interface rather than a block volume."
+        },
+        {
+          "id": "B",
+          "text": "Attach an Amazon EBS volume to the EC2 instance.",
+          "correct": true,
+          "why": "EBS provides persistent block volumes for EC2 with consistent, low-latency performance."
+        },
+        {
+          "id": "C",
+          "text": "Place the working data in an Amazon S3 bucket.",
+          "correct": false,
+          "why": "S3 provides object storage, not the block device the service expects."
+        },
+        {
+          "id": "D",
+          "text": "Mount an Amazon FSx for Windows File Server file system.",
+          "correct": false,
+          "why": "FSx for Windows File Server provides shared file storage, not the required block device."
+        }
+      ],
+      "explanation": "The application explicitly expects a persistent block device on an EC2 instance. Amazon EBS is designed to provide persistent block volumes for EC2 and the consistent, low-latency performance described. EFS and FSx for Windows File Server offer file system interfaces instead. S3 is object storage, so it also misses the block-device requirement.",
+      "keywordCues": [
+        "one EC2 instance",
+        "persistent block device",
+        "consistent, low-latency storage performance",
+        "does not need to share the data"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/storage-services.html"
+      ],
+      "es": {
+        "stem": "Un fabricante está trasladando un servicio de procesamiento a una sola instancia EC2. El servicio espera un dispositivo de bloques persistente para sus datos de trabajo y necesita un rendimiento de almacenamiento constante y de baja latencia; no necesita compartir los datos con otras instancias. ¿Qué solución de almacenamiento cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Montar un sistema de archivos Amazon EFS en la instancia.",
+            "why": "EFS ofrece una interfaz de sistema de archivos, no un volumen de bloques."
+          },
+          {
+            "id": "B",
+            "text": "Adjuntar un volumen Amazon EBS a la instancia EC2.",
+            "why": "EBS proporciona volúmenes de bloques persistentes para EC2 con rendimiento constante y de baja latencia."
+          },
+          {
+            "id": "C",
+            "text": "Colocar los datos de trabajo en un bucket de Amazon S3.",
+            "why": "S3 ofrece almacenamiento de objetos, no el dispositivo de bloques que espera el servicio."
+          },
+          {
+            "id": "D",
+            "text": "Montar un sistema de archivos Amazon FSx for Windows File Server.",
+            "why": "FSx for Windows File Server ofrece almacenamiento de archivos compartido, no el dispositivo de bloques requerido."
+          }
+        ],
+        "explanation": "La aplicación espera explícitamente un dispositivo de bloques persistente en una instancia EC2. Amazon EBS está diseñado para proporcionar volúmenes de bloques persistentes para EC2 y el rendimiento constante y de baja latencia descrito. EFS y FSx for Windows File Server ofrecen interfaces de sistema de archivos. S3 almacena objetos, por lo que tampoco satisface el requisito de dispositivo de bloques."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-types-object-file-block--bcf8daa5",
+      "conceptId": "storage-types-object-file-block",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A mobile travel application uploads completed trip photos and later retrieves each photo as an object. The archive is expected to grow substantially, but the application does not mount a file system or require a block device. Which storage solution meets these requirements MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the photos on Amazon FSx for Windows File Server.",
+          "correct": false,
+          "why": "FSx for Windows File Server supplies shared Windows file storage, not the application's object access pattern."
+        },
+        {
+          "id": "B",
+          "text": "Store the photos on an Amazon EFS file system.",
+          "correct": false,
+          "why": "EFS provides a file system interface that the application does not require."
+        },
+        {
+          "id": "C",
+          "text": "Store the photos in Amazon S3.",
+          "correct": true,
+          "why": "S3 provides scalable object storage for data such as application photos."
+        },
+        {
+          "id": "D",
+          "text": "Store the photos on an Amazon EBS volume attached to EC2.",
+          "correct": false,
+          "why": "EBS supplies an EC2 block volume rather than the requested object storage."
+        }
+      ],
+      "explanation": "The application uploads and retrieves completed photos as objects, with no need for a mounted file system or block device. Amazon S3 is the object-storage choice and can scale as the archive grows. EFS and FSx for Windows File Server address file access instead. EBS addresses block storage for EC2.",
+      "keywordCues": [
+        "retrieves each photo as an object",
+        "expected to grow substantially",
+        "does not mount a file system or require a block device"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/storage-services.html"
+      ],
+      "es": {
+        "stem": "Una aplicación móvil de viajes carga fotos de viajes finalizados y después recupera cada foto como objeto. Se espera que el archivo crezca considerablemente, pero la aplicación no monta un sistema de archivos ni requiere un dispositivo de bloques. ¿Qué solución de almacenamiento cumple estos requisitos de la forma MOST directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar las fotos en Amazon FSx for Windows File Server.",
+            "why": "FSx for Windows File Server proporciona almacenamiento de archivos compartido para Windows, no el patrón de acceso a objetos de la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Guardar las fotos en un sistema de archivos Amazon EFS.",
+            "why": "EFS proporciona una interfaz de sistema de archivos que la aplicación no necesita."
+          },
+          {
+            "id": "C",
+            "text": "Guardar las fotos en Amazon S3.",
+            "why": "S3 proporciona almacenamiento de objetos escalable para datos como las fotos de una aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Guardar las fotos en un volumen Amazon EBS adjunto a EC2.",
+            "why": "EBS proporciona un volumen de bloques para EC2, no el almacenamiento de objetos solicitado."
+          }
+        ],
+        "explanation": "La aplicación carga y recupera fotos completas como objetos, sin necesidad de un sistema de archivos montado ni de un dispositivo de bloques. Amazon S3 es la opción de almacenamiento de objetos y puede escalar a medida que crece el archivo. EFS y FSx for Windows File Server atienden necesidades de acceso a archivos. EBS proporciona almacenamiento de bloques para EC2."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "storage-types-object-file-block--d77a4378",
+      "conceptId": "storage-types-object-file-block",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media studio has two independent storage needs. Its ingestion service stores finished assets and retrieves them as objects; separately, Linux rendering instances in multiple Availability Zones must read and update files through a shared file system interface. Which two storage choices meet these requirements while preserving each workload's access pattern? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon S3 as the rendering instances' shared file system.",
+          "correct": false,
+          "why": "S3 is object storage rather than the shared file system interface the renderers require."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon EFS for the rendering instances' shared files.",
+          "correct": true,
+          "why": "EFS supports shared file access for Linux-based workloads across Availability Zones."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon EFS as the finished assets' object store.",
+          "correct": false,
+          "why": "EFS provides a file system interface rather than the ingestion service's object access pattern."
+        },
+        {
+          "id": "D",
+          "text": "Give each rendering instance its own Amazon EBS volume for shared files.",
+          "correct": false,
+          "why": "Separate EBS volumes do not provide one shared file system for the renderers."
+        },
+        {
+          "id": "E",
+          "text": "Use Amazon S3 for the finished assets.",
+          "correct": true,
+          "why": "S3 matches the ingestion service's object storage access pattern."
+        }
+      ],
+      "explanation": "The two workloads have different access patterns, so they should not be forced onto the same storage family. S3 fits the finished assets that the ingestion service accesses as objects. EFS fits the Linux renderers' shared file system requirement across Availability Zones. S3 cannot serve as the requested file system interface, while separate EBS volumes would not create a single shared file system.",
+      "keywordCues": [
+        "two independent storage needs",
+        "retrieves them as objects",
+        "Linux rendering instances in multiple Availability Zones",
+        "shared file system interface"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/storage-services.html"
+      ],
+      "es": {
+        "stem": "Un estudio de medios tiene dos necesidades de almacenamiento independientes. Su servicio de ingesta guarda recursos terminados y los recupera como objetos; por separado, instancias de renderizado basadas en Linux en varias Availability Zones deben leer y actualizar archivos mediante una interfaz de sistema de archivos compartido. ¿Qué dos opciones de almacenamiento cumplen estos requisitos y conservan el patrón de acceso de cada carga? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon S3 como sistema de archivos compartido de las instancias de renderizado.",
+            "why": "S3 es almacenamiento de objetos, no la interfaz de sistema de archivos compartido que necesitan las instancias de renderizado."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon EFS para los archivos compartidos de las instancias de renderizado.",
+            "why": "EFS permite el acceso compartido a archivos para cargas basadas en Linux entre Availability Zones."
+          },
+          {
+            "id": "C",
+            "text": "Usar Amazon EFS como almacén de objetos para los recursos terminados.",
+            "why": "EFS proporciona una interfaz de sistema de archivos, no el patrón de acceso a objetos del servicio de ingesta."
+          },
+          {
+            "id": "D",
+            "text": "Dar a cada instancia de renderizado su propio volumen Amazon EBS para los archivos compartidos.",
+            "why": "Los volúmenes EBS separados no proporcionan un único sistema de archivos compartido para las instancias de renderizado."
+          },
+          {
+            "id": "E",
+            "text": "Usar Amazon S3 para los recursos terminados.",
+            "why": "S3 coincide con el patrón de acceso a almacenamiento de objetos del servicio de ingesta."
+          }
+        ],
+        "explanation": "Las dos cargas tienen patrones de acceso distintos, por lo que no conviene obligarlas a usar la misma familia de almacenamiento. S3 sirve para los recursos terminados a los que el servicio de ingesta accede como objetos. EFS satisface el requisito de sistema de archivos compartido de las instancias de renderizado Linux entre Availability Zones. S3 no ofrece la interfaz de sistema de archivos solicitada, mientras que los volúmenes EBS separados no crearían un único sistema de archivos compartido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "storage-types-object-file-block--r0",
+      "conceptId": "storage-types-object-file-block",
+      "kind": "recall",
+      "prompt": "A Linux application on EC2 needs shared files across Availability Zones without changing its file access. Which storage service fits, and why?",
+      "promptEs": "Una aplicación Linux en EC2 necesita archivos compartidos entre Availability Zones sin cambiar su acceso a archivos. ¿Qué servicio elegirías y por qué?",
+      "idealAnswer": "Choose Amazon EFS. It provides a fully managed, shared file system interface for Linux-based workloads and supports access across Availability Zones.",
+      "rubric": [
+        "Names Amazon EFS.",
+        "Identifies the required shared file system interface.",
+        "Connects EFS to Linux workloads and cross-Availability Zone access."
+      ]
+    }
+  ]
+}

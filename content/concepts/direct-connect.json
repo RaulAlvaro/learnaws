@@ -1,0 +1,455 @@
+{
+  "conceptId": "direct-connect",
+  "card": {
+    "en": {
+      "tldr": "AWS Direct Connect provides a private network connection from your facilities to AWS that bypasses internet service providers in the network path. Choose it for substantial, sustained hybrid traffic when more consistent bandwidth and network performance justify arranging a physical connection; do not assume the connection is encrypted or resilient by itself.",
+      "whenToUse": [
+        "An on-premises network needs a private connection to VPC resources for sustained traffic.",
+        "A business values a more consistent network experience and can arrange connectivity through a Direct Connect location or partner.",
+        "Large outbound transfers make Direct Connect's data transfer pricing worth evaluating alongside port-hour charges."
+      ],
+      "keyFacts": [
+        "A private virtual interface accesses a VPC using private IP addresses; a public virtual interface accesses public AWS services, such as Amazon S3, using public IP addresses.",
+        "A Direct Connect gateway can extend private virtual interface access to multiple virtual private gateways across supported accounts and Regions.",
+        "Direct Connect billing includes port hours and outbound data transfer; a private connection can reduce costs in some circumstances, but is not automatically the cheapest choice.",
+        "For high availability, AWS recommends connections at multiple Direct Connect locations. An IPsec VPN can provide backup for VPC traffic.",
+        "Supported Direct Connect connections can use MACsec to encrypt traffic between an on-premises device and the Direct Connect point of presence."
+      ],
+      "gotchas": [
+        "A private network path does not, by itself, provide encryption.",
+        "One Direct Connect connection is not a highly available hybrid design.",
+        "A public virtual interface for Amazon S3 is not the private virtual interface used to reach VPC resources.",
+        "A link aggregation group can protect against a link failure but not a failure of its terminating device."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Site-to-Site VPN",
+          "difference": "Use an IPsec VPN when internet-based encrypted connectivity or a backup path fits; choose Direct Connect when the primary requirement is a private network path with more consistent performance."
+        },
+        {
+          "concept": "AWS Transit Gateway",
+          "difference": "Transit Gateway connects and routes among multiple networks; it does not replace the physical connection from a facility to AWS."
+        },
+        {
+          "concept": "VPC peering",
+          "difference": "VPC peering connects VPCs, not an on-premises facility to AWS over a dedicated private line."
+        }
+      ],
+      "examCues": [
+        "sustained transfers from a data center",
+        "bypass internet service providers",
+        "private path to VPC resources",
+        "public AWS services over a private network connection",
+        "redundant connections at multiple locations"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Direct Connect proporciona una conexión de red privada desde tus instalaciones hacia AWS que evita a los proveedores de internet en la ruta. Elígelo para tráfico híbrido sostenido cuando una experiencia de red más constante justifique coordinar una conexión física; no supongas que la conexión está cifrada o que ofrece redundancia por sí sola.",
+      "whenToUse": [
+        "Tu red local necesita una conexión privada a recursos de una VPC para tráfico sostenido.",
+        "Tu empresa valora una experiencia de red más constante y puede coordinar la conectividad mediante una ubicación de Direct Connect o un partner.",
+        "Las grandes transferencias de salida justifican evaluar las tarifas de transferencia de Direct Connect junto con los cargos por hora de puerto."
+      ],
+      "keyFacts": [
+        "Una private virtual interface permite acceder a una VPC mediante direcciones IP privadas; una public virtual interface permite acceder a servicios públicos de AWS, como Amazon S3, mediante direcciones IP públicas.",
+        "Un Direct Connect gateway puede extender el acceso de una private virtual interface a múltiples virtual private gateways entre cuentas y Regions compatibles.",
+        "Direct Connect cobra por horas de puerto y transferencia de datos de salida; una conexión privada puede reducir costos en algunas circunstancias, pero no es automáticamente la opción más barata.",
+        "Para alta disponibilidad, AWS recomienda conexiones en varias ubicaciones de Direct Connect. Una IPsec VPN puede servir como respaldo para el tráfico de la VPC.",
+        "Las conexiones de Direct Connect compatibles pueden usar MACsec para cifrar el tráfico entre un dispositivo local y el punto de presencia de Direct Connect."
+      ],
+      "gotchas": [
+        "Una ruta de red privada no proporciona cifrado por sí sola.",
+        "Una sola conexión de Direct Connect no constituye un diseño híbrido de alta disponibilidad.",
+        "Una public virtual interface para Amazon S3 no es la private virtual interface que se usa para llegar a recursos de la VPC.",
+        "Un link aggregation group puede proteger frente a la falla de un enlace, pero no frente a la falla del dispositivo donde termina."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Site-to-Site VPN",
+          "difference": "Usa una IPsec VPN cuando convenga una conexión cifrada por internet o una ruta de respaldo; elige Direct Connect si el requisito principal es una ruta de red privada con rendimiento más constante."
+        },
+        {
+          "concept": "AWS Transit Gateway",
+          "difference": "Transit Gateway conecta redes y enruta tráfico entre ellas; no sustituye la conexión física entre tus instalaciones y AWS."
+        },
+        {
+          "concept": "VPC peering",
+          "difference": "VPC peering conecta VPCs, no tus instalaciones con AWS mediante una línea privada dedicada."
+        }
+      ],
+      "examCues": [
+        "sustained transfers from a data center",
+        "bypass internet service providers",
+        "private path to VPC resources",
+        "public AWS services over a private network connection",
+        "redundant connections at multiple locations"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html",
+      "https://aws.amazon.com/directconnect/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "direct-connect--2d28d2ba",
+      "conceptId": "direct-connect",
+      "secondaryConcepts": [
+        "site-to-site-vpn",
+        "vpc-peering",
+        "transit-gateway"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A film archive transfers a large volume of footage between its data center and an application in an Amazon VPC each day. The archive can arrange a connection through a Direct Connect location and wants a private network path that avoids internet service providers, with a more consistent network experience than its current internet link. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an AWS Site-to-Site VPN from the data center to the VPC.",
+          "correct": false,
+          "why": "The VPN uses an internet-based path rather than the requested path that avoids internet service providers."
+        },
+        {
+          "id": "B",
+          "text": "Peer the application's VPC with another VPC used by the archive.",
+          "correct": false,
+          "why": "VPC peering does not connect the archive's on-premises data center to AWS."
+        },
+        {
+          "id": "C",
+          "text": "Establish AWS Direct Connect with a private virtual interface to the VPC.",
+          "correct": true,
+          "why": "Direct Connect provides the requested private network connection, and the private virtual interface reaches VPC resources."
+        },
+        {
+          "id": "D",
+          "text": "Attach the VPC to AWS Transit Gateway and route the data center's existing internet traffic to it.",
+          "correct": false,
+          "why": "Transit Gateway does not establish the required private connection from the data center to AWS."
+        }
+      ],
+      "explanation": "The deciding requirements are the private path from an on-premises facility and the desire to avoid internet service providers. Direct Connect supplies that connection, while a private virtual interface provides access to VPC resources using private IP addresses. A Site-to-Site VPN could connect the networks, but its internet-based path misses the stated requirement.",
+      "keywordCues": [
+        "transfers a large volume of footage",
+        "private network path that avoids internet service providers",
+        "more consistent network experience"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/directconnect/faqs/"
+      ],
+      "es": {
+        "stem": "Un archivo cinematográfico transfiere cada día un gran volumen de material entre su centro de datos y una aplicación en una Amazon VPC. Puede coordinar una conexión mediante una ubicación de Direct Connect y quiere una ruta de red privada que evite a los proveedores de internet, con una experiencia de red más constante que su enlace actual por internet. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una AWS Site-to-Site VPN desde el centro de datos hasta la VPC.",
+            "why": "La VPN usa una ruta basada en internet, en lugar de la ruta solicitada que evita a los proveedores de internet."
+          },
+          {
+            "id": "B",
+            "text": "Conectar mediante VPC peering la VPC de la aplicación con otra VPC del archivo.",
+            "why": "VPC peering no conecta el centro de datos local del archivo con AWS."
+          },
+          {
+            "id": "C",
+            "text": "Establecer AWS Direct Connect con una private virtual interface hacia la VPC.",
+            "why": "Direct Connect proporciona la conexión de red privada solicitada, y la private virtual interface permite llegar a los recursos de la VPC."
+          },
+          {
+            "id": "D",
+            "text": "Asociar la VPC a AWS Transit Gateway y enrutar hacia él el tráfico actual del centro de datos por internet.",
+            "why": "Transit Gateway no establece la conexión privada requerida entre el centro de datos y AWS."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la ruta privada desde las instalaciones y evitar a los proveedores de internet. Direct Connect proporciona esa conexión, mientras que una private virtual interface permite acceder a los recursos de la VPC mediante direcciones IP privadas. Una Site-to-Site VPN podría conectar las redes, pero su ruta basada en internet no cumple el requisito indicado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "direct-connect--73b2962e",
+      "conceptId": "direct-connect",
+      "secondaryConcepts": [
+        "site-to-site-vpn",
+        "transit-gateway"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer uses Direct Connect to exchange production data with an application in a VPC. It must keep a private connection to AWS available if a Direct Connect location or its terminating device fails; routing the production traffic over the internet is not permitted, even during failover. Which design meets these requirements with the HIGHEST availability?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Aggregate multiple dedicated connections into one link aggregation group at a single location.",
+          "correct": false,
+          "why": "A link aggregation group does not protect against failure of the device where it terminates."
+        },
+        {
+          "id": "B",
+          "text": "Keep one Direct Connect connection and add an IPsec Site-to-Site VPN for failover.",
+          "correct": false,
+          "why": "The VPN can back up VPC traffic but would route failover traffic over the internet, which is prohibited."
+        },
+        {
+          "id": "C",
+          "text": "Keep one Direct Connect connection and attach the VPC to a Transit Gateway.",
+          "correct": false,
+          "why": "A Transit Gateway attachment does not create another physical path if the Direct Connect connection fails."
+        },
+        {
+          "id": "D",
+          "text": "Provision redundant Direct Connect connections at multiple Direct Connect locations.",
+          "correct": true,
+          "why": "Connections at multiple locations provide private paths without depending on one location or terminating device."
+        }
+      ],
+      "explanation": "This scenario requires both location-level resilience and a private path during failover. AWS recommends connections at multiple Direct Connect locations for highly available connectivity. A link aggregation group at one location can help with a link failure but not a terminating-device failure. An IPsec VPN is a valid backup for VPC traffic only when an internet-based failover path is acceptable.",
+      "keywordCues": [
+        "if a Direct Connect location or its terminating device fails",
+        "routing the production traffic over the internet is not permitted",
+        "HIGHEST availability"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/directconnect/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa manufacturera usa Direct Connect para intercambiar datos de producción con una aplicación en una VPC. Debe mantener disponible una conexión privada a AWS si falla una ubicación de Direct Connect o el dispositivo donde termina la conexión; no se permite enviar el tráfico de producción por internet, ni siquiera durante la conmutación por error. ¿Qué diseño cumple estos requisitos con la HIGHEST availability?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrupar varias conexiones dedicadas en un link aggregation group en una única ubicación.",
+            "why": "Un link aggregation group no protege frente a la falla del dispositivo donde termina."
+          },
+          {
+            "id": "B",
+            "text": "Conservar una conexión de Direct Connect y agregar una IPsec Site-to-Site VPN para la conmutación por error.",
+            "why": "La VPN puede respaldar el tráfico de la VPC, pero enviaría el tráfico de respaldo por internet, lo cual está prohibido."
+          },
+          {
+            "id": "C",
+            "text": "Conservar una conexión de Direct Connect y asociar la VPC a un Transit Gateway.",
+            "why": "Una asociación a Transit Gateway no crea otra ruta física si falla la conexión de Direct Connect."
+          },
+          {
+            "id": "D",
+            "text": "Aprovisionar conexiones redundantes de Direct Connect en varias ubicaciones de Direct Connect.",
+            "why": "Las conexiones en varias ubicaciones proporcionan rutas privadas sin depender de una sola ubicación o dispositivo de terminación."
+          }
+        ],
+        "explanation": "El escenario exige tanto resiliencia ante la falla de una ubicación como una ruta privada durante la conmutación por error. AWS recomienda conexiones en varias ubicaciones de Direct Connect para una conectividad de alta disponibilidad. Un link aggregation group en una sola ubicación puede ayudar ante la falla de un enlace, pero no ante la falla del dispositivo de terminación. Una IPsec VPN solo es un respaldo adecuado para el tráfico de la VPC si se acepta una ruta por internet durante la conmutación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "direct-connect--935f7ae6",
+      "conceptId": "direct-connect",
+      "secondaryConcepts": [
+        "site-to-site-vpn",
+        "transit-gateway"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A healthcare organization has a Direct Connect connection to a VPC and is reviewing how it protects data in transit. Its policy requires encryption between its on-premises network device and the Direct Connect point of presence, without moving the primary traffic to an internet-based connection. The team confirms that its connection supports MACsec. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable MACsec on the supported Direct Connect connection.",
+          "correct": true,
+          "why": "MACsec encrypts data between the on-premises device and the Direct Connect point of presence."
+        },
+        {
+          "id": "B",
+          "text": "Continue using the private virtual interface without additional encryption because Direct Connect is private.",
+          "correct": false,
+          "why": "A private Direct Connect path does not itself satisfy the stated encryption requirement."
+        },
+        {
+          "id": "C",
+          "text": "Replace Direct Connect with a Site-to-Site VPN as the primary path.",
+          "correct": false,
+          "why": "A Site-to-Site VPN provides IPsec encryption but moves the primary path to the internet."
+        },
+        {
+          "id": "D",
+          "text": "Attach the VPC to a Transit Gateway and retain the existing Direct Connect connection unchanged.",
+          "correct": false,
+          "why": "Transit Gateway routing does not add the required encryption to the Direct Connect link."
+        }
+      ],
+      "explanation": "The deciding requirement is encryption over the existing private connection, specifically to the Direct Connect point of presence. MACsec provides that encryption on supported Direct Connect connections. Merely using a private virtual interface does not establish encryption. A Site-to-Site VPN addresses encryption but violates the constraint against an internet-based primary path.",
+      "keywordCues": [
+        "encryption between its on-premises network device and the Direct Connect point of presence",
+        "without moving the primary traffic to an internet-based connection",
+        "connection supports MACsec"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/directconnect/faqs/"
+      ],
+      "es": {
+        "stem": "Una organización de salud tiene una conexión de Direct Connect hacia una VPC y está revisando cómo protege los datos en tránsito. Su política exige cifrado entre su dispositivo de red local y el punto de presencia de Direct Connect, sin trasladar el tráfico principal a una conexión basada en internet. El equipo confirma que su conexión admite MACsec. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar MACsec en la conexión compatible de Direct Connect.",
+            "why": "MACsec cifra los datos entre el dispositivo local y el punto de presencia de Direct Connect."
+          },
+          {
+            "id": "B",
+            "text": "Seguir usando la private virtual interface sin cifrado adicional porque Direct Connect es privado.",
+            "why": "Una ruta privada de Direct Connect no cumple por sí sola el requisito de cifrado indicado."
+          },
+          {
+            "id": "C",
+            "text": "Sustituir Direct Connect por una Site-to-Site VPN como ruta principal.",
+            "why": "Una Site-to-Site VPN proporciona cifrado IPsec, pero traslada la ruta principal a internet."
+          },
+          {
+            "id": "D",
+            "text": "Asociar la VPC a un Transit Gateway y mantener sin cambios la conexión existente de Direct Connect.",
+            "why": "El enrutamiento de Transit Gateway no agrega el cifrado requerido al enlace de Direct Connect."
+          }
+        ],
+        "explanation": "El requisito decisivo es cifrar el tráfico sobre la conexión privada existente, específicamente hasta el punto de presencia de Direct Connect. MACsec proporciona ese cifrado en conexiones compatibles de Direct Connect. Usar una private virtual interface por sí solo no establece el cifrado. Una Site-to-Site VPN resuelve el cifrado, pero incumple la restricción de no usar una ruta principal basada en internet."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "direct-connect--7d893d1b",
+      "conceptId": "direct-connect",
+      "secondaryConcepts": [
+        "site-to-site-vpn",
+        "vpc-peering"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A publisher is planning sustained data transfers between its office network and an application in a VPC. It can arrange a Direct Connect connection and wants the primary VPC traffic to bypass its internet provider, but it will accept an internet-based backup if that connection fails. Which TWO components should the publisher include? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "An IPsec Site-to-Site VPN connection to back up VPC traffic.",
+          "correct": true,
+          "why": "An IPsec VPN can carry VPC traffic if the Direct Connect connection fails, and this scenario permits an internet-based backup."
+        },
+        {
+          "id": "B",
+          "text": "A Direct Connect public virtual interface as the primary interface for private VPC resources.",
+          "correct": false,
+          "why": "A public virtual interface accesses public AWS services rather than private VPC resources."
+        },
+        {
+          "id": "C",
+          "text": "A Direct Connect private virtual interface for access to the VPC.",
+          "correct": true,
+          "why": "The private virtual interface provides VPC access over the requested Direct Connect primary path."
+        },
+        {
+          "id": "D",
+          "text": "A link aggregation group at one Direct Connect location as the sole backup path.",
+          "correct": false,
+          "why": "A link aggregation group at one location does not provide an independent backup if its terminating device fails."
+        },
+        {
+          "id": "E",
+          "text": "VPC peering between the application VPC and another VPC as the office connection.",
+          "correct": false,
+          "why": "VPC peering does not connect the on-premises office network to AWS."
+        }
+      ],
+      "explanation": "The primary path must bypass the internet provider and reach private VPC resources, so it needs Direct Connect with a private virtual interface. The publisher explicitly permits an internet-based backup, making an IPsec Site-to-Site VPN suitable for VPC traffic during a Direct Connect failure. A public virtual interface targets public AWS services instead. A link aggregation group at one location is not an independent backup against a terminating-device failure.",
+      "keywordCues": [
+        "primary VPC traffic to bypass its internet provider",
+        "will accept an internet-based backup",
+        "if that connection fails"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html",
+        "https://aws.amazon.com/directconnect/faqs/"
+      ],
+      "es": {
+        "stem": "Una editorial planifica transferencias sostenidas de datos entre la red de su oficina y una aplicación en una VPC. Puede coordinar una conexión de Direct Connect y quiere que el tráfico principal hacia la VPC evite a su proveedor de internet, pero aceptará un respaldo basado en internet si esa conexión falla. ¿Qué DOS componentes debe incluir? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Una conexión IPsec Site-to-Site VPN como respaldo para el tráfico de la VPC.",
+            "why": "Una IPsec VPN puede transportar el tráfico de la VPC si falla Direct Connect, y este escenario permite un respaldo basado en internet."
+          },
+          {
+            "id": "B",
+            "text": "Una public virtual interface de Direct Connect como interfaz principal para los recursos privados de la VPC.",
+            "why": "Una public virtual interface permite acceder a servicios públicos de AWS, no a recursos privados de la VPC."
+          },
+          {
+            "id": "C",
+            "text": "Una private virtual interface de Direct Connect para acceder a la VPC.",
+            "why": "La private virtual interface permite acceder a la VPC mediante la ruta principal solicitada de Direct Connect."
+          },
+          {
+            "id": "D",
+            "text": "Un link aggregation group en una ubicación de Direct Connect como única ruta de respaldo.",
+            "why": "Un link aggregation group en una sola ubicación no ofrece un respaldo independiente si falla el dispositivo donde termina."
+          },
+          {
+            "id": "E",
+            "text": "VPC peering entre la VPC de la aplicación y otra VPC como conexión de la oficina.",
+            "why": "VPC peering no conecta la red local de la oficina con AWS."
+          }
+        ],
+        "explanation": "La ruta principal debe evitar al proveedor de internet y llegar a recursos privados de la VPC, por lo que necesita Direct Connect con una private virtual interface. La editorial permite expresamente un respaldo basado en internet; por eso, una IPsec Site-to-Site VPN sirve para el tráfico de la VPC si falla Direct Connect. Una public virtual interface se dirige a servicios públicos de AWS. Un link aggregation group en una sola ubicación no es un respaldo independiente frente a la falla del dispositivo donde termina."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "direct-connect--r0",
+      "conceptId": "direct-connect",
+      "kind": "recall",
+      "prompt": "A data center needs sustained private connectivity to VPC resources with a more consistent network experience. What would you choose, and which interface is needed?",
+      "promptEs": "Un centro de datos necesita conectividad privada sostenida a recursos de una VPC y una experiencia de red más constante. ¿Qué eliges y qué interfaz necesitas?",
+      "idealAnswer": "Choose AWS Direct Connect to bypass internet service providers through a private network connection. Use a private virtual interface to access VPC resources using private IP addresses.",
+      "rubric": [
+        "Names AWS Direct Connect.",
+        "Explains the private path and more consistent network experience.",
+        "Identifies the private virtual interface for VPC access."
+      ]
+    },
+    {
+      "id": "direct-connect--r1",
+      "conceptId": "direct-connect",
+      "kind": "why-not",
+      "prompt": "Why would Site-to-Site VPN not replace Direct Connect as the primary path when a facility must bypass internet service providers?",
+      "promptEs": "¿Por qué Site-to-Site VPN no sustituiría a Direct Connect como ruta principal si tus instalaciones deben evitar a los proveedores de internet?",
+      "idealAnswer": "Site-to-Site VPN provides an IPsec connection over an internet-based path, so it misses the requirement to bypass internet service providers. Direct Connect supplies the private primary path; the VPN may still serve as a backup if internet-based failover is allowed.",
+      "rubric": [
+        "Identifies the internet-based path as the VPN's mismatch.",
+        "Identifies Direct Connect as the private primary connection.",
+        "Distinguishes an acceptable VPN backup from an unacceptable primary path."
+      ]
+    }
+  ]
+}

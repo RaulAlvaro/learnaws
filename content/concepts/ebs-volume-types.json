@@ -1,0 +1,429 @@
+{
+  "conceptId": "ebs-volume-types",
+  "card": {
+    "en": {
+      "tldr": "Choose an EBS volume type by its dominant I/O pattern and performance requirement. Use gp3 for general-purpose SSD workloads, io2 Block Express for demanding low-latency or sustained-IOPS workloads, st1 for throughput-heavy streaming, and sc1 for infrequently accessed data when lowest EBS storage cost matters.",
+      "whenToUse": [
+        "An EC2 workload needs a boot volume or general-purpose transactional block storage: consider gp3.",
+        "A database requires sustained IOPS beyond gp3's limit or consistent sub-millisecond latency: consider io2 Block Express.",
+        "Large sequential reads or writes dominate: compare st1 for throughput with sc1 for colder, lower-cost storage."
+      ],
+      "keyFacts": [
+        "gp3 supports boot volumes and provides up to 80,000 IOPS and 2,000 MiB/s per volume.",
+        "io2 Block Express supports up to 256,000 IOPS and 4,000 MiB/s; it is designed for average latency under 500 microseconds with 16 KiB I/O.",
+        "st1 is a Throughput Optimized HDD volume for workloads such as big data, data warehouses, and log processing; its maximum throughput is 500 MiB/s.",
+        "sc1 is a Cold HDD volume for infrequently accessed, throughput-oriented data when lowest storage cost is important; its maximum throughput is 250 MiB/s.",
+        "st1 and sc1 cannot be boot volumes or use EBS Multi-Attach."
+      ],
+      "gotchas": [
+        "Do not choose an HDD volume for small-I/O transactional performance: SSD volumes are optimized for IOPS, while HDD volumes are optimized for streaming throughput.",
+        "sc1's cost-oriented use case does not make it suitable when the required per-volume throughput exceeds 250 MiB/s.",
+        "A volume's advertised limits do not guarantee application performance; instance configuration, I/O characteristics, and workload demand also matter."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 instance store",
+          "difference": "Instance store is temporary block storage; EBS is the choice when the data must remain available after an instance stops."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS provides shared Linux file storage, not an EBS block volume selected for one workload's I/O pattern."
+        }
+      ],
+      "examCues": [
+        "general-purpose boot volume",
+        "sustained IOPS above 80,000",
+        "large sequential log processing",
+        "infrequently accessed EBS data; lowest storage cost"
+      ]
+    },
+    "es": {
+      "tldr": "Elige el tipo de volumen EBS según el patrón de E/S dominante y el rendimiento requerido. Usa gp3 para SSD de propósito general, io2 Block Express para latencia baja o IOPS sostenidas exigentes, st1 para streaming de alto throughput y sc1 para datos de acceso infrecuente cuando importa el menor costo de almacenamiento EBS.",
+      "whenToUse": [
+        "Tu carga en EC2 necesita un volumen de arranque o almacenamiento de bloques transaccional de propósito general: considera gp3.",
+        "Tu base de datos necesita IOPS sostenidas por encima del límite de gp3 o latencia constante inferior a un milisegundo: considera io2 Block Express.",
+        "Predominan las lecturas o escrituras secuenciales grandes: compara st1 para throughput con sc1 para datos más fríos y menor costo."
+      ],
+      "keyFacts": [
+        "gp3 admite volúmenes de arranque y ofrece hasta 80,000 IOPS y 2,000 MiB/s por volumen.",
+        "io2 Block Express admite hasta 256,000 IOPS y 4,000 MiB/s; está diseñado para una latencia promedio inferior a 500 microsegundos con E/S de 16 KiB.",
+        "st1 es un volumen Throughput Optimized HDD para cargas como big data, almacenes de datos y procesamiento de registros; su throughput máximo es de 500 MiB/s.",
+        "sc1 es un volumen Cold HDD para datos de acceso infrecuente orientados a throughput cuando importa el menor costo de almacenamiento; su throughput máximo es de 250 MiB/s.",
+        "st1 y sc1 no admiten volúmenes de arranque ni EBS Multi-Attach."
+      ],
+      "gotchas": [
+        "No elijas un volumen HDD para rendimiento transaccional de E/S pequeñas: los SSD se optimizan para IOPS y los HDD para throughput de streaming.",
+        "El caso de uso de sc1 orientado al costo no lo hace adecuado si el throughput requerido por volumen supera 250 MiB/s.",
+        "Los límites publicados de un volumen no garantizan el rendimiento de tu aplicación; también influyen la configuración de la instancia, las características de E/S y la demanda."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 instance store",
+          "difference": "Instance store ofrece almacenamiento de bloques temporal; elige EBS si los datos deben seguir disponibles después de detener la instancia."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "EFS ofrece almacenamiento de archivos compartido para Linux, no un volumen de bloques EBS elegido según el patrón de E/S de una carga."
+        }
+      ],
+      "examCues": [
+        "general-purpose boot volume",
+        "sustained IOPS above 80,000",
+        "large sequential log processing",
+        "infrequently accessed EBS data; lowest storage cost"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ebs-volume-types--2c5fe216",
+      "conceptId": "ebs-volume-types",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio is moving a medium-sized, single-instance application database to EC2. The database performs frequent small reads and writes, and the team needs an EBS volume type that can also serve as a boot volume. It has no requirement for sustained IOPS beyond general-purpose SSD capacity or consistent sub-millisecond latency. Which volume type meets these requirements without selecting a higher-performance tier the workload does not need?",
+      "options": [
+        {
+          "id": "A",
+          "text": "st1 Throughput Optimized HDD",
+          "correct": false,
+          "why": "st1 targets streaming throughput rather than small transactional I/O and cannot be a boot volume."
+        },
+        {
+          "id": "B",
+          "text": "sc1 Cold HDD",
+          "correct": false,
+          "why": "sc1 targets infrequently accessed, throughput-oriented data and cannot be a boot volume."
+        },
+        {
+          "id": "C",
+          "text": "io2 Block Express Provisioned IOPS SSD",
+          "correct": false,
+          "why": "io2 Block Express targets more demanding sustained-IOPS and latency requirements that this scenario does not have."
+        },
+        {
+          "id": "D",
+          "text": "gp3 General Purpose SSD",
+          "correct": true,
+          "why": "gp3 supports boot volumes and general-purpose transactional workloads, including medium-sized single-instance databases."
+        }
+      ],
+      "explanation": "Frequent small reads and writes point to SSD-backed EBS storage, and the boot-volume requirement rules out st1 and sc1. gp3 fits the stated medium-sized, single-instance database use case. io2 Block Express is a plausible SSD alternative, but the scenario explicitly lacks the demanding IOPS or latency requirement that would justify selecting it.",
+      "keywordCues": [
+        "medium-sized, single-instance application database",
+        "frequent small reads and writes",
+        "also serve as a boot volume",
+        "no requirement for sustained IOPS beyond general-purpose SSD capacity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño está migrando a EC2 la base de datos de una aplicación de tamaño mediano que se ejecuta en una sola instancia. La base de datos realiza lecturas y escrituras pequeñas con frecuencia, y el equipo necesita un tipo de volumen EBS que también pueda servir como volumen de arranque. No requiere IOPS sostenidas por encima de la capacidad de un SSD de propósito general ni latencia constante inferior a un milisegundo. ¿Qué tipo de volumen cumple estos requisitos sin elegir un nivel de rendimiento que la carga no necesita?",
+        "options": [
+          {
+            "id": "A",
+            "text": "st1 Throughput Optimized HDD",
+            "why": "st1 está orientado al throughput de streaming, no a E/S transaccionales pequeñas, y no puede ser un volumen de arranque."
+          },
+          {
+            "id": "B",
+            "text": "sc1 Cold HDD",
+            "why": "sc1 está orientado a datos de acceso infrecuente y a throughput, y no puede ser un volumen de arranque."
+          },
+          {
+            "id": "C",
+            "text": "io2 Block Express Provisioned IOPS SSD",
+            "why": "io2 Block Express está orientado a requisitos de IOPS sostenidas y latencia más exigentes que los de este escenario."
+          },
+          {
+            "id": "D",
+            "text": "gp3 General Purpose SSD",
+            "why": "gp3 admite volúmenes de arranque y cargas transaccionales de propósito general, incluidas bases de datos medianas en una sola instancia."
+          }
+        ],
+        "explanation": "Las lecturas y escrituras pequeñas y frecuentes apuntan a almacenamiento EBS basado en SSD, y el requisito de arranque descarta st1 y sc1. gp3 se ajusta al caso de una base de datos mediana en una sola instancia. io2 Block Express también es un SSD, pero el escenario no exige las IOPS ni la latencia que justificarían elegirlo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-volume-types--8a579edf",
+      "conceptId": "ebs-volume-types",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company processes large, sequential log files on EC2. Its storage policy calls for an HDD-backed EBS data volume, and testing indicates that a single volume must deliver 350 MiB/s of streaming throughput. The volume will not be used to boot an instance. Which volume type meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "sc1 Cold HDD",
+          "correct": false,
+          "why": "sc1 is HDD-backed but its 250 MiB/s maximum is below the required 350 MiB/s."
+        },
+        {
+          "id": "B",
+          "text": "io2 Block Express Provisioned IOPS SSD",
+          "correct": false,
+          "why": "io2 Block Express can provide throughput but is SSD-backed and violates the stated HDD-backed volume policy."
+        },
+        {
+          "id": "C",
+          "text": "gp3 General Purpose SSD",
+          "correct": false,
+          "why": "gp3 can provide throughput but violates the stated HDD-backed volume policy."
+        },
+        {
+          "id": "D",
+          "text": "st1 Throughput Optimized HDD",
+          "correct": true,
+          "why": "st1 is an HDD volume for log processing and supports up to 500 MiB/s per volume."
+        }
+      ],
+      "explanation": "The policy restricts the choice to HDD-backed EBS volumes, while the workload needs 350 MiB/s on one volume. st1 targets streaming workloads such as log processing and has a maximum throughput of 500 MiB/s. sc1 is also HDD-backed but tops out at 250 MiB/s; the SSD alternatives do not satisfy the policy.",
+      "keywordCues": [
+        "large, sequential log files",
+        "HDD-backed EBS data volume",
+        "single volume must deliver 350 MiB/s",
+        "will not be used to boot"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios procesa archivos de registro grandes y secuenciales en EC2. Su política de almacenamiento exige un volumen de datos EBS basado en HDD, y las pruebas indican que un solo volumen debe entregar 350 MiB/s de throughput de streaming. El volumen no se usará para arrancar una instancia. ¿Qué tipo de volumen cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "sc1 Cold HDD",
+            "why": "sc1 está basado en HDD, pero su máximo de 250 MiB/s es inferior a los 350 MiB/s requeridos."
+          },
+          {
+            "id": "B",
+            "text": "io2 Block Express Provisioned IOPS SSD",
+            "why": "io2 Block Express puede proporcionar throughput, pero está basado en SSD e incumple la política que exige HDD."
+          },
+          {
+            "id": "C",
+            "text": "gp3 General Purpose SSD",
+            "why": "gp3 puede proporcionar throughput, pero incumple la política que exige un volumen basado en HDD."
+          },
+          {
+            "id": "D",
+            "text": "st1 Throughput Optimized HDD",
+            "why": "st1 es un volumen HDD adecuado para procesar registros y admite hasta 500 MiB/s por volumen."
+          }
+        ],
+        "explanation": "La política limita la elección a volúmenes EBS basados en HDD, mientras que la carga necesita 350 MiB/s en un solo volumen. st1 está orientado a cargas de streaming como el procesamiento de registros y alcanza un throughput máximo de 500 MiB/s. sc1 también usa HDD, pero su límite es de 250 MiB/s; las alternativas SSD incumplen la política."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-volume-types--26922241",
+      "conceptId": "ebs-volume-types",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab keeps historical instrument output on an EBS data volume attached to an EC2 analysis server. Researchers access the data infrequently and read it in large streams when needed; they do not need the volume to boot the server. Among current EBS volume types, the lab prioritizes the lowest storage cost over higher throughput. Which volume type is the best fit?",
+      "options": [
+        {
+          "id": "A",
+          "text": "gp3 General Purpose SSD",
+          "correct": false,
+          "why": "gp3 targets general-purpose SSD workloads rather than the stated lowest-cost, infrequently accessed HDD use case."
+        },
+        {
+          "id": "B",
+          "text": "st1 Throughput Optimized HDD",
+          "correct": false,
+          "why": "st1 favors higher streaming throughput, which the lab explicitly values less than lowest storage cost."
+        },
+        {
+          "id": "C",
+          "text": "sc1 Cold HDD",
+          "correct": true,
+          "why": "sc1 is intended for infrequently accessed, throughput-oriented data when lowest storage cost is important."
+        },
+        {
+          "id": "D",
+          "text": "io2 Block Express Provisioned IOPS SSD",
+          "correct": false,
+          "why": "io2 Block Express targets demanding IOPS and latency requirements that this cold, streaming workload does not have."
+        }
+      ],
+      "explanation": "This is still an EBS data-volume requirement, but access is infrequent and the dominant I/O pattern is streaming. sc1 is the Cold HDD type intended for throughput-oriented data when lowest storage cost matters. st1 is a plausible HDD choice if higher throughput is the priority, but that is not the lab's deciding constraint.",
+      "keywordCues": [
+        "EBS data volume",
+        "access the data infrequently",
+        "read it in large streams",
+        "lowest storage cost over higher throughput"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación conserva resultados históricos de instrumentos en un volumen de datos EBS conectado a un servidor de análisis EC2. Los investigadores acceden a los datos con poca frecuencia y los leen en streams grandes cuando los necesitan; el volumen no tiene que arrancar el servidor. Entre los tipos de volumen EBS actuales, el laboratorio prioriza el menor costo de almacenamiento sobre un throughput más alto. ¿Qué tipo de volumen se ajusta mejor?",
+        "options": [
+          {
+            "id": "A",
+            "text": "gp3 General Purpose SSD",
+            "why": "gp3 está orientado a cargas SSD de propósito general, no al caso descrito de datos HDD de acceso infrecuente y costo mínimo."
+          },
+          {
+            "id": "B",
+            "text": "st1 Throughput Optimized HDD",
+            "why": "st1 favorece un throughput de streaming más alto, que el laboratorio valora menos que el menor costo de almacenamiento."
+          },
+          {
+            "id": "C",
+            "text": "sc1 Cold HDD",
+            "why": "sc1 está destinado a datos de acceso infrecuente y orientados a throughput cuando importa el menor costo de almacenamiento."
+          },
+          {
+            "id": "D",
+            "text": "io2 Block Express Provisioned IOPS SSD",
+            "why": "io2 Block Express está orientado a exigencias de IOPS y latencia que esta carga fría de streaming no tiene."
+          }
+        ],
+        "explanation": "La necesidad sigue siendo un volumen de datos EBS, pero el acceso es infrecuente y el patrón de E/S dominante es el streaming. sc1 es el tipo Cold HDD para datos orientados a throughput cuando importa el menor costo de almacenamiento. st1 sería una opción HDD plausible si la prioridad fuera un throughput mayor, pero esa no es la restricción decisiva del laboratorio."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ebs-volume-types--11ba9f88",
+      "conceptId": "ebs-volume-types",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare company is assigning EBS volumes to two separate EC2 workloads. An appointment service needs a bootable volume for frequent small transactional I/O, without exceptional latency or IOPS demands. A database on a Nitro-based instance needs its data volume to sustain 110,000 IOPS with 16 KiB operations. Which two volume assignments meet the respective workload requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use gp3 for the database's data volume.",
+          "correct": false,
+          "why": "gp3 supports at most 80,000 IOPS, below the database's 110,000-IOPS requirement."
+        },
+        {
+          "id": "B",
+          "text": "Use st1 for the appointment service's boot volume.",
+          "correct": false,
+          "why": "st1 does not support boot volumes and is optimized for streaming throughput rather than transactional I/O."
+        },
+        {
+          "id": "C",
+          "text": "Use sc1 for the database's data volume.",
+          "correct": false,
+          "why": "sc1 is a throughput-oriented HDD volume, not a fit for the database's sustained small-I/O demand."
+        },
+        {
+          "id": "D",
+          "text": "Use gp3 for the appointment service's boot volume.",
+          "correct": true,
+          "why": "gp3 supports boot volumes and general-purpose transactional I/O."
+        },
+        {
+          "id": "E",
+          "text": "Use io2 Block Express for the database's data volume.",
+          "correct": true,
+          "why": "io2 Block Express supports the required sustained IOPS on a Nitro-based instance."
+        }
+      ],
+      "explanation": "The two workloads have different I/O requirements, so each needs its own volume-type decision. gp3 fits the bootable, general-purpose transactional workload. io2 Block Express supports the database's 110,000-IOPS requirement on a Nitro-based instance, whereas gp3's maximum is 80,000 IOPS. Neither HDD option fits its proposed assignment.",
+      "keywordCues": [
+        "two separate EC2 workloads",
+        "bootable volume for frequent small transactional I/O",
+        "without exceptional latency or IOPS demands",
+        "Nitro-based instance",
+        "sustain 110,000 IOPS with 16 KiB operations"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html"
+      ],
+      "es": {
+        "stem": "Una empresa de salud asigna volúmenes EBS a dos cargas separadas en EC2. Un servicio de citas necesita un volumen de arranque para E/S transaccionales pequeñas y frecuentes, sin exigencias excepcionales de latencia o IOPS. Una base de datos en una instancia basada en Nitro necesita que su volumen de datos sostenga 110,000 IOPS con operaciones de 16 KiB. ¿Qué dos asignaciones de volúmenes cumplen los requisitos de sus respectivas cargas? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar gp3 como volumen de datos de la base de datos.",
+            "why": "gp3 admite como máximo 80,000 IOPS, por debajo de las 110,000 IOPS requeridas por la base de datos."
+          },
+          {
+            "id": "B",
+            "text": "Usar st1 como volumen de arranque del servicio de citas.",
+            "why": "st1 no admite volúmenes de arranque y se optimiza para throughput de streaming, no para E/S transaccionales."
+          },
+          {
+            "id": "C",
+            "text": "Usar sc1 como volumen de datos de la base de datos.",
+            "why": "sc1 es un volumen HDD orientado a throughput, no a la demanda sostenida de E/S pequeñas de esta base de datos."
+          },
+          {
+            "id": "D",
+            "text": "Usar gp3 como volumen de arranque del servicio de citas.",
+            "why": "gp3 admite volúmenes de arranque y E/S transaccionales de propósito general."
+          },
+          {
+            "id": "E",
+            "text": "Usar io2 Block Express como volumen de datos de la base de datos.",
+            "why": "io2 Block Express admite las IOPS sostenidas requeridas en una instancia basada en Nitro."
+          }
+        ],
+        "explanation": "Las dos cargas tienen requisitos de E/S diferentes, así que debes elegir un tipo de volumen para cada una. gp3 se ajusta a la carga transaccional de propósito general que necesita arrancar. io2 Block Express admite las 110,000 IOPS requeridas por la base de datos en una instancia basada en Nitro, mientras que gp3 tiene un máximo de 80,000 IOPS. Ninguna opción HDD sirve para la asignación propuesta."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ebs-volume-types--r0",
+      "conceptId": "ebs-volume-types",
+      "kind": "recall",
+      "prompt": "Which EBS volume type fits a frequently used, bootable transactional application volume, and what requirement would push you toward io2 Block Express?",
+      "promptEs": "¿Qué tipo de volumen EBS usarías para una aplicación transaccional frecuente que debe arrancar, y qué requisito te llevaría a elegir io2 Block Express?",
+      "idealAnswer": "Use gp3 for a general-purpose, bootable transactional volume. Choose io2 Block Express when the workload needs demanding sustained IOPS beyond gp3's capacity or consistently sub-millisecond latency.",
+      "rubric": [
+        "Selects gp3 for the bootable general-purpose transactional volume.",
+        "Identifies demanding sustained IOPS or consistently sub-millisecond latency as a reason to select io2 Block Express."
+      ]
+    },
+    {
+      "id": "ebs-volume-types--r1",
+      "conceptId": "ebs-volume-types",
+      "kind": "why-not",
+      "prompt": "Why does sc1 not fit an EBS workload that needs 350 MiB/s of large sequential reads from one HDD volume?",
+      "promptEs": "¿Por qué sc1 no sirve para una carga EBS que necesita 350 MiB/s de lecturas secuenciales grandes desde un solo volumen HDD?",
+      "idealAnswer": "sc1's maximum throughput is 250 MiB/s per volume, so it cannot meet the 350 MiB/s requirement. st1 targets streaming workloads and supports up to 500 MiB/s per volume.",
+      "rubric": [
+        "States that sc1's 250 MiB/s maximum is below the required 350 MiB/s.",
+        "Selects st1 as the throughput-oriented HDD alternative.",
+        "Notes that st1 supports up to 500 MiB/s per volume."
+      ]
+    }
+  ]
+}

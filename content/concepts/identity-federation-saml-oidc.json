@@ -1,0 +1,373 @@
+{
+  "conceptId": "identity-federation-saml-oidc",
+  "card": {
+    "en": {
+      "tldr": "Federate an existing IdP to IAM roles when external identities need access to AWS resources without individual IAM users or long-term credentials. For a small-scale, single-account deployment, choose SAML 2.0 for a corporate SAML IdP or OIDC for a compatible external application; for centralized workforce access across multiple accounts, prefer IAM Identity Center.",
+      "whenToUse": [
+        "A corporate SAML IdP already authenticates employees who need access to one AWS account.",
+        "An external application with an OIDC-compatible IdP needs AWS access without stored access keys.",
+        "The requirement calls for temporary credentials and permissions defined by IAM roles."
+      ],
+      "keyFacts": [
+        "IAM federation supports SAML 2.0 and OIDC identity providers.",
+        "SAML federation can provide AWS Management Console SSO or AWS API access without creating an IAM user for each employee.",
+        "For SAML API access, AWS STS AssumeRoleWithSAML exchanges a SAML assertion for temporary security credentials.",
+        "A SAML role's trust policy names the SAML provider; its permissions policy defines allowed AWS actions.",
+        "A SAML provider referenced in a role trust policy must be in the same AWS account as that role."
+      ],
+      "gotchas": [
+        "Creating IAM users for every employee defeats the stated goal of using an existing IdP without individual AWS identities.",
+        "A role permissions policy alone does not establish trust with a SAML IdP.",
+        "IAM Identity Center is the better fit when the main requirement is centralized workforce access across multiple AWS accounts."
+      ],
+      "confusedWith": [
+        {
+          "concept": "iam-identity-center-sso",
+          "difference": "Choose IAM Identity Center for centralized workforce access across multiple AWS accounts; direct IAM federation fits a small-scale, single-account deployment."
+        },
+        {
+          "concept": "cognito-user-pools",
+          "difference": "User pools add sign-up and sign-in to an application; they are not the direct IAM role-federation path for corporate AWS access."
+        },
+        {
+          "concept": "cognito-identity-pools",
+          "difference": "Identity pools give application users temporary IAM credentials; direct IAM federation connects an external IdP to roles in an AWS account."
+        }
+      ],
+      "examCues": [
+        "existing corporate SAML IdP",
+        "single AWS account",
+        "no individual IAM users",
+        "temporary credentials for an external application"
+      ]
+    },
+    "es": {
+      "tldr": "Federa un IdP existente con roles de IAM cuando las identidades externas necesitan acceso a recursos de AWS sin crear usuarios de IAM individuales ni usar credenciales de larga duración. Para una implementación pequeña en una sola cuenta, elige SAML 2.0 si el IdP corporativo usa SAML u OIDC si una aplicación externa usa un IdP compatible; para acceso centralizado del personal a varias cuentas, prefiere IAM Identity Center.",
+      "whenToUse": [
+        "Un IdP corporativo SAML ya autentica a los empleados que necesitan acceso a una cuenta de AWS.",
+        "Una aplicación externa con un IdP compatible con OIDC necesita acceso a AWS sin guardar access keys.",
+        "El requisito pide credenciales temporales y permisos definidos por roles de IAM."
+      ],
+      "keyFacts": [
+        "La federación con IAM admite proveedores de identidad SAML 2.0 y OIDC.",
+        "La federación SAML puede dar acceso SSO a AWS Management Console o acceso a las API de AWS sin crear un usuario de IAM por empleado.",
+        "Para acceso a API mediante SAML, AWS STS AssumeRoleWithSAML intercambia una aserción SAML por credenciales de seguridad temporales.",
+        "La trust policy de un rol SAML identifica al proveedor SAML; su permissions policy define las acciones de AWS permitidas.",
+        "El proveedor SAML indicado en la trust policy de un rol debe estar en la misma cuenta de AWS que el rol."
+      ],
+      "gotchas": [
+        "Crear usuarios de IAM para cada empleado incumple el objetivo de usar el IdP existente sin identidades individuales en AWS.",
+        "La permissions policy de un rol, por sí sola, no establece confianza con un IdP SAML.",
+        "IAM Identity Center encaja mejor cuando el requisito principal es el acceso centralizado del personal a varias cuentas de AWS."
+      ],
+      "confusedWith": [
+        {
+          "concept": "iam-identity-center-sso",
+          "difference": "Elige IAM Identity Center para el acceso centralizado del personal a varias cuentas; la federación directa con IAM encaja en una implementación pequeña de una sola cuenta."
+        },
+        {
+          "concept": "cognito-user-pools",
+          "difference": "Los user pools agregan registro e inicio de sesión a una aplicación; no son la vía de federación directa con roles de IAM para el acceso corporativo a AWS."
+        },
+        {
+          "concept": "cognito-identity-pools",
+          "difference": "Los identity pools dan credenciales temporales de IAM a usuarios de aplicaciones; la federación directa con IAM conecta un IdP externo con roles de una cuenta de AWS."
+        }
+      ],
+      "examCues": [
+        "existing corporate SAML IdP",
+        "single AWS account",
+        "no individual IAM users",
+        "temporary credentials for an external application"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "identity-federation-saml-oidc--4734954c",
+      "conceptId": "identity-federation-saml-oidc",
+      "secondaryConcepts": [
+        "cognito-user-pools"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A software company runs build workflows in GitHub Actions and publishes artifacts to an S3 bucket in one AWS account. The workflows must use their existing OIDC identity and must not store AWS access keys. Which solution meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure the OIDC provider in IAM and grant the workflows access through an IAM role.",
+          "correct": true,
+          "why": "IAM OIDC federation connects an external application identity to role-based AWS access without stored access keys."
+        },
+        {
+          "id": "B",
+          "text": "Create a Cognito user pool and have each workflow sign in as an application user.",
+          "correct": false,
+          "why": "A user pool addresses application-user sign-in rather than the workflows' existing OIDC identity."
+        },
+        {
+          "id": "C",
+          "text": "Configure a SAML provider in IAM and require the workflows to submit SAML assertions.",
+          "correct": false,
+          "why": "The stated external identity is OIDC, not a SAML assertion source."
+        },
+        {
+          "id": "D",
+          "text": "Create an IAM user for the workflows and store its access keys in GitHub Actions secrets.",
+          "correct": false,
+          "why": "Stored access keys directly violate the requirement to avoid AWS access keys."
+        }
+      ],
+      "explanation": "The workflows already have an OIDC identity and cannot store AWS access keys. IAM supports an OIDC IdP trust relationship for external applications such as GitHub Actions to access AWS through roles. An IAM user with stored keys violates the credential constraint; SAML assumes a different identity-provider protocol.",
+      "keywordCues": [
+        "GitHub Actions",
+        "existing OIDC identity",
+        "must not store AWS access keys",
+        "one AWS account"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html"
+      ],
+      "es": {
+        "stem": "Una empresa de software ejecuta flujos de compilación en GitHub Actions y publica artefactos en un bucket de S3 de una cuenta de AWS. Los flujos deben usar su identidad OIDC existente y no pueden guardar AWS access keys. ¿Qué solución cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar el proveedor OIDC en IAM y dar acceso a los flujos mediante un rol de IAM.",
+            "why": "La federación OIDC con IAM conecta la identidad de una aplicación externa con acceso basado en roles, sin guardar access keys."
+          },
+          {
+            "id": "B",
+            "text": "Crear un Cognito user pool y hacer que cada flujo inicie sesión como usuario de una aplicación.",
+            "why": "Un user pool resuelve el inicio de sesión de usuarios de aplicaciones, no el uso de la identidad OIDC existente de los flujos."
+          },
+          {
+            "id": "C",
+            "text": "Configurar un proveedor SAML en IAM y exigir que los flujos envíen aserciones SAML.",
+            "why": "La identidad externa indicada usa OIDC, no una fuente de aserciones SAML."
+          },
+          {
+            "id": "D",
+            "text": "Crear un usuario de IAM para los flujos y guardar sus access keys en los secretos de GitHub Actions.",
+            "why": "Guardar access keys incumple directamente el requisito de evitarlas."
+          }
+        ],
+        "explanation": "Los flujos ya tienen una identidad OIDC y no pueden guardar AWS access keys. IAM admite una relación de confianza con un IdP OIDC para que aplicaciones externas, como GitHub Actions, accedan a AWS mediante roles. Un usuario de IAM con claves guardadas incumple el requisito de credenciales; SAML supone un protocolo de identidad distinto."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "identity-federation-saml-oidc--f36bcede",
+      "conceptId": "identity-federation-saml-oidc",
+      "secondaryConcepts": [
+        "cognito-user-pools",
+        "cognito-identity-pools"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company has one standalone AWS account. A small editorial team uses the company's SAML 2.0 IdP to access the AWS console for a short-term project, while an external GitHub Actions workflow uses OIDC to deliver files to S3. Neither group may receive individual IAM users or stored AWS access keys. Which TWO approaches meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a Cognito identity pool for the editorial team to replace their corporate console sign-in.",
+          "correct": false,
+          "why": "Identity pools supply credentials to application users, not the requested corporate console federation path."
+        },
+        {
+          "id": "B",
+          "text": "Give the editorial team accounts in a Cognito user pool for AWS console access.",
+          "correct": false,
+          "why": "A user pool provides application sign-in rather than the requested SAML-to-IAM-role console access."
+        },
+        {
+          "id": "C",
+          "text": "Federate the editorial team's SAML IdP with IAM roles for console access.",
+          "correct": true,
+          "why": "SAML federation provides console access through roles without individual IAM users."
+        },
+        {
+          "id": "D",
+          "text": "Federate the workflow's OIDC identity with an IAM role for S3 access.",
+          "correct": true,
+          "why": "IAM OIDC federation lets the external workflow use its existing identity for role-based access without stored access keys."
+        },
+        {
+          "id": "E",
+          "text": "Create an IAM user for GitHub Actions and store its access keys as workflow secrets.",
+          "correct": false,
+          "why": "The workflow is explicitly prohibited from receiving stored AWS access keys."
+        }
+      ],
+      "explanation": "The two identity sources require separate federation paths into the same account. IAM SAML federation serves the small editorial team through roles, and IAM OIDC federation serves the external workflow through a role. An IAM user with workflow secrets violates the access-key prohibition; Cognito pools address application users rather than these stated access paths.",
+      "keywordCues": [
+        "one standalone AWS account",
+        "small editorial team",
+        "SAML 2.0 IdP",
+        "GitHub Actions workflow uses OIDC",
+        "Neither group may receive individual IAM users or stored AWS access keys"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene una sola cuenta independiente de AWS. Un equipo editorial pequeño usa el IdP SAML 2.0 de la empresa para acceder a la consola de AWS durante un proyecto temporal, mientras que un flujo externo de GitHub Actions usa OIDC para entregar archivos a S3. Ninguno puede recibir usuarios de IAM individuales ni AWS access keys guardadas. ¿Qué DOS enfoques cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un Cognito identity pool para reemplazar el inicio de sesión corporativo del equipo editorial en la consola.",
+            "why": "Los identity pools entregan credenciales a usuarios de aplicaciones, no la vía solicitada de federación corporativa para la consola."
+          },
+          {
+            "id": "B",
+            "text": "Dar al equipo editorial cuentas en un Cognito user pool para acceder a la consola de AWS.",
+            "why": "Un user pool proporciona inicio de sesión en aplicaciones, no el acceso solicitado a la consola mediante federación SAML con roles de IAM."
+          },
+          {
+            "id": "C",
+            "text": "Federar el IdP SAML del equipo editorial con roles de IAM para acceder a la consola.",
+            "why": "La federación SAML proporciona acceso a la consola mediante roles sin usuarios de IAM individuales."
+          },
+          {
+            "id": "D",
+            "text": "Federar la identidad OIDC del flujo con un rol de IAM para acceder a S3.",
+            "why": "La federación OIDC con IAM permite que el flujo externo use su identidad existente para acceder mediante un rol sin guardar access keys."
+          },
+          {
+            "id": "E",
+            "text": "Crear un usuario de IAM para GitHub Actions y guardar sus access keys como secretos del flujo.",
+            "why": "El flujo tiene prohibido recibir AWS access keys guardadas."
+          }
+        ],
+        "explanation": "Las dos fuentes de identidad necesitan vías de federación distintas hacia la misma cuenta. La federación SAML con IAM da acceso al equipo editorial mediante roles, y la federación OIDC con IAM da acceso al flujo externo mediante un rol. Un usuario de IAM con secretos en el flujo incumple la prohibición de access keys; los pools de Cognito se orientan a usuarios de aplicaciones y no a estas vías de acceso."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "identity-federation-saml-oidc--17e2870a",
+      "conceptId": "identity-federation-saml-oidc",
+      "secondaryConcepts": [
+        "cognito-user-pools",
+        "directory-service-options"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio has one standalone AWS account and an existing corporate SAML 2.0 portal. A small group of employees needs AWS Management Console access through that portal for a short-term project, without separate IAM users. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create IAM users for the employees and link to the AWS sign-in page from the portal.",
+          "correct": false,
+          "why": "The employees would still need separate IAM users rather than using federated identities."
+        },
+        {
+          "id": "B",
+          "text": "Deploy AWS Managed Microsoft AD and create a new directory for the project.",
+          "correct": false,
+          "why": "A new directory does not use the existing SAML portal and adds unnecessary identity infrastructure."
+        },
+        {
+          "id": "C",
+          "text": "Configure the SAML IdP as an IAM identity provider and map employees to IAM roles for console access.",
+          "correct": true,
+          "why": "SAML federation uses the existing portal and IAM roles without creating an IAM user per employee."
+        },
+        {
+          "id": "D",
+          "text": "Create a Cognito user pool and enroll the employees for application sign-in.",
+          "correct": false,
+          "why": "A user pool provides application sign-in, not the requested direct federation to AWS console roles."
+        }
+      ],
+      "explanation": "The deciding constraints are the existing SAML portal, one AWS account, and no individual IAM users. IAM SAML federation maps the portal's users to roles and supports console SSO. Creating IAM users misses the identity requirement, while introducing another directory adds work without addressing it.",
+      "keywordCues": [
+        "one standalone AWS account",
+        "existing corporate SAML 2.0 portal",
+        "without separate IAM users",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_saml.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño tiene una sola cuenta independiente de AWS y un portal corporativo SAML 2.0 existente. Un grupo pequeño de empleados necesita acceso a AWS Management Console desde ese portal para un proyecto temporal, sin usuarios de IAM separados. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear usuarios de IAM para los empleados y agregar en el portal un enlace a la página de inicio de sesión de AWS.",
+            "why": "Los empleados seguirían necesitando usuarios de IAM separados en lugar de usar identidades federadas."
+          },
+          {
+            "id": "B",
+            "text": "Implementar AWS Managed Microsoft AD y crear un directorio nuevo para el proyecto.",
+            "why": "Un directorio nuevo no aprovecha el portal SAML existente y agrega infraestructura de identidad innecesaria."
+          },
+          {
+            "id": "C",
+            "text": "Configurar el IdP SAML como proveedor de identidad de IAM y asignar los empleados a roles de IAM para acceder a la consola.",
+            "why": "La federación SAML usa el portal existente y roles de IAM sin crear un usuario de IAM por empleado."
+          },
+          {
+            "id": "D",
+            "text": "Crear un Cognito user pool y registrar a los empleados para que inicien sesión en una aplicación.",
+            "why": "Un user pool permite iniciar sesión en una aplicación, pero no proporciona la federación directa solicitada con roles para la consola de AWS."
+          }
+        ],
+        "explanation": "Las condiciones decisivas son el portal SAML existente, una sola cuenta de AWS y la ausencia de usuarios de IAM individuales. La federación SAML con IAM asigna los usuarios del portal a roles y admite SSO en la consola. Crear usuarios de IAM incumple el requisito de identidad, mientras que introducir otro directorio agrega trabajo sin resolverlo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "identity-federation-saml-oidc--r0",
+      "conceptId": "identity-federation-saml-oidc",
+      "kind": "recall",
+      "prompt": "A small team uses a corporate SAML portal to access one AWS account without IAM users. What should you configure, and why?",
+      "promptEs": "Un equipo pequeño usa un portal corporativo SAML para acceder a una cuenta de AWS sin usuarios de IAM. ¿Qué configurarías y por qué?",
+      "idealAnswer": "Configure the SAML IdP as an IAM identity provider and create roles that trust it, with permissions for the required resources. SAML federation lets employees use their existing identities and receive temporary access without individual IAM users.",
+      "rubric": [
+        "Identify direct SAML federation with IAM roles.",
+        "Mention trust between the role and SAML provider.",
+        "Explain existing identities and temporary access without individual IAM users."
+      ]
+    },
+    {
+      "id": "identity-federation-saml-oidc--r1",
+      "conceptId": "identity-federation-saml-oidc",
+      "kind": "why-not",
+      "prompt": "Why is direct IAM SAML federation a weaker default than IAM Identity Center for workforce access across many AWS accounts?",
+      "promptEs": "¿Por qué la federación SAML directa con IAM es una opción predeterminada menos adecuada que IAM Identity Center para el acceso del personal a muchas cuentas de AWS?",
+      "idealAnswer": "IAM Identity Center is recommended for centralized management of workforce access and permissions across multiple AWS accounts. Direct IAM federation is better suited to short-term, small-scale access in a single account.",
+      "rubric": [
+        "Identify centralized multi-account workforce access as the deciding requirement.",
+        "Select IAM Identity Center for that requirement.",
+        "Contrast direct IAM federation's small-scale, single-account fit."
+      ]
+    }
+  ]
+}

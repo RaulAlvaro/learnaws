@@ -1,0 +1,445 @@
+{
+  "conceptId": "s3-infrequent-access-classes",
+  "card": {
+    "en": {
+      "tldr": "S3 Standard-IA and S3 One Zone-IA serve long-lived objects that are accessed infrequently but need millisecond access. Choose Standard-IA for a primary or irreplaceable copy that must survive an Availability Zone loss; choose the less expensive One Zone-IA when the data can be re-created after that loss.",
+      "whenToUse": [
+        "Access is predictably infrequent, but objects must be available in milliseconds.",
+        "Choose Standard-IA when the objects are the only copy or cannot be re-created.",
+        "Choose One Zone-IA when objects can be re-created and loss of their Availability Zone is acceptable."
+      ],
+      "keyFacts": [
+        "Standard-IA stores data across multiple Availability Zones; One Zone-IA stores it in one.",
+        "Both classes charge retrieval fees and have a 30-day minimum storage duration.",
+        "Both are suited to objects larger than 128 KB; smaller objects are billed as 128 KB.",
+        "One Zone-IA costs less than Standard-IA but is not resilient to the physical loss of its Availability Zone."
+      ],
+      "gotchas": [
+        "Millisecond access alone does not distinguish Standard-IA from One Zone-IA; recoverability after an Availability Zone loss does.",
+        "Deleting, overwriting, or transitioning objects before 30 days does not avoid the minimum-duration charge.",
+        "Do not choose an archive class that requires a restore when the application needs immediate access."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Intelligent-Tiering",
+          "difference": "Use it for unknown or changing access patterns; it moves objects between access tiers automatically and has a monitoring fee but no retrieval fees."
+        },
+        {
+          "concept": "S3 Glacier Instant Retrieval",
+          "difference": "It provides millisecond access for long-lived archive data accessed roughly once a quarter, rather than the roughly monthly access associated with the IA classes."
+        },
+        {
+          "concept": "S3 Glacier Flexible Retrieval",
+          "difference": "Archived objects require a restore and are not available for immediate, real-time access."
+        }
+      ],
+      "examCues": [
+        "only copy, accessed about once a month, millisecond access",
+        "re-creatable derivatives, infrequent reads, AZ loss acceptable",
+        "predictable infrequent access, objects retained for months",
+        "overwritten before the 30-day minimum"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Standard-IA y S3 One Zone-IA sirven para objetos de larga duración que se consultan poco, pero necesitan acceso en milisegundos. Elige Standard-IA para una copia principal o irreemplazable que deba resistir la pérdida de una Availability Zone; elige One Zone-IA, que cuesta menos, si puedes recrear los datos tras esa pérdida.",
+      "whenToUse": [
+        "El acceso es previsiblemente infrecuente, pero los objetos deben estar disponibles en milisegundos.",
+        "Elige Standard-IA si los objetos son la única copia o no puedes recrearlos.",
+        "Elige One Zone-IA si puedes recrear los objetos y es aceptable perderlos junto con su Availability Zone."
+      ],
+      "keyFacts": [
+        "Standard-IA almacena datos en varias Availability Zones; One Zone-IA los almacena en una sola.",
+        "Ambas clases cobran por recuperación y tienen una duración mínima de almacenamiento de 30 días.",
+        "Ambas son adecuadas para objetos de más de 128 KB; los objetos menores se facturan como si fueran de 128 KB.",
+        "One Zone-IA cuesta menos que Standard-IA, pero no resiste la pérdida física de su Availability Zone."
+      ],
+      "gotchas": [
+        "El acceso en milisegundos no distingue Standard-IA de One Zone-IA; la diferencia decisiva es la recuperación ante la pérdida de una Availability Zone.",
+        "Eliminar, sobrescribir o cambiar de clase un objeto antes de 30 días no evita el cargo por la duración mínima.",
+        "No elijas una clase de archivo que requiera restauración si la aplicación necesita acceso inmediato."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Intelligent-Tiering",
+          "difference": "Úsala si los patrones de acceso son desconocidos o cambian; mueve objetos automáticamente entre niveles y cobra por monitoreo, pero no por recuperación."
+        },
+        {
+          "concept": "S3 Glacier Instant Retrieval",
+          "difference": "Ofrece acceso en milisegundos para archivos de larga duración consultados aproximadamente una vez por trimestre, no para el acceso aproximadamente mensual asociado con las clases IA."
+        },
+        {
+          "concept": "S3 Glacier Flexible Retrieval",
+          "difference": "Los objetos archivados requieren restauración y no están disponibles para acceso inmediato en tiempo real."
+        }
+      ],
+      "examCues": [
+        "only copy, accessed about once a month, millisecond access",
+        "re-creatable derivatives, infrequent reads, AZ loss acceptable",
+        "predictable infrequent access, objects retained for months",
+        "overwritten before the 30-day minimum"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-infreq-data-access"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-infrequent-access-classes--7bc70552",
+      "conceptId": "s3-infrequent-access-classes",
+      "secondaryConcepts": [
+        "s3-glacier-classes-retrieval"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional museum stores digitized originals in Amazon S3. Curators retrieve each collection about once a month, but their catalog must open any image in milliseconds, and the files cannot be re-created if an Availability Zone is lost. Which storage class meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Glacier Flexible Retrieval for the digitized originals",
+          "correct": false,
+          "why": "Archived objects require restoration and are not available for immediate catalog access."
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard for the digitized originals",
+          "correct": false,
+          "why": "It supports immediate access, but it is designed for frequently accessed data rather than these predictably infrequent reads."
+        },
+        {
+          "id": "C",
+          "text": "S3 Standard-IA for the digitized originals",
+          "correct": true,
+          "why": "It provides millisecond access for infrequent reads and keeps the irreplaceable objects resilient to an Availability Zone loss."
+        },
+        {
+          "id": "D",
+          "text": "S3 One Zone-IA for the digitized originals",
+          "correct": false,
+          "why": "It provides millisecond access but cannot protect the only copy against loss of its Availability Zone."
+        }
+      ],
+      "explanation": "The deciding constraints are roughly monthly reads, millisecond access, and an irreplaceable copy that must survive an Availability Zone loss. Standard-IA is designed for infrequent access and stores objects across multiple Availability Zones. One Zone-IA is less expensive but fails the resilience requirement, while Glacier Flexible Retrieval requires a restore.",
+      "keywordCues": [
+        "about once a month",
+        "open any image in milliseconds",
+        "cannot be re-created if an Availability Zone is lost",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-infreq-data-access"
+      ],
+      "es": {
+        "stem": "Un museo regional guarda originales digitalizados en Amazon S3. El equipo consulta cada colección aproximadamente una vez al mes, pero su catálogo debe abrir cualquier imagen en milisegundos y los archivos no pueden recrearse si se pierde una Availability Zone. ¿Qué clase de almacenamiento cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Glacier Flexible Retrieval para los originales digitalizados",
+            "why": "Los objetos archivados requieren restauración y no están disponibles para acceso inmediato desde el catálogo."
+          },
+          {
+            "id": "B",
+            "text": "S3 Standard para los originales digitalizados",
+            "why": "Permite acceso inmediato, pero está diseñado para datos de acceso frecuente y no para estas consultas previsiblemente infrecuentes."
+          },
+          {
+            "id": "C",
+            "text": "S3 Standard-IA para los originales digitalizados",
+            "why": "Ofrece acceso en milisegundos para consultas infrecuentes y protege los objetos irreemplazables ante la pérdida de una Availability Zone."
+          },
+          {
+            "id": "D",
+            "text": "S3 One Zone-IA para los originales digitalizados",
+            "why": "Ofrece acceso en milisegundos, pero no protege la única copia ante la pérdida de su Availability Zone."
+          }
+        ],
+        "explanation": "Lo decisivo son las consultas aproximadamente mensuales, el acceso en milisegundos y una copia irreemplazable que debe resistir la pérdida de una Availability Zone. Standard-IA está diseñado para acceso infrecuente y almacena objetos en varias Availability Zones. One Zone-IA cuesta menos, pero no cumple el requisito de resiliencia; Glacier Flexible Retrieval requiere restauración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-infrequent-access-classes--d01e337f",
+      "conceptId": "s3-infrequent-access-classes",
+      "secondaryConcepts": [
+        "s3-intelligent-tiering",
+        "s3-glacier-classes-retrieval"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A game studio generates downloadable preview videos from source footage kept separately. Players request the previews about once a month and expect playback to start without a restore step; if the previews are lost with an Availability Zone, the studio can regenerate them. Which storage class meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Glacier Flexible Retrieval for the preview videos",
+          "correct": false,
+          "why": "Its archived objects must be restored before playback, contrary to the no-restore requirement."
+        },
+        {
+          "id": "B",
+          "text": "S3 Standard-IA for the preview videos",
+          "correct": false,
+          "why": "It meets the access requirement but provides multi-AZ resilience the studio does not require for regenerable previews."
+        },
+        {
+          "id": "C",
+          "text": "S3 Intelligent-Tiering for the preview videos",
+          "correct": false,
+          "why": "It targets unknown or changing access patterns and adds monitoring fees when this studio already knows its access pattern."
+        },
+        {
+          "id": "D",
+          "text": "S3 One Zone-IA for the preview videos",
+          "correct": true,
+          "why": "It offers millisecond access for infrequently requested objects and costs less than Standard-IA when AZ-loss resilience is unnecessary."
+        }
+      ],
+      "explanation": "The previews are predictably infrequent-access data that must be playable immediately, but they can be regenerated after an Availability Zone loss. One Zone-IA matches those requirements and is less expensive than Standard-IA. Standard-IA adds multi-AZ resilience that is not needed here; Glacier Flexible Retrieval cannot provide playback without a restore.",
+      "keywordCues": [
+        "about once a month",
+        "without a restore step",
+        "can regenerate them",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-infreq-data-access"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos genera videos de vista previa descargables a partir de material original que guarda por separado. Los jugadores solicitan las vistas previas aproximadamente una vez al mes y esperan iniciar la reproducción sin restauración; si se pierden junto con una Availability Zone, el estudio puede regenerarlas. ¿Qué clase de almacenamiento cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Glacier Flexible Retrieval para los videos de vista previa",
+            "why": "Sus objetos archivados deben restaurarse antes de reproducirse, lo que contradice el requisito de no restaurar."
+          },
+          {
+            "id": "B",
+            "text": "S3 Standard-IA para los videos de vista previa",
+            "why": "Cumple el requisito de acceso, pero aporta resiliencia en varias Availability Zones que el estudio no necesita para vistas previas regenerables."
+          },
+          {
+            "id": "C",
+            "text": "S3 Intelligent-Tiering para los videos de vista previa",
+            "why": "Está dirigido a patrones de acceso desconocidos o cambiantes y agrega cargos de monitoreo cuando el estudio ya conoce su patrón de acceso."
+          },
+          {
+            "id": "D",
+            "text": "S3 One Zone-IA para los videos de vista previa",
+            "why": "Ofrece acceso en milisegundos para objetos consultados con poca frecuencia y cuesta menos que Standard-IA cuando no se necesita resiliencia ante la pérdida de una Availability Zone."
+          }
+        ],
+        "explanation": "Las vistas previas se consultan de forma previsiblemente infrecuente y deben reproducirse de inmediato, pero pueden regenerarse tras perder una Availability Zone. One Zone-IA cumple estos requisitos y cuesta menos que Standard-IA. Standard-IA agrega resiliencia en varias Availability Zones que aquí no se necesita; Glacier Flexible Retrieval no permite reproducirlas sin restauración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-infrequent-access-classes--4e3ed279",
+      "conceptId": "s3-infrequent-access-classes",
+      "secondaryConcepts": [
+        "s3-glacier-classes-retrieval"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A delivery platform writes route snapshots to Amazon S3 and overwrites each snapshot after ten days. Dispatchers open snapshots repeatedly throughout each day, and the platform needs millisecond access. Which storage class best fits this workload MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Standard-IA for the route snapshots",
+          "correct": false,
+          "why": "Frequent reads and overwrites before its 30-day minimum make this infrequent-access class a poor fit."
+        },
+        {
+          "id": "B",
+          "text": "S3 One Zone-IA for the route snapshots",
+          "correct": false,
+          "why": "It charges for retrievals and for the remainder of its 30-day minimum when snapshots are overwritten early."
+        },
+        {
+          "id": "C",
+          "text": "S3 Standard for the route snapshots",
+          "correct": true,
+          "why": "It is designed for frequently accessed objects with millisecond access and has no minimum storage duration."
+        },
+        {
+          "id": "D",
+          "text": "S3 Glacier Instant Retrieval for the route snapshots",
+          "correct": false,
+          "why": "It is intended for rarely accessed, long-lived archives rather than snapshots opened throughout the day."
+        }
+      ],
+      "explanation": "The snapshots are opened frequently and overwritten after ten days. S3 Standard supports millisecond access for frequently accessed objects and has no minimum storage duration. Both IA classes are meant for infrequent reads and impose a 30-day minimum charge, including a prorated remainder when an object is overwritten early.",
+      "keywordCues": [
+        "overwrites each snapshot after ten days",
+        "repeatedly throughout each day",
+        "millisecond access",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-infreq-data-access"
+      ],
+      "es": {
+        "stem": "Una plataforma de entregas guarda capturas de rutas en Amazon S3 y sobrescribe cada una después de diez días. El personal de despacho abre las capturas repetidamente durante el día, y la plataforma necesita acceso en milisegundos. ¿Qué clase de almacenamiento se ajusta mejor a esta carga de trabajo de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Standard-IA para las capturas de rutas",
+            "why": "Las consultas frecuentes y las sobrescrituras antes de su mínimo de 30 días hacen que esta clase de acceso infrecuente no sea adecuada."
+          },
+          {
+            "id": "B",
+            "text": "S3 One Zone-IA para las capturas de rutas",
+            "why": "Cobra por recuperación y por el período restante de su mínimo de 30 días cuando las capturas se sobrescriben antes."
+          },
+          {
+            "id": "C",
+            "text": "S3 Standard para las capturas de rutas",
+            "why": "Está diseñado para objetos de acceso frecuente con acceso en milisegundos y no tiene duración mínima de almacenamiento."
+          },
+          {
+            "id": "D",
+            "text": "S3 Glacier Instant Retrieval para las capturas de rutas",
+            "why": "Está diseñado para archivos de larga duración consultados rara vez, no para capturas que se abren durante todo el día."
+          }
+        ],
+        "explanation": "Las capturas se abren con frecuencia y se sobrescriben después de diez días. S3 Standard ofrece acceso en milisegundos para objetos consultados con frecuencia y no tiene duración mínima de almacenamiento. Ambas clases IA están diseñadas para consultas infrecuentes e imponen un cargo mínimo de 30 días, incluido un cargo proporcional por el período restante si un objeto se sobrescribe antes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-infrequent-access-classes--db6ed9f8",
+      "conceptId": "s3-infrequent-access-classes",
+      "secondaryConcepts": [
+        "s3-glacier-classes-retrieval"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A biotech company has two S3 datasets retained for many months: original experiment records that cannot be re-created, and derived charts that can be regenerated from those records. Analysts open each dataset roughly once a month and require millisecond access. The company wants to minimize storage cost while preserving the originals through an Availability Zone loss; losing the charts in that event is acceptable. Which storage class assignments meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the original experiment records in S3 Standard-IA.",
+          "correct": true,
+          "why": "Standard-IA supports infrequent, millisecond-access reads while protecting the irreplaceable originals across Availability Zones."
+        },
+        {
+          "id": "B",
+          "text": "Store the derived charts in S3 Standard-IA.",
+          "correct": false,
+          "why": "It adds multi-AZ resilience that the company does not require for charts it can regenerate, rather than minimizing their storage cost."
+        },
+        {
+          "id": "C",
+          "text": "Store the original experiment records in S3 One Zone-IA.",
+          "correct": false,
+          "why": "The only copies of the records would not be resilient to loss of the storage Availability Zone."
+        },
+        {
+          "id": "D",
+          "text": "Store the derived charts in S3 Glacier Flexible Retrieval.",
+          "correct": false,
+          "why": "A restore would be required before analysts could open archived charts."
+        },
+        {
+          "id": "E",
+          "text": "Store the derived charts in S3 One Zone-IA.",
+          "correct": true,
+          "why": "One Zone-IA provides millisecond access at a lower cost than Standard-IA when regenerable charts can tolerate AZ loss."
+        }
+      ],
+      "explanation": "Both datasets have predictable, infrequent reads and require millisecond access, so an IA class fits their access pattern. The originals cannot be re-created and must survive an Availability Zone loss, making Standard-IA the appropriate assignment. The charts can be regenerated, so the less expensive One Zone-IA meets their requirements; Glacier Flexible Retrieval would require a restore.",
+      "keywordCues": [
+        "original experiment records that cannot be re-created",
+        "derived charts that can be regenerated",
+        "roughly once a month",
+        "require millisecond access",
+        "losing the charts in that event is acceptable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-infreq-data-access"
+      ],
+      "es": {
+        "stem": "Una empresa de biotecnología conserva durante muchos meses dos conjuntos de datos en S3: registros originales de experimentos que no puede recrear y gráficos derivados que puede regenerar a partir de esos registros. Los analistas abren cada conjunto aproximadamente una vez al mes y necesitan acceso en milisegundos. La empresa quiere minimizar el costo de almacenamiento y preservar los originales ante la pérdida de una Availability Zone; en ese caso, perder los gráficos es aceptable. ¿Qué asignaciones de clases de almacenamiento cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar los registros originales de experimentos en S3 Standard-IA.",
+            "why": "Standard-IA permite consultas infrecuentes con acceso en milisegundos y protege los originales irreemplazables en varias Availability Zones."
+          },
+          {
+            "id": "B",
+            "text": "Guardar los gráficos derivados en S3 Standard-IA.",
+            "why": "Agrega resiliencia en varias Availability Zones que la empresa no necesita para gráficos que puede regenerar, en lugar de minimizar su costo de almacenamiento."
+          },
+          {
+            "id": "C",
+            "text": "Guardar los registros originales de experimentos en S3 One Zone-IA.",
+            "why": "Las únicas copias de los registros no resistirían la pérdida de la Availability Zone donde se almacenan."
+          },
+          {
+            "id": "D",
+            "text": "Guardar los gráficos derivados en S3 Glacier Flexible Retrieval.",
+            "why": "Sería necesario restaurar los gráficos archivados antes de que los analistas pudieran abrirlos."
+          },
+          {
+            "id": "E",
+            "text": "Guardar los gráficos derivados en S3 One Zone-IA.",
+            "why": "One Zone-IA ofrece acceso en milisegundos a menor costo que Standard-IA cuando los gráficos regenerables pueden tolerar la pérdida de una Availability Zone."
+          }
+        ],
+        "explanation": "Ambos conjuntos tienen consultas previsibles e infrecuentes y necesitan acceso en milisegundos, por lo que una clase IA se ajusta a su patrón de acceso. Los originales no pueden recrearse y deben resistir la pérdida de una Availability Zone; por eso corresponde Standard-IA. Los gráficos pueden regenerarse, así que One Zone-IA, que cuesta menos, cumple sus requisitos; Glacier Flexible Retrieval requeriría restauración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-infrequent-access-classes--r0",
+      "conceptId": "s3-infrequent-access-classes",
+      "kind": "recall",
+      "prompt": "Which IA class fits monthly reads of the only copy of an object needing millisecond access, and which fits regenerable derivatives?",
+      "promptEs": "¿Qué clase IA elegirías para la única copia de un objeto consultado mensualmente y cuál para derivados regenerables, si ambos necesitan acceso en milisegundos?",
+      "idealAnswer": "Use S3 Standard-IA for the only copy because it spans Availability Zones and remains accessible in milliseconds. Use S3 One Zone-IA for regenerable derivatives when losing their Availability Zone is acceptable; it costs less than Standard-IA.",
+      "rubric": [
+        "Selects Standard-IA for the only copy and cites resilience to AZ loss.",
+        "Selects One Zone-IA for regenerable data when AZ loss is acceptable.",
+        "Notes that both provide millisecond access for infrequent reads."
+      ]
+    },
+    {
+      "id": "s3-infrequent-access-classes--r1",
+      "conceptId": "s3-infrequent-access-classes",
+      "kind": "why-not",
+      "prompt": "Why not use S3 Glacier Flexible Retrieval for monthly-read files that users must open immediately?",
+      "promptEs": "¿Por qué no usarías S3 Glacier Flexible Retrieval para archivos consultados cada mes que los usuarios deben abrir de inmediato?",
+      "idealAnswer": "S3 Glacier Flexible Retrieval archives objects, so they must be restored before access and cannot be opened immediately. Standard-IA provides millisecond access for infrequently read files; choose One Zone-IA instead only when the files can be re-created after an AZ loss.",
+      "rubric": [
+        "Explains that Glacier Flexible Retrieval requires restoration before access.",
+        "Identifies an IA class as suitable for infrequent reads requiring immediate access.",
+        "Distinguishes Standard-IA from One Zone-IA using AZ-loss tolerance."
+      ]
+    }
+  ]
+}

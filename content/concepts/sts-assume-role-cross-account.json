@@ -1,0 +1,411 @@
+{
+  "conceptId": "sts-assume-role-cross-account",
+  "card": {
+    "en": {
+      "tldr": "Use an IAM role in the resource-owning account to delegate cross-account access without creating a second set of users. The role’s trust policy identifies who may assume it, the caller needs permission to call AWS STS AssumeRole, and the role’s permissions policy limits what the resulting temporary credentials can do.",
+      "whenToUse": [
+        "Users managed in one AWS account need limited access to resources in another account.",
+        "Sensitive permissions should be activated only for a specific task, rather than held continuously.",
+        "An application needs cross-account access without storing long-term credentials for the destination account."
+      ],
+      "keyFacts": [
+        "The destination account creates the role and names trusted principals in its trust policy.",
+        "The source account grants selected callers permission to call AssumeRole for that role.",
+        "AWS STS returns temporary credentials after verifying the request against the role’s trust policy.",
+        "While a user has switched to a role, the role’s permissions apply and the user’s original permissions are suspended.",
+        "A role can require MFA before a user assumes it."
+      ],
+      "gotchas": [
+        "Trusting a source account does not, by itself, grant every user there permission to assume the role.",
+        "Permission to assume a role does not grant actions omitted from the role’s permissions policy.",
+        "Creating separate users in the destination account adds credentials to manage instead of using cross-account delegation."
+      ],
+      "confusedWith": [
+        {
+          "concept": "A second IAM user in the destination account",
+          "difference": "A cross-account role lets an existing identity obtain temporary credentials instead of maintaining another identity and password."
+        }
+      ],
+      "examCues": [
+        "users managed in a development account",
+        "occasional access to a production account",
+        "temporary cross-account credentials",
+        "permission denied when assuming a trusted role"
+      ]
+    },
+    "es": {
+      "tldr": "Usa un IAM role en la cuenta propietaria del recurso para delegar acceso entre cuentas sin crear otro conjunto de usuarios. La trust policy indica quién puede asumirlo, quien llama necesita permiso para usar AWS STS AssumeRole y la permissions policy del rol limita lo que permiten hacer las credenciales temporales.",
+      "whenToUse": [
+        "Los usuarios administrados en una cuenta de AWS necesitan acceso limitado a recursos de otra cuenta.",
+        "Los permisos sensibles deben activarse solo para una tarea específica, en vez de mantenerse de forma permanente.",
+        "Una aplicación necesita acceso entre cuentas sin guardar credenciales de largo plazo de la cuenta de destino."
+      ],
+      "keyFacts": [
+        "La cuenta de destino crea el rol e identifica a las entidades confiables en su trust policy.",
+        "La cuenta de origen concede a quienes corresponda permiso para llamar a AssumeRole sobre ese rol.",
+        "AWS STS devuelve credenciales temporales después de verificar la solicitud con la trust policy del rol.",
+        "Mientras un usuario tiene activo el rol, se aplican los permisos del rol y se suspenden sus permisos originales.",
+        "Un rol puede exigir MFA antes de que un usuario lo asuma."
+      ],
+      "gotchas": [
+        "Confiar en una cuenta de origen no concede, por sí solo, permiso a todos sus usuarios para asumir el rol.",
+        "Tener permiso para asumir un rol no concede acciones ausentes de la permissions policy del rol.",
+        "Crear usuarios adicionales en la cuenta de destino agrega credenciales que administrar, en lugar de usar delegación entre cuentas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Un segundo IAM user en la cuenta de destino",
+          "difference": "Un rol entre cuentas permite que una identidad existente obtenga credenciales temporales, sin mantener otra identidad y contraseña."
+        }
+      ],
+      "examCues": [
+        "users managed in a development account",
+        "occasional access to a production account",
+        "temporary cross-account credentials",
+        "permission denied when assuming a trusted role"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "sts-assume-role-cross-account--bfea0a04",
+      "conceptId": "sts-assume-role-cross-account",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research institute manages analysts and reviewers in one AWS account. A role in its archive account trusts the analysts’ account and grants read access to a specific S3 bucket; analysts can switch to the role successfully. A reviewer needs the same access but receives an error when attempting to switch, and the reviewer’s group has no permission to call AssumeRole for that role. Which change grants the reviewer access without broadening the role’s resource permissions?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Grant the reviewer’s group permission to call AssumeRole for the archive role.",
+          "correct": true,
+          "why": "This supplies the missing caller permission without changing what the role can access."
+        },
+        {
+          "id": "B",
+          "text": "Create a separate IAM user for the reviewer in the archive account with access to the bucket.",
+          "correct": false,
+          "why": "This adds a destination-account identity instead of fixing the existing cross-account role access."
+        },
+        {
+          "id": "C",
+          "text": "Add more S3 read actions to the archive role’s permissions policy.",
+          "correct": false,
+          "why": "The failure occurs before the reviewer can use the role’s existing bucket permissions."
+        },
+        {
+          "id": "D",
+          "text": "Replace the archive role’s trust policy so that it trusts every AWS account.",
+          "correct": false,
+          "why": "The existing trust already works for this source account, and broader trust does not supply the missing group permission."
+        }
+      ],
+      "explanation": "Analysts can already switch to the role, demonstrating that its trust relationship and bucket permissions support the intended access pattern. The reviewer’s group lacks permission to call AssumeRole for that role, so granting that specific caller permission addresses the stated failure. Adding S3 actions to the role would not help someone who cannot assume it. Trusting every account would broaden trust unnecessarily and would not replace the reviewer’s missing permission.",
+      "keywordCues": [
+        "analysts can switch to the role successfully",
+        "reviewer receives an error when attempting to switch",
+        "reviewer’s group has no permission to call AssumeRole for that role",
+        "without broadening the role’s resource permissions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación administra analistas y revisores en una cuenta de AWS. Un rol de su cuenta de archivos confía en la cuenta de los analistas y concede acceso de lectura a un bucket de S3 específico; los analistas pueden cambiar al rol correctamente. Un revisor necesita el mismo acceso, pero recibe un error al intentar cambiar al rol, y su grupo no tiene permiso para llamar a AssumeRole sobre ese rol. ¿Qué cambio da acceso al revisor sin ampliar los permisos del rol sobre recursos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Dar al grupo del revisor permiso para llamar a AssumeRole sobre el rol de archivos.",
+            "why": "Esto proporciona el permiso faltante a quien llama, sin cambiar los recursos a los que puede acceder el rol."
+          },
+          {
+            "id": "B",
+            "text": "Crear un IAM user separado para el revisor en la cuenta de archivos con acceso al bucket.",
+            "why": "Esto agrega una identidad en la cuenta de destino en vez de corregir el acceso mediante el rol existente."
+          },
+          {
+            "id": "C",
+            "text": "Agregar más acciones de lectura de S3 a la permissions policy del rol de archivos.",
+            "why": "El error ocurre antes de que el revisor pueda usar los permisos existentes del rol sobre el bucket."
+          },
+          {
+            "id": "D",
+            "text": "Reemplazar la trust policy del rol de archivos para que confíe en todas las cuentas de AWS.",
+            "why": "La confianza actual ya funciona para esa cuenta de origen; ampliarla no proporciona el permiso faltante al grupo."
+          }
+        ],
+        "explanation": "Los analistas ya pueden cambiar al rol, lo que demuestra que la relación de confianza y los permisos sobre el bucket respaldan el esquema de acceso previsto. El grupo del revisor no tiene permiso para llamar a AssumeRole sobre ese rol; concederle ese permiso específico resuelve el error descrito. Agregar acciones de S3 al rol no ayudaría a alguien que no puede asumirlo. Confiar en todas las cuentas ampliaría la confianza innecesariamente y no reemplazaría el permiso faltante del revisor."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sts-assume-role-cross-account--c320813e",
+      "conceptId": "sts-assume-role-cross-account",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturer keeps its quality-control staff in a workforce AWS account and inspection reports in an S3 bucket in a separate records account. A role in the records account already has a permissions policy limited to reading that bucket, but no trust policy or caller permissions have been configured for this access. Only the quality-control group should obtain temporary access without receiving records-account users. Which two actions complete the design with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Grant the quality-control group permission to call AssumeRole for the records role.",
+          "correct": true,
+          "why": "This authorizes only the intended callers to request the role’s temporary credentials."
+        },
+        {
+          "id": "B",
+          "text": "Create records-account IAM users for the quality-control staff.",
+          "correct": false,
+          "why": "Separate destination-account users conflict with the requirement to reuse workforce identities."
+        },
+        {
+          "id": "C",
+          "text": "Grant the quality-control group S3 read permission in the workforce account without changing the records role.",
+          "correct": false,
+          "why": "That permission does not establish the missing trust and AssumeRole authorization."
+        },
+        {
+          "id": "D",
+          "text": "Grant every workforce-account user permission to call AssumeRole for the records role.",
+          "correct": false,
+          "why": "This would extend role-switching permission beyond the specified quality-control group."
+        },
+        {
+          "id": "E",
+          "text": "Configure the records role’s trust policy to trust the workforce account.",
+          "correct": true,
+          "why": "The destination role must trust the account whose authorized users will assume it."
+        }
+      ],
+      "explanation": "The role already defines the allowed S3 action, but cross-account delegation still needs two pieces: destination-side trust and source-side permission to assume the role. Trusting the workforce account and granting AssumeRole to the quality-control group provide those pieces without creating new users. Granting AssumeRole to every workforce user would violate the restriction to the quality-control group. S3 permission on the source group alone does not complete the role-assumption path.",
+      "keywordCues": [
+        "already has a permissions policy limited to reading that bucket",
+        "no trust policy or caller permissions have been configured",
+        "Only the quality-control group",
+        "temporary access without receiving records-account users"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html"
+      ],
+      "es": {
+        "stem": "Un fabricante mantiene a su personal de control de calidad en una cuenta de AWS de personal y los informes de inspección en un bucket de S3 de una cuenta de registros separada. Un rol en la cuenta de registros ya tiene una permissions policy limitada a leer ese bucket, pero no se han configurado la trust policy ni los permisos de quienes llamarán para este acceso. Solo el grupo de control de calidad debe obtener acceso temporal sin recibir usuarios de la cuenta de registros. ¿Qué dos acciones completan el diseño con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conceder al grupo de control de calidad permiso para llamar a AssumeRole sobre el rol de registros.",
+            "why": "Esto autoriza solo a quienes corresponde a solicitar las credenciales temporales del rol."
+          },
+          {
+            "id": "B",
+            "text": "Crear IAM users en la cuenta de registros para el personal de control de calidad.",
+            "why": "Los usuarios separados en la cuenta de destino contradicen el requisito de reutilizar las identidades de la cuenta de personal."
+          },
+          {
+            "id": "C",
+            "text": "Conceder permiso de lectura de S3 al grupo de control de calidad en la cuenta de personal sin cambiar el rol de registros.",
+            "why": "Ese permiso no establece la confianza ni la autorización para AssumeRole que faltan."
+          },
+          {
+            "id": "D",
+            "text": "Conceder a todos los usuarios de la cuenta de personal permiso para llamar a AssumeRole sobre el rol de registros.",
+            "why": "Esto ampliaría el permiso para cambiar de rol más allá del grupo de control de calidad especificado."
+          },
+          {
+            "id": "E",
+            "text": "Configurar la trust policy del rol de registros para que confíe en la cuenta de personal.",
+            "why": "El rol de destino debe confiar en la cuenta cuyos usuarios autorizados lo asumirán."
+          }
+        ],
+        "explanation": "El rol ya define la acción permitida en S3, pero la delegación entre cuentas todavía necesita dos elementos: confianza en la cuenta de destino y permiso para asumir el rol en la cuenta de origen. Hacer que el rol confíe en la cuenta de personal y conceder AssumeRole al grupo de control de calidad proporciona ambos elementos sin crear usuarios nuevos. Conceder AssumeRole a todos los usuarios de la cuenta de personal incumpliría la restricción al grupo de control de calidad. Un permiso de S3 solo en el grupo de origen no completa el proceso para asumir el rol."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sts-assume-role-cross-account--e6b4fa0e",
+      "conceptId": "sts-assume-role-cross-account",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company manages its release engineers in a development AWS account. During deployments, selected engineers must upload files to one S3 bucket in a production account, without receiving separate production identities or long-term production credentials. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Grant the development engineers upload permissions in their own account and leave the production account unchanged.",
+          "correct": false,
+          "why": "Permissions in the development account alone do not establish access to the production bucket."
+        },
+        {
+          "id": "B",
+          "text": "Create IAM users in production for the selected engineers and grant them access to the bucket.",
+          "correct": false,
+          "why": "This creates the separate production identities the company wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Create a production role trusted by the development account with permissions limited to bucket uploads, and allow the selected engineers to call AssumeRole for it.",
+          "correct": true,
+          "why": "The role supplies limited, temporary cross-account access to existing development identities."
+        },
+        {
+          "id": "D",
+          "text": "Create a production role with bucket upload permissions and trust the development account, but grant no development engineers permission to call AssumeRole.",
+          "correct": false,
+          "why": "Trusted account status alone does not give the selected engineers permission to assume the role."
+        }
+      ],
+      "explanation": "The engineers already have identities in development and must access a resource in production without additional production credentials. A role in production can trust the development account and restrict its permissions to the bucket, while selected engineers receive permission to call AssumeRole. AWS STS then provides temporary credentials for the role. Merely configuring the role’s trust policy, as in option D, does not grant the engineers permission to assume it.",
+      "keywordCues": [
+        "manages its release engineers in a development AWS account",
+        "selected engineers must upload files to one S3 bucket in a production account",
+        "without receiving separate production identities or long-term production credentials"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios administra a sus ingenieros de despliegue en una cuenta de AWS de desarrollo. Durante los despliegues, algunos ingenieros deben subir archivos a un bucket de S3 en una cuenta de producción, sin recibir identidades separadas ni credenciales de largo plazo de producción. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Dar a los ingenieros permisos para subir archivos en su propia cuenta de desarrollo y no cambiar la cuenta de producción.",
+            "why": "Los permisos de la cuenta de desarrollo, por sí solos, no establecen acceso al bucket de producción."
+          },
+          {
+            "id": "B",
+            "text": "Crear IAM users en producción para los ingenieros seleccionados y darles acceso al bucket.",
+            "why": "Esto crea las identidades separadas de producción que la empresa quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Crear un rol en producción que confíe en la cuenta de desarrollo, limitar sus permisos a subir archivos al bucket y permitir que los ingenieros seleccionados llamen a AssumeRole.",
+            "why": "El rol da acceso temporal y limitado entre cuentas a las identidades existentes en desarrollo."
+          },
+          {
+            "id": "D",
+            "text": "Crear un rol en producción con permisos para subir archivos al bucket y confiar en la cuenta de desarrollo, pero no dar a los ingenieros permiso para llamar a AssumeRole.",
+            "why": "La confianza en la cuenta, por sí sola, no da a los ingenieros seleccionados permiso para asumir el rol."
+          }
+        ],
+        "explanation": "Los ingenieros ya tienen identidades en desarrollo y necesitan acceder a un recurso de producción sin credenciales adicionales de esa cuenta. Un rol en producción puede confiar en la cuenta de desarrollo y limitar sus permisos al bucket, mientras que los ingenieros seleccionados reciben permiso para llamar a AssumeRole. AWS STS proporciona credenciales temporales para el rol. Configurar únicamente la trust policy del rol, como en la opción D, no concede a los ingenieros permiso para asumirlo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "sts-assume-role-cross-account--a0df58c1",
+      "conceptId": "sts-assume-role-cross-account",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A hospital keeps critical EC2 instances in a separate operations account. Its administrators normally have no permission to terminate those instances, but must occasionally perform a reviewed retirement task from identities in a management account. The hospital requires administrators to activate the privilege for that task and authenticate with MFA before doing so. Which design meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create separate operations-account users with termination permissions and ask administrators to sign in to those accounts for retirements.",
+          "correct": false,
+          "why": "Separate users introduce additional identities and do not provide the specified MFA-protected role activation."
+        },
+        {
+          "id": "B",
+          "text": "Create a termination role in the operations account, require MFA to assume it, and allow selected management-account administrators to call AssumeRole.",
+          "correct": true,
+          "why": "Selected administrators must actively assume an MFA-protected role to obtain the elevated permissions."
+        },
+        {
+          "id": "C",
+          "text": "Grant the selected administrators permanent termination permissions through policies on their management-account identities.",
+          "correct": false,
+          "why": "Permanent permissions do not require administrators to activate an elevated role for the task."
+        },
+        {
+          "id": "D",
+          "text": "Create a termination role in the operations account and allow selected administrators to assume it without an MFA requirement.",
+          "correct": false,
+          "why": "The role supports task-specific access but omits the required MFA protection."
+        }
+      ],
+      "explanation": "The deciding requirements are task-specific elevation and MFA before termination privileges become available. A role can limit elevated permissions to times when selected administrators actively assume it, and its assumption can require MFA. Option D uses a role but misses the explicit MFA condition. Permanent permissions in option C also miss the requirement to activate privileges for the retirement task.",
+      "keywordCues": [
+        "normally have no permission to terminate those instances",
+        "activate the privilege for that task",
+        "authenticate with MFA before doing so"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html"
+      ],
+      "es": {
+        "stem": "Un hospital mantiene instancias EC2 críticas en una cuenta de operaciones separada. Sus administradores normalmente no tienen permiso para terminar esas instancias, pero ocasionalmente deben realizar una tarea de retiro revisada desde identidades de una cuenta de administración. El hospital exige que activen el privilegio para esa tarea y se autentiquen con MFA antes de hacerlo. ¿Qué diseño cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear usuarios separados en la cuenta de operaciones con permisos de terminación y pedir a los administradores que inicien sesión con ellos para los retiros.",
+            "why": "Los usuarios separados agregan identidades y no proporcionan la activación de un rol protegido con MFA que se exige."
+          },
+          {
+            "id": "B",
+            "text": "Crear un rol de terminación en la cuenta de operaciones, exigir MFA para asumirlo y permitir que los administradores seleccionados de la cuenta de administración llamen a AssumeRole.",
+            "why": "Los administradores seleccionados deben asumir activamente un rol protegido con MFA para obtener los permisos elevados."
+          },
+          {
+            "id": "C",
+            "text": "Conceder permisos permanentes de terminación a los administradores seleccionados mediante políticas de sus identidades en la cuenta de administración.",
+            "why": "Los permisos permanentes no exigen que los administradores activen un rol elevado para la tarea."
+          },
+          {
+            "id": "D",
+            "text": "Crear un rol de terminación en la cuenta de operaciones y permitir que los administradores seleccionados lo asuman sin exigir MFA.",
+            "why": "El rol permite acceso específico para la tarea, pero omite la protección MFA requerida."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la elevación de privilegios para una tarea específica y MFA antes de disponer de permisos de terminación. Un rol puede limitar los permisos elevados a los momentos en que los administradores seleccionados lo asumen activamente, y puede exigir MFA para asumirlo. La opción D usa un rol, pero omite el requisito explícito de MFA. Los permisos permanentes de la opción C tampoco cumplen el requisito de activar los privilegios para la tarea de retiro."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "sts-assume-role-cross-account--r0",
+      "conceptId": "sts-assume-role-cross-account",
+      "kind": "recall",
+      "prompt": "Developers in one account occasionally need limited production access without new users. What should you configure, and why?",
+      "promptEs": "Los desarrolladores de una cuenta necesitan acceso limitado y ocasional a producción sin usuarios nuevos. ¿Qué debes configurar y por qué?",
+      "idealAnswer": "Create a role in the production account with a trust policy for the source account and a permissions policy limited to the required resources. Allow the selected developers to call AssumeRole so AWS STS can provide temporary credentials for that role.",
+      "rubric": [
+        "Places the role in the destination account and identifies source-account trust.",
+        "Grants selected source identities permission to call AssumeRole.",
+        "Limits access with the role’s permissions policy and mentions temporary credentials."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+{
+  "conceptId": "s3-encryption-options",
+  "card": {
+    "en": {
+      "tldr": "Every new S3 object is encrypted at rest with SSE-S3 by default. Choose SSE-KMS when a scenario requires KMS key policies and auditable key usage, DSSE-KMS when it requires two independent server-side encryption layers, or SSE-C when the customer must manage the keys while S3 performs encryption.",
+      "whenToUse": [
+        "Choose SSE-S3 when automatic encryption with no additional encryption charge is sufficient.",
+        "Choose SSE-KMS with a customer managed key when you need to control key access, audit KMS usage, or share KMS-encrypted objects across accounts.",
+        "Choose DSSE-KMS when compliance explicitly requires two independent layers of server-side encryption.",
+        "Choose SSE-C when the customer must manage the encryption keys but wants S3 to encrypt and decrypt the objects."
+      ],
+      "keyFacts": [
+        "SSE-S3 is the default for new object uploads; SSE-KMS and DSSE-KMS can instead be configured as bucket defaults.",
+        "SSE-KMS supports key policies and auditing KMS key usage through CloudTrail, and incurs additional KMS charges.",
+        "An SSE-KMS key must be in the same Region as its S3 bucket; cross-account sharing of SSE-KMS objects requires a customer managed key.",
+        "DSSE-KMS applies two independent AES-256 encryption layers on the server side.",
+        "Changing a bucket's default to SSE-KMS does not change existing objects; S3 Batch Operations can copy them to apply SSE-KMS.",
+        "SSE-C is disabled by default for new general purpose buckets and must be deliberately enabled for applications that need it."
+      ],
+      "gotchas": [
+        "Default SSE-S3 encryption does not provide the KMS key-policy controls or KMS usage audit required by some scenarios.",
+        "An AWS managed SSE-KMS key is not suitable when SSE-KMS objects must be shared across accounts.",
+        "A new bucket default affects new uploads, not the encryption type of objects already stored.",
+        "Do not select DSSE-KMS merely because encryption is required; its distinguishing requirement is two independent layers."
+      ],
+      "confusedWith": [
+        {
+          "concept": "SSE-S3 vs. SSE-KMS",
+          "difference": "Both encrypt in S3, but SSE-KMS adds KMS key controls and auditable KMS usage."
+        },
+        {
+          "concept": "SSE-KMS vs. DSSE-KMS",
+          "difference": "DSSE-KMS provides two independent server-side encryption layers rather than one."
+        },
+        {
+          "concept": "SSE-C vs. SSE-KMS",
+          "difference": "With SSE-C, the customer manages and provides the keys; with SSE-KMS, AWS KMS manages the keys used by S3."
+        }
+      ],
+      "examCues": [
+        "audit encryption key usage in CloudTrail",
+        "share KMS-encrypted objects across accounts",
+        "two independent server-side encryption layers",
+        "encrypt existing objects after changing the bucket default",
+        "customer manages keys while S3 performs encryption"
+      ]
+    },
+    "es": {
+      "tldr": "Cada objeto nuevo de S3 se cifra en reposo con SSE-S3 de forma predeterminada. Elige SSE-KMS si necesitas políticas de claves y auditoría del uso de AWS KMS, DSSE-KMS si necesitas dos capas independientes de cifrado del lado del servidor, o SSE-C si el cliente debe administrar las claves mientras S3 realiza el cifrado.",
+      "whenToUse": [
+        "Elige SSE-S3 cuando baste el cifrado automático sin cargos adicionales por el cifrado.",
+        "Elige SSE-KMS con una customer managed key cuando necesites controlar el acceso a la clave, auditar su uso o compartir objetos cifrados con KMS entre cuentas.",
+        "Elige DSSE-KMS cuando el cumplimiento exija explícitamente dos capas independientes de cifrado del lado del servidor.",
+        "Elige SSE-C cuando el cliente deba administrar las claves de cifrado, pero quiera que S3 cifre y descifre los objetos."
+      ],
+      "keyFacts": [
+        "SSE-S3 es la opción predeterminada para objetos nuevos; SSE-KMS y DSSE-KMS también pueden configurarse como opciones predeterminadas del bucket.",
+        "SSE-KMS permite usar políticas de claves y auditar el uso de claves de AWS KMS mediante CloudTrail; AWS KMS genera cargos adicionales.",
+        "La clave de SSE-KMS debe estar en la misma Region que el bucket; para compartir objetos SSE-KMS entre cuentas se necesita una customer managed key.",
+        "DSSE-KMS aplica dos capas independientes de cifrado AES-256 del lado del servidor.",
+        "Cambiar el valor predeterminado del bucket a SSE-KMS no modifica los objetos existentes; S3 Batch Operations puede copiarlos para aplicar SSE-KMS.",
+        "SSE-C está deshabilitado de forma predeterminada para los buckets nuevos de uso general y debe habilitarse deliberadamente si una aplicación lo necesita."
+      ],
+      "gotchas": [
+        "El cifrado SSE-S3 predeterminado no proporciona los controles de políticas de claves ni la auditoría del uso de AWS KMS que requieren algunos escenarios.",
+        "Una AWS managed key de SSE-KMS no sirve cuando debes compartir objetos SSE-KMS entre cuentas.",
+        "Un nuevo valor predeterminado del bucket afecta las cargas nuevas, no el tipo de cifrado de los objetos ya almacenados.",
+        "No elijas DSSE-KMS solo porque se requiere cifrado; su requisito distintivo son dos capas independientes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "SSE-S3 vs. SSE-KMS",
+          "difference": "Ambos cifran en S3, pero SSE-KMS agrega controles de claves de AWS KMS y auditoría de su uso."
+        },
+        {
+          "concept": "SSE-KMS vs. DSSE-KMS",
+          "difference": "DSSE-KMS proporciona dos capas independientes de cifrado del lado del servidor en lugar de una."
+        },
+        {
+          "concept": "SSE-C vs. SSE-KMS",
+          "difference": "Con SSE-C, el cliente administra y proporciona las claves; con SSE-KMS, AWS KMS administra las claves que utiliza S3."
+        }
+      ],
+      "examCues": [
+        "audit encryption key usage in CloudTrail",
+        "share KMS-encrypted objects across accounts",
+        "two independent server-side encryption layers",
+        "encrypt existing objects after changing the bucket default",
+        "customer manages keys while S3 performs encryption"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-encryption-options--e1ccf0e3",
+      "conceptId": "s3-encryption-options",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small publisher is creating an S3 bucket for public-domain image archives. It requires encryption at rest for every new upload but has no requirement for KMS key policies, key-usage auditing, or customer-managed keys. Which solution meets the requirement with the LEAST operational overhead and no additional encryption charge?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure DSSE-KMS as the bucket default for two encryption layers.",
+          "correct": false,
+          "why": "The archive does not require two layers, and the KMS-based option does not meet the no-additional-encryption-charge preference."
+        },
+        {
+          "id": "B",
+          "text": "Enable SSE-C and have the publisher supply keys with its upload requests.",
+          "correct": false,
+          "why": "Supplying and managing SSE-C keys adds work when the publisher has no customer-key requirement."
+        },
+        {
+          "id": "C",
+          "text": "Configure SSE-KMS with an AWS managed KMS key as the bucket default.",
+          "correct": false,
+          "why": "SSE-KMS incurs additional KMS charges without satisfying any stated need beyond SSE-S3."
+        },
+        {
+          "id": "D",
+          "text": "Use the bucket's automatic SSE-S3 encryption for new uploads.",
+          "correct": true,
+          "why": "SSE-S3 encrypts new uploads automatically at no additional cost and requires no separate key configuration."
+        }
+      ],
+      "explanation": "New S3 uploads already receive SSE-S3 encryption at rest without an additional encryption charge. Because the publisher has no key-control, audit, or multilayer requirement, keeping that default meets the stated need with the least overhead. SSE-KMS introduces additional KMS charges, while SSE-C requires the publisher to manage keys. Neither provides a needed benefit in this scenario.",
+      "keywordCues": [
+        "every new upload",
+        "no requirement for KMS key policies",
+        "no additional encryption charge"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html"
+      ],
+      "es": {
+        "stem": "Una editorial pequeña está creando un bucket de S3 para un archivo de imágenes de dominio público. Necesita cifrado en reposo para cada carga nueva, pero no exige políticas de claves de AWS KMS, auditoría del uso de claves ni claves administradas por el cliente. ¿Qué solución cumple el requisito con el LEAST operational overhead y sin cargos adicionales por cifrado?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar DSSE-KMS como valor predeterminado del bucket para obtener dos capas de cifrado.",
+            "why": "El archivo no necesita dos capas y la opción basada en AWS KMS no satisface la preferencia de evitar cargos adicionales por cifrado."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar SSE-C y hacer que la editorial proporcione claves en sus solicitudes de carga.",
+            "why": "Proporcionar y administrar claves SSE-C agrega trabajo cuando no existe un requisito de claves administradas por el cliente."
+          },
+          {
+            "id": "C",
+            "text": "Configurar SSE-KMS con una AWS managed KMS key como valor predeterminado del bucket.",
+            "why": "SSE-KMS genera cargos adicionales de AWS KMS sin satisfacer ninguna necesidad indicada que SSE-S3 no cubra."
+          },
+          {
+            "id": "D",
+            "text": "Usar el cifrado SSE-S3 automático del bucket para las cargas nuevas.",
+            "why": "SSE-S3 cifra automáticamente las cargas nuevas sin costo adicional y no requiere configurar claves por separado."
+          }
+        ],
+        "explanation": "Las cargas nuevas de S3 ya reciben cifrado SSE-S3 en reposo sin cargos adicionales por cifrado. Como la editorial no necesita controles de claves, auditoría ni varias capas, mantener ese valor predeterminado cumple el requisito con el menor esfuerzo. SSE-KMS introduce cargos adicionales de AWS KMS, mientras que SSE-C exige que la editorial administre las claves. Ninguno aporta un beneficio necesario en este caso."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-encryption-options--4cca5f55",
+      "conceptId": "s3-encryption-options",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A medical imaging provider stores new scans in S3 and uses AWS services to analyze them after upload. Its compliance policy explicitly requires two independent layers of encryption applied on the server side, without making the application encrypt files before upload. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have the application encrypt each scan before upload, then store it using SSE-S3.",
+          "correct": false,
+          "why": "Application encryption before upload violates the requirement that both layers be applied on the server side."
+        },
+        {
+          "id": "B",
+          "text": "Use SSE-S3 for the scans and restrict access through an S3 bucket policy.",
+          "correct": false,
+          "why": "SSE-S3 encrypts the scans but does not provide the required two independent server-side layers."
+        },
+        {
+          "id": "C",
+          "text": "Configure DSSE-KMS for the scans in the S3 bucket.",
+          "correct": true,
+          "why": "DSSE-KMS applies two independent server-side AES-256 layers while allowing AWS services and tools to analyze S3 data."
+        },
+        {
+          "id": "D",
+          "text": "Use SSE-KMS with a customer managed KMS key for the scans.",
+          "correct": false,
+          "why": "Standard SSE-KMS provides KMS-backed server-side encryption but not DSSE-KMS's two independent layers."
+        }
+      ],
+      "explanation": "The decisive constraint is that both independent encryption layers must be applied on the server side. DSSE-KMS uses a KMS data encryption key for one layer and a separate S3-managed encryption key for the other. This also preserves the described ability to use AWS services and tools to analyze data in S3. Encrypting in the application adds a layer on the client side, while SSE-KMS alone does not provide two layers.",
+      "keywordCues": [
+        "two independent layers of encryption",
+        "applied on the server side",
+        "without making the application encrypt files before upload"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de imágenes médicas guarda estudios nuevos en S3 y utiliza servicios de AWS para analizarlos después de cargarlos. Su política de cumplimiento exige explícitamente dos capas independientes de cifrado aplicadas del lado del servidor, sin que la aplicación cifre los archivos antes de cargarlos. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Hacer que la aplicación cifre cada estudio antes de cargarlo y luego almacenarlo con SSE-S3.",
+            "why": "El cifrado en la aplicación antes de la carga incumple el requisito de aplicar ambas capas del lado del servidor."
+          },
+          {
+            "id": "B",
+            "text": "Usar SSE-S3 para los estudios y restringir el acceso mediante una política del bucket de S3.",
+            "why": "SSE-S3 cifra los estudios, pero no proporciona las dos capas independientes del lado del servidor requeridas."
+          },
+          {
+            "id": "C",
+            "text": "Configurar DSSE-KMS para los estudios del bucket de S3.",
+            "why": "DSSE-KMS aplica dos capas independientes de AES-256 del lado del servidor y permite analizar los datos de S3 con servicios y herramientas de AWS."
+          },
+          {
+            "id": "D",
+            "text": "Usar SSE-KMS con una customer managed KMS key para los estudios.",
+            "why": "SSE-KMS estándar proporciona cifrado del lado del servidor con AWS KMS, pero no las dos capas independientes de DSSE-KMS."
+          }
+        ],
+        "explanation": "La condición decisiva es que ambas capas independientes de cifrado deben aplicarse del lado del servidor. DSSE-KMS utiliza una clave de cifrado de datos de AWS KMS para una capa y una clave distinta administrada por S3 para la otra. Además, permite usar servicios y herramientas de AWS para analizar datos en S3. Cifrar en la aplicación agrega una capa del lado del cliente, mientras que SSE-KMS por sí solo no proporciona dos capas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-encryption-options--a4cd1e2f",
+      "conceptId": "s3-encryption-options",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research company stores trial files in an S3 bucket. Its security team must control which application roles can use the encryption key and review cryptographic key usage in CloudTrail. A single server-side encryption layer is sufficient. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the bucket's default SSE-S3 encryption and restrict object access with a bucket policy.",
+          "correct": false,
+          "why": "A bucket policy can restrict object access, but SSE-S3 does not provide the required KMS key policy and KMS usage audit."
+        },
+        {
+          "id": "B",
+          "text": "Configure SSE-KMS with a customer managed key and restrict its key policy to the application roles.",
+          "correct": true,
+          "why": "A customer managed KMS key provides controllable key access, and its cryptographic usage can be audited in CloudTrail."
+        },
+        {
+          "id": "C",
+          "text": "Use SSE-C and have the application supply its encryption key for each object request.",
+          "correct": false,
+          "why": "SSE-C lets the customer manage keys but does not meet the requirement to control and audit use of an AWS KMS key."
+        },
+        {
+          "id": "D",
+          "text": "Configure DSSE-KMS to add a second server-side encryption layer to the files.",
+          "correct": false,
+          "why": "The second layer is not required, so DSSE-KMS adds a feature that does not address the deciding requirement better than SSE-KMS."
+        }
+      ],
+      "explanation": "The deciding requirements are control over key use and an audit trail of cryptographic operations. SSE-KMS with a customer managed key supports key policies, and CloudTrail can record KMS operations such as GenerateDataKey and Decrypt. SSE-S3 already encrypts new uploads, but its default encryption does not supply the requested KMS key controls. The scenario explicitly does not require DSSE-KMS's second layer.",
+      "keywordCues": [
+        "control which application roles can use the encryption key",
+        "review cryptographic key usage in CloudTrail",
+        "A single server-side encryption layer is sufficient"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html"
+      ],
+      "es": {
+        "stem": "Una empresa de investigación guarda archivos de ensayos en un bucket de S3. Su equipo de seguridad debe controlar qué roles de las aplicaciones pueden usar la clave de cifrado y revisar el uso criptográfico de esa clave en CloudTrail. Una sola capa de cifrado del lado del servidor es suficiente. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener el cifrado SSE-S3 predeterminado del bucket y restringir el acceso a los objetos con una política del bucket.",
+            "why": "La política puede restringir el acceso a los objetos, pero SSE-S3 no proporciona la política de claves ni la auditoría de uso de AWS KMS solicitadas."
+          },
+          {
+            "id": "B",
+            "text": "Configurar SSE-KMS con una customer managed key y restringir su política de claves a los roles de las aplicaciones.",
+            "why": "Una customer managed key permite controlar el acceso a la clave y auditar su uso criptográfico en CloudTrail."
+          },
+          {
+            "id": "C",
+            "text": "Usar SSE-C y hacer que la aplicación proporcione su clave de cifrado en cada solicitud de objeto.",
+            "why": "SSE-C permite al cliente administrar las claves, pero no cumple el requisito de controlar y auditar el uso de una clave de AWS KMS."
+          },
+          {
+            "id": "D",
+            "text": "Configurar DSSE-KMS para agregar una segunda capa de cifrado del lado del servidor a los archivos.",
+            "why": "No se requiere una segunda capa, por lo que DSSE-KMS agrega una característica que no satisface mejor el requisito decisivo que SSE-KMS."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son controlar el uso de la clave y auditar las operaciones criptográficas. SSE-KMS con una customer managed key permite usar políticas de claves, y CloudTrail puede registrar operaciones de AWS KMS como GenerateDataKey y Decrypt. SSE-S3 ya cifra las cargas nuevas, pero su cifrado predeterminado no proporciona los controles de claves de AWS KMS solicitados. El escenario no exige la segunda capa de DSSE-KMS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-encryption-options--9c14df5a",
+      "conceptId": "s3-encryption-options",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics firm has an S3 bucket containing years of shipping records encrypted with SSE-S3. New compliance rules require both existing records and future uploads to use SSE-KMS, and the firm wants to process the old records in bulk rather than rewrite its application to upload them again. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Bucket Keys on the bucket and retain its SSE-S3 default encryption.",
+          "correct": false,
+          "why": "S3 Bucket Keys are for SSE-KMS cost reduction and do not change the encryption type of old or future objects to SSE-KMS by themselves."
+        },
+        {
+          "id": "B",
+          "text": "Set the bucket default to SSE-KMS and rely on S3 to update the encryption of all stored records.",
+          "correct": false,
+          "why": "Changing default encryption does not change the encryption type of existing objects."
+        },
+        {
+          "id": "C",
+          "text": "Set the bucket default to SSE-KMS and use S3 Batch Operations to copy existing records back to the bucket.",
+          "correct": true,
+          "why": "The default covers future uploads, and a Batch Operations copy rewrites existing objects with SSE-KMS."
+        },
+        {
+          "id": "D",
+          "text": "Keep SSE-S3 as the bucket default and use S3 Batch Operations to copy only the existing records.",
+          "correct": false,
+          "why": "Copying old records does not make future uploads use SSE-KMS while the default remains SSE-S3."
+        }
+      ],
+      "explanation": "This scenario has separate requirements for future uploads and objects already stored. Setting SSE-KMS as the bucket default addresses new uploads, but it does not retroactively change old objects. S3 Batch Operations can copy existing objects back to the bucket so they are written as SSE-KMS objects. Changing only the default is the key trap because the stored SSE-S3 records remain unchanged.",
+      "keywordCues": [
+        "both existing records and future uploads",
+        "process the old records in bulk",
+        "rather than rewrite its application"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene un bucket de S3 con años de registros de envíos cifrados con SSE-S3. Nuevas reglas de cumplimiento exigen que tanto los registros existentes como las cargas futuras usen SSE-KMS, y la empresa quiere procesar los registros antiguos en bloque en vez de modificar su aplicación para volver a cargarlos. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar S3 Bucket Keys en el bucket y mantener SSE-S3 como cifrado predeterminado.",
+            "why": "S3 Bucket Keys sirve para reducir costos de SSE-KMS y, por sí solo, no cambia a SSE-KMS el cifrado de los objetos antiguos o futuros."
+          },
+          {
+            "id": "B",
+            "text": "Establecer SSE-KMS como valor predeterminado del bucket y confiar en que S3 actualice el cifrado de todos los registros almacenados.",
+            "why": "Cambiar el cifrado predeterminado no modifica el tipo de cifrado de los objetos existentes."
+          },
+          {
+            "id": "C",
+            "text": "Establecer SSE-KMS como valor predeterminado del bucket y usar S3 Batch Operations para copiar los registros existentes al mismo bucket.",
+            "why": "El valor predeterminado cubre las cargas futuras y la copia con S3 Batch Operations vuelve a escribir los objetos existentes con SSE-KMS."
+          },
+          {
+            "id": "D",
+            "text": "Mantener SSE-S3 como valor predeterminado del bucket y usar S3 Batch Operations para copiar solo los registros existentes.",
+            "why": "Copiar los registros antiguos no hace que las cargas futuras utilicen SSE-KMS si el valor predeterminado sigue siendo SSE-S3."
+          }
+        ],
+        "explanation": "Este caso tiene requisitos distintos para las cargas futuras y los objetos ya almacenados. Establecer SSE-KMS como valor predeterminado del bucket cubre las cargas nuevas, pero no cambia retroactivamente los objetos antiguos. S3 Batch Operations puede copiar los objetos existentes al mismo bucket para escribirlos con SSE-KMS. Cambiar solo el valor predeterminado es la trampa principal: los registros almacenados con SSE-S3 no se modifican."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-encryption-options--r0",
+      "conceptId": "s3-encryption-options",
+      "kind": "recall",
+      "prompt": "An S3 workload needs controlled key access and an audit of cryptographic key usage. Which encryption option fits, and why?",
+      "promptEs": "Una carga de trabajo en S3 necesita controlar el acceso a la clave y auditar su uso criptográfico. ¿Qué opción de cifrado elegirías y por qué?",
+      "idealAnswer": "Choose SSE-KMS with a customer managed KMS key. Its key policy can control who uses the key, and CloudTrail can record KMS cryptographic operations.",
+      "rubric": [
+        "Selects SSE-KMS with a customer managed KMS key.",
+        "Explains that a key policy controls access to the key.",
+        "Identifies CloudTrail as a way to audit KMS key usage."
+      ]
+    }
+  ]
+}

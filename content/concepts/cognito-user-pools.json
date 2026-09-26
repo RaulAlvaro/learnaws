@@ -1,0 +1,450 @@
+{
+  "conceptId": "cognito-user-pools",
+  "card": {
+    "en": {
+      "tldr": "Amazon Cognito user pools provide a user directory and sign-in for web and mobile apps. Choose a user pool when customers need app accounts, external-provider sign-in, or tokens that the app uses to authorize requests; add an identity pool only when users need temporary AWS credentials.",
+      "whenToUse": [
+        "Customers need to sign up for and sign in to a web or mobile app.",
+        "The app needs social, SAML, or OIDC sign-in and user pool tokens.",
+        "The team wants managed pages for sign-up, sign-in, MFA, or password reset."
+      ],
+      "keyFacts": [
+        "A user pool acts as an OIDC identity provider for the app.",
+        "User pools support native users and sign-in through social, SAML, and OIDC identity providers.",
+        "Managed login provides pages for sign-up, sign-in, MFA, and password reset.",
+        "Lambda triggers can customize workflows, including rejecting a sign-up request.",
+        "Identity pools provide credentials for users to access AWS services; user pools provide app authentication."
+      ],
+      "gotchas": [
+        "Do not enable self-service sign-up unless public registration is intended.",
+        "A user pool token is not, by itself, temporary AWS credentials for direct access to S3 or DynamoDB.",
+        "An external SAML provider can be a sign-in source for a customer app; it does not make workforce SSO the required solution."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cognito-identity-pools",
+          "difference": "Identity pools issue temporary AWS credentials for access to AWS services; user pools handle app user sign-up and sign-in."
+        },
+        {
+          "concept": "iam-identity-center-sso",
+          "difference": "IAM Identity Center fits centralized workforce SSO, not customer self-registration for an app."
+        },
+        {
+          "concept": "identity-federation-saml-oidc",
+          "difference": "Federation to IAM roles addresses access through an existing IdP; a user pool can accept SAML or OIDC sign-in for app users."
+        }
+      ],
+      "examCues": [
+        "customer-facing mobile app sign-up",
+        "social sign-in and app tokens",
+        "managed sign-in and password reset pages",
+        "invite-only customer accounts",
+        "app users also need direct S3 access"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Cognito user pools ofrece un directorio de usuarios e inicio de sesión para aplicaciones web y móviles. Elige un user pool cuando los clientes necesiten cuentas en la aplicación, inicio de sesión con proveedores externos o tokens para autorizar solicitudes; agrega un identity pool solo si necesitan credenciales temporales de AWS.",
+      "whenToUse": [
+        "Tus clientes necesitan registrarse e iniciar sesión en una aplicación web o móvil.",
+        "La aplicación necesita inicio de sesión social, SAML u OIDC y tokens del user pool.",
+        "El equipo quiere páginas de managed login para registro, inicio de sesión, MFA o restablecimiento de contraseñas."
+      ],
+      "keyFacts": [
+        "Un user pool actúa como proveedor de identidad OIDC para la aplicación.",
+        "Los user pools admiten usuarios propios e inicio de sesión mediante proveedores sociales, SAML y OIDC.",
+        "Managed login proporciona páginas de registro, inicio de sesión, MFA y restablecimiento de contraseñas.",
+        "Los Lambda triggers pueden personalizar los flujos, incluso rechazar una solicitud de registro.",
+        "Los identity pools proporcionan credenciales para que los usuarios accedan a servicios de AWS; los user pools autentican usuarios de la aplicación."
+      ],
+      "gotchas": [
+        "No actives el registro de autoservicio a menos que quieras permitir el registro público.",
+        "Un token de user pool no es, por sí solo, una credencial temporal de AWS para acceder directamente a S3 o DynamoDB.",
+        "Un proveedor SAML externo puede servir para iniciar sesión en una aplicación de clientes; eso no convierte a workforce SSO en la solución necesaria."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cognito-identity-pools",
+          "difference": "Los identity pools emiten credenciales temporales de AWS para acceder a servicios de AWS; los user pools administran el registro y el inicio de sesión en la aplicación."
+        },
+        {
+          "concept": "iam-identity-center-sso",
+          "difference": "IAM Identity Center sirve para workforce SSO centralizado, no para el registro de clientes en una aplicación."
+        },
+        {
+          "concept": "identity-federation-saml-oidc",
+          "difference": "La federación hacia roles de IAM aborda el acceso mediante un IdP existente; un user pool puede aceptar inicio de sesión SAML u OIDC para usuarios de la aplicación."
+        }
+      ],
+      "examCues": [
+        "customer-facing mobile app sign-up",
+        "social sign-in and app tokens",
+        "managed sign-in and password reset pages",
+        "invite-only customer accounts",
+        "app users also need direct S3 access"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cognito-user-pools--d7dbab29",
+      "conceptId": "cognito-user-pools",
+      "secondaryConcepts": [
+        "cognito-identity-pools",
+        "iam-identity-center-sso",
+        "identity-federation-saml-oidc"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional theater is launching a ticketing app for the public. Visitors must create their own accounts, sign in, and reset forgotten passwords without the theater building those pages. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Federate the theater's corporate SAML provider directly to IAM roles for visitors.",
+          "correct": false,
+          "why": "Corporate federation to IAM roles does not provide public app sign-up and managed password-reset pages."
+        },
+        {
+          "id": "B",
+          "text": "Use a Cognito user pool with self-service sign-up and managed login.",
+          "correct": true,
+          "why": "A user pool authenticates app users, and managed login supplies the requested pages."
+        },
+        {
+          "id": "C",
+          "text": "Use a Cognito identity pool to issue AWS credentials to each visitor.",
+          "correct": false,
+          "why": "An identity pool supplies credentials for AWS service access, not the requested sign-up and password-reset pages."
+        },
+        {
+          "id": "D",
+          "text": "Use IAM Identity Center for visitor sign-in and account creation.",
+          "correct": false,
+          "why": "IAM Identity Center targets workforce SSO rather than public customer registration."
+        }
+      ],
+      "explanation": "The deciding requirements are public self-registration and ready-made sign-in and password-reset pages. A Cognito user pool supports self-service sign-up, while managed login provides those pages. An identity pool serves a different purpose: issuing credentials for access to AWS services. Public self-registration is appropriate here because the theater explicitly wants anyone to be able to create an account.",
+      "keywordCues": [
+        "for the public",
+        "create their own accounts",
+        "without the theater building those pages"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools.html"
+      ],
+      "es": {
+        "stem": "Un teatro regional lanzará una aplicación de venta de entradas para el público. Los visitantes deben crear sus propias cuentas, iniciar sesión y restablecer contraseñas olvidadas sin que el teatro construya esas páginas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Federar el proveedor SAML corporativo del teatro directamente con roles de IAM para los visitantes.",
+            "why": "La federación corporativa hacia roles de IAM no proporciona registro público en la aplicación ni páginas administradas para restablecer contraseñas."
+          },
+          {
+            "id": "B",
+            "text": "Usar un Cognito user pool con registro de autoservicio y managed login.",
+            "why": "Un user pool autentica a los usuarios de la aplicación, y managed login proporciona las páginas solicitadas."
+          },
+          {
+            "id": "C",
+            "text": "Usar un Cognito identity pool para emitir credenciales de AWS a cada visitante.",
+            "why": "Un identity pool proporciona credenciales para acceder a servicios de AWS, no las páginas de registro y restablecimiento de contraseñas solicitadas."
+          },
+          {
+            "id": "D",
+            "text": "Usar IAM Identity Center para el inicio de sesión y la creación de cuentas de los visitantes.",
+            "why": "IAM Identity Center está orientado a workforce SSO, no al registro público de clientes."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el registro público de autoservicio y las páginas listas para iniciar sesión y restablecer contraseñas. Un Cognito user pool admite el registro de autoservicio, y managed login proporciona esas páginas. Un identity pool tiene otro propósito: emitir credenciales para acceder a servicios de AWS. Aquí corresponde permitir el registro público porque el teatro quiere que cualquier persona pueda crear una cuenta."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cognito-user-pools--9aa53d49",
+      "conceptId": "cognito-user-pools",
+      "secondaryConcepts": [
+        "cognito-identity-pools",
+        "iam-identity-center-sso",
+        "identity-federation-saml-oidc"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A recipe publisher's mobile app lets readers sign in with Google or with an account created in the app. Its backend needs app user tokens to distinguish signed-in readers, but readers will not call AWS services directly. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Federate the publisher's corporate IdP to IAM roles for readers.",
+          "correct": false,
+          "why": "Federation to IAM roles does not supply the requested native customer accounts."
+        },
+        {
+          "id": "B",
+          "text": "Use IAM Identity Center with the publisher's workforce directory.",
+          "correct": false,
+          "why": "Workforce SSO does not address the stated customer accounts and Google sign-in."
+        },
+        {
+          "id": "C",
+          "text": "Use a Cognito identity pool with Google as its provider.",
+          "correct": false,
+          "why": "An identity pool focuses on AWS credentials, which readers do not need, rather than native app sign-up."
+        },
+        {
+          "id": "D",
+          "text": "Use a Cognito user pool with native accounts and Google sign-in.",
+          "correct": true,
+          "why": "A user pool supports both native app accounts and Google sign-in and provides user tokens."
+        }
+      ],
+      "explanation": "The app needs both native customer accounts and Google sign-in, followed by tokens for its backend. A Cognito user pool supports those app authentication paths. A Cognito identity pool is a tempting choice because it can work with external identities, but its purpose is to provide AWS service credentials, which this scenario does not require.",
+      "keywordCues": [
+        "sign in with Google",
+        "account created in the app",
+        "will not call AWS services directly"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools.html"
+      ],
+      "es": {
+        "stem": "La aplicación móvil de una editorial de recetas permite a los lectores iniciar sesión con Google o con una cuenta creada en la aplicación. Su backend necesita tokens de usuario de la aplicación para distinguir a los lectores autenticados, pero ellos no llamarán directamente a servicios de AWS. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Federar el IdP corporativo de la editorial con roles de IAM para los lectores.",
+            "why": "La federación hacia roles de IAM no proporciona las cuentas propias de clientes solicitadas."
+          },
+          {
+            "id": "B",
+            "text": "Usar IAM Identity Center con el directorio de empleados de la editorial.",
+            "why": "Workforce SSO no resuelve el requisito de cuentas de clientes e inicio de sesión con Google."
+          },
+          {
+            "id": "C",
+            "text": "Usar un Cognito identity pool con Google como proveedor.",
+            "why": "Un identity pool se centra en credenciales de AWS, que los lectores no necesitan, y no en el registro de cuentas propias de la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Usar un Cognito user pool con cuentas propias e inicio de sesión con Google.",
+            "why": "Un user pool admite tanto cuentas propias de la aplicación como inicio de sesión con Google y proporciona tokens de usuario."
+          }
+        ],
+        "explanation": "La aplicación necesita cuentas propias de clientes e inicio de sesión con Google, seguidos de tokens para su backend. Un Cognito user pool admite esas formas de autenticación. Un Cognito identity pool puede parecer adecuado porque acepta identidades externas, pero su propósito es proporcionar credenciales para servicios de AWS, que aquí no se requieren."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cognito-user-pools--446d21d4",
+      "conceptId": "cognito-user-pools",
+      "secondaryConcepts": [
+        "cognito-identity-pools",
+        "iam-identity-center-sso",
+        "identity-federation-saml-oidc"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A university alumni association is launching a web app for graduates. Some graduates will create accounts in the app, while others must sign in through the university's SAML identity provider; all need a consistent app user profile and tokens for the app backend. Graduates will not access AWS services directly. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Cognito identity pool as the app's user directory.",
+          "correct": false,
+          "why": "An identity pool provides AWS credentials, not the requested directory for native app accounts."
+        },
+        {
+          "id": "B",
+          "text": "Federate the university SAML provider directly to IAM roles for graduates.",
+          "correct": false,
+          "why": "IAM role federation does not combine native app sign-up with user pool profiles and tokens."
+        },
+        {
+          "id": "C",
+          "text": "Use IAM Identity Center permission sets for graduates' app accounts.",
+          "correct": false,
+          "why": "Workforce access through permission sets does not provide the requested customer app registration."
+        },
+        {
+          "id": "D",
+          "text": "Configure the SAML provider in the user pool and map its claims to user attributes.",
+          "correct": true,
+          "why": "A user pool can process SAML assertions into user profiles using attribute mapping."
+        },
+        {
+          "id": "E",
+          "text": "Create a Cognito user pool that permits native app sign-up.",
+          "correct": true,
+          "why": "A user pool provides the directory and registration path for graduates creating app accounts."
+        }
+      ],
+      "explanation": "The decisive combination is native app registration plus SAML sign-in into app user profiles. A Cognito user pool supports both, including attribute mapping for information received from the SAML provider, and supplies tokens for the app. Direct SAML federation to IAM roles addresses a different access pattern and does not supply the requested native registration path. An identity pool is unnecessary because graduates will not access AWS services directly.",
+      "keywordCues": [
+        "create accounts in the app",
+        "sign in through the university's SAML identity provider",
+        "consistent app user profile and tokens",
+        "will not access AWS services directly"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools.html"
+      ],
+      "es": {
+        "stem": "Una asociación universitaria de exalumnos lanzará una aplicación web para graduados. Algunos crearán cuentas en la aplicación y otros deberán iniciar sesión mediante el proveedor de identidad SAML de la universidad; todos necesitan un perfil de usuario coherente y tokens para el backend de la aplicación. Los graduados no accederán directamente a servicios de AWS. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un Cognito identity pool como directorio de usuarios de la aplicación.",
+            "why": "Un identity pool proporciona credenciales de AWS, no el directorio solicitado para cuentas propias de la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Federar el proveedor SAML universitario directamente con roles de IAM para los graduados.",
+            "why": "La federación hacia roles de IAM no combina el registro propio de la aplicación con perfiles y tokens del user pool."
+          },
+          {
+            "id": "C",
+            "text": "Usar permission sets de IAM Identity Center para las cuentas de graduados en la aplicación.",
+            "why": "El acceso del personal mediante permission sets no proporciona el registro de clientes solicitado."
+          },
+          {
+            "id": "D",
+            "text": "Configurar el proveedor SAML en el user pool y mapear sus atributos a los atributos del usuario.",
+            "why": "Un user pool puede procesar las aserciones SAML para crear perfiles de usuario mediante el mapeo de atributos."
+          },
+          {
+            "id": "E",
+            "text": "Crear un Cognito user pool que permita el registro de cuentas propias en la aplicación.",
+            "why": "Un user pool proporciona el directorio y la opción de registro para quienes crean cuentas en la aplicación."
+          }
+        ],
+        "explanation": "La combinación decisiva es el registro propio en la aplicación junto con el inicio de sesión SAML en perfiles de usuario de la aplicación. Un Cognito user pool admite ambos, incluido el mapeo de atributos recibidos del proveedor SAML, y proporciona tokens para la aplicación. La federación SAML directa hacia roles de IAM responde a otro tipo de acceso y no ofrece la opción de registro solicitada. Un identity pool no es necesario porque los graduados no accederán directamente a servicios de AWS."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cognito-user-pools--3e7369ee",
+      "conceptId": "cognito-user-pools",
+      "secondaryConcepts": [
+        "cognito-identity-pools",
+        "iam-identity-center-sso"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A medical equipment supplier is building a portal for approved repair shops. Shops need individual app accounts and sign-in, but the supplier must create each account after checking a contract; unknown visitors must not register themselves. Which solution meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Cognito identity pool and allow unauthenticated guests to obtain AWS credentials.",
+          "correct": false,
+          "why": "Guest AWS credentials do not enforce supplier-approved creation of app accounts."
+        },
+        {
+          "id": "B",
+          "text": "Use a Cognito user pool with self-service sign-up disabled and create users through its admin workflow.",
+          "correct": true,
+          "why": "A user pool supplies app sign-in while allowing the supplier to create users without opening public registration."
+        },
+        {
+          "id": "C",
+          "text": "Use a Cognito user pool with self-service sign-up enabled.",
+          "correct": false,
+          "why": "Self-service sign-up would allow unapproved visitors to create accounts."
+        },
+        {
+          "id": "D",
+          "text": "Use IAM Identity Center and allow shops to enroll themselves as workforce users.",
+          "correct": false,
+          "why": "Workforce SSO does not meet the requirement for supplier-created customer app accounts."
+        }
+      ],
+      "explanation": "The supplier needs app authentication but must control who receives an account. Cognito user pools support administrator-driven user creation, and self-service sign-up can remain disabled. Enabling self-service sign-up is the critical trap: it opens account registration to people on the internet, contrary to the approval requirement.",
+      "keywordCues": [
+        "must create each account after checking a contract",
+        "unknown visitors must not register themselves"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de equipos médicos está creando un portal para talleres de reparación aprobados. Los talleres necesitan cuentas individuales e inicio de sesión en la aplicación, pero el proveedor debe crear cada cuenta después de verificar un contrato; los visitantes desconocidos no deben registrarse por su cuenta. ¿Qué solución cumple estos requisitos de la manera MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un Cognito identity pool y permitir que los invitados no autenticados obtengan credenciales de AWS.",
+            "why": "Las credenciales de AWS para invitados no garantizan que el proveedor apruebe la creación de cuentas de la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Usar un Cognito user pool con el registro de autoservicio desactivado y crear usuarios mediante su flujo de administración.",
+            "why": "Un user pool proporciona inicio de sesión en la aplicación y permite al proveedor crear usuarios sin abrir el registro público."
+          },
+          {
+            "id": "C",
+            "text": "Usar un Cognito user pool con registro de autoservicio activado.",
+            "why": "El registro de autoservicio permitiría crear cuentas a visitantes no aprobados."
+          },
+          {
+            "id": "D",
+            "text": "Usar IAM Identity Center y permitir que los talleres se inscriban como usuarios del personal.",
+            "why": "Workforce SSO no cumple el requisito de cuentas de clientes creadas por el proveedor."
+          }
+        ],
+        "explanation": "El proveedor necesita autenticación en la aplicación, pero debe controlar quién recibe una cuenta. Cognito user pools admite la creación de usuarios por un administrador, y el registro de autoservicio puede permanecer desactivado. Activarlo es la trampa principal: abriría el registro a personas en internet, en contra del requisito de aprobación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cognito-user-pools--r0",
+      "conceptId": "cognito-user-pools",
+      "kind": "recall",
+      "prompt": "Customers need app sign-up, social sign-in, and tokens for a backend. Which Cognito feature fits, and why?",
+      "promptEs": "Tus clientes necesitan registrarse en una aplicación, iniciar sesión con una cuenta social y obtener tokens para el backend. ¿Qué función de Cognito eliges y por qué?",
+      "idealAnswer": "Use a Cognito user pool. It provides app user registration, supports social sign-in, and issues user tokens that the app backend can use for authorization.",
+      "rubric": [
+        "Names Cognito user pools.",
+        "Connects user pools to app sign-up and social sign-in.",
+        "Mentions tokens for the app backend."
+      ]
+    },
+    {
+      "id": "cognito-user-pools--r1",
+      "conceptId": "cognito-user-pools",
+      "kind": "why-not",
+      "prompt": "Why is a Cognito identity pool alone insufficient when customers need app sign-up and managed password-reset pages?",
+      "promptEs": "¿Por qué un Cognito identity pool por sí solo no basta si tus clientes necesitan registrarse en la aplicación y usar páginas de managed login para restablecer contraseñas?",
+      "idealAnswer": "An identity pool provides credentials for accessing AWS services; it does not supply the requested app registration and managed password-reset pages. Use a Cognito user pool with managed login for those app authentication needs.",
+      "rubric": [
+        "States that identity pools provide AWS service credentials.",
+        "Explains why that does not satisfy app sign-up and password reset.",
+        "Identifies user pools with managed login as the fit."
+      ]
+    }
+  ]
+}

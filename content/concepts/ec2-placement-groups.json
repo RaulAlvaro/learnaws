@@ -1,0 +1,337 @@
+{
+  "conceptId": "ec2-placement-groups",
+  "card": {
+    "en": {
+      "tldr": "EC2 placement groups influence where related instances run. Choose cluster for low-latency communication within one Availability Zone, spread for a small set of instances that must use distinct hardware, and partition for large distributed workloads that need hardware separation between groups.",
+      "whenToUse": [
+        "Tightly coupled compute nodes need low-latency node-to-node communication: choose cluster.",
+        "A small set of critical instances must be placed on distinct underlying hardware: choose spread.",
+        "A large distributed workload needs groups of instances isolated from other groups at the hardware level: choose partition."
+      ],
+      "keyFacts": [
+        "Cluster packs instances close together inside an Availability Zone.",
+        "Spread strictly places a small group of instances across distinct underlying hardware.",
+        "Partition separates logical partitions so instances in different partitions do not share underlying hardware.",
+        "Partition is commonly used for distributed and replicated workloads such as Hadoop, Cassandra, and Kafka.",
+        "An instance can belong to only one placement group at a time."
+      ],
+      "gotchas": [
+        "Default EC2 placement attempts to spread instances, but it is not the strict distinct-hardware placement provided by spread.",
+        "Partition separates groups from other groups; spread is the choice when each instance in a small set needs distinct hardware.",
+        "Cluster optimizes proximity and network latency, not hardware separation."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Default EC2 placement",
+          "difference": "EC2 tries to spread instances by default; a spread placement group strictly places a small group on distinct hardware."
+        },
+        {
+          "concept": "Precision time placement group",
+          "difference": "It provides supported hardware with direct access to high-precision time sources, not the node-to-node latency benefit of cluster."
+        }
+      ],
+      "examCues": [
+        "tightly coupled simulation nodes",
+        "small set of critical instances on distinct hardware",
+        "Kafka brokers organized into isolated groups",
+        "low-latency node-to-node communication"
+      ]
+    },
+    "es": {
+      "tldr": "Los EC2 placement groups influyen en dónde se ejecutan las instancias relacionadas. Elige cluster para comunicación de baja latencia dentro de una Availability Zone, spread para un grupo pequeño que debe usar hardware distinto y partition para cargas distribuidas grandes que necesitan separación de hardware entre grupos.",
+      "whenToUse": [
+        "Si los nodos de cómputo necesitan comunicación de baja latencia entre sí, eliges cluster.",
+        "Si un grupo pequeño de instancias críticas debe ejecutarse en hardware subyacente distinto, eliges spread.",
+        "Si una carga distribuida grande necesita separar grupos de instancias a nivel de hardware, eliges partition."
+      ],
+      "keyFacts": [
+        "Cluster agrupa instancias cerca unas de otras dentro de una Availability Zone.",
+        "Spread coloca estrictamente un grupo pequeño de instancias en hardware subyacente distinto.",
+        "Partition separa particiones lógicas para que las instancias de particiones diferentes no compartan hardware subyacente.",
+        "Partition suele usarse con cargas distribuidas y replicadas como Hadoop, Cassandra y Kafka.",
+        "Una instancia solo puede pertenecer a un placement group a la vez."
+      ],
+      "gotchas": [
+        "La ubicación predeterminada de EC2 intenta distribuir las instancias, pero no ofrece la colocación estricta en hardware distinto de spread.",
+        "Partition separa grupos entre sí; spread es la opción cuando cada instancia de un grupo pequeño necesita hardware distinto.",
+        "Cluster prioriza la proximidad y la baja latencia de red, no la separación de hardware."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Ubicación predeterminada de EC2",
+          "difference": "EC2 intenta distribuir las instancias de forma predeterminada; un spread placement group coloca estrictamente un grupo pequeño en hardware distinto."
+        },
+        {
+          "concept": "Precision time placement group",
+          "difference": "Proporciona acceso directo a fuentes de tiempo de alta precisión en hardware compatible, no la ventaja de latencia entre nodos de cluster."
+        }
+      ],
+      "examCues": [
+        "tightly coupled simulation nodes",
+        "small set of critical instances on distinct hardware",
+        "Kafka brokers organized into isolated groups",
+        "low-latency node-to-node communication"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ec2-placement-groups--24a2b6fc",
+      "conceptId": "ec2-placement-groups",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab runs an EC2-based fluid simulation whose workers exchange results continuously. The workers will run in one Availability Zone, and the lab's primary requirement is low-latency node-to-node communication. Which placement group strategy best meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a cluster placement group for the workers.",
+          "correct": true,
+          "why": "Cluster packs instances close together in an Availability Zone for low-latency node-to-node communication."
+        },
+        {
+          "id": "B",
+          "text": "Use a partition placement group for the workers.",
+          "correct": false,
+          "why": "Partition separates groups at the hardware level rather than packing communicating nodes close together."
+        },
+        {
+          "id": "C",
+          "text": "Use a spread placement group for the workers.",
+          "correct": false,
+          "why": "Spread targets distinct hardware for a small group rather than proximity for low-latency communication."
+        },
+        {
+          "id": "D",
+          "text": "Use a precision time placement group for the workers.",
+          "correct": false,
+          "why": "Precision time provides access to high-precision time sources, which does not address the stated network-latency requirement."
+        }
+      ],
+      "explanation": "The deciding requirement is low-latency communication among tightly coupled workers in one Availability Zone. A cluster placement group packs instances close together for that purpose. Spread and partition instead emphasize hardware separation, while precision time addresses access to time sources.",
+      "keywordCues": [
+        "workers exchange results continuously",
+        "one Availability Zone",
+        "low-latency node-to-node communication"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ejecuta en EC2 una simulación de fluidos cuyos nodos de trabajo intercambian resultados continuamente. Los nodos se ejecutarán en una sola Availability Zone, y el requisito principal es la comunicación de baja latencia entre nodos. ¿Qué estrategia de placement group cumple mejor este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un cluster placement group para los nodos de trabajo.",
+            "why": "Cluster agrupa instancias cerca unas de otras dentro de una Availability Zone para reducir la latencia entre nodos."
+          },
+          {
+            "id": "B",
+            "text": "Usar un partition placement group para los nodos de trabajo.",
+            "why": "Partition separa grupos a nivel de hardware en vez de agrupar nodos que se comunican estrechamente."
+          },
+          {
+            "id": "C",
+            "text": "Usar un spread placement group para los nodos de trabajo.",
+            "why": "Spread busca hardware distinto para un grupo pequeño, no proximidad para comunicación de baja latencia."
+          },
+          {
+            "id": "D",
+            "text": "Usar un precision time placement group para los nodos de trabajo.",
+            "why": "Precision time ofrece acceso a fuentes de tiempo de alta precisión, lo que no resuelve el requisito de latencia de red."
+          }
+        ],
+        "explanation": "El requisito decisivo es la comunicación de baja latencia entre nodos estrechamente acoplados en una Availability Zone. Un cluster placement group agrupa las instancias cerca unas de otras para ese fin. Spread y partition priorizan la separación de hardware, mientras que precision time atiende el acceso a fuentes de tiempo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-placement-groups--4ad746ba",
+      "conceptId": "ec2-placement-groups",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A payment company runs a small set of critical EC2 instances. It wants each instance placed on distinct underlying hardware to reduce correlated failures. Which approach meets this requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Launch the instances in separate partitions of a partition placement group.",
+          "correct": false,
+          "why": "Partition separates groups of instances, whereas spread directly addresses strict placement of a small set of individual instances."
+        },
+        {
+          "id": "B",
+          "text": "Launch the instances in a cluster placement group.",
+          "correct": false,
+          "why": "Cluster packs instances close together for low latency rather than placing each on distinct hardware."
+        },
+        {
+          "id": "C",
+          "text": "Launch the instances in a spread placement group.",
+          "correct": true,
+          "why": "Spread strictly places a small group of instances across distinct underlying hardware."
+        },
+        {
+          "id": "D",
+          "text": "Launch the instances without a placement group and rely on default EC2 placement.",
+          "correct": false,
+          "why": "Default EC2 placement tries to spread instances but does not provide the strict distinct-hardware placement requested."
+        }
+      ],
+      "explanation": "The company needs strict hardware separation for a small set of instances, so spread is the direct match. Default EC2 placement only tries to spread instances. Partition is designed to separate groups across logical partitions, and cluster serves low-latency communication instead.",
+      "keywordCues": [
+        "small set of critical EC2 instances",
+        "each instance placed on distinct underlying hardware",
+        "reduce correlated failures"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html"
+      ],
+      "es": {
+        "stem": "Una empresa de pagos ejecuta un grupo pequeño de instancias EC2 críticas. Quiere que cada instancia esté en hardware subyacente distinto para reducir fallas correlacionadas. ¿Qué enfoque cumple este requisito de la manera MÁS directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Lanzar las instancias en particiones separadas de un partition placement group.",
+            "why": "Partition separa grupos de instancias, mientras que spread atiende directamente la colocación estricta de un grupo pequeño de instancias individuales."
+          },
+          {
+            "id": "B",
+            "text": "Lanzar las instancias en un cluster placement group.",
+            "why": "Cluster agrupa instancias para lograr baja latencia en vez de colocar cada una en hardware distinto."
+          },
+          {
+            "id": "C",
+            "text": "Lanzar las instancias en un spread placement group.",
+            "why": "Spread coloca estrictamente un grupo pequeño de instancias en hardware subyacente distinto."
+          },
+          {
+            "id": "D",
+            "text": "Lanzar las instancias sin un placement group y confiar en la ubicación predeterminada de EC2.",
+            "why": "La ubicación predeterminada de EC2 intenta distribuir las instancias, pero no ofrece la colocación estricta en hardware distinto solicitada."
+          }
+        ],
+        "explanation": "La empresa necesita separación estricta de hardware para un grupo pequeño de instancias, por lo que spread es la opción directa. La ubicación predeterminada de EC2 solo intenta distribuirlas. Partition está diseñado para separar grupos mediante particiones lógicas, mientras que cluster atiende la comunicación de baja latencia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-placement-groups--2f25ad5b",
+      "conceptId": "ec2-placement-groups",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A university is deploying two independent EC2 workloads: a small set of critical admission-service instances that must each use distinct underlying hardware, and a large Cassandra deployment whose node groups must not share hardware across groups. The university can use separate placement groups for the workloads. Which two placement decisions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the admission-service instances in a spread placement group.",
+          "correct": true,
+          "why": "Spread strictly separates a small group of instances across distinct underlying hardware."
+        },
+        {
+          "id": "B",
+          "text": "Place the Cassandra nodes in a cluster placement group.",
+          "correct": false,
+          "why": "Cluster packs instances close together and does not provide the requested separation between node groups."
+        },
+        {
+          "id": "C",
+          "text": "Place the admission-service instances in a cluster placement group.",
+          "correct": false,
+          "why": "Cluster prioritizes proximity rather than distinct hardware for each critical instance."
+        },
+        {
+          "id": "D",
+          "text": "Place the Cassandra node groups in different partitions of a partition placement group.",
+          "correct": true,
+          "why": "Partition keeps groups in different partitions from sharing underlying hardware."
+        },
+        {
+          "id": "E",
+          "text": "Place the Cassandra nodes in a spread placement group.",
+          "correct": false,
+          "why": "Spread targets a small group of individually separated instances rather than hardware separation between groups in a large distributed workload."
+        }
+      ],
+      "explanation": "The two workloads have different placement requirements, so each needs its own strategy. Spread strictly places the small admission-service set on distinct hardware. Partition separates the Cassandra node groups by underlying hardware; cluster does not meet either isolation requirement.",
+      "keywordCues": [
+        "small set of critical admission-service instances",
+        "each use distinct underlying hardware",
+        "large Cassandra deployment",
+        "node groups must not share hardware across groups"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html"
+      ],
+      "es": {
+        "stem": "Una universidad implementará dos cargas de EC2 independientes: un grupo pequeño de instancias críticas del servicio de admisiones que deben usar hardware subyacente distinto entre sí, y una implementación grande de Cassandra cuyos grupos de nodos no deben compartir hardware entre grupos. La universidad puede usar placement groups separados para ambas cargas. ¿Qué dos decisiones de colocación cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar las instancias del servicio de admisiones en un spread placement group.",
+            "why": "Spread separa estrictamente un grupo pequeño de instancias en hardware subyacente distinto."
+          },
+          {
+            "id": "B",
+            "text": "Colocar los nodos de Cassandra en un cluster placement group.",
+            "why": "Cluster agrupa las instancias cerca unas de otras y no proporciona la separación solicitada entre grupos de nodos."
+          },
+          {
+            "id": "C",
+            "text": "Colocar las instancias del servicio de admisiones en un cluster placement group.",
+            "why": "Cluster prioriza la proximidad en vez de hardware distinto para cada instancia crítica."
+          },
+          {
+            "id": "D",
+            "text": "Colocar los grupos de nodos de Cassandra en particiones diferentes de un partition placement group.",
+            "why": "Partition evita que los grupos de particiones diferentes compartan hardware subyacente."
+          },
+          {
+            "id": "E",
+            "text": "Colocar los nodos de Cassandra en un spread placement group.",
+            "why": "Spread se enfoca en un grupo pequeño de instancias separadas individualmente, no en separar grupos de una carga distribuida grande."
+          }
+        ],
+        "explanation": "Las dos cargas tienen requisitos de colocación distintos, por lo que cada una necesita su propia estrategia. Spread coloca estrictamente el grupo pequeño del servicio de admisiones en hardware distinto. Partition separa los grupos de nodos de Cassandra a nivel de hardware subyacente; cluster no cumple ninguno de los dos requisitos de aislamiento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ec2-placement-groups--r0",
+      "conceptId": "ec2-placement-groups",
+      "kind": "recall",
+      "prompt": "A large Cassandra deployment needs hardware separation between node groups. Which EC2 placement group strategy fits, and why?",
+      "promptEs": "Una implementación grande de Cassandra necesita separación de hardware entre grupos de nodos. ¿Qué estrategia de EC2 placement group eliges y por qué?",
+      "idealAnswer": "Choose a partition placement group. Instances in different partitions do not share underlying hardware, which fits separation between groups in a large distributed workload.",
+      "rubric": [
+        "Names the partition placement group strategy.",
+        "Explains that different partitions do not share underlying hardware.",
+        "Connects the separation to groups in a large distributed workload."
+      ]
+    }
+  ]
+}

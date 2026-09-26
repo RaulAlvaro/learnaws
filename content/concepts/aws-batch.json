@@ -1,0 +1,360 @@
+{
+  "conceptId": "aws-batch",
+  "card": {
+    "en": {
+      "tldr": "AWS Batch is a fully managed way to queue, schedule, and run batch workloads without building a batch scheduler. Choose it when the requirement is managed job scheduling and elastic compute, not merely a place to run containers.",
+      "whenToUse": [
+        "Independent simulation, analytics, or ML jobs arrive in batches and need managed scheduling.",
+        "Compute capacity should adjust to submitted jobs, potentially using EC2 Spot Instances to reduce cost.",
+        "A team needs batch scheduling while running jobs on Amazon ECS, Amazon EKS, or AWS Fargate.",
+        "SageMaker Training jobs need configurable queues and priorities."
+      ],
+      "keyFacts": [
+        "AWS Batch provisions compute resources in response to submitted jobs and optimizes workload distribution.",
+        "It runs containerized batch workloads on top of Amazon ECS and Amazon EKS.",
+        "Its compute options include EC2 instances and Fargate resources; batch workloads can use Spot or On-Demand Instances.",
+        "AWS Batch can queue SageMaker Training jobs according to configured priorities and resource availability."
+      ],
+      "gotchas": [
+        "Fargate supplies container compute; choosing Fargate alone does not address a requirement for managed batch queues and scheduling.",
+        "An existing Kubernetes workflow does not rule out AWS Batch: Batch can run workloads on Amazon EKS.",
+        "Choosing EC2 Spot capacity alone does not eliminate the work of building or managing a batch scheduler."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Fargate",
+          "difference": "Fargate provides container compute without managing servers; Batch adds managed batch queues and scheduling and can use Fargate resources."
+        },
+        {
+          "concept": "Amazon EKS",
+          "difference": "EKS supports Kubernetes orchestration; Batch can run batch jobs on EKS while managing batch scheduling."
+        },
+        {
+          "concept": "Amazon ECS on EC2",
+          "difference": "ECS on EC2 runs containers on EC2 capacity; Batch addresses the additional need to queue and schedule batch jobs."
+        }
+      ],
+      "examCues": [
+        "thousands of independent simulation jobs",
+        "queue jobs until compute is available",
+        "avoid managing batch scheduling software",
+        "prioritize SageMaker Training jobs"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Batch permite poner en cola, programar y ejecutar cargas de trabajo por lotes sin que tengas que crear un programador de trabajos. Elígelo cuando el requisito sea la programación administrada de trabajos y la capacidad de cómputo elástica, no solo ejecutar contenedores.",
+      "whenToUse": [
+        "Tienes trabajos independientes de simulación, análisis o ML que llegan por lotes y necesitan programación administrada.",
+        "La capacidad de cómputo debe ajustarse a los trabajos enviados, posiblemente con EC2 Spot Instances para reducir costos.",
+        "Necesitas programación por lotes mientras ejecutas trabajos en Amazon ECS, Amazon EKS o AWS Fargate.",
+        "Los trabajos de SageMaker Training necesitan colas configurables y prioridades."
+      ],
+      "keyFacts": [
+        "AWS Batch aprovisiona recursos de cómputo según los trabajos enviados y optimiza la distribución de la carga.",
+        "Ejecuta cargas de trabajo por lotes en contenedores sobre Amazon ECS y Amazon EKS.",
+        "Sus opciones de cómputo incluyen instancias EC2 y recursos de Fargate; las cargas por lotes pueden usar Spot u On-Demand Instances.",
+        "AWS Batch puede poner en cola trabajos de SageMaker Training según prioridades configuradas y disponibilidad de recursos."
+      ],
+      "gotchas": [
+        "Fargate proporciona cómputo para contenedores; elegir solo Fargate no resuelve el requisito de colas y programación administradas de trabajos por lotes.",
+        "Un flujo existente de Kubernetes no descarta AWS Batch: Batch puede ejecutar cargas de trabajo sobre Amazon EKS.",
+        "Elegir capacidad EC2 Spot por sí sola no elimina el trabajo de crear o administrar un programador de trabajos por lotes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Fargate",
+          "difference": "Fargate proporciona cómputo para contenedores sin administrar servidores; Batch agrega colas y programación administradas y puede usar recursos de Fargate."
+        },
+        {
+          "concept": "Amazon EKS",
+          "difference": "EKS admite la orquestación con Kubernetes; Batch puede ejecutar trabajos por lotes sobre EKS y administrar su programación."
+        },
+        {
+          "concept": "Amazon ECS on EC2",
+          "difference": "ECS on EC2 ejecuta contenedores con capacidad EC2; Batch atiende la necesidad adicional de poner en cola y programar trabajos por lotes."
+        }
+      ],
+      "examCues": [
+        "thousands of independent simulation jobs",
+        "queue jobs until compute is available",
+        "avoid managing batch scheduling software",
+        "prioritize SageMaker Training jobs"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aws-batch--3461c4be",
+      "conceptId": "aws-batch",
+      "secondaryConcepts": [
+        "amazon-ecs-launch-types",
+        "fargate-serverless-containers",
+        "elastic-beanstalk"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab runs thousands of independent, containerized climate simulations after each new dataset arrives. Jobs may wait for capacity, and the lab wants to use EC2 Spot Instances to reduce compute costs without operating batch scheduling software. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy a worker application with AWS Elastic Beanstalk and have it poll a custom simulation queue.",
+          "correct": false,
+          "why": "A web application deployment platform does not remove the need to implement the specified batch queue and scheduling behavior."
+        },
+        {
+          "id": "B",
+          "text": "Submit the simulations to an AWS Batch job queue backed by an EC2 Spot compute environment.",
+          "correct": true,
+          "why": "AWS Batch supplies managed batch scheduling and can run the jobs using Spot Instances."
+        },
+        {
+          "id": "C",
+          "text": "Run the containers on an Amazon ECS cluster backed by EC2 Spot Instances and build a job queue and scheduler.",
+          "correct": false,
+          "why": "It can use the requested capacity, but the lab would still have to build and operate its batch scheduling components."
+        },
+        {
+          "id": "D",
+          "text": "Run each simulation as an AWS Fargate task and build a queue to start tasks when capacity is available.",
+          "correct": false,
+          "why": "It leaves queue management to the lab and does not select the requested EC2 Spot Instances."
+        }
+      ],
+      "explanation": "The deciding requirements are queued batch jobs, EC2 Spot capacity, and no self-managed batch scheduler. AWS Batch schedules submitted jobs and can run batch workloads using Spot Instances. ECS on EC2 Spot provides a plausible compute foundation, but the proposed design makes the lab build its own job queue and scheduler.",
+      "keywordCues": [
+        "thousands of independent, containerized climate simulations",
+        "Jobs may wait for capacity",
+        "use EC2 Spot Instances",
+        "without operating batch scheduling software"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ejecuta miles de simulaciones climáticas independientes en contenedores cada vez que llega un nuevo conjunto de datos. Los trabajos pueden esperar a que haya capacidad, y el laboratorio quiere usar EC2 Spot Instances para reducir costos sin operar software de programación de trabajos por lotes. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Desplegar una aplicación de trabajadores con AWS Elastic Beanstalk y hacer que consulte una cola de simulaciones personalizada.",
+            "why": "Una plataforma de despliegue de aplicaciones web no elimina la necesidad de implementar la cola y la programación por lotes solicitadas."
+          },
+          {
+            "id": "B",
+            "text": "Enviar las simulaciones a una cola de trabajos de AWS Batch respaldada por un entorno de cómputo EC2 Spot.",
+            "why": "AWS Batch proporciona programación administrada de trabajos por lotes y puede ejecutarlos con Spot Instances."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar los contenedores en un clúster de Amazon ECS respaldado por EC2 Spot Instances y crear una cola y un programador de trabajos.",
+            "why": "Puede usar la capacidad solicitada, pero el laboratorio todavía tendría que crear y operar los componentes de programación por lotes."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar cada simulación como una tarea de AWS Fargate y crear una cola que inicie tareas cuando haya capacidad.",
+            "why": "Deja la administración de la cola al laboratorio y no selecciona las EC2 Spot Instances solicitadas."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son trabajos por lotes en cola, capacidad EC2 Spot y no administrar un programador de trabajos por lotes. AWS Batch programa los trabajos enviados y puede ejecutar cargas por lotes con Spot Instances. ECS on EC2 Spot ofrece una base de cómputo plausible, pero el diseño propuesto obliga al laboratorio a crear su propia cola y su programador."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-batch--a1219897",
+      "conceptId": "aws-batch",
+      "secondaryConcepts": [
+        "amazon-eks",
+        "fargate-serverless-containers"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A genomics company has containerized analysis jobs and an established Kubernetes workflow on Amazon EKS. New sequencing runs arrive unpredictably; the company needs jobs queued and compute provisioned in response to submissions without administering batch scheduling software. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Batch to queue the analysis jobs and run the workloads on Amazon ECS instead of EKS.",
+          "correct": false,
+          "why": "It supplies managed scheduling but does not preserve the stated EKS-based Kubernetes workflow."
+        },
+        {
+          "id": "B",
+          "text": "Run the analysis containers on AWS Fargate and develop a queue to submit them as capacity becomes available.",
+          "correct": false,
+          "why": "It requires a custom queue and does not retain the stated EKS-based workflow."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Batch to queue the analysis jobs and run the batch workloads on Amazon EKS.",
+          "correct": true,
+          "why": "Batch provides managed job scheduling while supporting the company's Amazon EKS-based workflow."
+        },
+        {
+          "id": "D",
+          "text": "Submit Kubernetes Jobs directly to Amazon EKS and develop a batch queue and scheduler for incoming runs.",
+          "correct": false,
+          "why": "It retains EKS but requires the company to administer the batch scheduling software it wants to avoid."
+        }
+      ],
+      "explanation": "The company needs both its established EKS workflow and managed scheduling for variable batches of jobs. AWS Batch can run batch workloads on Amazon EKS and provision resources in response to submitted jobs. Submitting Kubernetes Jobs directly to EKS is plausible, but the proposed solution adds a scheduler the company explicitly does not want to administer.",
+      "keywordCues": [
+        "established Kubernetes workflow on Amazon EKS",
+        "jobs queued",
+        "compute provisioned in response to submissions",
+        "without administering batch scheduling software"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html"
+      ],
+      "es": {
+        "stem": "Una empresa de genómica tiene trabajos de análisis en contenedores y un flujo de trabajo establecido de Kubernetes en Amazon EKS. Las nuevas secuenciaciones llegan de forma impredecible; la empresa necesita poner los trabajos en cola y aprovisionar cómputo según los envíos, sin administrar software de programación por lotes. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Batch para poner en cola los trabajos de análisis y ejecutar las cargas en Amazon ECS en lugar de EKS.",
+            "why": "Aporta programación administrada, pero no conserva el flujo de trabajo de Kubernetes en EKS indicado."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar los contenedores de análisis en AWS Fargate y desarrollar una cola para enviarlos a medida que haya capacidad.",
+            "why": "Exige una cola personalizada y no conserva el flujo de trabajo basado en EKS indicado."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS Batch para poner en cola los trabajos de análisis y ejecutar las cargas por lotes en Amazon EKS.",
+            "why": "Batch ofrece programación administrada de trabajos y admite el flujo de trabajo basado en Amazon EKS de la empresa."
+          },
+          {
+            "id": "D",
+            "text": "Enviar Kubernetes Jobs directamente a Amazon EKS y desarrollar una cola y un programador de trabajos por lotes para las nuevas secuenciaciones.",
+            "why": "Conserva EKS, pero exige que la empresa administre el software de programación por lotes que quiere evitar."
+          }
+        ],
+        "explanation": "La empresa necesita tanto su flujo establecido en EKS como programación administrada para lotes variables de trabajos. AWS Batch puede ejecutar cargas por lotes en Amazon EKS y aprovisionar recursos según los trabajos enviados. Enviar Kubernetes Jobs directamente a EKS es plausible, pero la solución propuesta agrega un programador que la empresa no quiere administrar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-batch--11510600",
+      "conceptId": "aws-batch",
+      "secondaryConcepts": [
+        "amazon-eks",
+        "fargate-serverless-containers"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retail forecasting team submits SageMaker Training jobs from several departments. During busy periods, jobs must wait for available resources, and the team needs configurable queues that prioritize urgent training requests without manual coordination. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Start training containers as AWS Fargate tasks and have departments retry when resources are unavailable.",
+          "correct": false,
+          "why": "Retries by departments do not supply the requested managed priority queues for SageMaker Training jobs."
+        },
+        {
+          "id": "B",
+          "text": "Deploy training workers on Amazon EKS and build a service to assign request priorities.",
+          "correct": false,
+          "why": "The team would have to build the priority queuing capability it wants managed."
+        },
+        {
+          "id": "C",
+          "text": "Run training containers on Amazon ECS and have departments coordinate submission order themselves.",
+          "correct": false,
+          "why": "Manual coordination conflicts with the requirement for configurable queues and automatic execution."
+        },
+        {
+          "id": "D",
+          "text": "Configure AWS Batch queues with priorities for the SageMaker Training jobs.",
+          "correct": true,
+          "why": "AWS Batch supports priority-based SageMaker Training job queuing and execution as resources become available."
+        }
+      ],
+      "explanation": "The key requirement is prioritized queuing specifically for SageMaker Training jobs. AWS Batch supports configurable queues for these jobs, which run according to priorities and resource availability. Building priority assignment around EKS could address the workflow, but it introduces the custom coordination the team wants to avoid.",
+      "keywordCues": [
+        "SageMaker Training jobs",
+        "wait for available resources",
+        "configurable queues",
+        "prioritize urgent training requests",
+        "without manual coordination"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html"
+      ],
+      "es": {
+        "stem": "Un equipo de pronósticos de ventas envía trabajos de SageMaker Training desde varios departamentos. En períodos de alta demanda, los trabajos deben esperar a que haya recursos disponibles, y el equipo necesita colas configurables que den prioridad a las solicitudes urgentes sin coordinación manual. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Iniciar contenedores de entrenamiento como tareas de AWS Fargate y pedir a los departamentos que reintenten cuando no haya recursos.",
+            "why": "Los reintentos de los departamentos no proporcionan las colas prioritarias administradas solicitadas para trabajos de SageMaker Training."
+          },
+          {
+            "id": "B",
+            "text": "Desplegar trabajadores de entrenamiento en Amazon EKS y crear un servicio que asigne prioridades a las solicitudes.",
+            "why": "El equipo tendría que crear la capacidad de colas prioritarias que quiere recibir como servicio administrado."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar contenedores de entrenamiento en Amazon ECS y hacer que los departamentos coordinen entre sí el orden de envío.",
+            "why": "La coordinación manual contradice el requisito de colas configurables y ejecución automática."
+          },
+          {
+            "id": "D",
+            "text": "Configurar colas de AWS Batch con prioridades para los trabajos de SageMaker Training.",
+            "why": "AWS Batch admite poner en cola trabajos de SageMaker Training por prioridad y ejecutarlos cuando haya recursos disponibles."
+          }
+        ],
+        "explanation": "El requisito decisivo es la cola con prioridades específicamente para trabajos de SageMaker Training. AWS Batch admite colas configurables para estos trabajos, que se ejecutan según sus prioridades y la disponibilidad de recursos. Crear la asignación de prioridades alrededor de EKS podría atender el flujo, pero introduce la coordinación personalizada que el equipo quiere evitar."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aws-batch--r0",
+      "conceptId": "aws-batch",
+      "kind": "recall",
+      "prompt": "What would you choose for queued simulation jobs that need elastic compute without a self-managed batch scheduler, and why?",
+      "promptEs": "¿Qué elegirías para simulaciones en cola que necesitan cómputo elástico sin administrar un programador de trabajos por lotes, y por qué?",
+      "idealAnswer": "Choose AWS Batch. It manages batch job scheduling and provisions compute resources in response to submitted jobs.",
+      "rubric": [
+        "Names AWS Batch.",
+        "Mentions managed queuing or scheduling.",
+        "Explains that compute capacity responds to submitted jobs."
+      ]
+    },
+    {
+      "id": "aws-batch--r1",
+      "conceptId": "aws-batch",
+      "kind": "why-not",
+      "prompt": "Why isn't running containers directly on Fargate enough when a team needs managed queues and scheduling for batch jobs?",
+      "promptEs": "¿Por qué ejecutar contenedores directamente en Fargate no basta cuando un equipo necesita colas y programación administradas para trabajos por lotes?",
+      "idealAnswer": "Fargate provides container compute, but selecting it alone does not supply the managed batch queuing and scheduling required here. AWS Batch provides those capabilities and can use Fargate resources for compute.",
+      "rubric": [
+        "Identifies Fargate as a compute option.",
+        "Identifies managed batch queuing and scheduling as the unmet requirement.",
+        "Notes that AWS Batch can use Fargate resources."
+      ]
+    }
+  ]
+}

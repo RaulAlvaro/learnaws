@@ -1,0 +1,441 @@
+{
+  "conceptId": "dynamodb-fundamentals",
+  "card": {
+    "en": {
+      "tldr": "Amazon DynamoDB is a serverless, fully managed NoSQL database for key-value and document workloads that need consistent single-digit millisecond performance at scale. Choose it when the application can access data efficiently by key without relational JOINs.",
+      "whenToUse": [
+        "The workload needs fast lookups of sessions, carts, or other items by a known key.",
+        "Traffic is unpredictable and the team wants to avoid database servers and capacity planning.",
+        "The application can design keys around its access patterns and denormalize data instead of using JOINs."
+      ],
+      "keyFacts": [
+        "DynamoDB supports key-value and document data models, but not a JOIN operator.",
+        "On-demand capacity charges for read and write requests and scales with traffic, including down to zero throughput when idle.",
+        "Secondary indexes support queries using alternate keys.",
+        "The maximum item size is 400 KB; store larger images in Amazon S3 and keep an object pointer in DynamoDB.",
+        "Time to Live (TTL) automatically deletes expired items without consuming write throughput."
+      ],
+      "gotchas": [
+        "Serverless scaling does not replace designing a partition key that spreads access across items.",
+        "Document data does not, by itself, mean the application needs MongoDB compatibility.",
+        "DynamoDB supports ACID transactions; a requirement for coordinated item changes does not automatically require a relational database."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon RDS",
+          "difference": "Choose RDS for a managed relational engine; choose DynamoDB for key-based NoSQL access without JOINs."
+        },
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB is the MongoDB-compatible choice; DynamoDB supports document data without requiring MongoDB compatibility."
+        },
+        {
+          "concept": "Amazon Aurora",
+          "difference": "Aurora is MySQL/PostgreSQL-compatible; DynamoDB is a serverless NoSQL database for key-based access."
+        }
+      ],
+      "examCues": [
+        "session lookup by ID",
+        "unpredictable traffic, no capacity planning",
+        "single-digit millisecond key-value access",
+        "alternate lookup attribute",
+        "expired items should be removed automatically"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon DynamoDB es una base de datos NoSQL serverless y completamente administrada para datos clave-valor y documentos, con rendimiento constante de milisegundos de un solo dígito a cualquier escala. Elígela cuando puedas acceder a los datos eficientemente por clave sin JOINs relacionales.",
+      "whenToUse": [
+        "Necesitas consultar rápidamente sesiones, carritos u otros elementos mediante una clave conocida.",
+        "El tráfico es impredecible y quieres evitar servidores de base de datos y planificación de capacidad.",
+        "Puedes diseñar las claves según los patrones de acceso y desnormalizar los datos en lugar de usar JOINs."
+      ],
+      "keyFacts": [
+        "DynamoDB admite modelos clave-valor y de documentos, pero no un operador JOIN.",
+        "La capacidad on-demand cobra por solicitudes de lectura y escritura y se ajusta al tráfico, incluso hasta cero rendimiento cuando no hay actividad.",
+        "Los índices secundarios permiten consultar con claves alternativas.",
+        "El tamaño máximo de un elemento es 400 KB; guarda imágenes más grandes en Amazon S3 y una referencia al objeto en DynamoDB.",
+        "Time to Live (TTL) elimina automáticamente los elementos vencidos sin consumir rendimiento de escritura."
+      ],
+      "gotchas": [
+        "El escalado serverless no sustituye el diseño de una partition key que distribuya el acceso entre elementos.",
+        "Tener documentos no significa, por sí solo, que necesites compatibilidad con MongoDB.",
+        "DynamoDB admite transacciones ACID; los cambios coordinados de elementos no obligan a elegir una base de datos relacional."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon RDS",
+          "difference": "Elige RDS para un motor relacional administrado; elige DynamoDB para acceso NoSQL por clave sin JOINs."
+        },
+        {
+          "concept": "Amazon DocumentDB",
+          "difference": "DocumentDB es la opción compatible con MongoDB; DynamoDB admite documentos sin requerir esa compatibilidad."
+        },
+        {
+          "concept": "Amazon Aurora",
+          "difference": "Aurora es compatible con MySQL/PostgreSQL; DynamoDB es una base de datos NoSQL serverless para acceso por clave."
+        }
+      ],
+      "examCues": [
+        "session lookup by ID",
+        "unpredictable traffic, no capacity planning",
+        "single-digit millisecond key-value access",
+        "alternate lookup attribute",
+        "expired items should be removed automatically"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html",
+      "https://aws.amazon.com/dynamodb/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-fundamentals--3e62a406",
+      "conceptId": "dynamodb-fundamentals",
+      "secondaryConcepts": [
+        "rds-fundamentals",
+        "aurora-architecture",
+        "documentdb"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing startup stores a small record for each visitor session. Its API retrieves sessions by session ID, and traffic jumps sharply when new events go on sale. The team does not need relational JOINs and does not want to plan database throughput. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store sessions as documents in Amazon DocumentDB and retrieve them by session ID.",
+          "correct": false,
+          "why": "The scenario calls for serverless key-value access, not MongoDB compatibility."
+        },
+        {
+          "id": "B",
+          "text": "Store sessions in a DynamoDB on-demand table with session ID as the partition key.",
+          "correct": true,
+          "why": "DynamoDB supports key-based access, and on-demand capacity adjusts to changing request traffic without throughput planning."
+        },
+        {
+          "id": "C",
+          "text": "Store sessions in Amazon Aurora MySQL-Compatible Edition and retrieve each row by session ID.",
+          "correct": false,
+          "why": "Aurora provides a relational, MySQL-compatible database, but the workload does not need relational features."
+        },
+        {
+          "id": "D",
+          "text": "Store sessions in Amazon RDS for MySQL and retrieve each row by session ID.",
+          "correct": false,
+          "why": "MySQL can retrieve a session by ID, but this design introduces a relational database when the team wants to avoid database throughput planning."
+        }
+      ],
+      "explanation": "The deciding requirements are key-based session lookups, sharp traffic changes, and no throughput planning. DynamoDB provides serverless NoSQL access with consistent single-digit millisecond performance, while its on-demand mode adjusts capacity to request traffic. A relational engine might serve the lookups, but it does not provide the same fit for this stated access pattern and operational requirement.",
+      "keywordCues": [
+        "retrieves sessions by session ID",
+        "traffic jumps sharply",
+        "does not need relational JOINs",
+        "does not want to plan database throughput"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html",
+        "https://aws.amazon.com/dynamodb/faqs/"
+      ],
+      "es": {
+        "stem": "Una startup de venta de boletos guarda un registro pequeño por cada sesión de visitante. Su API consulta las sesiones mediante el ID de sesión, y el tráfico aumenta bruscamente cuando salen nuevos eventos a la venta. El equipo no necesita JOINs relacionales ni quiere planificar el rendimiento de la base de datos. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar las sesiones como documentos en Amazon DocumentDB y consultarlas por ID de sesión.",
+            "why": "El escenario requiere acceso clave-valor serverless, no compatibilidad con MongoDB."
+          },
+          {
+            "id": "B",
+            "text": "Guardar las sesiones en una tabla DynamoDB on-demand con el ID de sesión como partition key.",
+            "why": "DynamoDB admite acceso por clave y la capacidad on-demand se ajusta al tráfico cambiante sin planificar el rendimiento."
+          },
+          {
+            "id": "C",
+            "text": "Guardar las sesiones en Amazon Aurora MySQL-Compatible Edition y consultar cada fila por ID de sesión.",
+            "why": "Aurora ofrece una base de datos relacional compatible con MySQL, pero la carga no necesita funciones relacionales."
+          },
+          {
+            "id": "D",
+            "text": "Guardar las sesiones en Amazon RDS para MySQL y consultar cada fila por ID de sesión.",
+            "why": "MySQL puede consultar una sesión por ID, pero este diseño introduce una base de datos relacional cuando el equipo quiere evitar la planificación del rendimiento."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son las consultas de sesiones por clave, los cambios bruscos de tráfico y evitar la planificación del rendimiento. DynamoDB ofrece acceso NoSQL serverless con rendimiento constante de milisegundos de un solo dígito, mientras que su modo on-demand ajusta la capacidad al tráfico de solicitudes. Un motor relacional podría resolver las consultas, pero no se ajusta igual de bien al patrón de acceso y al requisito operativo indicados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-fundamentals--00adaa34",
+      "conceptId": "dynamodb-fundamentals",
+      "secondaryConcepts": [
+        "rds-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A repair company stores job records in DynamoDB and usually retrieves a job by its job ID. A new support tool must also retrieve jobs by a unique external claim ID without replacing the existing job-ID lookup. The team wants to keep one operational table. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the table's job-ID key with the external claim ID.",
+          "correct": false,
+          "why": "Replacing the key would sacrifice the required job-ID lookup."
+        },
+        {
+          "id": "B",
+          "text": "Add a JOIN between the DynamoDB job records and their external claim IDs.",
+          "correct": false,
+          "why": "DynamoDB does not support a JOIN operator."
+        },
+        {
+          "id": "C",
+          "text": "Add a global secondary index that uses the external claim ID as its key.",
+          "correct": true,
+          "why": "A secondary index enables an alternate-key lookup while retaining the table's existing primary key."
+        },
+        {
+          "id": "D",
+          "text": "Copy claim mappings into an Amazon RDS table and query it before reading DynamoDB.",
+          "correct": false,
+          "why": "A separate relational table adds an operational data store when a DynamoDB secondary index can provide the alternate lookup."
+        }
+      ],
+      "explanation": "The existing job-ID lookup must remain, but the support tool needs a second lookup key. DynamoDB secondary indexes allow queries using an alternate key without replacing the table's primary key. A separate RDS mapping adds a database, and a DynamoDB JOIN is not available.",
+      "keywordCues": [
+        "usually retrieves a job by its job ID",
+        "also retrieve jobs by a unique external claim ID",
+        "without replacing the existing job-ID lookup",
+        "keep one operational table"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html",
+        "https://aws.amazon.com/dynamodb/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de reparaciones guarda registros de trabajos en DynamoDB y normalmente consulta un trabajo por su ID de trabajo. Una nueva herramienta de soporte también debe consultar trabajos mediante un ID único de reclamo externo, sin reemplazar la consulta existente por ID de trabajo. El equipo quiere conservar una sola tabla operativa. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplazar la clave de ID de trabajo de la tabla por el ID de reclamo externo.",
+            "why": "Reemplazar la clave eliminaría la consulta requerida por ID de trabajo."
+          },
+          {
+            "id": "B",
+            "text": "Agregar un JOIN entre los registros de trabajos de DynamoDB y sus ID de reclamo externo.",
+            "why": "DynamoDB no admite un operador JOIN."
+          },
+          {
+            "id": "C",
+            "text": "Agregar un global secondary index que use el ID de reclamo externo como clave.",
+            "why": "Un índice secundario permite consultar por una clave alternativa y conservar la clave primaria de la tabla."
+          },
+          {
+            "id": "D",
+            "text": "Copiar las asociaciones de reclamos a una tabla de Amazon RDS y consultarla antes de leer DynamoDB.",
+            "why": "Una tabla relacional separada agrega un almacén operativo cuando un índice secundario de DynamoDB puede ofrecer la consulta alternativa."
+          }
+        ],
+        "explanation": "Debe mantenerse la consulta por ID de trabajo, pero la herramienta de soporte necesita una segunda clave de consulta. Los índices secundarios de DynamoDB permiten consultar mediante una clave alternativa sin reemplazar la clave primaria de la tabla. Una asociación separada en RDS agrega una base de datos, y DynamoDB no dispone de JOIN."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-fundamentals--b3e53ea1",
+      "conceptId": "dynamodb-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A travel app stores temporary itinerary drafts by draft ID in DynamoDB. Draft requests are unpredictable, and each draft has a known expiration timestamp after which it no longer needs to be stored. The team wants to avoid both throughput planning and a scheduled cleanup application. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use DynamoDB on-demand and set a Time to Live (TTL) timestamp on each draft.",
+          "correct": true,
+          "why": "On-demand adjusts to request traffic, while TTL automatically deletes expired items without write-throughput consumption."
+        },
+        {
+          "id": "B",
+          "text": "Use a DynamoDB Standard-IA table and retain drafts until users delete them.",
+          "correct": false,
+          "why": "Changing the table class does not remove drafts automatically after their expiration timestamps."
+        },
+        {
+          "id": "C",
+          "text": "Use DynamoDB Accelerator (DAX) with a DynamoDB table and retain drafts indefinitely.",
+          "correct": false,
+          "why": "DAX is a cache and does not meet the requirement to remove expired drafts from the table."
+        },
+        {
+          "id": "D",
+          "text": "Use DynamoDB on-demand and run a scheduled application to delete expired drafts.",
+          "correct": false,
+          "why": "On-demand addresses variable traffic, but scheduled cleanup adds the operation the team wants to avoid."
+        }
+      ],
+      "explanation": "This workload combines unpredictable requests with items that become unnecessary after a known time. DynamoDB on-demand avoids throughput planning, and TTL automatically deletes expired items to reduce storage usage without consuming write throughput. Standard-IA alone does not expire items, while a scheduled cleanup application adds operational work.",
+      "keywordCues": [
+        "Draft requests are unpredictable",
+        "known expiration timestamp",
+        "avoid both throughput planning and a scheduled cleanup application",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html",
+        "https://aws.amazon.com/dynamodb/faqs/"
+      ],
+      "es": {
+        "stem": "Una aplicación de viajes guarda borradores temporales de itinerarios por ID de borrador en DynamoDB. Las solicitudes son impredecibles y cada borrador tiene una marca de tiempo de vencimiento conocida, después de la cual ya no hace falta almacenarlo. El equipo quiere evitar tanto la planificación del rendimiento como una aplicación de limpieza programada. ¿Qué solución cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar DynamoDB on-demand y establecer una marca de tiempo de Time to Live (TTL) en cada borrador.",
+            "why": "On-demand se ajusta al tráfico de solicitudes, mientras que TTL elimina automáticamente los elementos vencidos sin consumir rendimiento de escritura."
+          },
+          {
+            "id": "B",
+            "text": "Usar una tabla DynamoDB Standard-IA y conservar los borradores hasta que los usuarios los eliminen.",
+            "why": "Cambiar la clase de tabla no elimina automáticamente los borradores después de su vencimiento."
+          },
+          {
+            "id": "C",
+            "text": "Usar DynamoDB Accelerator (DAX) con una tabla DynamoDB y conservar los borradores indefinidamente.",
+            "why": "DAX es una caché y no cumple el requisito de quitar los borradores vencidos de la tabla."
+          },
+          {
+            "id": "D",
+            "text": "Usar DynamoDB on-demand y ejecutar una aplicación programada que elimine los borradores vencidos.",
+            "why": "On-demand atiende el tráfico variable, pero la limpieza programada agrega la operación que el equipo quiere evitar."
+          }
+        ],
+        "explanation": "Esta carga combina solicitudes impredecibles con elementos que dejan de ser necesarios después de un momento conocido. DynamoDB on-demand evita planificar el rendimiento, y TTL elimina automáticamente los elementos vencidos para reducir el almacenamiento sin consumir rendimiento de escritura. Standard-IA por sí sola no vence los elementos, mientras que una aplicación de limpieza programada agrega trabajo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-fundamentals--d5bd09e3",
+      "conceptId": "dynamodb-fundamentals",
+      "secondaryConcepts": [
+        "rds-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A multiplayer game stores player state by player ID and serves players from two AWS Regions. Players in either Region must be able to read and write locally, and the team does not want to build its own replication process. The data is key-value data and does not require relational JOINs. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon RDS for MySQL in one Region and route all player requests to it.",
+          "correct": false,
+          "why": "A database in one Region does not provide local reads and writes in both Regions, and the workload does not require a relational engine."
+        },
+        {
+          "id": "B",
+          "text": "Use separate DynamoDB tables in both Regions and build an application to copy changes between them.",
+          "correct": false,
+          "why": "Custom replication can connect the tables but violates the requirement not to build a replication process."
+        },
+        {
+          "id": "C",
+          "text": "Use DynamoDB global tables with a replica table in each chosen Region.",
+          "correct": true,
+          "why": "Global tables provide managed multi-Region, multi-active replication and local read and write access."
+        },
+        {
+          "id": "D",
+          "text": "Use a DynamoDB table in one Region and send both Regions' requests to that table.",
+          "correct": false,
+          "why": "A single-Region table does not provide local reads and writes in both Regions."
+        }
+      ],
+      "explanation": "The decisive requirement is local reads and writes in both Regions without custom replication. DynamoDB global tables replicate changes across chosen Regions and are multi-active, so neither Region needs to act as the sole primary. A single-Region database misses local access in one Region, while copying changes between independent tables creates the replication process the team wants to avoid.",
+      "keywordCues": [
+        "two AWS Regions",
+        "read and write locally",
+        "does not want to build its own replication process",
+        "key-value data"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html",
+        "https://aws.amazon.com/dynamodb/faqs/"
+      ],
+      "es": {
+        "stem": "Un juego multijugador guarda el estado de los jugadores por ID de jugador y atiende a jugadores desde dos AWS Regions. Los jugadores de cualquiera de las Regions deben poder leer y escribir localmente, y el equipo no quiere construir su propio proceso de replicación. Los datos son clave-valor y no requieren JOINs relacionales. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon RDS para MySQL en una Region y dirigirle todas las solicitudes de los jugadores.",
+            "why": "Una base de datos en una sola Region no ofrece lecturas y escrituras locales en ambas Regions, y la carga no requiere un motor relacional."
+          },
+          {
+            "id": "B",
+            "text": "Usar tablas DynamoDB independientes en ambas Regions y crear una aplicación que copie los cambios entre ellas.",
+            "why": "La replicación personalizada puede conectar las tablas, pero incumple el requisito de no construir un proceso de replicación."
+          },
+          {
+            "id": "C",
+            "text": "Usar DynamoDB global tables con una tabla réplica en cada Region elegida.",
+            "why": "Global tables ofrece replicación multi-Region y multi-active administrada, además de acceso local de lectura y escritura."
+          },
+          {
+            "id": "D",
+            "text": "Usar una tabla DynamoDB en una Region y enviar a ella las solicitudes de ambas Regions.",
+            "why": "Una tabla en una sola Region no ofrece lecturas y escrituras locales en ambas Regions."
+          }
+        ],
+        "explanation": "El requisito decisivo es permitir lecturas y escrituras locales en ambas Regions sin replicación personalizada. DynamoDB global tables replica los cambios entre las Regions elegidas y es multi-active, por lo que ninguna Region tiene que ser la única primaria. Una base de datos en una sola Region no ofrece acceso local en la otra, y copiar cambios entre tablas independientes crea el proceso de replicación que el equipo quiere evitar."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-fundamentals--r0",
+      "conceptId": "dynamodb-fundamentals",
+      "kind": "recall",
+      "prompt": "A serverless app looks up sessions by ID and has unpredictable traffic. Which database and capacity mode fit, and why?",
+      "promptEs": "Una aplicación serverless consulta sesiones por ID y tiene tráfico impredecible. ¿Qué base de datos y modo de capacidad elegirías, y por qué?",
+      "idealAnswer": "Use Amazon DynamoDB with session ID as the partition key and on-demand capacity. It supports key-based NoSQL access with single-digit millisecond performance, while on-demand capacity adjusts to request traffic without throughput planning.",
+      "rubric": [
+        "Names Amazon DynamoDB.",
+        "Uses session ID as the key for the stated access pattern.",
+        "Chooses on-demand capacity for unpredictable traffic and explains the operational benefit."
+      ]
+    },
+    {
+      "id": "dynamodb-fundamentals--r1",
+      "conceptId": "dynamodb-fundamentals",
+      "kind": "why-not",
+      "prompt": "Why not choose Amazon DocumentDB solely because a serverless session service stores JSON-like records and looks them up by ID?",
+      "promptEs": "¿Por qué no elegirías Amazon DocumentDB solo porque un servicio de sesiones serverless guarda registros parecidos a JSON y los consulta por ID?",
+      "idealAnswer": "Document-shaped records alone do not establish a need for MongoDB compatibility. DynamoDB supports document and key-value data, and its serverless design fits ID-based lookups without requiring that compatibility.",
+      "rubric": [
+        "Identifies MongoDB compatibility as DocumentDB's distinguishing requirement.",
+        "States that DynamoDB supports document as well as key-value data.",
+        "Connects DynamoDB to the serverless, ID-based access pattern."
+      ]
+    }
+  ]
+}

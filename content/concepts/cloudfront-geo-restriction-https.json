@@ -1,0 +1,255 @@
+{
+  "conceptId": "cloudfront-geo-restriction-https",
+  "card": {
+    "en": {
+      "tldr": "Use CloudFront geographic restrictions to allow or block countries for every file in a distribution. Configure HTTPS separately for viewers and the origin; encrypting one connection does not establish that the other is encrypted.",
+      "whenToUse": [
+        "Every file in a distribution must be available only in approved countries.",
+        "Different files need different geographic rules while remaining in one distribution.",
+        "Traffic must be encrypted both from viewers to CloudFront and from CloudFront to the origin."
+      ],
+      "keyFacts": [
+        "CloudFront geographic restrictions use a country-level allowlist or denylist and apply to the entire distribution.",
+        "For different restrictions on different files, use separate distributions or a third-party geolocation service.",
+        "CloudFront returns HTTP 403 when its geographic restrictions block a request.",
+        "If CloudFront cannot determine a viewer’s location, it serves the requested content.",
+        "On an HTTPS cache miss, CloudFront decrypts the origin response and re-encrypts it for the viewer."
+      ],
+      "gotchas": [
+        "A country allowlist on one distribution cannot exempt a subset of its files.",
+        "A viewer HTTPS requirement alone does not establish HTTPS between CloudFront and the origin.",
+        "Do not infer protection of individual form fields merely from HTTPS transport encryption."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Third-party geolocation service",
+          "difference": "Use it with CloudFront when restrictions must vary by file or be more precise than country level."
+        },
+        {
+          "concept": "Separate CloudFront distributions",
+          "difference": "They can support different geographic rules, but do not meet a requirement to retain one distribution."
+        }
+      ],
+      "examCues": [
+        "approved countries for every file",
+        "different rules for selected files",
+        "retain one distribution",
+        "encrypt viewer and origin connections"
+      ]
+    },
+    "es": {
+      "tldr": "Usa CloudFront geographic restrictions para permitir o bloquear países en todos los archivos de una distribución. Configura HTTPS por separado para los clientes y el origen; cifrar una conexión no significa que la otra esté cifrada.",
+      "whenToUse": [
+        "Todos los archivos de una distribución deben estar disponibles solo en países aprobados.",
+        "Distintos archivos necesitan reglas geográficas diferentes sin salir de una misma distribución.",
+        "El tráfico debe estar cifrado tanto del cliente a CloudFront como de CloudFront al origen."
+      ],
+      "keyFacts": [
+        "CloudFront geographic restrictions usa una lista de países permitidos o bloqueados y se aplica a toda la distribución.",
+        "Para aplicar distintas restricciones a distintos archivos, usa distribuciones separadas o un servicio de geolocalización de terceros.",
+        "CloudFront devuelve HTTP 403 cuando sus restricciones geográficas bloquean una solicitud.",
+        "Si CloudFront no puede determinar la ubicación de un cliente, entrega el contenido solicitado.",
+        "Si hay un cache miss con HTTPS, CloudFront descifra la respuesta del origen y vuelve a cifrarla para el cliente."
+      ],
+      "gotchas": [
+        "Una lista de países permitidos en una distribución no puede excluir de la restricción solo algunos archivos.",
+        "Exigir HTTPS al cliente no establece por sí solo HTTPS entre CloudFront y el origen.",
+        "No supongas que el cifrado HTTPS del transporte protege individualmente los campos de un formulario."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Servicio de geolocalización de terceros",
+          "difference": "Úsalo con CloudFront cuando las restricciones deban variar por archivo o ser más precisas que el nivel de país."
+        },
+        {
+          "concept": "Distribuciones de CloudFront separadas",
+          "difference": "Pueden admitir reglas geográficas distintas, pero no cumplen el requisito de mantener una sola distribución."
+        }
+      ],
+      "examCues": [
+        "approved countries for every file",
+        "different rules for selected files",
+        "retain one distribution",
+        "encrypt viewer and origin connections"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/georestrictions.html",
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudfront-geo-restriction-https--a0fd1459",
+      "conceptId": "cloudfront-geo-restriction-https",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher has licensed its entire video catalog for viewing in three countries. Every file is served through one CloudFront distribution, and the publisher wants requests from all other countries blocked without maintaining application-based location checks. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add the three countries to a CloudFront geographic restrictions allowlist on the distribution.",
+          "correct": true,
+          "why": "The allowlist applies to every file in the distribution and permits requests from the approved countries."
+        },
+        {
+          "id": "B",
+          "text": "Create a separate CloudFront distribution for each licensed country and configure a country allowlist on each.",
+          "correct": false,
+          "why": "Multiple distributions add overhead and do not meet the requirement to serve every file through one distribution."
+        },
+        {
+          "id": "C",
+          "text": "Check each viewer’s country with a third-party geolocation service before issuing a CloudFront signed URL.",
+          "correct": false,
+          "why": "This can provide geographic control, but adds an application and third-party service when distribution-wide country rules suffice."
+        },
+        {
+          "id": "D",
+          "text": "Add the three licensed countries to a CloudFront geographic restrictions denylist.",
+          "correct": false,
+          "why": "A denylist blocks the countries it names, which would block the publisher’s approved viewers."
+        }
+      ],
+      "explanation": "The deciding requirements are country-level access for every file and the least operational overhead. A CloudFront geographic restrictions allowlist covers the entire distribution with the three approved countries. A third-party geolocation service is better suited to finer-grained rules, while a denylist naming the approved countries would block the wrong viewers.",
+      "keywordCues": [
+        "entire video catalog",
+        "three countries",
+        "Every file",
+        "one CloudFront distribution",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/georestrictions.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html"
+      ],
+      "es": {
+        "stem": "Una editorial tiene licencia para mostrar todo su catálogo de videos en tres países. Todos los archivos se entregan mediante una sola distribución de CloudFront, y la editorial quiere bloquear las solicitudes de los demás países sin mantener verificaciones de ubicación en la aplicación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega los tres países a una lista de países permitidos de CloudFront geographic restrictions en la distribución.",
+            "why": "La lista se aplica a todos los archivos de la distribución y permite solicitudes desde los países aprobados."
+          },
+          {
+            "id": "B",
+            "text": "Crea una distribución de CloudFront por cada país con licencia y configura una lista de países permitidos en cada una.",
+            "why": "Varias distribuciones aumentan el trabajo operativo y no cumplen el requisito de entregar todos los archivos mediante una sola distribución."
+          },
+          {
+            "id": "C",
+            "text": "Verifica el país de cada cliente con un servicio de geolocalización de terceros antes de emitir una URL firmada de CloudFront.",
+            "why": "Esto puede controlar el acceso geográfico, pero agrega una aplicación y un servicio externo cuando bastan reglas por país para toda la distribución."
+          },
+          {
+            "id": "D",
+            "text": "Agrega los tres países con licencia a una lista de países bloqueados de CloudFront geographic restrictions.",
+            "why": "Una lista de países bloqueados impediría el acceso precisamente a los clientes aprobados."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son controlar el acceso por país para todos los archivos y minimizar el trabajo operativo. Una lista de países permitidos de CloudFront geographic restrictions cubre toda la distribución con los tres países aprobados. Un servicio de geolocalización de terceros sirve mejor para reglas más específicas, mientras que una lista que bloquee los países aprobados impediría el acceso a los clientes correctos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-geo-restriction-https--c9675868",
+      "conceptId": "cloudfront-geo-restriction-https",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A booking company serves its web application through CloudFront with a custom HTTP/S origin. Its security policy requires encrypted connections from customers to CloudFront and from CloudFront to the origin, including requests that miss the cache. Which configuration meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Require HTTPS from viewers to CloudFront and configure CloudFront to use HTTPS with the origin.",
+          "correct": true,
+          "why": "Both required connections use HTTPS, including CloudFront-to-origin requests on cache misses."
+        },
+        {
+          "id": "B",
+          "text": "Require HTTPS from CloudFront to the origin, and continue accepting HTTP connections from viewers.",
+          "correct": false,
+          "why": "The origin connection is encrypted, but customer connections to CloudFront can remain unencrypted."
+        },
+        {
+          "id": "C",
+          "text": "Configure HTTPS at the origin and continue allowing CloudFront to use HTTP to contact it.",
+          "correct": false,
+          "why": "An HTTPS-capable origin does not encrypt requests that CloudFront sends to it over HTTP."
+        },
+        {
+          "id": "D",
+          "text": "Require HTTPS from viewers to CloudFront, and leave the connection from CloudFront to the origin configured for HTTP.",
+          "correct": false,
+          "why": "The viewer connection is encrypted, but cache misses can reach the origin over HTTP."
+        }
+      ],
+      "explanation": "The policy explicitly covers two connections: customer to CloudFront and CloudFront to the custom origin. Requiring viewer HTTPS and configuring HTTPS to the origin encrypts both, including the origin request on a cache miss. Securing only one connection leaves the other requirement unmet; merely making the origin HTTPS-capable does not change a CloudFront connection configured to use HTTP.",
+      "keywordCues": [
+        "custom HTTP/S origin",
+        "encrypted connections from customers to CloudFront",
+        "from CloudFront to the origin",
+        "miss the cache"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/georestrictions.html",
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html"
+      ],
+      "es": {
+        "stem": "Una empresa de reservas entrega su aplicación web mediante CloudFront con un origen HTTP/S personalizado. Su política de seguridad exige conexiones cifradas de los clientes a CloudFront y de CloudFront al origen, incluso cuando las solicitudes no están en caché. ¿Qué configuración cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Exige HTTPS de los clientes a CloudFront y configura CloudFront para usar HTTPS con el origen.",
+            "why": "Ambas conexiones requeridas usan HTTPS, incluidas las solicitudes de CloudFront al origen cuando no hay contenido en caché."
+          },
+          {
+            "id": "B",
+            "text": "Exige HTTPS de CloudFront al origen y sigue aceptando conexiones HTTP de los clientes.",
+            "why": "La conexión al origen está cifrada, pero las conexiones de los clientes a CloudFront pueden quedar sin cifrar."
+          },
+          {
+            "id": "C",
+            "text": "Configura HTTPS en el origen y sigue permitiendo que CloudFront use HTTP para comunicarse con él.",
+            "why": "Que el origen admita HTTPS no cifra las solicitudes que CloudFront le envía por HTTP."
+          },
+          {
+            "id": "D",
+            "text": "Exige HTTPS de los clientes a CloudFront y deja la conexión de CloudFront al origen configurada para HTTP.",
+            "why": "La conexión del cliente está cifrada, pero las solicitudes que no están en caché pueden llegar al origen por HTTP."
+          }
+        ],
+        "explanation": "La política abarca explícitamente dos conexiones: del cliente a CloudFront y de CloudFront al origen personalizado. Exigir HTTPS a los clientes y configurar HTTPS hacia el origen cifra ambas, incluida la solicitud al origen cuando no hay contenido en caché. Proteger solo una conexión deja el otro requisito sin cumplir; que el origen admita HTTPS no cambia una conexión de CloudFront configurada para usar HTTP."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudfront-geo-restriction-https--r0",
+      "conceptId": "cloudfront-geo-restriction-https",
+      "kind": "recall",
+      "prompt": "Every file in one CloudFront distribution must be available only in approved countries. What feature would you configure, and why?",
+      "promptEs": "Todos los archivos de una distribución de CloudFront deben estar disponibles solo en países aprobados. ¿Qué característica configurarías y por qué?",
+      "idealAnswer": "Configure a country allowlist using CloudFront geographic restrictions. It applies to every file in the distribution and blocks requests from countries outside the allowlist.",
+      "rubric": [
+        "Names CloudFront geographic restrictions.",
+        "Selects an allowlist of approved countries.",
+        "Explains that the rule applies to the entire distribution."
+      ]
+    }
+  ]
+}

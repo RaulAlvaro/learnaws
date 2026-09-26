@@ -1,0 +1,442 @@
+{
+  "conceptId": "route53-failover-routing",
+  "card": {
+    "en": {
+      "tldr": "Route 53 failover routing supports an active-passive design: send traffic to the primary resource while it is healthy and to a secondary resource when it is unhealthy. Choose it when the deciding condition is primary health, not a planned traffic split or a user's location.",
+      "whenToUse": [
+        "A standby site should receive traffic only when the primary fails a health check.",
+        "A secondary S3 website should display a fallback page during a primary outage.",
+        "An active-passive application needs failover records in a private hosted zone."
+      ],
+      "keyFacts": [
+        "Failover routing directs traffic to one resource when it is healthy and a different resource when it is unhealthy.",
+        "Primary and secondary records can point to resources ranging from an S3 bucket configured as a website to a complex tree of records.",
+        "Failover routing can be used for records in a private hosted zone."
+      ],
+      "gotchas": [
+        "Weighted routing expresses a traffic split; it is not the choice when the secondary must receive traffic only after primary failure.",
+        "Latency-based routing selects by network latency, not by an active-passive health condition.",
+        "Geolocation routing selects by user location, not by whether the primary is healthy."
+      ],
+      "confusedWith": [
+        {
+          "concept": "route53-weighted-routing",
+          "difference": "Weighted routing is for a percentage split; failover routing is for a healthy primary and an unhealthy-primary fallback."
+        },
+        {
+          "concept": "route53-latency-routing",
+          "difference": "Latency-based routing favors the lowest-latency Region; failover routing follows primary health."
+        },
+        {
+          "concept": "route53-geolocation-geoproximity",
+          "difference": "Geolocation follows user location, while geoproximity uses distance and bias; neither expresses primary-then-secondary failover."
+        }
+      ],
+      "examCues": [
+        "standby site only during an outage",
+        "primary health check fails",
+        "show a static S3 page if the application is unavailable",
+        "active-passive records in a private hosted zone"
+      ]
+    },
+    "es": {
+      "tldr": "Route 53 failover routing permite un diseño activo-pasivo: dirige el tráfico al recurso principal mientras está en buen estado y al secundario cuando deja de estarlo. Elígelo cuando la condición decisiva sea la salud del principal, no una distribución planificada del tráfico ni la ubicación del usuario.",
+      "whenToUse": [
+        "Un sitio de respaldo debe recibir tráfico solo cuando el principal falla una health check.",
+        "Un sitio web secundario de S3 debe mostrar una página alternativa durante una interrupción del principal.",
+        "Una aplicación activo-pasivo necesita registros de failover en una private hosted zone."
+      ],
+      "keyFacts": [
+        "Failover routing dirige el tráfico a un recurso cuando está en buen estado y a otro cuando no lo está.",
+        "Los registros principales y secundarios pueden apuntar a recursos que van desde un bucket de S3 configurado como sitio web hasta un árbol complejo de registros.",
+        "Puedes usar failover routing para registros de una private hosted zone."
+      ],
+      "gotchas": [
+        "Weighted routing expresa una distribución del tráfico; no es la opción si el secundario debe recibir tráfico solo tras la falla del principal.",
+        "Latency-based routing selecciona según la latencia de red, no según una condición de salud activo-pasivo.",
+        "Geolocation routing selecciona según la ubicación del usuario, no según la salud del principal."
+      ],
+      "confusedWith": [
+        {
+          "concept": "route53-weighted-routing",
+          "difference": "Weighted routing distribuye el tráfico por porcentaje; failover routing usa un principal saludable y un respaldo si ese principal falla."
+        },
+        {
+          "concept": "route53-latency-routing",
+          "difference": "Latency-based routing favorece la Región con menor latencia; failover routing sigue la salud del principal."
+        },
+        {
+          "concept": "route53-geolocation-geoproximity",
+          "difference": "Geolocation sigue la ubicación del usuario y geoproximity usa distancia y bias; ninguno expresa failover de principal a secundario."
+        }
+      ],
+      "examCues": [
+        "standby site only during an outage",
+        "primary health check fails",
+        "show a static S3 page if the application is unavailable",
+        "active-passive records in a private hosted zone"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-failover.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route53-failover-routing--b05eac88",
+      "conceptId": "route53-failover-routing",
+      "secondaryConcepts": [
+        "route53-weighted-routing",
+        "route53-latency-routing"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company serves its booking site from a primary application. It has prepared an S3 bucket configured as a website to display outage instructions, but customers must not see those instructions while the application is healthy. Which Route 53 routing policy meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Latency-based routing between the application and the S3 website",
+          "correct": false,
+          "why": "Choosing by latency does not enforce the requirement to use the S3 website only after primary failure."
+        },
+        {
+          "id": "B",
+          "text": "Weighted routing that gives the application most traffic and the S3 website a small share",
+          "correct": false,
+          "why": "A nonzero share would expose some customers to outage instructions while the application is healthy."
+        },
+        {
+          "id": "C",
+          "text": "Failover routing with the application as primary and the S3 website as secondary",
+          "correct": true,
+          "why": "It uses the application while healthy and directs traffic to the S3 website when the primary is unhealthy."
+        },
+        {
+          "id": "D",
+          "text": "Geolocation routing between the application and the S3 website",
+          "correct": false,
+          "why": "Choosing by customer location does not make application health the condition for showing the fallback page."
+        }
+      ],
+      "explanation": "The deciding constraint is that the S3 website must remain a fallback while the application is healthy. Failover routing sends traffic to the primary resource when healthy and to a different resource when it is unhealthy. Weighted routing would implement a planned split rather than this health-dependent switch, and the location- and latency-based policies use different selection criteria.",
+      "keywordCues": [
+        "S3 bucket configured as a website",
+        "must not see those instructions while the application is healthy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-failover.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas atiende su sitio de reservas desde una aplicación principal. Preparó un bucket de S3 configurado como sitio web para mostrar instrucciones durante una interrupción, pero los clientes no deben verlas mientras la aplicación esté en buen estado. ¿Qué política de enrutamiento de Route 53 cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Latency-based routing entre la aplicación y el sitio web de S3",
+            "why": "Elegir según la latencia no garantiza que el sitio web de S3 se use solo cuando falla el principal."
+          },
+          {
+            "id": "B",
+            "text": "Weighted routing que asigna la mayor parte del tráfico a la aplicación y una pequeña parte al sitio web de S3",
+            "why": "Una proporción distinta de cero mostraría las instrucciones de interrupción a algunos clientes mientras la aplicación está en buen estado."
+          },
+          {
+            "id": "C",
+            "text": "Failover routing con la aplicación como principal y el sitio web de S3 como secundario",
+            "why": "Usa la aplicación mientras está en buen estado y dirige el tráfico al sitio web de S3 cuando el principal deja de estarlo."
+          },
+          {
+            "id": "D",
+            "text": "Geolocation routing entre la aplicación y el sitio web de S3",
+            "why": "Elegir según la ubicación del cliente no hace que la salud de la aplicación determine cuándo mostrar la página alternativa."
+          }
+        ],
+        "explanation": "La condición decisiva es que el sitio web de S3 debe permanecer como respaldo mientras la aplicación esté en buen estado. Failover routing envía el tráfico al recurso principal cuando está en buen estado y a otro recurso cuando deja de estarlo. Weighted routing implementaría una distribución planificada, mientras que las políticas basadas en ubicación y latencia utilizan otros criterios."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-failover-routing--252715ee",
+      "conceptId": "route53-failover-routing",
+      "secondaryConcepts": [
+        "route53-geolocation-geoproximity",
+        "route53-weighted-routing"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A city museum publishes a visitor portal and has a separate S3 website with temporary-closure information. During normal operation, everyone should reach the portal, including visitors near the S3 website's location. Only an unhealthy portal should cause visitors to reach the closure page. Which DNS design meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use geolocation routing to assign nearby visitors to the S3 website",
+          "correct": false,
+          "why": "It would show closure information to visitors based on location even while the portal is healthy."
+        },
+        {
+          "id": "B",
+          "text": "Use Route 53 failover records for the portal and the S3 website",
+          "correct": true,
+          "why": "Failover records make the S3 website the secondary destination when the primary portal is unhealthy."
+        },
+        {
+          "id": "C",
+          "text": "Use weighted routing to assign a small visitor share to the S3 website",
+          "correct": false,
+          "why": "It would show closure information to some visitors during normal operation."
+        },
+        {
+          "id": "D",
+          "text": "Use geoproximity routing and bias traffic toward the portal's location",
+          "correct": false,
+          "why": "Distance and bias do not make portal health the deciding condition."
+        }
+      ],
+      "explanation": "The closure page is an outage destination, not local content for nearby visitors. Failover routing permits a primary portal and an S3 website secondary, with the switch determined by primary health. Geoproximity and geolocation answer location-based questions instead, while a weighted share would expose the closure page during normal operation.",
+      "keywordCues": [
+        "including visitors near the S3 website's location",
+        "Only an unhealthy portal",
+        "closure page"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-failover.html"
+      ],
+      "es": {
+        "stem": "Un museo municipal publica un portal para visitantes y tiene un sitio web de S3 separado con información sobre cierres temporales. Durante la operación normal, todos deben llegar al portal, incluso quienes estén cerca de la ubicación del sitio web de S3. Solo si el portal deja de estar en buen estado deben llegar a la página de cierre. ¿Qué diseño de DNS cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar geolocation routing para dirigir a los visitantes cercanos al sitio web de S3",
+            "why": "Mostraría información de cierre según la ubicación del visitante aunque el portal esté en buen estado."
+          },
+          {
+            "id": "B",
+            "text": "Usar registros de Route 53 failover para el portal y el sitio web de S3",
+            "why": "Los registros de failover hacen que el sitio web de S3 sea el destino secundario cuando el portal principal deja de estar en buen estado."
+          },
+          {
+            "id": "C",
+            "text": "Usar weighted routing para asignar una pequeña proporción de visitantes al sitio web de S3",
+            "why": "Mostraría información de cierre a algunos visitantes durante la operación normal."
+          },
+          {
+            "id": "D",
+            "text": "Usar geoproximity routing con bias hacia la ubicación del portal",
+            "why": "La distancia y el bias no convierten la salud del portal en la condición decisiva."
+          }
+        ],
+        "explanation": "La página de cierre es un destino para interrupciones, no contenido local para visitantes cercanos. Failover routing permite un portal principal y un sitio web de S3 secundario, con un cambio determinado por la salud del principal. Geoproximity y geolocation responden a criterios de ubicación, mientras que una proporción mediante weighted routing mostraría la página de cierre durante la operación normal."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-failover-routing--56e4ca74",
+      "conceptId": "route53-failover-routing",
+      "secondaryConcepts": [
+        "route53-weighted-routing",
+        "route53-latency-routing",
+        "route53-geolocation-geoproximity"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A nonprofit runs a public donation application and maintains an S3 website with instructions for donating later. The application must serve all normal traffic, and the S3 website must serve traffic only if the application fails its health check. Which TWO Route 53 record-design choices work together to meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a latency-based record for the S3 website as another destination",
+          "correct": false,
+          "why": "Latency is not the required trigger for showing the donation instructions."
+        },
+        {
+          "id": "B",
+          "text": "Configure a failover secondary record for the S3 website",
+          "correct": true,
+          "why": "It provides the fallback destination when the primary is unhealthy."
+        },
+        {
+          "id": "C",
+          "text": "Configure a weighted record for the application with most of the traffic",
+          "correct": false,
+          "why": "A weighted split does not express that all normal traffic must use the application."
+        },
+        {
+          "id": "D",
+          "text": "Configure a failover primary record for the application, associated with its health check",
+          "correct": true,
+          "why": "It makes application health the condition for retaining the primary destination."
+        },
+        {
+          "id": "E",
+          "text": "Configure a geolocation record for the S3 website for nearby donors",
+          "correct": false,
+          "why": "Donor location must not cause the fallback instructions to appear during normal operation."
+        }
+      ],
+      "explanation": "The design needs both sides of an active-passive pair: a health-checked primary for the application and a secondary for the S3 website. Route 53 failover routing supports switching from a healthy primary to a different resource when the primary is unhealthy, including an S3 bucket configured as a website. Weighted, latency-based, and geolocation records select traffic using criteria that do not satisfy the specified health-only fallback.",
+      "keywordCues": [
+        "serve all normal traffic",
+        "only if the application fails its health check",
+        "TWO Route 53 record-design choices"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-failover.html"
+      ],
+      "es": {
+        "stem": "Una organización sin fines de lucro tiene una aplicación pública de donaciones y mantiene un sitio web de S3 con instrucciones para donar más tarde. La aplicación debe atender todo el tráfico normal y el sitio web de S3 debe recibir tráfico solo si la aplicación falla su health check. ¿Qué DOS decisiones de diseño de registros de Route 53 funcionan juntas para cumplir estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar un registro latency-based para el sitio web de S3 como otro destino",
+            "why": "La latencia no es la condición requerida para mostrar las instrucciones de donación."
+          },
+          {
+            "id": "B",
+            "text": "Configurar un registro secundario de failover para el sitio web de S3",
+            "why": "Proporciona el destino de respaldo cuando el principal deja de estar en buen estado."
+          },
+          {
+            "id": "C",
+            "text": "Configurar un registro weighted para la aplicación con la mayor parte del tráfico",
+            "why": "Una distribución weighted no expresa que todo el tráfico normal deba usar la aplicación."
+          },
+          {
+            "id": "D",
+            "text": "Configurar un registro principal de failover para la aplicación, asociado a su health check",
+            "why": "Hace que la salud de la aplicación determine si se mantiene el destino principal."
+          },
+          {
+            "id": "E",
+            "text": "Configurar un registro geolocation para el sitio web de S3 destinado a donantes cercanos",
+            "why": "La ubicación del donante no debe hacer que aparezcan las instrucciones alternativas durante la operación normal."
+          }
+        ],
+        "explanation": "El diseño necesita ambas partes de un par activo-pasivo: un principal asociado a una health check para la aplicación y un secundario para el sitio web de S3. Route 53 failover routing permite pasar de un principal en buen estado a otro recurso cuando el principal deja de estarlo, incluido un bucket de S3 configurado como sitio web. Los registros weighted, latency-based y geolocation seleccionan el tráfico según criterios que no cumplen el requisito de respaldo activado solo por la salud."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-failover-routing--97238d8c",
+      "conceptId": "route53-failover-routing",
+      "secondaryConcepts": [
+        "route53-geolocation-geoproximity",
+        "route53-latency-routing",
+        "route53-weighted-routing"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer uses a Route 53 private hosted zone for an internal inventory service. A secondary service is ready, but employees should use it only when the primary service fails its health check. Which routing policy meets the requirement without making the secondary an active destination during normal operations?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Latency-based routing with records for both service locations",
+          "correct": false,
+          "why": "Routing by lowest latency could select the secondary while the primary is healthy."
+        },
+        {
+          "id": "B",
+          "text": "Weighted routing with a small allocation to the secondary service",
+          "correct": false,
+          "why": "The allocation would make the secondary an active destination during normal operations."
+        },
+        {
+          "id": "C",
+          "text": "Failover routing with primary and secondary records in the private hosted zone",
+          "correct": true,
+          "why": "Failover routing supports private hosted zones and the requested primary-to-secondary behavior."
+        },
+        {
+          "id": "D",
+          "text": "Geoproximity routing with bias toward the primary service location",
+          "correct": false,
+          "why": "Distance and bias do not express the required health-dependent switch."
+        }
+      ],
+      "explanation": "This is an active-passive requirement within a private hosted zone. Route 53 supports failover routing there, using a secondary resource when the primary is unhealthy. A weighted allocation would deliberately send some normal traffic to the secondary; geoproximity and latency-based routing select destinations for reasons other than the primary's health.",
+      "keywordCues": [
+        "private hosted zone",
+        "only when the primary service fails its health check",
+        "without making the secondary an active destination"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-failover.html"
+      ],
+      "es": {
+        "stem": "Una empresa manufacturera usa una private hosted zone de Route 53 para un servicio interno de inventario. Tiene listo un servicio secundario, pero los empleados deben usarlo solo cuando el servicio principal falle su health check. ¿Qué política de enrutamiento cumple el requisito sin convertir al secundario en un destino activo durante la operación normal?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Latency-based routing con registros para ambas ubicaciones del servicio",
+            "why": "Enrutar según la menor latencia podría seleccionar al secundario aunque el principal esté en buen estado."
+          },
+          {
+            "id": "B",
+            "text": "Weighted routing con una pequeña asignación al servicio secundario",
+            "why": "Esa asignación convertiría al secundario en un destino activo durante la operación normal."
+          },
+          {
+            "id": "C",
+            "text": "Failover routing con registros principales y secundarios en la private hosted zone",
+            "why": "Failover routing admite private hosted zones y el comportamiento solicitado de principal a secundario."
+          },
+          {
+            "id": "D",
+            "text": "Geoproximity routing con bias hacia la ubicación del servicio principal",
+            "why": "La distancia y el bias no expresan el cambio requerido según la salud del principal."
+          }
+        ],
+        "explanation": "Este es un requisito activo-pasivo dentro de una private hosted zone. Route 53 admite failover routing allí y usa el recurso secundario cuando el principal deja de estar en buen estado. Una asignación mediante weighted routing enviaría deliberadamente parte del tráfico normal al secundario; geoproximity y latency-based routing seleccionan destinos por criterios distintos de la salud del principal."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "route53-failover-routing--r0",
+      "conceptId": "route53-failover-routing",
+      "kind": "recall",
+      "prompt": "A primary site has a standby S3 website that should appear only after primary failure. Which Route 53 policy fits, and why?",
+      "promptEs": "Un sitio principal tiene un sitio web de S3 de respaldo que debe aparecer solo tras una falla. ¿Qué política de Route 53 usarías y por qué?",
+      "idealAnswer": "Use Route 53 failover routing with primary and secondary records. It directs traffic to the primary while healthy and to the S3 website when the primary is unhealthy.",
+      "rubric": [
+        "Names Route 53 failover routing.",
+        "Identifies the primary and secondary destinations.",
+        "Explains that primary health determines the switch."
+      ]
+    },
+    {
+      "id": "route53-failover-routing--r1",
+      "conceptId": "route53-failover-routing",
+      "kind": "why-not",
+      "prompt": "Why is weighted routing unsuitable when a recovery site must receive no traffic while the primary is healthy?",
+      "promptEs": "¿Por qué weighted routing no sirve si un sitio de recuperación no debe recibir tráfico mientras el principal está en buen estado?",
+      "idealAnswer": "Weighted routing is for distributing traffic by percentage, so giving the recovery site a share would send it normal traffic. Failover routing expresses the required healthy-primary, unhealthy-primary-to-secondary behavior.",
+      "rubric": [
+        "States that weighted routing represents a percentage split.",
+        "Explains why a normal traffic share violates the standby requirement.",
+        "Contrasts it with health-dependent failover routing."
+      ]
+    }
+  ]
+}

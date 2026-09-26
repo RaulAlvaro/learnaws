@@ -72,3 +72,5 @@ export const AuditSchema = z.object({
   recall: z.array(z.object({ index: z.number().int(), verdict: z.enum(["pass", "fail"]), issue: z.string() })),
 });
 export type Audit = z.infer<typeof AuditSchema>;
+
+export const CardFixSchema = z.object({ card: z.object({ en: CardBodySchema, es: CardBodySchema }) });

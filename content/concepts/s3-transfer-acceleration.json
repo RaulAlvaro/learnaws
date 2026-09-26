@@ -1,0 +1,357 @@
+{
+  "conceptId": "s3-transfer-acceleration",
+  "card": {
+    "en": {
+      "tldr": "S3 Transfer Acceleration speeds long-distance transfers into a general purpose S3 bucket by routing data through globally distributed edge locations. Choose it when geographically dispersed clients upload to one bucket and upload performance—not content delivery or application failover—is the requirement.",
+      "whenToUse": [
+        "Customers around the world upload to one centralized general purpose S3 bucket.",
+        "Regular cross-continent uploads cannot use all available internet bandwidth."
+      ],
+      "keyFacts": [
+        "Transfer Acceleration is enabled on the bucket and uses an optimized network path from an edge location to S3.",
+        "Accelerated requests use bucket-name.s3-accelerate.amazonaws.com; the dual-stack variant supports IPv6.",
+        "The bucket name must be DNS-compliant and contain no periods, and requests must use virtual-hosted style.",
+        "The speed increase can take up to 20 minutes after enabling the feature.",
+        "Additional data transfer charges might apply."
+      ],
+      "gotchas": [
+        "Enabling the feature does not make requests to regular S3 endpoints use the accelerated path.",
+        "A bucket name containing periods cannot be used with Transfer Acceleration.",
+        "CloudFront uses edge locations too, but edge caching is not the same requirement as accelerating uploads into S3."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cloudfront-fundamentals",
+          "difference": "Choose CloudFront for edge caching of delivered content; choose S3 Transfer Acceleration for long-distance transfers into a bucket."
+        },
+        {
+          "concept": "global-accelerator",
+          "difference": "Choose Global Accelerator for static anycast IPs, non-HTTP TCP/UDP applications, or fast Regional failover—not accelerated S3 bucket uploads."
+        }
+      ],
+      "examCues": [
+        "uploads from customers across continents",
+        "one centralized S3 bucket",
+        "available upload bandwidth is underused",
+        "accelerated uploads over IPv6"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Transfer Acceleration acelera las transferencias de larga distancia hacia un bucket de S3 de propósito general mediante ubicaciones de borde distribuidas globalmente. Elígelo cuando clientes dispersos geográficamente suben archivos a un solo bucket y el requisito es mejorar las cargas, no distribuir contenido ni proporcionar conmutación por error de aplicaciones.",
+      "whenToUse": [
+        "Clientes de todo el mundo suben archivos a un único bucket de S3 de propósito general.",
+        "Las cargas entre continentes no aprovechan todo el ancho de banda disponible de internet."
+      ],
+      "keyFacts": [
+        "Transfer Acceleration se habilita en el bucket y usa una ruta de red optimizada desde una ubicación de borde hasta S3.",
+        "Las solicitudes aceleradas usan bucket-name.s3-accelerate.amazonaws.com; la variante dual-stack admite IPv6.",
+        "El nombre del bucket debe cumplir con DNS y no contener puntos; las solicitudes deben usar virtual-hosted style.",
+        "La mejora de velocidad puede tardar hasta 20 minutos después de habilitar la función.",
+        "Podrían aplicarse cargos adicionales por transferencia de datos."
+      ],
+      "gotchas": [
+        "Habilitar la función no hace que las solicitudes a endpoints normales de S3 usen la ruta acelerada.",
+        "No puedes usar Transfer Acceleration con un nombre de bucket que contenga puntos.",
+        "CloudFront también usa ubicaciones de borde, pero almacenar contenido en caché no equivale a acelerar cargas hacia S3."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cloudfront-fundamentals",
+          "difference": "Elige CloudFront para almacenar en caché el contenido que entregas; elige S3 Transfer Acceleration para transferencias de larga distancia hacia un bucket."
+        },
+        {
+          "concept": "global-accelerator",
+          "difference": "Elige Global Accelerator si necesitas IP anycast estáticas, aplicaciones TCP/UDP no HTTP o conmutación por error rápida entre Regions, no para acelerar cargas a un bucket de S3."
+        }
+      ],
+      "examCues": [
+        "uploads from customers across continents",
+        "one centralized S3 bucket",
+        "available upload bandwidth is underused",
+        "accelerated uploads over IPv6"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-transfer-acceleration--b0b0c5a1",
+      "conceptId": "s3-transfer-acceleration",
+      "secondaryConcepts": [
+        "cloudfront-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A nonprofit has enabled S3 Transfer Acceleration on its general purpose bucket for volunteers who upload media from distant countries. A new volunteer application must connect to the bucket over IPv6 while using the accelerated path. The bucket name meets the feature's naming requirements. Which endpoint should the application use?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A CloudFront distribution endpoint with the bucket configured as its origin.",
+          "correct": false,
+          "why": "A CloudFront distribution does not give this upload application the requested S3 accelerated path."
+        },
+        {
+          "id": "B",
+          "text": "A regular S3 endpoint for the bucket with IPv6 connectivity.",
+          "correct": false,
+          "why": "A regular S3 endpoint can be used for standard transfers but does not use the accelerated path."
+        },
+        {
+          "id": "C",
+          "text": "The bucket-name.s3-accelerate.amazonaws.com endpoint.",
+          "correct": false,
+          "why": "For the stated IPv6 requirement, the documented accelerate option is the dual-stack endpoint."
+        },
+        {
+          "id": "D",
+          "text": "The bucket-name.s3-accelerate.dualstack.amazonaws.com endpoint.",
+          "correct": true,
+          "why": "The accelerate dual-stack endpoint supports IPv6 connections to a bucket enabled for Transfer Acceleration."
+        }
+      ],
+      "explanation": "The application needs both IPv6 connectivity and S3's accelerated transfer path. The documented endpoint for connecting to an enabled bucket over IPv6 is the accelerate dual-stack endpoint. A regular S3 endpoint does not provide accelerated transfers, even if it meets the connectivity requirement. The non-dual-stack accelerate endpoint is not the documented IPv6 choice.",
+      "keywordCues": [
+        "connect to the bucket over IPv6",
+        "using the accelerated path",
+        "enabled S3 Transfer Acceleration"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"
+      ],
+      "es": {
+        "stem": "Una organización sin fines de lucro habilitó S3 Transfer Acceleration en su bucket de propósito general para voluntarios que suben contenido multimedia desde países lejanos. Una nueva aplicación para voluntarios debe conectarse al bucket mediante IPv6 y usar la ruta acelerada. El nombre del bucket cumple los requisitos de la función. ¿Qué endpoint debe usar la aplicación?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Un endpoint de distribución de CloudFront con el bucket configurado como origen.",
+            "why": "Una distribución de CloudFront no proporciona a esta aplicación de carga la ruta acelerada de S3 solicitada."
+          },
+          {
+            "id": "B",
+            "text": "Un endpoint normal de S3 para el bucket con conectividad IPv6.",
+            "why": "Un endpoint normal de S3 puede usarse para transferencias estándar, pero no utiliza la ruta acelerada."
+          },
+          {
+            "id": "C",
+            "text": "El endpoint bucket-name.s3-accelerate.amazonaws.com.",
+            "why": "Para el requisito de IPv6, la opción acelerada documentada es el dual-stack endpoint."
+          },
+          {
+            "id": "D",
+            "text": "El endpoint bucket-name.s3-accelerate.dualstack.amazonaws.com.",
+            "why": "El accelerate dual-stack endpoint admite conexiones IPv6 a un bucket con Transfer Acceleration habilitado."
+          }
+        ],
+        "explanation": "La aplicación necesita tanto conectividad IPv6 como la ruta de transferencia acelerada de S3. El endpoint documentado para conectarse mediante IPv6 a un bucket con la función habilitada es el accelerate dual-stack endpoint. Un endpoint normal de S3 no proporciona transferencias aceleradas aunque cumpla el requisito de conectividad. El accelerate endpoint sin dual-stack no es la opción documentada para IPv6."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-transfer-acceleration--896f8827",
+      "conceptId": "s3-transfer-acceleration",
+      "secondaryConcepts": [
+        "cloudfront-fundamentals",
+        "global-accelerator"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "An online marketplace receives product videos from sellers across continents into a single general purpose S3 bucket. Its DNS-compliant bucket name has no periods, and sellers make virtual-hosted style requests. The marketplace wants those requests to use the S3 accelerated transfer path rather than standard transfers. Which two actions meet this requirement? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a CloudFront distribution with the bucket as its origin.",
+          "correct": false,
+          "why": "A CloudFront distribution does not enable S3 Transfer Acceleration for the sellers' uploads."
+        },
+        {
+          "id": "B",
+          "text": "Enable S3 Transfer Acceleration on the bucket.",
+          "correct": true,
+          "why": "The bucket must have Transfer Acceleration enabled to use the feature."
+        },
+        {
+          "id": "C",
+          "text": "Send uploads to the bucket's s3-accelerate.amazonaws.com endpoint.",
+          "correct": true,
+          "why": "Clients must use the bucket's accelerate endpoint to access the accelerated path."
+        },
+        {
+          "id": "D",
+          "text": "Route the upload clients through AWS Global Accelerator.",
+          "correct": false,
+          "why": "Global Accelerator addresses application connectivity rather than enabling accelerated transfers to this S3 bucket."
+        },
+        {
+          "id": "E",
+          "text": "Send uploads to the bucket's regular S3 endpoint.",
+          "correct": false,
+          "why": "Regular endpoint requests continue to use standard data transfer."
+        }
+      ],
+      "explanation": "The bucket already meets the stated naming and request-style requirements. To use Transfer Acceleration, the marketplace must enable it on the bucket and direct sellers to the bucket's accelerate endpoint. Sending requests to the regular S3 endpoint instead keeps them on standard transfers. CloudFront and Global Accelerator address different edge or application requirements and do not replace these two steps.",
+      "keywordCues": [
+        "single general purpose S3 bucket",
+        "DNS-compliant bucket name has no periods",
+        "virtual-hosted style requests",
+        "accelerated transfer path rather than standard transfers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"
+      ],
+      "es": {
+        "stem": "Un marketplace recibe videos de productos de vendedores de varios continentes en un único bucket de S3 de propósito general. El nombre del bucket cumple con DNS y no tiene puntos; los vendedores hacen solicitudes virtual-hosted style. El marketplace quiere que esas solicitudes usen la ruta de transferencia acelerada de S3 en lugar de transferencias estándar. ¿Qué dos acciones cumplen este requisito? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una distribución de CloudFront con el bucket como origen.",
+            "why": "Una distribución de CloudFront no habilita S3 Transfer Acceleration para las cargas de los vendedores."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar S3 Transfer Acceleration en el bucket.",
+            "why": "La función debe estar habilitada en el bucket para poder usarla."
+          },
+          {
+            "id": "C",
+            "text": "Enviar las cargas al s3-accelerate.amazonaws.com endpoint del bucket.",
+            "why": "Los clientes deben usar el accelerate endpoint del bucket para acceder a la ruta acelerada."
+          },
+          {
+            "id": "D",
+            "text": "Enrutar los clientes de carga mediante AWS Global Accelerator.",
+            "why": "Global Accelerator atiende la conectividad de aplicaciones, no habilita transferencias aceleradas hacia este bucket de S3."
+          },
+          {
+            "id": "E",
+            "text": "Enviar las cargas al endpoint normal de S3 del bucket.",
+            "why": "Las solicitudes al endpoint normal siguen usando transferencia de datos estándar."
+          }
+        ],
+        "explanation": "El bucket ya cumple los requisitos indicados de nombre y estilo de solicitud. Para usar Transfer Acceleration, el marketplace debe habilitarlo en el bucket y dirigir a los vendedores al accelerate endpoint del bucket. Si las solicitudes se envían al endpoint normal de S3, seguirán siendo transferencias estándar. CloudFront y Global Accelerator atienden otras necesidades de borde o de aplicaciones y no reemplazan estos dos pasos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-transfer-acceleration--88cf5e04",
+      "conceptId": "s3-transfer-acceleration",
+      "secondaryConcepts": [
+        "cloudfront-fundamentals",
+        "global-accelerator"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A wildlife research organization receives large camera archives from field teams on several continents. Every team uploads to the same general purpose S3 bucket, and upload tests show that the existing internet path does not use all available bandwidth. The organization does not need to cache files for viewers or provide static application IP addresses. Which solution improves upload performance with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Global Accelerator to provide static anycast IP addresses for the uploads.",
+          "correct": false,
+          "why": "The teams do not need static application IP addresses or application failover; they need accelerated transfers into S3."
+        },
+        {
+          "id": "B",
+          "text": "Keep using the bucket's regular S3 endpoint for uploads from every field team.",
+          "correct": false,
+          "why": "Regular endpoint requests remain standard transfers and do not use the Transfer Acceleration path."
+        },
+        {
+          "id": "C",
+          "text": "Place a CloudFront distribution in front of the S3 bucket for the field teams.",
+          "correct": false,
+          "why": "CloudFront edge caching addresses content delivery, not the stated need to accelerate long-distance uploads into the bucket."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Transfer Acceleration on the bucket and have teams use its accelerate endpoint.",
+          "correct": true,
+          "why": "Transfer Acceleration is designed for geographically distributed uploads into a centralized general purpose S3 bucket."
+        }
+      ],
+      "explanation": "The deciding requirement is faster uploads from multiple continents into one general purpose S3 bucket. S3 Transfer Acceleration sends incoming data through an edge location and an optimized path to S3; clients must use the accelerate endpoint. CloudFront is a plausible edge-based choice, but its caching purpose does not address this upload requirement. Global Accelerator solves different application connectivity requirements.",
+      "keywordCues": [
+        "several continents",
+        "same general purpose S3 bucket",
+        "does not use all available bandwidth",
+        "does not need to cache files"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación de fauna recibe grandes archivos de cámaras de equipos de campo en varios continentes. Todos los equipos suben los archivos al mismo bucket de S3 de propósito general, y las pruebas muestran que la ruta actual por internet no aprovecha todo el ancho de banda disponible. La organización no necesita almacenar archivos en caché para los lectores ni ofrecer IP estáticas para una aplicación. ¿Qué solución mejora el rendimiento de las cargas con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Global Accelerator para proporcionar IP anycast estáticas a las cargas.",
+            "why": "Los equipos no necesitan IP estáticas de aplicación ni conmutación por error; necesitan acelerar las transferencias hacia S3."
+          },
+          {
+            "id": "B",
+            "text": "Seguir usando el endpoint normal del bucket de S3 para las cargas de todos los equipos.",
+            "why": "Las solicitudes al endpoint normal siguen siendo transferencias estándar y no usan la ruta de Transfer Acceleration."
+          },
+          {
+            "id": "C",
+            "text": "Colocar una distribución de CloudFront delante del bucket de S3 para los equipos de campo.",
+            "why": "La caché de CloudFront sirve para distribuir contenido, no para cumplir el requisito de acelerar cargas de larga distancia hacia el bucket."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Transfer Acceleration en el bucket y hacer que los equipos usen su accelerate endpoint.",
+            "why": "Transfer Acceleration está diseñado para cargas desde distintas partes del mundo hacia un bucket de S3 de propósito general centralizado."
+          }
+        ],
+        "explanation": "El requisito decisivo es acelerar cargas desde varios continentes hacia un único bucket de S3 de propósito general. S3 Transfer Acceleration dirige los datos por una ubicación de borde y una ruta optimizada hacia S3; los clientes deben usar el accelerate endpoint. CloudFront parece una opción por sus ubicaciones de borde, pero su función de caché no resuelve este requisito de carga. Global Accelerator atiende otras necesidades de conectividad de aplicaciones."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-transfer-acceleration--r0",
+      "conceptId": "s3-transfer-acceleration",
+      "kind": "recall",
+      "prompt": "Remote teams upload large files to one S3 bucket but underuse available bandwidth. What feature would you choose, and what must clients change?",
+      "promptEs": "Equipos remotos suben archivos grandes a un solo bucket de S3, pero no aprovechan el ancho de banda disponible. ¿Qué función eliges y qué deben cambiar los clientes?",
+      "idealAnswer": "Choose S3 Transfer Acceleration for long-distance uploads into a general purpose bucket. Enable it on the bucket and have clients use the bucket's accelerate endpoint.",
+      "rubric": [
+        "Names S3 Transfer Acceleration.",
+        "Connects the choice to long-distance uploads into one general purpose bucket.",
+        "States that the feature must be enabled and clients must use the accelerate endpoint."
+      ]
+    },
+    {
+      "id": "s3-transfer-acceleration--r1",
+      "conceptId": "s3-transfer-acceleration",
+      "kind": "why-not",
+      "prompt": "Why isn't CloudFront edge caching the answer when global users need faster uploads into one S3 bucket?",
+      "promptEs": "¿Por qué la caché de CloudFront no resuelve la necesidad de acelerar cargas de usuarios globales hacia un solo bucket de S3?",
+      "idealAnswer": "CloudFront edge caching is for delivering content, whereas the requirement is faster long-distance transfers into S3. S3 Transfer Acceleration uses edge locations and an optimized path to the bucket for those transfers.",
+      "rubric": [
+        "Distinguishes content delivery or caching from uploads into S3.",
+        "Identifies S3 Transfer Acceleration as the fitting feature.",
+        "Mentions the edge-to-S3 optimized transfer path."
+      ]
+    }
+  ]
+}

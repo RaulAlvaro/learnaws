@@ -1,0 +1,247 @@
+{
+  "conceptId": "encryption-at-rest-vs-in-transit",
+  "card": {
+    "en": {
+      "tldr": "Identify where data needs protection. Use encryption at rest, such as encryption with AWS KMS, for stored data; use TLS with an AWS Certificate Manager (ACM) certificate for data moving across a connection; use client-side encryption when data must be encrypted before it leaves the client.",
+      "whenToUse": [
+        "Stored data must be unintelligible to unauthorized parties: choose encryption at rest.",
+        "A connection must protect data while it travels: choose TLS.",
+        "Data must be encrypted before it reaches AWS: choose client-side encryption."
+      ],
+      "keyFacts": [
+        "Encryption renders data unintelligible to unauthorized access.",
+        "AWS KMS is an example of a mechanism for encryption at rest.",
+        "ACM certificates used with TLS are an example of encryption in transit.",
+        "Client-side encryption acts before data is sent to AWS."
+      ],
+      "gotchas": [
+        "Encrypting stored data does not, by itself, satisfy a requirement to use TLS on a connection.",
+        "TLS on a connection does not, by itself, encrypt data in storage.",
+        "If data must be encrypted before it reaches AWS, encryption performed only after arrival is too late."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Encryption at rest vs. TLS",
+          "difference": "Encryption at rest protects stored data; TLS protects data on a connection."
+        },
+        {
+          "concept": "Encryption at rest vs. client-side encryption",
+          "difference": "Client-side encryption meets a requirement to encrypt data before it leaves the client."
+        }
+      ],
+      "examCues": [
+        "stored records must be encrypted",
+        "protect the browser-to-endpoint connection",
+        "encrypted before leaving the device",
+        "both stored data and data in transit"
+      ]
+    },
+    "es": {
+      "tldr": "Identifica dónde se necesita proteger los datos. Usa cifrado en reposo, por ejemplo con AWS KMS, para datos almacenados; usa TLS con un certificado de AWS Certificate Manager (ACM) para datos que viajan por una conexión; usa cifrado del lado del cliente cuando los datos deban cifrarse antes de salir del cliente.",
+      "whenToUse": [
+        "Los datos almacenados deben ser ininteligibles para personas no autorizadas: elige cifrado en reposo.",
+        "Una conexión debe proteger los datos mientras viajan: elige TLS.",
+        "Los datos deben cifrarse antes de llegar a AWS: elige cifrado del lado del cliente."
+      ],
+      "keyFacts": [
+        "El cifrado vuelve los datos ininteligibles para el acceso no autorizado.",
+        "AWS KMS es un ejemplo de mecanismo para el cifrado en reposo.",
+        "Los certificados de ACM usados con TLS son un ejemplo de cifrado en tránsito.",
+        "El cifrado del lado del cliente actúa antes de enviar los datos a AWS."
+      ],
+      "gotchas": [
+        "Cifrar los datos almacenados no satisface, por sí solo, un requisito de usar TLS en una conexión.",
+        "TLS en una conexión no cifra, por sí solo, los datos almacenados.",
+        "Si los datos deben cifrarse antes de llegar a AWS, cifrarlos solo después de su llegada es demasiado tarde."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Cifrado en reposo vs. TLS",
+          "difference": "El cifrado en reposo protege datos almacenados; TLS protege datos en una conexión."
+        },
+        {
+          "concept": "Cifrado en reposo vs. cifrado del lado del cliente",
+          "difference": "El cifrado del lado del cliente cumple un requisito de cifrar los datos antes de que salgan del cliente."
+        }
+      ],
+      "examCues": [
+        "stored records must be encrypted",
+        "protect the browser-to-endpoint connection",
+        "encrypted before leaving the device",
+        "both stored data and data in transit"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/data-protection.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "encryption-at-rest-vs-in-transit--5eaae3ad",
+      "conceptId": "encryption-at-rest-vs-in-transit",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher receives manuscripts over connections that already use TLS. Its new policy requires manuscripts to be encrypted while stored in AWS, without adding encryption logic to the submission application. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an ACM certificate with TLS for the submission connection.",
+          "correct": false,
+          "why": "TLS protects the connection, which is already covered, rather than the stored manuscripts."
+        },
+        {
+          "id": "B",
+          "text": "Encrypt manuscripts in the submission application before sending them to AWS.",
+          "correct": false,
+          "why": "This adds the application encryption logic that the publisher wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Use encryption at rest with AWS KMS for the stored manuscripts.",
+          "correct": true,
+          "why": "This targets the stored manuscripts without requiring the submission application to encrypt them."
+        },
+        {
+          "id": "D",
+          "text": "Set policies governing access to encryption keys, but do not encrypt the manuscripts.",
+          "correct": false,
+          "why": "Controlling access to keys does not make unencrypted manuscripts unintelligible."
+        }
+      ],
+      "explanation": "The deciding requirement concerns manuscripts while they are stored, not while they travel to AWS. Encryption at rest with AWS KMS addresses that layer without adding client-side encryption logic. An ACM certificate used with TLS protects a connection, so it does not resolve the new storage requirement.",
+      "keywordCues": [
+        "connections that already use TLS",
+        "encrypted while stored in AWS",
+        "without adding encryption logic"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/data-protection.html"
+      ],
+      "es": {
+        "stem": "Una editorial recibe manuscritos mediante conexiones que ya usan TLS. Su nueva política exige que los manuscritos estén cifrados mientras se almacenan en AWS, sin agregar lógica de cifrado a la aplicación de recepción. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un certificado de ACM con TLS para la conexión de recepción.",
+            "why": "TLS protege la conexión, que ya está cubierta, y no los manuscritos almacenados."
+          },
+          {
+            "id": "B",
+            "text": "Cifrar los manuscritos en la aplicación de recepción antes de enviarlos a AWS.",
+            "why": "Esto agrega la lógica de cifrado en la aplicación que la editorial quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Usar cifrado en reposo con AWS KMS para los manuscritos almacenados.",
+            "why": "Esto protege los manuscritos almacenados sin exigir que la aplicación de recepción los cifre."
+          },
+          {
+            "id": "D",
+            "text": "Establecer políticas de acceso a las claves de cifrado, pero no cifrar los manuscritos.",
+            "why": "Controlar el acceso a las claves no vuelve ininteligibles los manuscritos sin cifrar."
+          }
+        ],
+        "explanation": "El requisito decisivo se refiere a los manuscritos mientras están almacenados, no mientras viajan a AWS. El cifrado en reposo con AWS KMS protege esa capa sin agregar lógica de cifrado del lado del cliente. Un certificado de ACM usado con TLS protege una conexión, por lo que no resuelve el nuevo requisito de almacenamiento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "encryption-at-rest-vs-in-transit--0f720ead",
+      "conceptId": "encryption-at-rest-vs-in-transit",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company already encrypts customer records while they are stored in AWS. A security review finds that its public web endpoint must also protect the browser-to-endpoint connection with TLS. The company does not require encryption before data leaves the browser. Which solution meets the new requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Encrypt records in the browser before they are submitted.",
+          "correct": false,
+          "why": "Client-side encryption is not the requested TLS protection for the connection."
+        },
+        {
+          "id": "B",
+          "text": "Use an ACM certificate with TLS on the public web endpoint.",
+          "correct": true,
+          "why": "An ACM certificate used with TLS addresses the specified browser-to-endpoint connection."
+        },
+        {
+          "id": "C",
+          "text": "Change access policies for the keys protecting stored records.",
+          "correct": false,
+          "why": "Key access policies do not provide TLS for the public web endpoint."
+        },
+        {
+          "id": "D",
+          "text": "Apply additional AWS KMS encryption to the stored customer records.",
+          "correct": false,
+          "why": "Additional storage encryption does not provide TLS for the browser connection."
+        }
+      ],
+      "explanation": "The records are already encrypted while stored, so the missing control is protection for data in transit. An ACM certificate used with TLS addresses the browser-to-endpoint connection. More AWS KMS encryption of the stored records targets the wrong layer, while browser-side encryption is not the TLS control requested.",
+      "keywordCues": [
+        "already encrypts customer records while they are stored",
+        "browser-to-endpoint connection with TLS",
+        "does not require encryption before data leaves the browser"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/data-protection.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas ya cifra los registros de clientes mientras están almacenados en AWS. Una revisión de seguridad determina que su endpoint web público también debe proteger con TLS la conexión entre el navegador y el endpoint. La empresa no exige cifrar los datos antes de que salgan del navegador. ¿Qué solución cumple el nuevo requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Cifrar los registros en el navegador antes de enviarlos.",
+            "why": "El cifrado del lado del cliente no es la protección TLS solicitada para la conexión."
+          },
+          {
+            "id": "B",
+            "text": "Usar un certificado de ACM con TLS en el endpoint web público.",
+            "why": "Un certificado de ACM usado con TLS protege la conexión especificada entre el navegador y el endpoint."
+          },
+          {
+            "id": "C",
+            "text": "Cambiar las políticas de acceso a las claves que protegen los registros almacenados.",
+            "why": "Las políticas de acceso a claves no proporcionan TLS para el endpoint web público."
+          },
+          {
+            "id": "D",
+            "text": "Aplicar cifrado adicional con AWS KMS a los registros de clientes almacenados.",
+            "why": "El cifrado adicional del almacenamiento no proporciona TLS para la conexión del navegador."
+          }
+        ],
+        "explanation": "Los registros ya están cifrados mientras están almacenados, así que falta proteger los datos en tránsito. Un certificado de ACM usado con TLS protege la conexión entre el navegador y el endpoint. Más cifrado con AWS KMS para los registros almacenados apunta a la capa equivocada, mientras que el cifrado en el navegador no es el control TLS solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "encryption-at-rest-vs-in-transit--r0",
+      "conceptId": "encryption-at-rest-vs-in-transit",
+      "kind": "recall",
+      "prompt": "A workload must protect stored records and the browser-to-endpoint connection. Which AWS mechanisms fit each requirement, and why?",
+      "promptEs": "Una carga de trabajo debe proteger registros almacenados y la conexión entre el navegador y el endpoint. ¿Qué mecanismos de AWS corresponden a cada requisito y por qué?",
+      "idealAnswer": "Use encryption at rest with AWS KMS for the stored records. Use an ACM certificate with TLS for the browser-to-endpoint connection because that requirement concerns data in transit.",
+      "rubric": [
+        "Identifies AWS KMS encryption at rest for stored records.",
+        "Identifies an ACM certificate with TLS for the browser-to-endpoint connection.",
+        "Distinguishes storage protection from connection protection."
+      ]
+    }
+  ]
+}

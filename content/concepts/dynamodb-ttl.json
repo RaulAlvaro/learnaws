@@ -1,0 +1,233 @@
+{
+  "conceptId": "dynamodb-ttl",
+  "card": {
+    "en": {
+      "tldr": "DynamoDB Time to Live (TTL) marks individual items for automatic deletion using an expiration timestamp. Choose it for temporary data when deletion within a few days is acceptable, not when records must disappear at an exact deadline.",
+      "whenToUse": [
+        "DynamoDB sessions or temporary records need per-item expiration without a cleanup job.",
+        "Expired records can remain stored briefly while DynamoDB deletes them automatically.",
+        "The initial TTL deletion should not consume write throughput in the Region where it occurs."
+      ],
+      "keyFacts": [
+        "Enable TTL on the table and designate an attribute containing a Number in Unix epoch seconds.",
+        "DynamoDB typically deletes expired items within a few days, not necessarily at expiration.",
+        "An expired item pending deletion can still be updated; moving its TTL timestamp into the future or removing the attribute prevents its TTL deletion.",
+        "Filter expressions can exclude expired items from Scan and Query results while deletion is pending.",
+        "With current-version global tables, TTL deletions replicate; replica Regions incur replicated write capacity usage and applicable charges."
+      ],
+      "gotchas": [
+        "A TTL value stored as a string is ignored, even if it looks like a timestamp.",
+        "TTL alone does not keep expired items out of query results immediately.",
+        "No write throughput for the initial TTL deletion does not mean free replicated deletions in global tables."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "per-item expiration for temporary sessions",
+        "delete expired DynamoDB items without a cleanup job",
+        "hide expired items while deletion is pending",
+        "account for TTL deletes in replica Regions"
+      ]
+    },
+    "es": {
+      "tldr": "DynamoDB Time to Live (TTL) marca elementos individuales para su eliminación automática mediante una marca de tiempo de vencimiento. Elígelo para datos temporales cuando sea aceptable que la eliminación tarde unos días, no cuando los registros deban desaparecer en un momento exacto.",
+      "whenToUse": [
+        "Las sesiones o los registros temporales en DynamoDB necesitan vencimiento por elemento sin una tarea de limpieza.",
+        "Los registros vencidos pueden permanecer almacenados brevemente mientras DynamoDB los elimina automáticamente.",
+        "La eliminación TTL inicial no debe consumir capacidad de escritura en la Región donde ocurre."
+      ],
+      "keyFacts": [
+        "Debes habilitar TTL en la tabla y designar un atributo de tipo Number con la hora Unix en segundos.",
+        "DynamoDB suele eliminar los elementos vencidos dentro de unos días, no necesariamente al vencer.",
+        "Todavía puedes actualizar un elemento vencido pendiente de eliminación; si cambias su marca TTL a una fecha futura o quitas el atributo, evitas su eliminación por TTL.",
+        "Puedes usar filter expressions para excluir elementos vencidos de los resultados de Scan y Query mientras esperan eliminación.",
+        "Con la versión actual de global tables, las eliminaciones TTL se replican; las Regiones réplica consumen capacidad de escritura replicada y generan los cargos correspondientes."
+      ],
+      "gotchas": [
+        "TTL ignora un valor almacenado como string, aunque parezca una marca de tiempo.",
+        "TTL por sí solo no impide que los elementos vencidos aparezcan de inmediato en los resultados de las consultas.",
+        "Que la eliminación TTL inicial no consuma capacidad de escritura no significa que las eliminaciones replicadas en global tables sean gratuitas."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "per-item expiration for temporary sessions",
+        "delete expired DynamoDB items without a cleanup job",
+        "hide expired items while deletion is pending",
+        "account for TTL deletes in replica Regions"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dynamodb-ttl--4821dd0d",
+      "conceptId": "dynamodb-ttl",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company stores short-lived checkout reservations in a DynamoDB table. Each reservation has its own expiration time, and removal within a few days is acceptable. The team wants to avoid a recurring cleanup process and avoid write throughput for the initial deletion. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store numeric expiration times but leave TTL disabled and filter expired reservations from queries.",
+          "correct": false,
+          "why": "Filtering query results does not delete the stored reservations."
+        },
+        {
+          "id": "B",
+          "text": "Enable TTL and store each expiration as a Number containing Unix epoch seconds.",
+          "correct": true,
+          "why": "This supplies the required TTL format for automatic deletion without write throughput for the initial delete."
+        },
+        {
+          "id": "C",
+          "text": "Enable TTL and store each expiration as a Unix epoch timestamp string.",
+          "correct": false,
+          "why": "DynamoDB ignores TTL values that are not of type Number."
+        },
+        {
+          "id": "D",
+          "text": "Run a recurring Scan and issue DeleteItem requests for reservations past their expiration time.",
+          "correct": false,
+          "why": "A recurring deletion process adds operational work and uses writes for its deletes."
+        }
+      ],
+      "explanation": "The deciding requirements are per-item expiration, tolerance for deletion within a few days, and no recurring cleanup process. TTL automatically deletes items whose designated attribute contains a Number in Unix epoch seconds, without consuming write throughput for the initial deletion. A timestamp string is ignored by TTL, while filtering alone does not remove stored items.",
+      "keywordCues": [
+        "Each reservation has its own expiration time",
+        "removal within a few days is acceptable",
+        "avoid a recurring cleanup process",
+        "avoid write throughput for the initial deletion"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas guarda reservas de compra temporales en una tabla de DynamoDB. Cada reserva tiene su propia hora de vencimiento y es aceptable eliminarla dentro de unos días. El equipo quiere evitar un proceso recurrente de limpieza y no consumir capacidad de escritura en la eliminación inicial. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guardar horas de vencimiento numéricas, dejar TTL deshabilitado y filtrar las reservas vencidas de las consultas.",
+            "why": "Filtrar los resultados de las consultas no elimina las reservas almacenadas."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar TTL y guardar cada vencimiento como un Number con la hora Unix en segundos.",
+            "why": "Esto proporciona el formato que requiere TTL para la eliminación automática sin consumir capacidad de escritura en la eliminación inicial."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar TTL y guardar cada vencimiento como un string con la hora Unix.",
+            "why": "DynamoDB ignora los valores TTL que no son de tipo Number."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar un Scan periódico y enviar solicitudes DeleteItem para las reservas vencidas.",
+            "why": "Un proceso recurrente de eliminación agrega trabajo operativo y utiliza escrituras para eliminar los elementos."
+          }
+        ],
+        "explanation": "Lo decisivo es el vencimiento por elemento, la tolerancia a una eliminación dentro de unos días y la ausencia de un proceso recurrente de limpieza. TTL elimina automáticamente los elementos cuando el atributo designado contiene un Number con la hora Unix en segundos, sin consumir capacidad de escritura en la eliminación inicial. TTL ignora una marca de tiempo guardada como string, y filtrar por sí solo no elimina los elementos almacenados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dynamodb-ttl--e5ee3367",
+      "conceptId": "dynamodb-ttl",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A learning platform keeps temporary access grants in DynamoDB and has enabled TTL to remove them after expiration. A support dashboard uses Query to list grants, but an expired grant must stop appearing as soon as its expiration time passes, even if DynamoDB has not deleted it yet. The platform still wants automatic eventual cleanup. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep TTL enabled and rely on DynamoDB Streams service-deletion records to suppress grants before they are deleted.",
+          "correct": false,
+          "why": "TTL deletion records enter the stream after deletion, not while an expired item is pending deletion."
+        },
+        {
+          "id": "B",
+          "text": "Disable TTL and use only a Query filter expression to exclude grants past expiration.",
+          "correct": false,
+          "why": "The filter hides expired grants but does not provide automatic cleanup of stored items."
+        },
+        {
+          "id": "C",
+          "text": "Keep TTL enabled and rely on TTL alone to remove grants from Query results at expiration.",
+          "correct": false,
+          "why": "An expired item can remain pending deletion for days and may still appear in Query results."
+        },
+        {
+          "id": "D",
+          "text": "Keep TTL enabled and add a Query filter expression that excludes grants whose expiration time has passed.",
+          "correct": true,
+          "why": "The filter hides expired grants from Query results while TTL handles their eventual deletion."
+        }
+      ],
+      "explanation": "TTL deletion is not immediate: expired items can remain in the table for a few days. A Query filter expression can exclude those items from dashboard results during that interval, while TTL eventually deletes them. Relying on TTL alone misses the visibility requirement, and filtering without TTL misses the cleanup requirement.",
+      "keywordCues": [
+        "uses Query to list grants",
+        "must stop appearing as soon as its expiration time passes",
+        "even if DynamoDB has not deleted it yet",
+        "automatic eventual cleanup"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html"
+      ],
+      "es": {
+        "stem": "Una plataforma educativa guarda permisos de acceso temporales en DynamoDB y habilitó TTL para eliminarlos después del vencimiento. Un panel de soporte usa Query para listar los permisos, pero un permiso vencido debe dejar de aparecer en cuanto pase su hora de vencimiento, aunque DynamoDB todavía no lo haya eliminado. La plataforma también quiere una limpieza automática posterior. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener TTL habilitado y usar los registros de eliminación del servicio en DynamoDB Streams para ocultar los permisos antes de que se eliminen.",
+            "why": "Los registros de eliminación TTL llegan al stream después de la eliminación, no mientras un elemento vencido está pendiente de eliminación."
+          },
+          {
+            "id": "B",
+            "text": "Deshabilitar TTL y usar únicamente una filter expression en Query para excluir los permisos vencidos.",
+            "why": "El filtro oculta los permisos vencidos, pero no proporciona la limpieza automática de los elementos almacenados."
+          },
+          {
+            "id": "C",
+            "text": "Mantener TTL habilitado y confiar solo en TTL para quitar los permisos de los resultados de Query al vencer.",
+            "why": "Un elemento vencido puede permanecer pendiente de eliminación durante días y seguir apareciendo en los resultados de Query."
+          },
+          {
+            "id": "D",
+            "text": "Mantener TTL habilitado y agregar una filter expression a Query que excluya los permisos cuya hora de vencimiento ya pasó.",
+            "why": "El filtro oculta los permisos vencidos de los resultados de Query mientras TTL se encarga de eliminarlos posteriormente."
+          }
+        ],
+        "explanation": "La eliminación mediante TTL no es inmediata: los elementos vencidos pueden permanecer en la tabla durante unos días. Una filter expression en Query puede excluirlos de los resultados del panel durante ese intervalo, mientras TTL los elimina posteriormente. Confiar solo en TTL no cumple el requisito de visibilidad, y filtrar sin TTL no cumple el requisito de limpieza."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dynamodb-ttl--r0",
+      "conceptId": "dynamodb-ttl",
+      "kind": "recall",
+      "prompt": "How would you expire DynamoDB session records automatically when deletion within a few days is acceptable, and what timestamp format is required?",
+      "promptEs": "¿Cómo harías que los registros de sesión en DynamoDB vencieran automáticamente si es aceptable eliminarlos dentro de unos días, y qué formato de marca de tiempo se requiere?",
+      "idealAnswer": "Enable DynamoDB TTL and set a designated attribute on each session to its expiration time as a Number in Unix epoch seconds. DynamoDB automatically deletes expired items, typically within a few days, without consuming write throughput for the initial deletion.",
+      "rubric": [
+        "Names DynamoDB TTL and a designated per-item expiration attribute.",
+        "Specifies Number in Unix epoch seconds.",
+        "Notes that deletion is automatic but not immediate."
+      ]
+    }
+  ]
+}

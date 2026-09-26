@@ -1,0 +1,400 @@
+{
+  "conceptId": "cloudfront-oac-s3",
+  "card": {
+    "en": {
+      "tldr": "CloudFront origin access control (OAC) lets a distribution make signed requests to a private, regular S3 bucket origin. For private object delivery, attach OAC and grant s3:GetObject to the CloudFront service principal in a bucket policy scoped to that distribution.",
+      "whenToUse": [
+        "Viewers must retrieve S3 objects through CloudFront but not directly through S3 URLs.",
+        "A private S3 origin uses SSE-KMS or needs dynamic requests through CloudFront."
+      ],
+      "keyFacts": [
+        "Use the CloudFront service principal, cloudfront.amazonaws.com, with an AWS:SourceArn condition identifying the distribution in the bucket policy.",
+        "The recommended OAC setting always signs origin requests; with this setting, CloudFront-to-S3 communication is always HTTPS.",
+        "SSE-KMS objects also require a KMS key policy that permits the CloudFront distribution to use the key.",
+        "OAC requires a regular S3 bucket origin, not an S3 website endpoint."
+      ],
+      "gotchas": [
+        "Attaching OAC alone does not grant access to a private bucket; the bucket policy must allow it.",
+        "Do not sign requests requires the S3 origin to be publicly accessible.",
+        "An S3 website endpoint is a CloudFront custom origin and cannot use OAC."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Origin access identity (OAI)",
+          "difference": "OAI is the legacy option; OAC is recommended and supports SSE-KMS and dynamic requests."
+        }
+      ],
+      "examCues": [
+        "private S3 bucket behind CloudFront",
+        "prevent direct S3 URL access",
+        "SSE-KMS objects served through CloudFront",
+        "signed requests to the S3 origin"
+      ]
+    },
+    "es": {
+      "tldr": "CloudFront origin access control (OAC) permite que una distribución envíe solicitudes firmadas a un origen de bucket S3 privado y normal. Para entregar objetos privados, asocia OAC y concede s3:GetObject al principal de servicio de CloudFront mediante una política de bucket limitada a esa distribución.",
+      "whenToUse": [
+        "Los usuarios deben obtener objetos de S3 por CloudFront, pero no mediante URL directas de S3.",
+        "Un origen S3 privado usa SSE-KMS o necesita solicitudes dinámicas por CloudFront."
+      ],
+      "keyFacts": [
+        "En la política de bucket, usa el principal cloudfront.amazonaws.com y una condición AWS:SourceArn que identifique la distribución.",
+        "La configuración recomendada de OAC siempre firma las solicitudes al origen; con ella, la comunicación de CloudFront a S3 siempre usa HTTPS.",
+        "Los objetos con SSE-KMS también requieren una política de clave KMS que permita a la distribución usar la clave.",
+        "OAC requiere un origen de bucket S3 normal, no un endpoint de sitio web de S3."
+      ],
+      "gotchas": [
+        "Asociar OAC no basta para acceder a un bucket privado; también necesitas la política de bucket.",
+        "Do not sign requests requiere que el origen S3 sea accesible públicamente.",
+        "Un endpoint de sitio web de S3 es un origen personalizado de CloudFront y no admite OAC."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Origin access identity (OAI)",
+          "difference": "OAI es la opción anterior; se recomienda OAC, que admite SSE-KMS y solicitudes dinámicas."
+        }
+      ],
+      "examCues": [
+        "private S3 bucket behind CloudFront",
+        "prevent direct S3 URL access",
+        "SSE-KMS objects served through CloudFront",
+        "signed requests to the S3 origin"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudfront-oac-s3--c25d0045",
+      "conceptId": "cloudfront-oac-s3",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A design studio accepts asset uploads through CloudFront and stores them in a private, regular S3 bucket origin. Its distribution must send PUT requests to S3, and only that distribution should be permitted to upload objects through the origin access configuration. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an OAI for the distribution and use it for dynamic PUT requests to the bucket.",
+          "correct": false,
+          "why": "OAI does not support dynamic PUT requests in this scenario."
+        },
+        {
+          "id": "B",
+          "text": "Grant public s3:PutObject access in the bucket policy so uploads can reach S3.",
+          "correct": false,
+          "why": "Public upload permission violates the requirement to limit uploads to the distribution."
+        },
+        {
+          "id": "C",
+          "text": "Attach an OAC to the S3 origin and configure it to always sign origin requests.",
+          "correct": true,
+          "why": "OAC supports dynamic requests and signs the requests sent to the private S3 origin."
+        },
+        {
+          "id": "D",
+          "text": "Attach an OAC to the S3 origin and configure it to never sign origin requests.",
+          "correct": false,
+          "why": "Never signing requests requires a publicly accessible S3 origin."
+        },
+        {
+          "id": "E",
+          "text": "Allow cloudfront.amazonaws.com s3:PutObject on the objects in the bucket policy, conditioned on AWS:SourceArn matching the distribution.",
+          "correct": true,
+          "why": "The scoped bucket policy grants the distribution the required upload permission."
+        }
+      ],
+      "explanation": "The origin is private and must accept PUT requests specifically from this CloudFront distribution. An always-signing OAC supports dynamic requests, while a bucket policy granting s3:PutObject to the CloudFront service principal with a distribution-specific AWS:SourceArn authorizes the upload. OAI does not meet the dynamic-request requirement, and unsigned OAC requests require a publicly accessible origin.",
+      "keywordCues": [
+        "private, regular S3 bucket origin",
+        "PUT requests to S3",
+        "only that distribution"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño recibe archivos mediante CloudFront y los almacena en un origen de bucket S3 normal y privado. Su distribución debe enviar solicitudes PUT a S3 y solo esa distribución debe poder cargar objetos mediante la configuración de acceso al origen. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una OAI para la distribución y úsala para solicitudes PUT dinámicas al bucket.",
+            "why": "OAI no admite solicitudes PUT dinámicas en este escenario."
+          },
+          {
+            "id": "B",
+            "text": "Concede acceso público s3:PutObject en la política de bucket para que las cargas lleguen a S3.",
+            "why": "El permiso de carga pública incumple el requisito de limitar las cargas a la distribución."
+          },
+          {
+            "id": "C",
+            "text": "Asocia un OAC al origen S3 y configúralo para que siempre firme las solicitudes al origen.",
+            "why": "OAC admite solicitudes dinámicas y firma las solicitudes enviadas al origen S3 privado."
+          },
+          {
+            "id": "D",
+            "text": "Asocia un OAC al origen S3 y configúralo para que nunca firme las solicitudes al origen.",
+            "why": "No firmar las solicitudes requiere un origen S3 accesible públicamente."
+          },
+          {
+            "id": "E",
+            "text": "Permite s3:PutObject sobre los objetos a cloudfront.amazonaws.com en la política de bucket, con una condición AWS:SourceArn que coincida con la distribución.",
+            "why": "La política de bucket limitada concede a la distribución el permiso de carga necesario."
+          }
+        ],
+        "explanation": "El origen es privado y debe aceptar solicitudes PUT específicamente de esta distribución de CloudFront. Un OAC que siempre firma admite solicitudes dinámicas, mientras que una política de bucket que concede s3:PutObject al principal de servicio de CloudFront con un AWS:SourceArn específico autoriza la carga. OAI no cumple el requisito de solicitudes dinámicas, y las solicitudes sin firma con OAC requieren un origen accesible públicamente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-oac-s3--3b77694c",
+      "conceptId": "cloudfront-oac-s3",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum serves digitized exhibit images through a CloudFront distribution with a regular S3 bucket origin. Visitors must not be able to retrieve the images using S3 URLs, and the distribution needs read-only access. Which solution meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the bucket private, attach an OAC that always signs requests, and omit the CloudFront permission from the bucket policy.",
+          "correct": false,
+          "why": "The private bucket still needs a policy granting CloudFront access."
+        },
+        {
+          "id": "B",
+          "text": "Keep the bucket private, attach an OAC set to Do not sign requests, and allow cloudfront.amazonaws.com s3:GetObject in the bucket policy.",
+          "correct": false,
+          "why": "An OAC that does not sign requests cannot access a private S3 origin."
+        },
+        {
+          "id": "C",
+          "text": "Make the bucket publicly readable, attach an OAC that always signs requests, and serve the images through the distribution.",
+          "correct": false,
+          "why": "Public read access lets visitors bypass CloudFront using S3 URLs."
+        },
+        {
+          "id": "D",
+          "text": "Keep the bucket private, attach an OAC that always signs requests, and allow cloudfront.amazonaws.com s3:GetObject only when AWS:SourceArn identifies this distribution.",
+          "correct": true,
+          "why": "Signed OAC requests and a distribution-scoped bucket permission provide the required read-only origin access."
+        }
+      ],
+      "explanation": "The deciding requirement is that only the distribution can read objects while the bucket stays private. OAC signs origin requests, and a bucket policy granting s3:GetObject to the CloudFront service principal with a distribution-specific AWS:SourceArn permits those reads. Making the bucket public fails the direct-access restriction; attaching OAC without a suitable bucket policy does not grant access.",
+      "keywordCues": [
+        "regular S3 bucket origin",
+        "must not be able to retrieve the images using S3 URLs",
+        "read-only access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html"
+      ],
+      "es": {
+        "stem": "Un museo entrega imágenes digitalizadas mediante una distribución de CloudFront con un origen de bucket S3 normal. Los visitantes no deben poder obtener las imágenes con URL de S3, y la distribución solo necesita acceso de lectura. ¿Qué solución cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantén el bucket privado, asocia un OAC que siempre firme las solicitudes y omite el permiso de CloudFront en la política de bucket.",
+            "why": "El bucket privado también necesita una política que conceda acceso a CloudFront."
+          },
+          {
+            "id": "B",
+            "text": "Mantén el bucket privado, asocia un OAC configurado como Do not sign requests y permite s3:GetObject a cloudfront.amazonaws.com en la política de bucket.",
+            "why": "Un OAC que no firma solicitudes no puede acceder a un origen S3 privado."
+          },
+          {
+            "id": "C",
+            "text": "Permite la lectura pública del bucket, asocia un OAC que siempre firme las solicitudes y entrega las imágenes mediante la distribución.",
+            "why": "La lectura pública permite que los visitantes eviten CloudFront mediante URL de S3."
+          },
+          {
+            "id": "D",
+            "text": "Mantén el bucket privado, asocia un OAC que siempre firme las solicitudes y permite s3:GetObject a cloudfront.amazonaws.com solo cuando AWS:SourceArn identifique esta distribución.",
+            "why": "Las solicitudes firmadas con OAC y un permiso limitado a la distribución proporcionan el acceso de solo lectura requerido."
+          }
+        ],
+        "explanation": "El requisito decisivo es que solo la distribución pueda leer objetos mientras el bucket permanece privado. OAC firma las solicitudes al origen, y una política de bucket que concede s3:GetObject al principal de servicio de CloudFront con un AWS:SourceArn específico para la distribución permite esas lecturas. Hacer público el bucket incumple la restricción de acceso directo; asociar OAC sin una política adecuada tampoco concede acceso."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-oac-s3--0eea07f8",
+      "conceptId": "cloudfront-oac-s3",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher uses an S3 website endpoint as a CloudFront origin for a library of downloadable PDFs. The site does not need S3 website-specific behavior, and the publisher now requires the bucket to remain private while readers download through CloudFront. Which change meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the website endpoint with a regular S3 bucket origin and enable public read access for the PDFs.",
+          "correct": false,
+          "why": "Public read access violates the requirement that the bucket remain private."
+        },
+        {
+          "id": "B",
+          "text": "Replace the website endpoint with a regular S3 bucket origin, attach an always-signing OAC, and grant distribution-scoped s3:GetObject in the bucket policy.",
+          "correct": true,
+          "why": "A regular S3 bucket origin supports OAC, and the scoped policy permits private reads."
+        },
+        {
+          "id": "C",
+          "text": "Keep the website endpoint as a custom origin, attach OAC to it, and grant the distribution s3:GetObject.",
+          "correct": false,
+          "why": "OAC cannot be used with an S3 website endpoint configured as a custom origin."
+        },
+        {
+          "id": "D",
+          "text": "Keep the website endpoint as a custom origin, configure an OAI, and grant that identity s3:GetObject.",
+          "correct": false,
+          "why": "An S3 website endpoint cannot use OAI either."
+        }
+      ],
+      "explanation": "The existing website endpoint is the key constraint: CloudFront treats it as a custom origin, which cannot use OAC or OAI. Because website-specific behavior is unnecessary, the publisher can switch to a regular S3 bucket origin and use OAC with a distribution-scoped read policy. Keeping the website endpoint and adding an origin access mechanism will not work.",
+      "keywordCues": [
+        "S3 website endpoint",
+        "does not need S3 website-specific behavior",
+        "bucket to remain private"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html"
+      ],
+      "es": {
+        "stem": "Una editorial usa un endpoint de sitio web de S3 como origen de CloudFront para una biblioteca de archivos PDF descargables. El sitio no necesita funciones específicas de sitios web de S3, y ahora la editorial requiere que el bucket permanezca privado mientras los lectores descargan por CloudFront. ¿Qué cambio cumple el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Sustituye el endpoint de sitio web por un origen de bucket S3 normal y habilita la lectura pública de los PDF.",
+            "why": "La lectura pública incumple el requisito de mantener privado el bucket."
+          },
+          {
+            "id": "B",
+            "text": "Sustituye el endpoint de sitio web por un origen de bucket S3 normal, asocia un OAC que siempre firme y concede s3:GetObject limitado a la distribución en la política de bucket.",
+            "why": "Un origen de bucket S3 normal admite OAC, y la política limitada permite lecturas privadas."
+          },
+          {
+            "id": "C",
+            "text": "Conserva el endpoint de sitio web como origen personalizado, asígnale OAC y concede s3:GetObject a la distribución.",
+            "why": "No puedes usar OAC con un endpoint de sitio web de S3 configurado como origen personalizado."
+          },
+          {
+            "id": "D",
+            "text": "Conserva el endpoint de sitio web como origen personalizado, configura una OAI y concede s3:GetObject a esa identidad.",
+            "why": "Un endpoint de sitio web de S3 tampoco admite OAI."
+          }
+        ],
+        "explanation": "El endpoint de sitio web existente es la restricción clave: CloudFront lo trata como origen personalizado, que no admite OAC ni OAI. Como no se necesitan funciones específicas del sitio web, la editorial puede cambiar a un origen de bucket S3 normal y usar OAC con una política de lectura limitada a la distribución. Mantener el endpoint de sitio web e intentar agregarle un mecanismo de acceso al origen no funciona."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-oac-s3--db0cc97b",
+      "conceptId": "cloudfront-oac-s3",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A medical imaging portal serves files from a private S3 bucket through CloudFront. After the team changes the objects to SSE-KMS encryption, the distribution must continue serving them without granting public access to the bucket. The distribution already has an always-signing OAC and a distribution-scoped bucket policy allowing s3:GetObject. Which additional change meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace OAC with an OAI and leave the existing S3 bucket policy unchanged.",
+          "correct": false,
+          "why": "OAI does not support this SSE-KMS scenario, and the existing policy is scoped to the OAC distribution."
+        },
+        {
+          "id": "B",
+          "text": "Add a KMS key policy statement permitting the CloudFront service principal to use the key, scoped by AWS:SourceArn to the distribution.",
+          "correct": true,
+          "why": "SSE-KMS objects require the CloudFront distribution to have permission to use the KMS key."
+        },
+        {
+          "id": "C",
+          "text": "Change the OAC to Do not sign requests so that S3 handles decryption independently.",
+          "correct": false,
+          "why": "Unsigned origin requests cannot access this private bucket."
+        },
+        {
+          "id": "D",
+          "text": "Add another bucket policy statement granting s3:GetObject to cloudfront.amazonaws.com without a SourceArn condition.",
+          "correct": false,
+          "why": "A broader S3 read permission does not grant the distribution permission to use the KMS key."
+        }
+      ],
+      "explanation": "The S3 read permission already exists; the new requirement is access to objects encrypted with SSE-KMS. CloudFront also needs permission to use the KMS key, which can be granted in the key policy to its service principal and scoped to the distribution. Broadening the bucket policy does not supply KMS key permission, and OAI is not the recommended solution for SSE-KMS.",
+      "keywordCues": [
+        "SSE-KMS encryption",
+        "already has an always-signing OAC",
+        "bucket policy allowing s3:GetObject"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html"
+      ],
+      "es": {
+        "stem": "Un portal de imágenes médicas entrega archivos desde un bucket S3 privado mediante CloudFront. Después de que el equipo cambia los objetos a cifrado SSE-KMS, la distribución debe seguir entregándolos sin dar acceso público al bucket. La distribución ya tiene un OAC que siempre firma y una política de bucket limitada a la distribución que permite s3:GetObject. ¿Qué cambio adicional cumple el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Sustituye OAC por una OAI y deja sin cambios la política de bucket existente.",
+            "why": "OAI no admite este escenario de SSE-KMS y la política existente está limitada a la distribución con OAC."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una declaración a la política de la clave KMS que permita al principal de servicio de CloudFront usar la clave, limitada mediante AWS:SourceArn a la distribución.",
+            "why": "Los objetos con SSE-KMS requieren que la distribución de CloudFront tenga permiso para usar la clave KMS."
+          },
+          {
+            "id": "C",
+            "text": "Cambia OAC a Do not sign requests para que S3 gestione el descifrado de forma independiente.",
+            "why": "Las solicitudes al origen sin firma no pueden acceder a este bucket privado."
+          },
+          {
+            "id": "D",
+            "text": "Agrega otra declaración a la política de bucket que conceda s3:GetObject a cloudfront.amazonaws.com sin una condición SourceArn.",
+            "why": "Un permiso de lectura S3 más amplio no concede a la distribución permiso para usar la clave KMS."
+          }
+        ],
+        "explanation": "El permiso de lectura S3 ya existe; el nuevo requisito es acceder a objetos cifrados con SSE-KMS. CloudFront también necesita permiso para usar la clave KMS, que puedes conceder en la política de la clave a su principal de servicio y limitar a la distribución. Ampliar la política de bucket no proporciona el permiso de la clave KMS, y OAI no es la solución recomendada para SSE-KMS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudfront-oac-s3--r0",
+      "conceptId": "cloudfront-oac-s3",
+      "kind": "recall",
+      "prompt": "How would you let one CloudFront distribution read a private S3 bucket without allowing direct S3 URL access?",
+      "promptEs": "¿Cómo permitirías que una distribución de CloudFront lea un bucket S3 privado sin permitir acceso directo mediante URL de S3?",
+      "idealAnswer": "Use a regular S3 bucket origin with an OAC that always signs requests. Keep the bucket private and grant the CloudFront service principal s3:GetObject in the bucket policy, conditioned on AWS:SourceArn identifying that distribution.",
+      "rubric": [
+        "Uses OAC on a regular S3 bucket origin and signs requests.",
+        "Keeps the bucket private.",
+        "Grants s3:GetObject to cloudfront.amazonaws.com scoped to the distribution with AWS:SourceArn."
+      ]
+    }
+  ]
+}

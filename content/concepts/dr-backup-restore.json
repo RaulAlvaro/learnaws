@@ -1,0 +1,446 @@
+{
+  "conceptId": "dr-backup-restore",
+  "card": {
+    "en": {
+      "tldr": "Backup and restore is the lowest-cost DR strategy when the business can tolerate recovery points and recovery times measured in hours. At failover, restore the data and redeploy the infrastructure, configuration, and application; choose a more active strategy when the workload must recover faster.",
+      "whenToUse": [
+        "The workload can tolerate hours of lost data and hours to resume service.",
+        "Keeping a running recovery environment would cost more than the business requires.",
+        "Point-in-time recovery is important after accidental deletion or data corruption."
+      ],
+      "keyFacts": [
+        "Backup frequency determines the achievable recovery point and must align with the RPO.",
+        "AWS Backup centrally configures, schedules, and monitors backups for supported resources and can copy backups across Regions.",
+        "A regional recovery plan must restore backed-up data and redeploy infrastructure, configuration, and application code in the recovery Region.",
+        "Infrastructure as code, such as AWS CloudFormation, helps redeploy reliably; back up required code, configuration, and AMIs too.",
+        "AWS Backup provides restore capability but does not provide scheduled or automatic restoration; test backups and the DR plan."
+      ],
+      "gotchas": [
+        "Copying data to a recovery Region is not the same as having a workload ready to serve traffic.",
+        "Backups alone do not preserve the infrastructure and configuration needed to meet the RTO.",
+        "Continuous replication alone may be less useful than point-in-time backups for recovering from corruption or malicious changes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Pilot light",
+          "difference": "Core data and infrastructure are kept available in the recovery Region, while application servers must be switched on for recovery."
+        },
+        {
+          "concept": "Warm standby",
+          "difference": "A scaled-down, fully functional workload is already running and can handle traffic at reduced capacity."
+        },
+        {
+          "concept": "Multi-site active-active",
+          "difference": "Multiple Regions serve traffic simultaneously, with the greatest complexity and cost of these approaches."
+        }
+      ],
+      "examCues": [
+        "RPO and RTO measured in hours",
+        "lowest ongoing DR cost",
+        "restore after accidental deletion",
+        "redeploy the workload from backups"
+      ]
+    },
+    "es": {
+      "tldr": "Backup and restore es la estrategia de DR de menor costo cuando el negocio tolera un RPO y un RTO medidos en horas. Durante la recuperación, debes restaurar los datos y volver a desplegar la infraestructura, la configuración y la aplicación; elige una estrategia más activa si la carga debe recuperarse antes.",
+      "whenToUse": [
+        "La carga tolera horas de pérdida de datos y horas para reanudar el servicio.",
+        "Mantener un entorno de recuperación en ejecución costaría más de lo que exige el negocio.",
+        "Necesitas recuperar un punto anterior a una eliminación accidental o a datos dañados."
+      ],
+      "keyFacts": [
+        "La frecuencia de los backups determina el punto de recuperación alcanzable y debe ajustarse al RPO.",
+        "AWS Backup permite configurar, programar y supervisar de forma centralizada los backups de recursos compatibles, y puede copiarlos entre Regions.",
+        "Para recuperarte en otra Region, debes restaurar los datos y volver a desplegar la infraestructura, la configuración y el código de la aplicación.",
+        "La infraestructura como código, por ejemplo AWS CloudFormation, facilita un redespliegue confiable; respalda también el código, la configuración y las AMIs necesarias.",
+        "AWS Backup permite restaurar, pero no programa ni ejecuta automáticamente las restauraciones; debes probar los backups y el plan de DR."
+      ],
+      "gotchas": [
+        "Copiar datos a una Region de recuperación no significa que la carga esté lista para recibir tráfico.",
+        "Los backups de datos por sí solos no conservan la infraestructura y la configuración necesarias para cumplir el RTO.",
+        "La replicación continua por sí sola puede ser menos útil que los backups de un punto en el tiempo frente a datos dañados o cambios maliciosos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Pilot light",
+          "difference": "Mantiene disponibles los datos y la infraestructura principal en la Region de recuperación, pero hay que encender los servidores de aplicaciones."
+        },
+        {
+          "concept": "Warm standby",
+          "difference": "Ya ejecuta una copia funcional de menor escala que puede recibir tráfico con capacidad reducida."
+        },
+        {
+          "concept": "Multi-site active-active",
+          "difference": "Varias Regions atienden tráfico simultáneamente; es la opción de mayor complejidad y costo entre estas estrategias."
+        }
+      ],
+      "examCues": [
+        "RPO and RTO measured in hours",
+        "lowest ongoing DR cost",
+        "restore after accidental deletion",
+        "redeploy the workload from backups"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dr-backup-restore--30a39524",
+      "conceptId": "dr-backup-restore",
+      "secondaryConcepts": [
+        "dr-pilot-light",
+        "dr-warm-standby",
+        "dr-multi-site-active-active"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher runs an application in one AWS Region and is planning for a regional disruption. It can lose several hours of changes and remain offline for several hours, but wants to minimize ongoing DR spending. Which strategy meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run a scaled-down, functional copy of the application in a recovery Region as warm standby.",
+          "correct": false,
+          "why": "Warm standby keeps an application running to shorten recovery time beyond what the publisher requires."
+        },
+        {
+          "id": "B",
+          "text": "Copy backups to a recovery Region and restore the data and workload there when needed.",
+          "correct": true,
+          "why": "Backup and restore fits an hours-long recovery window without maintaining a running recovery workload."
+        },
+        {
+          "id": "C",
+          "text": "Replicate data to a recovery Region and keep core infrastructure available there as a pilot light.",
+          "correct": false,
+          "why": "Pilot light maintains recovery resources that this hours-long RPO and RTO do not require."
+        },
+        {
+          "id": "D",
+          "text": "Serve users from full application deployments in both Regions using multi-site active-active.",
+          "correct": false,
+          "why": "Multi-site active-active adds substantial cost and complexity for a workload that tolerates hours of recovery."
+        }
+      ],
+      "explanation": "The deciding constraints are an hours-long RPO and RTO and the lowest ongoing DR cost. Backup and restore meets those constraints if backups are taken frequently enough for the RPO and the team can restore and redeploy within the RTO. Pilot light, warm standby, and multi-site active-active keep progressively more resources available to reduce recovery time, which this publisher does not need.",
+      "keywordCues": [
+        "lose several hours of changes",
+        "remain offline for several hours",
+        "minimize ongoing DR spending"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta una aplicación en una sola AWS Region y se prepara para una interrupción regional. Puede perder varias horas de cambios y permanecer fuera de servicio varias horas, pero quiere minimizar el gasto continuo de DR. ¿Qué estrategia cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta una copia funcional de menor escala de la aplicación en una Region de recuperación como warm standby.",
+            "why": "Warm standby mantiene la aplicación en ejecución para acortar una recuperación que la editorial no necesita acelerar."
+          },
+          {
+            "id": "B",
+            "text": "Copia los backups a una Region de recuperación y restaura allí los datos y la carga cuando sea necesario.",
+            "why": "Backup and restore se ajusta a una recuperación de varias horas sin mantener una carga de recuperación en ejecución."
+          },
+          {
+            "id": "C",
+            "text": "Replica los datos a una Region de recuperación y mantén allí disponible la infraestructura principal como pilot light.",
+            "why": "Pilot light mantiene recursos de recuperación que este RPO y RTO de varias horas no requieren."
+          },
+          {
+            "id": "D",
+            "text": "Atiende a los usuarios desde despliegues completos en ambas Regions mediante multi-site active-active.",
+            "why": "Multi-site active-active agrega costo y complejidad considerables para una carga que tolera horas de recuperación."
+          }
+        ],
+        "explanation": "Los factores decisivos son el RPO y el RTO de varias horas y el menor costo continuo de DR. Backup and restore cumple esos requisitos si programas los backups con la frecuencia necesaria para el RPO y puedes restaurar y redesplegar dentro del RTO. Pilot light, warm standby y multi-site active-active mantienen cada vez más recursos disponibles para acelerar una recuperación que esta editorial no necesita."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-backup-restore--df8e7dfc",
+      "conceptId": "dr-backup-restore",
+      "secondaryConcepts": [
+        "dr-pilot-light",
+        "dr-warm-standby",
+        "dr-multi-site-active-active"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research team uses an Amazon RDS database for a batch application. Its main concern is discovering hours later that a faulty import corrupted records; the application can be unavailable for several hours while the team recovers. Which approach meets the recovery requirement MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the application in multiple active Regions and replicate database changes between them.",
+          "correct": false,
+          "why": "An active-active deployment is costly and still needs backups to recover from a data-corruption disaster."
+        },
+        {
+          "id": "B",
+          "text": "Continuously replicate the database to a live database in a recovery Region and rely on that copy for recovery.",
+          "correct": false,
+          "why": "Continuous replication alone may carry corrupted data to the recovery copy and does not provide the requested earlier recovery point."
+        },
+        {
+          "id": "C",
+          "text": "Keep a scaled-down application and database running in a recovery Region, using replication as the recovery mechanism.",
+          "correct": false,
+          "why": "Warm standby adds running infrastructure but does not by itself address recovery to a point before corruption."
+        },
+        {
+          "id": "D",
+          "text": "Schedule point-in-time-capable RDS backups, then restore an appropriate earlier backup and redeploy the application.",
+          "correct": true,
+          "why": "Restoring an earlier backup addresses corruption, and the permitted downtime makes backup and restore appropriate."
+        }
+      ],
+      "explanation": "The team must recover data from before the faulty import, not merely make a current copy available elsewhere. Point-in-time-capable RDS backups provide a restoration point, while the several-hour outage allowance permits restoration and redeployment. Continuous replication can propagate corruption, and keeping another application deployment running does not replace a point-in-time backup.",
+      "keywordCues": [
+        "faulty import corrupted records",
+        "hours later",
+        "unavailable for several hours"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación usa una base de datos Amazon RDS para una aplicación de procesamiento por lotes. Su principal preocupación es descubrir horas después que una importación defectuosa dañó registros; la aplicación puede quedar fuera de servicio varias horas mientras el equipo se recupera. ¿Qué enfoque cumple el requisito de recuperación MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta la aplicación en varias Regions activas y replica entre ellas los cambios de la base de datos.",
+            "why": "Un despliegue active-active es costoso y aun así necesita backups para recuperarse de datos dañados."
+          },
+          {
+            "id": "B",
+            "text": "Replica continuamente la base de datos a otra base de datos activa en una Region de recuperación y depende de esa copia para recuperarte.",
+            "why": "La replicación continua por sí sola puede llevar los datos dañados a la copia y no proporciona el punto de recuperación anterior solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Mantén una aplicación y una base de datos de menor escala en ejecución en una Region de recuperación, usando la replicación para recuperarte.",
+            "why": "Warm standby agrega infraestructura en ejecución, pero no resuelve por sí solo la recuperación a un momento anterior al daño."
+          },
+          {
+            "id": "D",
+            "text": "Programa backups de RDS que permitan recuperar un punto en el tiempo; luego restaura un backup anterior adecuado y vuelve a desplegar la aplicación.",
+            "why": "Restaurar un backup anterior resuelve el problema de los datos dañados, y el tiempo de inactividad permitido hace adecuado backup and restore."
+          }
+        ],
+        "explanation": "El equipo debe recuperar los datos anteriores a la importación defectuosa, no solo disponer de una copia actual en otro lugar. Los backups de RDS con capacidad de recuperar un punto en el tiempo proporcionan ese punto, y la tolerancia a varias horas de interrupción permite restaurar y redesplegar. La replicación continua puede propagar los datos dañados, y mantener otra aplicación en ejecución no reemplaza un backup de un punto en el tiempo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-backup-restore--98169dff",
+      "conceptId": "dr-backup-restore",
+      "secondaryConcepts": [
+        "dr-pilot-light",
+        "dr-warm-standby"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A local ticketing company is documenting recovery of its application in another AWS Region. It accepts an RPO and RTO of several hours and wants to avoid paying for a running recovery stack. Its database and EC2-based application must both be recoverable. Which TWO actions best support a backup-and-restore plan that meets these requirements MOST cost-effectively? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Maintain infrastructure-as-code templates and preserve the AMIs, code, and configuration needed to redeploy.",
+          "correct": true,
+          "why": "These assets support reliable reconstruction of the EC2-based workload within the recovery plan."
+        },
+        {
+          "id": "B",
+          "text": "Schedule backups at a frequency that meets the RPO and copy the needed backups to the recovery Region.",
+          "correct": true,
+          "why": "Backup timing determines the achievable recovery point, and regional copies make the data available for restoration there."
+        },
+        {
+          "id": "C",
+          "text": "Keep a scaled-down application stack running in the recovery Region so it can receive traffic immediately.",
+          "correct": false,
+          "why": "A running warm standby stack adds ongoing cost that the hours-long recovery target does not require."
+        },
+        {
+          "id": "D",
+          "text": "Store database backups, then recreate EC2 instances and application settings from memory during an outage.",
+          "correct": false,
+          "why": "Data backups alone leave the application rebuild error-prone and may cause the company to miss its RTO."
+        },
+        {
+          "id": "E",
+          "text": "Rely only on continuous replication to a live recovery database and omit point-in-time backups.",
+          "correct": false,
+          "why": "A live replicated database adds resources and continuous replication alone can be insufficient for data-corruption recovery."
+        }
+      ],
+      "explanation": "The company can accept hours for both data loss and restoration, so it does not need a running DR stack. Backups copied to the recovery Region must be frequent enough for its RPO. Infrastructure-as-code templates and preserved AMIs, code, and configuration address the separate need to rebuild the application within its RTO; a live standby stack costs more, while database backups alone leave the application incomplete.",
+      "keywordCues": [
+        "RPO and RTO of several hours",
+        "avoid paying for a running recovery stack",
+        "database and EC2-based application must both be recoverable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Una empresa local de venta de entradas está documentando la recuperación de su aplicación en otra AWS Region. Acepta un RPO y un RTO de varias horas y quiere evitar pagar por un entorno de recuperación en ejecución. Debe poder recuperar tanto su base de datos como su aplicación basada en EC2. ¿Qué DOS acciones respaldan mejor un plan de backup and restore que cumpla estos requisitos MOST cost-effectively? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantén plantillas de infraestructura como código y conserva las AMIs, el código y la configuración necesarios para redesplegar.",
+            "why": "Estos componentes permiten reconstruir confiablemente la carga basada en EC2 como parte del plan de recuperación."
+          },
+          {
+            "id": "B",
+            "text": "Programa backups con la frecuencia necesaria para cumplir el RPO y copia los backups requeridos a la Region de recuperación.",
+            "why": "La frecuencia determina el punto de recuperación alcanzable, y las copias regionales permiten restaurar allí los datos."
+          },
+          {
+            "id": "C",
+            "text": "Mantén un entorno de aplicación de menor escala en ejecución en la Region de recuperación para que pueda recibir tráfico de inmediato.",
+            "why": "Un entorno warm standby en ejecución agrega un costo continuo que el objetivo de recuperación de varias horas no exige."
+          },
+          {
+            "id": "D",
+            "text": "Guarda backups de la base de datos y, durante una interrupción, recrea de memoria las instancias EC2 y la configuración de la aplicación.",
+            "why": "Los backups de datos por sí solos dejan una reconstrucción propensa a errores y pueden hacer que la empresa incumpla su RTO."
+          },
+          {
+            "id": "E",
+            "text": "Depende solo de la replicación continua a una base de datos activa de recuperación y omite los backups de un punto en el tiempo.",
+            "why": "Una base de datos replicada y activa agrega recursos, y la replicación continua por sí sola puede ser insuficiente ante datos dañados."
+          }
+        ],
+        "explanation": "La empresa acepta horas tanto de pérdida de datos como de restauración, por lo que no necesita un entorno de DR en ejecución. Los backups copiados a la Region de recuperación deben tener la frecuencia necesaria para cumplir su RPO. Las plantillas de infraestructura como código y las AMIs, el código y la configuración conservados cubren la necesidad adicional de reconstruir la aplicación dentro del RTO; un entorno standby activo cuesta más, mientras que los backups de la base de datos por sí solos dejan incompleta la aplicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dr-backup-restore--dd81c758",
+      "conceptId": "dr-backup-restore",
+      "secondaryConcepts": [
+        "dr-warm-standby"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer runs a legacy application on Amazon EC2 and plans to recover in another Region. Its data backups already meet an hours-long RPO, and the business allows several hours to restore service. A recovery exercise showed that rebuilding servers and network settings manually took too long. Which change BEST supports the RTO while retaining a backup-and-restore strategy?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Copy the EC2 data-volume snapshots to the recovery Region and recreate instance configuration manually.",
+          "correct": false,
+          "why": "Copying data-volume snapshots still leaves the slow, error-prone configuration work identified in the exercise."
+        },
+        {
+          "id": "B",
+          "text": "Maintain AWS CloudFormation templates and copy the required AMIs, code, configuration, and backups to the recovery Region.",
+          "correct": true,
+          "why": "Infrastructure as code and saved application assets support reliable redeployment alongside restored data."
+        },
+        {
+          "id": "C",
+          "text": "Keep a scaled-down, functional application environment running in the recovery Region.",
+          "correct": false,
+          "why": "Warm standby can shorten recovery, but it abandons the requested backup-and-restore approach and adds running resources."
+        },
+        {
+          "id": "D",
+          "text": "Increase the frequency of data backups but continue rebuilding the application environment manually.",
+          "correct": false,
+          "why": "More frequent backups improve the recovery point but do not fix the slow infrastructure rebuild."
+        }
+      ],
+      "explanation": "The backups already satisfy the data-loss target; the failed requirement is timely reconstruction of the workload. AWS CloudFormation can define resources for reliable redeployment across Regions, while copied AMIs, code, configuration, and backups supply what must be restored. Increasing backup frequency addresses RPO instead of the observed RTO problem, and data-volume snapshots alone leave the manual rebuild in place.",
+      "keywordCues": [
+        "data backups already meet an hours-long RPO",
+        "rebuilding servers and network settings manually took too long",
+        "retaining a backup-and-restore strategy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+      ],
+      "es": {
+        "stem": "Un fabricante ejecuta una aplicación heredada en Amazon EC2 y planea recuperarla en otra Region. Sus backups de datos ya cumplen un RPO de varias horas, y el negocio permite varias horas para restaurar el servicio. Un ejercicio de recuperación mostró que reconstruir manualmente los servidores y la configuración de red tomó demasiado tiempo. ¿Qué cambio ayuda MEJOR a cumplir el RTO sin dejar la estrategia de backup and restore?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Copia los snapshots de los volúmenes de datos de EC2 a la Region de recuperación y recrea manualmente la configuración de las instancias.",
+            "why": "Copiar los snapshots de datos no elimina el trabajo de configuración lento y propenso a errores detectado en el ejercicio."
+          },
+          {
+            "id": "B",
+            "text": "Mantén plantillas de AWS CloudFormation y copia las AMIs, el código, la configuración y los backups necesarios a la Region de recuperación.",
+            "why": "La infraestructura como código y los componentes guardados de la aplicación permiten un redespliegue confiable junto con los datos restaurados."
+          },
+          {
+            "id": "C",
+            "text": "Mantén en ejecución un entorno funcional de menor escala en la Region de recuperación.",
+            "why": "Warm standby puede acelerar la recuperación, pero abandona el enfoque de backup and restore solicitado y agrega recursos en ejecución."
+          },
+          {
+            "id": "D",
+            "text": "Aumenta la frecuencia de los backups de datos, pero sigue reconstruyendo manualmente el entorno de la aplicación.",
+            "why": "Los backups más frecuentes mejoran el punto de recuperación, pero no corrigen la lentitud al reconstruir la infraestructura."
+          }
+        ],
+        "explanation": "Los backups ya cumplen el objetivo de pérdida de datos; lo que falla es la reconstrucción oportuna de la carga. AWS CloudFormation puede definir los recursos para redesplegarlos de forma confiable entre Regions, mientras que las AMIs, el código, la configuración y los backups copiados aportan lo necesario para la restauración. Aumentar la frecuencia de backups atiende el RPO, no el problema de RTO observado; los snapshots de volúmenes de datos tampoco eliminan la reconstrucción manual."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dr-backup-restore--r0",
+      "conceptId": "dr-backup-restore",
+      "kind": "recall",
+      "prompt": "A workload accepts an RPO and RTO of hours and needs the lowest ongoing DR cost. Which strategy fits, and what must the recovery plan include?",
+      "promptEs": "Una carga acepta un RPO y un RTO de horas y necesita el menor costo continuo de DR. ¿Qué estrategia eliges y qué debe incluir el plan?",
+      "idealAnswer": "Choose backup and restore. Take backups frequently enough for the RPO, and plan to restore data and redeploy the infrastructure, configuration, and application within the RTO.",
+      "rubric": [
+        "Names backup and restore.",
+        "Connects backup frequency to the RPO.",
+        "Includes restoring data and redeploying the workload within the RTO."
+      ]
+    },
+    {
+      "id": "dr-backup-restore--r1",
+      "conceptId": "dr-backup-restore",
+      "kind": "why-not",
+      "prompt": "Why is warm standby not the cost-focused choice when a workload can take hours to recover?",
+      "promptEs": "¿Por qué warm standby no es la opción centrada en el costo cuando una carga puede tardar horas en recuperarse?",
+      "idealAnswer": "Warm standby keeps a scaled-down, functional workload running in the recovery Region to shorten recovery time. If hours are acceptable, backup and restore avoids that running recovery environment, provided restoration and redeployment can meet the RTO.",
+      "rubric": [
+        "States that warm standby runs a functional recovery workload.",
+        "Identifies its additional ongoing resources or cost.",
+        "Explains why an hours-long RTO can favor backup and restore."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,344 @@
+{
+  "conceptId": "vpc-endpoint-policies",
+  "card": {
+    "en": {
+      "tldr": "A VPC endpoint policy controls which principals and requests can pass through that endpoint, including which S3 buckets they can reach through it. To make an S3 bucket accessible only through a particular endpoint, use a bucket policy that denies requests unless aws:SourceVpce matches that endpoint ID.",
+      "whenToUse": [
+        "Limit the buckets that workloads can reach through a shared S3 VPC endpoint.",
+        "Reject access to a protected bucket unless requests arrive through one specified VPC endpoint.",
+        "Apply both controls when the endpoint must reach only approved buckets and a bucket must reject other access paths."
+      ],
+      "keyFacts": [
+        "The default endpoint policy grants full access through the endpoint; it does not replace identity-based or bucket policies.",
+        "An S3 bucket policy can use aws:SourceVpce with the endpoint ID, not an endpoint ARN.",
+        "aws:SourceVpc identifies a VPC rather than one endpoint within that VPC.",
+        "For a gateway endpoint policy, set Principal to * and use aws:PrincipalArn to identify a particular principal."
+      ],
+      "gotchas": [
+        "An endpoint policy on one endpoint does not, by itself, prevent access to a bucket through another endpoint.",
+        "A bucket policy that denies requests not using a specified endpoint can also block console access to that bucket.",
+        "A deny based on the wrong endpoint ID can block all access to the bucket.",
+        "A deny condition does not grant access; requests still need appropriate permissions."
+      ],
+      "confusedWith": [
+        {
+          "concept": "aws:SourceVpc bucket condition",
+          "difference": "It restricts access by VPC, not by a particular endpoint when the VPC has multiple endpoints."
+        },
+        {
+          "concept": "Default endpoint policy",
+          "difference": "It allows full access through the endpoint, subject to other applicable permissions; it does not limit the reachable buckets."
+        }
+      ],
+      "examCues": [
+        "only approved buckets through this endpoint",
+        "bucket access only from one VPC endpoint",
+        "multiple S3 endpoints in the same VPC",
+        "console access may be blocked"
+      ]
+    },
+    "es": {
+      "tldr": "Una VPC endpoint policy controla qué principals y solicitudes pueden pasar por ese endpoint, incluidos los buckets de S3 que pueden alcanzar a través de él. Para que un bucket de S3 solo sea accesible mediante un endpoint específico, usa una bucket policy que deniegue las solicitudes salvo cuando aws:SourceVpce coincida con el ID de ese endpoint.",
+      "whenToUse": [
+        "Necesitas limitar los buckets que las cargas de trabajo pueden alcanzar mediante un S3 VPC endpoint compartido.",
+        "Necesitas rechazar el acceso a un bucket protegido salvo que la solicitud llegue por un VPC endpoint específico.",
+        "Necesitas ambos controles: limitar los buckets alcanzables desde el endpoint y rechazar otras rutas de acceso al bucket."
+      ],
+      "keyFacts": [
+        "La endpoint policy predeterminada permite acceso completo a través del endpoint; no sustituye las identity-based policies ni las bucket policies.",
+        "Una S3 bucket policy puede usar aws:SourceVpce con el ID del endpoint, no con el ARN del endpoint.",
+        "aws:SourceVpc identifica una VPC, no un endpoint específico dentro de ella.",
+        "En una gateway endpoint policy, configura Principal como * y usa aws:PrincipalArn para identificar un principal específico."
+      ],
+      "gotchas": [
+        "Una endpoint policy aplicada a un endpoint no impide, por sí sola, acceder a un bucket mediante otro endpoint.",
+        "Una bucket policy que deniega solicitudes ajenas al endpoint especificado también puede bloquear el acceso por consola al bucket.",
+        "Un ID de endpoint incorrecto en una condición de denegación puede bloquear todo acceso al bucket.",
+        "Una condición Deny no concede acceso; las solicitudes todavía necesitan los permisos correspondientes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Condición de bucket aws:SourceVpc",
+          "difference": "Restringe por VPC, no por un endpoint específico cuando hay varios endpoints en esa VPC."
+        },
+        {
+          "concept": "Endpoint policy predeterminada",
+          "difference": "Permite acceso completo a través del endpoint, sujeto a los demás permisos aplicables; no limita los buckets alcanzables."
+        }
+      ],
+      "examCues": [
+        "only approved buckets through this endpoint",
+        "bucket access only from one VPC endpoint",
+        "multiple S3 endpoints in the same VPC",
+        "console access may be blocked"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-access.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies-vpc-endpoint.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "vpc-endpoint-policies--e3358eb3",
+      "conceptId": "vpc-endpoint-policies",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research team has two S3 VPC endpoints in the same VPC. An archive bucket already has the permissions needed by authorized researchers, but compliance requires that every request to this bucket use the team's designated endpoint; access through the other endpoint must fail. The team accepts that this restriction will block console access to the bucket. Which solution meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set the designated endpoint policy to full access and retain the archive bucket's existing permissions.",
+          "correct": false,
+          "why": "Full access through the designated endpoint imposes no restriction on requests using the other endpoint."
+        },
+        {
+          "id": "B",
+          "text": "Add a bucket policy that denies requests when aws:SourceVpce is not the designated endpoint ID.",
+          "correct": true,
+          "why": "The bucket rejects requests that do not arrive through the designated endpoint, including those using the other endpoint."
+        },
+        {
+          "id": "C",
+          "text": "Restrict the designated endpoint policy to the archive bucket.",
+          "correct": false,
+          "why": "That controls requests through the designated endpoint but does not block access through the other endpoint."
+        },
+        {
+          "id": "D",
+          "text": "Add a bucket policy that denies requests when aws:SourceVpc is not the team's VPC ID.",
+          "correct": false,
+          "why": "Both endpoints are in that VPC, so the condition does not distinguish between them."
+        }
+      ],
+      "explanation": "The requirement concerns which endpoint may be used to access the bucket, not which bucket may be reached through an endpoint. A bucket policy with a deny when aws:SourceVpce differs from the designated endpoint ID enforces that boundary. aws:SourceVpc is too broad because both endpoints are in the same VPC, while an endpoint policy on the designated endpoint does not govern requests through the other one. The existing permissions remain necessary because the deny condition does not grant access.",
+      "keywordCues": [
+        "two S3 VPC endpoints in the same VPC",
+        "every request to this bucket use the team's designated endpoint",
+        "access through the other endpoint must fail",
+        "block console access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-access.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies-vpc-endpoint.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación tiene dos S3 VPC endpoints en la misma VPC. Un bucket de archivo ya tiene los permisos necesarios para los investigadores autorizados, pero cumplimiento exige que todas las solicitudes a ese bucket usen el endpoint designado del equipo; el acceso mediante el otro endpoint debe fallar. El equipo acepta que esta restricción bloqueará el acceso por consola al bucket. ¿Qué solución cumple el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar la endpoint policy del endpoint designado con acceso completo y conservar los permisos existentes del bucket de archivo.",
+            "why": "El acceso completo a través del endpoint designado no restringe las solicitudes que usan el otro endpoint."
+          },
+          {
+            "id": "B",
+            "text": "Agregar una bucket policy que deniegue las solicitudes cuando aws:SourceVpce no sea el ID del endpoint designado.",
+            "why": "El bucket rechaza las solicitudes que no llegan por el endpoint designado, incluidas las que usan el otro endpoint."
+          },
+          {
+            "id": "C",
+            "text": "Restringir la endpoint policy del endpoint designado al bucket de archivo.",
+            "why": "Eso controla las solicitudes que pasan por el endpoint designado, pero no bloquea el acceso mediante el otro."
+          },
+          {
+            "id": "D",
+            "text": "Agregar una bucket policy que deniegue las solicitudes cuando aws:SourceVpc no sea el ID de la VPC del equipo.",
+            "why": "Ambos endpoints están en esa VPC, por lo que la condición no los distingue."
+          }
+        ],
+        "explanation": "El requisito trata de qué endpoint puede usarse para acceder al bucket, no de qué bucket puede alcanzarse desde un endpoint. Una bucket policy con una denegación cuando aws:SourceVpce difiere del ID del endpoint designado aplica esa restricción. aws:SourceVpc es demasiado amplio porque ambos endpoints están en la misma VPC, mientras que una endpoint policy en el endpoint designado no controla las solicitudes que pasan por el otro. Los permisos existentes siguen siendo necesarios porque la condición Deny no concede acceso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-endpoint-policies--e286dca5",
+      "conceptId": "vpc-endpoint-policies",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company has two S3 VPC endpoints in one VPC and a protected shipment bucket. Workloads already have the necessary S3 permissions. Through endpoint X, workloads must reach only the shipment bucket; the shipment bucket must also reject requests that do not use endpoint X, including requests through endpoint Y. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a bucket policy that denies requests when aws:SourceVpc is not the company's VPC ID.",
+          "correct": false,
+          "why": "Endpoint Y is in the same VPC, so this condition does not reject its requests."
+        },
+        {
+          "id": "B",
+          "text": "Add a shipment bucket policy that denies requests when aws:SourceVpce is not endpoint X's ID.",
+          "correct": true,
+          "why": "This makes the bucket reject requests through endpoint Y and other paths that do not use endpoint X."
+        },
+        {
+          "id": "C",
+          "text": "Attach a custom policy to endpoint X that permits access through it only to the shipment bucket.",
+          "correct": true,
+          "why": "This limits the bucket destinations reachable through endpoint X."
+        },
+        {
+          "id": "D",
+          "text": "Attach a custom policy to endpoint Y that permits access only to the shipment bucket.",
+          "correct": false,
+          "why": "This would not limit endpoint X's destinations and would not make the shipment bucket reject endpoint Y."
+        },
+        {
+          "id": "E",
+          "text": "Keep endpoint X's default endpoint policy.",
+          "correct": false,
+          "why": "The default policy does not limit endpoint X to the shipment bucket."
+        }
+      ],
+      "explanation": "There are two distinct access boundaries: what can be reached through endpoint X and which paths the shipment bucket accepts. A custom endpoint policy addresses the first; a bucket policy denying requests whose aws:SourceVpce is not endpoint X addresses the second. The default endpoint policy does not restrict X's destinations. aws:SourceVpc cannot distinguish X from Y because both are in the same VPC.",
+      "keywordCues": [
+        "Through endpoint X, workloads must reach only the shipment bucket",
+        "reject requests that do not use endpoint X",
+        "including requests through endpoint Y",
+        "two S3 VPC endpoints in one VPC"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-access.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies-vpc-endpoint.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene dos S3 VPC endpoints en una VPC y un bucket protegido de envíos. Las cargas de trabajo ya tienen los permisos de S3 necesarios. A través del endpoint X, solo deben poder acceder al bucket de envíos; el bucket también debe rechazar las solicitudes que no usen el endpoint X, incluidas las que pasen por el endpoint Y. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar una bucket policy que deniegue las solicitudes cuando aws:SourceVpc no sea el ID de la VPC de la empresa.",
+            "why": "El endpoint Y está en la misma VPC, por lo que esta condición no rechaza sus solicitudes."
+          },
+          {
+            "id": "B",
+            "text": "Agregar al bucket de envíos una política que deniegue las solicitudes cuando aws:SourceVpce no sea el ID del endpoint X.",
+            "why": "Esto hace que el bucket rechace las solicitudes que pasan por el endpoint Y y por otras rutas que no usan el endpoint X."
+          },
+          {
+            "id": "C",
+            "text": "Adjuntar al endpoint X una política personalizada que permita acceder a través de él solo al bucket de envíos.",
+            "why": "Esto limita los buckets alcanzables a través del endpoint X."
+          },
+          {
+            "id": "D",
+            "text": "Adjuntar al endpoint Y una política personalizada que permita el acceso solo al bucket de envíos.",
+            "why": "Esto no limita los destinos del endpoint X ni hace que el bucket rechace al endpoint Y."
+          },
+          {
+            "id": "E",
+            "text": "Mantener la endpoint policy predeterminada del endpoint X.",
+            "why": "La política predeterminada no limita el endpoint X al bucket de envíos."
+          }
+        ],
+        "explanation": "Hay dos límites de acceso distintos: qué puede alcanzarse mediante el endpoint X y qué rutas acepta el bucket de envíos. Una endpoint policy personalizada resuelve el primero; una bucket policy que deniega solicitudes cuyo aws:SourceVpce no sea el endpoint X resuelve el segundo. La endpoint policy predeterminada no restringe los destinos de X. aws:SourceVpc no distingue X de Y porque ambos están en la misma VPC."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-endpoint-policies--abb2f029",
+      "conceptId": "vpc-endpoint-policies",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company uses one S3 VPC endpoint for applications that already have the required S3 permissions. Through this endpoint, the applications must reach two approved buckets but no other buckets, including buckets created later. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the default endpoint policy and add a bucket policy to each currently unapproved bucket.",
+          "correct": false,
+          "why": "New buckets would require additional policies, and the default endpoint policy does not limit bucket access."
+        },
+        {
+          "id": "B",
+          "text": "Attach a custom endpoint policy that permits access through the endpoint only to the two approved buckets.",
+          "correct": true,
+          "why": "The policy limits requests passing through this endpoint without requiring policies on every other bucket."
+        },
+        {
+          "id": "C",
+          "text": "Add aws:SourceVpc conditions to the policies of the two approved buckets.",
+          "correct": false,
+          "why": "Those conditions do not limit which other buckets requests can reach through the endpoint."
+        },
+        {
+          "id": "D",
+          "text": "Add aws:SourceVpce conditions to the policies of the two approved buckets.",
+          "correct": false,
+          "why": "Conditions on the approved buckets do not prevent the endpoint from being used to reach other buckets."
+        }
+      ],
+      "explanation": "The deciding requirement is to limit all bucket destinations reachable through one endpoint, including future buckets. A custom endpoint policy can permit access through that endpoint only to the two approved buckets; the existing S3 permissions must still allow each request. Policies on the approved buckets control access to those buckets, not access through the endpoint to every other bucket. Maintaining deny policies on unapproved buckets would also require ongoing work as buckets are created.",
+      "keywordCues": [
+        "one S3 VPC endpoint",
+        "two approved buckets but no other buckets",
+        "including buckets created later",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-access.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies-vpc-endpoint.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios usa un S3 VPC endpoint para aplicaciones que ya tienen los permisos de S3 necesarios. A través de ese endpoint, las aplicaciones deben acceder a dos buckets aprobados, pero a ningún otro, incluidos los buckets que se creen después. ¿Qué solución cumple el requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantener la endpoint policy predeterminada y agregar una bucket policy a cada bucket que actualmente no esté aprobado.",
+            "why": "Los buckets nuevos requerirían políticas adicionales, y la endpoint policy predeterminada no limita el acceso a buckets."
+          },
+          {
+            "id": "B",
+            "text": "Adjuntar una endpoint policy personalizada que permita el acceso a través del endpoint solo a los dos buckets aprobados.",
+            "why": "La política limita las solicitudes que pasan por este endpoint sin exigir políticas en todos los demás buckets."
+          },
+          {
+            "id": "C",
+            "text": "Agregar condiciones aws:SourceVpc a las políticas de los dos buckets aprobados.",
+            "why": "Esas condiciones no limitan los otros buckets a los que pueden llegar las solicitudes a través del endpoint."
+          },
+          {
+            "id": "D",
+            "text": "Agregar condiciones aws:SourceVpce a las políticas de los dos buckets aprobados.",
+            "why": "Las condiciones en los buckets aprobados no impiden que se use el endpoint para acceder a otros buckets."
+          }
+        ],
+        "explanation": "El requisito decisivo es limitar todos los buckets alcanzables mediante un endpoint, incluidos los futuros. Una endpoint policy personalizada puede permitir acceso por ese endpoint solo a los dos buckets aprobados; los permisos de S3 existentes todavía deben permitir cada solicitud. Las políticas de los buckets aprobados controlan el acceso a esos buckets, no el acceso desde el endpoint a todos los demás. Mantener políticas de denegación en los buckets no aprobados también exigiría trabajo cada vez que se cree uno."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "vpc-endpoint-policies--r0",
+      "conceptId": "vpc-endpoint-policies",
+      "kind": "recall",
+      "prompt": "A bucket must reject requests from every path except one S3 VPC endpoint. Which policy and condition do you use, and what access might this block?",
+      "promptEs": "Un bucket debe rechazar solicitudes de toda ruta excepto un S3 VPC endpoint. ¿Qué política y condición usas, y qué acceso podría bloquear?",
+      "idealAnswer": "Use a bucket policy that denies requests when aws:SourceVpce does not match the specified endpoint ID. This can also block console access because console requests do not originate from that endpoint; permitted requests still need appropriate access permissions.",
+      "rubric": [
+        "Identifies an S3 bucket policy, not just an endpoint policy.",
+        "Uses a deny condition with aws:SourceVpce and the endpoint ID.",
+        "Notes that console access can be blocked.",
+        "Recognizes that the deny condition does not grant access."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,360 @@
+{
+  "conceptId": "cognito-identity-pools",
+  "card": {
+    "en": {
+      "tldr": "Amazon Cognito identity pools exchange app users’ identities for temporary AWS credentials, including for users who have not signed in. Choose an identity pool when a mobile or web app needs users to make IAM-authorized requests directly to AWS services.",
+      "whenToUse": [
+        "App users need temporary credentials to sign requests to S3 or DynamoDB.",
+        "Guests need narrowly scoped access before signing in.",
+        "Permissions must differ by user claims or authentication status."
+      ],
+      "keyFacts": [
+        "Identity pools can issue temporary AWS credentials to authenticated and unauthenticated app users.",
+        "IAM roles and policies determine what those credentials can access.",
+        "An identity pool can exchange a Cognito user pool token or supported third-party identity-provider claims for AWS credentials.",
+        "Identity pools can use claims to select roles or create IAM session tags for granular access."
+      ],
+      "gotchas": [
+        "A user pool token authenticates a user; a user pool alone does not provide the temporary AWS credentials needed to sign direct AWS service requests.",
+        "Guest access still needs a narrowly scoped IAM role.",
+        "An identity pool can work with a user pool; the two are not mutually exclusive."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cognito-user-pools",
+          "difference": "User pools handle app sign-in and tokens; identity pools exchange identities or tokens for temporary AWS credentials."
+        },
+        {
+          "concept": "iam-identity-center-sso",
+          "difference": "IAM Identity Center is for workforce SSO; identity pools provide app users, including guests, with AWS credentials."
+        }
+      ],
+      "examCues": [
+        "guest users access S3 directly",
+        "temporary AWS credentials for a mobile app",
+        "exchange a user pool token for AWS credentials",
+        "IAM access based on app user claims"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Cognito identity pools intercambia las identidades de los usuarios de una aplicación por credenciales temporales de AWS, incluso si todavía no iniciaron sesión. Elige un identity pool cuando una aplicación móvil o web necesita que sus usuarios hagan solicitudes directas a servicios de AWS autorizadas mediante IAM.",
+      "whenToUse": [
+        "Los usuarios de la aplicación necesitan credenciales temporales para firmar solicitudes a S3 o DynamoDB.",
+        "Los visitantes necesitan acceso de alcance limitado antes de iniciar sesión.",
+        "Los permisos deben variar según los claims del usuario o su estado de autenticación."
+      ],
+      "keyFacts": [
+        "Identity pools puede emitir credenciales temporales de AWS para usuarios autenticados y no autenticados.",
+        "Los roles y las políticas de IAM determinan a qué pueden acceder esas credenciales.",
+        "Un identity pool puede intercambiar un token de Cognito user pools o claims de un proveedor de identidad compatible por credenciales de AWS.",
+        "Identity pools puede usar claims para seleccionar roles o crear IAM session tags para acceso granular."
+      ],
+      "gotchas": [
+        "Un token de user pools autentica al usuario; user pools por sí solo no entrega las credenciales temporales de AWS necesarias para firmar solicitudes directas a servicios de AWS.",
+        "El acceso de visitantes también necesita un rol de IAM con permisos de alcance limitado.",
+        "Un identity pool puede funcionar junto con un user pool; no son opciones excluyentes."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cognito-user-pools",
+          "difference": "User pools gestiona el inicio de sesión y los tokens de la aplicación; identity pools intercambia identidades o tokens por credenciales temporales de AWS."
+        },
+        {
+          "concept": "iam-identity-center-sso",
+          "difference": "IAM Identity Center sirve para workforce SSO; identity pools entrega credenciales de AWS a usuarios de aplicaciones, incluidos los visitantes."
+        }
+      ],
+      "examCues": [
+        "guest users access S3 directly",
+        "temporary AWS credentials for a mobile app",
+        "exchange a user pool token for AWS credentials",
+        "IAM access based on app user claims"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cognito-identity-pools--22c2afa3",
+      "conceptId": "cognito-identity-pools",
+      "secondaryConcepts": [
+        "cognito-user-pools",
+        "iam-identity-center-sso",
+        "directory-service-options"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A travel app lets guests read a limited set of itineraries from DynamoDB. After users sign in through the app’s existing Cognito user pool, they must make signed requests directly to DynamoDB with broader IAM permissions. The team does not want to distribute AWS credentials from its own servers. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Assign IAM Identity Center permission sets to guests and signed-in travelers.",
+          "correct": false,
+          "why": "Workforce permission sets do not address guest app users making direct signed DynamoDB requests."
+        },
+        {
+          "id": "B",
+          "text": "Use user pool tokens as the credentials for both guest and signed-in DynamoDB requests.",
+          "correct": false,
+          "why": "User pool tokens are not AWS credentials, and guests do not sign in to receive them."
+        },
+        {
+          "id": "C",
+          "text": "Use AD Connector to exchange the app’s user pool tokens for DynamoDB credentials.",
+          "correct": false,
+          "why": "AD Connector is not the identity-pool mechanism for exchanging user pool tokens for temporary AWS credentials."
+        },
+        {
+          "id": "D",
+          "text": "Configure the identity pool to accept user pool tokens and assign an authenticated IAM role.",
+          "correct": true,
+          "why": "An identity pool can exchange user pool tokens for temporary credentials with authenticated-user IAM access."
+        },
+        {
+          "id": "E",
+          "text": "Configure an identity pool to issue narrowly scoped temporary credentials for guests.",
+          "correct": true,
+          "why": "Identity pools support unauthenticated users and can limit guest access through IAM."
+        }
+      ],
+      "explanation": "The app needs two levels of temporary AWS credentials: narrow guest access and broader access after user pool sign-in. An identity pool can issue guest credentials and accept user pool tokens to provide credentials under an authenticated IAM role. User pool tokens alone cannot serve as AWS credentials for signed DynamoDB requests, so option B misses both the credential and guest requirements.",
+      "keywordCues": [
+        "guests read a limited set of itineraries",
+        "existing Cognito user pool",
+        "signed requests directly to DynamoDB",
+        "does not want to distribute AWS credentials from its own servers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de viajes permite que los visitantes lean un conjunto limitado de itinerarios en DynamoDB. Después de iniciar sesión mediante el Cognito user pool existente de la aplicación, los usuarios deben hacer solicitudes firmadas directamente a DynamoDB con permisos de IAM más amplios. El equipo no quiere distribuir credenciales de AWS desde sus propios servidores. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asignar permission sets de IAM Identity Center a visitantes y viajeros que iniciaron sesión.",
+            "why": "Los permission sets para workforce no resuelven las solicitudes directas y firmadas a DynamoDB de los visitantes de la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Usar los tokens de user pools como credenciales para las solicitudes a DynamoDB de visitantes y usuarios que iniciaron sesión.",
+            "why": "Los tokens de user pools no son credenciales de AWS, y los visitantes no inician sesión para obtenerlos."
+          },
+          {
+            "id": "C",
+            "text": "Usar AD Connector para intercambiar los tokens de user pools de la aplicación por credenciales para DynamoDB.",
+            "why": "AD Connector no es el mecanismo de identity pools para intercambiar tokens de user pools por credenciales temporales de AWS."
+          },
+          {
+            "id": "D",
+            "text": "Configurar el identity pool para aceptar tokens de user pools y asignar un rol de IAM para usuarios autenticados.",
+            "why": "Un identity pool puede intercambiar tokens de user pools por credenciales temporales con acceso de IAM para usuarios autenticados."
+          },
+          {
+            "id": "E",
+            "text": "Configurar un identity pool para emitir credenciales temporales de alcance limitado a los visitantes.",
+            "why": "Identity pools admite usuarios no autenticados y puede limitar el acceso de visitantes mediante IAM."
+          }
+        ],
+        "explanation": "La aplicación necesita dos niveles de credenciales temporales de AWS: acceso limitado para visitantes y acceso más amplio después del inicio de sesión en user pools. Un identity pool puede emitir credenciales para visitantes y aceptar tokens de user pools para entregar credenciales con un rol de IAM para usuarios autenticados. Los tokens de user pools por sí solos no son credenciales de AWS para firmar solicitudes a DynamoDB, por lo que la opción B incumple tanto el requisito de credenciales como el de visitantes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cognito-identity-pools--3f54ec4f",
+      "conceptId": "cognito-identity-pools",
+      "secondaryConcepts": [
+        "cognito-user-pools",
+        "iam-identity-center-sso",
+        "identity-federation-saml-oidc"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum’s mobile app lets visitors browse images stored in Amazon S3 without creating an account. The app must make signed requests directly to S3, and visitors must receive only the permissions needed to retrieve those images. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure IAM Identity Center for visitors and assign them access to the images.",
+          "correct": false,
+          "why": "Workforce SSO does not fit an app that must grant unsigned-in visitors temporary credentials."
+        },
+        {
+          "id": "B",
+          "text": "Configure a Cognito user pool and require each visitor to obtain a sign-in token.",
+          "correct": false,
+          "why": "Requiring sign-in violates the guest-access requirement, and the token alone does not provide AWS credentials for signed S3 requests."
+        },
+        {
+          "id": "C",
+          "text": "Configure a Cognito identity pool with guest access and a narrowly scoped IAM role.",
+          "correct": true,
+          "why": "Identity pools can give unsigned-in users temporary credentials governed by a narrowly scoped IAM role."
+        },
+        {
+          "id": "D",
+          "text": "Federate a corporate SAML provider to IAM roles for the app’s visitors.",
+          "correct": false,
+          "why": "A corporate identity provider does not serve visitors who have not signed in."
+        }
+      ],
+      "explanation": "The deciding requirements are unsigned-in visitors and signed requests directly to S3. A Cognito identity pool can issue temporary credentials for guests, with IAM limiting access to the intended images. A user pool sign-in token does not meet the guest requirement or by itself supply credentials for those requests.",
+      "keywordCues": [
+        "without creating an account",
+        "signed requests directly to S3",
+        "only the permissions needed"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html"
+      ],
+      "es": {
+        "stem": "La aplicación móvil de un museo permite que los visitantes consulten imágenes almacenadas en Amazon S3 sin crear una cuenta. La aplicación debe hacer solicitudes firmadas directamente a S3 y los visitantes deben recibir solo los permisos necesarios para recuperar esas imágenes. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar IAM Identity Center para los visitantes y asignarles acceso a las imágenes.",
+            "why": "Workforce SSO no se ajusta a una aplicación que debe dar credenciales temporales a visitantes que no iniciaron sesión."
+          },
+          {
+            "id": "B",
+            "text": "Configurar un Cognito user pool y exigir que cada visitante obtenga un token de inicio de sesión.",
+            "why": "Exigir el inicio de sesión incumple el requisito de acceso para visitantes, y el token por sí solo no proporciona credenciales de AWS para firmar solicitudes a S3."
+          },
+          {
+            "id": "C",
+            "text": "Configurar un Cognito identity pool con acceso para visitantes y un rol de IAM de alcance limitado.",
+            "why": "Identity pools puede entregar a usuarios que no iniciaron sesión credenciales temporales controladas por un rol de IAM de alcance limitado."
+          },
+          {
+            "id": "D",
+            "text": "Federar un proveedor SAML corporativo con roles de IAM para los visitantes de la aplicación.",
+            "why": "Un proveedor de identidad corporativo no resuelve el acceso de visitantes que no iniciaron sesión."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el acceso de visitantes sin iniciar sesión y las solicitudes firmadas directamente a S3. Un Cognito identity pool puede emitir credenciales temporales para visitantes, mientras IAM limita el acceso a las imágenes previstas. Un token de inicio de sesión de user pools no cumple el requisito de visitantes ni proporciona por sí solo credenciales para esas solicitudes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cognito-identity-pools--ee625f20",
+      "conceptId": "cognito-identity-pools",
+      "secondaryConcepts": [
+        "cognito-user-pools",
+        "iam-identity-center-sso",
+        "identity-federation-saml-oidc"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A fitness app already uses a Cognito user pool to sign in members. Its mobile clients now need to make signed requests directly to Amazon DynamoDB, with access controlled through IAM rather than application-issued credentials. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a Cognito identity pool that accepts the user pool tokens and assigns an IAM role.",
+          "correct": true,
+          "why": "The identity pool can exchange the existing tokens for temporary AWS credentials governed by IAM."
+        },
+        {
+          "id": "B",
+          "text": "Add IAM Identity Center and use workforce permission sets for app members.",
+          "correct": false,
+          "why": "Workforce SSO does not address exchanging these app members’ user pool tokens for AWS credentials."
+        },
+        {
+          "id": "C",
+          "text": "Replace the user pool with a corporate SAML provider federated to IAM roles.",
+          "correct": false,
+          "why": "Replacing member sign-in does not make use of the existing user pool or meet the stated low-overhead requirement."
+        },
+        {
+          "id": "D",
+          "text": "Use the existing user pool tokens as credentials when signing DynamoDB requests.",
+          "correct": false,
+          "why": "User pool tokens authenticate members but are not the temporary AWS credentials used to sign DynamoDB requests."
+        }
+      ],
+      "explanation": "The app already has authentication; it lacks AWS credentials for direct, IAM-authorized DynamoDB requests. A Cognito identity pool can accept user pool tokens and provide temporary credentials associated with an IAM role. A user pool token alone cannot sign the required AWS service requests as AWS credentials.",
+      "keywordCues": [
+        "already uses a Cognito user pool",
+        "signed requests directly to Amazon DynamoDB",
+        "access controlled through IAM"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de actividad física ya usa un Cognito user pool para que sus miembros inicien sesión. Ahora sus clientes móviles necesitan hacer solicitudes firmadas directamente a Amazon DynamoDB, con acceso controlado mediante IAM en lugar de credenciales emitidas por la aplicación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar un Cognito identity pool que acepte los tokens de user pools y asigne un rol de IAM.",
+            "why": "El identity pool puede intercambiar los tokens existentes por credenciales temporales de AWS controladas mediante IAM."
+          },
+          {
+            "id": "B",
+            "text": "Agregar IAM Identity Center y usar permission sets para los miembros de la aplicación.",
+            "why": "Workforce SSO no resuelve el intercambio de tokens de user pools de estos miembros por credenciales de AWS."
+          },
+          {
+            "id": "C",
+            "text": "Reemplazar user pools por un proveedor SAML corporativo federado con roles de IAM.",
+            "why": "Reemplazar el inicio de sesión de los miembros desaprovecha el user pool existente y no cumple el requisito de bajo esfuerzo operativo."
+          },
+          {
+            "id": "D",
+            "text": "Usar los tokens existentes de user pools como credenciales para firmar solicitudes a DynamoDB.",
+            "why": "Los tokens de user pools autentican a los miembros, pero no son las credenciales temporales de AWS que firman solicitudes a DynamoDB."
+          }
+        ],
+        "explanation": "La aplicación ya tiene autenticación; le faltan credenciales de AWS para hacer solicitudes directas a DynamoDB autorizadas mediante IAM. Un Cognito identity pool puede aceptar tokens de user pools y entregar credenciales temporales asociadas a un rol de IAM. Un token de user pools por sí solo no sirve como credenciales de AWS para firmar esas solicitudes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cognito-identity-pools--r0",
+      "conceptId": "cognito-identity-pools",
+      "kind": "recall",
+      "prompt": "A mobile app needs guests to read S3 objects directly using signed requests. Which feature fits, and how is access limited?",
+      "promptEs": "Una aplicación móvil necesita que los visitantes lean objetos de S3 directamente mediante solicitudes firmadas. ¿Qué feature corresponde y cómo limitas el acceso?",
+      "idealAnswer": "Use a Cognito identity pool to issue temporary AWS credentials to guests. Assign a narrowly scoped IAM role and policy so those credentials allow only the intended S3 access.",
+      "rubric": [
+        "Names Cognito identity pools.",
+        "Explains temporary credentials for guests.",
+        "Limits access with an IAM role and policy."
+      ]
+    },
+    {
+      "id": "cognito-identity-pools--r1",
+      "conceptId": "cognito-identity-pools",
+      "kind": "why-not",
+      "prompt": "Why is a Cognito user pool alone insufficient when signed-in app users must call DynamoDB directly with IAM authorization?",
+      "promptEs": "¿Por qué un Cognito user pool por sí solo no basta si los usuarios que iniciaron sesión deben llamar a DynamoDB directamente con autorización de IAM?",
+      "idealAnswer": "A user pool provides app authentication and tokens, not the temporary AWS credentials needed to sign direct DynamoDB requests. Add a Cognito identity pool to exchange the user pool tokens for credentials governed by IAM.",
+      "rubric": [
+        "Distinguishes user pool tokens from AWS credentials.",
+        "Identifies the need for signed, IAM-authorized requests.",
+        "Explains that an identity pool exchanges the tokens for temporary credentials."
+      ]
+    }
+  ]
+}

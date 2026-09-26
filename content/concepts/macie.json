@@ -1,0 +1,447 @@
+{
+  "conceptId": "macie",
+  "card": {
+    "en": {
+      "tldr": "Amazon Macie discovers sensitive data in Amazon S3 objects and monitors S3 general purpose buckets for security and access-control issues. Choose it when a scenario requires locating PII in S3, identifying publicly accessible buckets, or reviewing bucket encryption settings.",
+      "whenToUse": [
+        "Find PII, financial information, credentials, or organization-specific sensitive patterns in S3 objects.",
+        "Get an inventory of S3 general purpose buckets with visibility into public access and encryption settings.",
+        "Choose broad, sampled discovery across an S3 estate or a targeted discovery job for specific buckets and analysis criteria."
+      ],
+      "keyFacts": [
+        "Macie uses managed data identifiers, including machine learning and pattern matching, to discover sensitive data; custom data identifiers can match organization-specific patterns.",
+        "Automated sensitive data discovery continually evaluates the S3 bucket inventory and samples representative objects.",
+        "Sensitive data discovery jobs let you select buckets, sampling depth, and object-based criteria; they can run once or recur.",
+        "Macie creates sensitive data findings for detected data and policy findings for potential bucket security or privacy issues, such as public accessibility.",
+        "Macie publishes findings to Amazon EventBridge and can also publish them to AWS Security Hub CSPM."
+      ],
+      "gotchas": [
+        "Bucket monitoring and object inspection are different: an inventory showing encryption settings does not itself identify PII inside objects.",
+        "Automated discovery samples objects; choose a discovery job when the scenario specifies targeted buckets or analysis depth.",
+        "Security Hub CSPM can aggregate Macie findings, but it is not the service that inspects S3 objects for sensitive data."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon GuardDuty",
+          "difference": "GuardDuty identifies potentially malicious activity; Macie discovers sensitive data in S3 objects."
+        },
+        {
+          "concept": "AWS Security Hub CSPM",
+          "difference": "Security Hub CSPM aggregates security findings; Macie generates sensitive data findings from S3 analysis."
+        },
+        {
+          "concept": "Amazon Inspector",
+          "difference": "Inspector scans workloads for vulnerabilities; Macie examines S3 data for sensitive content."
+        }
+      ],
+      "examCues": [
+        "locate PII in S3 objects",
+        "identify publicly accessible S3 buckets",
+        "review S3 bucket encryption settings",
+        "targeted sensitive data analysis of selected buckets"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon Macie descubre datos sensibles en objetos de Amazon S3 y monitorea los buckets S3 de uso general para detectar problemas de seguridad y control de acceso. Elígelo cuando necesites localizar PII en S3, identificar buckets con acceso público o revisar la configuración de cifrado de los buckets.",
+      "whenToUse": [
+        "Debes encontrar PII, información financiera, credenciales o patrones sensibles propios de la organización en objetos de S3.",
+        "Necesitas un inventario de buckets S3 de uso general con visibilidad de acceso público y configuración de cifrado.",
+        "Debes elegir entre descubrimiento amplio mediante muestreo o un trabajo dirigido con criterios de análisis específicos."
+      ],
+      "keyFacts": [
+        "Macie usa managed data identifiers, incluidos machine learning y pattern matching; los custom data identifiers permiten buscar patrones propios de la organización.",
+        "Automated sensitive data discovery evalúa continuamente el inventario de buckets S3 y analiza una muestra de objetos representativos.",
+        "Los sensitive data discovery jobs permiten elegir buckets, profundidad de muestreo y criterios basados en propiedades de los objetos; pueden ejecutarse una vez o periódicamente.",
+        "Macie crea sensitive data findings por datos detectados y policy findings por posibles problemas de seguridad o privacidad de un bucket, como el acceso público.",
+        "Macie publica hallazgos en Amazon EventBridge y también puede publicarlos en AWS Security Hub CSPM."
+      ],
+      "gotchas": [
+        "Monitorear buckets no equivale a inspeccionar objetos: ver la configuración de cifrado no identifica por sí solo PII dentro de los objetos.",
+        "Automated sensitive data discovery usa muestreo; elige un discovery job si debes definir buckets o profundidad de análisis.",
+        "AWS Security Hub CSPM puede agregar los hallazgos de Macie, pero no inspecciona los objetos S3 para descubrir datos sensibles."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon GuardDuty",
+          "difference": "GuardDuty identifica actividad potencialmente maliciosa; Macie descubre datos sensibles en objetos S3."
+        },
+        {
+          "concept": "AWS Security Hub CSPM",
+          "difference": "Security Hub CSPM agrega hallazgos de seguridad; Macie genera hallazgos al analizar datos sensibles en S3."
+        },
+        {
+          "concept": "Amazon Inspector",
+          "difference": "Inspector analiza vulnerabilidades de cargas de trabajo; Macie examina contenido sensible en S3."
+        }
+      ],
+      "examCues": [
+        "locate PII in S3 objects",
+        "identify publicly accessible S3 buckets",
+        "review S3 bucket encryption settings",
+        "targeted sensitive data analysis of selected buckets"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "macie--be5754d9",
+      "conceptId": "macie",
+      "secondaryConcepts": [
+        "guardduty",
+        "security-hub",
+        "inspector"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A healthcare analytics company stores patient intake exports in many S3 buckets. Its security team needs to locate objects containing PII and see which buckets have become publicly accessible, without building its own object-inspection system. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Security Hub CSPM to aggregate security findings for the buckets.",
+          "correct": false,
+          "why": "Security Hub CSPM can aggregate findings but does not perform Macie's sensitive-data inspection."
+        },
+        {
+          "id": "B",
+          "text": "Enable Amazon GuardDuty to analyze activity associated with the S3 buckets.",
+          "correct": false,
+          "why": "GuardDuty identifies potentially malicious activity, not PII within S3 objects or Macie's bucket inventory."
+        },
+        {
+          "id": "C",
+          "text": "Enable Amazon Macie and configure automated sensitive data discovery.",
+          "correct": true,
+          "why": "Macie samples S3 objects for sensitive data and monitors buckets for issues such as public accessibility."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon Inspector to scan the company's workloads for vulnerabilities.",
+          "correct": false,
+          "why": "Inspector's vulnerability scanning does not classify PII in S3 objects."
+        }
+      ],
+      "explanation": "The deciding requirement is to inspect S3 objects for PII while also monitoring buckets for public accessibility. Macie provides both sensitive data discovery and bucket security monitoring, and its automated discovery avoids building an inspection system. GuardDuty detects suspicious activity rather than classifying the contents of S3 objects.",
+      "keywordCues": [
+        "locate objects containing PII",
+        "buckets have become publicly accessible",
+        "without building its own object-inspection system"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+      ],
+      "es": {
+        "stem": "Una empresa de análisis de salud guarda exportaciones de admisión de pacientes en muchos buckets S3. Su equipo de seguridad necesita localizar objetos con PII y ver qué buckets pasaron a tener acceso público, sin construir su propio sistema de inspección de objetos. ¿Qué solución cumple estos requisitos con el least operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Security Hub CSPM para agregar los hallazgos de seguridad de los buckets.",
+            "why": "Security Hub CSPM puede agregar hallazgos, pero no realiza la inspección de datos sensibles de Macie."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar Amazon GuardDuty para analizar la actividad asociada con los buckets S3.",
+            "why": "GuardDuty identifica actividad potencialmente maliciosa, no PII dentro de objetos S3 ni el inventario de buckets de Macie."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar Amazon Macie y configurar automated sensitive data discovery.",
+            "why": "Macie analiza muestras de objetos S3 para encontrar datos sensibles y monitorea los buckets para detectar problemas como el acceso público."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon Inspector para analizar las cargas de trabajo de la empresa en busca de vulnerabilidades.",
+            "why": "El análisis de vulnerabilidades de Inspector no clasifica PII en objetos S3."
+          }
+        ],
+        "explanation": "El requisito decisivo es inspeccionar objetos S3 para encontrar PII y, a la vez, monitorear si los buckets tienen acceso público. Macie ofrece descubrimiento de datos sensibles y monitoreo de seguridad de buckets; automated sensitive data discovery evita construir un sistema de inspección. GuardDuty detecta actividad sospechosa, pero no clasifica el contenido de los objetos S3."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "macie--b143cb1f",
+      "conceptId": "macie",
+      "secondaryConcepts": [
+        "security-hub",
+        "inspector"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retail company already uses Macie to discover sensitive data in S3. Its response team wants each new finding routed to an existing event-driven workflow, rather than requiring an analyst to repeatedly check the Macie console. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Route Macie findings published to Amazon EventBridge to the workflow's target.",
+          "correct": true,
+          "why": "Macie publishes findings as EventBridge events that can be routed to workflow targets."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Inspector findings as the input to the response workflow.",
+          "correct": false,
+          "why": "Inspector findings concern vulnerability scanning rather than the existing Macie S3 discoveries."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Security Hub CSPM solely to display aggregated Macie findings to analysts.",
+          "correct": false,
+          "why": "A view for analysts does not itself meet the requirement to route each finding into the event-driven workflow."
+        },
+        {
+          "id": "D",
+          "text": "Create recurring Macie discovery jobs and review their results in the Macie console.",
+          "correct": false,
+          "why": "Recurring jobs can produce findings, but console review does not route them to the event-driven workflow."
+        }
+      ],
+      "explanation": "The company already has sensitive-data detection; it needs event-driven delivery of the resulting findings. Macie publishes findings to Amazon EventBridge, which can route them to workflow targets. A console view or aggregated findings display still leaves the stated routing requirement unmet.",
+      "keywordCues": [
+        "already uses Macie",
+        "each new finding routed",
+        "existing event-driven workflow"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista ya usa Macie para descubrir datos sensibles en S3. Su equipo de respuesta quiere enviar cada hallazgo nuevo a un flujo de trabajo existente basado en eventos, en lugar de pedirle a un analista que revise repetidamente la consola de Macie. ¿Qué solución cumple este requisito con el least operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Enviar los hallazgos que Macie publica en Amazon EventBridge al destino del flujo de trabajo.",
+            "why": "Macie publica los hallazgos como eventos de EventBridge, que pueden dirigirse a destinos del flujo de trabajo."
+          },
+          {
+            "id": "B",
+            "text": "Usar hallazgos de Amazon Inspector como entrada del flujo de respuesta.",
+            "why": "Los hallazgos de Inspector se relacionan con el análisis de vulnerabilidades, no con los descubrimientos S3 que ya realiza Macie."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS Security Hub CSPM solo para mostrar a los analistas los hallazgos agregados de Macie.",
+            "why": "Una vista para analistas no cumple por sí sola el requisito de enviar cada hallazgo al flujo de trabajo basado en eventos."
+          },
+          {
+            "id": "D",
+            "text": "Crear Macie discovery jobs periódicos y revisar sus resultados en la consola de Macie.",
+            "why": "Los trabajos periódicos pueden producir hallazgos, pero revisarlos en la consola no los envía al flujo de trabajo basado en eventos."
+          }
+        ],
+        "explanation": "La empresa ya detecta datos sensibles; lo que necesita es entregar los hallazgos mediante eventos. Macie publica hallazgos en Amazon EventBridge, que puede dirigirlos a los destinos del flujo de trabajo. Una vista en consola o de hallazgos agregados no satisface el requisito de envío."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "macie--15377cf5",
+      "conceptId": "macie",
+      "secondaryConcepts": [
+        "guardduty",
+        "firewall-manager",
+        "detective",
+        "security-hub"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A financial cooperative manages S3 buckets in several AWS accounts. Its central security team must inspect member accounts' buckets for sensitive data and bring Macie findings into a broader security posture view alongside findings from other services. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure Macie to publish findings to AWS Security Hub CSPM.",
+          "correct": true,
+          "why": "Security Hub CSPM can consume Macie findings alongside findings from other services for broader posture analysis."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon Detective as the central view for Macie findings and compliance checks.",
+          "correct": false,
+          "why": "Detective is for investigation, not the broader findings aggregation and posture view provided by Security Hub CSPM."
+        },
+        {
+          "id": "C",
+          "text": "Use GuardDuty as the sole service to classify sensitive data in member accounts' S3 objects.",
+          "correct": false,
+          "why": "GuardDuty detects potentially malicious activity rather than classifying sensitive content in S3 objects."
+        },
+        {
+          "id": "D",
+          "text": "Use Firewall Manager policies to inspect S3 object contents for sensitive patterns.",
+          "correct": false,
+          "why": "Firewall Manager policy management does not provide Macie's S3 sensitive-data inspection."
+        },
+        {
+          "id": "E",
+          "text": "Configure a designated Macie administrator for the member accounts.",
+          "correct": true,
+          "why": "A Macie administrator can review member-account buckets and inspect them for sensitive data."
+        }
+      ],
+      "explanation": "This scenario has two distinct needs: centrally inspecting S3 data across member accounts and combining the resulting findings with a broader security view. A designated Macie administrator can inspect member-account buckets, while publication to Security Hub CSPM makes Macie findings available for aggregation with other services' findings. GuardDuty cannot replace Macie's sensitive-data inspection, and Detective is an investigation tool rather than the requested posture view.",
+      "keywordCues": [
+        "several AWS accounts",
+        "inspect member accounts' buckets for sensitive data",
+        "alongside findings from other services"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+      ],
+      "es": {
+        "stem": "Una cooperativa financiera administra buckets S3 en varias cuentas de AWS. Su equipo central de seguridad debe inspeccionar los buckets de las cuentas miembro para detectar datos sensibles e incorporar los hallazgos de Macie a una vista más amplia de la postura de seguridad junto con hallazgos de otros servicios. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar Macie para publicar hallazgos en AWS Security Hub CSPM.",
+            "why": "Security Hub CSPM puede recibir los hallazgos de Macie junto con los de otros servicios para un análisis más amplio de la postura de seguridad."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon Detective como vista central de los hallazgos de Macie y las comprobaciones de cumplimiento.",
+            "why": "Detective sirve para investigar, no para ofrecer la vista amplia de agregación de hallazgos y postura de Security Hub CSPM."
+          },
+          {
+            "id": "C",
+            "text": "Usar GuardDuty como único servicio para clasificar datos sensibles en objetos S3 de las cuentas miembro.",
+            "why": "GuardDuty detecta actividad potencialmente maliciosa, pero no clasifica el contenido sensible de objetos S3."
+          },
+          {
+            "id": "D",
+            "text": "Usar políticas de Firewall Manager para inspeccionar el contenido de los objetos S3 en busca de patrones sensibles.",
+            "why": "La administración de políticas de Firewall Manager no ofrece la inspección de datos sensibles en S3 que realiza Macie."
+          },
+          {
+            "id": "E",
+            "text": "Configurar un administrador designado de Macie para las cuentas miembro.",
+            "why": "Un administrador de Macie puede revisar los buckets de las cuentas miembro e inspeccionarlos para detectar datos sensibles."
+          }
+        ],
+        "explanation": "El escenario plantea dos necesidades distintas: inspeccionar de forma centralizada datos S3 de las cuentas miembro y combinar los hallazgos con una vista de seguridad más amplia. Un administrador designado de Macie puede inspeccionar esos buckets, mientras que publicar los hallazgos en Security Hub CSPM permite agregarlos con los de otros servicios. GuardDuty no sustituye la inspección de datos sensibles de Macie y Detective es una herramienta de investigación, no la vista de postura solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "macie--51e30367",
+      "conceptId": "macie",
+      "secondaryConcepts": [
+        "guardduty",
+        "security-hub"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher is preparing an audit of a small set of S3 buckets containing draft contracts. The audit team must choose those buckets, specify the sampling depth, and run the assessment once rather than maintain continuous discovery across the S3 estate. Which approach meets these requirements MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send Macie bucket policy findings to AWS Security Hub CSPM.",
+          "correct": false,
+          "why": "Aggregating policy findings does not perform the specified object analysis."
+        },
+        {
+          "id": "B",
+          "text": "Enable GuardDuty monitoring for activity involving the selected S3 buckets.",
+          "correct": false,
+          "why": "GuardDuty looks for potentially malicious activity rather than running a sensitive-data assessment with a chosen sampling depth."
+        },
+        {
+          "id": "C",
+          "text": "Create a one-time Macie sensitive data discovery job for the selected buckets.",
+          "correct": true,
+          "why": "A Macie job lets the team select buckets and sampling depth and run the analysis once."
+        },
+        {
+          "id": "D",
+          "text": "Enable Macie automated sensitive data discovery across the S3 estate.",
+          "correct": false,
+          "why": "Automated discovery provides broad visibility through sampling but does not provide the requested one-time, bucket-specific analysis configuration."
+        }
+      ],
+      "explanation": "The audit specifies both the buckets and the sampling depth, and it calls for a one-time assessment. A Macie sensitive data discovery job exposes those choices and can run on demand. Automated discovery is designed for broader, continual visibility using representative object samples, so it does not match the requested control as directly.",
+      "keywordCues": [
+        "choose those buckets",
+        "specify the sampling depth",
+        "run the assessment once"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+      ],
+      "es": {
+        "stem": "Una editorial prepara una auditoría de un grupo pequeño de buckets S3 que contienen borradores de contratos. El equipo debe elegir esos buckets, especificar la profundidad de muestreo y ejecutar la evaluación una sola vez en lugar de mantener un descubrimiento continuo en todo S3. ¿Qué enfoque cumple estos requisitos de la forma MÁS directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Enviar los policy findings de buckets de Macie a AWS Security Hub CSPM.",
+            "why": "Agregar policy findings no realiza el análisis de objetos solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar el monitoreo de GuardDuty para la actividad relacionada con los buckets S3 seleccionados.",
+            "why": "GuardDuty busca actividad potencialmente maliciosa, en vez de ejecutar una evaluación de datos sensibles con una profundidad de muestreo elegida."
+          },
+          {
+            "id": "C",
+            "text": "Crear un Macie sensitive data discovery job de una sola ejecución para los buckets seleccionados.",
+            "why": "Un Macie job permite elegir los buckets y la profundidad de muestreo, y ejecutar el análisis una sola vez."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar Macie automated sensitive data discovery para todo el entorno S3.",
+            "why": "Automated sensitive data discovery ofrece visibilidad amplia mediante muestreo, pero no la configuración solicitada para un análisis único de buckets específicos."
+          }
+        ],
+        "explanation": "La auditoría define tanto los buckets como la profundidad de muestreo y solicita una evaluación de una sola vez. Un Macie sensitive data discovery job permite tomar esas decisiones y ejecutarse bajo demanda. Automated sensitive data discovery está orientado a una visibilidad más amplia y continua mediante muestras representativas, por lo que no se ajusta tan directamente al control solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "macie--r0",
+      "conceptId": "macie",
+      "kind": "recall",
+      "prompt": "A company needs to find PII inside S3 objects and identify publicly accessible buckets. Which service fits, and why?",
+      "promptEs": "Una empresa necesita encontrar PII dentro de objetos S3 e identificar buckets con acceso público. ¿Qué servicio eliges y por qué?",
+      "idealAnswer": "Choose Amazon Macie. It discovers sensitive data in S3 objects and monitors S3 general purpose buckets for security issues such as public accessibility.",
+      "rubric": [
+        "Names Amazon Macie.",
+        "Explains sensitive-data discovery inside S3 objects.",
+        "Mentions bucket security or public-access monitoring."
+      ]
+    },
+    {
+      "id": "macie--r1",
+      "conceptId": "macie",
+      "kind": "why-not",
+      "prompt": "Why isn't GuardDuty a substitute for Macie when auditors need to classify sensitive content inside S3 objects?",
+      "promptEs": "¿Por qué GuardDuty no sustituye a Macie cuando los auditores necesitan clasificar contenido sensible dentro de objetos S3?",
+      "idealAnswer": "GuardDuty identifies potentially malicious activity using sources such as AWS logs and threat intelligence. Macie analyzes S3 objects to discover and report sensitive data, which is the auditors' requirement.",
+      "rubric": [
+        "Distinguishes GuardDuty's malicious-activity detection from content classification.",
+        "Identifies Macie as the service that analyzes S3 objects for sensitive data."
+      ]
+    }
+  ]
+}

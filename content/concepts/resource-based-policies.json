@@ -1,0 +1,449 @@
+{
+  "conceptId": "resource-based-policies",
+  "card": {
+    "en": {
+      "tldr": "An identity-based policy says what an IAM identity can do; a resource-based policy says who can access a particular resource and what they can do there. For direct cross-account resource access, check both sides: the requester needs an identity-based Allow, and the resource needs a resource-based Allow.",
+      "whenToUse": [
+        "A principal in another account needs access to an S3 bucket, SQS queue, or KMS key.",
+        "You need to specify permitted principals and actions on a supported resource itself.",
+        "You need to troubleshoot a resource policy's explicit Deny despite an identity-based Allow."
+      ],
+      "keyFacts": [
+        "Resource-based policies attach to resources; identity-based policies attach to IAM users, groups, or roles.",
+        "S3 bucket policies, SQS queue policies, and KMS key policies are examples of resource-based policies.",
+        "For cross-account requests, the requester's account needs an identity-based Allow and the resource's account needs a resource-based Allow.",
+        "For requests within one account to which only permissions policies apply, an Allow in either policy type can permit the request, but an explicit Deny overrides an Allow.",
+        "Specifying a resource ARN in an identity-based policy is a resource-level permission, not a resource-based policy."
+      ],
+      "gotchas": [
+        "An identity-based Allow in the requesting account does not, by itself, complete direct cross-account access.",
+        "A resource-based Allow does not override an explicit Deny in an applicable policy.",
+        "A policy attached to a role remains identity-based even when it names one specific bucket or queue."
+      ],
+      "confusedWith": [
+        {
+          "concept": "iam-identity-based-policies",
+          "difference": "Attached to an IAM identity to specify its actions; a resource-based policy attaches to the resource to specify who can access it."
+        },
+        {
+          "concept": "service-control-policies",
+          "difference": "An SCP is an account or OU permissions guardrail, not a resource-level access grant."
+        },
+        {
+          "concept": "permissions-boundaries",
+          "difference": "A permissions boundary caps an IAM user or role's permissions; it does not grant access to a resource."
+        }
+      ],
+      "examCues": [
+        "role in a partner account needs direct bucket access",
+        "requester already has an identity-based Allow",
+        "queue policy explicitly denies the role",
+        "specify which external principal can use the key"
+      ]
+    },
+    "es": {
+      "tldr": "Una identity-based policy indica qué puede hacer una identidad de IAM; una resource-based policy indica quién puede acceder a un recurso y qué puede hacer allí. Para el acceso directo entre cuentas, revisa ambos lados: la identidad solicitante necesita un Allow y la policy del recurso también.",
+      "whenToUse": [
+        "Una identidad de otra cuenta necesita acceso a un bucket de S3, una cola de SQS o una clave de KMS.",
+        "Necesitas especificar en el propio recurso qué principales y acciones están permitidos.",
+        "Debes investigar un Deny explícito en la policy del recurso pese a un Allow para la identidad."
+      ],
+      "keyFacts": [
+        "Las resource-based policies se adjuntan a recursos; las identity-based policies se adjuntan a usuarios, grupos o roles de IAM.",
+        "Las bucket policies de S3 y las policies de colas de SQS y claves de KMS son ejemplos de resource-based policies.",
+        "Para solicitudes entre cuentas, se requiere un Allow en la identity-based policy de la cuenta solicitante y otro en la resource-based policy de la cuenta del recurso.",
+        "En solicitudes dentro de una cuenta a las que solo se aplican permissions policies, un Allow de cualquiera de los dos tipos puede permitir la solicitud, pero un Deny explícito prevalece.",
+        "Indicar el ARN de un recurso en una identity-based policy es un permiso a nivel de recurso, no una resource-based policy."
+      ],
+      "gotchas": [
+        "Un Allow para la identidad en la cuenta solicitante no basta por sí solo para el acceso directo entre cuentas.",
+        "Un Allow en la resource-based policy no supera un Deny explícito aplicable.",
+        "Una policy adjunta a un rol sigue siendo identity-based aunque nombre un único bucket o cola."
+      ],
+      "confusedWith": [
+        {
+          "concept": "iam-identity-based-policies",
+          "difference": "Se adjunta a una identidad de IAM para definir sus acciones; una resource-based policy se adjunta al recurso para definir quién puede acceder."
+        },
+        {
+          "concept": "service-control-policies",
+          "difference": "Una SCP limita permisos de una cuenta u OU; no concede acceso a un recurso."
+        },
+        {
+          "concept": "permissions-boundaries",
+          "difference": "Una permissions boundary limita los permisos de un usuario o rol de IAM; no concede acceso a un recurso."
+        }
+      ],
+      "examCues": [
+        "role in a partner account needs direct bucket access",
+        "requester already has an identity-based Allow",
+        "queue policy explicitly denies the role",
+        "specify which external principal can use the key"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "resource-based-policies--5c4971ee",
+      "conceptId": "resource-based-policies",
+      "secondaryConcepts": [
+        "iam-identity-based-policies",
+        "permissions-boundaries"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics team has an IAM role and an SQS queue in the same AWS account. The role's identity-based policy allows it to send messages to the queue, but the queue policy explicitly denies that role the same action. The team must restore sending while keeping the role's existing scoped identity permission. Which change meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add another identity-based Allow for sending messages to the role.",
+          "correct": false,
+          "why": "A second identity-based Allow cannot override the queue policy's explicit Deny."
+        },
+        {
+          "id": "B",
+          "text": "Add an Allow for the role to the same queue policy while retaining the Deny.",
+          "correct": false,
+          "why": "The retained explicit Deny overrides the new Allow."
+        },
+        {
+          "id": "C",
+          "text": "Add the send-message action to the role's permissions boundary.",
+          "correct": false,
+          "why": "A permissions boundary cannot override the explicit Deny or grant the action."
+        },
+        {
+          "id": "D",
+          "text": "Remove the applicable explicit Deny from the queue policy.",
+          "correct": true,
+          "why": "The identity-based Allow can take effect once the queue policy no longer explicitly denies the request."
+        }
+      ],
+      "explanation": "The queue policy's explicit Deny is the deciding constraint. For this same-account request, an applicable explicit Deny overrides an Allow, regardless of which permissions policy contains the Allow. Remove the applicable Deny so the role's existing identity-based Allow can be evaluated without that conflict.",
+      "keywordCues": [
+        "same AWS account",
+        "identity-based policy allows it to send messages",
+        "queue policy explicitly denies that role"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+      ],
+      "es": {
+        "stem": "Un equipo de logística tiene un rol de IAM y una cola de SQS en la misma cuenta de AWS. La identity-based policy del rol le permite enviar mensajes a la cola, pero la queue policy prohíbe explícitamente esa misma acción al rol. El equipo debe restablecer el envío y conservar el permiso acotado que ya tiene el rol. ¿Qué cambio cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega al rol otro Allow en una identity-based policy para enviar mensajes.",
+            "why": "Un segundo Allow para la identidad no supera el Deny explícito de la queue policy."
+          },
+          {
+            "id": "B",
+            "text": "Agrega un Allow para el rol a la misma queue policy, pero conserva el Deny.",
+            "why": "El Deny explícito que se conserva prevalece sobre el nuevo Allow."
+          },
+          {
+            "id": "C",
+            "text": "Agrega la acción de enviar mensajes a la permissions boundary del rol.",
+            "why": "Una permissions boundary no supera el Deny explícito ni concede la acción."
+          },
+          {
+            "id": "D",
+            "text": "Elimina el Deny explícito aplicable de la queue policy.",
+            "why": "El Allow de la identity-based policy podrá surtir efecto cuando la queue policy deje de prohibir explícitamente la solicitud."
+          }
+        ],
+        "explanation": "El Deny explícito de la queue policy decide el caso. En esta solicitud dentro de la misma cuenta, un Deny explícito aplicable prevalece sobre un Allow, sin importar cuál permissions policy contenga el Allow. Elimina el Deny aplicable para que el Allow existente del rol pueda evaluarse sin ese conflicto."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "resource-based-policies--2fc44203",
+      "conceptId": "resource-based-policies",
+      "secondaryConcepts": [
+        "iam-identity-based-policies",
+        "service-control-policies",
+        "permissions-boundaries"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company keeps a KMS key in its archive account. An IAM role in a separate analytics account already has an identity-based policy allowing the required action on that key, but access is not yet permitted by the archive account. The company wants to name that role as an allowed principal for only the required key action. Which solution meets the cross-account access requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add another identity-based policy for the key action to the analytics role.",
+          "correct": false,
+          "why": "Another role policy repeats the requester-side Allow without providing the archive account's resource-side Allow."
+        },
+        {
+          "id": "B",
+          "text": "Add a KMS key policy allowing that role the required action on the key.",
+          "correct": true,
+          "why": "The key policy supplies the resource-based Allow missing from the archive account."
+        },
+        {
+          "id": "C",
+          "text": "Add the key action to a permissions boundary on the analytics role.",
+          "correct": false,
+          "why": "A permissions boundary does not provide the required Allow from the archive account."
+        },
+        {
+          "id": "D",
+          "text": "Add the key action to an SCP for the archive account.",
+          "correct": false,
+          "why": "An SCP does not grant the external role access to the key."
+        }
+      ],
+      "explanation": "The role already has an identity-based Allow, but it is requesting a resource in another account. Cross-account access also requires a resource-based Allow on the resource in the archive account. A KMS key policy can name the allowed role and action; another role policy or a permissions limit does not fill that gap.",
+      "keywordCues": [
+        "KMS key in its archive account",
+        "role in a separate analytics account already has an identity-based policy",
+        "name that role as an allowed principal"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios conserva una clave de KMS en su cuenta de archivo. Un rol de IAM de otra cuenta, dedicada a análisis, ya tiene una identity-based policy que permite la acción necesaria sobre esa clave, pero la cuenta de archivo todavía no permite el acceso. La empresa quiere nombrar ese rol como principal autorizado solo para la acción necesaria sobre la clave. ¿Qué solución cumple el requisito de acceso entre cuentas?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega al rol de análisis otra identity-based policy para la acción sobre la clave.",
+            "why": "Otra policy del rol repite el Allow del lado solicitante, pero no proporciona el Allow del recurso en la cuenta de archivo."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una key policy de KMS que permita a ese rol la acción necesaria sobre la clave.",
+            "why": "La key policy aporta el Allow en la resource-based policy que falta en la cuenta de archivo."
+          },
+          {
+            "id": "C",
+            "text": "Agrega la acción sobre la clave a una permissions boundary del rol de análisis.",
+            "why": "Una permissions boundary no proporciona el Allow necesario desde la cuenta de archivo."
+          },
+          {
+            "id": "D",
+            "text": "Agrega la acción sobre la clave a una SCP de la cuenta de archivo.",
+            "why": "Una SCP no concede al rol externo acceso a la clave."
+          }
+        ],
+        "explanation": "El rol ya tiene un Allow en su identity-based policy, pero solicita acceso a un recurso de otra cuenta. El acceso entre cuentas también requiere un Allow en la resource-based policy del recurso en la cuenta de archivo. Una key policy de KMS puede nombrar el rol y la acción permitida; otra policy del rol o un límite de permisos no cubren esa necesidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "resource-based-policies--1b9eecb6",
+      "conceptId": "resource-based-policies",
+      "secondaryConcepts": [
+        "iam-identity-based-policies",
+        "service-control-policies",
+        "permissions-boundaries"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research group stores a dataset in an S3 bucket in its data account. A processing role in a separate compute account needs direct read access to the dataset; neither account currently has a policy allowing that cross-account read. The group wants to authorize only that role and the required read action, without changing which account owns the bucket. Which TWO policy changes are required? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach an identity-based policy allowing the required bucket reads to the processing role.",
+          "correct": true,
+          "why": "The requester needs an identity-based Allow in the compute account."
+        },
+        {
+          "id": "B",
+          "text": "Add an SCP allowing reads of the bucket to the compute account.",
+          "correct": false,
+          "why": "An SCP does not grant the processing role permission to read the bucket."
+        },
+        {
+          "id": "C",
+          "text": "Attach a second identity-based policy allowing bucket reads to another role in the data account.",
+          "correct": false,
+          "why": "Permissions for a different role do not authorize the specified processing role."
+        },
+        {
+          "id": "D",
+          "text": "Add a bucket policy allowing the processing role the required reads.",
+          "correct": true,
+          "why": "The bucket policy provides the resource-based Allow in the data account."
+        },
+        {
+          "id": "E",
+          "text": "Attach a permissions boundary allowing bucket reads to the processing role.",
+          "correct": false,
+          "why": "A permissions boundary caps role permissions but does not supply either required access grant."
+        }
+      ],
+      "explanation": "This is direct cross-account access, and neither required Allow exists yet. The processing role needs an identity-based Allow in the compute account, and the bucket needs a resource-based Allow in the data account. A permissions boundary or SCP cannot replace either grant, while a policy for a different role does not authorize the requester.",
+      "keywordCues": [
+        "separate compute account",
+        "direct read access",
+        "neither account currently has a policy allowing that cross-account read",
+        "authorize only that role"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+      ],
+      "es": {
+        "stem": "Un grupo de investigación almacena un conjunto de datos en un bucket de S3 de su cuenta de datos. Un rol de procesamiento en otra cuenta, dedicada a cómputo, necesita acceso directo de lectura; ninguna de las cuentas tiene todavía una policy que permita esa lectura entre cuentas. El grupo quiere autorizar solo a ese rol y la acción de lectura necesaria, sin cambiar la cuenta propietaria del bucket. ¿Qué DOS cambios de policy se requieren? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Adjunta al rol de procesamiento una identity-based policy que permita las lecturas necesarias del bucket.",
+            "why": "El solicitante necesita un Allow en una identity-based policy de la cuenta de cómputo."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una SCP que permita a la cuenta de cómputo leer el bucket.",
+            "why": "Una SCP no concede al rol de procesamiento permiso para leer el bucket."
+          },
+          {
+            "id": "C",
+            "text": "Adjunta a otro rol de la cuenta de datos una segunda identity-based policy que permita leer el bucket.",
+            "why": "Los permisos de otro rol no autorizan al rol de procesamiento indicado."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una bucket policy que permita al rol de procesamiento las lecturas necesarias.",
+            "why": "La bucket policy proporciona el Allow en la resource-based policy de la cuenta de datos."
+          },
+          {
+            "id": "E",
+            "text": "Adjunta al rol de procesamiento una permissions boundary que permita leer el bucket.",
+            "why": "Una permissions boundary limita los permisos del rol, pero no aporta ninguno de los permisos de acceso requeridos."
+          }
+        ],
+        "explanation": "Se trata de acceso directo entre cuentas y todavía no existe ninguno de los dos Allow necesarios. El rol de procesamiento necesita un Allow en su identity-based policy de la cuenta de cómputo, y el bucket necesita un Allow en su resource-based policy de la cuenta de datos. Una permissions boundary o SCP no sustituye esos permisos; una policy para otro rol tampoco autoriza al solicitante."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "resource-based-policies--608956d8",
+      "conceptId": "resource-based-policies",
+      "secondaryConcepts": [
+        "iam-identity-based-policies",
+        "service-control-policies",
+        "permissions-boundaries"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company stores approved images in an S3 bucket in its production account. A partner's IAM role in another account already has an identity-based policy allowing it to read the images, but its requests still fail. The company wants to grant that role direct access to only the required bucket resources. Which change meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add another identity-based policy allowing S3 reads to the partner role.",
+          "correct": false,
+          "why": "The role already has an identity-based Allow; another one does not provide the required Allow on the resource side."
+        },
+        {
+          "id": "B",
+          "text": "Add an SCP to the production account listing the partner role's S3 read actions.",
+          "correct": false,
+          "why": "An SCP is a permissions guardrail, not a bucket policy granting the external role access."
+        },
+        {
+          "id": "C",
+          "text": "Add a permissions boundary to the partner role that includes the required S3 reads.",
+          "correct": false,
+          "why": "A permissions boundary limits a role's permissions rather than granting access from the bucket's account."
+        },
+        {
+          "id": "D",
+          "text": "Add an S3 bucket policy allowing the partner role to read the required bucket resources.",
+          "correct": true,
+          "why": "The bucket policy supplies the resource-side Allow needed alongside the partner role's existing identity-based Allow."
+        }
+      ],
+      "explanation": "The deciding requirement is direct access by a role in another account when that role already has an identity-based Allow. Cross-account requests also need a resource-based Allow in the account that owns the bucket. An S3 bucket policy supplies that missing side; repeating the role's Allow does not.",
+      "keywordCues": [
+        "IAM role in another account",
+        "already has an identity-based policy allowing it to read",
+        "grant that role direct access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+      ],
+      "es": {
+        "stem": "Una editorial almacena imágenes aprobadas en un bucket de S3 de su cuenta de producción. Un rol de IAM de un socio en otra cuenta ya tiene una identity-based policy que permite leer las imágenes, pero sus solicitudes siguen fallando. La editorial quiere dar acceso directo a ese rol solo a los recursos necesarios del bucket. ¿Qué cambio cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega al rol del socio otra identity-based policy que permita lecturas de S3.",
+            "why": "El rol ya tiene un Allow en su identity-based policy; agregar otro no proporciona el Allow necesario del lado del recurso."
+          },
+          {
+            "id": "B",
+            "text": "Agrega a la cuenta de producción una SCP que enumere las acciones de lectura de S3 del rol del socio.",
+            "why": "Una SCP es un límite de permisos, no una bucket policy que conceda acceso al rol externo."
+          },
+          {
+            "id": "C",
+            "text": "Agrega al rol del socio una permissions boundary que incluya las lecturas de S3 necesarias.",
+            "why": "Una permissions boundary limita los permisos de un rol; no concede acceso desde la cuenta del bucket."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una bucket policy de S3 que permita al rol del socio leer los recursos necesarios del bucket.",
+            "why": "La bucket policy proporciona el Allow del lado del recurso que se necesita junto con el Allow existente del rol."
+          }
+        ],
+        "explanation": "La clave es el acceso directo de un rol de otra cuenta que ya tiene un Allow en su identity-based policy. Las solicitudes entre cuentas también necesitan un Allow en la resource-based policy de la cuenta propietaria del bucket. Una bucket policy de S3 aporta ese permiso faltante; repetir el Allow del rol no lo hace."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "resource-based-policies--r0",
+      "conceptId": "resource-based-policies",
+      "kind": "recall",
+      "prompt": "A partner role already has permission to read your S3 bucket but still lacks cross-account access. Which policy would you add, and why?",
+      "promptEs": "Un rol de un socio ya tiene permiso para leer tu bucket de S3, pero aún no logra acceso entre cuentas. ¿Qué policy agregarías y por qué?",
+      "idealAnswer": "Add an S3 bucket policy allowing the partner role the required reads. The role's identity-based Allow covers the requesting account, but direct cross-account access also requires a resource-based Allow in the bucket's account.",
+      "rubric": [
+        "Names an S3 bucket policy as the needed resource-based policy.",
+        "Identifies the existing identity-based Allow on the requesting side.",
+        "Explains that cross-account access needs Allows on both sides."
+      ]
+    },
+    {
+      "id": "resource-based-policies--r1",
+      "conceptId": "resource-based-policies",
+      "kind": "why-not",
+      "prompt": "Why can't a permissions boundary replace a queue policy when a role in another account needs direct access to your SQS queue?",
+      "promptEs": "¿Por qué una permissions boundary no puede sustituir una queue policy cuando un rol de otra cuenta necesita acceso directo a tu cola de SQS?",
+      "idealAnswer": "A permissions boundary limits what an IAM role can do; it does not grant access from the queue's account. Direct cross-account access needs an identity-based Allow for the requester and a resource-based Allow on the SQS queue.",
+      "rubric": [
+        "States that a permissions boundary limits rather than grants permissions.",
+        "Names the SQS queue policy as the resource-side policy.",
+        "Identifies the need for both identity-side and resource-side Allows."
+      ]
+    }
+  ]
+}

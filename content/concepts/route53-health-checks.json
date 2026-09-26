@@ -1,0 +1,304 @@
+{
+  "conceptId": "route53-health-checks",
+  "card": {
+    "en": {
+      "tldr": "Route 53 health checks can monitor a specified resource, the status of other health checks, or the status of a CloudWatch alarm. When multiple resources serve the same function, use a health check with DNS failover to route traffic from an unhealthy resource to a healthy one.",
+      "whenToUse": [
+        "A reachable web server must be monitored so DNS traffic can move to a healthy alternative if it fails.",
+        "The health decision must follow an existing CloudWatch alarm rather than a direct resource check.",
+        "The health decision must depend on the status of other Route 53 health checks."
+      ],
+      "keyFacts": [
+        "A Route 53 health check can monitor a specified resource, such as a web server.",
+        "A health check can monitor the status of other health checks or a CloudWatch alarm.",
+        "With multiple resources performing the same function, DNS failover can route traffic from an unhealthy resource to a healthy one.",
+        "A CloudWatch alarm can notify you when a health check changes status; notification and DNS failover are separate configurations."
+      ],
+      "gotchas": [
+        "Monitoring health does not, by itself, configure DNS failover.",
+        "An alarm that notifies you of a health-check change is not a substitute for configuring DNS failover.",
+        "Choose a check of other health checks only when their statuses are the intended health signal."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "route traffic away from an unhealthy web server",
+        "health follows an existing CloudWatch alarm",
+        "decision depends on other health checks",
+        "notification is not enough; traffic must fail over"
+      ]
+    },
+    "es": {
+      "tldr": "Route 53 health checks pueden supervisar un recurso específico, el estado de otros health checks o el estado de una alarma de CloudWatch. Si varios recursos cumplen la misma función, usa un health check con DNS failover para dirigir el tráfico del recurso no saludable a uno saludable.",
+      "whenToUse": [
+        "Debes supervisar un servidor web para que el tráfico DNS pueda pasar a una alternativa saludable si falla.",
+        "La decisión de salud debe seguir una alarma existente de CloudWatch en lugar de verificar directamente un recurso.",
+        "La decisión de salud debe depender del estado de otros Route 53 health checks."
+      ],
+      "keyFacts": [
+        "Un Route 53 health check puede supervisar un recurso específico, como un servidor web.",
+        "Un health check puede supervisar el estado de otros health checks o de una alarma de CloudWatch.",
+        "Si varios recursos cumplen la misma función, DNS failover puede dirigir el tráfico de un recurso no saludable a uno saludable.",
+        "Una alarma de CloudWatch puede notificarte cuando cambia el estado de un health check; la notificación y DNS failover se configuran por separado."
+      ],
+      "gotchas": [
+        "Supervisar la salud no configura DNS failover por sí solo.",
+        "Una alarma que te notifica un cambio de estado de un health check no sustituye la configuración de DNS failover.",
+        "Elige una verificación de otros health checks solo si sus estados son la señal de salud que necesitas."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "route traffic away from an unhealthy web server",
+        "health follows an existing CloudWatch alarm",
+        "decision depends on other health checks",
+        "notification is not enough; traffic must fail over"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route53-health-checks--954cc95b",
+      "conceptId": "route53-health-checks",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company has two web servers that perform the same function. If either server becomes unhealthy, the company wants DNS to direct traffic to the healthy server rather than wait for an operator to respond to an alert. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create Route 53 health checks for the servers and configure CloudWatch alarms to notify operators of status changes.",
+          "correct": false,
+          "why": "Notifications inform operators but do not configure the requested DNS failover."
+        },
+        {
+          "id": "B",
+          "text": "Create a Route 53 health check that monitors the status of other health checks, but do not configure DNS failover.",
+          "correct": false,
+          "why": "Checking health without DNS failover does not provide the requested traffic routing."
+        },
+        {
+          "id": "C",
+          "text": "Create Route 53 health checks for the servers and configure DNS failover to route traffic to a healthy server.",
+          "correct": true,
+          "why": "The checks identify unhealthy servers, and DNS failover routes traffic to the healthy alternative."
+        },
+        {
+          "id": "D",
+          "text": "Create a CloudWatch alarm for each server and use the alarms solely to notify operators when a server is unhealthy.",
+          "correct": false,
+          "why": "Operator notifications do not meet the requirement for DNS to route traffic automatically."
+        }
+      ],
+      "explanation": "The deciding requirement is DNS routing to a healthy server without waiting for an operator. Route 53 health checks can monitor the servers, and DNS failover can route traffic away from an unhealthy resource when another resource performs the same function. CloudWatch notifications can report a status change, but notifications alone do not configure DNS failover.",
+      "keywordCues": [
+        "two web servers that perform the same function",
+        "DNS to direct traffic to the healthy server",
+        "rather than wait for an operator"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos tiene dos servidores web que cumplen la misma función. Si uno deja de estar saludable, la empresa quiere que DNS dirija el tráfico al servidor saludable sin esperar a que un operador responda a una alerta. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea Route 53 health checks para los servidores y configura alarmas de CloudWatch para notificar a los operadores sobre los cambios de estado.",
+            "why": "Las notificaciones informan a los operadores, pero no configuran el DNS failover solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Crea un Route 53 health check que supervise el estado de otros health checks, pero no configures DNS failover.",
+            "why": "Supervisar la salud sin DNS failover no proporciona el enrutamiento solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Crea Route 53 health checks para los servidores y configura DNS failover para dirigir el tráfico a un servidor saludable.",
+            "why": "Los health checks identifican los servidores no saludables y DNS failover dirige el tráfico a la alternativa saludable."
+          },
+          {
+            "id": "D",
+            "text": "Crea una alarma de CloudWatch para cada servidor y úsala únicamente para notificar a los operadores cuando un servidor no esté saludable.",
+            "why": "Las notificaciones a operadores no cumplen el requisito de que DNS dirija el tráfico automáticamente."
+          }
+        ],
+        "explanation": "El requisito decisivo es dirigir el tráfico DNS a un servidor saludable sin esperar a un operador. Route 53 health checks pueden supervisar los servidores y DNS failover puede apartar el tráfico de un recurso no saludable cuando otro cumple la misma función. Las notificaciones de CloudWatch pueden informar un cambio de estado, pero por sí solas no configuran DNS failover."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-health-checks--363dbb0f",
+      "conceptId": "route53-health-checks",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company already has Route 53 health checks for several resources in a regional application. For a new routing decision, it wants the health signal to come from the status of those existing checks, not from directly checking another server or consulting a CloudWatch alarm. Which Route 53 health check type should the company use?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A health check that monitors the new routing target as a specified resource.",
+          "correct": false,
+          "why": "This monitors a resource directly rather than the statuses of the existing health checks."
+        },
+        {
+          "id": "B",
+          "text": "A CloudWatch alarm that notifies operators when one existing health check changes status.",
+          "correct": false,
+          "why": "An operator notification is not a health check whose signal comes from other checks."
+        },
+        {
+          "id": "C",
+          "text": "A health check that monitors the status of a CloudWatch alarm.",
+          "correct": false,
+          "why": "The company explicitly requires existing health checks, not an alarm, as the signal."
+        },
+        {
+          "id": "D",
+          "text": "A health check that monitors the status of other health checks.",
+          "correct": true,
+          "why": "This uses the existing health-check statuses as the requested health signal."
+        }
+      ],
+      "explanation": "The key constraint is that the health signal must come from existing Route 53 health checks. Route 53 supports a health check that monitors the status of other health checks. A direct resource check or CloudWatch alarm check uses a different signal, while a notification does not create the requested health check.",
+      "keywordCues": [
+        "already has Route 53 health checks",
+        "status of those existing checks",
+        "not from directly checking another server or consulting a CloudWatch alarm"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística ya tiene Route 53 health checks para varios recursos de una aplicación regional. Para una nueva decisión de enrutamiento, quiere que la señal de salud provenga del estado de esos health checks existentes, no de verificar directamente otro servidor ni de consultar una alarma de CloudWatch. ¿Qué tipo de Route 53 health check debe usar?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Un health check que supervise el nuevo destino de enrutamiento como recurso específico.",
+            "why": "Esto supervisa directamente un recurso, no los estados de los health checks existentes."
+          },
+          {
+            "id": "B",
+            "text": "Una alarma de CloudWatch que notifique a los operadores cuando cambie el estado de un health check existente.",
+            "why": "Una notificación a operadores no es un health check cuya señal provenga de otros health checks."
+          },
+          {
+            "id": "C",
+            "text": "Un health check que supervise el estado de una alarma de CloudWatch.",
+            "why": "La empresa exige que la señal provenga de los health checks existentes, no de una alarma."
+          },
+          {
+            "id": "D",
+            "text": "Un health check que supervise el estado de otros health checks.",
+            "why": "Esto utiliza los estados de los health checks existentes como la señal de salud solicitada."
+          }
+        ],
+        "explanation": "La condición decisiva es que la señal de salud provenga de Route 53 health checks existentes. Route 53 permite crear un health check que supervise el estado de otros health checks. Verificar directamente un recurso o una alarma de CloudWatch usa una señal distinta, mientras que una notificación no crea el health check solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-health-checks--b7e2eeb8",
+      "conceptId": "route53-health-checks",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company has two resources that can serve the same application traffic. Its operations team already uses a CloudWatch alarm as the signal that the primary should stop receiving traffic, and it wants Route 53 DNS failover to follow that alarm's status. Which solution meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a Route 53 health check that monitors the primary resource directly, and configure DNS failover.",
+          "correct": false,
+          "why": "A direct resource check does not make the routing decision follow the existing alarm's status."
+        },
+        {
+          "id": "B",
+          "text": "Create a Route 53 health check that monitors other health checks, and configure DNS failover.",
+          "correct": false,
+          "why": "The required signal is a CloudWatch alarm, not the status of other health checks."
+        },
+        {
+          "id": "C",
+          "text": "Create a Route 53 health check that monitors the CloudWatch alarm, and configure DNS failover.",
+          "correct": true,
+          "why": "Route 53 can use alarm status as a health-check signal and use DNS failover to route to a healthy resource."
+        },
+        {
+          "id": "D",
+          "text": "Configure the CloudWatch alarm to notify operators and have them change DNS routing after each alert.",
+          "correct": false,
+          "why": "Manual routing after an alert does not meet the requirement for Route 53 DNS failover to follow the alarm."
+        }
+      ],
+      "explanation": "The existing CloudWatch alarm—not a direct check of the primary resource—is the required health signal. A Route 53 health check can monitor the status of that alarm, and DNS failover can route traffic to a healthy resource. A direct resource check might provide a different health decision, while notifying operators leaves the routing change to a manual step.",
+      "keywordCues": [
+        "already uses a CloudWatch alarm as the signal",
+        "DNS failover to follow that alarm's status"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene dos recursos capaces de atender el mismo tráfico de aplicación. Su equipo de operaciones ya usa una alarma de CloudWatch como señal para dejar de enviar tráfico al recurso principal y quiere que Route 53 DNS failover siga el estado de esa alarma. ¿Qué solución cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un Route 53 health check que supervise directamente el recurso principal y configura DNS failover.",
+            "why": "Verificar directamente el recurso no hace que la decisión de enrutamiento siga el estado de la alarma existente."
+          },
+          {
+            "id": "B",
+            "text": "Crea un Route 53 health check que supervise otros health checks y configura DNS failover.",
+            "why": "La señal requerida es una alarma de CloudWatch, no el estado de otros health checks."
+          },
+          {
+            "id": "C",
+            "text": "Crea un Route 53 health check que supervise la alarma de CloudWatch y configura DNS failover.",
+            "why": "Route 53 puede usar el estado de la alarma como señal de salud y DNS failover para dirigir el tráfico a un recurso saludable."
+          },
+          {
+            "id": "D",
+            "text": "Configura la alarma de CloudWatch para notificar a los operadores y haz que cambien el enrutamiento DNS después de cada alerta.",
+            "why": "Cambiar el enrutamiento manualmente tras una alerta no cumple el requisito de que Route 53 DNS failover siga la alarma."
+          }
+        ],
+        "explanation": "La señal de salud requerida es la alarma de CloudWatch existente, no una verificación directa del recurso principal. Un Route 53 health check puede supervisar el estado de esa alarma y DNS failover puede dirigir el tráfico a un recurso saludable. Una verificación directa podría producir una decisión de salud distinta, mientras que notificar a los operadores deja el cambio de enrutamiento como paso manual."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "route53-health-checks--r0",
+      "conceptId": "route53-health-checks",
+      "kind": "recall",
+      "prompt": "A web server fails while an equivalent server remains healthy. What Route 53 configurations can move DNS traffic to the healthy server, and why?",
+      "promptEs": "Un servidor web falla y otro equivalente sigue saludable. ¿Qué configuraciones de Route 53 pueden dirigir el tráfico DNS al servidor saludable y por qué?",
+      "idealAnswer": "Create Route 53 health checks to monitor the resources and configure DNS failover. When a resource is unhealthy, Route 53 can route traffic to a healthy resource performing the same function.",
+      "rubric": [
+        "Names Route 53 health checks.",
+        "Names DNS failover as a separate configuration.",
+        "Explains routing from an unhealthy resource to a healthy equivalent."
+      ]
+    }
+  ]
+}

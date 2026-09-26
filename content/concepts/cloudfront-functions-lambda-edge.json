@@ -1,0 +1,244 @@
+{
+  "conceptId": "cloudfront-functions-lambda-edge",
+  "card": {
+    "en": {
+      "tldr": "CloudFront Functions handles lightweight, short-running changes to requests and responses at viewer events. Choose Lambda@Edge when edge logic needs network access, request-body access, third-party libraries, or more memory.",
+      "whenToUse": [
+        "Choose CloudFront Functions to normalize URLs, headers, cookies, or query strings for a cache key.",
+        "Choose CloudFront Functions for simple header changes, redirects, rewrites, or token validation using request metadata.",
+        "Choose Lambda@Edge when processing needs an external service, the request body, or an origin-request or origin-response event."
+      ],
+      "keyFacts": [
+        "CloudFront Functions runs at viewer request and viewer response events; Lambda@Edge also runs at origin request and origin response events.",
+        "CloudFront Functions has no network, file system, or request-body access; Lambda@Edge supports all three.",
+        "CloudFront Functions supports up to millions of requests per second; Lambda@Edge supports up to 10,000 requests per second per Region.",
+        "CloudFront Functions has 2 MB maximum memory. Lambda@Edge allows up to 128 MB at viewer events and 10,240 MB at origin events.",
+        "CloudFront Functions uses JavaScript; Lambda@Edge supports Node.js and Python."
+      ],
+      "gotchas": [
+        "A viewer-response function cannot normalize a request before the cache lookup.",
+        "CloudFront Functions can inspect authorization headers for token validation, but it cannot call an external authorization service.",
+        "Lambda@Edge memory limits differ between viewer and origin events."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Lambda@Edge",
+          "difference": "It supports network calls, request bodies, libraries, and origin events; CloudFront Functions is for lightweight viewer-event logic."
+        }
+      ],
+      "examCues": [
+        "normalize the URL before cache lookup",
+        "add a header to every viewer request",
+        "call an external authorization service",
+        "inspect the request body at the edge",
+        "run Python on an origin response"
+      ]
+    },
+    "es": {
+      "tldr": "CloudFront Functions realiza cambios ligeros y de corta duración en solicitudes y respuestas durante eventos de viewer. Elige Lambda@Edge cuando la lógica en el edge necesite acceso a la red, al cuerpo de la solicitud, a bibliotecas de terceros o a más memoria.",
+      "whenToUse": [
+        "Elige CloudFront Functions para normalizar URL, encabezados, cookies o parámetros de consulta que forman parte de la cache key.",
+        "Elige CloudFront Functions para cambios sencillos de encabezados, redirecciones, reescrituras o validación de tokens mediante metadatos de la solicitud.",
+        "Elige Lambda@Edge si necesitas llamar a un servicio externo, leer el cuerpo de la solicitud o usar un evento origin request u origin response."
+      ],
+      "keyFacts": [
+        "CloudFront Functions se ejecuta en eventos viewer request y viewer response; Lambda@Edge también admite origin request y origin response.",
+        "CloudFront Functions no tiene acceso a la red, al sistema de archivos ni al cuerpo de la solicitud; Lambda@Edge sí.",
+        "CloudFront Functions admite hasta millones de solicitudes por segundo; Lambda@Edge admite hasta 10,000 solicitudes por segundo por Región.",
+        "CloudFront Functions tiene un máximo de 2 MB de memoria. Lambda@Edge admite hasta 128 MB en eventos de viewer y 10,240 MB en eventos de origin.",
+        "CloudFront Functions usa JavaScript; Lambda@Edge admite Node.js y Python."
+      ],
+      "gotchas": [
+        "Una función viewer response no puede normalizar una solicitud antes de la búsqueda en caché.",
+        "CloudFront Functions puede inspeccionar encabezados de autorización para validar tokens, pero no puede llamar a un servicio externo de autorización.",
+        "Los límites de memoria de Lambda@Edge son distintos para eventos de viewer y de origin."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Lambda@Edge",
+          "difference": "Admite llamadas de red, cuerpos de solicitudes, bibliotecas y eventos de origin; CloudFront Functions está orientado a lógica ligera en eventos de viewer."
+        }
+      ],
+      "examCues": [
+        "normalize the URL before cache lookup",
+        "add a header to every viewer request",
+        "call an external authorization service",
+        "inspect the request body at the edge",
+        "run Python on an origin response"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-choosing.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "cloudfront-functions-lambda-edge--8e6d4386",
+      "conceptId": "cloudfront-functions-lambda-edge",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A news publisher serves articles through Amazon CloudFront. Tracking parameters create different cache entries for otherwise identical articles, and traffic can reach hundreds of thousands of requests per second in a Region. The publisher wants to remove those parameters before each cache lookup using short-running edge code. Which solution meets these requirements at the required scale?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Lambda@Edge at the viewer request event to remove the tracking parameters.",
+          "correct": false,
+          "why": "It runs before cache lookup, but the stated traffic exceeds Lambda@Edge's documented scale of up to 10,000 requests per second per Region."
+        },
+        {
+          "id": "B",
+          "text": "Use Lambda@Edge at the origin request event to remove the tracking parameters.",
+          "correct": false,
+          "why": "An origin request event occurs after CloudFront determines whether the request is a cache hit."
+        },
+        {
+          "id": "C",
+          "text": "Use CloudFront Functions at the viewer response event to remove the tracking parameters.",
+          "correct": false,
+          "why": "A viewer response event occurs too late to change the request attributes used for the cache lookup."
+        },
+        {
+          "id": "D",
+          "text": "Use CloudFront Functions at the viewer request event to remove the tracking parameters.",
+          "correct": true,
+          "why": "It can normalize query strings before the cache lookup and supports up to millions of requests per second."
+        }
+      ],
+      "explanation": "The deciding requirements are normalization before the cache lookup and traffic far above 10,000 requests per second in a Region. CloudFront Functions at viewer request can change query strings for cache key normalization and supports up to millions of requests per second. Lambda@Edge at viewer request has the right timing but not the documented scale; response and origin-request events are too late for this cache lookup.",
+      "keywordCues": [
+        "before each cache lookup",
+        "hundreds of thousands of requests per second in a Region",
+        "short-running edge code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-choosing.html"
+      ],
+      "es": {
+        "stem": "Una editorial de noticias publica artículos mediante Amazon CloudFront. Los parámetros de seguimiento crean entradas de caché distintas para artículos idénticos, y el tráfico puede alcanzar cientos de miles de solicitudes por segundo en una Región. La editorial quiere eliminar esos parámetros antes de cada búsqueda en caché mediante código de corta duración en el edge. ¿Qué solución cumple estos requisitos a la escala requerida?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Lambda@Edge en el evento viewer request para eliminar los parámetros de seguimiento.",
+            "why": "Se ejecuta antes de la búsqueda en caché, pero el tráfico indicado supera la escala documentada de Lambda@Edge de hasta 10,000 solicitudes por segundo por Región."
+          },
+          {
+            "id": "B",
+            "text": "Usar Lambda@Edge en el evento origin request para eliminar los parámetros de seguimiento.",
+            "why": "El evento origin request ocurre después de que CloudFront determina si la solicitud encuentra una entrada en caché."
+          },
+          {
+            "id": "C",
+            "text": "Usar CloudFront Functions en el evento viewer response para eliminar los parámetros de seguimiento.",
+            "why": "El evento viewer response ocurre demasiado tarde para cambiar los atributos de la solicitud usados en la búsqueda en caché."
+          },
+          {
+            "id": "D",
+            "text": "Usar CloudFront Functions en el evento viewer request para eliminar los parámetros de seguimiento.",
+            "why": "Puede normalizar los parámetros de consulta antes de la búsqueda en caché y admite hasta millones de solicitudes por segundo."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son normalizar antes de la búsqueda en caché y atender un tráfico muy superior a 10,000 solicitudes por segundo en una Región. CloudFront Functions en viewer request puede modificar los parámetros de consulta para normalizar la cache key y admite hasta millones de solicitudes por segundo. Lambda@Edge en viewer request tiene el momento adecuado, pero no la escala documentada; los eventos de respuesta y origin request llegan demasiado tarde para esta búsqueda en caché."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "cloudfront-functions-lambda-edge--571663e7",
+      "conceptId": "cloudfront-functions-lambda-edge",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A streaming company uses CloudFront to deliver subscriber-only videos, including videos served from cache. Its security team requires an edge check on every viewer request that calls an external entitlement API before CloudFront returns content. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use CloudFront Functions at the viewer request event to call the entitlement API.",
+          "correct": false,
+          "why": "CloudFront Functions cannot make network calls to the external API."
+        },
+        {
+          "id": "B",
+          "text": "Use Lambda@Edge at the origin request event to call the entitlement API.",
+          "correct": false,
+          "why": "An origin request event does not provide a check on every viewer request, including cache hits."
+        },
+        {
+          "id": "C",
+          "text": "Use CloudFront Functions at the viewer response event to call the entitlement API.",
+          "correct": false,
+          "why": "CloudFront Functions has no network access, and a response event is too late for the required pre-return check."
+        },
+        {
+          "id": "D",
+          "text": "Use Lambda@Edge at the viewer request event to call the entitlement API.",
+          "correct": true,
+          "why": "Lambda@Edge has network access, and the viewer request event runs before CloudFront serves a cached response."
+        }
+      ],
+      "explanation": "The check must both call an external service and apply before content is returned on every viewer request. Lambda@Edge provides network access, and its viewer request event has the required timing. CloudFront Functions can validate tokens from request metadata, but it cannot call the entitlement API; an origin request event would not check cache hits.",
+      "keywordCues": [
+        "including videos served from cache",
+        "every viewer request",
+        "calls an external entitlement API",
+        "before CloudFront returns content"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-choosing.html"
+      ],
+      "es": {
+        "stem": "Una empresa de streaming usa CloudFront para entregar videos exclusivos para suscriptores, incluidos videos servidos desde caché. Su equipo de seguridad requiere una verificación en el edge para cada solicitud del viewer que llame a una API externa de derechos de acceso antes de que CloudFront devuelva el contenido. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar CloudFront Functions en el evento viewer request para llamar a la API de derechos de acceso.",
+            "why": "CloudFront Functions no puede hacer llamadas de red a la API externa."
+          },
+          {
+            "id": "B",
+            "text": "Usar Lambda@Edge en el evento origin request para llamar a la API de derechos de acceso.",
+            "why": "Un evento origin request no proporciona una verificación para cada solicitud del viewer, incluidas las que encuentran contenido en caché."
+          },
+          {
+            "id": "C",
+            "text": "Usar CloudFront Functions en el evento viewer response para llamar a la API de derechos de acceso.",
+            "why": "CloudFront Functions no tiene acceso a la red y un evento de respuesta ocurre demasiado tarde para la verificación previa requerida."
+          },
+          {
+            "id": "D",
+            "text": "Usar Lambda@Edge en el evento viewer request para llamar a la API de derechos de acceso.",
+            "why": "Lambda@Edge tiene acceso a la red y el evento viewer request ocurre antes de que CloudFront sirva una respuesta desde caché."
+          }
+        ],
+        "explanation": "La verificación debe llamar a un servicio externo y ejecutarse antes de devolver contenido en cada solicitud del viewer. Lambda@Edge proporciona acceso a la red y su evento viewer request tiene el momento adecuado. CloudFront Functions puede validar tokens con metadatos de la solicitud, pero no puede llamar a la API de derechos de acceso; un evento origin request no verificaría las solicitudes que encuentran contenido en caché."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "cloudfront-functions-lambda-edge--r0",
+      "conceptId": "cloudfront-functions-lambda-edge",
+      "kind": "recall",
+      "prompt": "Which edge feature would you choose to rewrite URL paths before cache lookup at very high request volume, and why?",
+      "promptEs": "¿Qué opción del edge elegirías para reescribir rutas URL antes de la búsqueda en caché con un volumen muy alto de solicitudes, y por qué?",
+      "idealAnswer": "Use CloudFront Functions at the viewer request event. URL rewriting is lightweight request manipulation, and CloudFront Functions supports up to millions of requests per second.",
+      "rubric": [
+        "Names CloudFront Functions.",
+        "Specifies the viewer request event so the rewrite precedes cache lookup.",
+        "Connects lightweight URL rewriting and high request volume to the choice."
+      ]
+    }
+  ]
+}

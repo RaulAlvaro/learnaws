@@ -1,0 +1,332 @@
+{
+  "conceptId": "aurora-serverless",
+  "card": {
+    "en": {
+      "tldr": "Aurora Serverless v2 automatically adjusts database compute and memory capacity as demand changes. Choose it for relational workloads with unpredictable peaks or idle periods when sizing and repeatedly resizing provisioned DB instances would add cost or operational work.",
+      "whenToUse": [
+        "An application has sudden, unpredictable increases in database activity.",
+        "A new application has uncertain database capacity requirements.",
+        "Development, test, or tenant workloads alternate between busy and quiet periods.",
+        "Aurora readers must scale independently to handle periodic read spikes."
+      ],
+      "keyFacts": [
+        "Set a minimum and maximum capacity range; Aurora Serverless adjusts capacity within the configured range based on demand.",
+        "Capacity can change in increments as small as 0.5 Aurora Capacity Units (ACUs).",
+        "Resource usage is measured per second, so reduced usage is reflected when an instance scales down.",
+        "Aurora Serverless supports reader DB instances, Multi-AZ clusters, Aurora global databases, and RDS Proxy.",
+        "Promotion tiers can be used to configure Aurora Serverless readers to scale independently of the writer."
+      ],
+      "gotchas": [
+        "A provisioned Aurora instance does not automatically gain Serverless v2 capacity scaling merely because it is in an Aurora cluster.",
+        "Setting the maximum capacity too low can prevent a Serverless v2 instance from scaling to meet an anticipated peak.",
+        "Adding Serverless v2 readers alone does not make a provisioned writer scale its capacity automatically."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Provisioned Aurora DB instances",
+          "difference": "Provisioned capacity is selected through DB instance classes; Aurora Serverless v2 adjusts capacity automatically within a configured range."
+        }
+      ],
+      "examCues": [
+        "unpredictable database traffic spikes",
+        "uncertain DB instance size",
+        "quiet between promotional events",
+        "read spikes independent of write traffic"
+      ]
+    },
+    "es": {
+      "tldr": "Aurora Serverless v2 ajusta automáticamente la capacidad de cómputo y memoria de la base de datos según cambia la demanda. Elígelo para cargas relacionales con picos impredecibles o períodos de inactividad cuando dimensionar y redimensionar instancias provisionadas aumentaría el costo o el trabajo operativo.",
+      "whenToUse": [
+        "Una aplicación presenta aumentos repentinos e impredecibles de actividad en la base de datos.",
+        "Una aplicación nueva tiene requisitos de capacidad de base de datos inciertos.",
+        "Las cargas de desarrollo, pruebas o distintos clientes alternan entre períodos de alta y baja actividad.",
+        "Los lectores de Aurora deben escalar independientemente para atender picos periódicos de lectura."
+      ],
+      "keyFacts": [
+        "Configuras un rango mínimo y máximo de capacidad; Aurora Serverless ajusta la capacidad dentro de ese rango según la demanda.",
+        "La capacidad puede cambiar en incrementos de tan solo 0.5 Aurora Capacity Units (ACUs).",
+        "El uso de recursos se mide por segundo, por lo que la reducción se refleja cuando una instancia disminuye su capacidad.",
+        "Aurora Serverless admite instancias lectoras, clústeres Multi-AZ, Aurora global databases y RDS Proxy.",
+        "Los promotion tiers permiten configurar lectores de Aurora Serverless para que escalen independientemente del escritor."
+      ],
+      "gotchas": [
+        "Una instancia provisionada de Aurora no adquiere escalado de capacidad de Serverless v2 solo por pertenecer a un clúster de Aurora.",
+        "Un máximo de capacidad demasiado bajo puede impedir que una instancia Serverless v2 escale para atender un pico previsto.",
+        "Agregar únicamente lectores Serverless v2 no hace que un escritor provisionado escale su capacidad automáticamente."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Instancias provisionadas de Aurora",
+          "difference": "La capacidad provisionada se selecciona mediante clases de instancia; Aurora Serverless v2 ajusta la capacidad automáticamente dentro de un rango configurado."
+        }
+      ],
+      "examCues": [
+        "unpredictable database traffic spikes",
+        "uncertain DB instance size",
+        "quiet between promotional events",
+        "read spikes independent of write traffic"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aurora-serverless--5196dc20",
+      "conceptId": "aurora-serverless",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A software company provides separate Aurora databases to tenants whose busy periods rarely coincide. Some tenants also run occasional read-heavy reporting jobs while their write activity remains steady. The company wants each tenant's capacity to follow its own demand and wants reporting readers to scale without forcing their writers to scale. Which TWO design choices meet these requirements MOST cost-effectively? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Aurora Serverless v2 readers with promotion tiers for independent scaling.",
+          "correct": true,
+          "why": "The readers can adjust to reporting spikes without requiring their writers to scale with them."
+        },
+        {
+          "id": "B",
+          "text": "Add provisioned reporting readers and change their instance classes after each job.",
+          "correct": false,
+          "why": "Repeated class changes do not meet the requirement for readers to follow demand automatically."
+        },
+        {
+          "id": "C",
+          "text": "Add only Serverless v2 writers and send each reporting job to its writer.",
+          "correct": false,
+          "why": "It does not provide reporting readers that scale independently of steady writer activity."
+        },
+        {
+          "id": "D",
+          "text": "Use a separate Aurora Serverless v2 cluster and capacity range for each tenant.",
+          "correct": true,
+          "why": "Each tenant's cluster can adjust capacity to its own busy and quiet periods."
+        },
+        {
+          "id": "E",
+          "text": "Size every tenant's provisioned writer for the fleet's busiest reporting period.",
+          "correct": false,
+          "why": "This retains provisioned capacity across tenants even when their activity is low."
+        }
+      ],
+      "explanation": "Two requirements drive the design: tenants have different busy periods, and reporting readers must scale separately from writers. A Serverless v2 cluster for each tenant lets capacity track that tenant's activity. Serverless v2 readers configured with promotion tiers can scale independently for reporting spikes. Peak-sized provisioned instances retain capacity during quiet periods, while changing reader instance classes after each job adds operational work.",
+      "keywordCues": [
+        "busy periods rarely coincide",
+        "read-heavy reporting jobs",
+        "each tenant's capacity to follow its own demand",
+        "readers to scale without forcing their writers to scale"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html"
+      ],
+      "es": {
+        "stem": "Una empresa de software proporciona bases de datos Aurora separadas a clientes cuyos períodos de mayor actividad rara vez coinciden. Algunos clientes también ejecutan trabajos ocasionales de reportes con muchas lecturas mientras su actividad de escritura permanece estable. La empresa quiere que la capacidad de cada cliente siga su propia demanda y que los lectores de reportes escalen sin obligar a sus escritores a escalar. ¿Qué DOS decisiones de diseño cumplen estos requisitos de la forma MOST cost-effective? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar lectores Aurora Serverless v2 con promotion tiers para el escalado independiente.",
+            "why": "Los lectores pueden ajustarse a los picos de reportes sin exigir que sus escritores escalen con ellos."
+          },
+          {
+            "id": "B",
+            "text": "Agregar lectores provisionados para reportes y cambiar sus clases de instancia después de cada trabajo.",
+            "why": "Los cambios repetidos de clase no cumplen el requisito de que los lectores sigan la demanda automáticamente."
+          },
+          {
+            "id": "C",
+            "text": "Agregar solo escritores Serverless v2 y enviar cada trabajo de reportes a su escritor.",
+            "why": "No proporciona lectores de reportes que escalen independientemente de la actividad estable del escritor."
+          },
+          {
+            "id": "D",
+            "text": "Usar un clúster Aurora Serverless v2 y un rango de capacidad separados para cada cliente.",
+            "why": "El clúster de cada cliente puede ajustar su capacidad según sus propios períodos de alta y baja actividad."
+          },
+          {
+            "id": "E",
+            "text": "Dimensionar el escritor provisionado de cada cliente para el período de reportes más ocupado de todos los clientes.",
+            "why": "Mantiene capacidad provisionada en todos los clientes incluso cuando su actividad es baja."
+          }
+        ],
+        "explanation": "Dos requisitos determinan el diseño: los clientes tienen distintos períodos de alta actividad y los lectores de reportes deben escalar por separado de los escritores. Un clúster Serverless v2 por cliente permite que la capacidad siga la actividad de ese cliente. Los lectores Serverless v2 configurados con promotion tiers pueden escalar independientemente durante los picos de reportes. Las instancias provisionadas para el pico mantienen capacidad en períodos tranquilos, mientras que cambiar las clases de los lectores después de cada trabajo agrega trabajo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-serverless--afd4dcd5",
+      "conceptId": "aurora-serverless",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs an Aurora-backed checkout application. Ticket releases cause unpredictable surges in both reads and writes, but the database is lightly used between releases. The team does not want to resize DB instances before each event. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add Aurora Serverless v2 readers while keeping the current provisioned writer.",
+          "correct": false,
+          "why": "The readers can scale, but the provisioned writer does not automatically scale for write surges."
+        },
+        {
+          "id": "B",
+          "text": "Change the provisioned writer's DB instance class before and after each release.",
+          "correct": false,
+          "why": "Repeated instance-class changes require the operational work the team wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Use an Aurora Serverless v2 writer with a capacity range that accommodates the releases.",
+          "correct": true,
+          "why": "The writer can automatically scale capacity for the unpredictable read and write demand."
+        },
+        {
+          "id": "D",
+          "text": "Keep a provisioned Aurora writer sized for the largest expected release.",
+          "correct": false,
+          "why": "It avoids event-by-event resizing but retains peak-sized capacity during lightly used periods."
+        }
+      ],
+      "explanation": "The deciding requirements are unpredictable read and write surges, quiet intervals, and no event-by-event resizing. An Aurora Serverless v2 writer adjusts its capacity with demand within a configured range. Serverless readers alone would not make a provisioned writer scale for the write surges. Keeping a writer sized for peak traffic would also leave capacity provisioned between releases.",
+      "keywordCues": [
+        "unpredictable surges in both reads and writes",
+        "lightly used between releases",
+        "does not want to resize DB instances"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta una aplicación de compras respaldada por Aurora. Las salidas a la venta provocan aumentos impredecibles tanto de lecturas como de escrituras, pero la base de datos tiene poco uso entre eventos. El equipo no quiere redimensionar las instancias de base de datos antes de cada evento. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar lectores Aurora Serverless v2 y conservar el escritor provisionado actual.",
+            "why": "Los lectores pueden escalar, pero el escritor provisionado no escala automáticamente para atender los picos de escrituras."
+          },
+          {
+            "id": "B",
+            "text": "Cambiar la clase de instancia del escritor provisionado antes y después de cada salida a la venta.",
+            "why": "Los cambios repetidos de clase de instancia requieren el trabajo operativo que el equipo quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Usar un escritor Aurora Serverless v2 con un rango de capacidad que permita atender las salidas a la venta.",
+            "why": "El escritor puede escalar automáticamente su capacidad para atender la demanda impredecible de lecturas y escrituras."
+          },
+          {
+            "id": "D",
+            "text": "Mantener un escritor provisionado de Aurora dimensionado para la mayor salida a la venta prevista.",
+            "why": "Evita redimensionar antes de cada evento, pero mantiene capacidad para el pico durante los períodos de poco uso."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son los picos impredecibles de lecturas y escrituras, los períodos de poco uso y evitar el redimensionamiento en cada evento. Un escritor Aurora Serverless v2 ajusta su capacidad según la demanda dentro de un rango configurado. Agregar solo lectores Serverless no haría que un escritor provisionado escalara para atender los picos de escrituras. Mantener un escritor dimensionado para el pico también dejaría capacidad provisionada entre eventos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aurora-serverless--fafc6030",
+      "conceptId": "aurora-serverless",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A game studio is building a new relational backend on Aurora and does not yet know its typical database capacity. Load tests occasionally place substantial demand on the database, while development environments spend long periods at low activity. The team wants capacity to follow demand without repeatedly selecting new instance classes. Which approach meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Aurora Serverless v2 with a maximum fixed at the expected low-activity capacity.",
+          "correct": false,
+          "why": "That maximum would not leave capacity for the substantial load-test demand."
+        },
+        {
+          "id": "B",
+          "text": "Use provisioned Aurora instances and revise their classes after each load test.",
+          "correct": false,
+          "why": "Revising instance classes is the repeated capacity-management work the team wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Use provisioned Aurora instances sized for the highest load-test result.",
+          "correct": false,
+          "why": "Peak-sized provisioned instances remain allocated during long low-activity periods."
+        },
+        {
+          "id": "D",
+          "text": "Use Aurora Serverless v2 with a low minimum and a maximum that accommodates load tests.",
+          "correct": true,
+          "why": "It scales down during low activity while retaining room to scale for substantial tests."
+        }
+      ],
+      "explanation": "The studio needs room for occasional substantial tests without paying for peak-sized instances throughout quiet periods. Aurora Serverless v2 can scale within a configured minimum and maximum, making a low minimum and sufficiently high maximum appropriate. A maximum set at the low-activity level would defeat the peak requirement. Provisioned instances either retain excess capacity or require repeated resizing.",
+      "keywordCues": [
+        "does not yet know its typical database capacity",
+        "occasionally place substantial demand",
+        "long periods at low activity",
+        "without repeatedly selecting new instance classes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos está creando un backend relacional nuevo en Aurora y aún no conoce su capacidad habitual de base de datos. Las pruebas de carga ocasionalmente generan una demanda considerable, mientras que los entornos de desarrollo pasan largos períodos con poca actividad. El equipo quiere que la capacidad siga la demanda sin seleccionar repetidamente nuevas clases de instancia. ¿Qué enfoque cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Aurora Serverless v2 con un máximo fijado en la capacidad prevista para los períodos de poca actividad.",
+            "why": "Ese máximo no dejaría capacidad para atender la demanda considerable de las pruebas de carga."
+          },
+          {
+            "id": "B",
+            "text": "Usar instancias provisionadas de Aurora y modificar sus clases después de cada prueba de carga.",
+            "why": "Modificar las clases de instancia es el trabajo recurrente de administración de capacidad que el equipo quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Usar instancias provisionadas de Aurora dimensionadas para el resultado más alto de las pruebas de carga.",
+            "why": "Las instancias provisionadas para el pico permanecen asignadas durante los largos períodos de poca actividad."
+          },
+          {
+            "id": "D",
+            "text": "Usar Aurora Serverless v2 con un mínimo bajo y un máximo que permita atender las pruebas de carga.",
+            "why": "Reduce su capacidad durante los períodos de poca actividad y conserva margen para escalar durante las pruebas exigentes."
+          }
+        ],
+        "explanation": "El estudio necesita capacidad para pruebas exigentes ocasionales sin mantener instancias dimensionadas para el pico durante los períodos tranquilos. Aurora Serverless v2 puede escalar entre un mínimo y un máximo configurados, por lo que convienen un mínimo bajo y un máximo suficientemente alto. Fijar el máximo en el nivel de poca actividad impediría atender el pico. Las instancias provisionadas conservarían capacidad excedente o requerirían redimensionamiento repetido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aurora-serverless--r0",
+      "conceptId": "aurora-serverless",
+      "kind": "recall",
+      "prompt": "An Aurora application has unpredictable peaks and long quiet periods. Which capacity configuration fits, and why?",
+      "promptEs": "Una aplicación de Aurora tiene picos impredecibles y largos períodos tranquilos. ¿Qué configuración de capacidad elegirías y por qué?",
+      "idealAnswer": "Use Aurora Serverless v2 with a capacity range that can accommodate the peaks. It automatically scales capacity with demand and scales down during quiet periods, reducing the need to size or resize provisioned instances.",
+      "rubric": [
+        "Names Aurora Serverless v2.",
+        "Explains automatic capacity scaling for unpredictable demand.",
+        "Mentions a suitable capacity range or scaling down during quiet periods."
+      ]
+    }
+  ]
+}

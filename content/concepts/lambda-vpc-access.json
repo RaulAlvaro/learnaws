@@ -1,0 +1,320 @@
+{
+  "conceptId": "lambda-vpc-access",
+  "card": {
+    "en": {
+      "tldr": "Attach a Lambda function to private subnets in your VPC when it must reach private resources such as Amazon RDS or Amazon ElastiCache. VPC attachment changes its network access: plan separate outbound connectivity if the function also needs the public internet or AWS APIs.",
+      "whenToUse": [
+        "A Lambda function must connect to an RDS or ElastiCache resource in private subnets.",
+        "A VPC-connected function must also make outbound requests to the public internet.",
+        "A deployment needs the permissions required for Lambda to create its VPC network interfaces."
+      ],
+      "keyFacts": [
+        "Configure VPC access by selecting subnets and security groups for the function.",
+        "A VPC-connected function does not retain its default public internet access; the VPC needs an internet-access path, such as a NAT gateway for private-subnet outbound traffic.",
+        "Placing a Lambda function in a public subnet does not give it a public IP address or internet access.",
+        "Lambda creates and manages Hyperplane ENIs for VPC access. The execution role needs network-interface permissions when those interfaces are created.",
+        "Functions using the same subnet and security group combination can share a Hyperplane ENI."
+      ],
+      "gotchas": [
+        "Do not assume Lambda's default internet access continues after you attach the function to your VPC.",
+        "A public subnet is not a shortcut to outbound internet access for a VPC-connected Lambda function.",
+        "An IAM permission to call an AWS API does not, by itself, provide a network path to that API."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "Lambda must query a private RDS instance",
+        "VPC-connected function must call an external API",
+        "public subnet but no internet access",
+        "execution role lacks network-interface permissions"
+      ]
+    },
+    "es": {
+      "tldr": "Conecta la función Lambda a subredes privadas de tu VPC cuando deba acceder a recursos privados como Amazon RDS o Amazon ElastiCache. La conexión a la VPC cambia su acceso de red: debes planear una salida adicional si también necesita internet público o AWS APIs.",
+      "whenToUse": [
+        "Una función Lambda debe conectarse a un recurso de RDS o ElastiCache en subredes privadas.",
+        "Una función conectada a una VPC también debe enviar solicitudes a internet público.",
+        "Un despliegue necesita los permisos para que Lambda cree sus interfaces de red de VPC."
+      ],
+      "keyFacts": [
+        "Para configurar el acceso a la VPC, selecciona las subredes y los security groups de la función.",
+        "Una función conectada a una VPC no conserva su acceso predeterminado a internet público; la VPC necesita una ruta de salida, como un NAT gateway para el tráfico saliente de subredes privadas.",
+        "Colocar una función Lambda en una subred pública no le da una dirección IP pública ni acceso a internet.",
+        "Lambda crea y administra Hyperplane ENIs para el acceso a la VPC. El execution role necesita permisos sobre interfaces de red cuando estas se crean.",
+        "Las funciones que usan la misma combinación de subredes y security groups pueden compartir una Hyperplane ENI."
+      ],
+      "gotchas": [
+        "No supongas que el acceso predeterminado de Lambda a internet continúa después de conectar la función a tu VPC.",
+        "Una subred pública no es un atajo para dar acceso saliente a internet a una función Lambda conectada a una VPC.",
+        "Un permiso de IAM para llamar a una AWS API no proporciona, por sí solo, una ruta de red hacia esa API."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "Lambda must query a private RDS instance",
+        "VPC-connected function must call an external API",
+        "public subnet but no internet access",
+        "execution role lacks network-interface permissions"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "lambda-vpc-access--03075ff2",
+      "conceptId": "lambda-vpc-access",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A food distributor is building a Lambda function that writes to a private Amazon RDS instance and sends shipment updates to a public HTTPS endpoint. The function currently has default Lambda networking, and the VPC has no outbound internet path configured for its private subnets. Which two changes together provide the required connectivity? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure the function with private subnets in the database VPC and appropriate security groups.",
+          "correct": true,
+          "why": "This gives the function VPC network access to the private database."
+        },
+        {
+          "id": "B",
+          "text": "Provide outbound internet access for the private subnets through a NAT gateway.",
+          "correct": true,
+          "why": "A NAT path supplies outbound connectivity for the VPC-connected function's public HTTPS calls."
+        },
+        {
+          "id": "C",
+          "text": "Allow outbound HTTPS in a security group without changing the private-subnet routing.",
+          "correct": false,
+          "why": "A security-group rule alone does not create the missing outbound internet path."
+        },
+        {
+          "id": "D",
+          "text": "Configure the function with public subnets in the database VPC.",
+          "correct": false,
+          "why": "Public-subnet attachment does not give the function a public IP address or internet access."
+        },
+        {
+          "id": "E",
+          "text": "Leave the function on default Lambda networking and grant it RDS access through its execution role.",
+          "correct": false,
+          "why": "An IAM permission does not provide a network connection to the private RDS instance."
+        }
+      ],
+      "explanation": "Two separate network needs determine the answer: access to private RDS and outbound access to a public HTTPS endpoint. Configuring private subnets and security groups addresses the database connection; providing a NAT path addresses outbound internet traffic. Public-subnet attachment is not a substitute for the NAT path because it does not give Lambda a public IP address. IAM and security-group permissions alone cannot create a missing network route.",
+      "keywordCues": [
+        "private Amazon RDS instance",
+        "public HTTPS endpoint",
+        "default Lambda networking",
+        "no outbound internet path"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html"
+      ],
+      "es": {
+        "stem": "Una distribuidora de alimentos está creando una función Lambda que escribe en una instancia privada de Amazon RDS y envía actualizaciones de envíos a un endpoint HTTPS público. Actualmente, la función usa la configuración de red predeterminada de Lambda, y la VPC no tiene una ruta de salida a internet para sus subredes privadas. ¿Qué dos cambios, en conjunto, proporcionan la conectividad requerida? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura la función con subredes privadas en la VPC de la base de datos y security groups apropiados.",
+            "why": "Esto proporciona a la función acceso de red mediante la VPC hacia la base de datos privada."
+          },
+          {
+            "id": "B",
+            "text": "Proporciona acceso saliente a internet para las subredes privadas mediante un NAT gateway.",
+            "why": "Una ruta NAT proporciona la conectividad saliente para las llamadas HTTPS públicas de la función conectada a la VPC."
+          },
+          {
+            "id": "C",
+            "text": "Permite HTTPS saliente en un security group sin cambiar las rutas de las subredes privadas.",
+            "why": "Una regla de security group por sí sola no crea la ruta de salida a internet que falta."
+          },
+          {
+            "id": "D",
+            "text": "Configura la función con subredes públicas en la VPC de la base de datos.",
+            "why": "Conectar la función a subredes públicas no le da una dirección IP pública ni acceso a internet."
+          },
+          {
+            "id": "E",
+            "text": "Deja la función con la configuración de red predeterminada de Lambda y concédele acceso a RDS mediante su execution role.",
+            "why": "Un permiso de IAM no proporciona una conexión de red a la instancia privada de RDS."
+          }
+        ],
+        "explanation": "Dos necesidades de red determinan la respuesta: acceso a RDS privado y salida hacia un endpoint HTTPS público. Configurar subredes privadas y security groups resuelve la conexión con la base de datos; proporcionar una ruta NAT resuelve el tráfico saliente a internet. Conectar la función a una subred pública no sustituye la ruta NAT porque no le da a Lambda una dirección IP pública. Los permisos de IAM y de security group por sí solos no crean una ruta de red faltante."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-vpc-access--ca6272cc",
+      "conceptId": "lambda-vpc-access",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company uses a Lambda function to update an Amazon RDS database in private subnets. The function must also send confirmations to an external HTTPS service. The VPC already has a NAT gateway and private-subnet routes for outbound internet traffic. Which solution meets both network requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach the function to private subnets in the database VPC and remove their outbound internet routes.",
+          "correct": false,
+          "why": "Removing the outbound routes prevents the function from reaching the external HTTPS service."
+        },
+        {
+          "id": "B",
+          "text": "Attach the function to public subnets and assign it a security group that permits outbound HTTPS.",
+          "correct": false,
+          "why": "A public subnet does not give a VPC-connected Lambda function internet access or a public IP address."
+        },
+        {
+          "id": "C",
+          "text": "Leave the function outside the company's VPC and grant its execution role permission to access Amazon RDS.",
+          "correct": false,
+          "why": "IAM permissions alone do not connect the function to the private database."
+        },
+        {
+          "id": "D",
+          "text": "Attach the function to private subnets in the database VPC and select a security group that permits the required traffic.",
+          "correct": true,
+          "why": "Private-subnet VPC attachment provides access to the database, while the existing NAT path supports outbound internet traffic."
+        }
+      ],
+      "explanation": "The function needs network access to both the private RDS instance and an external service. Attaching it to private subnets in the database VPC addresses the first requirement, and the existing NAT path addresses outbound internet access. A public subnet does not give a Lambda function a public IP address or internet access. IAM permissions cannot replace connectivity to a private resource.",
+      "keywordCues": [
+        "RDS database in private subnets",
+        "external HTTPS service",
+        "already has a NAT gateway and private-subnet routes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos usa una función Lambda para actualizar una base de datos Amazon RDS en subredes privadas. La función también debe enviar confirmaciones a un servicio HTTPS externo. La VPC ya tiene un NAT gateway y rutas de subredes privadas para el tráfico saliente a internet. ¿Qué solución cumple ambos requisitos de red con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conecta la función a subredes privadas de la VPC de la base de datos y elimina sus rutas salientes a internet.",
+            "why": "Eliminar las rutas salientes impide que la función llegue al servicio HTTPS externo."
+          },
+          {
+            "id": "B",
+            "text": "Conecta la función a subredes públicas y asígnale un security group que permita HTTPS saliente.",
+            "why": "Una subred pública no le da acceso a internet ni una dirección IP pública a una función Lambda conectada a una VPC."
+          },
+          {
+            "id": "C",
+            "text": "Deja la función fuera de la VPC de la empresa y concede a su execution role permiso para acceder a Amazon RDS.",
+            "why": "Los permisos de IAM por sí solos no conectan la función a la base de datos privada."
+          },
+          {
+            "id": "D",
+            "text": "Conecta la función a subredes privadas de la VPC de la base de datos y selecciona un security group que permita el tráfico necesario.",
+            "why": "La conexión a subredes privadas proporciona acceso a la base de datos y la ruta NAT existente permite el tráfico saliente a internet."
+          }
+        ],
+        "explanation": "La función necesita acceso de red tanto a la instancia privada de RDS como a un servicio externo. Conectarla a subredes privadas de la VPC de la base de datos resuelve el primer requisito, y la ruta NAT existente permite la salida a internet. Una subred pública no le da a Lambda una dirección IP pública ni acceso a internet. Los permisos de IAM no sustituyen la conectividad hacia un recurso privado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-vpc-access--b4ce55be",
+      "conceptId": "lambda-vpc-access",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company moves a Lambda function into its VPC so it can read an Amazon ElastiCache cluster. The function is configured with a public subnet, but its calls to an external licensing API now fail. The team wants to keep ElastiCache private and restore outbound access. Which change meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the public subnet and allow outbound HTTPS in the function's security group.",
+          "correct": false,
+          "why": "Allowing HTTPS does not give a Lambda function in a public subnet a public IP address or internet access."
+        },
+        {
+          "id": "B",
+          "text": "Keep the public subnet and add an internet gateway to the VPC.",
+          "correct": false,
+          "why": "An internet gateway does not make a VPC-connected Lambda function in a public subnet internet-accessible."
+        },
+        {
+          "id": "C",
+          "text": "Detach the function from the VPC to restore its default internet access.",
+          "correct": false,
+          "why": "Detaching restores default internet access but removes its VPC connection to the private ElastiCache cluster."
+        },
+        {
+          "id": "D",
+          "text": "Attach the function to private subnets with access to ElastiCache and configure outbound internet access through a NAT gateway.",
+          "correct": true,
+          "why": "Private-subnet attachment reaches ElastiCache, and the NAT path supplies the needed outbound access."
+        }
+      ],
+      "explanation": "The function must retain access to private ElastiCache while calling a public API. Attach it to private subnets for the private resource and provide an outbound internet path through a NAT gateway. A public subnet alone does not give Lambda a public IP address or internet access. Detaching the function would sacrifice the required VPC access.",
+      "keywordCues": [
+        "ElastiCache cluster",
+        "public subnet",
+        "external licensing API",
+        "keep ElastiCache private"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios conecta una función Lambda a su VPC para leer un clúster de Amazon ElastiCache. La función está configurada con una subred pública, pero ahora fallan sus llamadas a una API externa de licencias. El equipo quiere mantener ElastiCache privado y recuperar el acceso saliente. ¿Qué cambio cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantén la subred pública y permite HTTPS saliente en el security group de la función.",
+            "why": "Permitir HTTPS no le da a una función Lambda en una subred pública una dirección IP pública ni acceso a internet."
+          },
+          {
+            "id": "B",
+            "text": "Mantén la subred pública y agrega un internet gateway a la VPC.",
+            "why": "Un internet gateway no le da acceso a internet a una función Lambda conectada a una VPC mediante una subred pública."
+          },
+          {
+            "id": "C",
+            "text": "Desconecta la función de la VPC para recuperar su acceso predeterminado a internet.",
+            "why": "La desconexión recupera el acceso predeterminado a internet, pero elimina su conexión de VPC con el clúster privado de ElastiCache."
+          },
+          {
+            "id": "D",
+            "text": "Conecta la función a subredes privadas con acceso a ElastiCache y configura la salida a internet mediante un NAT gateway.",
+            "why": "La conexión a subredes privadas permite llegar a ElastiCache, y la ruta NAT proporciona la salida necesaria."
+          }
+        ],
+        "explanation": "La función debe conservar el acceso a ElastiCache privado y llamar a una API pública. Conéctala a subredes privadas para acceder al recurso privado y proporciona una ruta saliente a internet mediante un NAT gateway. Una subred pública por sí sola no le da a Lambda una dirección IP pública ni acceso a internet. Desconectar la función eliminaría el acceso necesario a la VPC."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "lambda-vpc-access--r0",
+      "conceptId": "lambda-vpc-access",
+      "kind": "recall",
+      "prompt": "A Lambda function must read private ElastiCache data and call a public API. What network configuration does it need, and why?",
+      "promptEs": "Una función Lambda debe leer datos privados de ElastiCache y llamar a una API pública. ¿Qué configuración de red necesita y por qué?",
+      "idealAnswer": "Attach the function to private subnets in the ElastiCache VPC and select appropriate security groups so it can reach the private resource. Provide an outbound internet path, such as a NAT gateway, for the public API call; a public subnet alone will not give Lambda internet access.",
+      "rubric": [
+        "Attach Lambda to private subnets in the resource's VPC.",
+        "Select appropriate security groups.",
+        "Provide a separate outbound internet path and explain why public-subnet attachment is insufficient."
+      ]
+    }
+  ]
+}

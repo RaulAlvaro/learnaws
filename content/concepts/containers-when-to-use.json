@@ -1,0 +1,340 @@
+{
+  "conceptId": "containers-when-to-use",
+  "card": {
+    "en": {
+      "tldr": "Containers package an application with its dependencies to make deployment more consistent across compatible hosts. Choose them when portability, isolated workloads on a shared host OS, or a path from a legacy application to managed container deployment matters more than keeping each application in a separate VM.",
+      "whenToUse": [
+        "The same application must move between compatible environments without rebuilding it for each host.",
+        "Multiple isolated applications or batch jobs should share a host OS.",
+        "An eligible legacy application must be containerized without requiring its source code."
+      ],
+      "keyFacts": [
+        "Containers use OS-level virtualization; VMs use hardware-level virtualization through a hypervisor.",
+        "Multiple isolated containers can run on one host OS without each needing a VM.",
+        "Amazon ECS and Amazon EKS are options for managing container deployments; Amazon ECR can hold container images.",
+        "AWS App2Container can generate images and deployment artifacts for supported existing applications without source code, but it is no longer open to new customers."
+      ],
+      "gotchas": [
+        "Portability still requires a host with suitable kernel components.",
+        "Moving an application into a container does not require splitting it into microservices first.",
+        "Do not propose a new App2Container signup: the tool is no longer open to new customers."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Virtual machines",
+          "difference": "VMs use hypervisor-based hardware virtualization; multiple containers can instead share a host OS while remaining isolated."
+        },
+        {
+          "concept": "AWS Lambda",
+          "difference": "For a requirement to preserve and deploy an existing application as a container image, rewriting it as functions is a different migration approach."
+        }
+      ],
+      "examCues": [
+        "same application across compatible hosts",
+        "isolated workloads on one host OS",
+        "legacy application without source code",
+        "store container images in Amazon ECR"
+      ]
+    },
+    "es": {
+      "tldr": "Los contenedores empaquetan una aplicación con sus dependencias para que su implementación sea más consistente entre hosts compatibles. Elígelos cuando importen la portabilidad, el aislamiento de cargas que comparten un host OS o la migración de una aplicación heredada a un despliegue administrado de contenedores.",
+      "whenToUse": [
+        "Debes mover la misma aplicación entre entornos compatibles sin reconstruirla para cada host.",
+        "Varias aplicaciones o tareas por lotes aisladas deben compartir un host OS.",
+        "Debes contenerizar una aplicación heredada elegible sin disponer de su código fuente."
+      ],
+      "keyFacts": [
+        "Los contenedores usan virtualización a nivel de OS; las máquinas virtuales usan virtualización de hardware mediante un hipervisor.",
+        "Varios contenedores aislados pueden ejecutarse en un mismo host OS sin necesitar una máquina virtual para cada uno.",
+        "Amazon ECS y Amazon EKS permiten administrar despliegues de contenedores; Amazon ECR puede almacenar sus imágenes.",
+        "AWS App2Container puede generar imágenes y artefactos de despliegue para aplicaciones existentes compatibles sin código fuente, pero ya no admite clientes nuevos."
+      ],
+      "gotchas": [
+        "La portabilidad aún requiere un host con componentes de kernel adecuados.",
+        "No necesitas dividir una aplicación en microservicios antes de llevarla a un contenedor.",
+        "No propongas registrarte ahora en App2Container: ya no admite clientes nuevos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Máquinas virtuales",
+          "difference": "Las máquinas virtuales usan un hipervisor; varios contenedores pueden compartir un host OS y permanecer aislados."
+        },
+        {
+          "concept": "AWS Lambda",
+          "difference": "Si debes conservar y desplegar una aplicación existente como imagen de contenedor, reescribirla como funciones es otra estrategia de migración."
+        }
+      ],
+      "examCues": [
+        "same application across compatible hosts",
+        "isolated workloads on one host OS",
+        "legacy application without source code",
+        "store container images in Amazon ECR"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/containers-on-aws/containers-on-aws.html",
+      "https://docs.aws.amazon.com/app2container/latest/UserGuide/what-is-a2c.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "containers-when-to-use--f6386882",
+      "conceptId": "containers-when-to-use",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retailer has an existing Java application running on a Linux server. The team cannot obtain its source code and wants a console-based path to replatform the application to Amazon ECS with minimal manual containerization work. The retailer is a new AWS customer and has never signed up for AWS App2Container. Which approach best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Sign up for AWS App2Container and use its command-line tool to generate an Amazon ECS deployment.",
+          "correct": false,
+          "why": "App2Container is no longer open to new customers, and the requested experience is console-based."
+        },
+        {
+          "id": "B",
+          "text": "Use the Replatform applications to Amazon ECS template in the AWS Migration Hub Orchestrator console.",
+          "correct": true,
+          "why": "The documented console-based replatforming path to Amazon ECS is the AWS Migration Hub Orchestrator template."
+        },
+        {
+          "id": "C",
+          "text": "Manually extract the application artifacts, write a Dockerfile, and configure the Amazon ECS deployment.",
+          "correct": false,
+          "why": "Manual containerization does not meet the preference for minimal manual work."
+        },
+        {
+          "id": "D",
+          "text": "Rewrite the application as AWS Lambda functions before migrating it from the Linux server.",
+          "correct": false,
+          "why": "A rewrite does not meet the requested replatforming path to Amazon ECS without source code."
+        }
+      ],
+      "explanation": "The retailer needs a console-based route to Amazon ECS, while App2Container cannot be newly adopted. AWS documentation identifies the Replatform applications to Amazon ECS template in AWS Migration Hub Orchestrator as the console-based option. App2Container would be a tempting choice for an existing customer with a supported application, but this retailer cannot sign up for it. Manual containerization also misses the preference to minimize that work.",
+      "keywordCues": [
+        "console-based path",
+        "minimal manual containerization work",
+        "new AWS customer",
+        "never signed up for AWS App2Container"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/containers-on-aws/containers-on-aws.html",
+        "https://docs.aws.amazon.com/app2container/latest/UserGuide/what-is-a2c.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista tiene una aplicación Java existente que se ejecuta en un servidor Linux. El equipo no puede obtener su código fuente y quiere una opción basada en consola para migrarla a Amazon ECS con el mínimo trabajo manual de contenerización. La empresa es un cliente nuevo de AWS y nunca se registró en AWS App2Container. ¿Qué enfoque cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Regístrate en AWS App2Container y usa su herramienta de línea de comandos para generar un despliegue en Amazon ECS.",
+            "why": "App2Container ya no admite clientes nuevos y, además, se solicita una experiencia basada en consola."
+          },
+          {
+            "id": "B",
+            "text": "Usa la plantilla Replatform applications to Amazon ECS en la consola de AWS Migration Hub Orchestrator.",
+            "why": "La plantilla de AWS Migration Hub Orchestrator es la opción documentada basada en consola para migrar a Amazon ECS."
+          },
+          {
+            "id": "C",
+            "text": "Extrae manualmente los artefactos de la aplicación, escribe un Dockerfile y configura el despliegue en Amazon ECS.",
+            "why": "La contenerización manual no satisface la preferencia por minimizar ese trabajo."
+          },
+          {
+            "id": "D",
+            "text": "Reescribe la aplicación como funciones de AWS Lambda antes de migrarla desde el servidor Linux.",
+            "why": "Reescribirla no cumple el objetivo de migrarla a Amazon ECS sin código fuente."
+          }
+        ],
+        "explanation": "La empresa necesita una ruta basada en consola hacia Amazon ECS y no puede adoptar App2Container como cliente nuevo. La documentación de AWS identifica la plantilla Replatform applications to Amazon ECS de AWS Migration Hub Orchestrator como opción basada en consola. App2Container podría parecer adecuado para un cliente existente con una aplicación compatible, pero esta empresa no puede registrarse. La contenerización manual tampoco cumple la preferencia de minimizar ese trabajo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "containers-when-to-use--4ac20fef",
+      "conceptId": "containers-when-to-use",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturer enrolled in AWS App2Container before it stopped accepting new customers. It has an existing ASP.NET application on a Windows server but no longer has the source code. The team wants to generate a container image from the running application, keep the image in an AWS container registry, and prepare for deployment on Amazon ECS with minimal manual packaging. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a separate VM image for the application and use it as the Amazon ECS container image.",
+          "correct": false,
+          "why": "A VM image does not meet the requirement to generate and store a container image."
+        },
+        {
+          "id": "B",
+          "text": "Use AWS App2Container to analyze the running application and generate its container image and AWS deployment artifacts.",
+          "correct": true,
+          "why": "An existing App2Container customer can use it to generate an image and deployment artifacts for a supported application without source code."
+        },
+        {
+          "id": "C",
+          "text": "Store the generated container image in Amazon ECR for the planned Amazon ECS deployment.",
+          "correct": true,
+          "why": "Amazon ECR is the AWS container image destination identified for App2Container-generated artifacts."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon EKS as the registry for the generated image and deploy the application on Amazon ECS.",
+          "correct": false,
+          "why": "Amazon EKS is a container orchestration option, not the requested container image registry."
+        },
+        {
+          "id": "E",
+          "text": "Rebuild the application as AWS Lambda functions before creating an Amazon ECS deployment.",
+          "correct": false,
+          "why": "Rebuilding the application conflicts with the lack of source code and the minimal-packaging requirement."
+        }
+      ],
+      "explanation": "The company is already an App2Container customer, and the running ASP.NET application matches a type the tool can inventory and analyze. App2Container can generate a container image and AWS deployment artifacts without requiring the application's source code. Amazon ECR provides the requested image destination. Amazon EKS is an orchestration option, not a substitute for the image registry.",
+      "keywordCues": [
+        "enrolled in AWS App2Container",
+        "existing ASP.NET application on a Windows server",
+        "no longer has the source code",
+        "AWS container registry"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/containers-on-aws/containers-on-aws.html",
+        "https://docs.aws.amazon.com/app2container/latest/UserGuide/what-is-a2c.html"
+      ],
+      "es": {
+        "stem": "Un fabricante se registró en AWS App2Container antes de que dejara de aceptar clientes nuevos. Tiene una aplicación ASP.NET existente en un servidor Windows, pero ya no dispone del código fuente. El equipo quiere generar una imagen de contenedor a partir de la aplicación en ejecución, conservarla en un registro de contenedores de AWS y preparar su despliegue en Amazon ECS con el mínimo trabajo manual de empaquetado. ¿Qué dos acciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una imagen de máquina virtual para la aplicación y úsala como imagen de contenedor de Amazon ECS.",
+            "why": "Una imagen de máquina virtual no cumple el requisito de generar y almacenar una imagen de contenedor."
+          },
+          {
+            "id": "B",
+            "text": "Usa AWS App2Container para analizar la aplicación en ejecución y generar su imagen de contenedor y los artefactos de despliegue de AWS.",
+            "why": "Un cliente existente de App2Container puede generar una imagen y artefactos de despliegue para una aplicación compatible sin código fuente."
+          },
+          {
+            "id": "C",
+            "text": "Almacena la imagen de contenedor generada en Amazon ECR para el despliegue previsto en Amazon ECS.",
+            "why": "Amazon ECR es el destino de imágenes de contenedor de AWS indicado para los artefactos generados por App2Container."
+          },
+          {
+            "id": "D",
+            "text": "Usa Amazon EKS como registro de la imagen generada y despliega la aplicación en Amazon ECS.",
+            "why": "Amazon EKS es una opción de orquestación de contenedores, no el registro de imágenes solicitado."
+          },
+          {
+            "id": "E",
+            "text": "Reconstruye la aplicación como funciones de AWS Lambda antes de crear un despliegue en Amazon ECS.",
+            "why": "Reconstruirla contradice la falta de código fuente y el requisito de minimizar el trabajo de empaquetado."
+          }
+        ],
+        "explanation": "La empresa ya es cliente de App2Container y la aplicación ASP.NET en ejecución es de un tipo que la herramienta puede inventariar y analizar. App2Container puede generar una imagen de contenedor y artefactos de despliegue de AWS sin necesitar el código fuente. Amazon ECR proporciona el destino solicitado para la imagen. Amazon EKS es una opción de orquestación, no un sustituto del registro de imágenes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "containers-when-to-use--fe5a72ce",
+      "conceptId": "containers-when-to-use",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs a rendering application in several environments whose hosts have suitable kernel components. Differences in software installed on those hosts cause inconsistent behavior, and the team wants to move the application without rebuilding it for each environment. The deployment artifact must include the application's dependencies. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Package the application and its dependencies in a container image, store it in Amazon ECR, and deploy the containers with Amazon ECS.",
+          "correct": true,
+          "why": "A container packages the application with its dependencies for consistent deployment on compatible hosts."
+        },
+        {
+          "id": "B",
+          "text": "Rewrite the rendering application as AWS Lambda functions and deploy a different version in each environment.",
+          "correct": false,
+          "why": "Rewriting and maintaining separate versions conflicts with moving the existing application without rebuilding it."
+        },
+        {
+          "id": "C",
+          "text": "Install the application directly on each host and maintain a host-specific dependency installation script.",
+          "correct": false,
+          "why": "Host-specific installations leave the deployment dependent on differences between environments."
+        },
+        {
+          "id": "D",
+          "text": "Create a separate VM image for each environment and install the application's dependencies in each image.",
+          "correct": false,
+          "why": "Separate VM images do not meet the requirement to avoid building an environment-specific deployment artifact."
+        }
+      ],
+      "explanation": "The deciding requirement is to carry the existing application and its dependencies between compatible hosts without environment-specific rebuilds. A container provides an isolated package that shields the application from differences in software installed on the host; Amazon ECR can hold the image and Amazon ECS can manage deployment. Separate VM images or host-specific installation scripts preserve the per-environment work the company wants to eliminate.",
+      "keywordCues": [
+        "hosts have suitable kernel components",
+        "without rebuilding it for each environment",
+        "include the application's dependencies"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/containers-on-aws/containers-on-aws.html",
+        "https://docs.aws.amazon.com/app2container/latest/UserGuide/what-is-a2c.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta una aplicación de renderizado en varios entornos cuyos hosts tienen componentes de kernel adecuados. Las diferencias en el software instalado en esos hosts causan comportamientos inconsistentes, y el equipo quiere mover la aplicación sin reconstruirla para cada entorno. El artefacto de despliegue debe incluir las dependencias de la aplicación. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Empaqueta la aplicación y sus dependencias en una imagen de contenedor, almacénala en Amazon ECR y despliega los contenedores con Amazon ECS.",
+            "why": "El contenedor empaqueta la aplicación con sus dependencias para desplegarla de forma consistente en hosts compatibles."
+          },
+          {
+            "id": "B",
+            "text": "Reescribe la aplicación de renderizado como funciones de AWS Lambda y despliega una versión distinta en cada entorno.",
+            "why": "Reescribirla y mantener versiones distintas contradice el requisito de mover la aplicación existente sin reconstruirla."
+          },
+          {
+            "id": "C",
+            "text": "Instala la aplicación directamente en cada host y mantén un script de instalación de dependencias específico para cada uno.",
+            "why": "Las instalaciones específicas de cada host mantienen la dependencia de las diferencias entre entornos."
+          },
+          {
+            "id": "D",
+            "text": "Crea una imagen de máquina virtual distinta para cada entorno e instala las dependencias de la aplicación en cada imagen.",
+            "why": "Las imágenes separadas no cumplen el requisito de evitar un artefacto de despliegue específico para cada entorno."
+          }
+        ],
+        "explanation": "El requisito decisivo es llevar la aplicación existente y sus dependencias entre hosts compatibles sin reconstruirla para cada entorno. Un contenedor ofrece un paquete aislado frente a diferencias en el software instalado en el host; Amazon ECR puede guardar la imagen y Amazon ECS administrar el despliegue. Las imágenes de máquina virtual separadas y los scripts específicos por host conservan el trabajo por entorno que la empresa quiere evitar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "containers-when-to-use--r0",
+      "conceptId": "containers-when-to-use",
+      "kind": "recall",
+      "prompt": "Several applications need isolated dependencies on one compatible host OS. What deployment approach fits, and why?",
+      "promptEs": "Varias aplicaciones necesitan dependencias aisladas en un host OS compatible. ¿Qué enfoque de despliegue elegirías y por qué?",
+      "idealAnswer": "Package each application and its dependencies in a container. Multiple isolated containers can run on one compatible host OS without requiring a separate VM for each application.",
+      "rubric": [
+        "Selects containers for the applications.",
+        "Explains isolation of applications and dependencies.",
+        "Explains that multiple containers can share a compatible host OS."
+      ]
+    }
+  ]
+}

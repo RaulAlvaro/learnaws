@@ -1,0 +1,322 @@
+{
+  "conceptId": "asg-health-checks-lifecycle-hooks",
+  "card": {
+    "en": {
+      "tldr": "An Auto Scaling group replaces instances it determines are unhealthy, but Elastic Load Balancing health checks must be enabled for the group if load balancer health should trigger replacement. Use lifecycle hooks to pause launch or termination for required work; with a warm pool, a launch hook can keep an instance from being stopped or hibernated before bootstrap finishes.",
+      "whenToUse": [
+        "Instances fail load balancer health checks and must be replaced automatically.",
+        "New instances must finish bootstrap before receiving traffic.",
+        "Logs or other data must be collected before scale-in termination.",
+        "Warm-pool instances must complete bootstrap before entering the pool."
+      ],
+      "keyFacts": [
+        "Auto Scaling uses built-in EC2 status checks and any optional health checks enabled for the group.",
+        "When an InService instance is determined unhealthy, Auto Scaling replaces it to maintain desired capacity.",
+        "A launch lifecycle hook can hold an instance until startup work completes, before load balancer registration.",
+        "A termination lifecycle hook can pause an instance and send an EventBridge notification so work can run before termination.",
+        "A warm pool can stop or hibernate an entering instance without waiting for user data; an EC2_INSTANCE_LAUNCHING hook can hold it until bootstrap completes."
+      ],
+      "gotchas": [
+        "Attaching a load balancer does not, by itself, establish that its health checks are enabled as Auto Scaling health checks.",
+        "A health check grace period is not a substitute for holding an instance until bootstrap succeeds.",
+        "A termination hook does not prevent Spot interruption, and a timed-out termination hook proceeds with termination by default."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "replace instances that fail load balancer health checks",
+        "finish bootstrap before receiving traffic",
+        "collect logs before scale-in termination",
+        "user data must finish before entering a warm pool"
+      ]
+    },
+    "es": {
+      "tldr": "Un Auto Scaling group reemplaza las instancias que determina como no saludables, pero debes habilitar las comprobaciones de Elastic Load Balancing para el grupo si quieres que una falla detectada por el balanceador provoque el reemplazo. Usa lifecycle hooks para pausar el lanzamiento o la terminación mientras se completa una tarea; con un warm pool, un hook de lanzamiento puede evitar que la instancia se detenga o hibérne antes de terminar el bootstrap.",
+      "whenToUse": [
+        "Necesitas reemplazar automáticamente instancias que fallan las comprobaciones de salud del balanceador.",
+        "Las instancias nuevas deben terminar el bootstrap antes de recibir tráfico.",
+        "Debes recopilar registros u otros datos antes de una terminación por scale-in.",
+        "Las instancias de un warm pool deben completar el bootstrap antes de entrar al pool."
+      ],
+      "keyFacts": [
+        "Auto Scaling usa las comprobaciones integradas de estado de EC2 y las comprobaciones opcionales que habilites para el grupo.",
+        "Si determina que una instancia InService no está saludable, Auto Scaling la reemplaza para mantener la capacidad deseada.",
+        "Un launch lifecycle hook puede retener una instancia hasta que termine la preparación, antes de registrarla en el balanceador.",
+        "Un termination lifecycle hook puede pausar una instancia y enviar una notificación por EventBridge para ejecutar tareas antes de terminarla.",
+        "Un warm pool puede detener o hibernar una instancia sin esperar a que termine user data; un hook EC2_INSTANCE_LAUNCHING puede retenerla hasta completar el bootstrap."
+      ],
+      "gotchas": [
+        "Conectar un balanceador no significa, por sí solo, que sus comprobaciones de salud estén habilitadas como comprobaciones de Auto Scaling.",
+        "El health check grace period no sustituye la pausa de una instancia hasta que el bootstrap termine correctamente.",
+        "Un termination hook no impide una interrupción de Spot y, de forma predeterminada, una terminación continúa si el hook agota su tiempo."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "replace instances that fail load balancer health checks",
+        "finish bootstrap before receiving traffic",
+        "collect logs before scale-in termination",
+        "user data must finish before entering a warm pool"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html",
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "asg-health-checks-lifecycle-hooks--098c07ab",
+      "conceptId": "asg-health-checks-lifecycle-hooks",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs its web tier in an EC2 Auto Scaling group behind a load balancer. Some instances continue running but fail the load balancer's application health checks, leaving fewer instances able to serve requests. The company wants the group to replace those instances automatically while maintaining its desired capacity. Which change meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a termination lifecycle hook that collects logs when the group scales in.",
+          "correct": false,
+          "why": "A termination hook runs before termination but does not supply the missing load balancer health signal."
+        },
+        {
+          "id": "B",
+          "text": "Increase the group's desired capacity whenever the load balancer reports an unhealthy instance.",
+          "correct": false,
+          "why": "Adding capacity does not make the group determine that the failing instance is unhealthy and replace it."
+        },
+        {
+          "id": "C",
+          "text": "Enable Elastic Load Balancing health checks for the Auto Scaling group.",
+          "correct": true,
+          "why": "These optional checks allow load balancer health failures to cause Auto Scaling to replace unhealthy instances."
+        },
+        {
+          "id": "D",
+          "text": "Add a launch lifecycle hook that pauses each new instance until its application starts.",
+          "correct": false,
+          "why": "A launch hook controls startup work but does not make existing load-balancer-unhealthy instances eligible for replacement."
+        }
+      ],
+      "explanation": "The deciding requirement is replacement when an otherwise running instance fails the load balancer's application checks. Elastic Load Balancing is an optional health-check source for an Auto Scaling group; once enabled, a failed check can cause the group to replace an unhealthy InService instance. Increasing desired capacity adds instances without addressing the failing ones. Lifecycle hooks manage work during instance transitions, not which health signal triggers replacement.",
+      "keywordCues": [
+        "continue running but fail the load balancer's application health checks",
+        "replace those instances automatically"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta su capa web en un EC2 Auto Scaling group detrás de un balanceador de carga. Algunas instancias siguen ejecutándose, pero fallan las comprobaciones de salud de la aplicación del balanceador, por lo que quedan menos instancias capaces de atender solicitudes. La empresa quiere que el grupo reemplace esas instancias automáticamente y mantenga su capacidad deseada. ¿Qué cambio cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar un termination lifecycle hook que recopile registros cuando el grupo haga scale-in.",
+            "why": "Un termination hook actúa antes de la terminación, pero no proporciona la señal de salud del balanceador que falta."
+          },
+          {
+            "id": "B",
+            "text": "Aumentar la capacidad deseada del grupo cada vez que el balanceador informe una instancia no saludable.",
+            "why": "Agregar capacidad no hace que el grupo determine que la instancia que falla no está saludable ni que la reemplace."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar las comprobaciones de salud de Elastic Load Balancing para el Auto Scaling group.",
+            "why": "Estas comprobaciones opcionales permiten que una falla detectada por el balanceador haga que Auto Scaling reemplace la instancia no saludable."
+          },
+          {
+            "id": "D",
+            "text": "Agregar un launch lifecycle hook que pause cada instancia nueva hasta que se inicie su aplicación.",
+            "why": "Un launch hook controla la preparación inicial, pero no permite reemplazar las instancias existentes que el balanceador considera no saludables."
+          }
+        ],
+        "explanation": "El requisito decisivo es reemplazar una instancia que sigue ejecutándose cuando falla las comprobaciones de la aplicación del balanceador. Elastic Load Balancing es una fuente opcional de comprobaciones de salud para un Auto Scaling group; al habilitarla, una falla puede hacer que el grupo reemplace una instancia InService no saludable. Aumentar la capacidad deseada agrega instancias sin resolver el problema de las que fallan. Los lifecycle hooks administran tareas durante las transiciones de las instancias, no la señal de salud que provoca el reemplazo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "asg-health-checks-lifecycle-hooks--1842a4c8",
+      "conceptId": "asg-health-checks-lifecycle-hooks",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company launches rendering coordinators in an EC2 Auto Scaling group associated with a load balancer. Each new instance must download application packages and complete a configuration script before it can safely accept requests. The team needs an automated way to hold a new instance out of load balancer registration until that work succeeds. Which solution meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Elastic Load Balancing health checks so an unready instance can be replaced after a failed check.",
+          "correct": false,
+          "why": "Detecting an unhealthy instance after launch does not hold registration until the configuration work succeeds."
+        },
+        {
+          "id": "B",
+          "text": "Add a launch lifecycle hook and complete its lifecycle action after the configuration script succeeds.",
+          "correct": true,
+          "why": "The launch hook holds the instance in a wait state until startup work succeeds, before load balancer registration."
+        },
+        {
+          "id": "C",
+          "text": "Extend the health check grace period to cover the expected package download time.",
+          "correct": false,
+          "why": "A grace period delays optional health checks but does not hold registration until the script succeeds."
+        },
+        {
+          "id": "D",
+          "text": "Add a termination lifecycle hook to run the configuration script before the instance shuts down.",
+          "correct": false,
+          "why": "A termination hook runs at the wrong transition for preparing a newly launched instance."
+        }
+      ],
+      "explanation": "The requirement is to gate traffic on successful startup work, not merely to detect a bad instance afterward. A launch lifecycle hook pauses the instance while its packages and configuration are installed; completing the action lets it proceed toward service and load balancer registration. Elastic Load Balancing health checks can drive replacement, but they do not provide this pre-registration wait. A longer health check grace period likewise does not confirm that the script succeeded.",
+      "keywordCues": [
+        "before it can safely accept requests",
+        "hold a new instance out of load balancer registration until that work succeeds"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios lanza coordinadores de renderizado en un EC2 Auto Scaling group asociado con un balanceador de carga. Cada instancia nueva debe descargar paquetes de la aplicación y completar un script de configuración antes de aceptar solicitudes de forma segura. El equipo necesita una forma automatizada de impedir el registro de la instancia en el balanceador hasta que ese trabajo termine correctamente. ¿Qué solución cumple el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar las comprobaciones de salud de Elastic Load Balancing para reemplazar una instancia que aún no está lista después de una comprobación fallida.",
+            "why": "Detectar una instancia no saludable después del lanzamiento no retrasa su registro hasta que la configuración termine correctamente."
+          },
+          {
+            "id": "B",
+            "text": "Agregar un launch lifecycle hook y completar su lifecycle action después de que el script de configuración termine correctamente.",
+            "why": "El launch hook mantiene la instancia en espera hasta que termine la preparación, antes de registrarla en el balanceador."
+          },
+          {
+            "id": "C",
+            "text": "Ampliar el health check grace period para cubrir el tiempo estimado de descarga de paquetes.",
+            "why": "El grace period retrasa las comprobaciones de salud opcionales, pero no impide el registro hasta que el script termine correctamente."
+          },
+          {
+            "id": "D",
+            "text": "Agregar un termination lifecycle hook para ejecutar el script de configuración antes de que la instancia se apague.",
+            "why": "Un termination hook actúa en la transición equivocada para preparar una instancia nueva."
+          }
+        ],
+        "explanation": "El requisito es condicionar la recepción de tráfico al éxito de la preparación, no solo detectar después una instancia defectuosa. Un launch lifecycle hook pausa la instancia mientras se instalan los paquetes y se aplica la configuración; al completar la acción, la instancia puede continuar hacia el servicio y el registro en el balanceador. Las comprobaciones de Elastic Load Balancing pueden provocar un reemplazo, pero no proporcionan esta espera previa al registro. Un health check grace period más largo tampoco confirma que el script haya terminado correctamente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "asg-health-checks-lifecycle-hooks--cb91b1ec",
+      "conceptId": "asg-health-checks-lifecycle-hooks",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics platform runs a service in an EC2 Auto Scaling group behind a load balancer. Instances that fail the load balancer's health checks must be replaced automatically, and instances removed during scale-in must provide their local diagnostic logs before termination. The team can configure Auto Scaling features and an event-driven log collection action. Which TWO changes meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add a termination lifecycle hook and use its EventBridge notification to start log collection.",
+          "correct": true,
+          "why": "The hook pauses termination so an event-driven action can collect logs before the instance terminates."
+        },
+        {
+          "id": "B",
+          "text": "Increase the health check grace period so scale-in waits for log collection.",
+          "correct": false,
+          "why": "The grace period applies to health checks, not to pausing termination for log collection."
+        },
+        {
+          "id": "C",
+          "text": "Enable Elastic Load Balancing health checks for the Auto Scaling group.",
+          "correct": true,
+          "why": "This lets load balancer health failures cause Auto Scaling to replace unhealthy instances."
+        },
+        {
+          "id": "D",
+          "text": "Increase desired capacity whenever a load balancer health check fails.",
+          "correct": false,
+          "why": "Adding instances does not cause the unhealthy instances to be replaced."
+        },
+        {
+          "id": "E",
+          "text": "Add a launch lifecycle hook that waits for software installation on replacement instances.",
+          "correct": false,
+          "why": "A launch hook addresses startup preparation, not the stated health-check and scale-in log requirements."
+        }
+      ],
+      "explanation": "This scenario has two distinct needs: replacement based on load balancer health and a pause before scale-in termination. Enable Elastic Load Balancing health checks so Auto Scaling can replace instances it determines are unhealthy. Use a termination lifecycle hook and its EventBridge notification to initiate log collection while the instance is waiting. Increasing the health check grace period does not pause termination, and increasing desired capacity does not replace the unhealthy instance.",
+      "keywordCues": [
+        "fail the load balancer's health checks must be replaced automatically",
+        "provide their local diagnostic logs before termination",
+        "during scale-in"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de logística ejecuta un servicio en un EC2 Auto Scaling group detrás de un balanceador de carga. Las instancias que fallan las comprobaciones de salud del balanceador deben reemplazarse automáticamente, y las instancias retiradas durante scale-in deben proporcionar sus registros de diagnóstico locales antes de terminar. El equipo puede configurar características de Auto Scaling y una acción de recopilación de registros basada en eventos. ¿Qué DOS cambios cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar un termination lifecycle hook y usar su notificación de EventBridge para iniciar la recopilación de registros.",
+            "why": "El hook pausa la terminación para que una acción basada en eventos recopile los registros antes de que termine la instancia."
+          },
+          {
+            "id": "B",
+            "text": "Aumentar el health check grace period para que scale-in espere la recopilación de registros.",
+            "why": "El grace period se aplica a las comprobaciones de salud, no a pausar la terminación para recopilar registros."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar las comprobaciones de salud de Elastic Load Balancing para el Auto Scaling group.",
+            "why": "Esto permite que las fallas detectadas por el balanceador hagan que Auto Scaling reemplace las instancias no saludables."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar la capacidad deseada cada vez que falle una comprobación de salud del balanceador.",
+            "why": "Agregar instancias no hace que se reemplacen las instancias no saludables."
+          },
+          {
+            "id": "E",
+            "text": "Agregar un launch lifecycle hook que espere la instalación del software en las instancias de reemplazo.",
+            "why": "Un launch hook resuelve la preparación inicial, no los requisitos indicados de salud y registros durante scale-in."
+          }
+        ],
+        "explanation": "El escenario tiene dos necesidades distintas: reemplazar instancias según la salud observada por el balanceador y pausar la terminación durante scale-in. Habilita las comprobaciones de Elastic Load Balancing para que Auto Scaling reemplace las instancias que determine como no saludables. Usa un termination lifecycle hook y su notificación de EventBridge para iniciar la recopilación mientras la instancia está en espera. Aumentar el health check grace period no pausa la terminación, y aumentar la capacidad deseada no reemplaza la instancia no saludable."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "asg-health-checks-lifecycle-hooks--r0",
+      "conceptId": "asg-health-checks-lifecycle-hooks",
+      "kind": "recall",
+      "prompt": "Warm-pool instances stop before user data finishes. What Auto Scaling feature would you use, and why?",
+      "promptEs": "Las instancias de un warm pool se detienen antes de que termine user data. ¿Qué característica de Auto Scaling usarías y por qué?",
+      "idealAnswer": "Use an EC2_INSTANCE_LAUNCHING lifecycle hook. It holds an instance until bootstrap completes, preventing warm-pool entry from stopping or hibernating it before the work finishes.",
+      "rubric": [
+        "Names an EC2_INSTANCE_LAUNCHING or launch lifecycle hook.",
+        "Explains that it holds the instance until bootstrap completes.",
+        "Identifies that warm-pool stop or hibernate does not otherwise wait for user data."
+      ]
+    }
+  ]
+}

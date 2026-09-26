@@ -1,0 +1,325 @@
+{
+  "conceptId": "scaling-metrics-selection",
+  "card": {
+    "en": {
+      "tldr": "Choose a scaling metric that reflects the work each instance must handle. For an SQS worker fleet, use backlog per InService instance rather than raw queue length; set its target from acceptable queue latency and average message-processing time.",
+      "whenToUse": [
+        "An EC2 Auto Scaling group processes messages from an SQS queue.",
+        "The workload specifies an acceptable queue delay.",
+        "Queue activity changes, and worker capacity should adjust with demand."
+      ],
+      "keyFacts": [
+        "Calculate backlog per instance by dividing the queue's ApproximateNumberOfMessages attribute by the Auto Scaling group's InService instance count.",
+        "Calculate the acceptable backlog-per-instance target by dividing acceptable latency by average processing time per message.",
+        "Raw visible-message count is not necessarily proportional to the worker capacity required.",
+        "Metric math can avoid the cost and effort of publishing a custom backlog-per-instance metric.",
+        "EC2 instance usage metrics, including CPU, are in the AWS/EC2 CloudWatch namespace."
+      ],
+      "gotchas": [
+        "A growing queue does not, by itself, tell you how many workers are needed; processing time and acceptable delay also matter.",
+        "Do not divide backlog by instances that are not InService.",
+        "Backlog-based scaling does not, by itself, protect an instance processing a long-running task from scale-in termination."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "messages waiting per worker",
+        "maximum acceptable queue delay",
+        "variable message-processing time",
+        "long-running work during scale-in"
+      ]
+    },
+    "es": {
+      "tldr": "Elige una métrica de escalado que refleje el trabajo que debe atender cada instancia. Para una flota que procesa mensajes de SQS, usa la cantidad de mensajes pendientes por instancia InService en vez del tamaño total de la cola; fija el objetivo según la latencia aceptable y el tiempo promedio de procesamiento.",
+      "whenToUse": [
+        "Un grupo de Amazon EC2 Auto Scaling procesa mensajes de una cola de SQS.",
+        "La carga de trabajo especifica una demora aceptable en la cola.",
+        "La actividad de la cola cambia y la capacidad de los trabajadores debe ajustarse a la demanda."
+      ],
+      "keyFacts": [
+        "Calcula los mensajes pendientes por instancia dividiendo el atributo ApproximateNumberOfMessages de la cola entre las instancias InService del grupo.",
+        "Calcula el objetivo de mensajes pendientes por instancia dividiendo la latencia aceptable entre el tiempo promedio de procesamiento por mensaje.",
+        "La cantidad total de mensajes visibles no necesariamente es proporcional a la capacidad de trabajadores requerida.",
+        "Metric math puede evitar el costo y el esfuerzo de publicar una métrica personalizada de mensajes pendientes por instancia.",
+        "Las métricas de uso de instancias EC2, incluida CPU, están en el espacio de nombres AWS/EC2 de CloudWatch."
+      ],
+      "gotchas": [
+        "Una cola que crece no indica por sí sola cuántos trabajadores necesitas; también importan el tiempo de procesamiento y la demora aceptable.",
+        "No dividas los mensajes pendientes entre instancias que no estén InService.",
+        "El escalado según mensajes pendientes no protege por sí solo a una instancia que procesa una tarea prolongada frente a su terminación durante el scale-in."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "messages waiting per worker",
+        "maximum acceptable queue delay",
+        "variable message-processing time",
+        "long-running work during scale-in"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-monitoring.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "scaling-metrics-selection--b5c35d95",
+      "conceptId": "scaling-metrics-selection",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company uses an EC2 Auto Scaling group to process videos listed in an SQS queue. Six instances are InService, 720 messages are available, and each instance takes an average of 0.1 seconds to process a message. The company accepts at most 8 seconds of queue delay and wants scaling to reflect work per worker. Which target tracking configuration meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use metric math to track backlog per InService instance, with a target of 80 messages.",
+          "correct": true,
+          "why": "The metric reflects work per worker, the target follows from acceptable latency, and metric math avoids publishing a custom metric."
+        },
+        {
+          "id": "B",
+          "text": "Publish a custom backlog-per-instance metric, with a target of 80 messages.",
+          "correct": false,
+          "why": "This uses the right metric and target but adds metric-publication effort that metric math can avoid."
+        },
+        {
+          "id": "C",
+          "text": "Use metric math to track backlog per InService instance, with a target of 120 messages.",
+          "correct": false,
+          "why": "120 is the current backlog per instance, while the acceptable backlog is 8 ÷ 0.1 = 80."
+        },
+        {
+          "id": "D",
+          "text": "Track the queue's visible-message count directly, with a target of 80 messages.",
+          "correct": false,
+          "why": "The 80-message target represents acceptable backlog per instance, not an appropriate target for total queue length."
+        }
+      ],
+      "explanation": "The deciding requirements are acceptable queue delay, work per worker, and least operational overhead. Divide 720 available messages by six InService instances to get a current backlog of 120 per instance; divide 8 seconds by 0.1 seconds per message to get an acceptable target of 80. Metric math provides the backlog-per-instance metric without publishing a custom metric. Setting the target to the current backlog of 120 would not express the company's latency limit.",
+      "keywordCues": [
+        "Six instances are InService",
+        "720 messages are available",
+        "0.1 seconds to process a message",
+        "at most 8 seconds of queue delay",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-monitoring.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios usa un grupo de Amazon EC2 Auto Scaling para procesar videos registrados en una cola de SQS. Hay seis instancias InService, 720 mensajes disponibles y cada instancia tarda en promedio 0.1 segundos en procesar un mensaje. La empresa acepta como máximo 8 segundos de demora en la cola y quiere que el escalado refleje el trabajo por instancia. ¿Qué configuración de target tracking cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar metric math para dar seguimiento a los mensajes pendientes por instancia InService, con un objetivo de 80 mensajes.",
+            "why": "La métrica refleja el trabajo por instancia, el objetivo se deriva de la latencia aceptable y metric math evita publicar una métrica personalizada."
+          },
+          {
+            "id": "B",
+            "text": "Publicar una métrica personalizada de mensajes pendientes por instancia, con un objetivo de 80 mensajes.",
+            "why": "Usa la métrica y el objetivo correctos, pero agrega el esfuerzo de publicar una métrica que metric math puede evitar."
+          },
+          {
+            "id": "C",
+            "text": "Usar metric math para dar seguimiento a los mensajes pendientes por instancia InService, con un objetivo de 120 mensajes.",
+            "why": "120 es la cantidad actual por instancia, mientras que la cantidad aceptable es 8 ÷ 0.1 = 80."
+          },
+          {
+            "id": "D",
+            "text": "Dar seguimiento directamente a la cantidad de mensajes visibles en la cola, con un objetivo de 80 mensajes.",
+            "why": "El objetivo de 80 mensajes representa la cantidad aceptable por instancia, no un objetivo adecuado para la longitud total de la cola."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la demora aceptable en la cola, el trabajo por instancia y el LEAST operational overhead. Divide los 720 mensajes disponibles entre seis instancias InService: hay 120 mensajes pendientes por instancia; divide 8 segundos entre 0.1 segundos por mensaje: el objetivo aceptable es 80. Metric math proporciona la métrica por instancia sin publicar una métrica personalizada. Un objetivo de 120 reflejaría la situación actual, no el límite de latencia."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "scaling-metrics-selection--e5293164",
+      "conceptId": "scaling-metrics-selection",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A ticketing company has an EC2 Auto Scaling group whose instances process reservations from an SQS queue. During releases, both the number of waiting reservations and the number of InService workers change. Architects need a target tracking policy tied to acceptable queue delay rather than a fixed total queue size. Which two choices establish the appropriate metric and target? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set the target to the total number of reservations the company expects during a release.",
+          "correct": false,
+          "why": "An expected total does not derive the acceptable work per instance from the queue-delay requirement."
+        },
+        {
+          "id": "B",
+          "text": "Divide the queue's ApproximateNumberOfMessages attribute by every instance in the group, regardless of state.",
+          "correct": false,
+          "why": "The documented calculation divides by instances in the InService state, not every instance."
+        },
+        {
+          "id": "C",
+          "text": "Divide the queue's ApproximateNumberOfMessages attribute by the group's InService instance count.",
+          "correct": true,
+          "why": "This calculates the backlog per instance needed for the worker scaling metric."
+        },
+        {
+          "id": "D",
+          "text": "Track the queue's visible-message count directly as the target tracking metric.",
+          "correct": false,
+          "why": "Total queue length might not change proportionally to the size of the group processing it."
+        },
+        {
+          "id": "E",
+          "text": "Divide acceptable queue latency by average per-instance processing time for one message to set the target.",
+          "correct": true,
+          "why": "This yields the acceptable backlog per instance for the latency requirement."
+        }
+      ],
+      "explanation": "The policy must represent waiting work per active worker and translate the delay limit into a target. Calculate backlog per instance from ApproximateNumberOfMessages divided by InService capacity, then calculate its target from acceptable latency divided by average message-processing time. A raw visible-message count misses the changing relationship between queue size and worker capacity. Including instances that are not InService also misstates the documented per-instance calculation.",
+      "keywordCues": [
+        "number of InService workers change",
+        "acceptable queue delay",
+        "rather than a fixed total queue size"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-monitoring.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos tiene un grupo de Amazon EC2 Auto Scaling cuyas instancias procesan reservaciones desde una cola de SQS. Durante las ventas, cambian tanto la cantidad de reservaciones en espera como la cantidad de trabajadores InService. Los arquitectos necesitan una política de target tracking vinculada a la demora aceptable en la cola, en vez de a un tamaño total fijo de la cola. ¿Qué dos opciones establecen la métrica y el objetivo adecuados? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Fijar el objetivo en la cantidad total de reservaciones que la empresa espera durante una venta.",
+            "why": "Un total esperado no deriva el trabajo aceptable por instancia del requisito de demora en la cola."
+          },
+          {
+            "id": "B",
+            "text": "Dividir el atributo ApproximateNumberOfMessages de la cola entre todas las instancias del grupo, sin importar su estado.",
+            "why": "El cálculo documentado divide entre las instancias en estado InService, no entre todas las instancias."
+          },
+          {
+            "id": "C",
+            "text": "Dividir el atributo ApproximateNumberOfMessages de la cola entre la cantidad de instancias InService del grupo.",
+            "why": "Así se calculan los mensajes pendientes por instancia que necesita la métrica de escalado."
+          },
+          {
+            "id": "D",
+            "text": "Usar directamente la cantidad de mensajes visibles de la cola como métrica de target tracking.",
+            "why": "La longitud total de la cola podría no cambiar de forma proporcional al tamaño del grupo que la procesa."
+          },
+          {
+            "id": "E",
+            "text": "Dividir la latencia aceptable de la cola entre el tiempo promedio que tarda una instancia en procesar un mensaje para fijar el objetivo.",
+            "why": "Esto da la cantidad aceptable de mensajes pendientes por instancia según el requisito de latencia."
+          }
+        ],
+        "explanation": "La política debe representar el trabajo en espera por trabajador activo y convertir el límite de demora en un objetivo. Calcula los mensajes pendientes por instancia dividiendo ApproximateNumberOfMessages entre la capacidad InService; luego calcula el objetivo dividiendo la latencia aceptable entre el tiempo promedio de procesamiento por mensaje. La cantidad total de mensajes visibles no refleja necesariamente cómo cambia la capacidad requerida. Incluir instancias que no estén InService también altera el cálculo documentado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "scaling-metrics-selection--318bb984",
+      "conceptId": "scaling-metrics-selection",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research portal runs its interactive application on one EC2 Auto Scaling group and processes submitted datasets from SQS on a separate worker group. The portal team monitors EC2 CPU usage for its application, while worker processing times and queue wait times determine how much worker capacity is needed. Each group must scale independently according to its own load. Which metric selection best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use EC2 CPU usage for the application group and SQS backlog per InService instance for the worker group.",
+          "correct": true,
+          "why": "It uses the monitored application load for one group and waiting work per active worker for the other."
+        },
+        {
+          "id": "B",
+          "text": "Use EC2 CPU usage for both groups.",
+          "correct": false,
+          "why": "For the worker group, CPU usage does not capture the stated queue-delay and message-processing requirements."
+        },
+        {
+          "id": "C",
+          "text": "Use SQS backlog per InService instance for the application group and EC2 CPU usage for the worker group.",
+          "correct": false,
+          "why": "It assigns the queue-work metric to the group that does not process queue messages."
+        },
+        {
+          "id": "D",
+          "text": "Use EC2 CPU usage for the application group and total SQS visible-message count for the worker group.",
+          "correct": false,
+          "why": "The worker metric omits the changing number of instances available to process the messages."
+        }
+      ],
+      "explanation": "The two groups have different sources of load and must scale independently. EC2 CPU usage is the metric the team monitors for its interactive application; the SQS workers need backlog per InService instance because processing time and acceptable delay determine their required capacity. Using CPU for both groups ignores the worker queue requirement. Using raw queue length for workers does not account for changes in active worker capacity.",
+      "keywordCues": [
+        "separate worker group",
+        "monitors EC2 CPU usage",
+        "worker processing times and queue wait times",
+        "scale independently"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-monitoring.html"
+      ],
+      "es": {
+        "stem": "Un portal de investigación ejecuta su aplicación interactiva en un grupo de Amazon EC2 Auto Scaling y procesa conjuntos de datos enviados a SQS en otro grupo de trabajadores. El equipo monitorea el uso de CPU de EC2 para la aplicación, mientras que los tiempos de procesamiento y de espera en la cola determinan la capacidad necesaria de los trabajadores. Cada grupo debe escalar de manera independiente según su propia carga. ¿Qué selección de métricas cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar el uso de CPU de EC2 para el grupo de la aplicación y los mensajes pendientes de SQS por instancia InService para el grupo de trabajadores.",
+            "why": "Usa la carga monitoreada de la aplicación para un grupo y el trabajo en espera por trabajador activo para el otro."
+          },
+          {
+            "id": "B",
+            "text": "Usar el uso de CPU de EC2 para ambos grupos.",
+            "why": "Para el grupo de trabajadores, el uso de CPU no refleja los requisitos indicados de demora en la cola y procesamiento de mensajes."
+          },
+          {
+            "id": "C",
+            "text": "Usar los mensajes pendientes de SQS por instancia InService para el grupo de la aplicación y el uso de CPU de EC2 para el grupo de trabajadores.",
+            "why": "Asigna la métrica de trabajo en cola al grupo que no procesa los mensajes de la cola."
+          },
+          {
+            "id": "D",
+            "text": "Usar el uso de CPU de EC2 para el grupo de la aplicación y la cantidad total de mensajes visibles de SQS para el grupo de trabajadores.",
+            "why": "La métrica de los trabajadores omite la cantidad cambiante de instancias disponibles para procesar mensajes."
+          }
+        ],
+        "explanation": "Los dos grupos tienen distintas fuentes de carga y deben escalar de forma independiente. El uso de CPU de EC2 es la métrica que el equipo monitorea para la aplicación interactiva; los trabajadores de SQS necesitan mensajes pendientes por instancia InService porque el tiempo de procesamiento y la demora aceptable determinan la capacidad requerida. Usar CPU para ambos grupos pasa por alto el requisito de la cola. Usar el tamaño total de la cola para los trabajadores no considera los cambios en la capacidad activa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "scaling-metrics-selection--r0",
+      "conceptId": "scaling-metrics-selection",
+      "kind": "recall",
+      "prompt": "An EC2 worker fleet processes SQS messages under a queue-delay limit. Which scaling metric and target would you use, and why?",
+      "promptEs": "Una flota de trabajadores EC2 procesa mensajes de SQS con un límite de demora en la cola. ¿Qué métrica y objetivo de escalado usarías, y por qué?",
+      "idealAnswer": "Use backlog per InService instance: divide available SQS messages by the group's InService instance count. Set the target by dividing acceptable queue latency by average per-instance processing time for a message; raw queue length alone does not reflect work per worker.",
+      "rubric": [
+        "Names backlog per instance rather than raw queue length.",
+        "Uses the InService instance count as the divisor.",
+        "Derives the target from acceptable latency and average message-processing time."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "conceptId": "s3-requester-pays",
+  "card": {
+    "en": {
+      "tldr": "S3 Requester Pays shifts request and data-download charges from the owner of a general purpose bucket to authenticated requesters. Choose it when sharing a dataset without paying for consumers’ access; the bucket owner still pays for storage.",
+      "whenToUse": [
+        "A dataset owner wants consumers to pay for their own S3 requests and downloads.",
+        "Consumers can authenticate and explicitly acknowledge Requester Pays charges."
+      ],
+      "keyFacts": [
+        "Requester Pays applies to S3 general purpose buckets.",
+        "For successful requests, the requester pays for the request and data transfer; the bucket owner pays for storage.",
+        "Anonymous requests are not allowed.",
+        "Requesters acknowledge charges with the x-amz-request-payer header, the RequestPayer parameter, or the CLI --request-payer parameter.",
+        "If a requester assumes an IAM role, the account that owns the role is charged.",
+        "For RestoreObject, the requester pays for the request, but the bucket owner pays retrieval charges."
+      ],
+      "gotchas": [
+        "Requester Pays does not transfer storage charges to consumers.",
+        "Enabling Requester Pays does not make anonymous downloads billable to anonymous users.",
+        "Having a consumer assume a role in the owner’s account does not charge the consumer’s account."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "share a large reference dataset",
+        "consumers pay for their own downloads",
+        "bucket owner continues paying for storage",
+        "authenticated requesters acknowledge charges"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Requester Pays traslada los cargos por solicitudes y descargas de datos del propietario de un bucket de uso general a los solicitantes autenticados. Elígelo para compartir un conjunto de datos sin pagar por el acceso de los consumidores; el propietario sigue pagando el almacenamiento.",
+      "whenToUse": [
+        "El propietario de un conjunto de datos quiere que los consumidores paguen sus propias solicitudes y descargas de S3.",
+        "Los consumidores pueden autenticarse y aceptar explícitamente los cargos de Requester Pays."
+      ],
+      "keyFacts": [
+        "Requester Pays se aplica a los buckets de uso general de S3.",
+        "En las solicitudes exitosas, el solicitante paga la solicitud y la transferencia de datos; el propietario paga el almacenamiento.",
+        "No se permiten solicitudes anónimas.",
+        "Los solicitantes aceptan los cargos con el encabezado x-amz-request-payer, el parámetro RequestPayer o el parámetro --request-payer de CLI.",
+        "Si un solicitante asume un rol de IAM, se cobra a la cuenta a la que pertenece el rol.",
+        "Con RestoreObject, el solicitante paga la solicitud, pero el propietario del bucket paga los cargos de recuperación."
+      ],
+      "gotchas": [
+        "Requester Pays no traslada los cargos de almacenamiento a los consumidores.",
+        "Activar Requester Pays no permite cobrar las descargas anónimas a usuarios anónimos.",
+        "Si un consumidor asume un rol de la cuenta del propietario, no se cobra a la cuenta del consumidor."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "share a large reference dataset",
+        "consumers pay for their own downloads",
+        "bucket owner continues paying for storage",
+        "authenticated requesters acknowledge charges"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-requester-pays--8b31013f",
+      "conceptId": "s3-requester-pays",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retail consortium stores shared product images in a Requester Pays S3 bucket. Each member runs a workload in its own AWS account and uses an assumed IAM role to download images. The consortium wants each member's account, not the consortium's account, charged for successful requests and downloads. Which access design meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have members assume a role in the consortium's account and include the RequestPayer parameter.",
+          "correct": false,
+          "why": "The consortium's account owns the assumed role and would be charged."
+        },
+        {
+          "id": "B",
+          "text": "Have members make anonymous requests and include the x-amz-request-payer header.",
+          "correct": false,
+          "why": "Requester Pays does not allow anonymous requests, even with a payer header."
+        },
+        {
+          "id": "C",
+          "text": "Have members assume roles in their own accounts and include the RequestPayer parameter.",
+          "correct": true,
+          "why": "Each member's account owns its role, and the parameter acknowledges the Requester Pays charges."
+        },
+        {
+          "id": "D",
+          "text": "Have members use roles in their own accounts but omit the RequestPayer parameter.",
+          "correct": false,
+          "why": "Requester Pays requests must explicitly acknowledge the charges."
+        }
+      ],
+      "explanation": "For a requester using an assumed IAM role, S3 charges the account that owns the role. Each member should therefore use a role in its own account and acknowledge Requester Pays charges with the RequestPayer parameter. A role in the consortium's account would put the charges on the wrong account, while omitting the acknowledgment does not meet Requester Pays request requirements.",
+      "keywordCues": [
+        "Requester Pays S3 bucket",
+        "assumed IAM role",
+        "each member's account, not the consortium's account",
+        "successful requests and downloads"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html"
+      ],
+      "es": {
+        "stem": "Un consorcio de comercios almacena imágenes compartidas de productos en un bucket de S3 con Requester Pays. Cada miembro ejecuta una carga de trabajo en su propia cuenta de AWS y usa un rol de IAM asumido para descargar imágenes. El consorcio quiere que se cobren las solicitudes y descargas exitosas a la cuenta de cada miembro, no a la suya. ¿Qué diseño de acceso cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Hacer que los miembros asuman un rol de la cuenta del consorcio e incluyan el parámetro RequestPayer.",
+            "why": "La cuenta del consorcio es propietaria del rol asumido y recibiría los cargos."
+          },
+          {
+            "id": "B",
+            "text": "Hacer que los miembros envíen solicitudes anónimas e incluyan el encabezado x-amz-request-payer.",
+            "why": "Requester Pays no permite solicitudes anónimas, aunque incluyan el encabezado."
+          },
+          {
+            "id": "C",
+            "text": "Hacer que los miembros asuman roles de sus propias cuentas e incluyan el parámetro RequestPayer.",
+            "why": "La cuenta de cada miembro es propietaria de su rol, y el parámetro acepta los cargos de Requester Pays."
+          },
+          {
+            "id": "D",
+            "text": "Hacer que los miembros usen roles de sus propias cuentas, pero omitan el parámetro RequestPayer.",
+            "why": "Las solicitudes a un bucket con Requester Pays deben aceptar explícitamente los cargos."
+          }
+        ],
+        "explanation": "Cuando un solicitante usa un rol de IAM asumido, S3 cobra a la cuenta propietaria del rol. Por eso, cada miembro debe usar un rol de su propia cuenta y aceptar los cargos de Requester Pays con el parámetro RequestPayer. Un rol de la cuenta del consorcio asignaría los cargos a la cuenta equivocada, mientras que omitir la aceptación no cumple los requisitos de las solicitudes de Requester Pays."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-requester-pays--0ab13e45",
+      "conceptId": "s3-requester-pays",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research institute shares objects in a Requester Pays S3 bucket with authenticated partner labs. Partners sometimes call RestoreObject, and the institute agrees to cover retrieval charges while partners pay for their restore requests. What should the institute require of partners to meet this billing arrangement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have partners assume an IAM role in the institute's account and include the RequestPayer parameter.",
+          "correct": false,
+          "why": "The institute's account would be charged for requests made using its role."
+        },
+        {
+          "id": "B",
+          "text": "Submit RestoreObject requests anonymously and include the RequestPayer parameter.",
+          "correct": false,
+          "why": "Requester Pays buckets do not accept anonymous requests."
+        },
+        {
+          "id": "C",
+          "text": "Include the x-amz-request-payer header in authenticated RestoreObject requests.",
+          "correct": true,
+          "why": "Requester Pays supports RestoreObject with the payer acknowledgment; partners pay for the request and the owner pays retrieval charges."
+        },
+        {
+          "id": "D",
+          "text": "Disable Requester Pays before each RestoreObject request and re-enable it afterward.",
+          "correct": false,
+          "why": "With Requester Pays disabled, the bucket owner generally pays S3 request charges."
+        }
+      ],
+      "explanation": "The institute wants partners to pay for RestoreObject requests, but not the associated retrieval charges. Requester Pays supports RestoreObject when the requester acknowledges charges with the payer header or parameter; the bucket owner still pays retrieval charges. Disabling Requester Pays or using a role owned by the institute would not place the request charge on the partner's account.",
+      "keywordCues": [
+        "Requester Pays S3 bucket",
+        "authenticated partner labs",
+        "call RestoreObject",
+        "institute agrees to cover retrieval charges",
+        "partners pay for their restore requests"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación comparte objetos de un bucket de S3 con Requester Pays con laboratorios asociados autenticados. A veces, los socios llaman a RestoreObject, y el instituto acepta cubrir los cargos de recuperación mientras los socios pagan sus solicitudes de restauración. ¿Qué debe exigir el instituto a los socios para cumplir este esquema de cobro?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Hacer que los socios asuman un rol de IAM de la cuenta del instituto e incluyan el parámetro RequestPayer.",
+            "why": "Se cobrarían a la cuenta del instituto las solicitudes hechas mediante un rol que le pertenece."
+          },
+          {
+            "id": "B",
+            "text": "Enviar solicitudes anónimas de RestoreObject e incluir el parámetro RequestPayer.",
+            "why": "Los buckets con Requester Pays no aceptan solicitudes anónimas."
+          },
+          {
+            "id": "C",
+            "text": "Incluir el encabezado x-amz-request-payer en las solicitudes autenticadas de RestoreObject.",
+            "why": "Requester Pays admite RestoreObject con la aceptación de cargos: los socios pagan la solicitud y el propietario paga los cargos de recuperación."
+          },
+          {
+            "id": "D",
+            "text": "Desactivar Requester Pays antes de cada solicitud de RestoreObject y volver a activarlo después.",
+            "why": "Sin Requester Pays, por lo general el propietario del bucket paga los cargos por solicitudes de S3."
+          }
+        ],
+        "explanation": "El instituto quiere que los socios paguen las solicitudes de RestoreObject, pero no los cargos de recuperación asociados. Requester Pays admite RestoreObject si el solicitante acepta los cargos mediante el encabezado o parámetro de pago; el propietario del bucket sigue pagando los cargos de recuperación. Desactivar Requester Pays o usar un rol propiedad del instituto no asignaría el cargo por solicitud a la cuenta del socio."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-requester-pays--r0",
+      "conceptId": "s3-requester-pays",
+      "kind": "recall",
+      "prompt": "A dataset owner will pay for S3 storage but wants authenticated consumers to pay for requests and downloads. What should the owner configure, and why?",
+      "promptEs": "El propietario de un conjunto de datos pagará el almacenamiento de S3, pero quiere que los consumidores autenticados paguen las solicitudes y descargas. ¿Qué debe configurar y por qué?",
+      "idealAnswer": "Configure Requester Pays on the S3 general purpose bucket. Authenticated consumers must acknowledge the charges; they then pay for successful requests and downloads, while the owner continues paying for storage.",
+      "rubric": [
+        "Names S3 Requester Pays on a general purpose bucket.",
+        "Explains that requesters pay for requests and downloads, while the owner pays for storage.",
+        "Mentions authentication and explicit acknowledgment of charges."
+      ]
+    }
+  ]
+}

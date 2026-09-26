@@ -1,0 +1,447 @@
+{
+  "conceptId": "transit-gateway",
+  "card": {
+    "en": {
+      "tldr": "AWS Transit Gateway is a transit hub for connecting many VPCs and on-premises networks. Choose it when a growing peering mesh needs a hub, or when different attachments need different routing policies.",
+      "whenToUse": [
+        "Many VPCs need connectivity through a shared hub rather than a growing set of pairwise connections.",
+        "VPCs and on-premises networks need to connect through VPC, VPN, or Direct Connect gateway attachments.",
+        "Groups of attachments need separate transit gateway route tables for network segmentation."
+      ],
+      "keyFacts": [
+        "A transit gateway can attach VPCs, VPN connections, Direct Connect gateways, and peer transit gateways.",
+        "Each attachment is associated with exactly one transit gateway route table; a route table can have many associated attachments.",
+        "Attachments use the default route table unless you configure other associations.",
+        "A VPC needs a static route to send traffic to the transit gateway.",
+        "A transit gateway incurs hourly attachment charges and traffic-processing charges."
+      ],
+      "gotchas": [
+        "A transit gateway route does not replace the route needed in a VPC to send traffic to the gateway.",
+        "Do not assume that every attachment must use the default transit gateway route table.",
+        "Transit Gateway simplifies a many-network topology, but its attachment and processing charges still matter."
+      ],
+      "confusedWith": [
+        {
+          "concept": "VPC peering",
+          "difference": "Peering connects VPCs directly; Transit Gateway provides a hub with attachment-based routing policies."
+        },
+        {
+          "concept": "AWS Site-to-Site VPN",
+          "difference": "A VPN connection can attach an on-premises network to a transit gateway; it is not itself the multi-VPC hub."
+        },
+        {
+          "concept": "AWS Direct Connect",
+          "difference": "A Direct Connect gateway can attach to a transit gateway; Transit Gateway organizes routing among the attached networks."
+        }
+      ],
+      "examCues": [
+        "growing mesh of VPC connections",
+        "many VPCs and on-premises networks",
+        "separate routing policies for attached networks",
+        "VPC traffic is not reaching the transit gateway"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Transit Gateway es un hub de tránsito para conectar muchas VPC y redes locales. Elígelo cuando una malla creciente de conexiones necesite un hub o cuando distintos attachments requieran políticas de enrutamiento diferentes.",
+      "whenToUse": [
+        "Necesitas conectar muchas VPC mediante un hub compartido en lugar de aumentar las conexiones entre pares.",
+        "Necesitas conectar VPC y redes locales mediante attachments de VPC, VPN o Direct Connect gateway.",
+        "Necesitas separar grupos de attachments mediante distintas transit gateway route tables."
+      ],
+      "keyFacts": [
+        "Puedes conectar VPC, conexiones VPN, Direct Connect gateways y otros transit gateways.",
+        "Cada attachment se asocia con exactamente una transit gateway route table; una tabla puede tener varios attachments asociados.",
+        "Los attachments usan la tabla predeterminada si no configuras otras asociaciones.",
+        "Una VPC necesita una ruta estática para enviar tráfico al transit gateway.",
+        "Transit Gateway genera cargos por hora por attachment y cargos por procesamiento de tráfico."
+      ],
+      "gotchas": [
+        "Una ruta en el transit gateway no sustituye la ruta que necesita la VPC para enviarle tráfico.",
+        "No supongas que todos los attachments deben usar la transit gateway route table predeterminada.",
+        "Transit Gateway simplifica una topología con muchas redes, pero debes considerar sus cargos por attachments y procesamiento."
+      ],
+      "confusedWith": [
+        {
+          "concept": "VPC peering",
+          "difference": "VPC peering conecta VPC directamente; Transit Gateway ofrece un hub con políticas de enrutamiento para sus attachments."
+        },
+        {
+          "concept": "AWS Site-to-Site VPN",
+          "difference": "Una conexión VPN puede conectar una red local a un transit gateway, pero no es por sí misma el hub para múltiples VPC."
+        },
+        {
+          "concept": "AWS Direct Connect",
+          "difference": "Un Direct Connect gateway puede conectarse a un transit gateway; Transit Gateway organiza el enrutamiento entre las redes conectadas."
+        }
+      ],
+      "examCues": [
+        "growing mesh of VPC connections",
+        "many VPCs and on-premises networks",
+        "separate routing policies for attached networks",
+        "VPC traffic is not reaching the transit gateway"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "transit-gateway--b490cf6b",
+      "conceptId": "transit-gateway",
+      "secondaryConcepts": [
+        "client-vpn"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company has a transit gateway in each of two AWS Regions and has established a peering attachment between them. Its network team has configured routes inside the VPCs, but traffic destined for the other Region has no matching route in one transit gateway route table. Which change should the team make to enable routing through the peering attachment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the peering attachment with a Client VPN endpoint attachment.",
+          "correct": false,
+          "why": "A Client VPN endpoint attachment does not provide the requested route through the existing transit gateway peering connection."
+        },
+        {
+          "id": "B",
+          "text": "Associate the peering attachment with both transit gateway route tables.",
+          "correct": false,
+          "why": "An attachment can be associated with exactly one route table, and association alone does not add the missing destination route."
+        },
+        {
+          "id": "C",
+          "text": "Enable automatic route propagation from the peering attachment into the transit gateway route table.",
+          "correct": false,
+          "why": "Routes to a transit gateway peering attachment must be created as static routes."
+        },
+        {
+          "id": "D",
+          "text": "Add a static route for the other Region's destination that targets the peering attachment.",
+          "correct": true,
+          "why": "A transit gateway route table needs a static route pointing to its peering attachment."
+        }
+      ],
+      "explanation": "The missing route is in the transit gateway route table, not in the VPCs. For a transit gateway peering attachment, the team must create a static route that points to that attachment. Relying on route propagation from the peering attachment does not meet this requirement.",
+      "keywordCues": [
+        "peering attachment between them",
+        "routes inside the VPCs",
+        "no matching route in one transit gateway route table"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene un transit gateway en cada una de dos AWS Regions y estableció un peering attachment entre ellos. El equipo de redes configuró rutas dentro de las VPC, pero el tráfico destinado a la otra Region no tiene una ruta correspondiente en una de las transit gateway route tables. ¿Qué cambio debe hacer el equipo para habilitar el enrutamiento mediante el peering attachment?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplaza el peering attachment con un attachment de Client VPN endpoint.",
+            "why": "Un Client VPN endpoint attachment no proporciona la ruta solicitada mediante la conexión de peering existente."
+          },
+          {
+            "id": "B",
+            "text": "Asocia el peering attachment con ambas transit gateway route tables.",
+            "why": "Un attachment solo puede asociarse con una tabla, y la asociación por sí sola no agrega la ruta de destino faltante."
+          },
+          {
+            "id": "C",
+            "text": "Habilita la propagación automática de rutas desde el peering attachment hacia la transit gateway route table.",
+            "why": "Las rutas hacia un peering attachment de Transit Gateway deben crearse como rutas estáticas."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una ruta estática para el destino en la otra Region que apunte al peering attachment.",
+            "why": "La transit gateway route table necesita una ruta estática que apunte a su peering attachment."
+          }
+        ],
+        "explanation": "La ruta faltante está en la transit gateway route table, no en las VPC. Para un peering attachment de Transit Gateway, debes crear una ruta estática que apunte a ese attachment. Depender de la propagación de rutas desde el peering attachment no cumple este requisito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "transit-gateway--e2a37502",
+      "conceptId": "transit-gateway",
+      "secondaryConcepts": [
+        "site-to-site-vpn",
+        "client-vpn"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A university has attached a new research VPC and an existing Site-to-Site VPN connection to a transit gateway. The on-premises router already has a return route, and a transit gateway route table already has a route to the VPN attachment. The research VPC still cannot send traffic toward the on-premises network. Which TWO configurations should the network team verify to meet the connectivity requirement? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rely on VPN route propagation to create the missing static route inside the research VPC.",
+          "correct": false,
+          "why": "VPN propagation does not remove the need to configure the VPC's route to the transit gateway."
+        },
+        {
+          "id": "B",
+          "text": "Associate the research VPC attachment with the transit gateway route table containing the route to the VPN attachment.",
+          "correct": true,
+          "why": "The VPC attachment must use a transit gateway route table that directs on-premises traffic to the VPN attachment."
+        },
+        {
+          "id": "C",
+          "text": "Replace the Site-to-Site VPN attachment with a Client VPN endpoint attachment.",
+          "correct": false,
+          "why": "Replacing the existing on-premises VPN connection does not address the VPC routing and association checks."
+        },
+        {
+          "id": "D",
+          "text": "Add a static route in the relevant VPC route table that sends on-premises traffic to the transit gateway.",
+          "correct": true,
+          "why": "A VPC needs a static route to send traffic to the transit gateway."
+        },
+        {
+          "id": "E",
+          "text": "Associate the research VPC attachment with two transit gateway route tables simultaneously.",
+          "correct": false,
+          "why": "Each attachment can be associated with only one transit gateway route table."
+        }
+      ],
+      "explanation": "This path requires routing at both the VPC and transit gateway levels. The VPC needs a static route to the transit gateway, and its attachment must be associated with a transit gateway route table that has the VPN route. VPN route propagation is not a substitute for the VPC's static route.",
+      "keywordCues": [
+        "route table already has a route to the VPN attachment",
+        "research VPC still cannot send traffic",
+        "Which TWO configurations"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html"
+      ],
+      "es": {
+        "stem": "Una universidad conectó una nueva VPC de investigación y una conexión existente de Site-to-Site VPN a un Transit Gateway. El router local ya tiene una ruta de retorno, y una transit gateway route table ya tiene una ruta hacia el VPN attachment. La VPC de investigación todavía no puede enviar tráfico hacia la red local. ¿Qué DOS configuraciones debe verificar el equipo de redes para cumplir el requisito de conectividad? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Depende de la propagación de rutas de VPN para crear la ruta estática faltante dentro de la VPC de investigación.",
+            "why": "La propagación de VPN no elimina la necesidad de configurar la ruta de la VPC hacia el transit gateway."
+          },
+          {
+            "id": "B",
+            "text": "Asocia el attachment de la VPC de investigación con la transit gateway route table que contiene la ruta hacia el VPN attachment.",
+            "why": "El attachment de la VPC debe usar una transit gateway route table que dirija el tráfico local hacia el VPN attachment."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza el Site-to-Site VPN attachment con un Client VPN endpoint attachment.",
+            "why": "Reemplazar la conexión VPN local existente no resuelve las verificaciones de rutas y asociación de la VPC."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una ruta estática en la VPC route table pertinente que envíe el tráfico hacia la red local al transit gateway.",
+            "why": "Una VPC necesita una ruta estática para enviar tráfico al transit gateway."
+          },
+          {
+            "id": "E",
+            "text": "Asocia simultáneamente el attachment de la VPC de investigación con dos transit gateway route tables.",
+            "why": "Cada attachment solo puede asociarse con una transit gateway route table."
+          }
+        ],
+        "explanation": "Esta conexión requiere enrutamiento tanto en la VPC como en el Transit Gateway. La VPC necesita una ruta estática hacia el transit gateway, y su attachment debe estar asociado con una transit gateway route table que tenga la ruta de VPN. La propagación de rutas de VPN no sustituye la ruta estática de la VPC."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "transit-gateway--24f712cb",
+      "conceptId": "transit-gateway",
+      "secondaryConcepts": [
+        "vpc-peering",
+        "site-to-site-vpn",
+        "direct-connect"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retailer connects a growing number of application VPCs with individual VPC peering connections. It now needs a shared network hub that can also connect its on-premises network, while keeping one group of VPCs on a separate routing policy. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add more VPC peering connections and configure routes separately for each new VPC pair.",
+          "correct": false,
+          "why": "This continues the pairwise approach instead of providing the required shared hub."
+        },
+        {
+          "id": "B",
+          "text": "Connect the on-premises network through a Direct Connect gateway and retain the existing VPC peering topology.",
+          "correct": false,
+          "why": "This retains the growing peering topology rather than replacing it with a hub."
+        },
+        {
+          "id": "C",
+          "text": "Create a Site-to-Site VPN connection from the on-premises network to each application VPC.",
+          "correct": false,
+          "why": "Separate VPN connections do not provide the requested shared hub for routing among VPC groups."
+        },
+        {
+          "id": "D",
+          "text": "Attach the VPCs and the on-premises connection to a Transit Gateway, and use separate transit gateway route tables for the VPC groups.",
+          "correct": true,
+          "why": "Transit Gateway provides the shared hub and supports separate route tables for attachment groups."
+        }
+      ],
+      "explanation": "The deciding requirements are a shared hub for many VPCs and an on-premises network, plus distinct routing policies. Transit Gateway supports these network attachments and additional route tables. Adding peering connections leaves the retailer managing a growing set of pairwise connections.",
+      "keywordCues": [
+        "growing number of application VPCs",
+        "shared network hub",
+        "on-premises network",
+        "separate routing policy"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista conecta cada vez más VPC de aplicaciones mediante conexiones individuales de VPC peering. Ahora necesita un hub de red compartido que también conecte su red local y permita aplicar una política de enrutamiento separada a un grupo de VPC. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega más conexiones de VPC peering y configura rutas por separado para cada nuevo par de VPC.",
+            "why": "Esto mantiene las conexiones entre pares en lugar de proporcionar el hub compartido requerido."
+          },
+          {
+            "id": "B",
+            "text": "Conecta la red local mediante un Direct Connect gateway y conserva la topología actual de VPC peering.",
+            "why": "Esto conserva la creciente topología de peering en lugar de reemplazarla con un hub."
+          },
+          {
+            "id": "C",
+            "text": "Crea una conexión de Site-to-Site VPN desde la red local hacia cada VPC de aplicaciones.",
+            "why": "Las conexiones VPN separadas no proporcionan el hub compartido solicitado para enrutar entre grupos de VPC."
+          },
+          {
+            "id": "D",
+            "text": "Conecta las VPC y la conexión local a un Transit Gateway, y usa distintas transit gateway route tables para los grupos de VPC.",
+            "why": "Transit Gateway proporciona el hub compartido y permite usar distintas tablas de rutas para los grupos de attachments."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son un hub compartido para muchas VPC y una red local, además de políticas de enrutamiento distintas. Transit Gateway admite estos attachments de red y route tables adicionales. Agregar conexiones de peering obligaría a seguir administrando más conexiones entre pares."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "transit-gateway--1ae3c4b0",
+      "conceptId": "transit-gateway",
+      "secondaryConcepts": [
+        "direct-connect",
+        "vpc-peering",
+        "site-to-site-vpn"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturing company already uses a Direct Connect gateway for its on-premises connection and is adding VPCs for new production systems. It wants the VPCs and the existing on-premises connection to participate in one hub, with different routing policies for production and development attachments. Which design meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach the VPCs and Direct Connect gateway to a Transit Gateway, using separate transit gateway route tables for the attachment groups.",
+          "correct": true,
+          "why": "Both attachment types are supported, and separate route tables can provide the required routing policies."
+        },
+        {
+          "id": "B",
+          "text": "Attach the Direct Connect gateway to one VPC and use VPC peering for all other VPCs.",
+          "correct": false,
+          "why": "This does not use a transit hub with separate routing policies for production and development attachments."
+        },
+        {
+          "id": "C",
+          "text": "Peer each production VPC with each development VPC and retain the Direct Connect gateway separately.",
+          "correct": false,
+          "why": "This does not place the VPCs and on-premises connection in the requested shared hub."
+        },
+        {
+          "id": "D",
+          "text": "Replace the Direct Connect gateway with a Site-to-Site VPN connection to each VPC.",
+          "correct": false,
+          "why": "Separate per-VPC VPN connections do not deliver the required shared hub and discard the existing connection."
+        }
+      ],
+      "explanation": "The company needs to incorporate its existing Direct Connect gateway into a hub for many VPCs. Transit Gateway supports both Direct Connect gateway and VPC attachments, as well as multiple route tables. A design built around individual VPC peering connections misses the shared-hub requirement.",
+      "keywordCues": [
+        "already uses a Direct Connect gateway",
+        "participate in one hub",
+        "different routing policies"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html"
+      ],
+      "es": {
+        "stem": "Una empresa manufacturera ya usa un Direct Connect gateway para su conexión local y está agregando VPC para nuevos sistemas de producción. Quiere que las VPC y la conexión local existente participen en un mismo hub, con políticas de enrutamiento distintas para los attachments de producción y desarrollo. ¿Qué diseño cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conecta las VPC y el Direct Connect gateway a un Transit Gateway y usa distintas transit gateway route tables para los grupos de attachments.",
+            "why": "Se admiten ambos tipos de attachments, y las tablas separadas permiten aplicar las políticas de enrutamiento requeridas."
+          },
+          {
+            "id": "B",
+            "text": "Conecta el Direct Connect gateway a una VPC y usa VPC peering para todas las demás VPC.",
+            "why": "Esto no usa un hub de tránsito con políticas de enrutamiento separadas para los attachments de producción y desarrollo."
+          },
+          {
+            "id": "C",
+            "text": "Conecta cada VPC de producción con cada VPC de desarrollo mediante peering y conserva el Direct Connect gateway por separado.",
+            "why": "Esto no coloca las VPC y la conexión local en el hub compartido solicitado."
+          },
+          {
+            "id": "D",
+            "text": "Reemplaza el Direct Connect gateway con una conexión de Site-to-Site VPN hacia cada VPC.",
+            "why": "Las conexiones VPN individuales no proporcionan el hub compartido requerido y descartan la conexión existente."
+          }
+        ],
+        "explanation": "La empresa necesita incorporar su Direct Connect gateway existente a un hub para muchas VPC. Transit Gateway admite attachments de Direct Connect gateway y VPC, además de varias route tables. Un diseño basado en conexiones individuales de VPC peering no cumple el requisito de un hub compartido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "transit-gateway--r0",
+      "conceptId": "transit-gateway",
+      "kind": "recall",
+      "prompt": "A growing set of VPCs and an on-premises network need a shared hub with separate routing policies. What would you choose, and why?",
+      "promptEs": "Un grupo creciente de VPC y una red local necesitan un hub compartido con políticas de enrutamiento separadas. ¿Qué elegirías y por qué?",
+      "idealAnswer": "Choose AWS Transit Gateway. It supports VPC and on-premises connectivity through attachments, and separate transit gateway route tables can apply different routing policies to attachment groups.",
+      "rubric": [
+        "Names AWS Transit Gateway.",
+        "Explains its hub role for VPCs and an on-premises network.",
+        "Mentions separate route tables for routing policies."
+      ]
+    },
+    {
+      "id": "transit-gateway--r1",
+      "conceptId": "transit-gateway",
+      "kind": "why-not",
+      "prompt": "Why would adding more VPC peering connections not meet a requirement for one hub with separate attachment routing policies?",
+      "promptEs": "¿Por qué agregar más conexiones de VPC peering no cumpliría el requisito de un solo hub con políticas de enrutamiento separadas para los attachments?",
+      "idealAnswer": "More VPC peering connections continue a pairwise topology rather than creating the requested shared transit hub. Transit Gateway connects network attachments through a hub and supports separate route tables for their routing policies.",
+      "rubric": [
+        "Identifies the pairwise topology as the mismatch.",
+        "Explains that Transit Gateway supplies the shared hub.",
+        "Mentions transit gateway route tables for attachment routing policies."
+      ]
+    }
+  ]
+}

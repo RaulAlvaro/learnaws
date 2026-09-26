@@ -1,0 +1,363 @@
+{
+  "conceptId": "gateway-load-balancer",
+  "card": {
+    "en": {
+      "tldr": "Gateway Load Balancer (GWLB) inserts third-party virtual firewalls, IDS/IPS, and other inspection appliances transparently into network traffic. Choose it when traffic must pass through appliances without application-level routing, especially when the appliance fleet must scale with demand.",
+      "whenToUse": [
+        "Traffic needs inline inspection by third-party virtual appliances.",
+        "The design needs a transparent entry and exit point for IP traffic across ports.",
+        "Applications in one VPC need private access to an appliance fleet in another VPC."
+      ],
+      "keyFacts": [
+        "GWLB operates at OSI Layer 3 and listens for IP packets across all ports.",
+        "GWLB exchanges application traffic with registered appliances using GENEVE on port 6081.",
+        "It routes traffic only to healthy registered targets and maintains flow stickiness; the default uses a 5-tuple.",
+        "For cross-VPC inspection, deploy GWLB with the appliances, create a GWLB endpoint in the consumer VPC, and direct traffic to the endpoint with route tables.",
+        "The GWLB endpoint and application servers must be in different subnets."
+      ],
+      "gotchas": [
+        "An ALB's HTTP routing is not a substitute for transparent inspection of IP traffic across ports.",
+        "An NLB can handle Layer 4 traffic, but it does not provide GWLB's transparent virtual-appliance insertion.",
+        "Creating a GWLB endpoint alone does not redirect application traffic; route tables must direct traffic through it."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Application Load Balancer",
+          "difference": "Choose ALB for HTTP/HTTPS Layer 7 routing, not transparent inline appliance inspection."
+        },
+        {
+          "concept": "Network Load Balancer",
+          "difference": "Choose NLB for TCP/UDP/TLS Layer 4 requirements; choose GWLB to insert and scale virtual security appliances."
+        }
+      ],
+      "examCues": [
+        "third-party virtual firewalls",
+        "transparent inline inspection",
+        "IDS/IPS appliance fleet",
+        "GENEVE",
+        "inspect traffic across VPCs"
+      ]
+    },
+    "es": {
+      "tldr": "Gateway Load Balancer (GWLB) inserta de forma transparente firewalls virtuales, IDS/IPS y otros dispositivos de inspección de terceros en el tráfico de red. Elígelo cuando el tráfico deba pasar por esos dispositivos sin enrutamiento a nivel de aplicación, especialmente si necesitas escalar los dispositivos según la demanda.",
+      "whenToUse": [
+        "Necesitas inspección en línea mediante dispositivos virtuales de terceros.",
+        "Necesitas un punto transparente de entrada y salida para tráfico IP de todos los puertos.",
+        "Las aplicaciones de una VPC necesitan acceso privado a dispositivos ubicados en otra VPC."
+      ],
+      "keyFacts": [
+        "GWLB opera en la capa 3 del modelo OSI y recibe paquetes IP de todos los puertos.",
+        "GWLB intercambia tráfico de aplicación con los dispositivos registrados mediante GENEVE en el puerto 6081.",
+        "Envía tráfico solo a targets registrados que estén saludables y mantiene la afinidad de flujo; el valor predeterminado usa una 5-tuple.",
+        "Para inspección entre VPC, implementa GWLB junto a los dispositivos, crea un GWLB endpoint en la VPC consumidora y dirige el tráfico al endpoint mediante route tables.",
+        "El GWLB endpoint y los servidores de aplicación deben estar en subredes diferentes."
+      ],
+      "gotchas": [
+        "El enrutamiento HTTP de ALB no reemplaza la inspección transparente de tráfico IP de todos los puertos.",
+        "NLB puede manejar tráfico de capa 4, pero no ofrece la inserción transparente de dispositivos virtuales de GWLB.",
+        "Crear un GWLB endpoint no redirige por sí solo el tráfico de aplicación; debes configurar las route tables."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Application Load Balancer",
+          "difference": "Elige ALB para enrutamiento HTTP/HTTPS de capa 7, no para inspección transparente mediante dispositivos en línea."
+        },
+        {
+          "concept": "Network Load Balancer",
+          "difference": "Elige NLB para requisitos TCP/UDP/TLS de capa 4; elige GWLB para insertar y escalar dispositivos virtuales de seguridad."
+        }
+      ],
+      "examCues": [
+        "third-party virtual firewalls",
+        "transparent inline inspection",
+        "IDS/IPS appliance fleet",
+        "GENEVE",
+        "inspect traffic across VPCs"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/introduction.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "gateway-load-balancer--845ae470",
+      "conceptId": "gateway-load-balancer",
+      "secondaryConcepts": [
+        "alb-routing",
+        "nlb-static-ip-tcp-udp"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company is introducing a third-party IDS/IPS fleet to inspect traffic to several services. The services use different ports and protocols, and the security team wants a transparent inspection point that distributes traffic as appliance demand changes. Which load balancer should the company select?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Gateway Load Balancer with the IDS/IPS instances registered as targets.",
+          "correct": true,
+          "why": "GWLB provides a transparent network gateway and distributes traffic across registered virtual appliances."
+        },
+        {
+          "id": "B",
+          "text": "Application Load Balancer with a separate target group for each IDS/IPS instance.",
+          "correct": false,
+          "why": "Separating ALB target groups does not provide GWLB's transparent network-gateway behavior."
+        },
+        {
+          "id": "C",
+          "text": "Application Load Balancer with listener rules for each service's traffic.",
+          "correct": false,
+          "why": "ALB's application-level listener rules do not meet the need to inspect IP traffic across ports and protocols transparently."
+        },
+        {
+          "id": "D",
+          "text": "Network Load Balancer with the IDS/IPS instances registered as targets.",
+          "correct": false,
+          "why": "NLB handles Layer 4 traffic but is not the load balancer designed for transparent virtual-appliance insertion."
+        }
+      ],
+      "explanation": "The deciding requirement is transparent distribution of traffic to an IDS/IPS fleet across different ports and protocols. GWLB listens for IP packets across all ports and scales distribution to virtual appliances as demand changes. NLB is a plausible choice for Layer 4 traffic, but the requirement is appliance insertion rather than a Layer 4 service front end. ALB's application-level routing also does not address that requirement.",
+      "keywordCues": [
+        "third-party IDS/IPS fleet",
+        "different ports and protocols",
+        "transparent inspection point",
+        "appliance demand changes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/introduction.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios incorporará un conjunto de IDS/IPS de terceros para inspeccionar el tráfico de varios servicios. Los servicios usan diferentes puertos y protocolos, y el equipo de seguridad quiere un punto de inspección transparente que distribuya el tráfico conforme cambie la demanda de los dispositivos. ¿Qué load balancer debe elegir la empresa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Gateway Load Balancer con las instancias IDS/IPS registradas como targets.",
+            "why": "GWLB ofrece un gateway de red transparente y distribuye el tráfico entre dispositivos virtuales registrados."
+          },
+          {
+            "id": "B",
+            "text": "Application Load Balancer con un target group separado para cada instancia IDS/IPS.",
+            "why": "Separar los target groups de ALB no proporciona el comportamiento de gateway de red transparente de GWLB."
+          },
+          {
+            "id": "C",
+            "text": "Application Load Balancer con listener rules para el tráfico de cada servicio.",
+            "why": "Las listener rules de ALB no satisfacen la inspección transparente de tráfico IP entre distintos puertos y protocolos."
+          },
+          {
+            "id": "D",
+            "text": "Network Load Balancer con las instancias IDS/IPS registradas como targets.",
+            "why": "NLB maneja tráfico de capa 4, pero no es el load balancer diseñado para insertar dispositivos virtuales de forma transparente."
+          }
+        ],
+        "explanation": "El requisito decisivo es distribuir de forma transparente el tráfico hacia un conjunto de IDS/IPS que inspecciona distintos puertos y protocolos. GWLB recibe paquetes IP de todos los puertos y escala la distribución hacia dispositivos virtuales conforme cambia la demanda. NLB parece razonable para tráfico de capa 4, pero aquí se necesita insertar dispositivos, no ofrecer una entrada para un servicio de capa 4. El enrutamiento a nivel de aplicación de ALB tampoco cumple ese requisito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "gateway-load-balancer--4cf1661a",
+      "conceptId": "gateway-load-balancer",
+      "secondaryConcepts": [
+        "nlb-static-ip-tcp-udp"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An online retailer places virtual firewalls in the traffic path before its workloads. During promotions, the firewall fleet must accommodate changing traffic, keep packets from the same flow on a specific appliance, and stop sending traffic to an appliance that fails health checks. Which design meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a GWLB with the firewalls registered in its target group and retain its default flow stickiness.",
+          "correct": true,
+          "why": "GWLB scales traffic distribution, uses default 5-tuple flow stickiness, and routes only to healthy registered targets."
+        },
+        {
+          "id": "B",
+          "text": "Use a GWLB endpoint for workload traffic, but direct it to appliance instances without a GWLB target group.",
+          "correct": false,
+          "why": "GWLB distributes traffic and checks appliance health through registered targets in its target group."
+        },
+        {
+          "id": "C",
+          "text": "Use an ALB to distribute HTTP requests to the firewall instances and route other IP traffic separately.",
+          "correct": false,
+          "why": "Separately routing other IP traffic does not provide one transparent inspection path for the workload traffic."
+        },
+        {
+          "id": "D",
+          "text": "Use an NLB to distribute traffic to the firewall instances and have the security team manage flow placement.",
+          "correct": false,
+          "why": "This leaves flow placement to the team instead of using GWLB's built-in stickiness for virtual appliances."
+        }
+      ],
+      "explanation": "This scenario needs appliance-specific flow stickiness, health-aware routing, and distribution that responds to traffic changes. GWLB provides those behaviors for registered virtual appliances, with 5-tuple stickiness by default. An NLB-based design that requires the team to manage flow placement misses the least-operational-overhead requirement. A GWLB endpoint does not replace the GWLB target group that contains the appliances.",
+      "keywordCues": [
+        "virtual firewalls in the traffic path",
+        "changing traffic",
+        "same flow on a specific appliance",
+        "fails health checks",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/introduction.html"
+      ],
+      "es": {
+        "stem": "Una tienda en línea coloca firewalls virtuales en la ruta del tráfico antes de sus cargas de trabajo. Durante las promociones, los firewalls deben adaptarse a cambios en el tráfico, mantener los paquetes de un mismo flujo en un dispositivo específico y dejar de enviar tráfico a un dispositivo que falle las health checks. ¿Qué diseño cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un GWLB con los firewalls registrados en su target group y conserva la afinidad de flujo predeterminada.",
+            "why": "GWLB escala la distribución del tráfico, usa afinidad de flujo 5-tuple de forma predeterminada y envía tráfico solo a targets registrados saludables."
+          },
+          {
+            "id": "B",
+            "text": "Usa un GWLB endpoint para el tráfico de las cargas de trabajo, pero dirígelo a instancias de dispositivos sin un target group de GWLB.",
+            "why": "GWLB distribuye tráfico y comprueba la salud de los dispositivos mediante targets registrados en su target group."
+          },
+          {
+            "id": "C",
+            "text": "Usa un ALB para distribuir solicitudes HTTP a los firewalls y enruta por separado el resto del tráfico IP.",
+            "why": "Enrutar por separado el resto del tráfico IP no ofrece una única ruta de inspección transparente para el tráfico de las cargas de trabajo."
+          },
+          {
+            "id": "D",
+            "text": "Usa un NLB para distribuir tráfico a los firewalls y pide al equipo de seguridad que administre la asignación de flujos.",
+            "why": "Esta opción deja la asignación de flujos al equipo, en lugar de aprovechar la afinidad integrada de GWLB para dispositivos virtuales."
+          }
+        ],
+        "explanation": "El escenario requiere afinidad de flujo con un dispositivo, enrutamiento según su estado de salud y distribución que responda a cambios en el tráfico. GWLB proporciona esas funciones para dispositivos virtuales registrados, con afinidad 5-tuple de forma predeterminada. Un diseño con NLB que obligue al equipo a administrar los flujos no cumple el requisito de LEAST operational overhead. Un GWLB endpoint no sustituye al target group de GWLB que contiene los dispositivos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "gateway-load-balancer--1996f4d5",
+      "conceptId": "gateway-load-balancer",
+      "secondaryConcepts": [
+        "alb-routing",
+        "nlb-static-ip-tcp-udp"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A manufacturing company runs application servers in a consumer VPC and virtual intrusion-prevention appliances in a provider VPC. It wants application-subnet traffic to traverse the appliances privately before returning to the consumer VPC, without changing application code. Which two actions are required for this design? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy a GWLB in the provider VPC and register the intrusion-prevention appliances in its target group.",
+          "correct": true,
+          "why": "GWLB must be in the VPC with the virtual appliances, which are registered as its targets."
+        },
+        {
+          "id": "B",
+          "text": "Create a GWLB endpoint in a separate consumer-VPC subnet and configure the application subnet's route table to use it as the next hop.",
+          "correct": true,
+          "why": "The endpoint provides private cross-VPC connectivity, and the route table directs application traffic through it."
+        },
+        {
+          "id": "C",
+          "text": "Use an ALB in the consumer VPC to forward application requests to the provider VPC for inspection.",
+          "correct": false,
+          "why": "ALB application-level forwarding does not provide transparent appliance inspection for application-subnet traffic."
+        },
+        {
+          "id": "D",
+          "text": "Use an NLB in the provider VPC as the next hop in the application subnet's route table.",
+          "correct": false,
+          "why": "The documented next hop for this cross-VPC inspection design is a GWLB endpoint, not an NLB."
+        },
+        {
+          "id": "E",
+          "text": "Place the GWLB endpoint in the same subnet as the application servers.",
+          "correct": false,
+          "why": "The endpoint and application servers must be in different subnets."
+        }
+      ],
+      "explanation": "The company needs both an appliance-side distribution point and a consumer-side traffic path. Deploy GWLB with the appliances in the provider VPC, then create a GWLB endpoint in the consumer VPC and route application-subnet traffic to that endpoint. The endpoint must be in a different subnet from the application servers. An NLB cannot take the endpoint's place as the documented route-table next hop for this design.",
+      "keywordCues": [
+        "consumer VPC",
+        "provider VPC",
+        "traverse the appliances privately",
+        "application-subnet traffic",
+        "without changing application code"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/introduction.html"
+      ],
+      "es": {
+        "stem": "Una empresa manufacturera ejecuta servidores de aplicación en una VPC consumidora y dispositivos virtuales de prevención de intrusiones en una VPC proveedora. Quiere que el tráfico de la subred de aplicaciones atraviese los dispositivos de forma privada antes de regresar a la VPC consumidora, sin cambiar el código de la aplicación. ¿Qué dos acciones requiere este diseño? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementa un GWLB en la VPC proveedora y registra los dispositivos de prevención de intrusiones en su target group.",
+            "why": "GWLB debe estar en la VPC de los dispositivos virtuales, que se registran como sus targets."
+          },
+          {
+            "id": "B",
+            "text": "Crea un GWLB endpoint en otra subred de la VPC consumidora y configura la route table de la subred de aplicaciones para usarlo como next hop.",
+            "why": "El endpoint proporciona conectividad privada entre VPC y la route table dirige el tráfico de aplicación a través de él."
+          },
+          {
+            "id": "C",
+            "text": "Usa un ALB en la VPC consumidora para enviar solicitudes de aplicación a la VPC proveedora para su inspección.",
+            "why": "El envío de solicitudes a nivel de aplicación mediante ALB no proporciona inspección transparente del tráfico de la subred."
+          },
+          {
+            "id": "D",
+            "text": "Usa un NLB en la VPC proveedora como next hop en la route table de la subred de aplicaciones.",
+            "why": "El next hop documentado para este diseño de inspección entre VPC es un GWLB endpoint, no un NLB."
+          },
+          {
+            "id": "E",
+            "text": "Ubica el GWLB endpoint en la misma subred que los servidores de aplicación.",
+            "why": "El endpoint y los servidores de aplicación deben estar en subredes diferentes."
+          }
+        ],
+        "explanation": "La empresa necesita tanto un punto de distribución junto a los dispositivos como una ruta para el tráfico en la VPC consumidora. Implementa GWLB con los dispositivos en la VPC proveedora; luego crea un GWLB endpoint en la VPC consumidora y dirige hacia él el tráfico de la subred de aplicaciones. El endpoint debe estar en una subred diferente de la de los servidores. Un NLB no reemplaza al endpoint como next hop documentado para este diseño."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "gateway-load-balancer--r0",
+      "conceptId": "gateway-load-balancer",
+      "kind": "recall",
+      "prompt": "Which load balancer would you use for transparent inline inspection by a changing fleet of virtual firewalls, and why?",
+      "promptEs": "¿Qué load balancer usarías para inspección transparente en línea mediante un conjunto variable de firewalls virtuales y por qué?",
+      "idealAnswer": "Use Gateway Load Balancer. It acts as a transparent network gateway, distributes traffic to registered virtual appliances, and scales distribution as demand changes.",
+      "rubric": [
+        "Names Gateway Load Balancer.",
+        "Explains transparent insertion of virtual appliances.",
+        "Mentions distribution or scaling with demand."
+      ]
+    },
+    {
+      "id": "gateway-load-balancer--r1",
+      "conceptId": "gateway-load-balancer",
+      "kind": "why-not",
+      "prompt": "Why isn't an NLB the best choice when traffic must pass transparently through third-party IDS/IPS appliances?",
+      "promptEs": "¿Por qué NLB no es la mejor opción cuando el tráfico debe atravesar de forma transparente dispositivos IDS/IPS de terceros?",
+      "idealAnswer": "NLB is suited to Layer 4 TCP/UDP/TLS traffic, but the requirement is transparent insertion of virtual inspection appliances. GWLB provides that gateway behavior and distributes traffic to the appliance fleet.",
+      "rubric": [
+        "Distinguishes NLB's Layer 4 role from appliance insertion.",
+        "Identifies GWLB as the transparent inspection choice."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "conceptId": "elasticache-redis-valkey",
+  "card": {
+    "en": {
+      "tldr": "Choose ElastiCache for Valkey or Redis OSS when an in-memory cache or session store needs read replicas, Multi-AZ failover, or features such as sorted sets for leaderboards and pub/sub. For node-based deployments, pair a primary with a replica in another Availability Zone when the cache must remain available after a primary failure.",
+      "whenToUse": [
+        "Sessions or cached data must remain available if a cache primary or Availability Zone fails.",
+        "Read-heavy traffic needs to be offloaded to cache read replicas.",
+        "The application needs Redis/Valkey features such as sorted sets for leaderboards or pub/sub.",
+        "A Valkey workload needs persistence beyond ordinary cache replication."
+      ],
+      "keyFacts": [
+        "Valkey and Redis OSS support read replicas; Memcached does not.",
+        "A read replica serves reads and can be promoted if the primary fails. Node-based replicas can be placed in different Availability Zones within the same Region.",
+        "ElastiCache Serverless manages cache capacity and maintains replicas automatically; node-based clusters give you control over nodes and placement.",
+        "Backup and Restore supports Valkey and Redis OSS snapshots. Node-based Valkey also offers durability through a Multi-AZ transactional log.",
+        "For Valkey durability, synchronous writes are designed for zero data loss; asynchronous writes prioritize write latency and can lose recent data during a failure."
+      ],
+      "gotchas": [
+        "A Memcached cluster is not a substitute when the requirement explicitly calls for read replicas or replica promotion.",
+        "A DAX cache targets DynamoDB reads; it does not replace a session store or leaderboard engine.",
+        "A read replica is a warm standby, not a guarantee of zero data loss: ordinary replication is asynchronous.",
+        "Snapshots support recovery but do not provide automatic failover for live traffic."
+      ],
+      "confusedWith": [
+        {
+          "concept": "ElastiCache for Memcached",
+          "difference": "Good for a simple cache without replication needs; choose Valkey or Redis OSS when read replicas and failover are required."
+        },
+        {
+          "concept": "DynamoDB Accelerator (DAX)",
+          "difference": "DAX accelerates DynamoDB reads with minimal application changes; Valkey or Redis OSS fits sessions and Redis-style data structures."
+        }
+      ],
+      "examCues": [
+        "session cache must survive an AZ failure",
+        "promote a cache replica",
+        "ranked gaming leaderboard",
+        "cache reads from replicas",
+        "persistent Valkey data with zero data loss"
+      ]
+    },
+    "es": {
+      "tldr": "Elige ElastiCache for Valkey o Redis OSS cuando una caché en memoria o un almacén de sesiones necesite réplicas de lectura, Multi-AZ failover o funciones como sorted sets para tablas de posiciones y pub/sub. En un despliegue basado en nodos, coloca una réplica en otra Availability Zone si la caché debe seguir disponible cuando falle el nodo primario.",
+      "whenToUse": [
+        "Las sesiones o los datos en caché deben seguir disponibles si falla el nodo primario o una Availability Zone.",
+        "Debes descargar las lecturas intensivas hacia réplicas de lectura de la caché.",
+        "La aplicación necesita funciones de Redis/Valkey, como sorted sets para tablas de posiciones o pub/sub.",
+        "Una carga de Valkey necesita persistencia además de la replicación habitual de la caché."
+      ],
+      "keyFacts": [
+        "Valkey y Redis OSS admiten réplicas de lectura; Memcached no.",
+        "Una réplica atiende lecturas y puede ascenderse si falla el primario. En clústeres basados en nodos, puedes ubicarla en otra Availability Zone de la misma Region.",
+        "ElastiCache Serverless administra la capacidad y mantiene las réplicas automáticamente; un clúster basado en nodos te da control sobre los nodos y su ubicación.",
+        "Backup and Restore admite snapshots de Valkey y Redis OSS. Valkey basado en nodos también ofrece durabilidad mediante un registro transaccional Multi-AZ.",
+        "En la durabilidad de Valkey, las escrituras síncronas están diseñadas para evitar la pérdida de datos; las asíncronas priorizan la latencia y pueden perder datos recientes ante una falla."
+      ],
+      "gotchas": [
+        "Un clúster de Memcached no sustituye a Valkey o Redis OSS si se requieren réplicas de lectura o su promoción.",
+        "DAX está orientado a acelerar lecturas de DynamoDB; no sustituye un almacén de sesiones ni un motor para tablas de posiciones.",
+        "Una réplica de lectura sirve como respaldo listo para usarse, pero no garantiza cero pérdida de datos: la replicación habitual es asíncrona.",
+        "Los snapshots permiten recuperar datos, pero no proporcionan failover automático para el tráfico activo."
+      ],
+      "confusedWith": [
+        {
+          "concept": "ElastiCache for Memcached",
+          "difference": "Sirve para una caché simple sin necesidad de replicación; elige Valkey o Redis OSS si necesitas réplicas de lectura y failover."
+        },
+        {
+          "concept": "DynamoDB Accelerator (DAX)",
+          "difference": "DAX acelera lecturas de DynamoDB con cambios mínimos en la aplicación; Valkey o Redis OSS encaja con sesiones y estructuras de datos de estilo Redis."
+        }
+      ],
+      "examCues": [
+        "session cache must survive an AZ failure",
+        "promote a cache replica",
+        "ranked gaming leaderboard",
+        "cache reads from replicas",
+        "persistent Valkey data with zero data loss"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html",
+      "https://aws.amazon.com/elasticache/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "elasticache-redis-valkey--27200033",
+      "conceptId": "elasticache-redis-valkey",
+      "secondaryConcepts": [
+        "elasticache-memcached",
+        "dynamodb-dax"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media service caches results of expensive recommendation calculations and also keeps temporary user sessions. Traffic spikes unpredictably, and the team does not want to choose cache node sizes or manage replicas; the cache must remain highly available. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run a node-based ElastiCache for Memcached cluster and add nodes when traffic rises.",
+          "correct": false,
+          "why": "The team would still need to plan nodes and capacity, contrary to the stated operating constraint."
+        },
+        {
+          "id": "B",
+          "text": "Run a node-based ElastiCache for Valkey cluster with replicas across Availability Zones.",
+          "correct": false,
+          "why": "It can provide availability, but the team must select node types and capacity."
+        },
+        {
+          "id": "C",
+          "text": "Put DAX in front of the service’s database and manage a separate session store.",
+          "correct": false,
+          "why": "DAX is for DynamoDB reads and a separate session store adds work the team wants to avoid."
+        },
+        {
+          "id": "D",
+          "text": "Use ElastiCache Serverless for Valkey to hold calculation results and temporary sessions.",
+          "correct": true,
+          "why": "Serverless scales cache capacity and maintains replicas without node sizing by the team."
+        }
+      ],
+      "explanation": "The decisive constraints are unpredictable demand, high availability, and avoiding node and replica management. ElastiCache Serverless monitors usage, scales capacity, and maintains replicas automatically. A node-based Valkey cluster could meet the availability requirement but still requires the team to choose nodes and plan capacity. DAX does not remove the need for a separate session store in this scenario.",
+      "keywordCues": [
+        "Traffic spikes unpredictably",
+        "does not want to choose cache node sizes or manage replicas",
+        "cache must remain highly available"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html",
+        "https://aws.amazon.com/elasticache/faqs/"
+      ],
+      "es": {
+        "stem": "Un servicio de contenido multimedia almacena en caché los resultados de cálculos costosos de recomendaciones y también conserva sesiones temporales de usuarios. El tráfico aumenta de forma impredecible, y el equipo no quiere elegir tamaños de nodos ni administrar réplicas; la caché debe mantener high availability. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar un clúster de ElastiCache for Memcached basado en nodos y agregar nodos cuando aumente el tráfico.",
+            "why": "El equipo aún tendría que planificar nodos y capacidad, contrario a su restricción operativa."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar un clúster de ElastiCache for Valkey basado en nodos con réplicas entre Availability Zones.",
+            "why": "Puede dar disponibilidad, pero el equipo debe seleccionar tipos de nodos y capacidad."
+          },
+          {
+            "id": "C",
+            "text": "Colocar DAX delante de la base de datos del servicio y administrar un almacén de sesiones independiente.",
+            "why": "DAX sirve para lecturas de DynamoDB y un almacén de sesiones adicional aumenta el trabajo que el equipo quiere evitar."
+          },
+          {
+            "id": "D",
+            "text": "Usar ElastiCache Serverless for Valkey para guardar los resultados de los cálculos y las sesiones temporales.",
+            "why": "Serverless escala la capacidad y mantiene las réplicas sin que el equipo tenga que dimensionar nodos."
+          }
+        ],
+        "explanation": "Las condiciones decisivas son la demanda impredecible, high availability y evitar la administración de nodos y réplicas. ElastiCache Serverless supervisa el uso, escala la capacidad y mantiene las réplicas automáticamente. Un clúster Valkey basado en nodos podría satisfacer la disponibilidad, pero aún obliga al equipo a elegir nodos y planificar capacidad. DAX no elimina la necesidad de otro almacén de sesiones en este caso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elasticache-redis-valkey--c2e231e8",
+      "conceptId": "elasticache-redis-valkey",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A payment platform wants to keep tokenization state in ElastiCache for Valkey and retrieve it with microsecond read latency. Unlike disposable cache entries, an acknowledged write must be protected against data loss even if cache nodes fail; the platform accepts higher write latency for this protection. Which solution meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable asynchronous Valkey durability so writes return before persistence in the Multi-AZ transactional log.",
+          "correct": false,
+          "why": "Asynchronous durability can lose recently acknowledged writes during a failure."
+        },
+        {
+          "id": "B",
+          "text": "Enable synchronous durability on a node-based Valkey cluster to persist writes across Availability Zones before acknowledgement.",
+          "correct": true,
+          "why": "Synchronous durability is designed for zero data loss and preserves microsecond read latency."
+        },
+        {
+          "id": "C",
+          "text": "Create a Valkey read replica in another Availability Zone and rely on ordinary replication for write durability.",
+          "correct": false,
+          "why": "Ordinary primary-to-replica replication is asynchronous and cannot guarantee the stated protection."
+        },
+        {
+          "id": "D",
+          "text": "Configure recurring Valkey snapshots and restore the latest snapshot after cache node failures.",
+          "correct": false,
+          "why": "A periodic snapshot cannot protect every acknowledged write made since that snapshot."
+        }
+      ],
+      "explanation": "The key requirement is protecting acknowledged writes from data loss, even at the cost of write latency. Node-based Valkey synchronous durability persists writes in a Multi-AZ transactional log before responding and is designed for zero data loss while retaining microsecond reads. Asynchronous durability responds before persistence and can lose recent data in a failure. Neither a read replica nor periodic snapshots provide the same acknowledged-write guarantee.",
+      "keywordCues": [
+        "an acknowledged write must be protected against data loss",
+        "even if cache nodes fail",
+        "accepts higher write latency"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html",
+        "https://aws.amazon.com/elasticache/faqs/"
+      ],
+      "es": {
+        "stem": "Una plataforma de pagos quiere guardar el estado de tokenización en ElastiCache for Valkey y consultarlo con latencia de lectura de microsegundos. A diferencia de las entradas desechables de una caché, una escritura confirmada debe protegerse contra la pérdida de datos incluso si fallan los nodos; la plataforma acepta mayor latencia de escritura a cambio. ¿Qué solución cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar durabilidad asíncrona de Valkey para responder antes de persistir las escrituras en el registro transaccional Multi-AZ.",
+            "why": "La durabilidad asíncrona puede perder escrituras confirmadas recientemente durante una falla."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar durabilidad síncrona en un clúster Valkey basado en nodos para persistir las escrituras entre Availability Zones antes de confirmarlas.",
+            "why": "La durabilidad síncrona está diseñada para evitar la pérdida de datos y mantiene latencia de lectura de microsegundos."
+          },
+          {
+            "id": "C",
+            "text": "Crear una réplica de lectura de Valkey en otra Availability Zone y confiar en la replicación habitual para la durabilidad de las escrituras.",
+            "why": "La replicación habitual entre primario y réplica es asíncrona y no garantiza la protección solicitada."
+          },
+          {
+            "id": "D",
+            "text": "Configurar snapshots recurrentes de Valkey y restaurar el último después de una falla de los nodos.",
+            "why": "Un snapshot periódico no protege todas las escrituras confirmadas desde que se tomó."
+          }
+        ],
+        "explanation": "El requisito clave es proteger las escrituras confirmadas contra la pérdida de datos, aunque aumente la latencia de escritura. La durabilidad síncrona de Valkey basado en nodos persiste las escrituras en un registro transaccional Multi-AZ antes de responder y está diseñada para evitar la pérdida de datos, conservando lecturas de microsegundos. La durabilidad asíncrona responde antes de persistir y puede perder datos recientes ante una falla. Ni una réplica ni los snapshots periódicos ofrecen la misma protección para escrituras confirmadas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "elasticache-redis-valkey--r0",
+      "conceptId": "elasticache-redis-valkey",
+      "kind": "recall",
+      "prompt": "A session cache must keep serving after its primary fails in an Availability Zone. What ElastiCache engine and deployment would you choose, and why?",
+      "promptEs": "Una caché de sesiones debe seguir atendiendo tráfico si falla su primario en una Availability Zone. ¿Qué motor y despliegue de ElastiCache elegirías y por qué?",
+      "idealAnswer": "Choose a node-based ElastiCache for Valkey or Redis OSS cluster with a read replica in another Availability Zone and Multi-AZ failover. The replica can be promoted if the primary fails, allowing the cache to continue serving traffic.",
+      "rubric": [
+        "Names Valkey or Redis OSS.",
+        "Places a read replica in another Availability Zone.",
+        "Explains promotion or failover rather than relying on snapshot restore."
+      ]
+    },
+    {
+      "id": "elasticache-redis-valkey--r1",
+      "conceptId": "elasticache-redis-valkey",
+      "kind": "why-not",
+      "prompt": "Why would ElastiCache for Memcached not fit a cache design that depends on promoting a read replica after primary failure?",
+      "promptEs": "¿Por qué ElastiCache for Memcached no serviría para una caché que depende de ascender una réplica de lectura si falla el primario?",
+      "idealAnswer": "Memcached does not support ElastiCache read replicas, so it cannot meet a requirement to promote one after primary failure. Valkey or Redis OSS supports read replicas that can serve as warm standbys.",
+      "rubric": [
+        "States that Memcached does not support read replicas.",
+        "Connects that limitation to the required promotion after failure.",
+        "Identifies Valkey or Redis OSS as the appropriate alternative."
+      ]
+    }
+  ]
+}

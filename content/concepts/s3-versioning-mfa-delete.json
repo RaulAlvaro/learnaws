@@ -1,0 +1,428 @@
+{
+  "conceptId": "s3-versioning-mfa-delete",
+  "card": {
+    "en": {
+      "tldr": "S3 Versioning keeps multiple versions of an object so you can recover from accidental overwrites and deletes. Add MFA Delete when permanently deleting a version or changing the bucket’s versioning state must require an MFA code.",
+      "whenToUse": [
+        "Users might overwrite an object and need to restore an earlier version.",
+        "An accidental delete must be reversible.",
+        "Permanent version deletion or a versioning-state change must require MFA."
+      ],
+      "keyFacts": [
+        "Versioning is disabled by default and is enabled at the bucket level.",
+        "In a versioning-enabled bucket, an overwrite creates a new version; an ordinary delete inserts a delete marker rather than permanently removing the object.",
+        "MFA Delete requires additional authentication to permanently delete an object version or change the bucket’s versioning state.",
+        "Only the bucket owner’s root account can enable MFA Delete, using the AWS CLI or API—not the AWS Management Console.",
+        "Each stored version is a full object and incurs normal S3 storage charges."
+      ],
+      "gotchas": [
+        "MFA Delete does not require MFA for an ordinary delete that inserts a delete marker.",
+        "MFA Delete cannot be used with lifecycle configurations.",
+        "Enabling versioning does not change objects already in the bucket; future modifications receive versions."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Object Lock",
+          "difference": "Choose Object Lock for WORM retention, not merely to recover from an accidental overwrite or delete."
+        },
+        {
+          "concept": "S3 Replication",
+          "difference": "Replication copies objects to another destination; Versioning preserves earlier variants in the bucket for recovery."
+        }
+      ],
+      "examCues": [
+        "restore an accidentally overwritten object",
+        "recover after an ordinary S3 delete",
+        "require MFA to permanently delete a version",
+        "prevent an unverified versioning-state change"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Versioning conserva varias versiones de un objeto para que puedas recuperarte de sobrescrituras y eliminaciones accidentales. Agrega MFA Delete cuando la eliminación permanente de una versión o un cambio en el estado de versionado del bucket deba requerir un código MFA.",
+      "whenToUse": [
+        "Los usuarios podrían sobrescribir un objeto y necesitar restaurar una versión anterior.",
+        "Una eliminación accidental debe poder revertirse.",
+        "La eliminación permanente de versiones o los cambios en el estado de versionado deben requerir MFA."
+      ],
+      "keyFacts": [
+        "Versioning está deshabilitado de forma predeterminada y se habilita a nivel de bucket.",
+        "En un bucket con Versioning habilitado, una sobrescritura crea una versión nueva; una eliminación normal inserta un delete marker en lugar de quitar el objeto permanentemente.",
+        "MFA Delete exige autenticación adicional para eliminar permanentemente una versión de objeto o cambiar el estado de versionado del bucket.",
+        "Solo la cuenta raíz del propietario del bucket puede habilitar MFA Delete mediante AWS CLI o la API, no mediante AWS Management Console.",
+        "Cada versión almacenada es un objeto completo y genera los cargos normales de almacenamiento de S3."
+      ],
+      "gotchas": [
+        "MFA Delete no exige MFA para una eliminación normal que inserta un delete marker.",
+        "MFA Delete no se puede usar con configuraciones de lifecycle.",
+        "Habilitar Versioning no cambia los objetos que ya están en el bucket; las modificaciones futuras reciben versiones."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Object Lock",
+          "difference": "Elige Object Lock para retención WORM, no solo para recuperarte de una sobrescritura o eliminación accidental."
+        },
+        {
+          "concept": "S3 Replication",
+          "difference": "Replication copia objetos a otro destino; Versioning conserva variantes anteriores en el bucket para su recuperación."
+        }
+      ],
+      "examCues": [
+        "restore an accidentally overwritten object",
+        "recover after an ordinary S3 delete",
+        "require MFA to permanently delete a version",
+        "prevent an unverified versioning-state change"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/MultiFactorAuthenticationDelete.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-versioning-mfa-delete--6961df4f",
+      "conceptId": "s3-versioning-mfa-delete",
+      "secondaryConcepts": [
+        "s3-object-lock-vault-lock",
+        "s3-replication"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design agency stores client deliverables in an S3 bucket. Staff sometimes overwrite the wrong file or delete one by mistake, and the security team wants an additional authentication factor before anyone permanently removes a stored version. The agency has no WORM retention requirement. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Versioning on the bucket without MFA Delete.",
+          "correct": false,
+          "why": "Versioning supports recovery but does not add the required MFA check for permanent version deletion."
+        },
+        {
+          "id": "B",
+          "text": "Apply S3 Object Lock compliance-mode retention to the deliverables.",
+          "correct": false,
+          "why": "WORM retention addresses a different requirement and does not provide the requested MFA-gated deletion of versions."
+        },
+        {
+          "id": "C",
+          "text": "Configure S3 Replication to copy deliverables to another bucket.",
+          "correct": false,
+          "why": "Replication does not satisfy the requirement to require MFA before permanently deleting a version."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Versioning and MFA Delete on the bucket.",
+          "correct": true,
+          "why": "Versioning preserves recoverable versions, and MFA Delete adds authentication for permanent version deletion."
+        }
+      ],
+      "explanation": "The deciding combination is recovery from accidental overwrites and deletes plus MFA before permanent version deletion. S3 Versioning retains earlier variants and uses a delete marker for an ordinary delete; MFA Delete adds authentication when a version is permanently deleted. Versioning alone misses the MFA requirement, while Object Lock compliance mode addresses WORM retention that the agency does not need.",
+      "keywordCues": [
+        "overwrite the wrong file or delete one by mistake",
+        "additional authentication factor before anyone permanently removes a stored version",
+        "no WORM retention requirement"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/MultiFactorAuthenticationDelete.html"
+      ],
+      "es": {
+        "stem": "Una agencia de diseño guarda entregables de clientes en un bucket de S3. A veces, el personal sobrescribe el archivo equivocado o lo elimina por error, y el equipo de seguridad quiere un factor adicional de autenticación antes de que alguien quite permanentemente una versión almacenada. La agencia no tiene un requisito de retención WORM. ¿Qué solución cumple estos requisitos con LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar S3 Versioning en el bucket sin MFA Delete.",
+            "why": "Versioning permite recuperar objetos, pero no agrega la verificación MFA requerida para eliminar permanentemente una versión."
+          },
+          {
+            "id": "B",
+            "text": "Aplicar retención en compliance mode de S3 Object Lock a los entregables.",
+            "why": "La retención WORM responde a otro requisito y no proporciona la eliminación de versiones condicionada a MFA que se solicita."
+          },
+          {
+            "id": "C",
+            "text": "Configurar S3 Replication para copiar los entregables a otro bucket.",
+            "why": "Replication no cumple el requisito de exigir MFA antes de eliminar permanentemente una versión."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Versioning y MFA Delete en el bucket.",
+            "why": "Versioning conserva versiones recuperables y MFA Delete agrega autenticación para su eliminación permanente."
+          }
+        ],
+        "explanation": "La combinación decisiva es recuperar objetos tras sobrescrituras y eliminaciones accidentales, y exigir MFA antes de eliminar permanentemente una versión. S3 Versioning conserva variantes anteriores y usa un delete marker para una eliminación normal; MFA Delete agrega autenticación cuando se elimina una versión permanentemente. Versioning por sí solo no cumple el requisito de MFA, mientras que Object Lock compliance mode aborda una retención WORM que la agencia no necesita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-versioning-mfa-delete--c5267309",
+      "conceptId": "s3-versioning-mfa-delete",
+      "secondaryConcepts": [
+        "s3-replication"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company wants to restore S3 objects after accidental overwrites. To control storage costs, it also needs an automated policy that eventually removes noncurrent versions; no MFA approval is required for those removals. Which configuration meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Versioning and MFA Delete, then configure S3 Lifecycle expiration for noncurrent versions.",
+          "correct": false,
+          "why": "MFA Delete cannot be used with lifecycle configurations."
+        },
+        {
+          "id": "B",
+          "text": "Configure S3 Replication and expire objects in the source bucket.",
+          "correct": false,
+          "why": "Replication does not replace a noncurrent-version expiration policy in the bucket."
+        },
+        {
+          "id": "C",
+          "text": "Enable S3 Versioning and configure S3 Lifecycle expiration for noncurrent versions.",
+          "correct": true,
+          "why": "Versioning supports overwrite recovery, while noncurrent-version expiration manages the versions that accumulate."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Versioning and configure S3 Lifecycle expiration only for current objects.",
+          "correct": false,
+          "why": "Expiration for current objects does not provide the requested management of noncurrent versions."
+        }
+      ],
+      "explanation": "The company needs both recoverable prior versions and automated removal of noncurrent versions to control their storage cost. S3 Versioning provides the former, and a noncurrent expiration configuration provides the latter. MFA Delete is a tempting extra protection, but it cannot be used with lifecycle configurations and is not required here. Expiring only current objects does not address the specified noncurrent versions.",
+      "keywordCues": [
+        "restore S3 objects after accidental overwrites",
+        "automated policy that eventually removes noncurrent versions",
+        "no MFA approval is required"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/MultiFactorAuthenticationDelete.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios quiere restaurar objetos de S3 después de sobrescrituras accidentales. Para controlar los costos de almacenamiento, también necesita una política automatizada que elimine con el tiempo las versiones noncurrent; no se requiere aprobación mediante MFA para esas eliminaciones. ¿Qué configuración cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar S3 Versioning y MFA Delete, y luego configurar S3 Lifecycle para que expire las versiones noncurrent.",
+            "why": "MFA Delete no se puede usar con configuraciones de lifecycle."
+          },
+          {
+            "id": "B",
+            "text": "Configurar S3 Replication y establecer la expiración de objetos en el bucket de origen.",
+            "why": "Replication no sustituye una política de expiración de versiones noncurrent en el bucket."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar S3 Versioning y configurar S3 Lifecycle para que expire las versiones noncurrent.",
+            "why": "Versioning permite recuperarse de sobrescrituras, mientras que la expiración de versiones noncurrent gestiona las versiones acumuladas."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Versioning y configurar S3 Lifecycle para que expire solo los objetos current.",
+            "why": "La expiración de objetos current no gestiona las versiones noncurrent solicitadas."
+          }
+        ],
+        "explanation": "La empresa necesita versiones anteriores recuperables y eliminación automatizada de versiones noncurrent para controlar su costo de almacenamiento. S3 Versioning proporciona lo primero, y una configuración de expiración de versiones noncurrent proporciona lo segundo. MFA Delete puede parecer una protección adicional útil, pero no se puede usar con configuraciones de lifecycle y aquí no es necesario. Expirar solo los objetos current no resuelve la necesidad indicada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-versioning-mfa-delete--80e5e1a2",
+      "conceptId": "s3-versioning-mfa-delete",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An engineering firm already has Versioning enabled on an S3 bucket. Its security policy now requires an MFA code to change the bucket’s versioning state or permanently delete a version. An IAM administrator offers to enable the feature in the AWS Management Console. Which implementation meets the policy?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have the bucket owner’s root account enable MFA Delete in the AWS Management Console.",
+          "correct": false,
+          "why": "The root account is the right actor, but MFA Delete cannot be enabled in the console."
+        },
+        {
+          "id": "B",
+          "text": "Have the IAM administrator enable MFA Delete using the AWS CLI or API.",
+          "correct": false,
+          "why": "The CLI or API is the right interface, but an IAM administrator cannot enable MFA Delete."
+        },
+        {
+          "id": "C",
+          "text": "Have the bucket owner’s root account enable MFA Delete using the AWS CLI or API.",
+          "correct": true,
+          "why": "Only the bucket owner’s root account can enable MFA Delete, and it must use the CLI or API."
+        },
+        {
+          "id": "D",
+          "text": "Have the IAM administrator enable MFA Delete in the AWS Management Console.",
+          "correct": false,
+          "why": "Neither the IAM administrator nor the console can enable MFA Delete."
+        }
+      ],
+      "explanation": "The policy identifies the two operations protected by MFA Delete: changing the versioning state and permanently deleting a version. Only the bucket owner’s root account can enable MFA Delete, and enablement requires the AWS CLI or API. The proposed IAM administrator lacks that ability; switching to the root account but staying in the console would still fail.",
+      "keywordCues": [
+        "Versioning enabled",
+        "MFA code to change the bucket’s versioning state or permanently delete a version",
+        "IAM administrator offers to enable the feature in the AWS Management Console"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/MultiFactorAuthenticationDelete.html"
+      ],
+      "es": {
+        "stem": "Una empresa de ingeniería ya tiene Versioning habilitado en un bucket de S3. Su política de seguridad ahora exige un código MFA para cambiar el estado de versionado del bucket o eliminar permanentemente una versión. Un administrador de IAM se ofrece a habilitar la característica en AWS Management Console. ¿Qué implementación cumple la política?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Pedirle a la cuenta raíz del propietario del bucket que habilite MFA Delete en AWS Management Console.",
+            "why": "La cuenta raíz es el actor correcto, pero MFA Delete no se puede habilitar en la consola."
+          },
+          {
+            "id": "B",
+            "text": "Pedirle al administrador de IAM que habilite MFA Delete mediante AWS CLI o la API.",
+            "why": "AWS CLI o la API son la interfaz correcta, pero un administrador de IAM no puede habilitar MFA Delete."
+          },
+          {
+            "id": "C",
+            "text": "Pedirle a la cuenta raíz del propietario del bucket que habilite MFA Delete mediante AWS CLI o la API.",
+            "why": "Solo la cuenta raíz del propietario del bucket puede habilitar MFA Delete, y debe usar AWS CLI o la API."
+          },
+          {
+            "id": "D",
+            "text": "Pedirle al administrador de IAM que habilite MFA Delete en AWS Management Console.",
+            "why": "Ni el administrador de IAM ni la consola pueden habilitar MFA Delete."
+          }
+        ],
+        "explanation": "La política identifica las dos operaciones que protege MFA Delete: cambiar el estado de versionado y eliminar permanentemente una versión. Solo la cuenta raíz del propietario del bucket puede habilitar MFA Delete, y debe hacerlo mediante AWS CLI o la API. El administrador de IAM propuesto no puede habilitarlo; cambiar a la cuenta raíz sin dejar de usar la consola tampoco funcionaría."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-versioning-mfa-delete--38434f3e",
+      "conceptId": "s3-versioning-mfa-delete",
+      "secondaryConcepts": [
+        "s3-replication",
+        "s3-object-lock-vault-lock"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum has years of photographs in an S3 bucket that has never used versioning. Editors will continue updating photographs in place and need to retrieve an earlier image if a future edit is incorrect. The museum does not need a second bucket or a retention lock, and it does not want to rewrite its existing files as part of setup. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure S3 Replication to a destination bucket; retrieve copies after future overwrites.",
+          "correct": false,
+          "why": "Replication introduces the second bucket the museum explicitly does not want."
+        },
+        {
+          "id": "B",
+          "text": "Enable S3 Versioning on the existing bucket; retrieve earlier versions after future overwrites.",
+          "correct": true,
+          "why": "Enabling versioning leaves existing objects unchanged and creates recoverable versions when they are modified later."
+        },
+        {
+          "id": "C",
+          "text": "Apply S3 Object Lock compliance-mode retention to the photographs.",
+          "correct": false,
+          "why": "A WORM retention lock is not the requested mechanism for recovering from incorrect future edits."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Versioning and then suspend it before editors resume updating files.",
+          "correct": false,
+          "why": "Suspending versioning stops the intended accrual of new object versions for future edits."
+        }
+      ],
+      "explanation": "The museum needs versions of future edits without moving or rewriting the photographs already in its bucket. Enabling S3 Versioning does not change existing objects, but future modifications receive versions that can be retrieved. Replication conflicts with the no-second-bucket constraint, and suspending versioning would defeat the goal of preserving future edits.",
+      "keywordCues": [
+        "years of photographs in an S3 bucket that has never used versioning",
+        "retrieve an earlier image if a future edit is incorrect",
+        "does not need a second bucket",
+        "does not want to rewrite its existing files"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/MultiFactorAuthenticationDelete.html"
+      ],
+      "es": {
+        "stem": "Un museo tiene años de fotografías en un bucket de S3 que nunca ha usado Versioning. Los editores seguirán actualizando las fotografías y necesitan recuperar una imagen anterior si una edición futura resulta incorrecta. El museo no necesita un segundo bucket ni un bloqueo de retención, y no quiere volver a escribir los archivos existentes durante la configuración. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar S3 Replication hacia un bucket de destino y recuperar copias después de futuras sobrescrituras.",
+            "why": "Replication introduce el segundo bucket que el museo explícitamente no quiere."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar S3 Versioning en el bucket existente y recuperar versiones anteriores después de futuras sobrescrituras.",
+            "why": "Habilitar Versioning deja intactos los objetos existentes y crea versiones recuperables cuando se modifican posteriormente."
+          },
+          {
+            "id": "C",
+            "text": "Aplicar retención en compliance mode de S3 Object Lock a las fotografías.",
+            "why": "Un bloqueo de retención WORM no es el mecanismo solicitado para recuperarse de ediciones futuras incorrectas."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Versioning y luego suspenderlo antes de que los editores vuelvan a actualizar archivos.",
+            "why": "Suspender Versioning detiene la acumulación prevista de nuevas versiones para ediciones futuras."
+          }
+        ],
+        "explanation": "El museo necesita versiones de las ediciones futuras sin mover ni volver a escribir las fotografías que ya están en su bucket. Habilitar S3 Versioning no cambia los objetos existentes, pero las modificaciones futuras reciben versiones que se pueden recuperar. Replication contradice el requisito de no usar un segundo bucket, y suspender Versioning impediría conservar las ediciones futuras."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-versioning-mfa-delete--r0",
+      "conceptId": "s3-versioning-mfa-delete",
+      "kind": "recall",
+      "prompt": "An S3 team needs recovery from accidental overwrites and MFA before permanent version deletion. What features fit, and why?",
+      "promptEs": "Un equipo necesita recuperar objetos tras sobrescrituras accidentales y exigir MFA antes de eliminar permanentemente una versión. ¿Qué características usarías y por qué?",
+      "idealAnswer": "Enable S3 Versioning to retain earlier versions after overwrites. Add MFA Delete to require additional authentication before permanently deleting a version.",
+      "rubric": [
+        "Names S3 Versioning for recovery from overwrites.",
+        "Names MFA Delete for permanent version deletion.",
+        "Distinguishes retaining versions from authorizing their permanent deletion."
+      ]
+    },
+    {
+      "id": "s3-versioning-mfa-delete--r1",
+      "conceptId": "s3-versioning-mfa-delete",
+      "kind": "why-not",
+      "prompt": "Why isn't S3 Object Lock the best fit when a team needs accidental-delete recovery and MFA-gated permanent version deletion, but no WORM retention?",
+      "promptEs": "¿Por qué S3 Object Lock no es la mejor opción si necesitas recuperación tras eliminaciones accidentales y MFA para eliminar versiones permanentemente, pero no retención WORM?",
+      "idealAnswer": "S3 Object Lock addresses WORM retention rather than the requested MFA check for permanently deleting a version. S3 Versioning supports recovery from accidental deletes, and MFA Delete adds the specified authentication requirement.",
+      "rubric": [
+        "Identifies Object Lock as a WORM retention control.",
+        "Identifies Versioning as the accidental-delete recovery mechanism.",
+        "Identifies MFA Delete as the control for permanent version deletion."
+      ]
+    }
+  ]
+}

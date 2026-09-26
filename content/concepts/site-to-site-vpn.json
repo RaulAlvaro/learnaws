@@ -1,0 +1,454 @@
+{
+  "conceptId": "site-to-site-vpn",
+  "card": {
+    "en": {
+      "tldr": "AWS Site-to-Site VPN creates an IPsec connection between an on-premises network and AWS. Choose it when a site needs encrypted hybrid connectivity over the internet, rather than a connection for individual remote users or between VPCs.",
+      "whenToUse": [
+        "An on-premises network needs encrypted access to resources in a VPC.",
+        "A site needs a VPN endpoint for one VPC or for a network of multiple VPCs.",
+        "The design needs redundant VPN tunnels for availability."
+      ],
+      "keyFacts": [
+        "Each Site-to-Site VPN connection includes two encrypted tunnels that can be used simultaneously for high availability.",
+        "A virtual private gateway is an AWS-side VPN endpoint that attaches to a single VPC; a transit gateway can serve as the endpoint for multiple VPCs.",
+        "Configure routing so traffic passes through the VPN connection.",
+        "A standard tunnel supports 1.25 Gbps. A Large Bandwidth Tunnel supports up to 5 Gbps per tunnel on connections attached to Transit Gateway or Cloud WAN.",
+        "One VPN connection cannot carry IPv4 and IPv6 traffic simultaneously; use separate connections. VPN connections on a virtual private gateway do not support IPv6 traffic."
+      ],
+      "gotchas": [
+        "Creating a VPN connection without configuring routes does not complete the path between the networks.",
+        "The two tunnels belong to one VPN connection; you can use both for high availability.",
+        "Do not assume the 5 Gbps Large Bandwidth Tunnel is available with a virtual private gateway.",
+        "Do not choose a virtual private gateway for a requirement to carry IPv6 traffic through the VPN."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Direct Connect",
+          "difference": "Choose Site-to-Site VPN when the requirement is an IPsec connection over the internet; Direct Connect is a dedicated private connection, not an IPsec VPN by default."
+        },
+        {
+          "concept": "AWS Client VPN",
+          "difference": "Client VPN connects individual remote users; Site-to-Site VPN connects an on-premises network through customer gateway equipment."
+        },
+        {
+          "concept": "AWS Transit Gateway",
+          "difference": "Transit Gateway can be the AWS-side endpoint for Site-to-Site VPN and interconnect multiple VPCs; it is not itself the encrypted tunnel."
+        }
+      ],
+      "examCues": [
+        "encrypted connection from an on-premises site",
+        "IPsec over the internet",
+        "two tunnels for high availability",
+        "VPN access to multiple VPCs"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Site-to-Site VPN crea una conexión IPsec entre una red local y AWS. Elígela cuando una sede necesite conectividad híbrida cifrada por internet, en vez de una conexión para usuarios remotos individuales o entre VPC.",
+      "whenToUse": [
+        "Una red local necesita acceso cifrado a recursos de una VPC.",
+        "Una sede necesita un endpoint VPN para una VPC o para una red de varias VPC.",
+        "El diseño necesita túneles VPN redundantes para disponibilidad."
+      ],
+      "keyFacts": [
+        "Cada conexión Site-to-Site VPN incluye dos túneles cifrados que puedes usar simultáneamente para alta disponibilidad.",
+        "Un virtual private gateway es un endpoint VPN del lado de AWS que se conecta a una sola VPC; un transit gateway puede ser el endpoint para varias VPC.",
+        "Configura el enrutamiento para que el tráfico pase por la conexión VPN.",
+        "Un túnel estándar admite 1.25 Gbps. Large Bandwidth Tunnel admite hasta 5 Gbps por túnel en conexiones asociadas a Transit Gateway o Cloud WAN.",
+        "Una conexión VPN no puede transportar IPv4 e IPv6 simultáneamente; usa conexiones separadas. Las conexiones VPN en un virtual private gateway no admiten tráfico IPv6."
+      ],
+      "gotchas": [
+        "Crear una conexión VPN sin configurar rutas no completa la comunicación entre las redes.",
+        "Los dos túneles pertenecen a una conexión VPN; puedes usar ambos para alta disponibilidad.",
+        "No supongas que Large Bandwidth Tunnel de 5 Gbps está disponible con un virtual private gateway.",
+        "No elijas un virtual private gateway si necesitas transportar tráfico IPv6 por la VPN."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Direct Connect",
+          "difference": "Elige Site-to-Site VPN si necesitas una conexión IPsec por internet; Direct Connect es una conexión privada dedicada, no una VPN IPsec de forma predeterminada."
+        },
+        {
+          "concept": "AWS Client VPN",
+          "difference": "Client VPN conecta a usuarios remotos individuales; Site-to-Site VPN conecta una red local mediante un customer gateway device."
+        },
+        {
+          "concept": "AWS Transit Gateway",
+          "difference": "Transit Gateway puede ser el endpoint de AWS para Site-to-Site VPN e interconectar varias VPC; no es, por sí mismo, el túnel cifrado."
+        }
+      ],
+      "examCues": [
+        "encrypted connection from an on-premises site",
+        "IPsec over the internet",
+        "two tunnels for high availability",
+        "VPN access to multiple VPCs"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "site-to-site-vpn--660f1e71",
+      "conceptId": "site-to-site-vpn",
+      "secondaryConcepts": [
+        "transit-gateway"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publishing company already uses an IPv4 Site-to-Site VPN to connect its office to workloads behind a transit gateway. A new application also needs IPv6 traffic from the office, and the company must keep the existing IPv4 path. Which change meets both requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the IPv4 VPN connection and create a separate IPv6 VPN connection attached to the transit gateway.",
+          "correct": true,
+          "why": "Separate VPN connections are required for IPv4 and IPv6, and a transit gateway supports the IPv6 VPN path."
+        },
+        {
+          "id": "B",
+          "text": "Enable IPv6 on the existing VPN connection so the same connection carries IPv4 and IPv6 packets.",
+          "correct": false,
+          "why": "One Site-to-Site VPN connection cannot carry IPv4 and IPv6 traffic simultaneously."
+        },
+        {
+          "id": "C",
+          "text": "Add an IPv6 VPN connection to a virtual private gateway and retain the IPv4 connection on the transit gateway.",
+          "correct": false,
+          "why": "VPN connections on a virtual private gateway do not support IPv6 traffic."
+        },
+        {
+          "id": "D",
+          "text": "Convert the existing IPv4 VPN connection to IPv6 and route the IPv4 application through its other tunnel.",
+          "correct": false,
+          "why": "An existing IPv4 connection cannot be modified to use IPv6, and its second tunnel does not make it a separate IPv4 connection."
+        }
+      ],
+      "explanation": "Keeping IPv4 while adding IPv6 is the deciding constraint. A single Site-to-Site VPN connection cannot transport both protocols simultaneously, so the company needs a separate IPv6 connection. The existing transit gateway can serve as the AWS-side VPN endpoint for the new path. Neither a second tunnel on the IPv4 connection nor a virtual private gateway resolves the IPv6 requirement.",
+      "keywordCues": [
+        "already uses an IPv4 Site-to-Site VPN",
+        "behind a transit gateway",
+        "also needs IPv6 traffic",
+        "keep the existing IPv4 path"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html"
+      ],
+      "es": {
+        "stem": "Una editorial ya usa una Site-to-Site VPN IPv4 para conectar su oficina con cargas de trabajo detrás de un transit gateway. Una aplicación nueva también necesita tráfico IPv6 desde la oficina, y la empresa debe conservar la ruta IPv4 existente. ¿Qué cambio cumple ambos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conserva la conexión VPN IPv4 y crea otra conexión VPN IPv6 asociada al transit gateway.",
+            "why": "IPv4 e IPv6 requieren conexiones VPN separadas, y un transit gateway admite la ruta VPN IPv6."
+          },
+          {
+            "id": "B",
+            "text": "Habilita IPv6 en la conexión VPN existente para que la misma conexión transporte paquetes IPv4 e IPv6.",
+            "why": "Una conexión Site-to-Site VPN no puede transportar tráfico IPv4 e IPv6 simultáneamente."
+          },
+          {
+            "id": "C",
+            "text": "Agrega una conexión VPN IPv6 a un virtual private gateway y conserva la conexión IPv4 en el transit gateway.",
+            "why": "Las conexiones VPN en un virtual private gateway no admiten tráfico IPv6."
+          },
+          {
+            "id": "D",
+            "text": "Convierte la conexión VPN IPv4 existente a IPv6 y enruta la aplicación IPv4 por su otro túnel.",
+            "why": "No puedes modificar una conexión IPv4 existente para que use IPv6, y su segundo túnel no la convierte en otra conexión IPv4."
+          }
+        ],
+        "explanation": "La condición decisiva es conservar IPv4 mientras agregas IPv6. Una sola conexión Site-to-Site VPN no puede transportar ambos protocolos simultáneamente, así que necesitas una conexión IPv6 separada. El transit gateway existente puede ser el endpoint VPN del lado de AWS para la nueva ruta. Ni el segundo túnel de la conexión IPv4 ni un virtual private gateway resuelven el requisito de IPv6."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "site-to-site-vpn--e238d13c",
+      "conceptId": "site-to-site-vpn",
+      "secondaryConcepts": [
+        "vpc-peering",
+        "client-vpn",
+        "direct-connect"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A community hospital needs its on-premises scheduling system to communicate with an application in one VPC using IPsec over the internet. The network team will configure its gateway device and wants the connection designed for high availability. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Direct Connect connection by itself as the encrypted IPsec tunnel from the hospital.",
+          "correct": false,
+          "why": "Direct Connect alone is not the requested IPsec VPN over the internet."
+        },
+        {
+          "id": "B",
+          "text": "Create a Client VPN endpoint and install client software on hospital employees' laptops.",
+          "correct": false,
+          "why": "Laptop access does not connect the on-premises scheduling system's network to the VPC."
+        },
+        {
+          "id": "C",
+          "text": "Create a VPC peering connection between the hospital network and the application VPC.",
+          "correct": false,
+          "why": "VPC peering connects VPCs and does not create an IPsec connection to the hospital network."
+        },
+        {
+          "id": "D",
+          "text": "Configure the Site-to-Site VPN connection's two tunnels for simultaneous use.",
+          "correct": true,
+          "why": "Each connection includes two tunnels that can be used simultaneously for high availability."
+        },
+        {
+          "id": "E",
+          "text": "Create a Site-to-Site VPN to a virtual private gateway on the VPC and configure routes for the hospital network.",
+          "correct": true,
+          "why": "This provides an AWS-side endpoint for the single VPC and routes the site's traffic through the IPsec connection."
+        }
+      ],
+      "explanation": "The hospital needs both a routed IPsec connection from its site and a design that uses the VPN's availability feature. For a single VPC, a virtual private gateway can be the AWS-side endpoint; configuring routes lets the scheduling traffic use the VPN. Each Site-to-Site VPN connection includes two tunnels that can be used simultaneously for high availability. Client VPN serves individual remote clients, not the hospital's site network.",
+      "keywordCues": [
+        "on-premises scheduling system",
+        "one VPC",
+        "IPsec over the internet",
+        "high availability",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html"
+      ],
+      "es": {
+        "stem": "Un hospital comunitario necesita que su sistema local de programación se comunique con una aplicación en una sola VPC mediante IPsec por internet. El equipo de redes configurará su dispositivo gateway y quiere diseñar la conexión para alta disponibilidad. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa una conexión Direct Connect por sí sola como túnel IPsec cifrado desde el hospital.",
+            "why": "Direct Connect por sí solo no es la VPN IPsec por internet solicitada."
+          },
+          {
+            "id": "B",
+            "text": "Crea un endpoint de Client VPN e instala software cliente en las laptops de los empleados del hospital.",
+            "why": "El acceso desde laptops no conecta la red del sistema local de programación con la VPC."
+          },
+          {
+            "id": "C",
+            "text": "Crea una conexión de VPC peering entre la red del hospital y la VPC de la aplicación.",
+            "why": "VPC peering conecta VPC y no crea una conexión IPsec con la red del hospital."
+          },
+          {
+            "id": "D",
+            "text": "Configura los dos túneles de la conexión Site-to-Site VPN para uso simultáneo.",
+            "why": "Cada conexión incluye dos túneles que puedes usar simultáneamente para alta disponibilidad."
+          },
+          {
+            "id": "E",
+            "text": "Crea una Site-to-Site VPN hacia un virtual private gateway en la VPC y configura rutas para la red del hospital.",
+            "why": "Esto proporciona un endpoint del lado de AWS para la única VPC y enruta el tráfico de la sede por la conexión IPsec."
+          }
+        ],
+        "explanation": "El hospital necesita tanto una conexión IPsec enrutada desde su sede como un diseño que aproveche la disponibilidad de la VPN. Para una sola VPC, un virtual private gateway puede ser el endpoint del lado de AWS; al configurar rutas, permites que el tráfico de programación use la VPN. Cada conexión Site-to-Site VPN incluye dos túneles que puedes usar simultáneamente para alta disponibilidad. Client VPN sirve a clientes remotos individuales, no a la red de la sede."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "site-to-site-vpn--00fd62a5",
+      "conceptId": "site-to-site-vpn",
+      "secondaryConcepts": [
+        "transit-gateway",
+        "vpc-peering",
+        "client-vpn"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional food distributor is moving its inventory application into one VPC. Its warehouse network must reach the application through an encrypted connection over the internet, and the network team can configure its on-premises gateway device. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a VPC peering connection and add routes from the warehouse network to the VPC.",
+          "correct": false,
+          "why": "VPC peering connects VPCs, not the warehouse's on-premises gateway device."
+        },
+        {
+          "id": "B",
+          "text": "Create a Site-to-Site VPN to a transit gateway attached to the VPC, and configure routes through the VPN.",
+          "correct": false,
+          "why": "This can provide VPN connectivity, but a transit hub adds an unnecessary component for the stated single-VPC requirement."
+        },
+        {
+          "id": "C",
+          "text": "Create a Site-to-Site VPN to a virtual private gateway attached to the VPC, and configure routes through the VPN.",
+          "correct": true,
+          "why": "Site-to-Site VPN provides the required IPsec connection, and a virtual private gateway serves the single VPC."
+        },
+        {
+          "id": "D",
+          "text": "Create a Client VPN endpoint for the inventory application and give the warehouse network a client configuration.",
+          "correct": false,
+          "why": "Client VPN is intended for individual remote clients rather than a site-wide connection from the warehouse gateway."
+        }
+      ],
+      "explanation": "The deciding requirements are a site-wide, encrypted connection over the internet and access to just one VPC. Site-to-Site VPN supplies the IPsec connection, while a virtual private gateway can serve as the AWS-side endpoint for that VPC. Routes must direct traffic through the connection. A transit gateway could also be a VPN endpoint, but it adds a hub the scenario does not need.",
+      "keywordCues": [
+        "one VPC",
+        "encrypted connection over the internet",
+        "on-premises gateway device",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html"
+      ],
+      "es": {
+        "stem": "Una distribuidora regional de alimentos traslada su aplicación de inventario a una sola VPC. La red de su almacén debe acceder a la aplicación mediante una conexión cifrada por internet, y el equipo de redes puede configurar su dispositivo gateway local. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una conexión de VPC peering y agrega rutas desde la red del almacén hacia la VPC.",
+            "why": "VPC peering conecta VPC, no el dispositivo gateway local del almacén."
+          },
+          {
+            "id": "B",
+            "text": "Crea una Site-to-Site VPN hacia un transit gateway conectado a la VPC y configura rutas por la VPN.",
+            "why": "Puede proporcionar conectividad VPN, pero un hub agrega un componente innecesario para el requisito de una sola VPC."
+          },
+          {
+            "id": "C",
+            "text": "Crea una Site-to-Site VPN hacia un virtual private gateway conectado a la VPC y configura rutas por la VPN.",
+            "why": "Site-to-Site VPN proporciona la conexión IPsec requerida, y un virtual private gateway sirve a la única VPC."
+          },
+          {
+            "id": "D",
+            "text": "Crea un endpoint de Client VPN para la aplicación de inventario y entrega a la red del almacén una configuración de cliente.",
+            "why": "Client VPN está orientado a clientes remotos individuales, no a una conexión de toda la sede desde el gateway del almacén."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son una conexión cifrada por internet para toda la sede y acceso a una sola VPC. Site-to-Site VPN proporciona la conexión IPsec, mientras que un virtual private gateway puede ser el endpoint del lado de AWS para esa VPC. Debes configurar rutas para dirigir el tráfico por la conexión. Un transit gateway también podría ser un endpoint VPN, pero agregaría un hub que este caso no necesita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "site-to-site-vpn--ac6488c0",
+      "conceptId": "site-to-site-vpn",
+      "secondaryConcepts": [
+        "transit-gateway",
+        "vpc-peering",
+        "direct-connect"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research company has separate VPCs for data ingestion, analysis, and reporting. Its laboratory network needs an IPsec connection over the internet that can reach all three VPCs through an AWS-side network hub. Which design meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach the VPCs to a transit gateway, use it as the Site-to-Site VPN endpoint, and configure the needed routes.",
+          "correct": true,
+          "why": "A transit gateway can interconnect multiple VPCs and an on-premises network while serving as the AWS-side VPN endpoint."
+        },
+        {
+          "id": "B",
+          "text": "Connect the laboratory to the ingestion VPC with Direct Connect and peer that VPC with the other two.",
+          "correct": false,
+          "why": "Direct Connect alone does not satisfy the stated IPsec-over-the-internet requirement, and peering is not a transitive hub."
+        },
+        {
+          "id": "C",
+          "text": "Peer the three VPCs and terminate a Client VPN connection at the ingestion VPC.",
+          "correct": false,
+          "why": "Client VPN targets remote clients, and peering does not provide a transitive path from the laboratory network."
+        },
+        {
+          "id": "D",
+          "text": "Attach a virtual private gateway to the ingestion VPC and route traffic to the other VPCs through VPC peering.",
+          "correct": false,
+          "why": "A virtual private gateway attaches to one VPC, and VPC peering does not provide the requested transitive hub."
+        }
+      ],
+      "explanation": "The company needs both an IPsec site connection and a hub for multiple VPCs. Site-to-Site VPN provides the encrypted tunnels, and a transit gateway can be its AWS-side endpoint while interconnecting the VPCs and on-premises network. Configure routing for the intended paths. A virtual private gateway is an endpoint for a single VPC, not the requested multi-VPC hub.",
+      "keywordCues": [
+        "separate VPCs for data ingestion, analysis, and reporting",
+        "laboratory network",
+        "IPsec connection over the internet",
+        "AWS-side network hub"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html"
+      ],
+      "es": {
+        "stem": "Una empresa de investigación tiene VPC separadas para la ingesta, el análisis y los informes de datos. Su red de laboratorio necesita una conexión IPsec por internet que pueda llegar a las tres VPC mediante un hub de red del lado de AWS. ¿Qué diseño cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conecta las VPC a un transit gateway, úsalo como endpoint de Site-to-Site VPN y configura las rutas necesarias.",
+            "why": "Un transit gateway puede interconectar varias VPC y una red local, además de servir como endpoint VPN del lado de AWS."
+          },
+          {
+            "id": "B",
+            "text": "Conecta el laboratorio a la VPC de ingesta con Direct Connect y usa VPC peering para las otras dos.",
+            "why": "Direct Connect por sí solo no cumple el requisito de IPsec por internet, y VPC peering no es un hub transitivo."
+          },
+          {
+            "id": "C",
+            "text": "Conecta las tres VPC mediante VPC peering y termina una conexión de Client VPN en la VPC de ingesta.",
+            "why": "Client VPN está orientado a clientes remotos, y VPC peering no proporciona una ruta transitiva desde la red del laboratorio."
+          },
+          {
+            "id": "D",
+            "text": "Conecta un virtual private gateway a la VPC de ingesta y enruta el tráfico hacia las demás VPC mediante VPC peering.",
+            "why": "Un virtual private gateway se conecta a una sola VPC, y VPC peering no proporciona el hub transitivo solicitado."
+          }
+        ],
+        "explanation": "La empresa necesita tanto una conexión IPsec para la sede como un hub para varias VPC. Site-to-Site VPN proporciona los túneles cifrados, y un transit gateway puede ser su endpoint del lado de AWS mientras interconecta las VPC y la red local. Configura el enrutamiento para las rutas previstas. Un virtual private gateway es un endpoint para una sola VPC, no el hub de varias VPC solicitado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "site-to-site-vpn--r0",
+      "conceptId": "site-to-site-vpn",
+      "kind": "recall",
+      "prompt": "An office network needs encrypted access to one VPC over the internet. What would you choose, and what configuration completes the path?",
+      "promptEs": "Una red de oficina necesita acceso cifrado a una VPC por internet. ¿Qué elegirías y qué configuración completa la ruta?",
+      "idealAnswer": "Choose AWS Site-to-Site VPN with a virtual private gateway as the AWS-side endpoint for the VPC. Configure routing to pass the office-to-VPC traffic through the VPN connection.",
+      "rubric": [
+        "Names AWS Site-to-Site VPN for the on-premises IPsec connection.",
+        "Identifies the virtual private gateway as an endpoint for the single VPC.",
+        "States that routing through the VPN must be configured."
+      ]
+    },
+    {
+      "id": "site-to-site-vpn--r1",
+      "conceptId": "site-to-site-vpn",
+      "kind": "why-not",
+      "prompt": "Why would Client VPN not replace Site-to-Site VPN for an entire warehouse network connecting to a VPC?",
+      "promptEs": "¿Por qué Client VPN no reemplazaría a Site-to-Site VPN para conectar toda la red de un almacén con una VPC?",
+      "idealAnswer": "Client VPN is for individual remote clients, such as employees connecting from laptops. Site-to-Site VPN connects the warehouse's on-premises gateway device and network to the VPC through encrypted tunnels.",
+      "rubric": [
+        "Distinguishes individual remote clients from an on-premises network.",
+        "Identifies the warehouse gateway device as the site-side component.",
+        "Names Site-to-Site VPN as the fit for the site-wide connection."
+      ]
+    }
+  ]
+}

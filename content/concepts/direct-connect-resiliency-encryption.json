@@ -1,0 +1,338 @@
+{
+  "conceptId": "direct-connect-resiliency-encryption",
+  "card": {
+    "en": {
+      "tldr": "Direct Connect resiliency depends on redundant connections and where they terminate, not on adding Direct Connect gateways. Choose a resiliency model for the failure the business must survive, and assess encryption separately: these excerpts do not specify how to implement VPN backup, IPsec VPN over Direct Connect, or MACsec.",
+      "whenToUse": [
+        "A critical workload must withstand a Direct Connect device, connection, or complete location failure.",
+        "A team needs to order redundant dedicated connections against a stated availability objective.",
+        "The business wants to verify that traffic uses a redundant virtual interface during a failover test."
+      ],
+      "keyFacts": [
+        "The maximum resiliency model uses separate connections on separate devices in more than one location and addresses device, connectivity, and complete location failures.",
+        "The high resiliency model uses two single connections in multiple locations.",
+        "The development and test model uses separate devices in one location; it does not protect against location failure.",
+        "The Resiliency Toolkit can guide connection ordering and test failover by bringing down a BGP peering session to check routing to a redundant virtual interface.",
+        "A Direct Connect gateway has built-in high availability; adding gateways does not replace redundant physical connections."
+      ],
+      "gotchas": [
+        "Two connections on separate devices at one location still share a location-failure risk.",
+        "A Direct Connect gateway connects networks; its built-in availability does not make a single connection resilient.",
+        "Do not treat a resiliency model as an encryption configuration. The supplied excerpts do not establish implementation details for VPN backup, VPN over Direct Connect, or MACsec."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Direct Connect gateway",
+          "difference": "It connects Direct Connect to associated gateways or networks; it is not a second Direct Connect location."
+        },
+        {
+          "concept": "Development and test resiliency",
+          "difference": "Separate devices in one location address device failure, not complete location failure."
+        }
+      ],
+      "examCues": [
+        "complete Direct Connect location failure",
+        "separate devices in more than one location",
+        "verify traffic moves to a redundant virtual interface",
+        "multiple VPCs across Regions"
+      ]
+    },
+    "es": {
+      "tldr": "La resiliencia de Direct Connect depende de conexiones redundantes y de dónde terminan, no de agregar Direct Connect gateways. Elige un resiliency model según la falla que debe resistir el negocio y evalúa el cifrado por separado: estos extractos no especifican cómo implementar VPN backup, IPsec VPN over Direct Connect ni MACsec.",
+      "whenToUse": [
+        "Una carga crítica debe resistir la falla de un dispositivo, una conexión o una ubicación completa de Direct Connect.",
+        "Un equipo necesita solicitar conexiones dedicadas redundantes para cumplir un objetivo de disponibilidad.",
+        "El negocio quiere verificar que el tráfico use una virtual interface redundante durante una prueba de failover."
+      ],
+      "keyFacts": [
+        "El modelo maximum resiliency usa conexiones separadas en dispositivos separados y en más de una ubicación; contempla fallas de dispositivo, conectividad y ubicación completa.",
+        "El modelo high resiliency usa dos conexiones individuales en múltiples ubicaciones.",
+        "El modelo development and test usa dispositivos separados en una sola ubicación; no protege contra una falla de esa ubicación.",
+        "El Resiliency Toolkit guía la solicitud de conexiones y permite probar el failover al interrumpir una sesión BGP para comprobar el enrutamiento hacia una virtual interface redundante.",
+        "Direct Connect gateway tiene alta disponibilidad integrada; agregar gateways no sustituye las conexiones físicas redundantes."
+      ],
+      "gotchas": [
+        "Dos conexiones en dispositivos distintos de una misma ubicación siguen expuestas a la falla de esa ubicación.",
+        "Direct Connect gateway conecta redes; su alta disponibilidad integrada no vuelve resiliente a una conexión única.",
+        "No confundas un resiliency model con una configuración de cifrado. Los extractos proporcionados no detallan cómo implementar VPN backup, VPN over Direct Connect ni MACsec."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Direct Connect gateway",
+          "difference": "Conecta Direct Connect con gateways o redes asociados; no constituye una segunda ubicación de Direct Connect."
+        },
+        {
+          "concept": "Development and test resiliency",
+          "difference": "Los dispositivos separados en una ubicación cubren fallas de dispositivo, no una falla completa de la ubicación."
+        }
+      ],
+      "examCues": [
+        "complete Direct Connect location failure",
+        "separate devices in more than one location",
+        "verify traffic moves to a redundant virtual interface",
+        "multiple VPCs across Regions"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/directconnect/latest/UserGuide/resiliency_toolkit.html",
+      "https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "direct-connect-resiliency-encryption--6111531c",
+      "conceptId": "direct-connect-resiliency-encryption",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A hospital is redesigning Direct Connect access for a critical application. Its acceptance criteria cover device, connectivity, and complete Direct Connect location failures; before sign-off, the network team must demonstrate that traffic takes a redundant virtual interface when a BGP peering session is brought down. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Verify only that the Direct Connect gateway can reach each VPC.",
+          "correct": false,
+          "why": "Reachability alone does not demonstrate routing to a redundant virtual interface after BGP peering is brought down."
+        },
+        {
+          "id": "B",
+          "text": "Use the Direct Connect Resiliency Toolkit failover test to check routing when BGP peering is brought down.",
+          "correct": true,
+          "why": "The test verifies whether traffic routes to a redundant virtual interface under the specified condition."
+        },
+        {
+          "id": "C",
+          "text": "Use the maximum resiliency model for connections on separate devices in more than one location.",
+          "correct": true,
+          "why": "This model addresses all three specified failure types."
+        },
+        {
+          "id": "D",
+          "text": "Order connections in the development and test model on separate devices at one location.",
+          "correct": false,
+          "why": "This model does not cover the required complete location failure."
+        },
+        {
+          "id": "E",
+          "text": "Provision multiple Direct Connect gateways instead of redundant dedicated connections.",
+          "correct": false,
+          "why": "More gateways do not provide the physical connection and location redundancy required."
+        }
+      ],
+      "explanation": "This scenario requires both a design that covers location failure and a specific failover validation. The maximum resiliency model uses separate connections and devices in more than one location. The Direct Connect Resiliency Toolkit supports a failover test that brings down BGP peering to verify routing to a redundant virtual interface. A one-location model misses the failure requirement, while checking ordinary gateway reachability misses the requested test.",
+      "keywordCues": [
+        "device, connectivity, and complete Direct Connect location failures",
+        "traffic takes a redundant virtual interface when a BGP peering session is brought down"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/resiliency_toolkit.html",
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html"
+      ],
+      "es": {
+        "stem": "Un hospital está rediseñando el acceso por Direct Connect para una aplicación crítica. Sus criterios de aceptación abarcan fallas de dispositivo, conectividad y ubicación completa de Direct Connect; antes de aprobar el diseño, el equipo debe demostrar que el tráfico usa una virtual interface redundante cuando se interrumpe una sesión BGP. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Verificar únicamente que el Direct Connect gateway pueda llegar a cada VPC.",
+            "why": "La conectividad normal no demuestra el enrutamiento hacia una virtual interface redundante cuando se interrumpe BGP."
+          },
+          {
+            "id": "B",
+            "text": "Usar la prueba de failover del Direct Connect Resiliency Toolkit para comprobar las rutas al interrumpir BGP.",
+            "why": "La prueba verifica si el tráfico se dirige a una virtual interface redundante en la condición indicada."
+          },
+          {
+            "id": "C",
+            "text": "Usar el modelo maximum resiliency con conexiones en dispositivos separados y en más de una ubicación.",
+            "why": "Este modelo contempla los tres tipos de falla especificados."
+          },
+          {
+            "id": "D",
+            "text": "Solicitar conexiones con el modelo development and test en dispositivos separados de una sola ubicación.",
+            "why": "Este modelo no cubre la falla completa de ubicación requerida."
+          },
+          {
+            "id": "E",
+            "text": "Implementar varios Direct Connect gateways en lugar de conexiones dedicadas redundantes.",
+            "why": "Más gateways no proporcionan la redundancia física de conexiones y ubicaciones requerida."
+          }
+        ],
+        "explanation": "El escenario exige un diseño que cubra la falla de una ubicación y una validación específica del failover. El modelo maximum resiliency usa conexiones y dispositivos separados en más de una ubicación. Direct Connect Resiliency Toolkit permite interrumpir BGP durante una prueba para verificar el enrutamiento hacia una virtual interface redundante. Un modelo de una sola ubicación no cumple el requisito de falla, y comprobar la conectividad normal del gateway no cumple el requisito de prueba."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "direct-connect-resiliency-encryption--79d34e86",
+      "conceptId": "direct-connect-resiliency-encryption",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A payment processor is replacing a single Direct Connect connection for its production VPC. Its continuity plan requires the network design to withstand a device failure, a connectivity failure, or the loss of an entire Direct Connect location. Which approach meets these requirements with the MOST resilient design?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the maximum resiliency model with separate connections on separate devices in more than one location.",
+          "correct": true,
+          "why": "This model addresses device, connectivity, and complete location failures."
+        },
+        {
+          "id": "B",
+          "text": "Use the development and test model with connections on separate devices at one location.",
+          "correct": false,
+          "why": "Separate devices at one location do not address the required complete location failure."
+        },
+        {
+          "id": "C",
+          "text": "Add a second Direct Connect gateway while keeping the existing connection at one location.",
+          "correct": false,
+          "why": "Another gateway does not provide redundant connections or a second location."
+        },
+        {
+          "id": "D",
+          "text": "Add a second dedicated connection on the same device at the existing location.",
+          "correct": false,
+          "why": "Both connections would still depend on the same device and location."
+        }
+      ],
+      "explanation": "The deciding constraint is survival of an entire Direct Connect location failure as well as device and connectivity failures. The maximum resiliency model uses separate connections on separate devices in more than one location for those failure types. The development and test model separates devices but remains in one location. Adding a Direct Connect gateway does not change where the physical connections terminate.",
+      "keywordCues": [
+        "a device failure, a connectivity failure, or the loss of an entire Direct Connect location",
+        "MOST resilient design"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/resiliency_toolkit.html",
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html"
+      ],
+      "es": {
+        "stem": "Una empresa de procesamiento de pagos reemplazará una única conexión de Direct Connect para su VPC de producción. Su plan de continuidad exige resistir una falla de dispositivo, una falla de conectividad o la pérdida de una ubicación completa de Direct Connect. ¿Qué enfoque cumple estos requisitos con el diseño MOST resilient?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar el modelo maximum resiliency con conexiones separadas en dispositivos separados y en más de una ubicación.",
+            "why": "Este modelo contempla fallas de dispositivo, conectividad y ubicación completa."
+          },
+          {
+            "id": "B",
+            "text": "Usar el modelo development and test con conexiones en dispositivos separados de una sola ubicación.",
+            "why": "Los dispositivos separados en una ubicación no cubren la pérdida completa de esa ubicación."
+          },
+          {
+            "id": "C",
+            "text": "Agregar un segundo Direct Connect gateway y mantener la conexión actual en una sola ubicación.",
+            "why": "Otro gateway no proporciona conexiones redundantes ni una segunda ubicación."
+          },
+          {
+            "id": "D",
+            "text": "Agregar una segunda conexión dedicada en el mismo dispositivo de la ubicación actual.",
+            "why": "Ambas conexiones seguirían dependiendo del mismo dispositivo y de la misma ubicación."
+          }
+        ],
+        "explanation": "La condición decisiva es resistir la pérdida de una ubicación completa de Direct Connect, además de fallas de dispositivo y conectividad. El modelo maximum resiliency usa conexiones separadas en dispositivos separados y en más de una ubicación. El modelo development and test separa dispositivos, pero permanece en una sola ubicación. Agregar un Direct Connect gateway no cambia dónde terminan las conexiones físicas."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "direct-connect-resiliency-encryption--4836deb9",
+      "conceptId": "direct-connect-resiliency-encryption",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab runs a non-critical development environment over Direct Connect. The lab wants connectivity to survive a device failure but accepts an outage if the entire Direct Connect location fails; it also wants to avoid ordering connections at another location. Which resiliency model best meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Maximum resiliency: separate devices and connections in more than one location.",
+          "correct": false,
+          "why": "It protects against a location failure that the lab accepts and requires more than one location."
+        },
+        {
+          "id": "B",
+          "text": "One connection at the existing location and two Direct Connect gateways.",
+          "correct": false,
+          "why": "Gateway redundancy does not address failure of the device serving the sole connection."
+        },
+        {
+          "id": "C",
+          "text": "High resiliency: two single connections in multiple locations.",
+          "correct": false,
+          "why": "It introduces another location that the lab explicitly does not want to order."
+        },
+        {
+          "id": "D",
+          "text": "Development and test: separate connections on separate devices at one location.",
+          "correct": true,
+          "why": "It addresses device failure at one location without requiring another location."
+        }
+      ],
+      "explanation": "The lab requires device-failure protection but explicitly accepts location failure and does not want a second location. The development and test model provides separate connections on separate devices at one location for non-critical workloads. High and maximum resiliency both involve multiple locations, exceeding this stated need. Additional Direct Connect gateways do not substitute for separate connections.",
+      "keywordCues": [
+        "non-critical development environment",
+        "survive a device failure but accepts an outage if the entire Direct Connect location fails",
+        "avoid ordering connections at another location"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/resiliency_toolkit.html",
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ejecuta un entorno de desarrollo no crítico mediante Direct Connect. Quiere mantener la conectividad ante una falla de dispositivo, pero acepta una interrupción si falla toda la ubicación de Direct Connect; también desea evitar solicitar conexiones en otra ubicación. ¿Qué resiliency model cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Maximum resiliency: dispositivos y conexiones separados en más de una ubicación.",
+            "why": "Protege contra una falla de ubicación que el laboratorio acepta y requiere más de una ubicación."
+          },
+          {
+            "id": "B",
+            "text": "Una conexión en la ubicación actual y dos Direct Connect gateways.",
+            "why": "La redundancia de gateways no cubre la falla del dispositivo que presta servicio a la única conexión."
+          },
+          {
+            "id": "C",
+            "text": "High resiliency: dos conexiones individuales en múltiples ubicaciones.",
+            "why": "Introduce otra ubicación que el laboratorio explícitamente no desea solicitar."
+          },
+          {
+            "id": "D",
+            "text": "Development and test: conexiones separadas en dispositivos separados de una sola ubicación.",
+            "why": "Cubre una falla de dispositivo en una ubicación sin requerir otra ubicación."
+          }
+        ],
+        "explanation": "El laboratorio necesita protección ante una falla de dispositivo, pero acepta una falla de ubicación y no quiere una segunda ubicación. El modelo development and test ofrece conexiones separadas en dispositivos separados de una sola ubicación para cargas no críticas. High y maximum resiliency abarcan múltiples ubicaciones y exceden la necesidad indicada. Agregar Direct Connect gateways no sustituye las conexiones separadas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "direct-connect-resiliency-encryption--r0",
+      "conceptId": "direct-connect-resiliency-encryption",
+      "kind": "recall",
+      "prompt": "A critical workload must survive a complete Direct Connect location failure. Which resiliency model fits, and how would you verify failover routing?",
+      "promptEs": "Una carga crítica debe resistir la falla completa de una ubicación de Direct Connect. ¿Qué resiliency model elegirías y cómo verificarías las rutas durante el failover?",
+      "idealAnswer": "Use the maximum resiliency model, with separate connections on separate devices in more than one location. Use the Direct Connect Resiliency Toolkit failover test to check that traffic routes to a redundant virtual interface when BGP peering is brought down.",
+      "rubric": [
+        "Names the maximum resiliency model.",
+        "Specifies separate connections and devices in more than one location.",
+        "Describes testing routing to a redundant virtual interface by bringing down BGP peering."
+      ]
+    }
+  ]
+}

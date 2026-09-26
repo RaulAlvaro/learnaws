@@ -1,0 +1,254 @@
+{
+  "conceptId": "ec2-hibernation",
+  "card": {
+    "en": {
+      "tldr": "EC2 hibernation saves an instance’s RAM to its EBS root volume, then resumes its processes when the instance starts again. Choose it when a workload must retain its in-memory state through an idle period without paying for instance usage while it is stopped.",
+      "whenToUse": [
+        "An application takes a long time to initialize or build its in-memory state.",
+        "The instance can be paused during idle periods but must resume its running processes.",
+        "The team wants to avoid instance usage charges during those stopped periods."
+      ],
+      "keyFacts": [
+        "Hibernation saves RAM contents to the EBS root volume.",
+        "On start, RAM contents are reloaded and previously running processes resume.",
+        "The EBS root volume and attached EBS data volumes persist; data volumes are reattached on start.",
+        "A hibernated instance retains its instance ID.",
+        "There is no instance usage charge while the hibernated instance is stopped, but EBS storage charges continue, including storage for RAM contents.",
+        "The instance must have hibernation enabled and meet the hibernation prerequisites."
+      ],
+      "gotchas": [
+        "A standard stop is not the choice when the requirement is to resume the prior contents of RAM.",
+        "Hibernation does not eliminate EBS storage charges.",
+        "Do not assume an existing instance can be hibernated unless hibernation is enabled and its prerequisites are met."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 stop",
+          "difference": "Choose hibernation when the instance must reload its saved RAM and resume its processes on start."
+        },
+        {
+          "concept": "EC2 reboot",
+          "difference": "Hibernation is the choice when the instance must enter a stopped state yet later resume its saved in-memory work."
+        }
+      ],
+      "examCues": [
+        "resume running processes after an idle period",
+        "long bootstrap and memory warm-up",
+        "no instance usage charges while stopped",
+        "preserve RAM across a pause"
+      ]
+    },
+    "es": {
+      "tldr": "EC2 hibernation guarda la RAM de una instancia en su volumen raíz de EBS y reanuda sus procesos cuando la instancia vuelve a iniciarse. Elígela cuando una carga de trabajo deba conservar su estado en memoria durante un período de inactividad sin pagar por el uso de la instancia mientras está detenida.",
+      "whenToUse": [
+        "Una aplicación tarda mucho en inicializarse o en construir su estado en memoria.",
+        "Puedes pausar la instancia durante períodos de inactividad, pero debes reanudar sus procesos.",
+        "El equipo quiere evitar los cargos por uso de la instancia durante esos períodos."
+      ],
+      "keyFacts": [
+        "Hibernation guarda el contenido de la RAM en el volumen raíz de EBS.",
+        "Al iniciar la instancia, se recarga la RAM y se reanudan los procesos que estaban en ejecución.",
+        "Persisten el volumen raíz y los volúmenes de datos de EBS adjuntos; los volúmenes de datos se vuelven a adjuntar al iniciar.",
+        "Una instancia hibernada conserva su ID de instancia.",
+        "No se cobra el uso de la instancia mientras está detenida por hibernation, pero se sigue cobrando el almacenamiento de EBS, incluido el espacio para el contenido de la RAM.",
+        "La instancia debe tener hibernation habilitada y cumplir sus requisitos previos."
+      ],
+      "gotchas": [
+        "Una detención normal no es la opción cuando necesitas reanudar el contenido anterior de la RAM.",
+        "Hibernation no elimina los cargos de almacenamiento de EBS.",
+        "No supongas que puedes hibernar una instancia existente sin comprobar que tenga hibernation habilitada y cumpla los requisitos previos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "EC2 stop",
+          "difference": "Elige hibernation cuando la instancia deba recargar la RAM guardada y reanudar sus procesos al iniciarse."
+        },
+        {
+          "concept": "EC2 reboot",
+          "difference": "Hibernation es la opción cuando la instancia debe quedar detenida y después reanudar el trabajo que conservó en memoria."
+        }
+      ],
+      "examCues": [
+        "resume running processes after an idle period",
+        "long bootstrap and memory warm-up",
+        "no instance usage charges while stopped",
+        "preserve RAM across a pause"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Hibernate.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ec2-hibernation--7749d3c9",
+      "conceptId": "ec2-hibernation",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A design studio has an EC2 rendering workspace with attached EBS data volumes. Artists need to pause work between projects and later resume the same running processes on the same instance ID, with their data volumes available again. The studio wants no instance usage charges during the pause and accepts ongoing storage charges. The instance is eligible for hibernation. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Hibernate the instance and start it when the next project begins.",
+          "correct": true,
+          "why": "Hibernation resumes the saved processes, retains the instance ID, and reattaches EBS data volumes without instance usage charges while stopped."
+        },
+        {
+          "id": "B",
+          "text": "Stop the instance and start it when the next project begins.",
+          "correct": false,
+          "why": "A standard stop does not restore the RAM contents needed to resume the artists’ processes."
+        },
+        {
+          "id": "C",
+          "text": "Keep the instance running and leave its EBS data volumes attached.",
+          "correct": false,
+          "why": "This keeps the workspace available but misses the requirement to avoid instance usage charges during the pause."
+        },
+        {
+          "id": "D",
+          "text": "Terminate the instance and attach its data volumes to a replacement instance.",
+          "correct": false,
+          "why": "A replacement instance would not retain the original instance ID or resume its running processes."
+        }
+      ],
+      "explanation": "The studio needs more than persistent files: it needs the running processes and instance ID to survive a pause. Hibernation saves RAM to the EBS root volume; on start, processes resume, previously attached EBS data volumes are reattached, and the instance retains its ID. Keeping the instance running misses the cost requirement, and a standard stop misses the in-memory-state requirement. EBS storage remains billable while the instance is hibernated.",
+      "keywordCues": [
+        "resume the same running processes",
+        "same instance ID",
+        "data volumes available again",
+        "no instance usage charges during the pause",
+        "eligible for hibernation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Hibernate.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño tiene un espacio de trabajo de renderizado en EC2 con volúmenes de datos de EBS adjuntos. Los artistas necesitan pausar el trabajo entre proyectos y después reanudar los mismos procesos en la misma instancia, conservando su ID y recuperando el acceso a los volúmenes de datos. El estudio no quiere cargos por uso de la instancia durante la pausa y acepta los cargos de almacenamiento. La instancia puede hibernarse. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Hibernar la instancia e iniciarla cuando comience el siguiente proyecto.",
+            "why": "Hibernation reanuda los procesos guardados, conserva el ID de instancia y vuelve a adjuntar los volúmenes de datos de EBS sin cargos por uso de la instancia mientras está detenida."
+          },
+          {
+            "id": "B",
+            "text": "Detener la instancia e iniciarla cuando comience el siguiente proyecto.",
+            "why": "Una detención normal no restaura el contenido de la RAM necesario para reanudar los procesos de los artistas."
+          },
+          {
+            "id": "C",
+            "text": "Mantener la instancia en ejecución y dejar adjuntos sus volúmenes de datos de EBS.",
+            "why": "Esto mantiene disponible el espacio de trabajo, pero no cumple el requisito de evitar cargos por uso de la instancia durante la pausa."
+          },
+          {
+            "id": "D",
+            "text": "Terminar la instancia y adjuntar sus volúmenes de datos a una instancia de reemplazo.",
+            "why": "Una instancia de reemplazo no conservaría el ID de la instancia original ni reanudaría sus procesos."
+          }
+        ],
+        "explanation": "El estudio necesita más que archivos persistentes: debe conservar los procesos en ejecución y el ID de instancia durante la pausa. Hibernation guarda la RAM en el volumen raíz de EBS; al iniciar, se reanudan los procesos, se vuelven a adjuntar los volúmenes de datos de EBS y se conserva el ID. Mantener la instancia en ejecución no cumple el requisito de costo, y una detención normal no conserva el estado en memoria. El almacenamiento de EBS sigue generando cargos durante hibernation."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-hibernation--250213f9",
+      "conceptId": "ec2-hibernation",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research team runs a simulation on an EC2 instance that spends hours building an in-memory model. The team does not need compute overnight, but researchers must continue from the running model the next morning. The instance can meet the prerequisites for hibernation. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Terminate the EC2 instance overnight and launch a new instance each morning.",
+          "correct": false,
+          "why": "A newly launched instance does not resume the prior instance’s in-memory model."
+        },
+        {
+          "id": "B",
+          "text": "Keep the EC2 instance running overnight so the model stays in memory.",
+          "correct": false,
+          "why": "Keeping it running preserves the model but does not avoid instance usage during the idle period."
+        },
+        {
+          "id": "C",
+          "text": "Stop the EC2 instance overnight and start it each morning.",
+          "correct": false,
+          "why": "A standard stop does not meet the requirement to restore the running model from saved RAM."
+        },
+        {
+          "id": "D",
+          "text": "Enable EC2 hibernation, build the model, and hibernate the instance overnight.",
+          "correct": true,
+          "why": "Hibernation saves the model’s in-memory state and avoids instance usage charges while stopped."
+        }
+      ],
+      "explanation": "The deciding requirements are to retain the built in-memory model and avoid paying for instance usage overnight. EC2 hibernation saves RAM to the EBS root volume and resumes processes when the instance starts. A standard stop does not satisfy the RAM-resumption requirement, while leaving the instance running misses the idle-period cost goal. EBS storage charges still apply during hibernation.",
+      "keywordCues": [
+        "hours building an in-memory model",
+        "does not need compute overnight",
+        "continue from the running model",
+        "can meet the prerequisites for hibernation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Hibernate.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación ejecuta una simulación en una instancia de EC2 que tarda horas en construir un modelo en memoria. El equipo no necesita capacidad de cómputo durante la noche, pero debe continuar con el modelo en ejecución a la mañana siguiente. La instancia puede cumplir los requisitos previos de hibernation. ¿Qué solución cumple estos requisitos de la forma MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Terminar la instancia de EC2 durante la noche y lanzar una nueva cada mañana.",
+            "why": "Una instancia nueva no reanuda el modelo en memoria de la instancia anterior."
+          },
+          {
+            "id": "B",
+            "text": "Mantener la instancia de EC2 en ejecución durante la noche para conservar el modelo en memoria.",
+            "why": "Mantenerla en ejecución conserva el modelo, pero no evita el uso de la instancia durante el período de inactividad."
+          },
+          {
+            "id": "C",
+            "text": "Detener la instancia de EC2 durante la noche e iniciarla cada mañana.",
+            "why": "Una detención normal no cumple el requisito de restaurar el modelo en ejecución desde la RAM guardada."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar EC2 hibernation, construir el modelo e hibernar la instancia durante la noche.",
+            "why": "Hibernation guarda el estado en memoria del modelo y evita los cargos por uso de la instancia mientras está detenida."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son conservar el modelo construido en memoria y evitar pagar por el uso de la instancia durante la noche. EC2 hibernation guarda la RAM en el volumen raíz de EBS y reanuda los procesos cuando la instancia se inicia. Una detención normal no cumple el requisito de reanudar el contenido de la RAM; mantener la instancia en ejecución no cumple el objetivo de costo. Los cargos de almacenamiento de EBS continúan durante hibernation."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ec2-hibernation--r0",
+      "conceptId": "ec2-hibernation",
+      "kind": "recall",
+      "prompt": "An EC2 application takes hours to build its in-memory state. How can it pause between runs and resume that state without instance usage charges?",
+      "promptEs": "Una aplicación de EC2 tarda horas en construir su estado en memoria. ¿Cómo puede pausarse entre ejecuciones y reanudar ese estado sin cargos por uso de la instancia?",
+      "idealAnswer": "Launch an eligible instance with hibernation enabled, bring the application to its desired state, and hibernate it between runs. Hibernation saves RAM to the EBS root volume and resumes the processes on start; EBS storage charges still apply.",
+      "rubric": [
+        "Identify EC2 hibernation and the need to enable it on an eligible instance.",
+        "Explain that saved RAM allows the application’s processes to resume.",
+        "Distinguish no instance usage charges while stopped from continuing EBS storage charges."
+      ]
+    }
+  ]
+}

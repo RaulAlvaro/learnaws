@@ -1,0 +1,370 @@
+{
+  "conceptId": "dedicated-hosts-vs-instances",
+  "card": {
+    "en": {
+      "tldr": "Both EC2 Dedicated Hosts and Dedicated Instances run instances on dedicated physical hardware. Choose Dedicated Hosts when licensing requires socket or core visibility, targeted placement, or host affinity; choose Dedicated Instances when the requirement is hardware isolation without those host-level controls.",
+      "whenToUse": [
+        "Choose Dedicated Hosts for eligible BYOL licenses tied to physical sockets or cores.",
+        "Choose Dedicated Hosts when instances must be placed on, or return to, a specific host.",
+        "Consider Dedicated Instances when dedicated hardware is required but host visibility and placement control are not."
+      ],
+      "keyFacts": [
+        "Dedicated Hosts expose host IDs and physical socket and core counts; Dedicated Instances do not.",
+        "Dedicated Hosts support targeted placement and host affinity; Dedicated Instances support neither.",
+        "Dedicated Hosts are billed per host, while Dedicated Instances are billed per instance.",
+        "Dedicated Instances have limited BYOL support, including certain licenses with specific mobility rights.",
+        "Dedicated Instances run on hardware dedicated to one AWS account, but might share hardware with other instances from that same account."
+      ],
+      "gotchas": [
+        "Dedicated hardware alone does not provide the socket or core visibility needed for some BYOL terms.",
+        "Stopping and starting a Dedicated Instance might place it on a different host.",
+        "Do not choose Dedicated Hosts on the assumption that they have an inherent performance or security advantage over Dedicated Instances."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Dedicated Instances",
+          "difference": "Provide dedicated hardware without host visibility, targeted placement, or host affinity."
+        },
+        {
+          "concept": "On-Demand Capacity Reservations",
+          "difference": "Reserve EC2 capacity in an Availability Zone; they do not provide Dedicated Host socket or core visibility."
+        },
+        {
+          "concept": "Reserved Instances",
+          "difference": "A purchasing option does not, by itself, provide Dedicated Host placement and license visibility."
+        }
+      ],
+      "examCues": [
+        "BYOL license tied to physical cores",
+        "audit the host socket count",
+        "return to the same physical host",
+        "dedicated hardware without placement control",
+        "pay per dedicated instance"
+      ]
+    },
+    "es": {
+      "tldr": "Tanto EC2 Dedicated Hosts como Dedicated Instances ejecutan instancias en hardware físico dedicado. Elige Dedicated Hosts si la licencia exige visibilidad de sockets o núcleos, ubicación dirigida o host affinity; elige Dedicated Instances si solo necesitas aislamiento de hardware sin esos controles.",
+      "whenToUse": [
+        "Elige Dedicated Hosts para licencias BYOL elegibles vinculadas a sockets o núcleos físicos.",
+        "Elige Dedicated Hosts si las instancias deben ubicarse en un host específico o volver a él.",
+        "Considera Dedicated Instances si necesitas hardware dedicado, pero no visibilidad ni control de ubicación del host."
+      ],
+      "keyFacts": [
+        "Dedicated Hosts muestran el ID del host y la cantidad de sockets y núcleos físicos; Dedicated Instances no.",
+        "Dedicated Hosts admiten targeted placement y host affinity; Dedicated Instances no admiten ninguna de las dos.",
+        "Dedicated Hosts se facturan por host; Dedicated Instances, por instancia.",
+        "Dedicated Instances tienen compatibilidad limitada con BYOL, incluidas ciertas licencias con derechos específicos de movilidad.",
+        "Dedicated Instances usan hardware dedicado a una sola cuenta de AWS, pero podrían compartirlo con otras instancias de esa misma cuenta."
+      ],
+      "gotchas": [
+        "El hardware dedicado, por sí solo, no ofrece la visibilidad de sockets o núcleos que exigen algunas licencias BYOL.",
+        "Al detener e iniciar una Dedicated Instance, podría ejecutarse en otro host.",
+        "No elijas Dedicated Hosts suponiendo que ofrecen una ventaja inherente de rendimiento o seguridad frente a Dedicated Instances."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Dedicated Instances",
+          "difference": "Ofrecen hardware dedicado sin visibilidad del host, targeted placement ni host affinity."
+        },
+        {
+          "concept": "On-Demand Capacity Reservations",
+          "difference": "Reservan capacidad de EC2 en una Availability Zone; no ofrecen visibilidad de sockets o núcleos de Dedicated Hosts."
+        },
+        {
+          "concept": "Reserved Instances",
+          "difference": "Una opción de compra no proporciona, por sí sola, la ubicación y visibilidad de licencias de Dedicated Hosts."
+        }
+      ],
+      "examCues": [
+        "BYOL license tied to physical cores",
+        "audit the host socket count",
+        "return to the same physical host",
+        "dedicated hardware without placement control",
+        "pay per dedicated instance"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-hosts-overview.html",
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "dedicated-hosts-vs-instances--259d5120",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "secondaryConcepts": [
+        "reserved-instances",
+        "on-demand-capacity-reservations"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A healthcare startup will run a small, variable number of EC2 instances for an internal application. Its policy requires hardware that is not shared with other AWS accounts, but it does not require host IDs, placement control, or socket-based licenses. The team wants billing based on the instances it runs rather than on an entire host. Which option meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allocate Dedicated Hosts and launch the application instances on them.",
+          "correct": false,
+          "why": "Dedicated Hosts provide isolation but are billed per host, contrary to the stated billing requirement."
+        },
+        {
+          "id": "B",
+          "text": "Launch default-tenancy EC2 instances with On-Demand Capacity Reservations.",
+          "correct": false,
+          "why": "A capacity reservation does not make default-tenancy hardware dedicated to the account."
+        },
+        {
+          "id": "C",
+          "text": "Launch the application as EC2 Dedicated Instances.",
+          "correct": true,
+          "why": "Dedicated Instances provide account-level hardware isolation and are billed per instance."
+        },
+        {
+          "id": "D",
+          "text": "Launch default-tenancy EC2 instances covered by Reserved Instances.",
+          "correct": false,
+          "why": "A Reserved Instance purchasing option does not make default-tenancy hardware dedicated."
+        }
+      ],
+      "explanation": "The startup needs hardware isolated from other accounts and explicitly wants per-instance billing. Dedicated Instances meet both requirements without requiring host-level controls. Dedicated Hosts also provide dedicated hardware, but their per-host billing misses the stated preference. A capacity reservation or purchasing discount does not change default-tenancy hardware into dedicated hardware.",
+      "keywordCues": [
+        "not shared with other AWS accounts",
+        "does not require host IDs, placement control, or socket-based licenses",
+        "billing based on the instances it runs rather than on an entire host"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-hosts-overview.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html"
+      ],
+      "es": {
+        "stem": "Una startup de salud ejecutará una cantidad pequeña y variable de instancias EC2 para una aplicación interna. Su política exige hardware que no se comparta con otras cuentas de AWS, pero no requiere ID de host, control de ubicación ni licencias basadas en sockets. El equipo quiere facturación por las instancias que ejecuta, no por un host completo. ¿Qué opción cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asignar Dedicated Hosts y ejecutar allí las instancias de la aplicación.",
+            "why": "Dedicated Hosts ofrecen aislamiento, pero se facturan por host, lo que contradice el requisito de facturación."
+          },
+          {
+            "id": "B",
+            "text": "Iniciar instancias EC2 con default tenancy y On-Demand Capacity Reservations.",
+            "why": "Una Capacity Reservation no hace que el hardware con default tenancy sea dedicado a la cuenta."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar la aplicación como EC2 Dedicated Instances.",
+            "why": "Dedicated Instances ofrecen aislamiento de hardware entre cuentas y se facturan por instancia."
+          },
+          {
+            "id": "D",
+            "text": "Iniciar instancias EC2 con default tenancy cubiertas por Reserved Instances.",
+            "why": "La opción de compra Reserved Instances no hace que el hardware con default tenancy sea dedicado."
+          }
+        ],
+        "explanation": "La startup necesita hardware aislado de otras cuentas y solicita explícitamente facturación por instancia. Dedicated Instances cumplen ambos requisitos sin necesidad de controles del host. Dedicated Hosts también ofrecen hardware dedicado, pero su facturación por host no cumple la preferencia indicada. Una Capacity Reservation o un descuento de compra no convierten el hardware con default tenancy en hardware dedicado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dedicated-hosts-vs-instances--70e2fde5",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "secondaryConcepts": [
+        "reserved-instances",
+        "on-demand-capacity-reservations"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company runs a licensed rendering tool on EC2 and stops its instance between projects. The vendor requires the tool to run on the same physical server when the instance starts again, and the operations team must be able to target that server for placement. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Dedicated Host with host affinity and targeted instance placement.",
+          "correct": true,
+          "why": "Dedicated Hosts support both returning to a specific host and targeting placement on it."
+        },
+        {
+          "id": "B",
+          "text": "Use a Dedicated Reserved Instance to reserve dedicated instance capacity.",
+          "correct": false,
+          "why": "Reserving Dedicated Instance capacity does not give targeted host placement or host affinity."
+        },
+        {
+          "id": "C",
+          "text": "Use a Dedicated Instance and restart it when the next project begins.",
+          "correct": false,
+          "why": "A stopped and restarted Dedicated Instance might run on a different host."
+        },
+        {
+          "id": "D",
+          "text": "Use an On-Demand Capacity Reservation for the required Availability Zone.",
+          "correct": false,
+          "why": "Capacity in an Availability Zone does not identify or preserve the required physical host."
+        }
+      ],
+      "explanation": "The requirement is not merely dedicated hardware or available capacity: the instance must return to a particular physical server. Dedicated Hosts support host affinity and targeted placement. A Dedicated Instance might move to another host after a stop and start. Reserving instance capacity does not supply the missing host-level control.",
+      "keywordCues": [
+        "same physical server when the instance starts again",
+        "target that server for placement"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-hosts-overview.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta una herramienta de renderizado con licencia en EC2 y detiene su instancia entre proyectos. El proveedor exige que la herramienta se ejecute en el mismo servidor físico cuando la instancia vuelva a iniciarse, y el equipo de operaciones debe poder elegir ese servidor para la ubicación. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un Dedicated Host con host affinity y targeted instance placement.",
+            "why": "Dedicated Hosts permiten volver a un host específico y dirigir la ubicación hacia él."
+          },
+          {
+            "id": "B",
+            "text": "Usar una Dedicated Reserved Instance para reservar capacidad de instancias dedicadas.",
+            "why": "Reservar capacidad de Dedicated Instances no proporciona ubicación dirigida al host ni host affinity."
+          },
+          {
+            "id": "C",
+            "text": "Usar una Dedicated Instance y reiniciarla cuando comience el siguiente proyecto.",
+            "why": "Una Dedicated Instance detenida y reiniciada podría ejecutarse en otro host."
+          },
+          {
+            "id": "D",
+            "text": "Usar una On-Demand Capacity Reservation para la Availability Zone requerida.",
+            "why": "La capacidad en una Availability Zone no identifica ni conserva el host físico requerido."
+          }
+        ],
+        "explanation": "El requisito no es solo hardware dedicado o capacidad disponible: la instancia debe volver a un servidor físico determinado. Dedicated Hosts admiten host affinity y targeted placement. Una Dedicated Instance podría cambiar de host después de detenerse e iniciarse. Reservar capacidad de instancias no proporciona el control del host que falta."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "dedicated-hosts-vs-instances--b900bed4",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "secondaryConcepts": [
+        "on-demand-capacity-reservations"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research organization is migrating two unrelated EC2 workloads. A simulation uses an existing per-socket software license and must report the physical socket count for audits. A variable-size data review workload requires hardware isolated from other AWS accounts, needs no host-level controls, and must be billed per instance rather than per host. Which two choices meet the respective requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the data review workload on default-tenancy instances with Capacity Reservations.",
+          "correct": false,
+          "why": "Capacity Reservations do not provide the required hardware isolation for default-tenancy instances."
+        },
+        {
+          "id": "B",
+          "text": "Run the simulation on Dedicated Instances and record its EC2 instance type.",
+          "correct": false,
+          "why": "Dedicated Instances do not expose the host's physical socket count for the simulation audit."
+        },
+        {
+          "id": "C",
+          "text": "Run the data review workload as Dedicated Instances.",
+          "correct": true,
+          "why": "Dedicated Instances isolate hardware from other accounts and are billed per instance."
+        },
+        {
+          "id": "D",
+          "text": "Run the simulation on a Dedicated Host and use its socket visibility for audits.",
+          "correct": true,
+          "why": "Dedicated Hosts support eligible per-socket BYOL and expose the physical socket count."
+        },
+        {
+          "id": "E",
+          "text": "Run the data review workload on Dedicated Hosts and allocate hosts as demand changes.",
+          "correct": false,
+          "why": "Dedicated Hosts are billed per host rather than per instance."
+        }
+      ],
+      "explanation": "The workloads have different deciding requirements. The simulation needs physical socket visibility for its existing license, so it belongs on a Dedicated Host. The data review workload needs account-level hardware isolation and per-instance billing, which Dedicated Instances provide. Using Dedicated Hosts for data review would miss its billing requirement, while Dedicated Instances cannot supply the simulation's socket visibility.",
+      "keywordCues": [
+        "existing per-socket software license",
+        "report the physical socket count for audits",
+        "hardware isolated from other AWS accounts",
+        "billed per instance rather than per host"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-hosts-overview.html",
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación migrará dos cargas de trabajo independientes a EC2. Una simulación usa una licencia de software existente por socket y debe informar la cantidad de sockets físicos para auditorías. Una carga de revisión de datos de tamaño variable exige hardware aislado de otras cuentas de AWS, no necesita controles del host y debe facturarse por instancia, no por host. ¿Qué dos opciones cumplen los requisitos respectivos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar la revisión de datos en instancias con default tenancy y Capacity Reservations.",
+            "why": "Capacity Reservations no proporcionan el aislamiento de hardware requerido para instancias con default tenancy."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar la simulación en Dedicated Instances y registrar su tipo de instancia EC2.",
+            "why": "Dedicated Instances no muestran la cantidad de sockets físicos del host para la auditoría de la simulación."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar la revisión de datos como Dedicated Instances.",
+            "why": "Dedicated Instances aíslan el hardware de otras cuentas y se facturan por instancia."
+          },
+          {
+            "id": "D",
+            "text": "Ejecutar la simulación en un Dedicated Host y usar su visibilidad de sockets para las auditorías.",
+            "why": "Dedicated Hosts admiten BYOL elegible por socket y muestran la cantidad de sockets físicos."
+          },
+          {
+            "id": "E",
+            "text": "Ejecutar la revisión de datos en Dedicated Hosts y asignar hosts conforme cambie la demanda.",
+            "why": "Dedicated Hosts se facturan por host, no por instancia."
+          }
+        ],
+        "explanation": "Las cargas tienen requisitos decisivos diferentes. La simulación necesita visibilidad de sockets físicos para su licencia existente, por lo que corresponde un Dedicated Host. La revisión de datos necesita aislamiento de hardware entre cuentas y facturación por instancia, que ofrecen Dedicated Instances. Usar Dedicated Hosts para la revisión incumpliría su requisito de facturación, mientras que Dedicated Instances no mostrarían los sockets físicos para la simulación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "dedicated-hosts-vs-instances--r0",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "kind": "recall",
+      "prompt": "An EC2 workload uses a license tied to physical cores and needs an auditable core count. What would you choose, and why?",
+      "promptEs": "Una carga en EC2 usa una licencia vinculada a núcleos físicos y necesita una cantidad de núcleos auditable. ¿Qué eliges y por qué?",
+      "idealAnswer": "Choose a Dedicated Host. It supports eligible per-core BYOL and exposes the physical core count of the host.",
+      "rubric": [
+        "Selects Dedicated Hosts.",
+        "Connects physical core visibility to the licensing audit."
+      ]
+    },
+    {
+      "id": "dedicated-hosts-vs-instances--r1",
+      "conceptId": "dedicated-hosts-vs-instances",
+      "kind": "why-not",
+      "prompt": "Why doesn't a Dedicated Instance fit a workload that must return to the same physical host after it is stopped and started?",
+      "promptEs": "¿Por qué una Dedicated Instance no sirve si una carga debe volver al mismo host físico después de detenerse e iniciarse?",
+      "idealAnswer": "Dedicated Instances do not support host affinity or targeted host placement. After a stop and start, the instance might run on a different host; a Dedicated Host provides the needed control.",
+      "rubric": [
+        "States that Dedicated Instances lack host affinity or targeted placement.",
+        "Explains that a stop and start might change the physical host.",
+        "Identifies Dedicated Hosts as the appropriate alternative."
+      ]
+    }
+  ]
+}

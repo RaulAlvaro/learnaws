@@ -1,0 +1,357 @@
+{
+  "conceptId": "vpc-flow-logs",
+  "card": {
+    "en": {
+      "tldr": "VPC Flow Logs captures information about IP traffic going to and from network interfaces in a VPC. Choose it when you need traffic records to investigate a connectivity problem; it does not capture packet contents or identify who changed an AWS resource.",
+      "whenToUse": [
+        "Investigate whether restrictive security group rules are contributing to failed connections.",
+        "Monitor traffic reaching an instance or determine traffic direction at its network interface.",
+        "Publish network traffic records to CloudWatch Logs, Amazon S3, or Amazon Data Firehose."
+      ],
+      "keyFacts": [
+        "Flow logs capture information about IP traffic to and from VPC network interfaces, including accepted and rejected traffic metadata.",
+        "You can publish records to CloudWatch Logs, Amazon S3, or Amazon Data Firehose.",
+        "Collection occurs outside the network traffic path, so creating or deleting flow logs does not affect network throughput or latency.",
+        "Publishing flow logs incurs vended-log ingestion and archival charges."
+      ],
+      "gotchas": [
+        "Flow logs provide traffic metadata, not packet contents.",
+        "CloudWatch Logs can receive flow log records, but CloudWatch metrics alone do not provide those records.",
+        "A flow log cannot tell you which identity made an API call that changed a security group."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS CloudTrail",
+          "difference": "CloudTrail answers who made an API call; VPC Flow Logs shows IP traffic information."
+        },
+        {
+          "concept": "AWS Config",
+          "difference": "Config tracks resource configuration history and compliance; VPC Flow Logs records traffic information."
+        },
+        {
+          "concept": "AWS X-Ray",
+          "difference": "X-Ray traces requests across services to find latency bottlenecks; VPC Flow Logs examines IP traffic at network interfaces."
+        }
+      ],
+      "examCues": [
+        "traffic reaching an instance",
+        "overly restrictive security group rules",
+        "direction of traffic at a network interface",
+        "IP traffic records without affecting network performance"
+      ]
+    },
+    "es": {
+      "tldr": "VPC Flow Logs captura información sobre el tráfico IP que entra y sale de las interfaces de red de una VPC. Elígelo cuando necesites registros de tráfico para investigar un problema de conectividad; no captura el contenido de los paquetes ni identifica quién cambió un recurso de AWS.",
+      "whenToUse": [
+        "Investigar si reglas demasiado restrictivas de un security group contribuyen a conexiones fallidas.",
+        "Monitorear el tráfico que llega a una instancia o determinar su dirección en la interfaz de red.",
+        "Publicar registros de tráfico de red en CloudWatch Logs, Amazon S3 o Amazon Data Firehose."
+      ],
+      "keyFacts": [
+        "Flow logs captura información sobre el tráfico IP que entra y sale de las interfaces de red de una VPC, incluidos metadatos de tráfico aceptado y rechazado.",
+        "Puedes publicar los registros en CloudWatch Logs, Amazon S3 o Amazon Data Firehose.",
+        "La recopilación ocurre fuera de la ruta del tráfico, por lo que crear o eliminar flow logs no afecta el rendimiento ni la latencia de la red.",
+        "Publicar flow logs genera cargos por ingesta y archivo de vended logs."
+      ],
+      "gotchas": [
+        "Flow logs proporciona metadatos de tráfico, no el contenido de los paquetes.",
+        "CloudWatch Logs puede recibir registros de flow logs, pero las métricas de CloudWatch por sí solas no proporcionan esos registros.",
+        "Un flow log no te indica qué identidad hizo una llamada a la API para cambiar un security group."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS CloudTrail",
+          "difference": "CloudTrail responde quién hizo una llamada a la API; VPC Flow Logs muestra información del tráfico IP."
+        },
+        {
+          "concept": "AWS Config",
+          "difference": "Config sigue el historial de configuración y el cumplimiento de los recursos; VPC Flow Logs registra información del tráfico."
+        },
+        {
+          "concept": "AWS X-Ray",
+          "difference": "X-Ray rastrea solicitudes entre servicios para encontrar problemas de latencia; VPC Flow Logs examina el tráfico IP en las interfaces de red."
+        }
+      ],
+      "examCues": [
+        "traffic reaching an instance",
+        "overly restrictive security group rules",
+        "direction of traffic at a network interface",
+        "IP traffic records without affecting network performance"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "vpc-flow-logs--85c73ac1",
+      "conceptId": "vpc-flow-logs",
+      "secondaryConcepts": [
+        "aws-config",
+        "cloudtrail",
+        "x-ray"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher's application intermittently fails to connect to an EC2 instance. The operations team suspects an overly restrictive security group rule and wants records of IP traffic reaching the instance's network interface in CloudWatch Logs. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a VPC flow log and publish its records to CloudWatch Logs.",
+          "correct": true,
+          "why": "VPC Flow Logs captures information about IP traffic at network interfaces and can publish it to CloudWatch Logs."
+        },
+        {
+          "id": "B",
+          "text": "Enable AWS X-Ray and inspect traces for requests to the application.",
+          "correct": false,
+          "why": "X-Ray traces application requests rather than recording IP traffic at the network interface."
+        },
+        {
+          "id": "C",
+          "text": "Enable AWS CloudTrail and send API activity records to CloudWatch Logs.",
+          "correct": false,
+          "why": "CloudTrail records API activity, not the IP traffic reaching the instance."
+        },
+        {
+          "id": "D",
+          "text": "Enable AWS Config and review the instance's security group configuration history.",
+          "correct": false,
+          "why": "Config can show configuration history but not the requested traffic records."
+        }
+      ],
+      "explanation": "The deciding requirement is to see IP traffic reaching a network interface, with records delivered to CloudWatch Logs. VPC Flow Logs is designed to capture that information and can help diagnose overly restrictive security group rules. AWS Config might reveal what a rule was, but it does not provide the requested traffic records.",
+      "keywordCues": [
+        "overly restrictive security group rule",
+        "records of IP traffic reaching the instance's network interface",
+        "in CloudWatch Logs"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+      ],
+      "es": {
+        "stem": "La aplicación de una editorial falla de forma intermitente al conectarse a una instancia EC2. El equipo de operaciones sospecha que una regla de un security group es demasiado restrictiva y quiere registros del tráfico IP que llega a la interfaz de red de la instancia en CloudWatch Logs. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un VPC flow log y publicar sus registros en CloudWatch Logs.",
+            "why": "VPC Flow Logs captura información del tráfico IP en las interfaces de red y puede publicarla en CloudWatch Logs."
+          },
+          {
+            "id": "B",
+            "text": "Habilitar AWS X-Ray e inspeccionar los rastreos de solicitudes de la aplicación.",
+            "why": "X-Ray rastrea solicitudes de la aplicación, pero no registra el tráfico IP en la interfaz de red."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar AWS CloudTrail y enviar los registros de actividad de la API a CloudWatch Logs.",
+            "why": "CloudTrail registra la actividad de la API, no el tráfico IP que llega a la instancia."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar AWS Config y revisar el historial de configuración del security group de la instancia.",
+            "why": "Config puede mostrar el historial de configuración, pero no los registros de tráfico solicitados."
+          }
+        ],
+        "explanation": "El requisito decisivo es ver el tráfico IP que llega a una interfaz de red y enviar los registros a CloudWatch Logs. VPC Flow Logs captura esa información y puede ayudar a diagnosticar reglas demasiado restrictivas de un security group. AWS Config podría mostrar cómo estaba configurada una regla, pero no proporciona los registros de tráfico solicitados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-flow-logs--06924c7d",
+      "conceptId": "vpc-flow-logs",
+      "secondaryConcepts": [
+        "cloudtrail",
+        "aws-config",
+        "cloudwatch-metrics-alarms"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab must retain records showing the direction of IP traffic to and from its VPC network interfaces in an existing Amazon S3 bucket. Researchers are concerned that collecting these records might slow a latency-sensitive workload. Which solution meets these requirements without affecting network performance?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Collect CloudWatch performance metrics and store reports in the S3 bucket.",
+          "correct": false,
+          "why": "Performance metrics do not provide records of IP traffic direction at network interfaces."
+        },
+        {
+          "id": "B",
+          "text": "Create a VPC flow log that publishes records to the S3 bucket.",
+          "correct": true,
+          "why": "Flow logs can publish IP traffic information to S3 and are collected outside the network traffic path."
+        },
+        {
+          "id": "C",
+          "text": "Send CloudTrail API activity records to the S3 bucket.",
+          "correct": false,
+          "why": "CloudTrail addresses API activity, not the direction of IP traffic at network interfaces."
+        },
+        {
+          "id": "D",
+          "text": "Export AWS Config resource configuration history to the S3 bucket.",
+          "correct": false,
+          "why": "Configuration history does not provide the requested network traffic information."
+        }
+      ],
+      "explanation": "The lab needs records of IP traffic direction at network interfaces, not API events, configuration changes, or performance measurements. VPC Flow Logs can publish those records to Amazon S3. Flow log collection occurs outside the network traffic path and does not affect network throughput or latency.",
+      "keywordCues": [
+        "direction of IP traffic",
+        "VPC network interfaces",
+        "existing Amazon S3 bucket",
+        "without affecting network performance"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación debe conservar en un bucket de Amazon S3 existente registros que muestren la dirección del tráfico IP hacia y desde las interfaces de red de su VPC. A los investigadores les preocupa que la recopilación de estos registros ralentice una carga de trabajo sensible a la latencia. ¿Qué solución cumple estos requisitos sin afectar el rendimiento de la red?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Recopilar métricas de rendimiento de CloudWatch y guardar informes en el bucket de S3.",
+            "why": "Las métricas de rendimiento no proporcionan registros de la dirección del tráfico IP en las interfaces de red."
+          },
+          {
+            "id": "B",
+            "text": "Crear un VPC flow log que publique los registros en el bucket de S3.",
+            "why": "Flow logs puede publicar información del tráfico IP en S3 y recopila los datos fuera de la ruta del tráfico."
+          },
+          {
+            "id": "C",
+            "text": "Enviar los registros de actividad de la API de CloudTrail al bucket de S3.",
+            "why": "CloudTrail se centra en la actividad de la API, no en la dirección del tráfico IP en las interfaces de red."
+          },
+          {
+            "id": "D",
+            "text": "Exportar el historial de configuración de recursos de AWS Config al bucket de S3.",
+            "why": "El historial de configuración no proporciona la información de tráfico de red solicitada."
+          }
+        ],
+        "explanation": "El laboratorio necesita registros de la dirección del tráfico IP en las interfaces de red, no eventos de la API, cambios de configuración ni mediciones de rendimiento. VPC Flow Logs puede publicar esos registros en Amazon S3. La recopilación ocurre fuera de la ruta del tráfico y no afecta el rendimiento ni la latencia de la red."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-flow-logs--9953d870",
+      "conceptId": "vpc-flow-logs",
+      "secondaryConcepts": [
+        "x-ray",
+        "cloudwatch-metrics-alarms",
+        "aws-config"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A delivery company sees errors in a service that runs across several application components. Its immediate question is whether traffic is reaching a particular EC2 instance's network interface; tracing application latency can wait. Which solution should the team choose to answer the immediate question?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use VPC Flow Logs to inspect IP traffic information for the instance's network interface.",
+          "correct": true,
+          "why": "VPC Flow Logs provides information about traffic going to and from VPC network interfaces."
+        },
+        {
+          "id": "B",
+          "text": "Use CloudWatch metrics to compare application performance over time.",
+          "correct": false,
+          "why": "Performance metrics do not supply records of traffic reaching a network interface."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Config to review the instance's resource configuration history.",
+          "correct": false,
+          "why": "Configuration history cannot establish what traffic reached the interface."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS X-Ray to trace requests across the application components.",
+          "correct": false,
+          "why": "X-Ray addresses request tracing and latency, which the scenario explicitly defers."
+        }
+      ],
+      "explanation": "The team is asking about traffic at a specific network interface, so VPC Flow Logs is the direct fit. It captures information about IP traffic going to and from network interfaces and can help monitor traffic reaching an instance. X-Ray is a plausible choice for a distributed application, but its request tracing addresses the latency investigation that the team has postponed.",
+      "keywordCues": [
+        "whether traffic is reaching",
+        "network interface",
+        "tracing application latency can wait"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+      ],
+      "es": {
+        "stem": "Una empresa de entregas observa errores en un servicio que se ejecuta en varios componentes de la aplicación. Su pregunta inmediata es si el tráfico llega a la interfaz de red de una instancia EC2 específica; el análisis de la latencia de la aplicación puede esperar. ¿Qué solución debe elegir el equipo para responder la pregunta inmediata?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar VPC Flow Logs para inspeccionar la información del tráfico IP de la interfaz de red de la instancia.",
+            "why": "VPC Flow Logs proporciona información sobre el tráfico que entra y sale de las interfaces de red de una VPC."
+          },
+          {
+            "id": "B",
+            "text": "Usar métricas de CloudWatch para comparar el rendimiento de la aplicación a lo largo del tiempo.",
+            "why": "Las métricas de rendimiento no proporcionan registros del tráfico que llega a una interfaz de red."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS Config para revisar el historial de configuración de recursos de la instancia.",
+            "why": "El historial de configuración no permite establecer qué tráfico llegó a la interfaz."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS X-Ray para rastrear solicitudes entre los componentes de la aplicación.",
+            "why": "X-Ray se centra en el rastreo de solicitudes y la latencia, cuyo análisis el escenario pospone."
+          }
+        ],
+        "explanation": "El equipo pregunta por el tráfico en una interfaz de red específica, por lo que VPC Flow Logs es la opción directa. Captura información sobre el tráfico IP que entra y sale de las interfaces de red y puede ayudar a monitorear el tráfico que llega a una instancia. X-Ray es una opción plausible para una aplicación distribuida, pero su rastreo de solicitudes corresponde al análisis de latencia que el equipo decidió posponer."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "vpc-flow-logs--r0",
+      "conceptId": "vpc-flow-logs",
+      "kind": "recall",
+      "prompt": "Connections to an instance fail. What would you enable to examine IP traffic reaching its network interface, and why?",
+      "promptEs": "Fallan las conexiones a una instancia. ¿Qué habilitarías para examinar el tráfico IP que llega a su interfaz de red y por qué?",
+      "idealAnswer": "Enable VPC Flow Logs for the relevant VPC network traffic. Its records show information about IP traffic going to and from network interfaces and can help diagnose overly restrictive security group rules.",
+      "rubric": [
+        "Names VPC Flow Logs.",
+        "Identifies IP traffic information at network interfaces as the evidence.",
+        "Connects the evidence to investigating failed connections or restrictive security group rules."
+      ]
+    },
+    {
+      "id": "vpc-flow-logs--r1",
+      "conceptId": "vpc-flow-logs",
+      "kind": "why-not",
+      "prompt": "Why wouldn't CloudTrail replace VPC Flow Logs when investigating traffic reaching an instance's network interface?",
+      "promptEs": "¿Por qué CloudTrail no sustituye a VPC Flow Logs al investigar el tráfico que llega a la interfaz de red de una instancia?",
+      "idealAnswer": "CloudTrail records API activity, such as who made a change, rather than IP traffic at a network interface. VPC Flow Logs provides the traffic information needed to investigate what reached the instance.",
+      "rubric": [
+        "States that CloudTrail addresses API activity or caller identity.",
+        "States that VPC Flow Logs captures IP traffic information at network interfaces.",
+        "Explains why API activity alone does not answer the traffic question."
+      ]
+    }
+  ]
+}

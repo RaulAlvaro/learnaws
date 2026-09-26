@@ -1,0 +1,436 @@
+{
+  "conceptId": "s3-intelligent-tiering",
+  "card": {
+    "en": {
+      "tldr": "S3 Intelligent-Tiering automatically adjusts the access tier of eligible objects as their access patterns change. Choose it when future access is hard to predict and you want cost optimization without managing tier transitions.",
+      "whenToUse": [
+        "Objects may alternate between frequent and infrequent access.",
+        "The application needs low-latency access even when objects become rarely accessed.",
+        "Objects can eventually be restored asynchronously, and you want to enable optional archive tiers."
+      ],
+      "keyFacts": [
+        "Eligible objects move to Infrequent Access after 30 consecutive days without access and to Archive Instant Access after 90 days.",
+        "The three automatic tiers provide low-latency access; the storage class remains S3 Intelligent-Tiering as objects move between tiers.",
+        "Optional Archive Access and Deep Archive Access tiers support asynchronous access after a minimum of 90 and 180 days without access, respectively.",
+        "Objects smaller than 128 KB are not monitored or automatically tiered; they remain in Frequent Access.",
+        "Intelligent-Tiering has a monthly object monitoring and automation charge."
+      ],
+      "gotchas": [
+        "Do not enable optional asynchronous archive tiers when every read must remain immediately available.",
+        "Do not expect objects smaller than 128 KB to move automatically to lower-cost tiers.",
+        "SelectObjectContent resets the inactivity timer for optional archive tiers, but does not move an object back to Frequent Access."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Standard-IA and One Zone-IA",
+          "difference": "Choose Intelligent-Tiering when you need S3 to monitor changing access and move eligible objects between access tiers automatically."
+        },
+        {
+          "concept": "S3 Glacier storage classes",
+          "difference": "Intelligent-Tiering's automatic tiers retain low-latency access; its optional asynchronous archive tiers require a restore before retrieval."
+        }
+      ],
+      "examCues": [
+        "unpredictable access patterns",
+        "objects become cold and later popular again",
+        "automatically adjust storage tiers",
+        "millisecond access even after months of inactivity"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Intelligent-Tiering ajusta automáticamente el nivel de acceso de los objetos elegibles cuando cambia su patrón de uso. Elígelo si no puedes predecir el acceso futuro y quieres optimizar costos sin administrar las transiciones entre niveles.",
+      "whenToUse": [
+        "Los objetos pueden alternar entre acceso frecuente e infrecuente.",
+        "La aplicación necesita acceso de baja latencia incluso cuando los objetos se consultan rara vez.",
+        "Los objetos podrían restaurarse de forma asíncrona más adelante y quieres habilitar niveles de archivo opcionales."
+      ],
+      "keyFacts": [
+        "Los objetos elegibles pasan a Infrequent Access después de 30 días consecutivos sin acceso y a Archive Instant Access después de 90 días.",
+        "Los tres niveles automáticos ofrecen acceso de baja latencia; la clase de almacenamiento sigue siendo S3 Intelligent-Tiering al cambiar de nivel.",
+        "Los niveles opcionales Archive Access y Deep Archive Access permiten acceso asíncrono después de un mínimo de 90 y 180 días sin acceso, respectivamente.",
+        "Los objetos menores de 128 KB no se monitorean ni cambian automáticamente de nivel; permanecen en Frequent Access.",
+        "Intelligent-Tiering tiene un cargo mensual por monitoreo y automatización de objetos."
+      ],
+      "gotchas": [
+        "No habilites los niveles opcionales de archivo asíncrono si todas las lecturas deben estar disponibles de inmediato.",
+        "No esperes que los objetos menores de 128 KB pasen automáticamente a niveles de menor costo.",
+        "SelectObjectContent reinicia el período de inactividad para los niveles opcionales de archivo, pero no devuelve un objeto a Frequent Access."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Standard-IA y One Zone-IA",
+          "difference": "Elige Intelligent-Tiering si necesitas que S3 supervise los cambios de acceso y mueva automáticamente los objetos elegibles entre niveles."
+        },
+        {
+          "concept": "Clases de almacenamiento S3 Glacier",
+          "difference": "Los niveles automáticos de Intelligent-Tiering conservan el acceso de baja latencia; sus niveles opcionales de archivo asíncrono requieren una restauración antes de la recuperación."
+        }
+      ],
+      "examCues": [
+        "unpredictable access patterns",
+        "objects become cold and later popular again",
+        "automatically adjust storage tiers",
+        "millisecond access even after months of inactivity"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering-overview.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-intelligent-tiering--5ec2cff4",
+      "conceptId": "s3-intelligent-tiering",
+      "secondaryConcepts": [
+        "s3-infrequent-access-classes",
+        "s3-glacier-classes-retrieval"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum stores high-resolution exhibit photos in Amazon S3. Public interest is unpredictable: a photo may go unused for months and then receive many requests after a news story. Every request must receive low-latency access, and the museum does not want to manage transitions as popularity changes. Which storage choice meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move photos to S3 Glacier Flexible Retrieval once they have gone unused for 90 days.",
+          "correct": false,
+          "why": "That archival choice does not meet the requirement for immediate low-latency access to every photo."
+        },
+        {
+          "id": "B",
+          "text": "Store the photos in S3 Intelligent-Tiering without enabling its optional archive tiers.",
+          "correct": true,
+          "why": "Its automatic tiers respond to changing access while retaining low-latency retrieval."
+        },
+        {
+          "id": "C",
+          "text": "Store the photos in S3 Intelligent-Tiering and enable Deep Archive Access after 180 days without access.",
+          "correct": false,
+          "why": "An object in Deep Archive Access needs restoration before it can be retrieved."
+        },
+        {
+          "id": "D",
+          "text": "Store the photos in S3 Standard-IA and review access reports to change storage classes when popularity rises.",
+          "correct": false,
+          "why": "This requires staff to manage the changes in access pattern."
+        }
+      ],
+      "explanation": "Unpredictable demand and low-latency reads are the deciding requirements. S3 Intelligent-Tiering automatically moves eligible objects among three low-latency tiers and moves accessed objects in its lower automatic tiers back to Frequent Access. Enabling Deep Archive Access would introduce an asynchronous restore step for archived photos, while reviewing reports and changing classes adds operational work.",
+      "keywordCues": [
+        "Public interest is unpredictable",
+        "receive low-latency access",
+        "does not want to manage transitions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering-overview.html"
+      ],
+      "es": {
+        "stem": "Un museo guarda fotografías de exhibiciones en alta resolución en Amazon S3. El interés del público es impredecible: una fotografía puede pasar meses sin consultas y luego recibir muchas solicitudes tras aparecer en las noticias. Cada solicitud debe tener acceso de baja latencia, y el museo no quiere administrar transiciones cuando cambia la popularidad. ¿Qué opción de almacenamiento cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mueve las fotografías a S3 Glacier Flexible Retrieval cuando lleven 90 días sin usarse.",
+            "why": "Esa opción de archivo no cumple el requisito de acceso inmediato y de baja latencia a todas las fotografías."
+          },
+          {
+            "id": "B",
+            "text": "Guarda las fotografías en S3 Intelligent-Tiering sin habilitar sus niveles opcionales de archivo.",
+            "why": "Sus niveles automáticos responden a los cambios de acceso y conservan la recuperación de baja latencia."
+          },
+          {
+            "id": "C",
+            "text": "Guarda las fotografías en S3 Intelligent-Tiering y habilita Deep Archive Access después de 180 días sin acceso.",
+            "why": "Un objeto en Deep Archive Access requiere restauración antes de poder recuperarse."
+          },
+          {
+            "id": "D",
+            "text": "Guarda las fotografías en S3 Standard-IA y revisa informes de acceso para cambiar la clase cuando aumente su popularidad.",
+            "why": "Esta opción exige que el equipo administre los cambios en el patrón de acceso."
+          }
+        ],
+        "explanation": "La demanda impredecible y las lecturas de baja latencia son los requisitos decisivos. S3 Intelligent-Tiering mueve automáticamente los objetos elegibles entre tres niveles de baja latencia y devuelve a Frequent Access los objetos consultados desde sus niveles automáticos inferiores. Habilitar Deep Archive Access introduciría una restauración asíncrona para las fotografías archivadas, mientras que revisar informes y cambiar clases agrega trabajo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-intelligent-tiering--b9508c5b",
+      "conceptId": "s3-intelligent-tiering",
+      "secondaryConcepts": [
+        "s3-infrequent-access-classes"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design platform stores 2 MB project files and 60 KB preview thumbnails in Amazon S3. Access to project files changes unpredictably, so the team wants eligible files to change access tiers automatically. Thumbnails must remain readily available, but the team does not want its cost plan to assume they will automatically tier. Which plan meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use S3 Intelligent-Tiering for project files and S3 Standard for thumbnails.",
+          "correct": true,
+          "why": "The project files qualify for automatic tiering, and the plan makes no tiering assumption about the small thumbnails."
+        },
+        {
+          "id": "B",
+          "text": "Use S3 Standard-IA for project files and S3 Intelligent-Tiering for thumbnails, forecasting automatic tiering for the thumbnails.",
+          "correct": false,
+          "why": "The plan assigns automatic tiering to the objects that are below the eligibility threshold."
+        },
+        {
+          "id": "C",
+          "text": "Use S3 Intelligent-Tiering with Deep Archive Access enabled for both groups and forecast automatic archival of the thumbnails.",
+          "correct": false,
+          "why": "Enabling an optional archive tier does not make 60 KB objects eligible for automatic tiering."
+        },
+        {
+          "id": "D",
+          "text": "Use S3 Intelligent-Tiering for both groups and forecast automatic lower-tier placement for both.",
+          "correct": false,
+          "why": "The 60 KB thumbnails are too small to be monitored or automatically tiered."
+        }
+      ],
+      "explanation": "Object size determines whether Intelligent-Tiering can perform the expected automatic moves. The 2 MB files exceed the documented 128 KB threshold, while 60 KB thumbnails remain in Frequent Access if placed in Intelligent-Tiering. Using Intelligent-Tiering for the project files and not budgeting for automatic thumbnail tiering satisfies both requirements; enabling an archive tier does not remove the size restriction.",
+      "keywordCues": [
+        "2 MB project files",
+        "60 KB preview thumbnails",
+        "does not want its cost plan to assume they will automatically tier"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering-overview.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de diseño guarda archivos de proyecto de 2 MB y miniaturas de vista previa de 60 KB en Amazon S3. El acceso a los archivos de proyecto cambia de forma impredecible, por lo que el equipo quiere que los archivos elegibles cambien automáticamente de nivel de acceso. Las miniaturas deben permanecer disponibles de inmediato, pero el equipo no quiere que su plan de costos suponga que cambiarán de nivel automáticamente. ¿Qué plan cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa S3 Intelligent-Tiering para los archivos de proyecto y S3 Standard para las miniaturas.",
+            "why": "Los archivos de proyecto cumplen los requisitos para cambiar automáticamente de nivel, y el plan no supone que eso ocurra con las miniaturas pequeñas."
+          },
+          {
+            "id": "B",
+            "text": "Usa S3 Standard-IA para los archivos de proyecto y S3 Intelligent-Tiering para las miniaturas, y proyecta el cambio automático de nivel de las miniaturas.",
+            "why": "El plan atribuye el cambio automático de nivel a objetos que no alcanzan el umbral de tamaño."
+          },
+          {
+            "id": "C",
+            "text": "Usa S3 Intelligent-Tiering con Deep Archive Access habilitado para ambos grupos y proyecta el archivado automático de las miniaturas.",
+            "why": "Habilitar un nivel opcional de archivo no hace que los objetos de 60 KB puedan cambiar automáticamente de nivel."
+          },
+          {
+            "id": "D",
+            "text": "Usa S3 Intelligent-Tiering para ambos grupos y proyecta que ambos pasarán automáticamente a niveles inferiores.",
+            "why": "Las miniaturas de 60 KB son demasiado pequeñas para monitorearse o cambiar automáticamente de nivel."
+          }
+        ],
+        "explanation": "El tamaño determina si Intelligent-Tiering puede realizar los cambios automáticos esperados. Los archivos de 2 MB superan el umbral documentado de 128 KB, mientras que las miniaturas de 60 KB permanecen en Frequent Access si se guardan en Intelligent-Tiering. Usar Intelligent-Tiering para los archivos de proyecto sin presupuestar cambios automáticos para las miniaturas cumple ambos requisitos; habilitar un nivel de archivo no elimina la restricción de tamaño."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-intelligent-tiering--350284b0",
+      "conceptId": "s3-intelligent-tiering",
+      "secondaryConcepts": [
+        "s3-glacier-classes-retrieval"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab stores large datasets in S3 Intelligent-Tiering and plans to enable Deep Archive Access after 180 days without use. Analysts sometimes query datasets with SelectObjectContent; the lab considers those queries meaningful activity and does not want queried datasets archived prematurely. Which approach meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable Deep Archive Access at 180 days; let SelectObjectContent queries reset its inactivity timer.",
+          "correct": true,
+          "why": "Those queries postpone entry into the optional deep archive tier until the configured period has elapsed since the last query."
+        },
+        {
+          "id": "B",
+          "text": "Keep only the automatic tiers and expect SelectObjectContent to prevent movement to Archive Instant Access.",
+          "correct": false,
+          "why": "SelectObjectContent does not prevent tiering down through the automatic tiers."
+        },
+        {
+          "id": "C",
+          "text": "Enable Deep Archive Access at 180 days and archive datasets 180 days after upload, regardless of queries.",
+          "correct": false,
+          "why": "Deep Archive Access uses inactivity since relevant access, not a fixed interval since upload."
+        },
+        {
+          "id": "D",
+          "text": "Enable Archive Access at 90 days because SelectObjectContent immediately moves queried objects to Frequent Access.",
+          "correct": false,
+          "why": "SelectObjectContent does not move objects to Frequent Access, and 90 days is earlier than required."
+        }
+      ],
+      "explanation": "The requirement concerns the inactivity clock for an optional archive tier. SelectObjectContent resets that clock, so enabling Deep Archive Access at 180 days lets each query defer archival without a separate tracking process. The subtle distinction is that SelectObjectContent does not move an object to Frequent Access or stop movement through the three automatic tiers.",
+      "keywordCues": [
+        "Deep Archive Access after 180 days without use",
+        "query datasets with SelectObjectContent",
+        "does not want queried datasets archived prematurely"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering-overview.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación guarda conjuntos de datos grandes en S3 Intelligent-Tiering y planea habilitar Deep Archive Access después de 180 días sin uso. Los analistas a veces consultan los datos con SelectObjectContent; el laboratorio considera esas consultas una actividad significativa y no quiere que los conjuntos consultados se archiven antes de tiempo. ¿Qué enfoque cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita Deep Archive Access a los 180 días y permite que las consultas con SelectObjectContent reinicien su período de inactividad.",
+            "why": "Esas consultas posponen el ingreso al nivel opcional de archivo profundo hasta que transcurra el período configurado desde la última consulta."
+          },
+          {
+            "id": "B",
+            "text": "Conserva solo los niveles automáticos y espera que SelectObjectContent impida el movimiento a Archive Instant Access.",
+            "why": "SelectObjectContent no impide el descenso por los niveles automáticos."
+          },
+          {
+            "id": "C",
+            "text": "Habilita Deep Archive Access a los 180 días y archiva los conjuntos de datos 180 días después de su carga, sin importar las consultas.",
+            "why": "Deep Archive Access considera la inactividad desde el acceso pertinente, no un plazo fijo desde la carga."
+          },
+          {
+            "id": "D",
+            "text": "Habilita Archive Access a los 90 días porque SelectObjectContent devuelve inmediatamente los objetos consultados a Frequent Access.",
+            "why": "SelectObjectContent no devuelve objetos a Frequent Access, y 90 días es antes de lo requerido."
+          }
+        ],
+        "explanation": "El requisito se refiere al período de inactividad de un nivel opcional de archivo. SelectObjectContent reinicia ese período, por lo que habilitar Deep Archive Access a los 180 días permite que cada consulta posponga el archivado sin un proceso de seguimiento aparte. La distinción importante es que SelectObjectContent no devuelve un objeto a Frequent Access ni detiene su movimiento por los tres niveles automáticos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-intelligent-tiering--8e2beb30",
+      "conceptId": "s3-intelligent-tiering",
+      "secondaryConcepts": [
+        "s3-infrequent-access-classes",
+        "s3-glacier-classes-retrieval"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A travel marketplace stores 3 MB destination images and 80 KB icons in Amazon S3. Campaigns can make old images popular again without warning, and any image request must have low-latency access without a restore step. The team wants automatic storage-tier adjustments for eligible images but will not assume that the icons can tier automatically. Which two choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the 3 MB images in S3 Intelligent-Tiering to adapt to changing access.",
+          "correct": true,
+          "why": "These images are eligible for automatic tiering as their demand changes."
+        },
+        {
+          "id": "B",
+          "text": "Place the 80 KB icons in Intelligent-Tiering and budget for their automatic movement to lower tiers.",
+          "correct": false,
+          "why": "Objects smaller than 128 KB are not monitored or eligible for automatic tiering."
+        },
+        {
+          "id": "C",
+          "text": "Leave Intelligent-Tiering's optional asynchronous archive tiers disabled for the images.",
+          "correct": true,
+          "why": "The automatic tiers retain low-latency access without an archive restore step."
+        },
+        {
+          "id": "D",
+          "text": "Place the images in S3 One Zone-IA and change their storage class manually after each campaign.",
+          "correct": false,
+          "why": "Manual changes do not satisfy the requirement for automatic adjustments to changing demand."
+        },
+        {
+          "id": "E",
+          "text": "Enable Intelligent-Tiering Archive Access for images after 90 days of inactivity.",
+          "correct": false,
+          "why": "Images in that optional tier require restoration rather than immediate low-latency retrieval."
+        }
+      ],
+      "explanation": "The large images have unpredictable demand, must remain available with low latency, and qualify for Intelligent-Tiering's automatic tier changes. Choose Intelligent-Tiering for those images and leave optional asynchronous archive tiers disabled so a newly popular image does not need restoration. The 80 KB icons cannot tier automatically, and manually changing an image's class misses the automation requirement.",
+      "keywordCues": [
+        "3 MB destination images and 80 KB icons",
+        "popular again without warning",
+        "low-latency access without a restore step",
+        "automatic storage-tier adjustments"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering-overview.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de viajes guarda imágenes de destinos de 3 MB e íconos de 80 KB en Amazon S3. Las campañas pueden volver populares imágenes antiguas sin aviso, y toda solicitud de imagen debe tener acceso de baja latencia sin una restauración. El equipo quiere ajustes automáticos del nivel de almacenamiento para las imágenes elegibles, pero no supondrá que los íconos pueden cambiar automáticamente de nivel. ¿Qué dos opciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Coloca las imágenes de 3 MB en S3 Intelligent-Tiering para adaptarse a los cambios de acceso.",
+            "why": "Estas imágenes cumplen los requisitos para cambiar automáticamente de nivel cuando varía la demanda."
+          },
+          {
+            "id": "B",
+            "text": "Coloca los íconos de 80 KB en Intelligent-Tiering y presupuesta su movimiento automático a niveles inferiores.",
+            "why": "Los objetos menores de 128 KB no se monitorean ni pueden cambiar automáticamente de nivel."
+          },
+          {
+            "id": "C",
+            "text": "Deja deshabilitados los niveles opcionales de archivo asíncrono de Intelligent-Tiering para las imágenes.",
+            "why": "Los niveles automáticos conservan el acceso de baja latencia sin un paso de restauración."
+          },
+          {
+            "id": "D",
+            "text": "Coloca las imágenes en S3 One Zone-IA y cambia manualmente su clase de almacenamiento después de cada campaña.",
+            "why": "Los cambios manuales no cumplen el requisito de ajustes automáticos ante variaciones de demanda."
+          },
+          {
+            "id": "E",
+            "text": "Habilita Intelligent-Tiering Archive Access para las imágenes después de 90 días de inactividad.",
+            "why": "Las imágenes en ese nivel opcional requieren restauración en lugar de recuperación inmediata de baja latencia."
+          }
+        ],
+        "explanation": "Las imágenes grandes tienen demanda impredecible, deben permanecer disponibles con baja latencia y cumplen los requisitos para los cambios automáticos de Intelligent-Tiering. Elige Intelligent-Tiering para ellas y deja deshabilitados los niveles opcionales de archivo asíncrono, de modo que una imagen que vuelva a ser popular no necesite restauración. Los íconos de 80 KB no pueden cambiar automáticamente de nivel, y cambiar manualmente la clase de una imagen incumple el requisito de automatización."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-intelligent-tiering--r0",
+      "conceptId": "s3-intelligent-tiering",
+      "kind": "recall",
+      "prompt": "Which S3 storage class fits large objects with unpredictable access and immediate retrieval needs, and how does it handle inactivity?",
+      "promptEs": "¿Qué clase de S3 conviene para objetos grandes con acceso impredecible y recuperación inmediata, y cómo maneja la inactividad?",
+      "idealAnswer": "Choose S3 Intelligent-Tiering without enabling optional asynchronous archive tiers. Eligible objects automatically move to Infrequent Access after 30 days without access and Archive Instant Access after 90 days; both retain low-latency access.",
+      "rubric": [
+        "Names S3 Intelligent-Tiering.",
+        "Explains automatic movement based on inactivity.",
+        "Keeps optional asynchronous archive tiers disabled for immediate retrieval."
+      ]
+    },
+    {
+      "id": "s3-intelligent-tiering--r1",
+      "conceptId": "s3-intelligent-tiering",
+      "kind": "why-not",
+      "prompt": "Why not enable Intelligent-Tiering Deep Archive Access for objects that may become popular again and always need immediate retrieval?",
+      "promptEs": "¿Por qué no habilitarías Intelligent-Tiering Deep Archive Access para objetos que pueden volver a ser populares y siempre requieren recuperación inmediata?",
+      "idealAnswer": "Deep Archive Access is an optional asynchronous tier: an object in it must be restored before retrieval. Leave it disabled when every request needs immediate access, and use Intelligent-Tiering's automatic low-latency tiers instead.",
+      "rubric": [
+        "Identifies Deep Archive Access as asynchronous.",
+        "States that retrieval requires restoration.",
+        "Contrasts it with Intelligent-Tiering's automatic low-latency tiers."
+      ]
+    }
+  ]
+}

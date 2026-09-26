@@ -1,0 +1,390 @@
+{
+  "conceptId": "route-tables-internet-gateway",
+  "card": {
+    "en": {
+      "tldr": "A subnet is public when its associated route table has a route to an internet gateway (IGW). To troubleshoot internet connectivity, check both the route for the traffic’s destination and whether the resource has the required public IPv4 or IPv6 address.",
+      "whenToUse": [
+        "You need to decide whether a subnet is public or private from its associated route table.",
+        "An instance has a public IP address but cannot communicate through an IGW.",
+        "A design needs internet routing for IPv4, IPv6, or only a specified destination range."
+      ],
+      "keyFacts": [
+        "A route has a destination and a target; routing depends on the destination IP address.",
+        "An IGW must be attached to the VPC and used as a route target.",
+        "A route to an IGW makes its associated subnet public; without that route, the subnet is private.",
+        "An IGW route can use 0.0.0.0/0 for IPv4, ::/0 for IPv6, or a narrower destination range.",
+        "IPv4 communication through an IGW requires a public IPv4 address or Elastic IP address on the instance.",
+        "IPv6 communication requires IPv6 CIDR blocks for the VPC and subnet and an IPv6 address on the instance."
+      ],
+      "gotchas": [
+        "An attached IGW alone does not make every subnet public; inspect the subnet’s associated route table.",
+        "A public IPv4 address alone cannot overcome a missing route to the IGW.",
+        "An IPv4 route to an IGW does not provide an IPv6 route."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "subnet route table has no route to the internet gateway",
+        "instance has a public IPv4 address but cannot reach the internet",
+        "IPv6 address assigned, but only an IPv4 default route exists",
+        "route internet traffic only to approved public endpoints"
+      ]
+    },
+    "es": {
+      "tldr": "Una subred es pública cuando su tabla de rutas asociada tiene una ruta hacia un internet gateway (IGW). Para diagnosticar la conectividad a internet, revisa tanto la ruta hacia el destino como si el recurso tiene la dirección pública IPv4 o IPv6 necesaria.",
+      "whenToUse": [
+        "Necesitas determinar si una subred es pública o privada a partir de su tabla de rutas asociada.",
+        "Una instancia tiene una dirección IP pública, pero no puede comunicarse mediante un IGW.",
+        "Un diseño necesita rutas hacia internet para IPv4, IPv6 o solo un rango específico de destinos."
+      ],
+      "keyFacts": [
+        "Una ruta tiene un destino y un objetivo; el tráfico se enruta según la dirección IP de destino.",
+        "El IGW debe estar conectado a la VPC y configurado como objetivo de una ruta.",
+        "Una ruta hacia un IGW hace pública a la subred asociada; sin esa ruta, la subred es privada.",
+        "Una ruta hacia un IGW puede usar 0.0.0.0/0 para IPv4, ::/0 para IPv6 o un rango de destinos más limitado.",
+        "Para comunicarse por IPv4 mediante un IGW, la instancia necesita una dirección IPv4 pública o una Elastic IP.",
+        "Para comunicarse por IPv6, la VPC y la subred necesitan bloques CIDR IPv6, y la instancia necesita una dirección IPv6."
+      ],
+      "gotchas": [
+        "Conectar un IGW no vuelve públicas a todas las subredes; revisa la tabla de rutas asociada a cada una.",
+        "Una dirección IPv4 pública no compensa la ausencia de una ruta hacia el IGW.",
+        "Una ruta IPv4 hacia un IGW no proporciona una ruta IPv6."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "subnet route table has no route to the internet gateway",
+        "instance has a public IPv4 address but cannot reach the internet",
+        "IPv6 address assigned, but only an IPv4 default route exists",
+        "route internet traffic only to approved public endpoints"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route-tables-internet-gateway--e6980ea2",
+      "conceptId": "route-tables-internet-gateway",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small publisher launches an EC2 instance in a nondefault VPC to serve a public catalog over IPv4. The subnet’s associated route table sends 0.0.0.0/0 to an attached internet gateway, but the instance was launched with only a private IPv4 address. Network permissions permit the catalog traffic. Which change meets the public-connectivity requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the IGW route with a route to a NAT gateway.",
+          "correct": false,
+          "why": "Removing the IGW route does not meet the requirement for visitors to reach the instance over IPv4."
+        },
+        {
+          "id": "B",
+          "text": "Add another 0.0.0.0/0 route to the same internet gateway.",
+          "correct": false,
+          "why": "The subnet already has an IGW route; the instance lacks a public IPv4 address."
+        },
+        {
+          "id": "C",
+          "text": "Assign an Elastic IP address to the instance.",
+          "correct": true,
+          "why": "An Elastic IP supplies the public IPv4 address needed to communicate through the existing IGW route."
+        },
+        {
+          "id": "D",
+          "text": "Add an IPv6 default route to the internet gateway.",
+          "correct": false,
+          "why": "An IPv6 route does not give this IPv4-only instance a public IPv4 address."
+        }
+      ],
+      "explanation": "The subnet already has the route that makes it public. IPv4 communication through the IGW also requires the instance to have a public IPv4 address, which an Elastic IP provides. Changing the route would address the wrong part of this configuration.",
+      "keywordCues": [
+        "serve a public catalog over IPv4",
+        "sends 0.0.0.0/0 to an attached internet gateway",
+        "only a private IPv4 address"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+      ],
+      "es": {
+        "stem": "Una editorial pequeña lanza una instancia EC2 en una VPC no predeterminada para ofrecer un catálogo público por IPv4. La tabla de rutas asociada a la subred envía 0.0.0.0/0 a un internet gateway conectado, pero la instancia se lanzó solo con una dirección IPv4 privada. Los permisos de red permiten el tráfico del catálogo. ¿Qué cambio cumple el requisito de conectividad pública?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplaza la ruta hacia el IGW por una ruta hacia un NAT gateway.",
+            "why": "Quitar la ruta hacia el IGW no cumple el requisito de que los visitantes lleguen a la instancia por IPv4."
+          },
+          {
+            "id": "B",
+            "text": "Agrega otra ruta 0.0.0.0/0 al mismo internet gateway.",
+            "why": "La subred ya tiene una ruta hacia el IGW; a la instancia le falta una dirección IPv4 pública."
+          },
+          {
+            "id": "C",
+            "text": "Asigna una Elastic IP a la instancia.",
+            "why": "Una Elastic IP aporta la dirección IPv4 pública necesaria para comunicarse mediante la ruta existente hacia el IGW."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una ruta IPv6 predeterminada hacia el internet gateway.",
+            "why": "Una ruta IPv6 no le da una dirección IPv4 pública a esta instancia que solo usa IPv4."
+          }
+        ],
+        "explanation": "La subred ya tiene la ruta que la hace pública. La comunicación IPv4 mediante el IGW también requiere que la instancia tenga una dirección IPv4 pública, que puede proporcionar una Elastic IP. Cambiar la ruta atendería una parte de la configuración que ya está resuelta."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route-tables-internet-gateway--5d279ad5",
+      "conceptId": "route-tables-internet-gateway",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A community theater is preparing a new EC2 instance in a nondefault VPC to accept connections from visitors over the public IPv4 internet. The VPC already has an attached internet gateway, but the intended subnet’s associated route table has no route to it. The instance currently has only a private IPv4 address, and network permissions will allow the visitor traffic. Which two changes are required for internet connectivity through the gateway? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Assign an IPv6 address to the instance while leaving its IPv4 address private.",
+          "correct": false,
+          "why": "An IPv6 address does not satisfy the requirement for a public IPv4 address."
+        },
+        {
+          "id": "B",
+          "text": "Add a ::/0 route targeting the internet gateway to the subnet’s associated route table.",
+          "correct": false,
+          "why": "An IPv6 default route does not route the requested public IPv4 traffic."
+        },
+        {
+          "id": "C",
+          "text": "Add a 0.0.0.0/0 route targeting the internet gateway to the subnet’s associated route table.",
+          "correct": true,
+          "why": "This provides the subnet’s route to the attached IGW for IPv4 internet traffic."
+        },
+        {
+          "id": "D",
+          "text": "Assign a public IPv4 address or Elastic IP address to the instance.",
+          "correct": true,
+          "why": "The instance needs a public IPv4 address to communicate through the IGW over IPv4."
+        },
+        {
+          "id": "E",
+          "text": "Add a 0.0.0.0/0 route targeting a NAT gateway to the subnet’s associated route table.",
+          "correct": false,
+          "why": "A NAT gateway route does not provide the required route to the IGW."
+        }
+      ],
+      "explanation": "Two pieces are missing: an IGW route in the subnet’s associated route table and a public IPv4 address on the instance. Adding 0.0.0.0/0 to the IGW supplies the route; assigning a public IPv4 address or Elastic IP supplies the required instance address. IPv6 changes do not resolve an IPv4 connectivity requirement.",
+      "keywordCues": [
+        "public IPv4 internet",
+        "associated route table has no route to it",
+        "only a private IPv4 address",
+        "Which two changes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+      ],
+      "es": {
+        "stem": "Un teatro comunitario prepara una nueva instancia EC2 en una VPC no predeterminada para aceptar conexiones de visitantes por internet público IPv4. La VPC ya tiene un internet gateway conectado, pero la tabla de rutas asociada a la subred prevista no tiene una ruta hacia él. La instancia actualmente solo tiene una dirección IPv4 privada, y los permisos de red permitirán el tráfico de los visitantes. ¿Qué dos cambios se requieren para la conectividad a internet mediante el gateway? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asigna una dirección IPv6 a la instancia y conserva su dirección IPv4 privada.",
+            "why": "Una dirección IPv6 no cumple el requisito de una dirección IPv4 pública."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una ruta ::/0 hacia el internet gateway en la tabla de rutas asociada a la subred.",
+            "why": "Una ruta IPv6 predeterminada no enruta el tráfico IPv4 público solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Agrega una ruta 0.0.0.0/0 hacia el internet gateway en la tabla de rutas asociada a la subred.",
+            "why": "Esto proporciona a la subred la ruta hacia el IGW conectado para el tráfico IPv4 de internet."
+          },
+          {
+            "id": "D",
+            "text": "Asigna una dirección IPv4 pública o una Elastic IP a la instancia.",
+            "why": "La instancia necesita una dirección IPv4 pública para comunicarse por IPv4 mediante el IGW."
+          },
+          {
+            "id": "E",
+            "text": "Agrega una ruta 0.0.0.0/0 hacia un NAT gateway en la tabla de rutas asociada a la subred.",
+            "why": "Una ruta hacia un NAT gateway no proporciona la ruta requerida hacia el IGW."
+          }
+        ],
+        "explanation": "Faltan dos elementos: una ruta hacia el IGW en la tabla asociada a la subred y una dirección IPv4 pública en la instancia. Agregar 0.0.0.0/0 hacia el IGW proporciona la ruta; asignar una dirección IPv4 pública o una Elastic IP proporciona la dirección necesaria para la instancia. Los cambios de IPv6 no resuelven un requisito de conectividad IPv4."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route-tables-internet-gateway--4a48bffe",
+      "conceptId": "route-tables-internet-gateway",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum hosts a ticket-status page on an EC2 instance with a public IPv4 address. Its VPC has an attached internet gateway, but the instance’s subnet is associated with a route table whose default IPv4 route targets a NAT gateway. Network permissions already allow the requested traffic. Which change enables visitors on the internet to reach the instance?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Change the default IPv4 route to target a VPC peering connection.",
+          "correct": false,
+          "why": "A peering connection does not provide the required route to the internet through the IGW."
+        },
+        {
+          "id": "B",
+          "text": "Keep the subnet route table and add a second internet gateway to the VPC.",
+          "correct": false,
+          "why": "The VPC already has an IGW; the subnet’s associated route table still does not target it."
+        },
+        {
+          "id": "C",
+          "text": "Associate the subnet with a route table that sends 0.0.0.0/0 to the internet gateway.",
+          "correct": true,
+          "why": "The instance already has a public IPv4 address, so a route to the attached IGW supplies the missing path."
+        },
+        {
+          "id": "D",
+          "text": "Keep the NAT gateway route and assign an Elastic IP address to the instance.",
+          "correct": false,
+          "why": "Replacing one form of public IPv4 address with another does not supply the missing IGW route."
+        }
+      ],
+      "explanation": "The deciding detail is the default route in the subnet’s associated route table. For the subnet to be public, that table needs a route to the IGW, and the instance already meets the public IPv4 address requirement. Assigning an Elastic IP would not fix the route to the NAT gateway.",
+      "keywordCues": [
+        "public IPv4 address",
+        "attached internet gateway",
+        "default IPv4 route targets a NAT gateway",
+        "visitors on the internet to reach the instance"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+      ],
+      "es": {
+        "stem": "Un museo publica el estado de sus boletos en una instancia EC2 con una dirección IPv4 pública. Su VPC tiene un internet gateway conectado, pero la subred de la instancia está asociada a una tabla de rutas cuya ruta IPv4 predeterminada apunta a un NAT gateway. Los permisos de red ya permiten el tráfico solicitado. ¿Qué cambio permite que los visitantes en internet lleguen a la instancia?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Cambia la ruta IPv4 predeterminada para que apunte a una conexión de VPC peering.",
+            "why": "Una conexión de peering no proporciona la ruta requerida hacia internet mediante el IGW."
+          },
+          {
+            "id": "B",
+            "text": "Conserva la tabla de rutas de la subred y agrega otro internet gateway a la VPC.",
+            "why": "La VPC ya tiene un IGW; la tabla de rutas asociada a la subred sigue sin apuntar a él."
+          },
+          {
+            "id": "C",
+            "text": "Asocia la subred a una tabla de rutas que envíe 0.0.0.0/0 al internet gateway.",
+            "why": "La instancia ya tiene una dirección IPv4 pública; la ruta hacia el IGW aporta el camino que falta."
+          },
+          {
+            "id": "D",
+            "text": "Conserva la ruta hacia el NAT gateway y asigna una Elastic IP a la instancia.",
+            "why": "Cambiar una forma de dirección IPv4 pública por otra no aporta la ruta faltante hacia el IGW."
+          }
+        ],
+        "explanation": "El detalle decisivo es la ruta predeterminada de la tabla asociada a la subred. Para que la subred sea pública, esa tabla necesita una ruta hacia el IGW, y la instancia ya cumple el requisito de tener una dirección IPv4 pública. Asignar una Elastic IP no corregiría la ruta hacia el NAT gateway."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route-tables-internet-gateway--6ccd29b5",
+      "conceptId": "route-tables-internet-gateway",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab has assigned an IPv6 CIDR block to its VPC and subnet and an IPv6 address to an EC2 instance. The VPC has an attached internet gateway. The subnet’s associated route table contains 0.0.0.0/0 to that gateway but no IPv6 route; network permissions allow the traffic. Which change enables the instance to communicate with IPv6 destinations on the internet?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add ::/0 with the internet gateway as its target to the associated route table.",
+          "correct": true,
+          "why": "The instance has the necessary IPv6 addressing, and ::/0 directs IPv6 internet traffic to the IGW."
+        },
+        {
+          "id": "B",
+          "text": "Add another 0.0.0.0/0 route with the internet gateway as its target.",
+          "correct": false,
+          "why": "An additional IPv4 route would not match the IPv6 destinations in this scenario."
+        },
+        {
+          "id": "C",
+          "text": "Replace 0.0.0.0/0 with an IPv4 route to a NAT gateway.",
+          "correct": false,
+          "why": "Changing the IPv4 route does not provide a route for IPv6 destination addresses."
+        },
+        {
+          "id": "D",
+          "text": "Assign an Elastic IP address to the instance.",
+          "correct": false,
+          "why": "An Elastic IP addresses IPv4 connectivity, while the missing route is for IPv6 destinations."
+        }
+      ],
+      "explanation": "Routes are selected using the destination IP address. The existing 0.0.0.0/0 route applies to IPv4, so it does not route traffic to IPv6 internet destinations. Because the VPC, subnet, and instance already have IPv6 addressing, adding ::/0 to the IGW supplies the missing route.",
+      "keywordCues": [
+        "IPv6 CIDR block to its VPC and subnet",
+        "an IPv6 address",
+        "0.0.0.0/0 to that gateway but no IPv6 route",
+        "IPv6 destinations on the internet"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación asignó un bloque CIDR IPv6 a su VPC y subred, y una dirección IPv6 a una instancia EC2. La VPC tiene un internet gateway conectado. La tabla de rutas asociada a la subred contiene 0.0.0.0/0 hacia ese gateway, pero ninguna ruta IPv6; los permisos de red permiten el tráfico. ¿Qué cambio permite que la instancia se comunique con destinos IPv6 en internet?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega ::/0 con el internet gateway como objetivo en la tabla de rutas asociada.",
+            "why": "La instancia ya tiene el direccionamiento IPv6 necesario, y ::/0 dirige el tráfico IPv6 de internet hacia el IGW."
+          },
+          {
+            "id": "B",
+            "text": "Agrega otra ruta 0.0.0.0/0 con el internet gateway como objetivo.",
+            "why": "Otra ruta IPv4 no coincidiría con los destinos IPv6 de este escenario."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza 0.0.0.0/0 por una ruta IPv4 hacia un NAT gateway.",
+            "why": "Cambiar la ruta IPv4 no proporciona una ruta para direcciones IPv6 de destino."
+          },
+          {
+            "id": "D",
+            "text": "Asigna una Elastic IP a la instancia.",
+            "why": "Una Elastic IP sirve para la conectividad IPv4, mientras que la ruta faltante es para destinos IPv6."
+          }
+        ],
+        "explanation": "Las rutas se seleccionan según la dirección IP de destino. La ruta 0.0.0.0/0 existente corresponde a IPv4, por lo que no enruta tráfico hacia destinos IPv6 en internet. Como la VPC, la subred y la instancia ya tienen direccionamiento IPv6, agregar ::/0 hacia el IGW aporta la ruta faltante."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": []
+}

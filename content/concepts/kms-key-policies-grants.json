@@ -1,0 +1,322 @@
+{
+  "conceptId": "kms-key-policies-grants",
+  "card": {
+    "en": {
+      "tldr": "A KMS key policy is the primary access control for a KMS key; an IAM allow alone cannot grant access unless the key policy permits it. For cross-account key use, the key owner's policy must permit the external account or principal, and the external account must delegate the permitted actions to its identity.",
+      "whenToUse": [
+        "An application in one AWS account must encrypt or decrypt with a KMS key owned by another account.",
+        "An IAM role has KMS permissions but still cannot use a key.",
+        "Only a specific external role should be able to use a shared key."
+      ],
+      "keyFacts": [
+        "Every KMS key has exactly one key policy, and key policies are Regional.",
+        "A key policy can name an external account or specific external users or roles; the external account must also grant the applicable permissions to its identities.",
+        "The IAM policy in the external account can grant only actions and principals permitted by the key policy.",
+        "Cross-account permissions work for cryptographic operations and certain listed operations, including CreateGrant and DescribeKey, but not ScheduleKeyDeletion.",
+        "For cross-account cryptographic requests, identify the key by its key ARN or alias ARN; a bare key ID or alias name is treated as a key in the caller's account."
+      ],
+      "gotchas": [
+        "Granting an external role kms:Decrypt in IAM does not override a key policy that excludes it.",
+        "Naming an external account in the key policy does not, by itself, give every identity in that account usable access.",
+        "Do not use an unrestricted * principal in an allow statement: it can expose the key to identities in other accounts that have matching permissions."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "cross-account decrypt with a customer managed key",
+        "IAM role already allows kms:Decrypt but access fails",
+        "share key use with one external role",
+        "key ID fails for a key in another account"
+      ]
+    },
+    "es": {
+      "tldr": "La key policy es el control de acceso principal de una KMS key; un permiso de IAM por sí solo no concede acceso si la key policy no lo permite. Para usar una clave entre cuentas, la política de la cuenta propietaria debe permitir la cuenta o identidad externa, y la cuenta externa debe delegar las acciones permitidas a su identidad.",
+      "whenToUse": [
+        "Una aplicación de una cuenta de AWS debe cifrar o descifrar con una KMS key de otra cuenta.",
+        "Un IAM role tiene permisos de KMS, pero aun así no puede usar la clave.",
+        "Solo un rol externo específico debe poder usar una clave compartida."
+      ],
+      "keyFacts": [
+        "Cada KMS key tiene exactamente una key policy, y las key policies son Regional.",
+        "Una key policy puede nombrar una cuenta externa o usuarios o roles externos específicos; la cuenta externa también debe conceder los permisos correspondientes a sus identidades.",
+        "La IAM policy de la cuenta externa solo puede conceder acciones a identidades permitidas por la key policy.",
+        "Los permisos entre cuentas funcionan para operaciones criptográficas y ciertas operaciones enumeradas, incluidas CreateGrant y DescribeKey, pero no ScheduleKeyDeletion.",
+        "Para operaciones criptográficas entre cuentas, identifica la clave con su key ARN o alias ARN; un key ID o alias name sin ARN se interpreta como una clave de la cuenta que hace la solicitud."
+      ],
+      "gotchas": [
+        "Conceder kms:Decrypt a un rol externo mediante IAM no anula una key policy que lo excluye.",
+        "Nombrar una cuenta externa en la key policy no da, por sí solo, acceso utilizable a todas sus identidades.",
+        "No uses un principal * sin condiciones en una declaración allow: puede exponer la clave a identidades de otras cuentas que tengan permisos correspondientes."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "cross-account decrypt with a customer managed key",
+        "IAM role already allows kms:Decrypt but access fails",
+        "share key use with one external role",
+        "key ID fails for a key in another account"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+      "https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-modifying-external-accounts.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "kms-key-policies-grants--1d6c3083",
+      "conceptId": "kms-key-policies-grants",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics firm has authorized a role in its reporting account to encrypt data with a KMS key in its security account. The key policy and the role's IAM policy allow the operation, but the role's application specifies only the key ID and cannot use the intended key. The team wants to keep the existing cross-account access model. Which change should the team make?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Select the security account's key from the KMS console list in the reporting account.",
+          "correct": false,
+          "why": "The KMS console does not list keys from other accounts, even when the role can use them."
+        },
+        {
+          "id": "B",
+          "text": "Specify the security account's key ARN in the encryption request.",
+          "correct": true,
+          "why": "A key ARN identifies the KMS key in the other account for a cryptographic operation."
+        },
+        {
+          "id": "C",
+          "text": "Replace the key ID with the key's alias name, without an ARN.",
+          "correct": false,
+          "why": "A bare alias name, like a bare key ID, is interpreted as a key in the caller's account."
+        },
+        {
+          "id": "D",
+          "text": "Add kms:ListKeys to the reporting role's IAM policy.",
+          "correct": false,
+          "why": "ListKeys does not change how the encryption request resolves a bare key ID."
+        }
+      ],
+      "explanation": "Both policies already provide cross-account encryption permission; the remaining problem is key identification. For a cryptographic request against a key in another account, the application can supply its key ARN or alias ARN. A bare key ID is interpreted as referring to a key in the caller's account. Adding ListKeys permission does not fix that interpretation.",
+      "keywordCues": [
+        "key policy and the role's IAM policy allow the operation",
+        "specifies only the key ID",
+        "existing cross-account access model"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+        "https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-modifying-external-accounts.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística autorizó a un rol de su cuenta de reportes a cifrar datos con una KMS key de su cuenta de seguridad. La key policy y la IAM policy del rol permiten la operación, pero la aplicación del rol indica solo el key ID y no puede usar la clave prevista. El equipo quiere conservar el modelo de acceso entre cuentas existente. ¿Qué cambio debe hacer?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Selecciona la clave de la cuenta de seguridad en la lista de la consola de KMS de la cuenta de reportes.",
+            "why": "La consola de KMS no muestra claves de otras cuentas, incluso si el rol puede usarlas."
+          },
+          {
+            "id": "B",
+            "text": "Indica el key ARN de la cuenta de seguridad en la solicitud de cifrado.",
+            "why": "Un key ARN identifica la KMS key de la otra cuenta para una operación criptográfica."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza el key ID por el alias name de la clave, sin un ARN.",
+            "why": "Un alias name sin ARN, al igual que un key ID sin ARN, se interpreta como una clave de la cuenta que hace la solicitud."
+          },
+          {
+            "id": "D",
+            "text": "Agrega kms:ListKeys a la IAM policy del rol de reportes.",
+            "why": "ListKeys no cambia cómo la solicitud de cifrado interpreta un key ID sin ARN."
+          }
+        ],
+        "explanation": "Ambas políticas ya conceden el permiso de cifrado entre cuentas; el problema restante es identificar la clave. Para una solicitud criptográfica sobre una clave de otra cuenta, la aplicación puede proporcionar su key ARN o alias ARN. Un key ID sin ARN se interpreta como una clave de la cuenta que hace la solicitud. Agregar ListKeys no cambia esa interpretación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-key-policies-grants--01564779",
+      "conceptId": "kms-key-policies-grants",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturing company keeps a KMS key in a central security account. A quality-control role in a separate account must decrypt data with that key, but neither account has configured cross-account key access. The application will identify the key by its ARN, and the company wants to authorize only that role and the required operation. Which TWO changes provide the required KMS permissions? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach an IAM policy to the quality-control role allowing kms:Decrypt on the key ARN.",
+          "correct": true,
+          "why": "The role also needs an IAM policy in its own account permitting the operation on that key."
+        },
+        {
+          "id": "B",
+          "text": "Enable IAM policies in the key policy only for identities in the security account.",
+          "correct": false,
+          "why": "Enabling IAM permissions only for the owner's account does not authorize the external quality-control role."
+        },
+        {
+          "id": "C",
+          "text": "Grant kms:Decrypt to a role in the security account that does not make the requests.",
+          "correct": false,
+          "why": "Permissions for a different role do not grant the requesting role access to the key."
+        },
+        {
+          "id": "D",
+          "text": "Allow the quality-control role ARN to perform kms:Decrypt in the key's policy.",
+          "correct": true,
+          "why": "The owner's key policy must permit the external role and the intended decrypt operation."
+        },
+        {
+          "id": "E",
+          "text": "Give the quality-control role the key ARN without changing either account's policies.",
+          "correct": false,
+          "why": "The ARN identifies the key but does not grant permission to use it."
+        }
+      ],
+      "explanation": "Cross-account use requires permission on both sides: the key owner's key policy and the external identity's IAM policy. Allowing kms:Decrypt for the named role in the key policy limits access to the intended external principal. An IAM policy on that role then permits the same operation on the key ARN. Possessing the ARN identifies the key but does not replace either permission.",
+      "keywordCues": [
+        "separate account",
+        "neither account has configured cross-account key access",
+        "authorize only that role and the required operation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+        "https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-modifying-external-accounts.html"
+      ],
+      "es": {
+        "stem": "Una empresa manufacturera mantiene una KMS key en una cuenta central de seguridad. Un rol de control de calidad en otra cuenta debe descifrar datos con esa clave, pero ninguna de las cuentas ha configurado el acceso entre cuentas a la clave. La aplicación identificará la clave mediante su ARN, y la empresa quiere autorizar solo a ese rol y la operación requerida. ¿Qué DOS cambios proporcionan los permisos de KMS necesarios? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Adjunta al rol de control de calidad una IAM policy que permita kms:Decrypt sobre el key ARN.",
+            "why": "El rol también necesita una IAM policy en su propia cuenta que permita la operación sobre esa clave."
+          },
+          {
+            "id": "B",
+            "text": "Habilita IAM policies en la key policy solo para las identidades de la cuenta de seguridad.",
+            "why": "Habilitar permisos de IAM solo para la cuenta propietaria no autoriza al rol externo de control de calidad."
+          },
+          {
+            "id": "C",
+            "text": "Concede kms:Decrypt a un rol de la cuenta de seguridad que no hace las solicitudes.",
+            "why": "Los permisos de otro rol no conceden acceso a la clave al rol que hace las solicitudes."
+          },
+          {
+            "id": "D",
+            "text": "Permite que el ARN del rol de control de calidad ejecute kms:Decrypt en la key policy.",
+            "why": "La key policy de la cuenta propietaria debe permitir al rol externo y la operación de descifrado prevista."
+          },
+          {
+            "id": "E",
+            "text": "Entrega el key ARN al rol de control de calidad sin cambiar las políticas de ninguna cuenta.",
+            "why": "El ARN identifica la clave, pero no concede permiso para usarla."
+          }
+        ],
+        "explanation": "El uso entre cuentas requiere permisos en ambos lados: la key policy de la cuenta propietaria y la IAM policy de la identidad externa. Permitir kms:Decrypt para el rol nombrado en la key policy limita el acceso a la identidad externa prevista. Una IAM policy adjunta a ese rol permite la misma operación sobre el key ARN. Tener el ARN identifica la clave, pero no reemplaza ninguno de los permisos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-key-policies-grants--48337bbd",
+      "conceptId": "kms-key-policies-grants",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research company stores encrypted analysis results in one AWS account. A processing role in a second account already has an IAM policy allowing kms:Decrypt on the KMS key ARN, but its decrypt requests are denied. The key owner's policy does not mention the second account. Which change allows only that processing role to use the key for decryption with the MOST restrictive access?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add kms:Decrypt to the processing role's existing IAM policy with a Resource of *.",
+          "correct": false,
+          "why": "A broader IAM resource does not help when the owning account's key policy does not permit the external role."
+        },
+        {
+          "id": "B",
+          "text": "Add the processing role ARN as a principal in the key policy and allow kms:Decrypt.",
+          "correct": true,
+          "why": "The existing IAM permission and a key policy allowance for that specific external role provide the required cross-account access."
+        },
+        {
+          "id": "C",
+          "text": "Add kms:ListKeys to the processing role's IAM policy in the second account.",
+          "correct": false,
+          "why": "ListKeys does not grant decrypt access and is not an effective cross-account permission on the owner's key."
+        },
+        {
+          "id": "D",
+          "text": "Add the second account as a principal in the key policy and allow kms:Decrypt.",
+          "correct": false,
+          "why": "This can enable the existing role, but it also lets that account's administrators delegate the permission to other identities, missing the restriction to one role."
+        }
+      ],
+      "explanation": "The deciding requirements are cross-account decryption and access limited to one role. The role already has its IAM permission, so the missing allowance belongs in the key owner's key policy. Naming the role ARN there restricts which external identity can receive the permission. Naming the entire external account would work for access but would permit broader delegation than requested.",
+      "keywordCues": [
+        "already has an IAM policy allowing kms:Decrypt",
+        "key owner's policy does not mention the second account",
+        "only that processing role"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+        "https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-modifying-external-accounts.html"
+      ],
+      "es": {
+        "stem": "Una empresa de investigación guarda resultados de análisis cifrados en una cuenta de AWS. Un rol de procesamiento en una segunda cuenta ya tiene una IAM policy que permite kms:Decrypt sobre el KMS key ARN, pero sus solicitudes de descifrado son rechazadas. La key policy de la cuenta propietaria no menciona la segunda cuenta. ¿Qué cambio permite que solo ese rol use la clave para descifrar con el acceso MOST restrictive?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agrega kms:Decrypt a la IAM policy existente del rol de procesamiento con un Resource de *.",
+            "why": "Ampliar el Resource en IAM no ayuda si la key policy de la cuenta propietaria no permite al rol externo."
+          },
+          {
+            "id": "B",
+            "text": "Agrega el ARN del rol de procesamiento como principal en la key policy y permite kms:Decrypt.",
+            "why": "El permiso de IAM existente y la autorización en la key policy para ese rol externo específico proporcionan el acceso entre cuentas requerido."
+          },
+          {
+            "id": "C",
+            "text": "Agrega kms:ListKeys a la IAM policy del rol de procesamiento en la segunda cuenta.",
+            "why": "ListKeys no concede acceso para descifrar ni es un permiso entre cuentas efectivo sobre la clave de la cuenta propietaria."
+          },
+          {
+            "id": "D",
+            "text": "Agrega la segunda cuenta como principal en la key policy y permite kms:Decrypt.",
+            "why": "Esto puede habilitar al rol existente, pero también permite que los administradores de esa cuenta deleguen el permiso a otras identidades."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el descifrado entre cuentas y el acceso limitado a un solo rol. El rol ya tiene su permiso de IAM, así que falta autorizarlo en la key policy de la cuenta propietaria. Indicar allí el ARN del rol limita qué identidad externa puede recibir el permiso. Indicar toda la cuenta externa permitiría una delegación más amplia que la solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "kms-key-policies-grants--r0",
+      "conceptId": "kms-key-policies-grants",
+      "kind": "recall",
+      "prompt": "An external role needs to decrypt with your account's KMS key. Which policies must permit it, and why?",
+      "promptEs": "Un rol externo debe descifrar con la KMS key de tu cuenta. ¿Qué políticas deben permitirlo y por qué?",
+      "idealAnswer": "The key policy in the owning account must permit the external role or its account to decrypt. An IAM policy in the external role's account must also grant that role kms:Decrypt on the key; neither policy alone is sufficient for this cross-account use.",
+      "rubric": [
+        "Identifies the key policy in the key-owning account.",
+        "Identifies an IAM policy granting permission to the role in the external account.",
+        "Explains that both must allow the required decrypt operation."
+      ]
+    }
+  ]
+}

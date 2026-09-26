@@ -1,0 +1,421 @@
+{
+  "conceptId": "compute-cost-lambda-ec2-fargate",
+  "card": {
+    "en": {
+      "tldr": "Choose compute using measured utilization, workload requirements, and a cost model—not a blanket rule that one service is cheapest. Standard Lambda functions charge by requests and execution duration; steady workloads may justify evaluating EC2 purchasing options or Lambda Managed Instances, while an existing container workload may favor Fargate when the cost model and operational requirements support it.",
+      "whenToUse": [
+        "Short, infrequent code executions with long idle periods: evaluate standard Lambda functions.",
+        "A containerized workload that should avoid managing EC2 instances: evaluate Fargate against the modeled alternatives.",
+        "Predictable, sustained demand: right-size resources and evaluate applicable EC2 purchasing options.",
+        "High-volume Lambda functions that must retain the Lambda programming model: evaluate Lambda Managed Instances."
+      ],
+      "keyFacts": [
+        "Standard Lambda functions are priced by request count and execution duration, measured in GB-seconds.",
+        "Lambda Managed Instances use EC2 instances managed by Lambda and retain the Lambda programming model; their charges include requests, EC2 instance charges, and a compute management fee.",
+        "The provided pricing documentation identifies Compute Savings Plans, EC2 Instance Savings Plans, and Reserved Instances as options for eligible EC2 instance charges.",
+        "AWS recommends cost modeling and selecting resource type, size, and number based on workload data."
+      ],
+      "gotchas": [
+        "Infrequent requests do not necessarily make Lambda cheapest if each execution consumes substantial duration and memory.",
+        "A steady workload does not, by itself, establish that EC2 beats Fargate; compare modeled costs for designs that meet the requirements.",
+        "Lambda Managed Instances are not billed like standard Lambda functions: EC2 instance and management charges apply."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Standard Lambda functions vs. Lambda Managed Instances",
+          "difference": "Standard functions have request and execution-duration charges; Managed Instances add EC2 instance and management charges while retaining the Lambda programming model."
+        },
+        {
+          "concept": "Fargate vs. EC2",
+          "difference": "For a container workload, use its operational constraints and measured cost model to decide rather than assuming either option is always cheaper."
+        }
+      ],
+      "examCues": [
+        "brief requests with long idle periods",
+        "must retain the Lambda programming model",
+        "containerized application; no EC2 instance management",
+        "steady utilization with measured instance requirements",
+        "cost model compares only compliant designs"
+      ]
+    },
+    "es": {
+      "tldr": "Elige el cómputo según la utilización medida, los requisitos y un modelo de costos; ningún servicio es siempre el más barato. Las funciones Lambda estándar cobran por solicitudes y duración de ejecución; para cargas sostenidas, evalúa opciones de compra de EC2 o Lambda Managed Instances, y para contenedores considera Fargate si el modelo de costos y los requisitos operativos lo respaldan.",
+      "whenToUse": [
+        "Código que se ejecuta brevemente y con poca frecuencia, con largos períodos de inactividad: evalúa funciones Lambda estándar.",
+        "Una carga en contenedores que no debe requerir administrar instancias EC2: compara Fargate con las alternativas modeladas.",
+        "Demanda predecible y sostenida: ajusta los recursos y evalúa las opciones de compra de EC2 aplicables.",
+        "Funciones Lambda de alto volumen que deben conservar el modelo de programación de Lambda: evalúa Lambda Managed Instances."
+      ],
+      "keyFacts": [
+        "Las funciones Lambda estándar se cobran según la cantidad de solicitudes y la duración de ejecución, medida en GB-segundos.",
+        "Lambda Managed Instances usa instancias EC2 administradas por Lambda y conserva el modelo de programación de Lambda; sus cargos incluyen solicitudes, instancias EC2 y una tarifa de administración.",
+        "La documentación de precios proporcionada identifica Compute Savings Plans, EC2 Instance Savings Plans y Reserved Instances como opciones para cargos de instancias EC2 elegibles.",
+        "AWS recomienda modelar los costos y elegir el tipo, tamaño y número de recursos según los datos de la carga."
+      ],
+      "gotchas": [
+        "Las solicitudes poco frecuentes no garantizan que Lambda sea la opción más barata si cada ejecución consume mucha duración y memoria.",
+        "Una carga sostenida no demuestra, por sí sola, que EC2 sea más barato que Fargate; compara los costos modelados de diseños que cumplan los requisitos.",
+        "Lambda Managed Instances no se cobra igual que las funciones Lambda estándar: se aplican cargos por instancias EC2 y administración."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Funciones Lambda estándar frente a Lambda Managed Instances",
+          "difference": "Las funciones estándar tienen cargos por solicitudes y duración; Managed Instances agrega cargos por instancias EC2 y administración, pero conserva el modelo de programación de Lambda."
+        },
+        {
+          "concept": "Fargate frente a EC2",
+          "difference": "Para una carga en contenedores, decide según los requisitos operativos y el modelo de costos medido, sin suponer que una opción siempre es más barata."
+        }
+      ],
+      "examCues": [
+        "brief requests with long idle periods",
+        "must retain the Lambda programming model",
+        "containerized application; no EC2 instance management",
+        "steady utilization with measured instance requirements",
+        "cost model compares only compliant designs"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/select-the-correct-resource-type-size-and-number.html",
+      "https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/lambda.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "compute-cost-lambda-ec2-fargate--1f6a634b",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum runs code that validates small submissions from visitors. Requests arrive in brief bursts on event days, and the application does no work for weeks between events. The team has confirmed that each validation is a short execution and wants to avoid paying for provisioned compute throughout the idle periods. Which approach best meets these requirements with the MOST cost-effective compute billing model?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run each validation as a standard AWS Lambda function invocation.",
+          "correct": true,
+          "why": "Standard Lambda function charges follow requests and execution duration, matching the short, infrequent work."
+        },
+        {
+          "id": "B",
+          "text": "Run the validator continuously on right-sized EC2 instances.",
+          "correct": false,
+          "why": "Continuously provisioned instances do not address the stated goal of avoiding provisioned compute during weeks without work."
+        },
+        {
+          "id": "C",
+          "text": "Use Lambda Managed Instances backed by EC2 instances.",
+          "correct": false,
+          "why": "Its EC2 instance and management charges do not match the requirement to avoid provisioned compute during long idle periods."
+        },
+        {
+          "id": "D",
+          "text": "Keep the validator running as a continuously provisioned Fargate service.",
+          "correct": false,
+          "why": "A continuously provisioned service does not satisfy the stated preference to provision compute only when validation work arrives."
+        }
+      ],
+      "explanation": "The deciding constraints are short executions and weeks without requests. Standard Lambda functions are charged by requests and execution duration, making their billing model a strong fit for this pattern. Lambda Managed Instances can retain the Lambda programming model, but they also introduce EC2 instance and management charges, which undermine the stated idle-time objective.",
+      "keywordCues": [
+        "short execution",
+        "does no work for weeks",
+        "avoid paying for provisioned compute"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/select-the-correct-resource-type-size-and-number.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/lambda.html"
+      ],
+      "es": {
+        "stem": "Un museo ejecuta código que valida pequeños envíos de visitantes. Las solicitudes llegan en ráfagas breves durante días de eventos, y la aplicación no tiene trabajo durante semanas entre eventos. El equipo confirmó que cada validación dura poco y quiere evitar pagar por cómputo aprovisionado durante esos períodos. ¿Qué enfoque cumple estos requisitos con el modelo de cobro de cómputo MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar cada validación como una invocación de una función AWS Lambda estándar.",
+            "why": "Los cargos de las funciones Lambda estándar dependen de las solicitudes y la duración de ejecución, lo que se ajusta al trabajo breve y poco frecuente."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar el validador continuamente en instancias EC2 de tamaño adecuado.",
+            "why": "Las instancias aprovisionadas continuamente no cumplen el objetivo de evitar cómputo aprovisionado durante semanas sin trabajo."
+          },
+          {
+            "id": "C",
+            "text": "Usar Lambda Managed Instances respaldado por instancias EC2.",
+            "why": "Sus cargos por instancias EC2 y administración no se ajustan al requisito de evitar cómputo aprovisionado durante períodos largos de inactividad."
+          },
+          {
+            "id": "D",
+            "text": "Mantener el validador como un servicio Fargate aprovisionado continuamente.",
+            "why": "Un servicio aprovisionado continuamente no satisface la preferencia indicada de aprovisionar cómputo solo cuando llega trabajo."
+          }
+        ],
+        "explanation": "Los factores decisivos son las ejecuciones breves y las semanas sin solicitudes. Las funciones Lambda estándar se cobran por solicitudes y duración de ejecución, por lo que su modelo de cobro se ajusta bien a este patrón. Lambda Managed Instances conserva el modelo de programación de Lambda, pero agrega cargos por instancias EC2 y administración que contradicen el objetivo respecto a los períodos de inactividad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "compute-cost-lambda-ec2-fargate--833ab84e",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A mapping company has an existing containerized service with stable demand. Its cost model, based on measured usage, finds that Fargate is the lowest-cost option among designs that meet its performance target and do not require the team to manage EC2 instances. Moving the code into Lambda functions would require a redesign that the company will not undertake. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the containers on right-sized EC2 instances managed by the team.",
+          "correct": false,
+          "why": "Team-managed EC2 instances fail the operational constraint used in the cost comparison."
+        },
+        {
+          "id": "B",
+          "text": "Move the service to standard Lambda functions to pay for invocation duration.",
+          "correct": false,
+          "why": "This requires the Lambda redesign that the company explicitly ruled out."
+        },
+        {
+          "id": "C",
+          "text": "Keep the containerized service on Fargate.",
+          "correct": true,
+          "why": "It preserves the required design and is the lowest-cost compliant option in the company's measured model."
+        },
+        {
+          "id": "D",
+          "text": "Rebuild the service as functions on Lambda Managed Instances.",
+          "correct": false,
+          "why": "Preserving the Lambda programming model is useful for Lambda workloads, but this service cannot be redesigned as functions."
+        }
+      ],
+      "explanation": "Cost optimization starts with options that actually meet the workload and operational requirements. Here, the measured model identifies Fargate as the least costly compliant design, while the application must remain containerized without team-managed EC2 instances. Lambda would require a prohibited redesign, and choosing EC2 solely because demand is stable would ignore the operational requirement.",
+      "keywordCues": [
+        "existing containerized service",
+        "Fargate is the lowest-cost option",
+        "do not require the team to manage EC2 instances",
+        "will not undertake"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/select-the-correct-resource-type-size-and-number.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/lambda.html"
+      ],
+      "es": {
+        "stem": "Una empresa de cartografía tiene un servicio en contenedores con demanda estable. Su modelo de costos, basado en el uso medido, indica que Fargate es la opción de menor costo entre los diseños que cumplen el objetivo de rendimiento y no requieren que el equipo administre instancias EC2. Pasar el código a funciones Lambda exigiría un rediseño que la empresa no realizará. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar los contenedores en instancias EC2 de tamaño adecuado administradas por el equipo.",
+            "why": "Las instancias EC2 administradas por el equipo incumplen la restricción operativa usada en la comparación de costos."
+          },
+          {
+            "id": "B",
+            "text": "Migrar el servicio a funciones Lambda estándar para pagar por la duración de las invocaciones.",
+            "why": "Esto exige el rediseño para Lambda que la empresa descartó explícitamente."
+          },
+          {
+            "id": "C",
+            "text": "Mantener el servicio en contenedores en Fargate.",
+            "why": "Conserva el diseño requerido y es la opción válida de menor costo en el modelo medido de la empresa."
+          },
+          {
+            "id": "D",
+            "text": "Reconstruir el servicio como funciones en Lambda Managed Instances.",
+            "why": "Conservar el modelo de programación de Lambda puede servir para cargas Lambda, pero este servicio no se puede rediseñar como funciones."
+          }
+        ],
+        "explanation": "La optimización de costos comienza por las opciones que realmente cumplen los requisitos de la carga y de operación. En este caso, el modelo medido identifica a Fargate como el diseño válido de menor costo, mientras que la aplicación debe permanecer en contenedores sin instancias EC2 administradas por el equipo. Lambda requeriría un rediseño prohibido, y elegir EC2 solo porque la demanda es estable ignoraría la restricción operativa."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "compute-cost-lambda-ec2-fargate--548891b3",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics firm already processes events with Lambda functions. Its high-volume workload is steady, and a cost model shows that moving those functions to Lambda Managed Instances would lower its total compute cost after accounting for instance charges and the management fee. The firm must retain its Lambda programming model and wants AWS to manage instance provisioning and patching. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Rebuild the functions as a continuously running Fargate container service.",
+          "correct": false,
+          "why": "Rebuilding them as a container service does not retain the required Lambda programming model."
+        },
+        {
+          "id": "B",
+          "text": "Keep the functions on standard Lambda compute because it has no EC2 instance charge.",
+          "correct": false,
+          "why": "Avoiding an instance line item does not overcome the modeled lower total cost of the compliant alternative."
+        },
+        {
+          "id": "C",
+          "text": "Run the functions on Lambda Managed Instances.",
+          "correct": true,
+          "why": "It retains the Lambda programming model, delegates instance management to Lambda, and has the lower modeled total cost."
+        },
+        {
+          "id": "D",
+          "text": "Move the event processing to team-managed EC2 instances with a purchasing commitment.",
+          "correct": false,
+          "why": "Team-managed instances fail the requirement for AWS-managed provisioning and patching."
+        }
+      ],
+      "explanation": "The firm needs both the Lambda programming model and managed instance operations. Lambda Managed Instances supplies those properties, and the scenario's cost model establishes the total-cost advantage for this particular workload. Standard Lambda functions avoid EC2 instance charges but can still cost more overall; moving to team-managed EC2 would violate the operational requirement.",
+      "keywordCues": [
+        "moving those functions to Lambda Managed Instances would lower its total compute cost",
+        "retain its Lambda programming model",
+        "AWS to manage instance provisioning and patching"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/select-the-correct-resource-type-size-and-number.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/lambda.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística ya procesa eventos con funciones Lambda. Su carga de alto volumen es estable, y un modelo de costos muestra que migrar esas funciones a Lambda Managed Instances reduciría el costo total de cómputo, incluidos los cargos por instancias y la tarifa de administración. La empresa debe conservar su modelo de programación de Lambda y quiere que AWS administre el aprovisionamiento y los parches de las instancias. ¿Qué solución cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reconstruir las funciones como un servicio de contenedores Fargate que se ejecuta continuamente.",
+            "why": "Reconstruirlas como servicio de contenedores no conserva el modelo de programación de Lambda requerido."
+          },
+          {
+            "id": "B",
+            "text": "Mantener las funciones en el cómputo Lambda estándar porque no tiene cargos por instancias EC2.",
+            "why": "Evitar un cargo por instancias no supera el menor costo total modelado de la alternativa que cumple los requisitos."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar las funciones en Lambda Managed Instances.",
+            "why": "Conserva el modelo de programación de Lambda, delega la administración de instancias a Lambda y tiene el menor costo total modelado."
+          },
+          {
+            "id": "D",
+            "text": "Migrar el procesamiento de eventos a instancias EC2 administradas por el equipo con un compromiso de compra.",
+            "why": "Las instancias administradas por el equipo incumplen el requisito de que AWS se encargue del aprovisionamiento y los parches."
+          }
+        ],
+        "explanation": "La empresa necesita tanto el modelo de programación de Lambda como la administración de instancias por parte de AWS. Lambda Managed Instances ofrece ambas características, y el modelo de costos del escenario demuestra la ventaja en costo total para esta carga específica. Las funciones Lambda estándar evitan cargos por instancias EC2, pero aun así pueden costar más en total; migrar a EC2 administrado por el equipo incumpliría el requisito operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "compute-cost-lambda-ec2-fargate--e5dc6b24",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research institute is planning compute for two independent applications. One performs brief checks only when occasional samples arrive; the other keeps an EC2-based analysis engine continuously busy at a measured, appropriate instance size, with a predictable baseline. The institute wants to choose a cost approach suited to each usage pattern rather than impose one compute model on both. Which TWO choices best meet these requirements MOST cost-effectively? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run the occasional sample checks as standard Lambda function invocations.",
+          "correct": true,
+          "why": "Request- and duration-based Lambda function charges fit the brief, occasional checks."
+        },
+        {
+          "id": "B",
+          "text": "Keep EC2 instances continuously provisioned for the occasional sample checks.",
+          "correct": false,
+          "why": "Continuous provisioning does not suit the checks' long periods without work."
+        },
+        {
+          "id": "C",
+          "text": "Keep the measured EC2 configuration for the analysis engine and evaluate a purchasing option for its stable baseline.",
+          "correct": true,
+          "why": "It preserves the data-supported size and assesses purchasing options against predictable EC2 usage."
+        },
+        {
+          "id": "D",
+          "text": "Increase the analysis engine's EC2 instance size to obtain more unused capacity.",
+          "correct": false,
+          "why": "The measured size already meets demand, so adding unused capacity works against right-sizing."
+        },
+        {
+          "id": "E",
+          "text": "Move the busy analysis engine to standard Lambda functions without modeling its request and duration costs.",
+          "correct": false,
+          "why": "Continuous use alone does not justify a Lambda migration without a cost comparison."
+        }
+      ],
+      "explanation": "The applications have different utilization patterns, so each needs its own cost decision. Standard Lambda function billing matches brief, occasional checks, while the continuously busy engine has a measured EC2 size and a predictable baseline suitable for evaluating purchasing options. Provisioning idle compute for the checks or increasing an already adequate instance size disregards the supplied usage data.",
+      "keywordCues": [
+        "brief checks only when occasional samples arrive",
+        "continuously busy at a measured, appropriate instance size",
+        "predictable baseline",
+        "two independent applications"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/select-the-correct-resource-type-size-and-number.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/lambda.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación planifica el cómputo de dos aplicaciones independientes. Una hace verificaciones breves solo cuando llegan muestras ocasionales; la otra mantiene continuamente ocupado un motor de análisis en EC2 con un tamaño de instancia medido y adecuado, y una carga base predecible. El instituto quiere elegir un enfoque de costos apropiado para cada patrón de uso en lugar de imponer un mismo modelo de cómputo a ambas aplicaciones. ¿Qué DOS opciones cumplen mejor estos requisitos de la forma MOST cost-effective? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar las verificaciones ocasionales de muestras como invocaciones de funciones Lambda estándar.",
+            "why": "Los cargos de Lambda por solicitudes y duración se ajustan a las verificaciones breves y ocasionales."
+          },
+          {
+            "id": "B",
+            "text": "Mantener instancias EC2 aprovisionadas continuamente para las verificaciones ocasionales de muestras.",
+            "why": "El aprovisionamiento continuo no se ajusta a los largos períodos sin trabajo de las verificaciones."
+          },
+          {
+            "id": "C",
+            "text": "Mantener la configuración EC2 medida del motor de análisis y evaluar una opción de compra para su carga base estable.",
+            "why": "Conserva el tamaño respaldado por los datos y permite evaluar opciones de compra para el uso predecible de EC2."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar el tamaño de las instancias EC2 del motor de análisis para obtener más capacidad sin utilizar.",
+            "why": "El tamaño medido ya satisface la demanda, por lo que agregar capacidad sin utilizar contradice el ajuste de tamaño."
+          },
+          {
+            "id": "E",
+            "text": "Migrar el motor de análisis ocupado a funciones Lambda estándar sin modelar sus costos por solicitudes y duración.",
+            "why": "El uso continuo, por sí solo, no justifica una migración a Lambda sin comparar costos."
+          }
+        ],
+        "explanation": "Las aplicaciones tienen patrones de utilización diferentes, así que cada una necesita su propia decisión de costos. El cobro de las funciones Lambda estándar se ajusta a verificaciones breves y ocasionales, mientras que el motor continuamente ocupado tiene un tamaño EC2 medido y una carga base predecible para evaluar opciones de compra. Aprovisionar cómputo inactivo para las verificaciones o aumentar un tamaño de instancia que ya es adecuado ignora los datos de uso proporcionados."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "compute-cost-lambda-ec2-fargate--r0",
+      "conceptId": "compute-cost-lambda-ec2-fargate",
+      "kind": "recall",
+      "prompt": "For brief, occasional code executions with long idle periods, which compute option would you evaluate first, and why?",
+      "promptEs": "Para ejecuciones breves y ocasionales de código con largos períodos de inactividad, ¿qué opción de cómputo evaluarías primero y por qué?",
+      "idealAnswer": "I would evaluate standard AWS Lambda functions first. Their charges depend on requests and execution duration, which fits brief work separated by long idle periods; I would still validate the choice with a cost model.",
+      "rubric": [
+        "Names standard AWS Lambda functions.",
+        "Connects request- and duration-based charges to brief, infrequent executions.",
+        "Avoids claiming Lambda is always the cheapest option."
+      ]
+    }
+  ]
+}

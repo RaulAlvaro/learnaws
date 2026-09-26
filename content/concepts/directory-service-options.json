@@ -1,0 +1,359 @@
+{
+  "conceptId": "directory-service-options",
+  "card": {
+    "en": {
+      "tldr": "Choose the directory based on where Active Directory lives and which features the workload needs. AD Connector forwards requests to an existing on-premises AD; AWS Managed Microsoft AD provides actual Microsoft AD in AWS; Simple AD provides a basic, low-cost standalone directory.",
+      "whenToUse": [
+        "Use AD Connector when compatible AWS applications must authenticate against an existing on-premises AD without caching directory information in the cloud.",
+        "Use AWS Managed Microsoft AD when a workload needs actual Microsoft AD features, such as trusts or schema extensions, in AWS.",
+        "Use Simple AD when a standalone, low-scale directory needs only basic AD compatibility."
+      ],
+      "keyFacts": [
+        "AD Connector forwards sign-in requests to on-premises domain controllers and can join EC2 Windows instances to the existing domain.",
+        "AD Connector does not support transitive trusts and is not compatible with RDS for SQL Server.",
+        "AWS Managed Microsoft AD supports trusts, schema extensions, and RDS for SQL Server workloads.",
+        "Simple AD is powered by Samba 4 and supports basic features including user accounts, group membership, domain join, and group policies.",
+        "Simple AD does not support MFA, trusts, schema extensions, or RDS for SQL Server."
+      ],
+      "gotchas": [
+        "AD Connector is a proxy, not a new Microsoft AD domain hosted in AWS.",
+        "Simple AD’s basic AD compatibility does not make it suitable for workloads that require actual Microsoft AD features.",
+        "An existing on-premises AD does not automatically make AD Connector the right choice: check whether the AWS workload supports it."
+      ],
+      "confusedWith": [
+        {
+          "concept": "IAM Identity Center",
+          "difference": "Use it for centralized workforce access across AWS accounts and applications, not as the AD domain needed by a Windows workload."
+        },
+        {
+          "concept": "SAML/OIDC federation to IAM roles",
+          "difference": "Use federation for access through an existing identity provider; it does not provide AD domain services to an application."
+        },
+        {
+          "concept": "Amazon Cognito user pools",
+          "difference": "Use user pools to authenticate application subscribers, not to supply AD features for Windows workloads."
+        }
+      ],
+      "examCues": [
+        "forward authentication to existing on-premises AD",
+        "no directory information cached in the cloud",
+        "actual Microsoft AD with trusts or schema extensions",
+        "low-cost standalone directory with basic AD features",
+        "RDS for SQL Server requires a directory"
+      ]
+    },
+    "es": {
+      "tldr": "Elige el directorio según dónde reside Active Directory y qué funciones necesita la carga de trabajo. AD Connector reenvía solicitudes a un AD local existente; AWS Managed Microsoft AD proporciona Microsoft AD real en AWS; Simple AD ofrece un directorio independiente, básico y de bajo costo.",
+      "whenToUse": [
+        "Usa AD Connector cuando las aplicaciones compatibles de AWS deban autenticarse con un AD local existente sin almacenar información del directorio en la nube.",
+        "Usa AWS Managed Microsoft AD cuando una carga de trabajo necesite funciones de Microsoft AD real, como trusts o schema extensions, en AWS.",
+        "Usa Simple AD cuando necesites un directorio independiente de baja escala con compatibilidad básica con AD."
+      ],
+      "keyFacts": [
+        "AD Connector reenvía las solicitudes de inicio de sesión a los controladores de dominio locales y puede unir instancias EC2 Windows al dominio existente.",
+        "AD Connector no admite transitive trusts y no es compatible con RDS for SQL Server.",
+        "AWS Managed Microsoft AD admite trusts, schema extensions y cargas de trabajo de RDS for SQL Server.",
+        "Simple AD se basa en Samba 4 y admite funciones básicas como cuentas de usuario, pertenencia a grupos, unión al dominio y group policies.",
+        "Simple AD no admite MFA, trusts, schema extensions ni RDS for SQL Server."
+      ],
+      "gotchas": [
+        "AD Connector es un proxy, no un nuevo dominio de Microsoft AD alojado en AWS.",
+        "La compatibilidad básica de Simple AD con AD no basta para cargas de trabajo que requieren funciones de Microsoft AD real.",
+        "Tener un AD local no significa que AD Connector siempre sea adecuado: verifica si la carga de trabajo de AWS lo admite."
+      ],
+      "confusedWith": [
+        {
+          "concept": "IAM Identity Center",
+          "difference": "Úsalo para centralizar el acceso del personal a cuentas y aplicaciones de AWS, no como el dominio AD que necesita una carga de trabajo Windows."
+        },
+        {
+          "concept": "SAML/OIDC federation to IAM roles",
+          "difference": "Usa federation para acceder mediante un proveedor de identidad existente; no proporciona servicios de dominio AD a una aplicación."
+        },
+        {
+          "concept": "Amazon Cognito user pools",
+          "difference": "Usa user pools para autenticar suscriptores de una aplicación, no para proporcionar funciones de AD a cargas de trabajo Windows."
+        }
+      ],
+      "examCues": [
+        "forward authentication to existing on-premises AD",
+        "no directory information cached in the cloud",
+        "actual Microsoft AD with trusts or schema extensions",
+        "low-cost standalone directory with basic AD features",
+        "RDS for SQL Server requires a directory"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/what_is.html",
+      "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/directory_ad_connector.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "directory-service-options--41571f25",
+      "conceptId": "directory-service-options",
+      "secondaryConcepts": [
+        "iam-identity-center-sso"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio is moving its staff desktops to Amazon WorkSpaces. Staff must keep using credentials from the company's on-premises Microsoft AD, and the studio does not want directory information cached in the cloud. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Connect WorkSpaces to the on-premises AD through AD Connector.",
+          "correct": true,
+          "why": "AD Connector supports WorkSpaces and redirects directory requests to on-premises AD without caching directory information in the cloud."
+        },
+        {
+          "id": "B",
+          "text": "Use IAM Identity Center as the directory for WorkSpaces.",
+          "correct": false,
+          "why": "IAM Identity Center does not serve as the on-premises AD proxy required for this WorkSpaces deployment."
+        },
+        {
+          "id": "C",
+          "text": "Create a Simple AD directory for WorkSpaces users.",
+          "correct": false,
+          "why": "Simple AD is a standalone directory and would not forward authentication to the existing on-premises AD."
+        },
+        {
+          "id": "D",
+          "text": "Create an AWS Managed Microsoft AD directory for WorkSpaces users.",
+          "correct": false,
+          "why": "Managed Microsoft AD provides an AD domain in AWS, which is unnecessary when the requirement is to proxy requests to the existing directory."
+        }
+      ],
+      "explanation": "The deciding requirements are use of the existing on-premises AD and no directory information cached in the cloud. AD Connector supports WorkSpaces and forwards directory requests to the on-premises directory without caching them. Simple AD creates a separate directory, while Managed Microsoft AD supplies an AD domain in AWS rather than the requested proxy.",
+      "keywordCues": [
+        "Amazon WorkSpaces",
+        "credentials from the company's on-premises Microsoft AD",
+        "does not want directory information cached in the cloud"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/what_is.html",
+        "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/directory_ad_connector.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño está trasladando los escritorios de su personal a Amazon WorkSpaces. El personal debe seguir usando las credenciales del Microsoft AD local de la empresa, y el estudio no quiere que se almacene información del directorio en la nube. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conecta WorkSpaces al AD local mediante AD Connector.",
+            "why": "AD Connector admite WorkSpaces y redirige las solicitudes del directorio al AD local sin almacenar información del directorio en la nube."
+          },
+          {
+            "id": "B",
+            "text": "Usa IAM Identity Center como directorio para WorkSpaces.",
+            "why": "IAM Identity Center no funciona como el proxy del AD local que requiere este despliegue de WorkSpaces."
+          },
+          {
+            "id": "C",
+            "text": "Crea un directorio Simple AD para los usuarios de WorkSpaces.",
+            "why": "Simple AD es un directorio independiente y no reenviaría la autenticación al AD local existente."
+          },
+          {
+            "id": "D",
+            "text": "Crea un directorio AWS Managed Microsoft AD para los usuarios de WorkSpaces.",
+            "why": "Managed Microsoft AD proporciona un dominio AD en AWS, innecesario cuando se requiere reenviar solicitudes al directorio existente."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son usar el AD local existente y no almacenar información del directorio en la nube. AD Connector admite WorkSpaces y reenvía las solicitudes al directorio local sin almacenarlas. Simple AD crea otro directorio, mientras que Managed Microsoft AD proporciona un dominio AD en AWS en vez del proxy solicitado."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "directory-service-options--57f305bc",
+      "conceptId": "directory-service-options",
+      "secondaryConcepts": [
+        "iam-identity-center-sso"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer is moving an AD-aware application to AWS. The application requires schema extensions and secure LDAP communications, and administrators must establish a trust with the company's on-premises AD so employees can use their existing credentials. Which directory option meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AD Connector to redirect the application's directory requests.",
+          "correct": false,
+          "why": "AD Connector proxies to on-premises AD rather than providing the Microsoft AD in AWS with the requested features."
+        },
+        {
+          "id": "B",
+          "text": "Use IAM Identity Center to provision workforce access to the application.",
+          "correct": false,
+          "why": "IAM Identity Center does not provide the AD schema, secure LDAP communications, and trust required by the application."
+        },
+        {
+          "id": "C",
+          "text": "Use Simple AD and connect the application to its cloud directory.",
+          "correct": false,
+          "why": "Simple AD does not support schema extensions, LDAPS, or trust relationships."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Managed Microsoft AD and establish a trust with on-premises AD.",
+          "correct": true,
+          "why": "Managed Microsoft AD provides actual Microsoft AD in AWS with schema extensions, secure LDAP, and trusts."
+        }
+      ],
+      "explanation": "The application needs actual AD capabilities in AWS, not just a way to forward sign-in requests. AWS Managed Microsoft AD supports schema extensions and secure LDAP communications, and a trust can allow use of credentials from on-premises AD. Simple AD lacks all three required features; AD Connector is a proxy rather than an AD domain in AWS.",
+      "keywordCues": [
+        "requires schema extensions",
+        "secure LDAP communications",
+        "establish a trust with the company's on-premises AD"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/what_is.html",
+        "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/directory_ad_connector.html"
+      ],
+      "es": {
+        "stem": "Un fabricante está trasladando una aplicación compatible con AD a AWS. La aplicación requiere schema extensions y comunicaciones secure LDAP, y los administradores deben establecer un trust con el AD local de la empresa para que los empleados usen sus credenciales existentes. ¿Qué opción de directorio cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa AD Connector para redirigir las solicitudes de directorio de la aplicación.",
+            "why": "AD Connector actúa como proxy del AD local, en lugar de proporcionar Microsoft AD en AWS con las funciones solicitadas."
+          },
+          {
+            "id": "B",
+            "text": "Usa IAM Identity Center para aprovisionar el acceso del personal a la aplicación.",
+            "why": "IAM Identity Center no proporciona el esquema de AD, las comunicaciones secure LDAP ni el trust que requiere la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Usa Simple AD y conecta la aplicación a su directorio en la nube.",
+            "why": "Simple AD no admite schema extensions, LDAPS ni trust relationships."
+          },
+          {
+            "id": "D",
+            "text": "Usa AWS Managed Microsoft AD y establece un trust con el AD local.",
+            "why": "Managed Microsoft AD proporciona Microsoft AD real en AWS con schema extensions, secure LDAP y trusts."
+          }
+        ],
+        "explanation": "La aplicación necesita funciones de AD real en AWS, no solo una forma de reenviar solicitudes de inicio de sesión. AWS Managed Microsoft AD admite schema extensions y comunicaciones secure LDAP, y un trust permite usar credenciales del AD local. Simple AD carece de las tres funciones; AD Connector es un proxy, no un dominio AD en AWS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "directory-service-options--dbd69049",
+      "conceptId": "directory-service-options",
+      "secondaryConcepts": [
+        "iam-identity-center-sso"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A small nonprofit is deploying a few Windows EC2 instances for an internal application that is compatible with Samba 4. It needs a standalone directory in AWS for user accounts, group memberships, and domain join, but does not need MFA, trusts, or schema extensions. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy AD Connector for the application and instances.",
+          "correct": false,
+          "why": "AD Connector redirects requests to an existing on-premises AD and does not provide the requested standalone directory."
+        },
+        {
+          "id": "B",
+          "text": "Configure IAM Identity Center for the application and instances.",
+          "correct": false,
+          "why": "IAM Identity Center does not supply the standalone AD-compatible directory needed for domain join."
+        },
+        {
+          "id": "C",
+          "text": "Create a Simple AD directory for the application and instances.",
+          "correct": true,
+          "why": "Simple AD is the low-cost standalone option for basic AD-compatible features and Windows EC2 domain join."
+        },
+        {
+          "id": "D",
+          "text": "Create an AWS Managed Microsoft AD directory for the application and instances.",
+          "correct": false,
+          "why": "Managed Microsoft AD provides actual Microsoft AD features that this basic, low-cost scenario does not require."
+        }
+      ],
+      "explanation": "The nonprofit needs a low-cost, standalone cloud directory with only basic AD-compatible features. Simple AD provides accounts, groups, and domain join, and the application is explicitly compatible with Samba 4. Managed Microsoft AD offers capabilities the scenario does not need, while AD Connector requires an existing on-premises directory to proxy.",
+      "keywordCues": [
+        "compatible with Samba 4",
+        "standalone directory in AWS",
+        "does not need MFA, trusts, or schema extensions",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/what_is.html",
+        "https://docs.aws.amazon.com/directoryservice/latest/admin-guide/directory_ad_connector.html"
+      ],
+      "es": {
+        "stem": "Una pequeña organización sin fines de lucro está desplegando unas pocas instancias Windows EC2 para una aplicación interna compatible con Samba 4. Necesita un directorio independiente en AWS para cuentas de usuario, pertenencia a grupos y unión al dominio, pero no requiere MFA, trusts ni schema extensions. ¿Qué solución cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Despliega AD Connector para la aplicación y las instancias.",
+            "why": "AD Connector redirige solicitudes a un AD local existente y no proporciona el directorio independiente solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Configura IAM Identity Center para la aplicación y las instancias.",
+            "why": "IAM Identity Center no proporciona el directorio independiente compatible con AD necesario para la unión al dominio."
+          },
+          {
+            "id": "C",
+            "text": "Crea un directorio Simple AD para la aplicación y las instancias.",
+            "why": "Simple AD es la opción independiente de bajo costo para funciones básicas compatibles con AD y unión al dominio de instancias Windows EC2."
+          },
+          {
+            "id": "D",
+            "text": "Crea un directorio AWS Managed Microsoft AD para la aplicación y las instancias.",
+            "why": "Managed Microsoft AD proporciona funciones de Microsoft AD real que este escenario básico y de bajo costo no necesita."
+          }
+        ],
+        "explanation": "La organización necesita un directorio independiente en la nube, de bajo costo y con solo funciones básicas compatibles con AD. Simple AD proporciona cuentas, grupos y unión al dominio, y la aplicación es compatible con Samba 4. Managed Microsoft AD ofrece funciones que no se necesitan, mientras que AD Connector requiere un directorio local existente al cual redirigir solicitudes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "directory-service-options--r0",
+      "conceptId": "directory-service-options",
+      "kind": "recall",
+      "prompt": "A company needs actual Microsoft AD in AWS with schema extensions and a trust to on-premises AD. Which directory option fits, and why?",
+      "promptEs": "Una empresa necesita Microsoft AD real en AWS con schema extensions y un trust con su AD local. ¿Qué opción eliges y por qué?",
+      "idealAnswer": "Choose AWS Managed Microsoft AD. It provides actual Microsoft AD in AWS, supports schema extensions, and can establish a trust so users can use credentials from an on-premises AD.",
+      "rubric": [
+        "Names AWS Managed Microsoft AD.",
+        "Identifies its support for actual Microsoft AD features, including schema extensions.",
+        "Explains that a trust can connect it to on-premises AD credentials."
+      ]
+    },
+    {
+      "id": "directory-service-options--r1",
+      "conceptId": "directory-service-options",
+      "kind": "why-not",
+      "prompt": "Why is IAM Identity Center not a substitute for AD Connector when WorkSpaces must authenticate against an existing on-premises AD?",
+      "promptEs": "¿Por qué IAM Identity Center no sustituye a AD Connector cuando WorkSpaces debe autenticarse con un AD local existente?",
+      "idealAnswer": "The requirement is to connect WorkSpaces to the existing AD and forward directory requests for authentication. AD Connector provides that proxy; IAM Identity Center addresses workforce access to AWS accounts and applications, not this WorkSpaces-to-AD connection.",
+      "rubric": [
+        "Identifies the requirement to use the existing on-premises AD for WorkSpaces.",
+        "States that AD Connector forwards directory requests to that AD.",
+        "Distinguishes IAM Identity Center’s workforce access purpose from the required directory proxy."
+      ]
+    }
+  ]
+}

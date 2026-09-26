@@ -20,7 +20,7 @@ import OpenAI, { toFile } from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import type { Concept, ConceptContent, Question, Syllabus } from "../../src/lib/content/types";
 import { AUDIT_INSTRUCTIONS, auditInput, GEN_INSTRUCTIONS, genInput, questionTarget, SOLVE_INSTRUCTIONS, solveInput } from "./prompts";
-import { AuditSchema, GeneratedSchema, SolveSchema, type Audit, type Generated, type Solve } from "./schemas";
+import { AuditSchema, CardFixSchema, GeneratedSchema, SolveSchema, type Audit, type Generated, type Solve } from "./schemas";
 
 config({ path: [".env.local", ".env"], quiet: true });
 
@@ -178,9 +178,35 @@ function outputText(response: { output?: { type: string; content?: { type: strin
     .join("");
 }
 
+/** Rewrites a card the auditor flagged, applying exactly its observations. */
+function cardFixRequest(c: Concept, g: Generated, issues: string[]): Req {
+  return {
+    custom_id: `cardfix:${c.id}`,
+    body: {
+      model: MODEL,
+      instructions: `You correct AWS SAA-C03 micro-lesson cards. Apply the reviewer's issues precisely (qualify or remove the flagged claims), keep everything else, keep the same structure and brevity. Update the Spanish (es) version to match, neutral Spanish with "tú", AWS terms in English.`,
+      input: `CARD:
+${JSON.stringify(g.card)}
+
+REVIEWER ISSUES:
+- ${issues.join("\n- ")}
+
+AWS DOCUMENTATION EXCERPTS:
+${docsFor(c, 12_000)}`,
+      reasoning: { effort: "medium" },
+      max_output_tokens: 8_000,
+      text: { format: strip(zodTextFormat(CardFixSchema, "card_fix")) },
+    },
+  };
+}
+
 function applyResult(customId: string, text: string) {
   const [kind, id] = customId.split(":");
   const data = JSON.parse(text);
+  if (kind === "cardfix") {
+    fs.writeFileSync(path.join(VERIFY, `${id}.cardfix.json`), JSON.stringify(CardFixSchema.parse(data), null, 2));
+    return;
+  }
   if (kind === "gen") fs.writeFileSync(path.join(STAGE, `${id}.json`), JSON.stringify(GeneratedSchema.parse(data), null, 2));
   else fs.writeFileSync(path.join(VERIFY, `${id}.${kind}.json`), JSON.stringify(kind === "solve" ? SolveSchema.parse(data) : AuditSchema.parse(data), null, 2));
 }
@@ -189,7 +215,7 @@ async function runDirect(reqs: Req[]) {
   let i = 0;
   const queue = [...reqs];
   await Promise.all(
-    Array.from({ length: 4 }, async () => {
+    Array.from({ length: Number(opt("concurrency") ?? 4) }, async () => {
       for (let r = queue.shift(); r; r = queue.shift()) {
         try {
           const res = await client().responses.create(r.body as never);
@@ -254,6 +280,45 @@ function validShape(q: Generated["questions"][number]): boolean {
   return shapeOk && q.es.options.length === n;
 }
 
+function keyIsLongest(q: Generated["questions"][number]): boolean {
+  if (q.type !== "single") return false;
+  const lens = q.options.map((o) => o.text.length);
+  return lens[q.options.findIndex((o) => o.correct)] === Math.max(...lens);
+}
+
+/**
+ * Deterministic option shuffle so the key is evenly spread across letters,
+ * rewriting "Option X"/"opción X" references in explanations and whys.
+ */
+function reletter(q: Generated["questions"][number], seed: number) {
+  const n = q.options.length;
+  const order = Array.from({ length: n }, (_, i) => i);
+  let s = seed || 1;
+  for (let i = n - 1; i > 0; i--) {
+    s = (s * 16807) % 2147483647;
+    const j = s % (i + 1);
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  const letters = "ABCDEF".slice(0, n).split("");
+  const map = new Map(order.map((oldIdx, newIdx) => [q.options[oldIdx].id, letters[newIdx]]));
+  const fix = (text: string) =>
+    text.replace(/\b([Oo]ptions?|[Oo]pci(?:ón|ones)) ([A-F])\b/g, (_m, w, l) => `${w} ${map.get(l) ?? l}`);
+  const options = order.map((oldIdx, newIdx) => {
+    const o = q.options[oldIdx];
+    return { ...o, id: letters[newIdx], why: fix(o.why) };
+  });
+  const esById = new Map(q.es.options.map((o) => [o.id, o]));
+  const esOptions = order.map((oldIdx, newIdx) => {
+    const o = esById.get(q.options[oldIdx].id) ?? q.es.options[oldIdx];
+    return { id: letters[newIdx], text: o.text, why: fix(o.why) };
+  });
+  return {
+    options,
+    explanation: fix(q.explanation),
+    es: { stem: q.es.stem, options: esOptions, explanation: fix(q.es.explanation) },
+  };
+}
+
 function finalize() {
   let kept = 0;
   let dropped = 0;
@@ -271,44 +336,53 @@ function finalize() {
     }
     const solve: Solve = JSON.parse(fs.readFileSync(solveFile, "utf8"));
     const audit: Audit = JSON.parse(fs.readFileSync(auditFile, "utf8"));
+    const cardFix = path.join(VERIFY, `${c.id}.cardfix.json`);
     if (audit.card.verdict === "fail") {
-      report.push(`${c.id}: ficha rechazada — ${audit.card.factualIssues.join("; ")}`);
-      continue;
+      if (!fs.existsSync(cardFix)) {
+        report.push(`${c.id}: ficha con observaciones, falta corregirla (pnpm content fix-cards) — ${audit.card.factualIssues.join("; ")}`);
+        continue;
+      }
+      g.card = CardFixSchema.parse(JSON.parse(fs.readFileSync(cardFix, "utf8"))).card;
     }
     const { keep } = questionTarget(c);
-    const questions: Question[] = [];
+    const siblings = new Set(syllabus.concepts.map((x) => x.id));
+    const passing: { q: Generated["questions"][number]; notes: string }[] = [];
     g.questions.forEach((q, i) => {
       const key = q.options.filter((o) => o.correct).map((o) => o.id);
       const s = solve.answers.find((a) => a.index === i);
       const a = audit.questions.find((x) => x.index === i);
       const pass =
         validShape(q) && !!s && sameSet(s.chosen, key) && !!a && a.verdict === "pass" && a.keyCorrect && a.uniquelyCorrect && a.translationOk;
-      if (!pass || questions.length >= keep) {
-        if (!pass) {
-          dropped++;
-          report.push(`${c.id} q${i}: descartada (${!validShape(q) ? "forma" : !s || !sameSet(s.chosen, key) ? `solver eligió ${s?.chosen.join(",")} vs ${key.join(",")}` : a?.factualIssues.join("; ") || "auditoría"})`);
-        }
-        return;
+      if (pass) {
+        passing.push({ q, notes: a?.factualIssues.join("; ") ?? "" });
+      } else {
+        dropped++;
+        report.push(`${c.id} q${i}: descartada (${!validShape(q) ? "forma" : !s || !sameSet(s.chosen, key) ? `solver eligió ${s?.chosen.join(",")} vs ${key.join(",")}` : a?.factualIssues.join("; ") || "auditoría"})`);
       }
-      const siblings = new Set(syllabus.concepts.map((x) => x.id));
-      questions.push({
-        id: `${c.id}--${createHash("sha1").update(q.stem).digest("hex").slice(0, 8)}`,
+    });
+    // When there are spares, drop the ones where the key is the longest option (a giveaway cue).
+    passing.sort((x, y) => Number(keyIsLongest(x.q)) - Number(keyIsLongest(y.q)));
+    const questions: Question[] = passing.slice(0, keep).map(({ q, notes }) => {
+      const id = `${c.id}--${createHash("sha1").update(q.stem).digest("hex").slice(0, 8)}`;
+      const r = reletter(q, hash(id));
+      kept++;
+      return {
+        id,
         conceptId: c.id,
         secondaryConcepts: q.secondaryConcepts.filter((x) => siblings.has(x) && x !== c.id),
         domain: c.domain,
         type: q.type,
         difficulty: Math.min(3, Math.max(1, q.difficulty)) as 1 | 2 | 3,
         stem: q.stem,
-        options: q.options,
-        explanation: q.explanation,
+        options: r.options,
+        explanation: r.explanation,
         keywordCues: q.keywordCues,
         docs: c.docs,
-        es: q.es,
+        es: r.es,
         heldOut: false,
         source: "generated",
-        verification: { status: "pass", notes: a?.factualIssues.join("; ") ?? "" },
-      });
-      kept++;
+        verification: { status: "pass", notes },
+      };
     });
     const recall = g.recall
       .map((r, i) => ({ r, i }))
@@ -384,6 +458,20 @@ async function main() {
       const reqs = list.flatMap((c) => verifyRequests(c, JSON.parse(fs.readFileSync(path.join(STAGE, `${c.id}.json`), "utf8"))));
       console.log(`Verificando ${list.length} conceptos con ${VERIFY_MODEL}${flag("direct") ? " (directo)" : " (batch)"}`);
       return flag("direct") ? runDirect(reqs) : submitBatch("verify", reqs);
+    }
+    case "fix-cards": {
+      const list = selectConcepts((c) => {
+        const a = path.join(VERIFY, `${c.id}.audit.json`);
+        if (!fs.existsSync(a) || fs.existsSync(path.join(VERIFY, `${c.id}.cardfix.json`))) return false;
+        return (JSON.parse(fs.readFileSync(a, "utf8")) as Audit).card.verdict === "fail";
+      });
+      const reqs = list.map((c) => {
+        const g: Generated = JSON.parse(fs.readFileSync(path.join(STAGE, `${c.id}.json`), "utf8"));
+        const a: Audit = JSON.parse(fs.readFileSync(path.join(VERIFY, `${c.id}.audit.json`), "utf8"));
+        return cardFixRequest(c, g, a.card.factualIssues);
+      });
+      console.log(`Corrigiendo ${reqs.length} fichas con ${MODEL}`);
+      return runDirect(reqs);
     }
     case "collect":
       return collect();

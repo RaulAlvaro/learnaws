@@ -1,0 +1,446 @@
+{
+  "conceptId": "s3-bucket-policies-block-public-access",
+  "card": {
+    "en": {
+      "tldr": "Use an S3 bucket policy for rules that apply to a bucket and its objects, such as granting a specified account access or restricting requests to a VPC endpoint. Use S3 Object Ownership with Bucket owner enforced to disable ACLs, and use S3 Block Public Access for safeguards against public exposure that override resource policies and ACLs.",
+      "whenToUse": [
+        "A bucket owner needs to grant another AWS account access to a bucket.",
+        "Access to a bucket must depend on a request condition, such as the VPC endpoint used.",
+        "Public access must be blocked centrally across multiple AWS accounts.",
+        "The bucket owner wants to manage uploaded objects through policies instead of ACLs."
+      ],
+      "keyFacts": [
+        "Only the bucket owner can associate a bucket policy with the bucket.",
+        "By default, Object Ownership uses Bucket owner enforced: ACLs are disabled, the bucket owner owns all objects, and policies manage access.",
+        "S3 applies the most restrictive applicable Block Public Access settings across organization, account, bucket, and access point levels.",
+        "At the organization level, Block Public Access enables or disables all four settings together; individual settings cannot be selected.",
+        "BlockPublicAcls rejects requests that specify public ACLs; IgnorePublicAcls ignores public ACLs but does not prevent them from being submitted."
+      ],
+      "gotchas": [
+        "A bucket-level Block Public Access setting cannot relax a more restrictive organization or account setting.",
+        "Block Public Access does not remove existing public policies or ACLs; removing a protective setting can expose resources again.",
+        "RestrictPublicBuckets can block even specifically granted cross-account access when the bucket has a public policy.",
+        "A bucket policy cannot prevent deletions or transitions performed by an S3 Lifecycle rule."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 presigned URLs",
+          "difference": "A presigned URL provides temporary access to an individual object; a bucket policy sets rules for bucket and object requests."
+        },
+        {
+          "concept": "S3 Access Points",
+          "difference": "Access Points provide separate access paths and policies for applications sharing a bucket; a bucket policy can enforce a rule on direct bucket requests."
+        },
+        {
+          "concept": "CloudFront signed URLs/cookies",
+          "difference": "These restrict content delivered through CloudFront, not general S3 bucket API access."
+        }
+      ],
+      "examCues": [
+        "grant a specified account access to a bucket",
+        "require requests through a designated VPC endpoint",
+        "block public exposure across the organization",
+        "disable ACLs and manage access with policies"
+      ]
+    },
+    "es": {
+      "tldr": "Usa una S3 bucket policy para reglas aplicables a un bucket y sus objetos, como dar acceso a una cuenta específica o restringir solicitudes a un VPC endpoint. Usa S3 Object Ownership con Bucket owner enforced para desactivar las ACL y S3 Block Public Access para impedir la exposición pública incluso si las políticas o ACL permiten acceso.",
+      "whenToUse": [
+        "El propietario necesita dar acceso al bucket a otra cuenta de AWS.",
+        "El acceso debe depender de una condición de la solicitud, como el VPC endpoint utilizado.",
+        "Debes bloquear el acceso público de forma centralizada en varias cuentas de AWS.",
+        "El propietario quiere administrar los objetos cargados mediante políticas en lugar de ACL."
+      ],
+      "keyFacts": [
+        "Solo el propietario del bucket puede asociarle una bucket policy.",
+        "De forma predeterminada, Object Ownership usa Bucket owner enforced: las ACL están desactivadas, el propietario del bucket posee todos los objetos y el acceso se administra con políticas.",
+        "S3 aplica la combinación más restrictiva de Block Public Access entre los niveles de organización, cuenta, bucket y access point que correspondan.",
+        "A nivel de organización, Block Public Access activa o desactiva las cuatro configuraciones juntas; no permite elegirlas individualmente.",
+        "BlockPublicAcls rechaza solicitudes que especifican ACL públicas; IgnorePublicAcls ignora las ACL públicas, pero no impide que se envíen."
+      ],
+      "gotchas": [
+        "Desactivar Block Public Access en un bucket no reduce una protección más restrictiva de la organización o la cuenta.",
+        "Block Public Access no elimina las políticas ni ACL públicas existentes; quitar una protección puede volver a exponer los recursos.",
+        "RestrictPublicBuckets puede bloquear incluso el acceso concedido específicamente a otra cuenta si el bucket tiene una política pública.",
+        "Una bucket policy no puede impedir eliminaciones ni transiciones realizadas por una regla de S3 Lifecycle."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 presigned URLs",
+          "difference": "Una presigned URL da acceso temporal a un objeto individual; una bucket policy establece reglas para solicitudes al bucket y sus objetos."
+        },
+        {
+          "concept": "S3 Access Points",
+          "difference": "Access Points ofrecen rutas y políticas separadas para aplicaciones que comparten un bucket; una bucket policy puede imponer una regla a las solicitudes directas al bucket."
+        },
+        {
+          "concept": "CloudFront signed URLs/cookies",
+          "difference": "Restringen el contenido entregado por CloudFront, no el acceso general a la API del bucket de S3."
+        }
+      ],
+      "examCues": [
+        "grant a specified account access to a bucket",
+        "require requests through a designated VPC endpoint",
+        "block public exposure across the organization",
+        "disable ACLs and manage access with policies"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-bucket-policies-block-public-access--829685b7",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "secondaryConcepts": [
+        "s3-access-points"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A financial services group has S3 buckets in several AWS accounts. Administrators want a central safeguard that blocks public access to current and future S3 resources in selected member accounts, even if a bucket owner changes a bucket-level setting. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Block Public Access through an AWS Organizations policy for the selected accounts.",
+          "correct": true,
+          "why": "Organization-level Block Public Access propagates to selected member accounts and overrides less restrictive account or bucket settings."
+        },
+        {
+          "id": "B",
+          "text": "Add a non-public bucket policy to each existing bucket and review new buckets monthly.",
+          "correct": false,
+          "why": "Per-bucket policies and reviews do not provide the requested centrally enforced protection for future resources."
+        },
+        {
+          "id": "C",
+          "text": "Enable S3 Block Public Access only on each bucket that currently stores financial data.",
+          "correct": false,
+          "why": "Bucket-level settings do not automatically cover future buckets or establish a central safeguard across accounts."
+        },
+        {
+          "id": "D",
+          "text": "Require each application to access its objects through an S3 Access Point with a non-public policy.",
+          "correct": false,
+          "why": "Access point policies do not replace a centrally enforced public-access safeguard across the organization's S3 resources."
+        }
+      ],
+      "explanation": "The requirement is centralized enforcement across selected accounts, including future resources. An AWS Organizations Block Public Access policy applies to member accounts and cannot be weakened by disabling protection at an individual bucket. Bucket-by-bucket policies or settings require ongoing coverage and do not satisfy that central enforcement requirement.",
+      "keywordCues": [
+        "several AWS accounts",
+        "current and future S3 resources",
+        "even if a bucket owner changes a bucket-level setting"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+      ],
+      "es": {
+        "stem": "Un grupo de servicios financieros tiene buckets de S3 en varias cuentas de AWS. Los administradores quieren una protección central que bloquee el acceso público a los recursos de S3 actuales y futuros en cuentas miembro seleccionadas, incluso si el propietario de un bucket cambia una configuración de ese bucket. ¿Qué solución cumple estos requisitos con el least operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activa S3 Block Public Access mediante una política de AWS Organizations para las cuentas seleccionadas.",
+            "why": "Block Public Access a nivel de organización se propaga a las cuentas miembro seleccionadas y prevalece sobre configuraciones menos restrictivas de cuentas o buckets."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una bucket policy no pública a cada bucket existente y revisa los buckets nuevos cada mes.",
+            "why": "Las políticas por bucket y las revisiones no brindan la protección central solicitada para recursos futuros."
+          },
+          {
+            "id": "C",
+            "text": "Activa S3 Block Public Access solo en los buckets que actualmente almacenan datos financieros.",
+            "why": "La configuración por bucket no cubre automáticamente los buckets futuros ni establece una protección central entre cuentas."
+          },
+          {
+            "id": "D",
+            "text": "Exige que cada aplicación acceda a sus objetos mediante un S3 Access Point con una política no pública.",
+            "why": "Las políticas de access point no sustituyen una protección central contra el acceso público para los recursos de S3 de la organización."
+          }
+        ],
+        "explanation": "El requisito es la aplicación centralizada en cuentas seleccionadas, incluidos los recursos futuros. Una política de Block Public Access de AWS Organizations se aplica a las cuentas miembro y no puede debilitarse al desactivar la protección de un bucket individual. Las políticas o configuraciones por bucket requieren mantenimiento continuo y no cumplen ese requisito de aplicación central."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-bucket-policies-block-public-access--04055985",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media archive is auditing legacy clients that upload S3 objects with public ACLs. During the audit, uploads containing those ACLs must continue to succeed, but the ACLs must not grant public access. Which setting meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable BlockPublicPolicy on the bucket.",
+          "correct": false,
+          "why": "BlockPublicPolicy addresses new public bucket policies, not public access granted by object ACLs."
+        },
+        {
+          "id": "B",
+          "text": "Enable RestrictPublicBuckets on the bucket.",
+          "correct": false,
+          "why": "RestrictPublicBuckets addresses access when a bucket or access point has a public policy, not the stated ACL behavior."
+        },
+        {
+          "id": "C",
+          "text": "Enable BlockPublicAcls on the bucket.",
+          "correct": false,
+          "why": "BlockPublicAcls rejects PutObject requests that include a public ACL, so the legacy uploads would fail."
+        },
+        {
+          "id": "D",
+          "text": "Enable IgnorePublicAcls on the bucket.",
+          "correct": true,
+          "why": "IgnorePublicAcls prevents public ACLs from granting access while allowing uploads that include them."
+        }
+      ],
+      "explanation": "The deciding constraint is that uploads carrying public ACLs must still succeed without making objects publicly accessible. IgnorePublicAcls causes S3 to ignore those ACLs without preventing them from being submitted. BlockPublicAcls would instead reject the affected PutObject requests, interrupting the legacy clients.",
+      "keywordCues": [
+        "uploads containing those ACLs must continue to succeed",
+        "ACLs must not grant public access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+      ],
+      "es": {
+        "stem": "Un archivo de medios está auditando clientes antiguos que cargan objetos de S3 con ACL públicas. Durante la auditoría, las cargas que incluyen esas ACL deben seguir funcionando, pero las ACL no deben conceder acceso público. ¿Qué configuración cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activa BlockPublicPolicy en el bucket.",
+            "why": "BlockPublicPolicy controla las políticas públicas nuevas del bucket, no el acceso público concedido por ACL de objetos."
+          },
+          {
+            "id": "B",
+            "text": "Activa RestrictPublicBuckets en el bucket.",
+            "why": "RestrictPublicBuckets controla el acceso cuando un bucket o access point tiene una política pública, no el comportamiento de ACL solicitado."
+          },
+          {
+            "id": "C",
+            "text": "Activa BlockPublicAcls en el bucket.",
+            "why": "BlockPublicAcls rechaza las solicitudes PutObject que incluyen una ACL pública, por lo que las cargas de los clientes antiguos fallarían."
+          },
+          {
+            "id": "D",
+            "text": "Activa IgnorePublicAcls en el bucket.",
+            "why": "IgnorePublicAcls impide que las ACL públicas concedan acceso y permite las cargas que las incluyen."
+          }
+        ],
+        "explanation": "La condición decisiva es que las cargas con ACL públicas deben seguir funcionando sin exponer los objetos al público. IgnorePublicAcls hace que S3 ignore esas ACL sin impedir que se envíen. BlockPublicAcls, en cambio, rechazaría las solicitudes PutObject afectadas e interrumpiría a los clientes antiguos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-bucket-policies-block-public-access--026dbdcb",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "secondaryConcepts": [
+        "s3-presigned-urls",
+        "s3-access-points",
+        "cloudfront-signed-urls-cookies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company has a private S3 bucket used by several internal applications. Security requires requests to the bucket to be authorized only when they come through a designated VPC endpoint, including requests made directly to the bucket rather than through an application-specific access path. Which solution meets this requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Require CloudFront signed URLs for each application's S3 API requests.",
+          "correct": false,
+          "why": "CloudFront signed URLs govern content delivered through CloudFront rather than direct S3 bucket API requests."
+        },
+        {
+          "id": "B",
+          "text": "Create VPC-only S3 Access Points and leave direct bucket requests governed by the existing policy.",
+          "correct": false,
+          "why": "VPC-only access points do not, by themselves, impose the condition on requests made directly to the bucket."
+        },
+        {
+          "id": "C",
+          "text": "Give each application an S3 presigned URL for the objects it needs.",
+          "correct": false,
+          "why": "Per-object presigned URLs do not impose the designated VPC endpoint condition on all bucket requests."
+        },
+        {
+          "id": "D",
+          "text": "Apply a bucket policy that conditions access on the designated VPC endpoint.",
+          "correct": true,
+          "why": "A bucket policy can evaluate the VPC endpoint used for requests to the bucket, including direct bucket requests."
+        }
+      ],
+      "explanation": "The endpoint condition must apply to bucket requests even when applications bypass a separate access path. A bucket policy is the appropriate resource policy for conditioning access to the bucket on the request's VPC endpoint. VPC-only Access Points can constrain requests through those access points, but the proposed access point design leaves direct bucket requests outside that path.",
+      "keywordCues": [
+        "designated VPC endpoint",
+        "including requests made directly to the bucket"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene un bucket privado de S3 que usan varias aplicaciones internas. Seguridad exige que las solicitudes al bucket se autoricen solo cuando provengan de un VPC endpoint designado, incluidas las solicitudes directas al bucket en lugar de las que usan una ruta de acceso específica de una aplicación. ¿Qué solución cumple este requisito de la manera MOST directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Exige CloudFront signed URLs para las solicitudes de cada aplicación a la API de S3.",
+            "why": "CloudFront signed URLs controlan el contenido entregado mediante CloudFront, no las solicitudes directas a la API del bucket de S3."
+          },
+          {
+            "id": "B",
+            "text": "Crea S3 Access Points VPC-only y deja que la política existente controle las solicitudes directas al bucket.",
+            "why": "Los access points VPC-only no imponen por sí solos la condición a las solicitudes hechas directamente al bucket."
+          },
+          {
+            "id": "C",
+            "text": "Entrega a cada aplicación una S3 presigned URL para los objetos que necesita.",
+            "why": "Las presigned URLs por objeto no imponen la condición del VPC endpoint designado a todas las solicitudes al bucket."
+          },
+          {
+            "id": "D",
+            "text": "Aplica una bucket policy que condicione el acceso al VPC endpoint designado.",
+            "why": "Una bucket policy puede evaluar el VPC endpoint usado en las solicitudes al bucket, incluidas las solicitudes directas."
+          }
+        ],
+        "explanation": "La condición del endpoint debe aplicarse a las solicitudes al bucket incluso cuando las aplicaciones no usan una ruta de acceso separada. Una bucket policy es la política de recursos adecuada para condicionar el acceso al bucket según el VPC endpoint de la solicitud. Los S3 Access Points VPC-only pueden limitar las solicitudes que pasan por ellos, pero el diseño propuesto deja fuera de esa ruta las solicitudes directas al bucket."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-bucket-policies-block-public-access--a576cc43",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A software company lets a deployment team update an S3 bucket policy and upload build artifacts. Security wants S3 to reject any newly submitted public bucket policy and to reject uploads that specify public ACLs, without relying on a later audit to find them. Which TWO S3 Block Public Access settings meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "IgnorePublicAcls",
+          "correct": false,
+          "why": "IgnorePublicAcls ignores public ACLs but still permits uploads that specify them."
+        },
+        {
+          "id": "B",
+          "text": "BlockPublicAcls",
+          "correct": true,
+          "why": "BlockPublicAcls rejects PutObject requests that include a public ACL."
+        },
+        {
+          "id": "C",
+          "text": "BlockPublicPolicy",
+          "correct": true,
+          "why": "BlockPublicPolicy rejects PutBucketPolicy requests that specify a public bucket policy."
+        },
+        {
+          "id": "D",
+          "text": "RestrictPublicBuckets",
+          "correct": false,
+          "why": "RestrictPublicBuckets limits access associated with a public policy but does not reject a newly submitted public bucket policy."
+        },
+        {
+          "id": "E",
+          "text": "Bucket owner enforced",
+          "correct": false,
+          "why": "Bucket owner enforced disables ACLs but does not reject newly submitted public bucket policies."
+        }
+      ],
+      "explanation": "The company needs two preventive checks: one for newly submitted public bucket policies and one for uploads carrying public ACLs. BlockPublicPolicy rejects the first, and BlockPublicAcls rejects the second. IgnorePublicAcls would allow an upload with a public ACL to succeed, so it misses the explicit rejection requirement.",
+      "keywordCues": [
+        "reject any newly submitted public bucket policy",
+        "reject uploads that specify public ACLs",
+        "without relying on a later audit"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+      ],
+      "es": {
+        "stem": "Una empresa de software permite que un equipo de despliegue actualice una bucket policy de S3 y cargue artefactos de compilación. Seguridad quiere que S3 rechace toda política pública nueva del bucket y las cargas que especifiquen ACL públicas, sin depender de una auditoría posterior para detectarlas. ¿Qué DOS configuraciones de S3 Block Public Access cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "IgnorePublicAcls",
+            "why": "IgnorePublicAcls ignora las ACL públicas, pero permite cargas que las especifican."
+          },
+          {
+            "id": "B",
+            "text": "BlockPublicAcls",
+            "why": "BlockPublicAcls rechaza las solicitudes PutObject que incluyen una ACL pública."
+          },
+          {
+            "id": "C",
+            "text": "BlockPublicPolicy",
+            "why": "BlockPublicPolicy rechaza las solicitudes PutBucketPolicy que especifican una política pública del bucket."
+          },
+          {
+            "id": "D",
+            "text": "RestrictPublicBuckets",
+            "why": "RestrictPublicBuckets limita el acceso asociado con una política pública, pero no rechaza una política pública nueva del bucket."
+          },
+          {
+            "id": "E",
+            "text": "Bucket owner enforced",
+            "why": "Bucket owner enforced desactiva las ACL, pero no rechaza las políticas públicas nuevas del bucket."
+          }
+        ],
+        "explanation": "La empresa necesita dos controles preventivos: uno para las políticas públicas nuevas del bucket y otro para las cargas con ACL públicas. BlockPublicPolicy rechaza las primeras y BlockPublicAcls rechaza las segundas. IgnorePublicAcls permitiría una carga con una ACL pública, así que no cumple el requisito explícito de rechazo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-bucket-policies-block-public-access--r0",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "kind": "recall",
+      "prompt": "A partner account uploads objects to your bucket. How do you grant access while managing all uploaded objects without ACLs?",
+      "promptEs": "Una cuenta de un socio carga objetos en tu bucket. ¿Cómo le das acceso y administras todos los objetos cargados sin ACL?",
+      "idealAnswer": "Grant the partner account upload access with a bucket policy. Keep S3 Object Ownership set to Bucket owner enforced so ACLs are disabled and the bucket owner owns the uploaded objects.",
+      "rubric": [
+        "Names a bucket policy for the cross-account upload grant.",
+        "Names Bucket owner enforced under S3 Object Ownership.",
+        "Explains that ACLs are disabled and the bucket owner owns uploaded objects."
+      ]
+    },
+    {
+      "id": "s3-bucket-policies-block-public-access--r1",
+      "conceptId": "s3-bucket-policies-block-public-access",
+      "kind": "why-not",
+      "prompt": "Why aren't S3 presigned URLs a substitute for a bucket policy requiring requests through a designated VPC endpoint?",
+      "promptEs": "¿Por qué S3 presigned URLs no sustituyen una bucket policy que exige solicitudes a través de un VPC endpoint designado?",
+      "idealAnswer": "Presigned URLs provide temporary access to individual objects. A bucket policy can apply a VPC endpoint condition to requests for the bucket and its objects, including direct bucket requests.",
+      "rubric": [
+        "Identifies presigned URLs as temporary, per-object access.",
+        "Identifies the bucket policy as the place for the VPC endpoint condition.",
+        "Explains that the requirement covers bucket requests, not just access through issued URLs."
+      ]
+    }
+  ]
+}

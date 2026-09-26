@@ -1,0 +1,329 @@
+{
+  "conceptId": "elb-tls-termination-acm",
+  "card": {
+    "en": {
+      "tldr": "An ALB HTTPS listener terminates client TLS at the load balancer and decrypts requests before sending them to targets. Choose it when the load balancer must handle HTTPS requests; choose an NLB TCP listener on port 443 when encrypted traffic must reach targets without load-balancer decryption.",
+      "whenToUse": [
+        "Clients need HTTPS, and TLS should terminate at an Application Load Balancer.",
+        "An HTTPS listener needs a certificate available from ACM.",
+        "A listener needs a default certificate and additional certificates in its SNI list."
+      ],
+      "keyFacts": [
+        "An ALB HTTPS listener requires a server certificate and a security policy.",
+        "The listener uses the certificate to terminate the front-end connection and decrypt client requests.",
+        "You can select the default certificate from certificates available in ACM and add certificates to the listener’s certificate list.",
+        "The default certificate is also added to the SNI list.",
+        "An NLB TCP listener on port 443 passes encrypted traffic to targets without decrypting it."
+      ],
+      "gotchas": [
+        "An ALB HTTPS listener is not TLS passthrough: it decrypts the client connection.",
+        "A certificate alone is insufficient to configure a secure listener; a security policy is also required.",
+        "A forwarding default rule needs an available target group."
+      ],
+      "confusedWith": [
+        {
+          "concept": "NLB TCP listener on port 443",
+          "difference": "It passes encrypted traffic through without load-balancer decryption; an ALB HTTPS listener terminates the client TLS connection."
+        }
+      ],
+      "examCues": [
+        "terminate client TLS at the load balancer",
+        "select a certificate from ACM",
+        "add certificates to the SNI list",
+        "encrypted traffic must reach targets without load-balancer decryption"
+      ]
+    },
+    "es": {
+      "tldr": "Un HTTPS listener de ALB termina el TLS del cliente en el load balancer y descifra las solicitudes antes de enviarlas a los targets. Elígelo cuando el load balancer deba manejar solicitudes HTTPS; elige un TCP listener de NLB en el puerto 443 si el tráfico cifrado debe llegar a los targets sin que el load balancer lo descifre.",
+      "whenToUse": [
+        "Tus clientes necesitan HTTPS y TLS debe terminar en un Application Load Balancer.",
+        "Tu HTTPS listener necesita un certificado disponible en ACM.",
+        "Tu listener necesita un certificado predeterminado y certificados adicionales en su SNI list."
+      ],
+      "keyFacts": [
+        "Un HTTPS listener de ALB requiere un certificado de servidor y una security policy.",
+        "El listener usa el certificado para terminar la conexión frontal y descifrar las solicitudes de los clientes.",
+        "Puedes seleccionar el certificado predeterminado entre los disponibles en ACM y agregar certificados a la certificate list del listener.",
+        "El certificado predeterminado también se agrega a la SNI list.",
+        "Un TCP listener de NLB en el puerto 443 pasa tráfico cifrado a los targets sin descifrarlo."
+      ],
+      "gotchas": [
+        "Un HTTPS listener de ALB no es TLS passthrough: descifra la conexión del cliente.",
+        "Un certificado por sí solo no basta para configurar un secure listener; también necesitas una security policy.",
+        "Una default rule que usa forward necesita un target group disponible."
+      ],
+      "confusedWith": [
+        {
+          "concept": "TCP listener de NLB en el puerto 443",
+          "difference": "Pasa el tráfico cifrado sin que el load balancer lo descifre; un HTTPS listener de ALB termina la conexión TLS del cliente."
+        }
+      ],
+      "examCues": [
+        "terminate client TLS at the load balancer",
+        "select a certificate from ACM",
+        "add certificates to the SNI list",
+        "encrypted traffic must reach targets without load-balancer decryption"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "elb-tls-termination-acm--67440573",
+      "conceptId": "elb-tls-termination-acm",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company is moving its web application behind a load balancer. Clients must connect over HTTPS, and the load balancer must decrypt their requests before forwarding them to an existing target group. The company has a certificate available in ACM. Which configuration meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an ALB HTTPS listener with the ACM certificate, a security policy, and a forward action to the target group.",
+          "correct": true,
+          "why": "An ALB HTTPS listener terminates client TLS and decrypts requests, while its forward action sends them to the target group."
+        },
+        {
+          "id": "B",
+          "text": "Create an ALB HTTPS listener with the ACM certificate and a forward action, but omit the security policy.",
+          "correct": false,
+          "why": "A secure listener requires a security policy as well as a certificate."
+        },
+        {
+          "id": "C",
+          "text": "Create an NLB TCP listener on port 443 and send connections to the targets.",
+          "correct": false,
+          "why": "A TCP listener passes encrypted traffic through without decrypting it at the load balancer."
+        },
+        {
+          "id": "D",
+          "text": "Create an ALB HTTPS listener with the ACM certificate and a security policy, and set its default action to redirect.",
+          "correct": false,
+          "why": "A redirect default action does not forward these requests to the existing target group."
+        }
+      ],
+      "explanation": "The deciding requirement is that the load balancer decrypt client HTTPS requests and forward them to a target group. An ALB HTTPS listener does this when configured with a certificate, security policy, and forward action. An NLB TCP listener on port 443 instead passes encrypted traffic through without decryption.",
+      "keywordCues": [
+        "load balancer must decrypt their requests",
+        "forwarding them to an existing target group",
+        "certificate available in ACM"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas está trasladando su aplicación web detrás de un load balancer. Los clientes deben conectarse por HTTPS, y el load balancer debe descifrar sus solicitudes antes de enviarlas a un target group existente. La empresa tiene un certificado disponible en ACM. ¿Qué configuración cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un HTTPS listener de ALB con el certificado de ACM, una security policy y una acción forward hacia el target group.",
+            "why": "Un HTTPS listener de ALB termina el TLS del cliente y descifra las solicitudes, mientras que la acción forward las envía al target group."
+          },
+          {
+            "id": "B",
+            "text": "Crea un HTTPS listener de ALB con el certificado de ACM y una acción forward, pero omite la security policy.",
+            "why": "Un secure listener requiere una security policy además de un certificado."
+          },
+          {
+            "id": "C",
+            "text": "Crea un TCP listener de NLB en el puerto 443 y envía las conexiones a los targets.",
+            "why": "Un TCP listener pasa el tráfico cifrado sin que el load balancer lo descifre."
+          },
+          {
+            "id": "D",
+            "text": "Crea un HTTPS listener de ALB con el certificado de ACM y una security policy, y establece su default action en redirect.",
+            "why": "Una default action de redirect no envía estas solicitudes al target group existente."
+          }
+        ],
+        "explanation": "El requisito decisivo es que el load balancer descifre las solicitudes HTTPS de los clientes y las envíe a un target group. Un HTTPS listener de ALB lo hace cuando configuras un certificado, una security policy y una acción forward. En cambio, un TCP listener de NLB en el puerto 443 pasa el tráfico cifrado sin descifrarlo."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elb-tls-termination-acm--b1b219e7",
+      "conceptId": "elb-tls-termination-acm",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A community theater is updating its ALB so that visitors who arrive at its HTTPS endpoint receive a permanent redirect to a new URL. The ALB must terminate the visitors’ TLS connections, and the team has a server certificate available in ACM. Which two configurations meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set the HTTPS listener’s default action to redirect to the new URL with HTTP 301.",
+          "correct": true,
+          "why": "The listener supports a redirect action with a permanent HTTP 301 status code."
+        },
+        {
+          "id": "B",
+          "text": "Use an NLB TCP listener on port 443 to pass visitors’ encrypted connections through.",
+          "correct": false,
+          "why": "TCP passthrough does not terminate visitors’ TLS connections at the load balancer."
+        },
+        {
+          "id": "C",
+          "text": "Configure an ALB HTTP listener with the new URL as its redirect destination.",
+          "correct": false,
+          "why": "An HTTP listener does not provide the required HTTPS endpoint for visitors."
+        },
+        {
+          "id": "D",
+          "text": "Set the HTTPS listener’s default action to forward to an available target group.",
+          "correct": false,
+          "why": "A forward action sends requests to targets instead of redirecting visitors to the new URL."
+        },
+        {
+          "id": "E",
+          "text": "Configure an ALB HTTPS listener with the ACM certificate and a security policy.",
+          "correct": true,
+          "why": "The HTTPS listener uses a certificate to terminate client TLS and requires a security policy."
+        }
+      ],
+      "explanation": "The visitors need an HTTPS endpoint that terminates TLS and issues a permanent redirect. An ALB HTTPS listener needs a certificate and security policy, and its redirect action can use HTTP 301. Forwarding to a target group misses the redirect requirement, while TCP passthrough misses TLS termination at the load balancer.",
+      "keywordCues": [
+        "HTTPS endpoint",
+        "permanent redirect to a new URL",
+        "ALB must terminate the visitors’ TLS connections",
+        "server certificate available in ACM"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html"
+      ],
+      "es": {
+        "stem": "Un teatro comunitario está actualizando su ALB para que los visitantes que llegan a su endpoint HTTPS reciban un redirect permanente hacia una nueva URL. El ALB debe terminar las conexiones TLS de los visitantes, y el equipo tiene un certificado de servidor disponible en ACM. ¿Qué dos configuraciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Establece la default action del HTTPS listener en redirect hacia la nueva URL con HTTP 301.",
+            "why": "El listener admite una acción redirect con el código de estado permanente HTTP 301."
+          },
+          {
+            "id": "B",
+            "text": "Usa un TCP listener de NLB en el puerto 443 para pasar las conexiones cifradas de los visitantes.",
+            "why": "TCP passthrough no termina las conexiones TLS de los visitantes en el load balancer."
+          },
+          {
+            "id": "C",
+            "text": "Configura un HTTP listener de ALB con la nueva URL como destino del redirect.",
+            "why": "Un HTTP listener no proporciona el endpoint HTTPS requerido para los visitantes."
+          },
+          {
+            "id": "D",
+            "text": "Establece la default action del HTTPS listener en forward hacia un target group disponible.",
+            "why": "Una acción forward envía las solicitudes a los targets en vez de redirigir a los visitantes a la nueva URL."
+          },
+          {
+            "id": "E",
+            "text": "Configura un HTTPS listener de ALB con el certificado de ACM y una security policy.",
+            "why": "El HTTPS listener usa un certificado para terminar el TLS del cliente y requiere una security policy."
+          }
+        ],
+        "explanation": "Los visitantes necesitan un endpoint HTTPS que termine TLS y emita un redirect permanente. Un HTTPS listener de ALB necesita un certificado y una security policy, y su acción redirect puede usar HTTP 301. La acción forward hacia un target group no cumple el requisito del redirect, mientras que TCP passthrough no termina TLS en el load balancer."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elb-tls-termination-acm--3ea25fa7",
+      "conceptId": "elb-tls-termination-acm",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization sends encrypted connections to application targets. Its security rule prohibits the load balancer from decrypting client traffic; the encrypted traffic must pass through to the targets. The team does not need the load balancer to process HTTP requests. Which listener design meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an ALB HTTPS listener with a redirect default action.",
+          "correct": false,
+          "why": "The HTTPS listener decrypts the front-end connection, and a redirect does not pass the connection through to targets."
+        },
+        {
+          "id": "B",
+          "text": "Use an NLB TCP listener on port 443 to pass the encrypted traffic to targets.",
+          "correct": true,
+          "why": "An NLB TCP listener on port 443 passes encrypted traffic through without decrypting it."
+        },
+        {
+          "id": "C",
+          "text": "Use an ALB HTTPS listener with certificates in its SNI list.",
+          "correct": false,
+          "why": "Adding certificates does not change the ALB HTTPS listener’s front-end decryption behavior."
+        },
+        {
+          "id": "D",
+          "text": "Use an ALB HTTPS listener with an ACM certificate and a forward action.",
+          "correct": false,
+          "why": "An ALB HTTPS listener terminates the front-end TLS connection and decrypts client requests."
+        }
+      ],
+      "explanation": "The security rule excludes TLS termination at the load balancer. An NLB TCP listener on port 443 passes encrypted traffic to targets without decrypting it. An ALB HTTPS listener, even with certificates in its SNI list, terminates the client connection and decrypts requests.",
+      "keywordCues": [
+        "prohibits the load balancer from decrypting client traffic",
+        "encrypted traffic must pass through to the targets",
+        "does not need the load balancer to process HTTP requests"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación envía conexiones cifradas a los targets de su aplicación. Su regla de seguridad prohíbe que el load balancer descifre el tráfico de los clientes; el tráfico cifrado debe pasar a los targets. El equipo no necesita que el load balancer procese solicitudes HTTP. ¿Qué diseño de listener cumple el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un HTTPS listener de ALB con una default action de redirect.",
+            "why": "El HTTPS listener descifra la conexión frontal, y un redirect no pasa la conexión a los targets."
+          },
+          {
+            "id": "B",
+            "text": "Usa un TCP listener de NLB en el puerto 443 para pasar el tráfico cifrado a los targets.",
+            "why": "Un TCP listener de NLB en el puerto 443 pasa el tráfico cifrado sin descifrarlo."
+          },
+          {
+            "id": "C",
+            "text": "Usa un HTTPS listener de ALB con certificados en su SNI list.",
+            "why": "Agregar certificados no cambia el comportamiento de descifrado frontal del HTTPS listener de ALB."
+          },
+          {
+            "id": "D",
+            "text": "Usa un HTTPS listener de ALB con un certificado de ACM y una acción forward.",
+            "why": "Un HTTPS listener de ALB termina la conexión TLS frontal y descifra las solicitudes de los clientes."
+          }
+        ],
+        "explanation": "La regla de seguridad excluye la terminación de TLS en el load balancer. Un TCP listener de NLB en el puerto 443 pasa el tráfico cifrado a los targets sin descifrarlo. Un HTTPS listener de ALB, incluso con certificados en su SNI list, termina la conexión del cliente y descifra las solicitudes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "elb-tls-termination-acm--r0",
+      "conceptId": "elb-tls-termination-acm",
+      "kind": "recall",
+      "prompt": "Clients need HTTPS terminated at an ALB. Which listener and certificate setup would you choose, and what else must the secure listener specify?",
+      "promptEs": "Tus clientes necesitan que TLS termine en un ALB. ¿Qué listener y configuración de certificado eliges, y qué más debes especificar para el secure listener?",
+      "idealAnswer": "Use an ALB HTTPS listener with a server certificate selected from ACM. Specify a security policy; the listener terminates the client TLS connection and decrypts requests before sending them to targets.",
+      "rubric": [
+        "Chooses an ALB HTTPS listener.",
+        "Selects a server certificate from ACM.",
+        "Names the required security policy and explains front-end TLS termination."
+      ]
+    }
+  ]
+}

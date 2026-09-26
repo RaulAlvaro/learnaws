@@ -1,0 +1,230 @@
+{
+  "conceptId": "network-optimization-review",
+  "card": {
+    "en": {
+      "tldr": "Review an existing workload’s traffic patterns and network costs before changing its topology. Use the findings to decide whether to co-locate frequently communicating components, remove unnecessary hops, or consolidate network resources without breaking required connectivity or availability.",
+      "whenToUse": [
+        "A workload’s network costs have increased, but the costly traffic paths are not yet clear.",
+        "Components communicate frequently through NAT gateways or Transit Gateway attachments.",
+        "A team wants to simplify an existing network while preserving its routing and availability requirements."
+      ],
+      "keyFacts": [
+        "Cloud networking resources are consumed and paid for as they are used.",
+        "Efficient use of networking resources is part of cost optimization.",
+        "AWS cost-optimization guidance recommends modeling data transfer before making changes.",
+        "The guidance also recommends selecting components and implementing services to reduce data transfer costs."
+      ],
+      "gotchas": [
+        "Do not consolidate network resources solely because the diagram looks complicated; check traffic and cost data first.",
+        "Removing a hop is not an optimization if that hop provides required connectivity.",
+        "Moving components closer together must not violate the workload’s availability requirements."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "identify which existing network paths drive costs",
+        "frequent communication between workload components",
+        "simplify NAT and Transit Gateway usage",
+        "preserve required routing and availability"
+      ]
+    },
+    "es": {
+      "tldr": "Revisa los patrones de tráfico y los costos de red de una carga de trabajo existente antes de cambiar su topología. Usa los resultados para decidir si conviene acercar componentes que se comunican con frecuencia, eliminar saltos innecesarios o consolidar recursos de red sin afectar la conectividad ni la disponibilidad requeridas.",
+      "whenToUse": [
+        "Los costos de red de una carga de trabajo aumentaron, pero aún no está claro qué rutas generan el gasto.",
+        "Los componentes se comunican con frecuencia a través de NAT gateways o attachments de AWS Transit Gateway.",
+        "Un equipo quiere simplificar una red existente sin perder las rutas ni la disponibilidad requeridas."
+      ],
+      "keyFacts": [
+        "Los recursos de red en la nube se consumen y se pagan según su uso.",
+        "El uso eficiente de los recursos de red forma parte de la optimización de costos.",
+        "La guía de optimización de costos de AWS recomienda modelar la transferencia de datos antes de hacer cambios.",
+        "La guía también recomienda seleccionar componentes e implementar servicios que reduzcan los costos de transferencia de datos."
+      ],
+      "gotchas": [
+        "No consolides recursos de red solo porque el diagrama parezca complejo; primero revisa los datos de tráfico y costos.",
+        "Eliminar un salto no es una optimización si ese salto proporciona conectividad necesaria.",
+        "Acercar componentes no debe incumplir los requisitos de disponibilidad de la carga de trabajo."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "identify which existing network paths drive costs",
+        "frequent communication between workload components",
+        "simplify NAT and Transit Gateway usage",
+        "preserve required routing and availability"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "network-optimization-review--20ad0c99",
+      "conceptId": "network-optimization-review",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A retailer runs applications across several VPCs. Its network spending has increased, and engineers suspect that some application-to-application traffic takes unnecessary paths through shared network resources, but they have not identified the traffic sources. The team must keep existing connectivity while deciding what to change. Which approach meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Remove the shared AWS Transit Gateway attachments first, then investigate any application connections that stop working.",
+          "correct": false,
+          "why": "Removing attachments before identifying required paths risks breaking existing connectivity."
+        },
+        {
+          "id": "B",
+          "text": "Add NAT gateways to each VPC first, then compare network spending after the deployment.",
+          "correct": false,
+          "why": "Adding resources before identifying the costly paths does not target the stated problem."
+        },
+        {
+          "id": "C",
+          "text": "Move every application component into one VPC first, then inspect traffic that still crosses network boundaries.",
+          "correct": false,
+          "why": "A broad migration is not justified before the team knows which paths need optimization."
+        },
+        {
+          "id": "D",
+          "text": "Review VPC Flow Logs and AWS Cost Explorer data, model the significant traffic paths, and then change only paths shown to be unnecessary.",
+          "correct": true,
+          "why": "This uses traffic and cost evidence to target changes while checking that required connectivity remains."
+        }
+      ],
+      "explanation": "The deciding constraint is that the team has not identified which paths drive spending and must preserve connectivity. Reviewing traffic and cost data supports data transfer modeling before selecting changes. Removing attachments immediately may disrupt required connections, while adding resources or migrating everything makes unverified changes to the topology.",
+      "keywordCues": [
+        "network spending has increased",
+        "have not identified the traffic sources",
+        "keep existing connectivity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista ejecuta aplicaciones en varias VPC. Su gasto de red aumentó y los ingenieros sospechan que parte del tráfico entre aplicaciones recorre rutas innecesarias a través de recursos de red compartidos, pero todavía no identifican el origen de ese tráfico. El equipo debe mantener la conectividad actual mientras decide qué cambiar. ¿Qué enfoque cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Eliminar primero los attachments compartidos de AWS Transit Gateway y después investigar las conexiones entre aplicaciones que dejen de funcionar.",
+            "why": "Eliminar attachments antes de identificar las rutas necesarias puede interrumpir la conectividad actual."
+          },
+          {
+            "id": "B",
+            "text": "Agregar primero NAT gateways a cada VPC y después comparar el gasto de red.",
+            "why": "Agregar recursos antes de identificar las rutas costosas no resuelve el problema de forma dirigida."
+          },
+          {
+            "id": "C",
+            "text": "Mover primero todos los componentes de las aplicaciones a una sola VPC y después inspeccionar el tráfico que todavía cruce límites de red.",
+            "why": "No se justifica una migración amplia antes de saber qué rutas necesitan optimización."
+          },
+          {
+            "id": "D",
+            "text": "Revisar VPC Flow Logs y los datos de AWS Cost Explorer, modelar las rutas de tráfico más importantes y después cambiar solo las rutas que resulten innecesarias.",
+            "why": "Usa datos de tráfico y costos para dirigir los cambios y comprobar que se mantenga la conectividad requerida."
+          }
+        ],
+        "explanation": "Lo decisivo es que el equipo aún no identifica qué rutas generan el gasto y debe preservar la conectividad. Revisar los datos de tráfico y costos permite modelar la transferencia de datos antes de elegir cambios. Quitar attachments de inmediato podría interrumpir conexiones necesarias; agregar recursos o migrar todo implica cambiar la topología sin comprobar primero la causa."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "network-optimization-review--5deaf5e4",
+      "conceptId": "network-optimization-review",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company operates a processing service and a metadata service in separate locations within its AWS network. A review of VPC Flow Logs shows frequent communication between the two, and the team wants to reduce avoidable data transfer while retaining the workload’s required availability. Which change should the solutions architect evaluate FIRST to meet these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Remove the metadata service’s existing network connection and rely on the processing service to retry requests.",
+          "correct": false,
+          "why": "Retries cannot replace the connectivity the two services require."
+        },
+        {
+          "id": "B",
+          "text": "Route all communication between the services through an additional shared network hop so both services use one path.",
+          "correct": false,
+          "why": "An extra hop does not address the identified frequent traffic or demonstrate lower transfer costs."
+        },
+        {
+          "id": "C",
+          "text": "Evaluate placing the frequently communicating components closer together, while checking the placement against availability requirements.",
+          "correct": true,
+          "why": "This targets the observed traffic pattern without treating availability as optional."
+        },
+        {
+          "id": "D",
+          "text": "Consolidate all application instances into one location without reviewing the workload’s availability design.",
+          "correct": false,
+          "why": "That move could violate the explicitly required availability."
+        }
+      ],
+      "explanation": "The traffic review has already identified a frequently used communication path, so the next step is to evaluate component placement as part of data transfer optimization. The proposed placement must still satisfy the workload’s availability requirement. Consolidating all instances without that check misses the constraint, and adding a hop does not target avoidable transfer.",
+      "keywordCues": [
+        "frequent communication between the two",
+        "reduce avoidable data transfer",
+        "retaining the workload’s required availability"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/plan-for-data-transfer.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios opera un servicio de procesamiento y un servicio de metadatos en ubicaciones distintas dentro de su red de AWS. Una revisión de VPC Flow Logs muestra comunicación frecuente entre ambos, y el equipo quiere reducir la transferencia de datos evitable sin perder la disponibilidad requerida de la carga de trabajo. ¿Qué cambio debe evaluar PRIMERO el arquitecto de soluciones para cumplir estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Eliminar la conexión de red actual del servicio de metadatos y hacer que el servicio de procesamiento reintente las solicitudes.",
+            "why": "Los reintentos no sustituyen la conectividad que los dos servicios necesitan."
+          },
+          {
+            "id": "B",
+            "text": "Enviar toda la comunicación entre los servicios a través de un salto de red compartido adicional para que ambos usen una sola ruta.",
+            "why": "Un salto adicional no aborda el tráfico frecuente identificado ni demuestra una reducción del costo de transferencia."
+          },
+          {
+            "id": "C",
+            "text": "Evaluar si conviene ubicar más cerca los componentes que se comunican con frecuencia y comprobar que la ubicación cumpla los requisitos de disponibilidad.",
+            "why": "Apunta al patrón de tráfico observado sin tratar la disponibilidad como opcional."
+          },
+          {
+            "id": "D",
+            "text": "Consolidar todas las instancias de la aplicación en una sola ubicación sin revisar el diseño de disponibilidad.",
+            "why": "Ese cambio podría incumplir el requisito explícito de disponibilidad."
+          }
+        ],
+        "explanation": "La revisión de tráfico ya identificó una ruta de comunicación frecuente, por lo que el siguiente paso es evaluar la ubicación de los componentes como parte de la optimización de la transferencia de datos. La ubicación propuesta también debe cumplir el requisito de disponibilidad. Consolidar todas las instancias sin esa verificación ignora la restricción, y agregar un salto no se enfoca en la transferencia evitable."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "network-optimization-review--r0",
+      "conceptId": "network-optimization-review",
+      "kind": "recall",
+      "prompt": "Network spending rises across several VPCs. What evidence would you review before consolidating NAT gateways or Transit Gateway attachments, and why?",
+      "promptEs": "El gasto de red aumenta en varias VPC. ¿Qué datos revisarías antes de consolidar NAT gateways o attachments de AWS Transit Gateway, y por qué?",
+      "idealAnswer": "Review VPC Flow Logs and AWS Cost Explorer data alongside the application routes to identify significant traffic paths and their costs. Use that evidence to model data transfer and consolidate only resources that are unnecessary for required connectivity and availability.",
+      "rubric": [
+        "Names traffic evidence from VPC Flow Logs.",
+        "Names cost evidence from AWS Cost Explorer.",
+        "Connects the evidence to data transfer modeling and targeted consolidation.",
+        "Preserves required connectivity and availability."
+      ]
+    }
+  ]
+}

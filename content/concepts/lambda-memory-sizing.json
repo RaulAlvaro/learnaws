@@ -1,0 +1,324 @@
+{
+  "conceptId": "lambda-memory-sizing",
+  "card": {
+    "en": {
+      "tldr": "Lambda memory is also a performance setting: increasing it allocates proportionally more CPU. For a slow function, use CloudWatch observations and tests at different memory settings to choose a configuration that meets the performance requirement.",
+      "whenToUse": [
+        "A Lambda function is CPU-bound or its duration suggests a compute bottleneck.",
+        "A function approaches its configured memory maximum.",
+        "You need to compare memory settings against a latency target rather than assume the minimum setting is best."
+      ],
+      "keyFacts": [
+        "Lambda memory can be configured from 128 MB to 10,240 MB in 1-MB increments.",
+        "Lambda allocates CPU power in proportion to configured memory; at 1,769 MB, a function has the equivalent of one vCPU.",
+        "CloudWatch memory observations can identify memory-bound functions; duration can help assess CPU-bound and IO-bound functions.",
+        "AWS Lambda Power Tuning tests a function at different memory allocations and measures performance.",
+        "AWS Compute Optimizer memory recommendations support only functions using the x86_64 architecture."
+      ],
+      "gotchas": [
+        "Do not assume 128 MB is the best setting for every function; AWS recommends it only for simple functions such as event transformers and routers.",
+        "Raising a timeout does not address a CPU bottleneck by itself; memory is the setting that increases allocated CPU.",
+        "Do not assume Compute Optimizer memory recommendations are available for a function using an architecture other than x86_64."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "CPU-bound Lambda function misses latency target",
+        "duration rises but memory use remains low",
+        "compare performance at several memory settings",
+        "memory usage approaches configured maximum"
+      ]
+    },
+    "es": {
+      "tldr": "La memoria de Lambda también determina el rendimiento: al aumentarla, se asigna proporcionalmente más CPU. Si una función tarda demasiado, usa observaciones de CloudWatch y pruebas con distintas configuraciones de memoria para cumplir el objetivo de rendimiento.",
+      "whenToUse": [
+        "Una función Lambda está limitada por CPU o su duración sugiere un cuello de botella de procesamiento.",
+        "Una función se acerca a su límite de memoria configurado.",
+        "Necesitas comparar configuraciones de memoria con un objetivo de latencia, en vez de suponer que la mínima es la mejor."
+      ],
+      "keyFacts": [
+        "Puedes configurar la memoria de Lambda entre 128 MB y 10,240 MB, en incrementos de 1 MB.",
+        "Lambda asigna CPU en proporción a la memoria configurada; con 1,769 MB, una función tiene el equivalente a una vCPU.",
+        "Las observaciones de memoria en CloudWatch ayudan a identificar funciones limitadas por memoria; la duración ayuda a evaluar funciones limitadas por CPU o I/O.",
+        "AWS Lambda Power Tuning prueba una función con distintas asignaciones de memoria y mide su rendimiento.",
+        "Las recomendaciones de memoria de AWS Compute Optimizer solo admiten funciones con arquitectura x86_64."
+      ],
+      "gotchas": [
+        "No supongas que 128 MB es lo mejor para todas las funciones; AWS lo recomienda solo para funciones sencillas, como las que transforman o enrutan eventos.",
+        "Aumentar el timeout no resuelve por sí solo un cuello de botella de CPU; la memoria es la configuración que incrementa la CPU asignada.",
+        "No supongas que las recomendaciones de memoria de Compute Optimizer están disponibles para arquitecturas distintas de x86_64."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "CPU-bound Lambda function misses latency target",
+        "duration rises but memory use remains low",
+        "compare performance at several memory settings",
+        "memory usage approaches configured maximum"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/lambda/latest/dg/configuration-memory.html",
+      "https://docs.aws.amazon.com/lambda/latest/operatorguide/computing-power.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "lambda-memory-sizing--a8e253ab",
+      "conceptId": "lambda-memory-sizing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company uses a Lambda function to generate thumbnails after images arrive. The function completes successfully, but image processing frequently misses its latency target; CloudWatch shows that memory consumption remains well below the configured maximum. Which change should the team test FIRST to improve processing speed without rewriting the function?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Reduce the function memory setting and measure its duration again.",
+          "correct": false,
+          "why": "Reducing memory also reduces allocated CPU and does not address the suspected compute bottleneck."
+        },
+        {
+          "id": "B",
+          "text": "Keep the memory setting and add a CloudWatch alarm for maximum memory consumption.",
+          "correct": false,
+          "why": "The alarm could help detect memory pressure, but the observations already indicate that memory capacity is not the immediate issue."
+        },
+        {
+          "id": "C",
+          "text": "Increase the function timeout while keeping its memory setting unchanged.",
+          "correct": false,
+          "why": "A longer timeout does not increase the CPU allocated to a function that already completes."
+        },
+        {
+          "id": "D",
+          "text": "Increase the function memory setting and measure its duration again.",
+          "correct": true,
+          "why": "More memory allocates proportionally more CPU, which can improve a CPU-bound function's duration."
+        }
+      ],
+      "explanation": "The function finishes but is too slow, while its memory consumption is well below the maximum. Because Lambda allocates CPU in proportion to configured memory, testing a higher memory setting directly addresses a possible compute bottleneck. Increasing the timeout would allow more time but would not add CPU.",
+      "keywordCues": [
+        "completes successfully",
+        "misses its latency target",
+        "memory consumption remains well below the configured maximum",
+        "without rewriting the function"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/configuration-memory.html",
+        "https://docs.aws.amazon.com/lambda/latest/operatorguide/computing-power.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios usa una función Lambda para generar miniaturas cuando llegan imágenes. La función termina correctamente, pero el procesamiento suele incumplir su objetivo de latencia; CloudWatch muestra que el consumo de memoria permanece muy por debajo del máximo configurado. ¿Qué cambio debería probar primero el equipo para mejorar la velocidad sin reescribir la función?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reducir la memoria configurada de la función y volver a medir su duración.",
+            "why": "Reducir la memoria también reduce la CPU asignada y no atiende el posible cuello de botella de procesamiento."
+          },
+          {
+            "id": "B",
+            "text": "Mantener la memoria configurada y agregar una alarma de CloudWatch para el consumo máximo de memoria.",
+            "why": "La alarma podría detectar presión de memoria, pero las observaciones ya indican que la capacidad de memoria no es el problema inmediato."
+          },
+          {
+            "id": "C",
+            "text": "Aumentar el timeout de la función sin cambiar su configuración de memoria.",
+            "why": "Un timeout mayor no aumenta la CPU asignada a una función que ya termina."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar la memoria configurada de la función y volver a medir su duración.",
+            "why": "Más memoria asigna proporcionalmente más CPU, lo que puede reducir la duración de una función limitada por CPU."
+          }
+        ],
+        "explanation": "La función termina, pero tarda demasiado, mientras que su consumo de memoria está muy por debajo del máximo. Como Lambda asigna CPU en proporción a la memoria configurada, probar más memoria atiende directamente un posible cuello de botella de procesamiento. Aumentar el timeout daría más tiempo, pero no agregaría CPU."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-memory-sizing--b2b3c0a3",
+      "conceptId": "lambda-memory-sizing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A retailer is preparing a Lambda function that reads product files from Amazon S3 for a seasonal campaign. The team wants to choose a memory setting based on observed performance across several configurations, using live calls made by the function in its own AWS account. Which approach meets these requirements with the LEAST custom testing work?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set memory to 1,769 MB because that setting provides the equivalent of one vCPU.",
+          "correct": false,
+          "why": "The known CPU allocation does not establish which setting best meets this function's observed performance needs."
+        },
+        {
+          "id": "B",
+          "text": "Set memory to 128 MB and use CloudWatch alarms to report when usage approaches that setting.",
+          "correct": false,
+          "why": "This detects memory pressure but does not compare performance across configurations."
+        },
+        {
+          "id": "C",
+          "text": "Increase the timeout at each deployment and compare whether the function completes.",
+          "correct": false,
+          "why": "Changing the timeout does not test the effect of different memory allocations on performance."
+        },
+        {
+          "id": "D",
+          "text": "Use AWS Lambda Power Tuning to test the function at different memory allocations.",
+          "correct": true,
+          "why": "The tool measures performance across memory settings while the input function runs in the team's AWS account."
+        }
+      ],
+      "explanation": "The deciding requirement is to measure performance at several memory settings while the function makes live calls in its own account. AWS Lambda Power Tuning is designed to run those comparisons. Selecting a fixed setting based solely on its vCPU equivalence skips the workload-specific measurement.",
+      "keywordCues": [
+        "observed performance across several configurations",
+        "live calls made by the function in its own AWS account",
+        "LEAST custom testing work"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/configuration-memory.html",
+        "https://docs.aws.amazon.com/lambda/latest/operatorguide/computing-power.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista prepara una función Lambda que lee archivos de productos desde Amazon S3 para una campaña de temporada. El equipo quiere elegir la memoria según el rendimiento observado con varias configuraciones, mediante llamadas reales realizadas por la función en su propia cuenta de AWS. ¿Qué enfoque cumple estos requisitos con el LEAST custom testing work?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar 1,769 MB de memoria porque esa configuración proporciona el equivalente a una vCPU.",
+            "why": "La asignación conocida de CPU no demuestra qué configuración satisface mejor las necesidades de rendimiento observadas de esta función."
+          },
+          {
+            "id": "B",
+            "text": "Configurar 128 MB de memoria y usar alarmas de CloudWatch para avisar cuando el consumo se acerque a ese valor.",
+            "why": "Esto detecta presión de memoria, pero no compara el rendimiento entre configuraciones."
+          },
+          {
+            "id": "C",
+            "text": "Aumentar el timeout en cada implementación y comparar si la función termina.",
+            "why": "Cambiar el timeout no prueba cómo afectan al rendimiento distintas asignaciones de memoria."
+          },
+          {
+            "id": "D",
+            "text": "Usar AWS Lambda Power Tuning para probar la función con distintas asignaciones de memoria.",
+            "why": "La herramienta mide el rendimiento con varias configuraciones de memoria mientras la función se ejecuta en la cuenta de AWS del equipo."
+          }
+        ],
+        "explanation": "El requisito decisivo es medir el rendimiento con varias configuraciones de memoria mientras la función realiza llamadas reales en la cuenta del equipo. AWS Lambda Power Tuning está diseñado para ejecutar esas comparaciones. Elegir una configuración fija solo por su equivalencia en vCPU omite la medición de esta carga de trabajo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-memory-sizing--e2574f6b",
+      "conceptId": "lambda-memory-sizing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A software company is reviewing an x86_64 Lambda function that imports several libraries. It needs evidence to choose a memory setting that meets a response-time goal, and administrators can opt in to AWS Compute Optimizer. The team wants both a performance comparison based on running the function and an AWS-provided memory recommendation it can review in the Lambda console. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Opt in to AWS Compute Optimizer and review eligible function memory recommendations in the Lambda console.",
+          "correct": true,
+          "why": "Compute Optimizer can provide console memory recommendations for eligible x86_64 functions after opt-in."
+        },
+        {
+          "id": "B",
+          "text": "Run AWS Lambda Power Tuning with the function to compare performance at different memory allocations.",
+          "correct": true,
+          "why": "It measures the running function's performance across different memory settings."
+        },
+        {
+          "id": "C",
+          "text": "Set memory to 1,769 MB without testing because one-vCPU equivalence guarantees the response-time goal.",
+          "correct": false,
+          "why": "The documented CPU equivalence does not guarantee this workload's response time."
+        },
+        {
+          "id": "D",
+          "text": "Increase the function timeout and use its new value as the recommended memory setting.",
+          "correct": false,
+          "why": "Timeout is not a memory allocation or a measured memory recommendation."
+        },
+        {
+          "id": "E",
+          "text": "Keep the default 128 MB setting because Lambda functions that import libraries need no additional performance testing.",
+          "correct": false,
+          "why": "Imported libraries can benefit from higher memory, so the default does not replace the requested evidence."
+        }
+      ],
+      "explanation": "The team requests two different forms of guidance: measured performance across settings and an AWS-provided recommendation. AWS Lambda Power Tuning supplies the comparison, while eligible x86_64 functions can receive Compute Optimizer memory recommendations after opt-in. Choosing 1,769 MB solely because of its CPU equivalence provides neither evidence that the response-time goal is met nor the requested recommendation.",
+      "keywordCues": [
+        "x86_64 Lambda function",
+        "performance comparison based on running the function",
+        "AWS-provided memory recommendation",
+        "administrators can opt in"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/configuration-memory.html",
+        "https://docs.aws.amazon.com/lambda/latest/operatorguide/computing-power.html"
+      ],
+      "es": {
+        "stem": "Una empresa de software revisa una función Lambda x86_64 que importa varias bibliotecas. Necesita evidencia para elegir una configuración de memoria que cumpla un objetivo de tiempo de respuesta, y los administradores pueden habilitar AWS Compute Optimizer. El equipo quiere tanto una comparación de rendimiento basada en la ejecución de la función como una recomendación de memoria de AWS que pueda revisar en la consola de Lambda. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilitar AWS Compute Optimizer y revisar en la consola de Lambda las recomendaciones de memoria para funciones elegibles.",
+            "why": "Tras habilitarlo, Compute Optimizer puede ofrecer recomendaciones de memoria en la consola para funciones x86_64 elegibles."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar AWS Lambda Power Tuning con la función para comparar el rendimiento con distintas asignaciones de memoria.",
+            "why": "Mide el rendimiento de la función en ejecución con diferentes configuraciones de memoria."
+          },
+          {
+            "id": "C",
+            "text": "Configurar 1,769 MB de memoria sin hacer pruebas porque la equivalencia a una vCPU garantiza el objetivo de tiempo de respuesta.",
+            "why": "La equivalencia documentada de CPU no garantiza el tiempo de respuesta de esta carga de trabajo."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar el timeout de la función y usar su nuevo valor como configuración de memoria recomendada.",
+            "why": "El timeout no es una asignación de memoria ni una recomendación de memoria medida."
+          },
+          {
+            "id": "E",
+            "text": "Mantener la configuración predeterminada de 128 MB porque las funciones Lambda que importan bibliotecas no necesitan pruebas adicionales de rendimiento.",
+            "why": "Las bibliotecas importadas pueden beneficiarse de más memoria, por lo que el valor predeterminado no sustituye la evidencia solicitada."
+          }
+        ],
+        "explanation": "El equipo solicita dos tipos de orientación: rendimiento medido con distintas configuraciones y una recomendación de AWS. AWS Lambda Power Tuning proporciona la comparación, mientras que las funciones x86_64 elegibles pueden recibir recomendaciones de memoria de Compute Optimizer después de habilitarlo. Elegir 1,769 MB solo por su equivalencia de CPU no demuestra que se cumpla el objetivo de respuesta ni proporciona la recomendación solicitada."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "lambda-memory-sizing--r0",
+      "conceptId": "lambda-memory-sizing",
+      "kind": "recall",
+      "prompt": "A CPU-bound Lambda function misses its latency target. Which setting would you test, and why?",
+      "promptEs": "Una función Lambda limitada por CPU incumple su objetivo de latencia. ¿Qué configuración probarías y por qué?",
+      "idealAnswer": "I would test a higher Lambda memory setting because Lambda allocates CPU power in proportion to memory. I would compare function duration at different settings to see whether the change meets the latency target.",
+      "rubric": [
+        "Identifies the Lambda memory setting.",
+        "Explains that increasing memory allocates proportionally more CPU.",
+        "Mentions measuring duration or comparing settings against the latency goal."
+      ]
+    }
+  ]
+}

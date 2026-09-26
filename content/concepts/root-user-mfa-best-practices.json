@@ -1,0 +1,324 @@
+{
+  "conceptId": "root-user-mfa-best-practices",
+  "card": {
+    "en": {
+      "tldr": "Protect the AWS account root user with MFA, avoid root access keys, and use root credentials only for tasks that require them. For everyday administration, use an administrative identity; configure MFA separately for IAM users because root MFA does not protect their sign-ins.",
+      "whenToUse": [
+        "A team wants to secure an account’s most privileged identity without using it for routine work.",
+        "An application or administrator needs programmatic access, and someone proposes root access keys.",
+        "IAM users need MFA even though MFA is already configured for the root user.",
+        "An organization wants to prevent root sign-in to its member accounts."
+      ],
+      "keyFacts": [
+        "The root user has complete access to resources in its account; AWS recommends using it only for tasks that require root credentials.",
+        "AWS strongly recommends not creating root user access keys. IAM roles provide temporary credentials rather than standard long-term credentials.",
+        "Root-user MFA affects only root credentials; each IAM user has a separate MFA configuration.",
+        "A root user or IAM user can register up to eight MFA devices, and only one registered device is needed to sign in.",
+        "For AWS Organizations member accounts, centrally removing root credentials prevents root sign-in and root password recovery in those accounts."
+      ],
+      "gotchas": [
+        "Enabling root MFA does not enable MFA for IAM users.",
+        "Adding MFA to root access keys does not make those long-term keys the recommended approach.",
+        "Removing root credentials from an Organizations member account also removes its MFA; this is a distinct strategy from retaining and protecting member-account root credentials."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "routine administration without root sign-in",
+        "root access keys for automation",
+        "IAM users still lack MFA",
+        "prevent member-account root sign-in"
+      ]
+    },
+    "es": {
+      "tldr": "Protege al root user de la cuenta de AWS con MFA, evita sus access keys y usa sus credenciales solo para tareas que las requieran. Para la administración diaria, usa una identidad administrativa; configura MFA por separado para los IAM users, porque el MFA del root user no protege sus inicios de sesión.",
+      "whenToUse": [
+        "Un equipo quiere proteger la identidad con más privilegios de la cuenta sin usarla para el trabajo diario.",
+        "Una aplicación o un administrador necesita acceso programático y alguien propone access keys del root user.",
+        "Los IAM users necesitan MFA aunque el root user ya lo tenga configurado.",
+        "Una organización quiere impedir el inicio de sesión del root user en sus member accounts."
+      ],
+      "keyFacts": [
+        "El root user tiene acceso completo a los recursos de su cuenta; AWS recomienda usarlo solo para tareas que requieren sus credenciales.",
+        "AWS recomienda enfáticamente no crear access keys para el root user. Los IAM roles proporcionan credenciales temporales en lugar de credenciales estándar de larga duración.",
+        "El MFA del root user solo afecta sus credenciales; cada IAM user tiene su propia configuración de MFA.",
+        "Un root user o IAM user puede registrar hasta ocho dispositivos MFA, y basta uno de los dispositivos registrados para iniciar sesión.",
+        "En member accounts de AWS Organizations, la eliminación centralizada de las credenciales del root user impide que este inicie sesión o recupere su contraseña en esas cuentas."
+      ],
+      "gotchas": [
+        "Habilitar MFA para el root user no lo habilita para los IAM users.",
+        "Agregar MFA al root user no convierte sus access keys de larga duración en la opción recomendada.",
+        "Eliminar las credenciales del root user de una member account de AWS Organizations también elimina su MFA; es una estrategia distinta de conservar y proteger esas credenciales."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "routine administration without root sign-in",
+        "root access keys for automation",
+        "IAM users still lack MFA",
+        "prevent member-account root sign-in"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/root-user-best-practices.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "root-user-mfa-best-practices--382e5d52",
+      "conceptId": "root-user-mfa-best-practices",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab has enabled MFA for the root user of its AWS account. Several researchers still sign in as IAM users with passwords, and the lab requires a second factor for those sign-ins. The security team wants to address that gap without treating root and IAM users as the same identity. Which action meets the requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure MFA for each researcher’s IAM user identity in addition to the root user’s MFA.",
+          "correct": true,
+          "why": "Each IAM user has a separate MFA configuration that can protect that user’s sign-in."
+        },
+        {
+          "id": "B",
+          "text": "Use the root user’s existing MFA configuration as the second factor for all IAM users in the account.",
+          "correct": false,
+          "why": "Root MFA applies only to root credentials and is not shared across IAM identities."
+        },
+        {
+          "id": "C",
+          "text": "Register additional MFA devices for the root user so the researchers can use one of those devices.",
+          "correct": false,
+          "why": "Additional root MFA devices protect root sign-in, not the researchers’ separate IAM user sign-ins."
+        },
+        {
+          "id": "D",
+          "text": "Replace the root user’s MFA device with a hardware security key and leave IAM user settings unchanged.",
+          "correct": false,
+          "why": "A stronger root MFA method still does not add a second factor to IAM user sign-ins."
+        }
+      ],
+      "explanation": "The researchers sign in with IAM user identities, not root credentials. Each IAM user has its own MFA configuration, so the lab must configure MFA for those identities. Adding or changing devices on the root user protects only root sign-in and leaves the stated gap unresolved.",
+      "keywordCues": [
+        "enabled MFA for the root user",
+        "sign in as IAM users with passwords",
+        "requires a second factor for those sign-ins"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/root-user-best-practices.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación habilitó MFA para el root user de su cuenta de AWS. Varios investigadores todavía inician sesión como IAM users con contraseñas, y el laboratorio exige un segundo factor para esos inicios de sesión. El equipo de seguridad quiere cerrar esa brecha sin tratar al root user y a los IAM users como una misma identidad. ¿Qué acción cumple el requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura MFA para la identidad IAM user de cada investigador, además del MFA del root user.",
+            "why": "Cada IAM user tiene una configuración de MFA independiente que puede proteger su inicio de sesión."
+          },
+          {
+            "id": "B",
+            "text": "Usa la configuración de MFA existente del root user como segundo factor para todos los IAM users de la cuenta.",
+            "why": "El MFA del root user solo afecta sus credenciales y no se comparte entre identidades de IAM."
+          },
+          {
+            "id": "C",
+            "text": "Registra dispositivos MFA adicionales para el root user, de modo que los investigadores puedan usar uno de ellos.",
+            "why": "Los dispositivos MFA adicionales del root user protegen su inicio de sesión, no el de los IAM users."
+          },
+          {
+            "id": "D",
+            "text": "Sustituye el dispositivo MFA del root user por una security key de hardware y deja sin cambios la configuración de los IAM users.",
+            "why": "Un método MFA más sólido para el root user no agrega un segundo factor al inicio de sesión de los IAM users."
+          }
+        ],
+        "explanation": "Los investigadores inician sesión con identidades IAM user, no con credenciales del root user. Cada IAM user tiene su propia configuración de MFA, así que el laboratorio debe configurar MFA para esas identidades. Agregar o cambiar dispositivos del root user solo protege su inicio de sesión y deja sin resolver la brecha indicada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "root-user-mfa-best-practices--d3ab183b",
+      "conceptId": "root-user-mfa-best-practices",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A media company has a standalone AWS account with a root user and IAM users who access the console. The security team requires phishing-resistant MFA where possible and wants a lost MFA device not to interrupt access to a highly privileged identity. Which two actions best meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Register passkeys or security keys as MFA for the root user and for the IAM users who sign in.",
+          "correct": true,
+          "why": "These FIDO-based methods provide phishing-resistant MFA for each separately configured identity."
+        },
+        {
+          "id": "B",
+          "text": "Assign one hardware TOTP token to several IAM users so they can share a backup second factor.",
+          "correct": false,
+          "why": "A user cannot authenticate with another user’s assigned TOTP device, and TOTP is not the preferred phishing-resistant method."
+        },
+        {
+          "id": "C",
+          "text": "Give the root user access keys so administrators can regain access if its MFA device is lost.",
+          "correct": false,
+          "why": "AWS strongly recommends against root access keys, which do not replace MFA-device resilience."
+        },
+        {
+          "id": "D",
+          "text": "Register multiple MFA devices for the highly privileged identity so another registered device can be used if one is lost.",
+          "correct": true,
+          "why": "Multiple registered devices provide a way to sign in without account recovery when one device becomes inaccessible."
+        },
+        {
+          "id": "E",
+          "text": "Configure only the root user with a virtual TOTP authenticator and rely on it to protect IAM user sign-ins.",
+          "correct": false,
+          "why": "Root MFA does not protect IAM users, and TOTP is not the recommended phishing-resistant option."
+        }
+      ],
+      "explanation": "The scenario calls for both phishing resistance across the identities that sign in and resilience if a device is lost. Passkeys and security keys are the recommended phishing-resistant MFA methods, and root and IAM users need their own MFA configurations. Registering multiple devices lets the highly privileged identity use another registered device if one is unavailable. Root access keys and a shared TOTP token do not satisfy those requirements.",
+      "keywordCues": [
+        "root user and IAM users who access the console",
+        "phishing-resistant MFA where possible",
+        "lost MFA device not to interrupt access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/root-user-best-practices.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene una cuenta independiente de AWS con un root user y varios IAM users que acceden a la consola. El equipo de seguridad exige MFA resistente al phishing cuando sea posible y quiere que la pérdida de un dispositivo MFA no interrumpa el acceso a una identidad con privilegios elevados. ¿Qué dos acciones cumplen mejor estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Registra passkeys o security keys como MFA para el root user y para los IAM users que inician sesión.",
+            "why": "Estos métodos basados en FIDO ofrecen MFA resistente al phishing para cada identidad configurada por separado."
+          },
+          {
+            "id": "B",
+            "text": "Asigna un mismo token TOTP de hardware a varios IAM users para que compartan un segundo factor de respaldo.",
+            "why": "Un usuario no puede autenticarse con el dispositivo TOTP asignado a otro, y TOTP no es el método preferido contra el phishing."
+          },
+          {
+            "id": "C",
+            "text": "Entrega access keys al root user para que los administradores recuperen el acceso si se pierde su dispositivo MFA.",
+            "why": "AWS recomienda enfáticamente no usar access keys del root user, y estas no sustituyen la redundancia de dispositivos MFA."
+          },
+          {
+            "id": "D",
+            "text": "Registra varios dispositivos MFA para la identidad con privilegios elevados, de modo que pueda usar otro dispositivo registrado si pierde uno.",
+            "why": "Varios dispositivos registrados permiten iniciar sesión sin recurrir a la recuperación de la cuenta si uno deja de estar disponible."
+          },
+          {
+            "id": "E",
+            "text": "Configura solo al root user con una aplicación virtual TOTP y confía en que proteja los inicios de sesión de los IAM users.",
+            "why": "El MFA del root user no protege a los IAM users, y TOTP no es la opción recomendada contra el phishing."
+          }
+        ],
+        "explanation": "El escenario exige resistencia al phishing para las identidades que inician sesión y continuidad si se pierde un dispositivo. Passkeys y security keys son los métodos MFA recomendados contra el phishing, y el root user y los IAM users necesitan configuraciones de MFA propias. Registrar varios dispositivos permite que la identidad con privilegios elevados use otro dispositivo registrado si uno no está disponible. Las access keys del root user y un token TOTP compartido no cumplen esos requisitos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "root-user-mfa-best-practices--8519a069",
+      "conceptId": "root-user-mfa-best-practices",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company has a standalone AWS account. Its operations team signs in as the root user for routine resource changes and wants credentials for a deployment script. The company must reduce exposure of its most privileged identity while keeping routine administration and deployments possible. Which approach meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure MFA for the root user, then continue using it for routine console work and create root access keys for the deployment script.",
+          "correct": false,
+          "why": "Root MFA does not address routine root use or the risk of long-term root access keys."
+        },
+        {
+          "id": "B",
+          "text": "Create an administrative IAM user for deployments, but leave root sign-in without MFA because it will be used infrequently.",
+          "correct": false,
+          "why": "Infrequent root use does not remove the need to protect root sign-in with MFA."
+        },
+        {
+          "id": "C",
+          "text": "Configure MFA for the root user, reserve root sign-in for tasks requiring it, and use appropriately permitted administrative identities and temporary role credentials for other work.",
+          "correct": true,
+          "why": "This protects root sign-in and avoids using root credentials for routine administration or deployments."
+        },
+        {
+          "id": "D",
+          "text": "Keep root credentials for console administration and use an IAM role only for the deployment script.",
+          "correct": false,
+          "why": "The script avoids root credentials, but routine console administration still unnecessarily uses the root user."
+        }
+      ],
+      "explanation": "The deciding constraint is to reduce exposure of the account’s most privileged identity while preserving both workflows. Configure root MFA and reserve root credentials for tasks that require them; use administrative identities for ordinary work and temporary role credentials instead of root access keys for deployments. MFA alone does not make routine root use or root access keys a good choice.",
+      "keywordCues": [
+        "signs in as the root user for routine resource changes",
+        "credentials for a deployment script",
+        "reduce exposure of its most privileged identity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/root-user-best-practices.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html"
+      ],
+      "es": {
+        "stem": "Una editorial tiene una cuenta independiente de AWS. Su equipo de operaciones inicia sesión como root user para hacer cambios rutinarios en recursos y quiere credenciales para un script de despliegue. La empresa debe reducir la exposición de su identidad con más privilegios sin impedir la administración diaria ni los despliegues. ¿Qué enfoque cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura MFA para el root user, sigue usándolo para el trabajo rutinario en la consola y crea access keys del root user para el script de despliegue.",
+            "why": "El MFA del root user no resuelve el uso rutinario de esa identidad ni el riesgo de sus access keys de larga duración."
+          },
+          {
+            "id": "B",
+            "text": "Crea un IAM user administrativo para los despliegues, pero deja el inicio de sesión del root user sin MFA porque se usará con poca frecuencia.",
+            "why": "Usar el root user con poca frecuencia no elimina la necesidad de proteger su inicio de sesión con MFA."
+          },
+          {
+            "id": "C",
+            "text": "Configura MFA para el root user, reserva su inicio de sesión para tareas que lo requieran y usa identidades administrativas con permisos adecuados y credenciales temporales de roles para el resto del trabajo.",
+            "why": "Esto protege el inicio de sesión del root user y evita usar sus credenciales para la administración o los despliegues rutinarios."
+          },
+          {
+            "id": "D",
+            "text": "Mantén las credenciales del root user para administrar desde la consola y usa un IAM role solo para el script de despliegue.",
+            "why": "El script evita las credenciales del root user, pero la administración rutinaria en la consola sigue usándolas innecesariamente."
+          }
+        ],
+        "explanation": "La condición decisiva es reducir la exposición de la identidad con más privilegios sin perder ninguno de los dos flujos de trabajo. Configura MFA para el root user y reserva sus credenciales para tareas que las requieran; usa identidades administrativas para el trabajo habitual y credenciales temporales de roles en vez de access keys del root user para los despliegues. MFA por sí solo no justifica el uso rutinario del root user ni de sus access keys."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "root-user-mfa-best-practices--r0",
+      "conceptId": "root-user-mfa-best-practices",
+      "kind": "recall",
+      "prompt": "How would you protect root access while letting administrators perform routine work and deployments?",
+      "promptEs": "¿Cómo protegerías el acceso del root user sin impedir que los administradores hagan tareas habituales y despliegues?",
+      "idealAnswer": "Configure MFA for the root user and use it only for tasks requiring root credentials. Use an administrative identity for routine work and temporary role credentials for deployments instead of root access keys.",
+      "rubric": [
+        "Configure MFA for the root user.",
+        "Reserve root credentials for tasks that require them.",
+        "Use administrative access for routine work and temporary credentials rather than root access keys for deployments."
+      ]
+    }
+  ]
+}

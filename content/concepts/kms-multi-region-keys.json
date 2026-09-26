@@ -1,0 +1,273 @@
+{
+  "conceptId": "kms-multi-region-keys",
+  "card": {
+    "en": {
+      "tldr": "AWS KMS multi-Region keys are related keys in selected Regions that share key material and a key ID. Choose them when client-side encrypted data must be decrypted in another Region without re-encryption or a cross-Region KMS call.",
+      "whenToUse": [
+        "A disaster recovery Region must decrypt client-side encrypted data from the primary Region.",
+        "An active-active application moves client-side encrypted data between Regions and needs local cryptographic operations."
+      ],
+      "keyFacts": [
+        "Create a multi-Region primary key, then explicitly create replicas in selected Regions within the same AWS partition.",
+        "Related primary and replica keys can decrypt one another’s ciphertext because they share key material and a key ID.",
+        "Each Regional key has its own key policy, grants, aliases, tags, and enabled or disabled state.",
+        "An existing single-Region key cannot be converted to a multi-Region key; moving existing data requires re-encryption under new multi-Region keys.",
+        "Most AWS services that integrate with KMS treat multi-Region keys as single-Region keys; Amazon S3 cross-Region replication still decrypts and re-encrypts data keys in the destination Region."
+      ],
+      "gotchas": [
+        "Multi-Region keys are not global: AWS KMS does not automatically create replicas in other Regions.",
+        "A replica does not automatically inherit later changes to the primary key’s policy or grants.",
+        "Related keys do not eliminate a service-specific replication workflow, such as S3 cross-Region replication’s handling of encrypted data keys."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS managed KMS keys",
+          "difference": "AWS managed keys are always single-Region keys, so they cannot provide a related multi-Region replica."
+        },
+        {
+          "concept": "Single-Region customer managed KMS keys",
+          "difference": "Separately created single-Region keys do not share the key material and key ID needed for interoperable decryption."
+        },
+        {
+          "concept": "AWS CloudHSM",
+          "difference": "Multi-Region KMS keys cannot be created in a custom key store; choose related KMS keys for this cross-Region interoperability requirement."
+        }
+      ],
+      "examCues": [
+        "decrypt client-side encrypted backups in a recovery Region",
+        "no cross-Region KMS call",
+        "no re-encryption after failover",
+        "different key policies in each Region"
+      ]
+    },
+    "es": {
+      "tldr": "Las multi-Region keys de AWS KMS son claves relacionadas en las Regions que selecciones; comparten material de clave y key ID. Elígelas cuando necesites descifrar datos cifrados del lado del cliente en otra Region sin volver a cifrarlos ni hacer una llamada entre Regions a KMS.",
+      "whenToUse": [
+        "Una Region de recuperación debe descifrar datos cifrados del lado del cliente en la Region principal.",
+        "Una aplicación active-active mueve datos cifrados del lado del cliente entre Regions y necesita operaciones criptográficas locales."
+      ],
+      "keyFacts": [
+        "Creas una multi-Region primary key y luego creas explícitamente réplicas en las Regions elegidas dentro de la misma AWS partition.",
+        "Las claves principales y réplicas relacionadas pueden descifrar los datos cifrados por cualquiera de ellas porque comparten material de clave y key ID.",
+        "Cada clave regional tiene sus propias key policies, grants, aliases, tags y estado enabled o disabled.",
+        "No puedes convertir una single-Region key existente en una multi-Region key; para migrar datos existentes debes volver a cifrarlos con nuevas multi-Region keys.",
+        "La mayoría de los servicios integrados con KMS tratan las multi-Region keys como single-Region keys; Amazon S3 cross-Region replication todavía descifra y vuelve a cifrar las claves de datos en la Region de destino."
+      ],
+      "gotchas": [
+        "Las multi-Region keys no son globales: AWS KMS no crea réplicas automáticamente en otras Regions.",
+        "Una réplica no hereda automáticamente los cambios posteriores en la key policy o los grants de la clave principal.",
+        "Las claves relacionadas no eliminan el proceso de replicación propio de un servicio, como el manejo de claves de datos cifradas en S3 cross-Region replication."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS managed KMS keys",
+          "difference": "Las AWS managed keys siempre son single-Region keys, por lo que no pueden tener una réplica multi-Region relacionada."
+        },
+        {
+          "concept": "Single-Region customer managed KMS keys",
+          "difference": "Las single-Region keys creadas por separado no comparten el material de clave ni el key ID necesarios para descifrar los datos de forma intercambiable."
+        },
+        {
+          "concept": "AWS CloudHSM",
+          "difference": "No puedes crear multi-Region KMS keys en un custom key store; elige claves KMS relacionadas para este requisito de interoperabilidad entre Regions."
+        }
+      ],
+      "examCues": [
+        "decrypt client-side encrypted backups in a recovery Region",
+        "no cross-Region KMS call",
+        "no re-encryption after failover",
+        "different key policies in each Region"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/kms/latest/developerguide/multi-region-keys-overview.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "kms-multi-region-keys--bbae2328",
+      "conceptId": "kms-multi-region-keys",
+      "secondaryConcepts": [
+        "kms-key-types"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company encrypts archive files in its application before storing copies in two AWS Regions. If the primary Region fails, the recovery application must decrypt the existing files locally without re-encrypting them or calling KMS in the failed Region. Which key design meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an AWS managed KMS key in each Region and grant the recovery application access to both keys.",
+          "correct": false,
+          "why": "AWS managed keys are single-Region keys and do not form an interoperable primary-and-replica set."
+        },
+        {
+          "id": "B",
+          "text": "Create a KMS key in the primary Region and have the recovery application call that Region to decrypt files.",
+          "correct": false,
+          "why": "Calling KMS in the primary Region violates the local-decryption requirement during its outage."
+        },
+        {
+          "id": "C",
+          "text": "Create a customer managed single-Region KMS key in each Region and give both keys the same alias.",
+          "correct": false,
+          "why": "Matching aliases do not make independently created keys share the key material needed to decrypt existing ciphertext."
+        },
+        {
+          "id": "D",
+          "text": "Create a multi-Region KMS primary key and a related replica in the recovery Region.",
+          "correct": true,
+          "why": "The related replica can decrypt ciphertext encrypted under the primary key using KMS in the recovery Region."
+        }
+      ],
+      "explanation": "The deciding constraint is local decryption of already encrypted files during a Regional outage. A related multi-Region replica shares the primary key’s material and key ID, so the recovery application can decrypt the files in its own Region without re-encryption. Two independent Regional keys, even with matching aliases, are not interchangeable. A cross-Region call also fails because the primary Region may be unavailable.",
+      "keywordCues": [
+        "encrypts archive files in its application",
+        "decrypt the existing files locally",
+        "without re-encrypting them or calling KMS in the failed Region"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/multi-region-keys-overview.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios cifra archivos en su aplicación antes de guardar copias en dos AWS Regions. Si falla la Region principal, la aplicación de recuperación debe descifrar los archivos existentes localmente, sin volver a cifrarlos ni llamar a KMS en la Region afectada. ¿Qué diseño de claves cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa una AWS managed KMS key en cada Region y da a la aplicación de recuperación acceso a ambas.",
+            "why": "Las AWS managed keys son single-Region keys y no forman un conjunto interoperable de clave principal y réplica."
+          },
+          {
+            "id": "B",
+            "text": "Crea una KMS key en la Region principal y haz que la aplicación de recuperación llame a esa Region para descifrar los archivos.",
+            "why": "Llamar a KMS en la Region principal incumple el requisito de descifrado local durante la interrupción."
+          },
+          {
+            "id": "C",
+            "text": "Crea una customer managed single-Region KMS key en cada Region y asigna el mismo alias a ambas.",
+            "why": "Los aliases iguales no hacen que claves creadas por separado compartan el material necesario para descifrar los datos existentes."
+          },
+          {
+            "id": "D",
+            "text": "Crea una multi-Region KMS primary key y una réplica relacionada en la Region de recuperación.",
+            "why": "La réplica relacionada puede descifrar con KMS en la Region de recuperación los datos cifrados con la clave principal."
+          }
+        ],
+        "explanation": "La condición decisiva es descifrar localmente archivos ya cifrados durante una interrupción regional. Una réplica multi-Region relacionada comparte el material y el key ID de la clave principal, así que la aplicación puede descifrar los archivos en su propia Region sin volver a cifrarlos. Dos claves regionales independientes no son intercambiables, aunque tengan el mismo alias. Una llamada entre Regions tampoco sirve si la Region principal no está disponible."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "kms-multi-region-keys--b6a80a35",
+      "conceptId": "kms-multi-region-keys",
+      "secondaryConcepts": [
+        "kms-key-types",
+        "cloudhsm"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research platform runs active-active analysis in two AWS Regions. Its applications encrypt datasets client-side and move the ciphertext between Regions; each Regional team must maintain its own key policy and grants. Which solution supports local decryption in either Region while preserving that independent access control?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the AWS managed KMS key in each Region and configure matching application permissions.",
+          "correct": false,
+          "why": "AWS managed keys are single-Region keys and cannot supply related key material across Regions."
+        },
+        {
+          "id": "B",
+          "text": "Create separate customer managed single-Region keys and configure matching policies and grants.",
+          "correct": false,
+          "why": "Matching access settings do not make separate keys cryptographically interoperable."
+        },
+        {
+          "id": "C",
+          "text": "Create a multi-Region primary key and a related replica, then set each Regional key’s policy and grants.",
+          "correct": true,
+          "why": "Related keys share cryptographic material while their key policies and grants are managed independently."
+        },
+        {
+          "id": "D",
+          "text": "Create multi-Region KMS keys in a custom key store in both Regions.",
+          "correct": false,
+          "why": "AWS KMS does not support creating multi-Region keys in a custom key store."
+        }
+      ],
+      "explanation": "This design needs both interchangeable decryption and separate Regional access controls. Related multi-Region keys share key material, while each key has its own policy and grants. Independently created single-Region keys can have similar policies but cannot decrypt one another’s ciphertext. A custom key store is not an alternative because multi-Region keys cannot be created in one.",
+      "keywordCues": [
+        "active-active analysis in two AWS Regions",
+        "encrypt datasets client-side and move the ciphertext",
+        "each Regional team must maintain its own key policy and grants"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/kms/latest/developerguide/multi-region-keys-overview.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de investigación ejecuta análisis active-active en dos AWS Regions. Sus aplicaciones cifran conjuntos de datos del lado del cliente y trasladan los datos cifrados entre Regions; cada equipo regional debe administrar su propia key policy y sus grants. ¿Qué solución permite el descifrado local en cualquiera de las Regions y conserva ese control de acceso independiente?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa la AWS managed KMS key de cada Region y configura los mismos permisos para las aplicaciones.",
+            "why": "Las AWS managed keys son single-Region keys y no proporcionan material de clave relacionado entre Regions."
+          },
+          {
+            "id": "B",
+            "text": "Crea customer managed single-Region keys independientes y configura las mismas policies y grants.",
+            "why": "Tener los mismos ajustes de acceso no hace que claves independientes sean criptográficamente interoperables."
+          },
+          {
+            "id": "C",
+            "text": "Crea una multi-Region primary key y una réplica relacionada; luego configura la key policy y los grants de cada clave regional.",
+            "why": "Las claves relacionadas comparten material criptográfico, mientras que sus key policies y grants se administran por separado."
+          },
+          {
+            "id": "D",
+            "text": "Crea multi-Region KMS keys en un custom key store en ambas Regions.",
+            "why": "AWS KMS no permite crear multi-Region keys en un custom key store."
+          }
+        ],
+        "explanation": "El diseño exige descifrado intercambiable y controles de acceso regionales independientes. Las multi-Region keys relacionadas comparten material de clave, pero cada una tiene su propia key policy y sus grants. Las single-Region keys creadas por separado pueden tener policies similares, pero no pueden descifrar los datos de la otra. Un custom key store tampoco sirve porque no admite la creación de multi-Region keys."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "kms-multi-region-keys--r0",
+      "conceptId": "kms-multi-region-keys",
+      "kind": "recall",
+      "prompt": "Your client-side encrypted backups must be decrypted locally after failover to another Region. Which KMS key design fits, and why?",
+      "promptEs": "Tus respaldos cifrados del lado del cliente deben descifrarse localmente tras un failover a otra Region. ¿Qué diseño de KMS keys elegirías y por qué?",
+      "idealAnswer": "Create a multi-Region KMS primary key and a related replica in the recovery Region. They share key material and a key ID, allowing local decryption without re-encrypting the data or calling KMS in the original Region.",
+      "rubric": [
+        "Names a multi-Region KMS primary key and related replica.",
+        "Places the replica in the recovery Region.",
+        "Explains shared key material and local decryption without re-encryption."
+      ]
+    },
+    {
+      "id": "kms-multi-region-keys--r1",
+      "conceptId": "kms-multi-region-keys",
+      "kind": "why-not",
+      "prompt": "Why won't AWS managed KMS keys in two Regions let a recovery app decrypt unchanged client-side ciphertext locally?",
+      "promptEs": "¿Por qué las AWS managed KMS keys de dos Regions no permiten que una aplicación de recuperación descifre localmente datos cifrados del lado del cliente sin modificarlos?",
+      "idealAnswer": "AWS managed KMS keys are always single-Region keys, not related multi-Region keys. Keys independently created in different Regions do not share the key material required to decrypt the same unchanged ciphertext.",
+      "rubric": [
+        "States that AWS managed keys are single-Region keys.",
+        "Identifies the absence of related, shared key material.",
+        "Connects that difference to the failure to decrypt unchanged ciphertext locally."
+      ]
+    }
+  ]
+}

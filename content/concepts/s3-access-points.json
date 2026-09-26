@@ -1,0 +1,276 @@
+{
+  "conceptId": "s3-access-points",
+  "card": {
+    "en": {
+      "tldr": "S3 Access Points give applications separate named endpoints for object access to a shared bucket. Choose them when each application needs its own access policy or network controls, especially an endpoint that accepts requests only from a VPC.",
+      "whenToUse": [
+        "Many teams or applications use objects in the same bucket but need distinct permissions.",
+        "An application's S3 object-access endpoint must accept requests only from a VPC.",
+        "You want to manage an application's object-access rules separately from those of other applications."
+      ],
+      "keyFacts": [
+        "An access point is a named network endpoint attached to a data source such as an S3 bucket.",
+        "Each access point has its own policy and network controls for requests made through it.",
+        "An access point attached to a bucket works in conjunction with the underlying bucket policy.",
+        "An access point can be configured to accept requests only from a VPC.",
+        "Access points support object operations such as GetObject and PutObject, not bucket deletion or S3 Replication configuration."
+      ],
+      "gotchas": [
+        "An access point policy does not replace the underlying bucket policy.",
+        "VPC-only settings control requests through that access point; do not assume they automatically restrict every other route to the bucket.",
+        "An access point is not an endpoint for bucket administration."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 bucket policy",
+          "difference": "A bucket policy applies to the bucket; access points give applications separate endpoints with distinct policies and network controls."
+        },
+        {
+          "concept": "S3 presigned URL",
+          "difference": "A presigned URL provides temporary access to an object, rather than a reusable application endpoint with its own policy."
+        },
+        {
+          "concept": "CloudFront signed URLs/cookies",
+          "difference": "These restrict content delivered through CloudFront, rather than govern application requests through S3 access points."
+        }
+      ],
+      "examCues": [
+        "multiple applications share one S3 bucket",
+        "separate policy for each application",
+        "accept requests only from a VPC",
+        "object access through named endpoints"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Access Points ofrece endpoints con nombre separados para que las aplicaciones accedan a objetos de un bucket compartido. Elígelo cuando cada aplicación necesite su propia política o controles de red, en especial un endpoint que solo acepte solicitudes desde una VPC.",
+      "whenToUse": [
+        "Varios equipos o aplicaciones usan objetos del mismo bucket, pero necesitan permisos distintos.",
+        "El endpoint de acceso a objetos de una aplicación solo debe aceptar solicitudes desde una VPC.",
+        "Necesitas administrar las reglas de acceso a objetos de una aplicación por separado de las demás."
+      ],
+      "keyFacts": [
+        "Un access point es un endpoint de red con nombre asociado a una fuente de datos, como un bucket de S3.",
+        "Cada access point tiene su propia política y controles de red para las solicitudes que pasan por él.",
+        "La política de un access point asociado a un bucket funciona junto con la política del bucket subyacente.",
+        "Puedes configurar un access point para que solo acepte solicitudes desde una VPC.",
+        "Los access points admiten operaciones sobre objetos, como GetObject y PutObject, pero no la eliminación de buckets ni la configuración de S3 Replication."
+      ],
+      "gotchas": [
+        "La política de un access point no reemplaza la política del bucket subyacente.",
+        "La configuración de acceso solo desde una VPC controla las solicitudes que pasan por ese access point; no supongas que restringe automáticamente todas las demás rutas al bucket.",
+        "Un access point no es un endpoint para administrar buckets."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 bucket policy",
+          "difference": "La política del bucket se aplica al bucket; los access points ofrecen endpoints separados con políticas y controles de red distintos para cada aplicación."
+        },
+        {
+          "concept": "S3 presigned URL",
+          "difference": "Una presigned URL da acceso temporal a un objeto, no un endpoint reutilizable para una aplicación con política propia."
+        },
+        {
+          "concept": "CloudFront signed URLs/cookies",
+          "difference": "Restringen contenido entregado mediante CloudFront, no las solicitudes de aplicaciones que pasan por S3 Access Points."
+        }
+      ],
+      "examCues": [
+        "multiple applications share one S3 bucket",
+        "separate policy for each application",
+        "accept requests only from a VPC",
+        "object access through named endpoints"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-access-points--b200b577",
+      "conceptId": "s3-access-points",
+      "secondaryConcepts": [
+        "s3-bucket-policies-block-public-access"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company lets several production applications upload and retrieve objects from a shared S3 bucket. The architect proposes separate S3 access points so each application can have its own object-access policy. A reviewer asks whether those policies will replace the bucket policy and whether the endpoints can also be used to configure S3 Replication. Which response is correct?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The access point policies replace the bucket policy, but replication must be configured through another S3 interface.",
+          "correct": false,
+          "why": "An access point policy works in conjunction with the underlying bucket policy rather than replacing it."
+        },
+        {
+          "id": "B",
+          "text": "The access point policies work with the bucket policy, and replication must be configured without using access points.",
+          "correct": true,
+          "why": "Both the access point and bucket policies matter for bucket-backed access points, which support object operations rather than replication configuration."
+        },
+        {
+          "id": "C",
+          "text": "The access point policies work with the bucket policy, and the access points can configure replication for their applications.",
+          "correct": false,
+          "why": "Access points cannot be used to create S3 Replication configurations."
+        },
+        {
+          "id": "D",
+          "text": "The bucket policy alone determines requests through the access points, and the access points can configure replication.",
+          "correct": false,
+          "why": "Each access point has its own enforced policy, and access points do not configure S3 Replication."
+        }
+      ],
+      "explanation": "The reviewer is testing two boundaries of S3 Access Points. For an access point attached to a bucket, its policy works in conjunction with the underlying bucket policy. Access points support object operations such as GetObject and PutObject, but cannot create S3 Replication configurations. Answers that treat the access point policy as a replacement or the endpoint as a replication-management interface fail those boundaries.",
+      "keywordCues": [
+        "shared S3 bucket",
+        "replace the bucket policy",
+        "configure S3 Replication"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios permite que varias aplicaciones de producción carguen y recuperen objetos de un bucket de S3 compartido. El arquitecto propone S3 access points separados para que cada aplicación tenga su propia política de acceso a objetos. Una persona del equipo pregunta si esas políticas reemplazan la política del bucket y si los endpoints también sirven para configurar S3 Replication. ¿Cuál respuesta es correcta?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Las políticas de los access points reemplazan la política del bucket, pero S3 Replication debe configurarse mediante otra interfaz de S3.",
+            "why": "La política de un access point funciona junto con la política del bucket subyacente; no la reemplaza."
+          },
+          {
+            "id": "B",
+            "text": "Las políticas de los access points funcionan junto con la política del bucket, y S3 Replication debe configurarse sin usar access points.",
+            "why": "Para access points asociados a un bucket, importan ambas políticas; estos endpoints admiten operaciones sobre objetos, no la configuración de S3 Replication."
+          },
+          {
+            "id": "C",
+            "text": "Las políticas de los access points funcionan junto con la política del bucket, y los access points pueden configurar S3 Replication para sus aplicaciones.",
+            "why": "Los access points no permiten crear configuraciones de S3 Replication."
+          },
+          {
+            "id": "D",
+            "text": "Solo la política del bucket determina las solicitudes que pasan por los access points, y estos pueden configurar S3 Replication.",
+            "why": "Cada access point aplica su propia política y no permite configurar S3 Replication."
+          }
+        ],
+        "explanation": "La pregunta evalúa dos límites de S3 Access Points. Si un access point está asociado a un bucket, su política funciona junto con la política del bucket subyacente. Los access points admiten operaciones sobre objetos, como GetObject y PutObject, pero no permiten crear configuraciones de S3 Replication. Las respuestas que sustituyen la política del bucket o usan el endpoint para administrar S3 Replication no cumplen esos límites."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-access-points--03f53f14",
+      "conceptId": "s3-access-points",
+      "secondaryConcepts": [
+        "s3-bucket-policies-block-public-access",
+        "s3-presigned-urls",
+        "cloudfront-signed-urls-cookies"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research company stores datasets for several internal applications in one S3 bucket. Each application needs a distinct policy for reading and writing objects, and one application must use an endpoint that accepts requests only from its VPC. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Issue a presigned URL for each object request and maintain separate URL-generation rules for each application.",
+          "correct": false,
+          "why": "Presigned URLs provide temporary object access but do not provide each application with a named endpoint and distinct network controls."
+        },
+        {
+          "id": "B",
+          "text": "Create an S3 access point for each application, assign distinct access point policies, and configure the required access point to accept requests only from the VPC.",
+          "correct": true,
+          "why": "Separate access points provide distinct policies, and the specified endpoint can accept requests only from a VPC."
+        },
+        {
+          "id": "C",
+          "text": "Use one bucket policy to manage every application's object permissions and network conditions.",
+          "correct": false,
+          "why": "A bucket policy can govern access but does not give applications separate endpoints with their own network controls."
+        },
+        {
+          "id": "D",
+          "text": "Deliver the datasets through CloudFront and assign signed cookies to each application.",
+          "correct": false,
+          "why": "CloudFront signed cookies govern access to CloudFront-delivered content rather than provide VPC-only S3 object-access endpoints."
+        }
+      ],
+      "explanation": "The deciding requirements are separate application policies and an endpoint that accepts requests only from a VPC. S3 Access Points provide distinct policies and network controls for requests through each endpoint. A single bucket policy does not provide a separate endpoint per application, while presigned URLs address temporary object access. The access point policies still work in conjunction with the bucket policy.",
+      "keywordCues": [
+        "one S3 bucket",
+        "distinct policy for reading and writing objects",
+        "endpoint that accepts requests only from its VPC"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points.html"
+      ],
+      "es": {
+        "stem": "Una empresa de investigación guarda conjuntos de datos para varias aplicaciones internas en un solo bucket de S3. Cada aplicación necesita una política distinta para leer y escribir objetos, y una de ellas debe usar un endpoint que solo acepte solicitudes desde su VPC. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Emite una presigned URL para cada solicitud de objeto y mantén reglas de generación de URL separadas para cada aplicación.",
+            "why": "Las presigned URLs proporcionan acceso temporal a objetos, pero no ofrecen a cada aplicación un endpoint con nombre y controles de red distintos."
+          },
+          {
+            "id": "B",
+            "text": "Crea un S3 access point para cada aplicación, asigna políticas distintas a los access points y configura el endpoint requerido para que solo acepte solicitudes desde la VPC.",
+            "why": "Los access points separados ofrecen políticas distintas, y el endpoint indicado puede aceptar solicitudes solo desde una VPC."
+          },
+          {
+            "id": "C",
+            "text": "Usa una sola política de bucket para administrar los permisos de objetos y las condiciones de red de todas las aplicaciones.",
+            "why": "Una política de bucket puede controlar el acceso, pero no proporciona endpoints separados con controles de red propios para las aplicaciones."
+          },
+          {
+            "id": "D",
+            "text": "Entrega los conjuntos de datos mediante CloudFront y asigna signed cookies a cada aplicación.",
+            "why": "Las CloudFront signed cookies controlan el acceso al contenido entregado por CloudFront, pero no proporcionan endpoints de acceso a objetos de S3 limitados a una VPC."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son políticas separadas por aplicación y un endpoint que solo acepte solicitudes desde una VPC. S3 Access Points proporciona políticas y controles de red distintos para las solicitudes que pasan por cada endpoint. Una sola política de bucket no ofrece un endpoint por aplicación, mientras que las presigned URLs resuelven el acceso temporal a objetos. Las políticas de los access points siguen funcionando junto con la política del bucket."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-access-points--r0",
+      "conceptId": "s3-access-points",
+      "kind": "recall",
+      "prompt": "Several applications share an S3 bucket; one needs a VPC-only object-access endpoint. What would you use, and why?",
+      "promptEs": "Varias aplicaciones comparten un bucket de S3; una necesita un endpoint de acceso a objetos solo desde una VPC. ¿Qué usarías y por qué?",
+      "idealAnswer": "Use a separate S3 access point for each application. Each has its own policy and network controls, and the specified access point can accept requests only from a VPC.",
+      "rubric": [
+        "Names S3 Access Points.",
+        "Explains separate application policies or endpoints.",
+        "Mentions configuring the required access point to accept requests only from a VPC."
+      ]
+    },
+    {
+      "id": "s3-access-points--r1",
+      "conceptId": "s3-access-points",
+      "kind": "why-not",
+      "prompt": "Why aren't presigned URLs the best fit for giving each application a VPC-restricted endpoint to a shared S3 bucket?",
+      "promptEs": "¿Por qué las presigned URLs no son la mejor opción para dar a cada aplicación un endpoint restringido a una VPC hacia un bucket de S3 compartido?",
+      "idealAnswer": "Presigned URLs provide temporary access to objects, not a reusable endpoint with its own application policy and network controls. S3 Access Points provide those separate endpoints and can be configured to accept requests only from a VPC.",
+      "rubric": [
+        "Identifies presigned URLs as temporary object access.",
+        "Contrasts them with separate S3 Access Point endpoints and policies.",
+        "Mentions VPC-only configuration on an access point."
+      ]
+    }
+  ]
+}

@@ -83,27 +83,27 @@
       "options": [
         {
           "id": "A",
+          "text": "Allow inbound TCP 3306 on the database security group from the current private IP addresses of the application instances.",
+          "correct": false,
+          "why": "The rule would need updates as application instances are replaced and their addresses change."
+        },
+        {
+          "id": "B",
           "text": "Allow TCP 3306 from the application subnet's CIDR range in the database subnet's network ACL.",
           "correct": false,
           "why": "This permits other sources in the application subnet, not just instances in the application tier."
         },
         {
-          "id": "B",
+          "id": "C",
           "text": "Add an outbound TCP 3306 rule to the application security group and leave the database security group without an inbound TCP 3306 rule.",
           "correct": false,
           "why": "The database security group must also permit the inbound connection."
         },
         {
-          "id": "C",
+          "id": "D",
           "text": "Allow inbound TCP 3306 on the database security group with the application security group as the source.",
           "correct": true,
           "why": "The source reference limits database access to the application group without tracking instance IP addresses."
-        },
-        {
-          "id": "D",
-          "text": "Allow inbound TCP 3306 on the database security group from the current private IP addresses of the application instances.",
-          "correct": false,
-          "why": "The rule would need updates as application instances are replaced and their addresses change."
         }
       ],
       "explanation": "The deciding requirements are workload-specific access and changing application IP addresses. Referencing the application security group in the database security group's inbound TCP 3306 rule meets both. A subnet CIDR is broader than the application tier, while listing current instance addresses creates ongoing maintenance. An application outbound rule alone does not authorize inbound traffic at the database.",
@@ -120,107 +120,28 @@
         "options": [
           {
             "id": "A",
+            "text": "Permitir TCP 3306 entrante en el security group de base de datos desde las direcciones IP privadas actuales de las instancias de aplicación.",
+            "why": "Tendrías que actualizar la regla al reemplazar las instancias de aplicación y cambiar sus direcciones."
+          },
+          {
+            "id": "B",
             "text": "Permitir TCP 3306 desde el rango CIDR de la subred de aplicación en la network ACL de la subred de base de datos.",
             "why": "Esto permite otros orígenes de la subred de aplicación, no solo las instancias de esa capa."
           },
           {
-            "id": "B",
+            "id": "C",
             "text": "Agregar una regla saliente TCP 3306 al security group de aplicación y dejar el security group de base de datos sin una regla entrante TCP 3306.",
             "why": "El security group de la base de datos también debe permitir la conexión entrante."
           },
           {
-            "id": "C",
+            "id": "D",
             "text": "Permitir TCP 3306 entrante en el security group de base de datos con el security group de aplicación como origen.",
             "why": "La referencia de origen limita el acceso a la base de datos al grupo de aplicación sin mantener una lista de direcciones IP."
-          },
-          {
-            "id": "D",
-            "text": "Permitir TCP 3306 entrante en el security group de base de datos desde las direcciones IP privadas actuales de las instancias de aplicación.",
-            "why": "Tendrías que actualizar la regla al reemplazar las instancias de aplicación y cambiar sus direcciones."
           }
         ],
         "explanation": "Los requisitos decisivos son el acceso específico de la carga de trabajo y los cambios de IP de la aplicación. Una regla TCP 3306 entrante en el security group de base de datos que referencia el security group de aplicación cumple ambos. El CIDR de la subred abarca más que la capa de aplicación, mientras que enumerar las IP actuales exige mantenimiento. Una regla saliente de aplicación, por sí sola, no autoriza el tráfico entrante en la base de datos."
       },
       "heldOut": true,
-      "source": "generated",
-      "verification": {
-        "status": "pass",
-        "notes": ""
-      }
-    },
-    {
-      "id": "security-groups--c7df44ea",
-      "conceptId": "security-groups",
-      "secondaryConcepts": [
-        "network-acls"
-      ],
-      "domain": "d1",
-      "type": "single",
-      "difficulty": 1,
-      "stem": "A media company's EC2 instance has a security group that permits inbound HTTPS requests from approved clients. Its network ACL already permits the necessary traffic in both directions. The company wants the instance to send responses to those requests without broadly opening additional ports in the security group. Which solution meets the requirement with the LEAST operational overhead?",
-      "options": [
-        {
-          "id": "A",
-          "text": "Keep the existing security group rules; responses to permitted inbound requests can leave automatically.",
-          "correct": true,
-          "why": "Security groups are stateful and allow responses to permitted inbound traffic regardless of outbound rules."
-        },
-        {
-          "id": "B",
-          "text": "Add outbound security group rules for all client return ports.",
-          "correct": false,
-          "why": "Stateful security groups do not require separate outbound rules for those responses."
-        },
-        {
-          "id": "C",
-          "text": "Replace the inbound HTTPS security group rule with an inbound rule allowing every TCP port.",
-          "correct": false,
-          "why": "Broadening inbound access is unnecessary for the instance to respond to permitted requests."
-        },
-        {
-          "id": "D",
-          "text": "Add inbound security group rules for the client return ports.",
-          "correct": false,
-          "why": "The responses leave the instance, and security group statefulness already permits them."
-        }
-      ],
-      "explanation": "The question concerns responses to HTTPS traffic that the security group already permits inbound. A security group is stateful, so those responses may leave regardless of outbound security group rules. Additional outbound port rules do not solve a missing requirement here. Opening more inbound ports would also grant unnecessary access.",
-      "keywordCues": [
-        "permits inbound HTTPS requests",
-        "network ACL already permits the necessary traffic in both directions",
-        "send responses",
-        "without broadly opening additional ports"
-      ],
-      "docs": [
-        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html"
-      ],
-      "es": {
-        "stem": "Una instancia EC2 de una empresa de medios tiene un security group que permite solicitudes HTTPS entrantes desde clientes aprobados. Su network ACL ya permite el tráfico necesario en ambos sentidos. La empresa quiere que la instancia responda a esas solicitudes sin abrir ampliamente puertos adicionales en el security group. ¿Qué solución cumple el requisito con el LEAST operational overhead?",
-        "options": [
-          {
-            "id": "A",
-            "text": "Mantener las reglas actuales del security group; las respuestas a solicitudes entrantes permitidas pueden salir automáticamente.",
-            "why": "Los security groups son stateful y permiten las respuestas al tráfico entrante autorizado sin depender de las reglas salientes."
-          },
-          {
-            "id": "B",
-            "text": "Agregar reglas salientes al security group para todos los puertos de retorno de los clientes.",
-            "why": "Un security group stateful no necesita reglas salientes independientes para esas respuestas."
-          },
-          {
-            "id": "C",
-            "text": "Reemplazar la regla HTTPS entrante del security group por una regla entrante que permita todos los puertos TCP.",
-            "why": "No hace falta ampliar el acceso entrante para que la instancia responda a solicitudes permitidas."
-          },
-          {
-            "id": "D",
-            "text": "Agregar reglas entrantes al security group para los puertos de retorno de los clientes.",
-            "why": "Las respuestas salen de la instancia y la característica stateful del security group ya las permite."
-          }
-        ],
-        "explanation": "La pregunta trata sobre respuestas al tráfico HTTPS que el security group ya permite como entrada. Un security group es stateful, por lo que esas respuestas pueden salir independientemente de sus reglas salientes. Las reglas adicionales para puertos salientes no resuelven un requisito pendiente en este caso. Abrir más puertos entrantes también concedería acceso innecesario."
-      },
-      "heldOut": false,
       "source": "generated",
       "verification": {
         "status": "pass",
@@ -240,27 +161,27 @@
       "options": [
         {
           "id": "A",
-          "text": "Add a deny rule for the hostile IP address to the EC2 instance's security group.",
-          "correct": false,
-          "why": "Security groups do not support deny rules."
-        },
-        {
-          "id": "B",
-          "text": "Remove the partner CIDR from the security group and allow only the hostile IP address in the subnet's network ACL.",
-          "correct": false,
-          "why": "This would not retain access for the rest of the approved partner range."
-        },
-        {
-          "id": "C",
           "text": "Add a security group rule allowing TCP 443 from the partner CIDR with a higher priority than other rules.",
           "correct": false,
           "why": "An allow rule cannot block the hostile address, and security group rules are not ordered deny rules."
         },
         {
-          "id": "D",
+          "id": "B",
+          "text": "Add a deny rule for the hostile IP address to the EC2 instance's security group.",
+          "correct": false,
+          "why": "Security groups do not support deny rules."
+        },
+        {
+          "id": "C",
           "text": "Add a network ACL deny rule for the hostile IP address before the broader allow rule for the partner CIDR.",
           "correct": true,
           "why": "A network ACL supports an ordered deny that can exclude one address while allowing the remaining CIDR range."
+        },
+        {
+          "id": "D",
+          "text": "Remove the partner CIDR from the security group and allow only the hostile IP address in the subnet's network ACL.",
+          "correct": false,
+          "why": "This would not retain access for the rest of the approved partner range."
         }
       ],
       "explanation": "The decisive constraint is an explicit block of one IP at the subnet boundary, without blocking other partner addresses. A network ACL supports deny rules and evaluates them in rule-number order, so the specific deny must precede the broader allow. A security group has allow rules only and cannot express this exception. Removing the entire partner CIDR would violate the requirement to retain access.",
@@ -278,23 +199,23 @@
         "options": [
           {
             "id": "A",
-            "text": "Agregar una regla deny para la dirección IP hostil al security group de la instancia EC2.",
-            "why": "Los security groups no admiten reglas deny."
-          },
-          {
-            "id": "B",
-            "text": "Quitar el CIDR asociado del security group y permitir solo la dirección IP hostil en la network ACL de la subred.",
-            "why": "Esto no mantendría el acceso para el resto del rango asociado aprobado."
-          },
-          {
-            "id": "C",
             "text": "Agregar al security group una regla que permita TCP 443 desde el CIDR asociado con mayor prioridad que otras reglas.",
             "why": "Una regla allow no puede bloquear la dirección hostil y los security groups no tienen reglas deny ordenadas."
           },
           {
-            "id": "D",
+            "id": "B",
+            "text": "Agregar una regla deny para la dirección IP hostil al security group de la instancia EC2.",
+            "why": "Los security groups no admiten reglas deny."
+          },
+          {
+            "id": "C",
             "text": "Agregar en la network ACL una regla deny para la dirección IP hostil antes de la regla allow más amplia para el CIDR asociado.",
             "why": "Una network ACL admite una regla deny ordenada que excluye una dirección sin bloquear el resto del rango CIDR."
+          },
+          {
+            "id": "D",
+            "text": "Quitar el CIDR asociado del security group y permitir solo la dirección IP hostil en la network ACL de la subred.",
+            "why": "Esto no mantendría el acceso para el resto del rango asociado aprobado."
           }
         ],
         "explanation": "La restricción decisiva es bloquear explícitamente una IP en el límite de la subred sin bloquear las demás direcciones asociadas. Una network ACL admite reglas deny y las evalúa según el número de regla, por lo que la regla deny específica debe preceder a la regla allow más amplia. Un security group solo tiene reglas allow y no puede expresar esta excepción. Eliminar todo el CIDR asociado incumpliría el requisito de conservar el acceso."
@@ -319,15 +240,15 @@
       "options": [
         {
           "id": "A",
-          "text": "Add a network ACL rule allowing TCP 8443 from the processing tier to the shared subnet.",
-          "correct": false,
-          "why": "The subnet-level rule does not distinguish rendering instances from asset-management instances."
-        },
-        {
-          "id": "B",
           "text": "Associate a security group with the rendering instances that allows inbound TCP 8443 from the processing tier's security group.",
           "correct": true,
           "why": "The rule grants access to the intended instances and sources rather than to all instances in the subnet."
+        },
+        {
+          "id": "B",
+          "text": "Add a network ACL rule allowing TCP 8443 from the processing tier to the shared subnet.",
+          "correct": false,
+          "why": "The subnet-level rule does not distinguish rendering instances from asset-management instances."
         },
         {
           "id": "C",
@@ -357,13 +278,13 @@
         "options": [
           {
             "id": "A",
-            "text": "Agregar una regla a la network ACL que permita TCP 8443 desde la capa de procesamiento hacia la subred compartida.",
-            "why": "La regla de subred no distingue las instancias de renderizado de las de gestión de recursos."
+            "text": "Asociar a las instancias de renderizado un security group que permita TCP 8443 entrante desde el security group de la capa de procesamiento.",
+            "why": "La regla concede acceso a las instancias y los orígenes previstos, en lugar de hacerlo a todas las instancias de la subred."
           },
           {
             "id": "B",
-            "text": "Asociar a las instancias de renderizado un security group que permita TCP 8443 entrante desde el security group de la capa de procesamiento.",
-            "why": "La regla concede acceso a las instancias y los orígenes previstos, en lugar de hacerlo a todas las instancias de la subred."
+            "text": "Agregar una regla a la network ACL que permita TCP 8443 desde la capa de procesamiento hacia la subred compartida.",
+            "why": "La regla de subred no distingue las instancias de renderizado de las de gestión de recursos."
           },
           {
             "id": "C",
@@ -377,6 +298,96 @@
           }
         ],
         "explanation": "Ambas cargas de trabajo comparten una subred, pero solo las instancias de renderizado deben aceptar conexiones de la capa de procesamiento. Un security group asociado a las instancias de renderizado proporciona ese control específico, y la referencia al grupo de procesamiento identifica el origen permitido. Una network ACL opera en el límite de la subred, así que su regla allow no puede, por sí sola, separar estas cargas de trabajo. Una regla saliente en la capa de procesamiento tampoco sustituye el permiso entrante en la capa de renderizado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "security-groups--4101f343",
+      "conceptId": "security-groups",
+      "secondaryConcepts": [
+        "network-acls"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A logistics company runs web, application, and database EC2 tiers in one VPC. Web instances must connect to application instances on TCP 443, and only application instances must connect to database instances on TCP 3306; other EC2 instances share their subnets. The security groups already permit the required outbound connections, and the network ACLs permit the necessary traffic in both directions. Which TWO inbound-rule changes provide the required workload isolation with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allow inbound TCP 443 on the application security group from the entire web subnet CIDR.",
+          "correct": false,
+          "why": "Other instances in the web subnet would also be permitted as sources."
+        },
+        {
+          "id": "B",
+          "text": "Allow inbound TCP 3306 on the database security group from the entire application subnet CIDR.",
+          "correct": false,
+          "why": "Other instances sharing the application subnet would also be permitted to connect."
+        },
+        {
+          "id": "C",
+          "text": "Allow inbound TCP 3306 on the database security group with the application security group as the source.",
+          "correct": true,
+          "why": "This limits database connections to the application tier rather than its entire subnet."
+        },
+        {
+          "id": "D",
+          "text": "Allow inbound TCP 3306 on the web security group with the application security group as the source.",
+          "correct": false,
+          "why": "This changes access to the web tier rather than permitting connections to the database tier."
+        },
+        {
+          "id": "E",
+          "text": "Allow inbound TCP 443 on the application security group with the web security group as the source.",
+          "correct": true,
+          "why": "This allows the web tier to reach the application tier without including other instances in its subnet."
+        }
+      ],
+      "explanation": "The requirement is to authorize two specific tier-to-tier paths while excluding unrelated instances in shared subnets. An inbound TCP 443 rule on the application group sourced from the web group provides the first path. An inbound TCP 3306 rule on the database group sourced from the application group provides the second. Subnet CIDR sources are too broad, and changing the web group's inbound database-port rule targets the wrong tier.",
+      "keywordCues": [
+        "only application instances",
+        "other EC2 instances share their subnets",
+        "already permit the required outbound connections",
+        "TWO inbound-rule changes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística ejecuta capas web, de aplicación y de base de datos en instancias EC2 dentro de una VPC. Las instancias web deben conectarse a las de aplicación por TCP 443 y solo las instancias de aplicación deben conectarse a las de base de datos por TCP 3306; otras instancias EC2 comparten sus subredes. Los security groups ya permiten las conexiones salientes requeridas y las network ACLs permiten el tráfico necesario en ambos sentidos. ¿Qué DOS cambios en las reglas entrantes proporcionan el aislamiento requerido entre cargas de trabajo con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Permitir TCP 443 entrante en el security group de aplicación desde todo el CIDR de la subred web.",
+            "why": "También permitiría como orígenes a otras instancias de la subred web."
+          },
+          {
+            "id": "B",
+            "text": "Permitir TCP 3306 entrante en el security group de base de datos desde todo el CIDR de la subred de aplicación.",
+            "why": "También permitiría conexiones de otras instancias que comparten la subred de aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Permitir TCP 3306 entrante en el security group de base de datos con el security group de aplicación como origen.",
+            "why": "Limita las conexiones a la base de datos a la capa de aplicación y no a toda su subred."
+          },
+          {
+            "id": "D",
+            "text": "Permitir TCP 3306 entrante en el security group web con el security group de aplicación como origen.",
+            "why": "Esto modifica el acceso a la capa web en lugar de permitir conexiones a la capa de base de datos."
+          },
+          {
+            "id": "E",
+            "text": "Permitir TCP 443 entrante en el security group de aplicación con el security group web como origen.",
+            "why": "Permite el acceso de la capa web a la de aplicación sin incluir otras instancias de su subred."
+          }
+        ],
+        "explanation": "El requisito es autorizar dos rutas específicas entre capas y excluir instancias no relacionadas que comparten las subredes. Una regla TCP 443 entrante en el grupo de aplicación con el grupo web como origen proporciona la primera ruta. Una regla TCP 3306 entrante en el grupo de base de datos con el grupo de aplicación como origen proporciona la segunda. Los CIDR de subred son orígenes demasiado amplios, y cambiar una regla entrante del grupo web para el puerto de base de datos apunta a la capa equivocada."
       },
       "heldOut": false,
       "source": "generated",

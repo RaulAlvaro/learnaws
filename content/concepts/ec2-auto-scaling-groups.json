@@ -1,0 +1,419 @@
+{
+  "conceptId": "ec2-auto-scaling-groups",
+  "card": {
+    "en": {
+      "tldr": "An EC2 Auto Scaling group (ASG) maintains an EC2 fleet at its desired capacity and can adjust capacity as demand changes. For a resilient application fleet, use an ASG across multiple Availability Zones with a launch template and connect it to a load balancer.",
+      "whenToUse": [
+        "An EC2 fleet must replace terminated or impaired instances automatically.",
+        "Application demand varies, so instance count must grow and shrink within defined bounds.",
+        "Instances must be distributed across Availability Zones and added to a load balancer automatically."
+      ],
+      "keyFacts": [
+        "Minimum and maximum capacity bound the group; desired capacity is the number the group works to maintain.",
+        "Scaling policies can launch or terminate instances as demand changes.",
+        "An ASG can balance instances across multiple Availability Zones.",
+        "When connected to Elastic Load Balancing, the ASG automatically registers and deregisters instances.",
+        "Launch templates define instance configuration and support versioning; they are required for a single ASG using both Spot and On-Demand Instances or multiple instance types."
+      ],
+      "gotchas": [
+        "A load balancer distributes traffic but does not, by itself, replace failed EC2 instances.",
+        "Updating a launch template does not, by itself, roll the new configuration across existing instances; instance refresh provides rolling updates.",
+        "EC2 health checks might not detect an application that has stopped responding; a custom application health check can identify it."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Launch configuration",
+          "difference": "Unlike a launch template, it cannot configure an ASG with both Spot and On-Demand Instances or multiple instance types."
+        },
+        {
+          "concept": "Elastic Load Balancing",
+          "difference": "It distributes traffic to healthy instances; the ASG manages fleet capacity and replaces impaired instances."
+        }
+      ],
+      "examCues": [
+        "replace impaired EC2 instances automatically",
+        "scale a fleet between minimum and maximum capacity",
+        "maintain capacity across multiple Availability Zones",
+        "register new instances with the load balancer",
+        "roll out a new AMI across an existing fleet"
+      ]
+    },
+    "es": {
+      "tldr": "Un EC2 Auto Scaling group (ASG) mantiene una flota EC2 en su capacidad deseada y puede ajustar la capacidad cuando cambia la demanda. Para una flota de aplicaciones resiliente, usa un ASG en varias Availability Zones con un launch template y conéctalo a un load balancer.",
+      "whenToUse": [
+        "Necesitas reemplazar automáticamente instancias EC2 terminadas o deterioradas.",
+        "La demanda varía y necesitas aumentar o reducir las instancias dentro de límites definidos.",
+        "Necesitas distribuir instancias entre Availability Zones y agregarlas automáticamente a un load balancer."
+      ],
+      "keyFacts": [
+        "Las capacidades mínima y máxima delimitan el grupo; la capacidad deseada es la cantidad de instancias que el grupo procura mantener.",
+        "Las scaling policies pueden iniciar o terminar instancias cuando cambia la demanda.",
+        "Un ASG puede equilibrar las instancias entre varias Availability Zones.",
+        "Al conectarse a Elastic Load Balancing, el ASG registra y elimina automáticamente el registro de las instancias.",
+        "Los launch templates definen la configuración de las instancias y admiten versiones; son necesarios para usar Spot y On-Demand Instances, o varios tipos de instancia, en un mismo ASG."
+      ],
+      "gotchas": [
+        "Un load balancer distribuye tráfico, pero por sí solo no reemplaza instancias EC2 fallidas.",
+        "Actualizar un launch template no aplica por sí solo la nueva configuración a las instancias existentes; instance refresh permite actualizaciones graduales.",
+        "Los EC2 health checks podrían no detectar que una aplicación dejó de responder; un custom application health check puede identificarlo."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Launch configuration",
+          "difference": "A diferencia de un launch template, no permite configurar un ASG con Spot y On-Demand Instances ni con varios tipos de instancia."
+        },
+        {
+          "concept": "Elastic Load Balancing",
+          "difference": "Distribuye tráfico a instancias saludables; el ASG administra la capacidad de la flota y reemplaza instancias deterioradas."
+        }
+      ],
+      "examCues": [
+        "replace impaired EC2 instances automatically",
+        "scale a fleet between minimum and maximum capacity",
+        "maintain capacity across multiple Availability Zones",
+        "register new instances with the load balancer",
+        "roll out a new AMI across an existing fleet"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html",
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ec2-auto-scaling-groups--839a561f",
+      "conceptId": "ec2-auto-scaling-groups",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An education platform has released a new application AMI for its existing EC2 Auto Scaling group. The operations team wants the running fleet updated in a rolling fashion rather than leaving existing instances on the old AMI. Which action meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase the group's maximum capacity and wait for demand-based scaling to replace every running instance.",
+          "correct": false,
+          "why": "Changing the maximum only changes a capacity bound and does not ensure a rolling update of existing instances."
+        },
+        {
+          "id": "B",
+          "text": "Update the group's launch template to use the new AMI and start an instance refresh.",
+          "correct": true,
+          "why": "Instance refresh updates existing group instances in a rolling fashion after the launch template changes."
+        },
+        {
+          "id": "C",
+          "text": "Enable EC2 health checks on the group and wait for healthy instances to be replaced with the new AMI.",
+          "correct": false,
+          "why": "Health checks replace terminated or impaired instances, not healthy instances merely because an AMI changed."
+        },
+        {
+          "id": "D",
+          "text": "Create a new launch template version with the AMI and make it the group's template without starting a refresh.",
+          "correct": false,
+          "why": "Changing the launch template alone does not roll the update across running instances."
+        }
+      ],
+      "explanation": "The key requirement is updating the existing fleet in a rolling fashion. After changing the launch template to reference the new AMI, instance refresh provides a mechanism to update the group's instances gradually. A new launch template version alone affects the configuration used for launches but does not perform the requested rolling update.",
+      "keywordCues": [
+        "existing EC2 Auto Scaling group",
+        "running fleet updated in a rolling fashion",
+        "rather than leaving existing instances on the old AMI"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html"
+      ],
+      "es": {
+        "stem": "Una plataforma educativa publicó una nueva AMI de la aplicación para su EC2 Auto Scaling group existente. El equipo de operaciones quiere actualizar gradualmente la flota en ejecución en vez de dejar las instancias existentes con la AMI anterior. ¿Qué acción cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Aumenta la capacidad máxima del grupo y espera a que el escalado basado en la demanda reemplace todas las instancias en ejecución.",
+            "why": "Cambiar el máximo solo modifica un límite de capacidad y no garantiza una actualización gradual de las instancias existentes."
+          },
+          {
+            "id": "B",
+            "text": "Actualiza el launch template del grupo para usar la nueva AMI e inicia un instance refresh.",
+            "why": "Instance refresh actualiza gradualmente las instancias existentes del grupo después de cambiar el launch template."
+          },
+          {
+            "id": "C",
+            "text": "Habilita EC2 health checks en el grupo y espera a que las instancias saludables se reemplacen con la nueva AMI.",
+            "why": "Los health checks reemplazan instancias terminadas o deterioradas, no instancias saludables solo porque cambió una AMI."
+          },
+          {
+            "id": "D",
+            "text": "Crea una versión del launch template con la AMI y asígnala al grupo sin iniciar un refresh.",
+            "why": "Cambiar solo el launch template no aplica la actualización a las instancias en ejecución."
+          }
+        ],
+        "explanation": "El requisito clave es actualizar gradualmente la flota existente. Después de cambiar el launch template para que use la nueva AMI, instance refresh permite actualizar las instancias del grupo de forma gradual. Una nueva versión del launch template, por sí sola, no ejecuta la actualización gradual solicitada."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-auto-scaling-groups--9bb922ea",
+      "conceptId": "ec2-auto-scaling-groups",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A ticketing company runs its web tier on an EC2 Auto Scaling group, but operators currently change its size and update load balancer registrations by hand. Demand rises and falls unpredictably, and new instances must receive application traffic without manual registration. Which TWO actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Set minimum and maximum capacity for the ASG and add scaling policies based on demand.",
+          "correct": true,
+          "why": "Scaling policies automatically adjust instance count within the configured capacity bounds."
+        },
+        {
+          "id": "B",
+          "text": "Connect the ASG to Elastic Load Balancing so launched and terminated instances are registered and deregistered automatically.",
+          "correct": true,
+          "why": "The ASG's load balancer integration removes the need to update instance registrations by hand."
+        },
+        {
+          "id": "C",
+          "text": "Create additional launch template versions whenever traffic changes.",
+          "correct": false,
+          "why": "Launch template versions define instance configuration, not automatic demand-based capacity or traffic registration."
+        },
+        {
+          "id": "D",
+          "text": "Set the group's desired capacity manually whenever operators notice a traffic change.",
+          "correct": false,
+          "why": "Manual changes do not meet the requirement to respond to unpredictable demand with minimal operations."
+        },
+        {
+          "id": "E",
+          "text": "Enable EC2 health checks and keep the group's desired capacity fixed.",
+          "correct": false,
+          "why": "Health checks help replace impaired instances but do not scale a fixed-size group with changing demand."
+        }
+      ],
+      "explanation": "The scenario has two separate operational tasks: changing fleet size with demand and keeping load balancer registrations current. ASG scaling policies address the first task within minimum and maximum capacity, while Elastic Load Balancing integration automatically registers and deregisters instances. EC2 health checks support replacement of impaired instances but do not solve either demand-based scaling or manual registration on their own.",
+      "keywordCues": [
+        "change its size and update load balancer registrations by hand",
+        "Demand rises and falls unpredictably",
+        "without manual registration"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas ejecuta su capa web en un EC2 Auto Scaling group, pero el personal cambia su tamaño y actualiza manualmente los registros del load balancer. La demanda sube y baja de forma impredecible, y las instancias nuevas deben recibir tráfico de la aplicación sin registro manual. ¿Qué DOS acciones cumplen estos requisitos con el LEAST operational overhead? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura las capacidades mínima y máxima del ASG y agrega scaling policies basadas en la demanda.",
+            "why": "Las scaling policies ajustan automáticamente la cantidad de instancias dentro de los límites de capacidad configurados."
+          },
+          {
+            "id": "B",
+            "text": "Conecta el ASG a Elastic Load Balancing para registrar y eliminar automáticamente el registro de las instancias iniciadas y terminadas.",
+            "why": "La integración del ASG con el load balancer elimina la necesidad de actualizar manualmente los registros de las instancias."
+          },
+          {
+            "id": "C",
+            "text": "Crea versiones adicionales del launch template cada vez que cambie el tráfico.",
+            "why": "Las versiones del launch template definen la configuración de las instancias, no la capacidad automática basada en la demanda ni su registro para recibir tráfico."
+          },
+          {
+            "id": "D",
+            "text": "Configura manualmente la capacidad deseada del grupo cada vez que el personal detecte un cambio de tráfico.",
+            "why": "Los cambios manuales no cumplen el requisito de responder a la demanda impredecible con pocas tareas operativas."
+          },
+          {
+            "id": "E",
+            "text": "Habilita EC2 health checks y mantén fija la capacidad deseada del grupo.",
+            "why": "Los health checks ayudan a reemplazar instancias deterioradas, pero no escalan un grupo de tamaño fijo cuando cambia la demanda."
+          }
+        ],
+        "explanation": "El escenario presenta dos tareas operativas distintas: cambiar el tamaño de la flota según la demanda y mantener actualizados los registros del load balancer. Las scaling policies del ASG resuelven la primera tarea dentro de los límites mínimo y máximo; la integración con Elastic Load Balancing registra y elimina automáticamente el registro de las instancias. Los EC2 health checks ayudan a reemplazar instancias deterioradas, pero por sí solos no resuelven el escalado según la demanda ni el registro manual."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-auto-scaling-groups--bbbc8f28",
+      "conceptId": "ec2-auto-scaling-groups",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A clinic runs a stateless appointment application on EC2 instances behind a load balancer. Traffic varies during the day, and an instance or an Availability Zone might become unavailable. Which solution maintains application capacity across Availability Zones and responds to demand with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an ASG with a launch template and scaling policies in one Availability Zone, connected to the load balancer.",
+          "correct": false,
+          "why": "It can scale and replace instances but does not maintain capacity across multiple Availability Zones."
+        },
+        {
+          "id": "B",
+          "text": "Deploy fixed EC2 fleets in two Availability Zones behind the load balancer and replace failed instances manually.",
+          "correct": false,
+          "why": "The fixed fleets require manual replacement and do not adjust capacity as demand changes."
+        },
+        {
+          "id": "C",
+          "text": "Use an ASG with a launch template across two Availability Zones, set minimum, desired, and maximum capacity, add scaling policies, and connect it to the load balancer.",
+          "correct": true,
+          "why": "The ASG replaces impaired instances, balances capacity across zones, scales within its bounds, and manages load balancer registration."
+        },
+        {
+          "id": "D",
+          "text": "Use an ASG across two Availability Zones with minimum, desired, and maximum capacity set to the same value, connected to the load balancer.",
+          "correct": false,
+          "why": "It can replace instances across zones, but identical capacity bounds prevent the fleet from growing or shrinking with demand."
+        }
+      ],
+      "explanation": "The deciding requirements are automatic capacity adjustment and resilience across Availability Zones. A multi-AZ ASG with scaling policies maintains capacity within its minimum and maximum bounds, replaces impaired instances, and integrates with the load balancer. A fixed-size ASG addresses replacement but cannot respond to changing demand.",
+      "keywordCues": [
+        "Traffic varies during the day",
+        "an instance or an Availability Zone might become unavailable",
+        "responds to demand"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html"
+      ],
+      "es": {
+        "stem": "Una clínica ejecuta una aplicación de citas sin estado en instancias EC2 detrás de un load balancer. El tráfico varía durante el día y una instancia o una Availability Zone podría dejar de estar disponible. ¿Qué solución mantiene la capacidad de la aplicación entre Availability Zones y responde a la demanda con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un ASG con un launch template y scaling policies en una sola Availability Zone, conectado al load balancer.",
+            "why": "Puede escalar y reemplazar instancias, pero no mantiene capacidad en varias Availability Zones."
+          },
+          {
+            "id": "B",
+            "text": "Implementa flotas EC2 de tamaño fijo en dos Availability Zones detrás del load balancer y reemplaza manualmente las instancias fallidas.",
+            "why": "Las flotas fijas requieren reemplazos manuales y no ajustan la capacidad cuando cambia la demanda."
+          },
+          {
+            "id": "C",
+            "text": "Usa un ASG con un launch template en dos Availability Zones, configura las capacidades mínima, deseada y máxima, agrega scaling policies y conéctalo al load balancer.",
+            "why": "El ASG reemplaza instancias deterioradas, equilibra la capacidad entre zonas, escala dentro de sus límites y administra el registro en el load balancer."
+          },
+          {
+            "id": "D",
+            "text": "Usa un ASG en dos Availability Zones con las capacidades mínima, deseada y máxima configuradas con el mismo valor, conectado al load balancer.",
+            "why": "Puede reemplazar instancias entre zonas, pero los límites iguales impiden que la flota crezca o se reduzca según la demanda."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son ajustar automáticamente la capacidad y resistir fallas entre Availability Zones. Un ASG en varias zonas con scaling policies mantiene la capacidad dentro de sus límites, reemplaza instancias deterioradas y se integra con el load balancer. Un ASG de tamaño fijo permite reemplazos, pero no responde a los cambios de demanda."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-auto-scaling-groups--a37fdab6",
+      "conceptId": "ec2-auto-scaling-groups",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A rendering company wants one EC2 Auto Scaling group for workers that can use several instance types. It also wants to combine Spot and On-Demand Instances in that group to optimize costs while maintaining the required capacity. Which configuration meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create one ASG from a launch configuration and specify multiple instance types and both purchase options.",
+          "correct": false,
+          "why": "Launch configurations cannot support multiple instance types or a mix of Spot and On-Demand Instances in an ASG."
+        },
+        {
+          "id": "B",
+          "text": "Create one ASG from a launch template, but configure only one instance type and On-Demand Instances.",
+          "correct": false,
+          "why": "The group would not use several instance types or combine Spot and On-Demand Instances."
+        },
+        {
+          "id": "C",
+          "text": "Create one ASG using a launch template and configure multiple instance types with Spot and On-Demand Instances.",
+          "correct": true,
+          "why": "A launch template supports the requested instance types and purchase options within one ASG."
+        },
+        {
+          "id": "D",
+          "text": "Create separate Spot and On-Demand ASGs from launch configurations, each with one instance type.",
+          "correct": false,
+          "why": "Separate groups do not meet the requirement for one ASG using several instance types and both purchase options."
+        }
+      ],
+      "explanation": "The requirement for several instance types and both purchase options within a single ASG determines the answer. A launch template is required to configure those features together. Launch configurations are a plausible alternative for simpler fleets, but they do not support this combination.",
+      "keywordCues": [
+        "one EC2 Auto Scaling group",
+        "several instance types",
+        "combine Spot and On-Demand Instances"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html"
+      ],
+      "es": {
+        "stem": "Una empresa de renderizado quiere un solo EC2 Auto Scaling group para trabajadores que puedan usar varios tipos de instancia. También quiere combinar Spot y On-Demand Instances en ese grupo para optimizar costos mientras mantiene la capacidad requerida. ¿Qué configuración cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un ASG a partir de un launch configuration y especifica varios tipos de instancia y ambas opciones de compra.",
+            "why": "Los launch configurations no admiten varios tipos de instancia ni una combinación de Spot y On-Demand Instances en un ASG."
+          },
+          {
+            "id": "B",
+            "text": "Crea un ASG a partir de un launch template, pero configura solo un tipo de instancia y On-Demand Instances.",
+            "why": "El grupo no usaría varios tipos de instancia ni combinaría Spot y On-Demand Instances."
+          },
+          {
+            "id": "C",
+            "text": "Crea un ASG con un launch template y configura varios tipos de instancia con Spot y On-Demand Instances.",
+            "why": "Un launch template admite los tipos de instancia y las opciones de compra solicitadas dentro de un solo ASG."
+          },
+          {
+            "id": "D",
+            "text": "Crea ASG separados para Spot y On-Demand a partir de launch configurations, cada uno con un tipo de instancia.",
+            "why": "Los grupos separados no cumplen el requisito de usar varios tipos de instancia y ambas opciones de compra en un solo ASG."
+          }
+        ],
+        "explanation": "El requisito de usar varios tipos de instancia y ambas opciones de compra en un solo ASG determina la respuesta. Se necesita un launch template para configurar esas características juntas. Los launch configurations son una alternativa posible para flotas más sencillas, pero no admiten esta combinación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ec2-auto-scaling-groups--r0",
+      "conceptId": "ec2-auto-scaling-groups",
+      "kind": "recall",
+      "prompt": "What would you configure for an EC2 web fleet that must survive instance failures across Availability Zones and scale with demand?",
+      "promptEs": "¿Qué configurarías para una flota web EC2 que debe resistir fallas de instancias entre Availability Zones y escalar según la demanda?",
+      "idealAnswer": "Use an EC2 Auto Scaling group with a launch template across multiple Availability Zones, set minimum, desired, and maximum capacity, and add scaling policies. Connect it to a load balancer so new and terminated instances are registered and deregistered automatically.",
+      "rubric": [
+        "Names an EC2 Auto Scaling group with a launch template across multiple Availability Zones.",
+        "Explains desired capacity, capacity bounds, and scaling policies.",
+        "Mentions automatic instance replacement and load balancer registration."
+      ]
+    }
+  ]
+}

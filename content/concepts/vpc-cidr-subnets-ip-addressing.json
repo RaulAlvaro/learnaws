@@ -1,0 +1,328 @@
+{
+  "conceptId": "vpc-cidr-subnets-ip-addressing",
+  "card": {
+    "en": {
+      "tldr": "Choose a VPC IPv4 CIDR that leaves room for growth without conflicting with networks you may connect later. Divide its address space into separate subnets for each required Availability Zone; an existing VPC CIDR cannot be resized.",
+      "whenToUse": [
+        "A new VPC must later connect to another VPC or an on-premises network.",
+        "A workload needs address capacity in multiple Availability Zones.",
+        "An existing VPC needs more IPv4 address space."
+      ],
+      "keyFacts": [
+        "A VPC requires an IPv4 CIDR when created; its allowed size is /16 through /28.",
+        "An existing IPv4 CIDR cannot be enlarged or reduced. You can associate a non-overlapping secondary CIDR, subject to association restrictions and quotas.",
+        "Each subnet resides entirely in one Availability Zone; subnets cannot span Availability Zones.",
+        "A secondary VPC CIDR receives a local route in the VPC route tables.",
+        "An active peering connection permits a new VPC CIDR only if it does not overlap the peer's CIDR."
+      ],
+      "gotchas": [
+        "Do not plan to resize the primary VPC CIDR when the workload grows.",
+        "A single subnet cannot provide placement in two Availability Zones.",
+        "A subnet's public or private classification depends on its route to an internet gateway, not its CIDR size."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "future VPC peering",
+        "additional IP capacity",
+        "subnets in two Availability Zones",
+        "cannot renumber existing resources"
+      ]
+    },
+    "es": {
+      "tldr": "Elige un CIDR IPv4 para la VPC que permita crecer sin entrar en conflicto con redes que conectarás después. Divide el espacio en subredes distintas para cada Availability Zone requerida; no puedes cambiar el tamaño de un CIDR existente.",
+      "whenToUse": [
+        "Una VPC nueva deberá conectarse después con otra VPC o con una red local.",
+        "Una carga de trabajo necesita capacidad de direcciones en varias Availability Zones.",
+        "Una VPC existente necesita más espacio de direcciones IPv4."
+      ],
+      "keyFacts": [
+        "Debes asignar un CIDR IPv4 al crear una VPC; el tamaño permitido va de /16 a /28.",
+        "No puedes ampliar ni reducir un CIDR IPv4 existente. Puedes asociar un CIDR secundario que no se superponga, sujeto a restricciones de asociación y cuotas.",
+        "Cada subred reside por completo en una sola Availability Zone; no puede abarcar varias.",
+        "Un CIDR secundario de la VPC recibe una ruta local en las tablas de rutas de la VPC.",
+        "Con una conexión de VPC peering activa, solo puedes agregar un CIDR que no se superponga con el CIDR de la VPC par."
+      ],
+      "gotchas": [
+        "No planees cambiar el tamaño del CIDR principal de la VPC cuando crezca la carga.",
+        "Una sola subred no permite ubicar recursos en dos Availability Zones.",
+        "Que una subred sea pública o privada depende de su ruta hacia un internet gateway, no del tamaño de su CIDR."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "future VPC peering",
+        "additional IP capacity",
+        "subnets in two Availability Zones",
+        "cannot renumber existing resources"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "vpc-cidr-subnets-ip-addressing--d6c1e58a",
+      "conceptId": "vpc-cidr-subnets-ip-addressing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company has a VPC with primary CIDR 10.20.0.0/16 and an active peering connection to a VPC using 10.21.0.0/16. New processing instances need more IPv4 addresses, but existing instances must keep their addresses. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Associate 10.21.0.0/16 as a secondary VPC CIDR and create subnets from it.",
+          "correct": false,
+          "why": "An added CIDR cannot overlap the CIDR of the actively peered VPC."
+        },
+        {
+          "id": "B",
+          "text": "Increase the existing primary VPC CIDR to 10.20.0.0/15 and create new subnets.",
+          "correct": false,
+          "why": "An existing VPC CIDR cannot be resized, and this proposed range also covers the peer's range."
+        },
+        {
+          "id": "C",
+          "text": "Replace the primary CIDR with 10.22.0.0/16 and recreate the existing subnets there.",
+          "correct": false,
+          "why": "The primary VPC CIDR cannot be disassociated, and recreating subnets would not preserve existing instance addresses."
+        },
+        {
+          "id": "D",
+          "text": "Associate 10.22.0.0/16 as a secondary VPC CIDR and create subnets from it.",
+          "correct": true,
+          "why": "The secondary CIDR adds non-overlapping address space without changing existing addresses or overlapping the active peer."
+        }
+      ],
+      "explanation": "The VPC needs additional IPv4 capacity without changing existing addresses or conflicting with its active peer. A non-overlapping secondary CIDR provides space for new subnets; AWS also adds its local route to the VPC route tables. Resizing or replacing the primary CIDR is not supported, and 10.21.0.0/16 overlaps the peer.",
+      "keywordCues": [
+        "primary CIDR 10.20.0.0/16",
+        "active peering connection",
+        "10.21.0.0/16",
+        "more IPv4 addresses",
+        "existing instances must keep their addresses"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene una VPC con el CIDR principal 10.20.0.0/16 y una conexión de VPC peering activa con una VPC que usa 10.21.0.0/16. Nuevas instancias de procesamiento necesitan más direcciones IPv4, pero las instancias existentes deben conservar sus direcciones. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asocia 10.21.0.0/16 como CIDR secundario de la VPC y crea subredes a partir de él.",
+            "why": "Un CIDR agregado no puede superponerse con el CIDR de una VPC con VPC peering activo."
+          },
+          {
+            "id": "B",
+            "text": "Amplía el CIDR principal existente de la VPC a 10.20.0.0/15 y crea nuevas subredes.",
+            "why": "No puedes cambiar el tamaño de un CIDR de VPC existente y el rango propuesto también abarca el de la VPC par."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza el CIDR principal con 10.22.0.0/16 y vuelve a crear allí las subredes existentes.",
+            "why": "No puedes desasociar el CIDR principal de la VPC, y volver a crear las subredes no conservaría las direcciones de las instancias existentes."
+          },
+          {
+            "id": "D",
+            "text": "Asocia 10.22.0.0/16 como CIDR secundario de la VPC y crea subredes a partir de él.",
+            "why": "El CIDR secundario agrega espacio sin superposiciones, sin cambiar las direcciones existentes ni entrar en conflicto con la VPC par activa."
+          }
+        ],
+        "explanation": "La VPC necesita más capacidad IPv4 sin cambiar las direcciones existentes ni entrar en conflicto con su VPC par activa. Un CIDR secundario sin superposiciones proporciona espacio para nuevas subredes; AWS también agrega su ruta local a las tablas de rutas de la VPC. No puedes cambiar el tamaño ni reemplazar el CIDR principal, y 10.21.0.0/16 se superpone con la VPC par."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-cidr-subnets-ip-addressing--031d4d08",
+      "conceptId": "vpc-cidr-subnets-ip-addressing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturer has a VPC with primary CIDR 10.60.0.0/16 and an active peering connection to a VPC using 10.61.0.0/16. It plans to use 10.62.0.0/16 for a separate network. A new application needs additional IPv4 address space and instances in two Availability Zones, while existing instance addresses remain unchanged. Which two actions together meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create distinct subnets, such as 10.63.0.0/24 and 10.63.1.0/24, in separate Availability Zones.",
+          "correct": true,
+          "why": "Distinct subnets from the added CIDR allow placement in both Availability Zones."
+        },
+        {
+          "id": "B",
+          "text": "Associate 10.61.0.0/16 as a secondary CIDR of the existing VPC.",
+          "correct": false,
+          "why": "The secondary CIDR would overlap the CIDR of the actively peered VPC."
+        },
+        {
+          "id": "C",
+          "text": "Increase the existing VPC's primary CIDR from 10.60.0.0/16 to 10.60.0.0/14.",
+          "correct": false,
+          "why": "An existing CIDR cannot be resized, and the proposed range covers the specified peer and separate network."
+        },
+        {
+          "id": "D",
+          "text": "Associate 10.63.0.0/16 as a secondary CIDR of the existing VPC.",
+          "correct": true,
+          "why": "This adds address space without changing the primary CIDR or using either of the specified external networks' ranges."
+        },
+        {
+          "id": "E",
+          "text": "Create one subnet from the additional CIDR and place instances in both Availability Zones in that subnet.",
+          "correct": false,
+          "why": "One subnet cannot span two Availability Zones."
+        }
+      ],
+      "explanation": "The application needs both new address space and placement in two Availability Zones without changing existing addresses. Associating the non-overlapping 10.63.0.0/16 CIDR provides the space, and creating separate subnets from it provides per-zone placement. The primary CIDR cannot be enlarged; using 10.61.0.0/16 would overlap the active peer, and one subnet cannot span zones.",
+      "keywordCues": [
+        "active peering connection",
+        "10.61.0.0/16",
+        "10.62.0.0/16 for a separate network",
+        "additional IPv4 address space",
+        "two Availability Zones",
+        "existing instance addresses remain unchanged"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html"
+      ],
+      "es": {
+        "stem": "Un fabricante tiene una VPC con el CIDR principal 10.60.0.0/16 y una conexión de VPC peering activa con una VPC que usa 10.61.0.0/16. Planea usar 10.62.0.0/16 para una red independiente. Una aplicación nueva necesita más espacio de direcciones IPv4 e instancias en dos Availability Zones, sin cambiar las direcciones de las instancias existentes. ¿Qué dos acciones, en conjunto, cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea subredes distintas, como 10.63.0.0/24 y 10.63.1.0/24, en Availability Zones diferentes.",
+            "why": "Las subredes distintas del CIDR agregado permiten ubicar instancias en ambas Availability Zones."
+          },
+          {
+            "id": "B",
+            "text": "Asocia 10.61.0.0/16 como CIDR secundario de la VPC existente.",
+            "why": "El CIDR secundario se superpondría con el CIDR de la VPC con VPC peering activo."
+          },
+          {
+            "id": "C",
+            "text": "Amplía el CIDR principal de la VPC existente de 10.60.0.0/16 a 10.60.0.0/14.",
+            "why": "No puedes cambiar el tamaño de un CIDR existente, y el rango propuesto abarca la VPC par y la red independiente indicadas."
+          },
+          {
+            "id": "D",
+            "text": "Asocia 10.63.0.0/16 como CIDR secundario de la VPC existente.",
+            "why": "Esto agrega espacio de direcciones sin cambiar el CIDR principal ni usar los rangos de las redes externas indicadas."
+          },
+          {
+            "id": "E",
+            "text": "Crea una sola subred a partir del CIDR adicional y coloca allí instancias de ambas Availability Zones.",
+            "why": "Una sola subred no puede abarcar dos Availability Zones."
+          }
+        ],
+        "explanation": "La aplicación necesita tanto espacio de direcciones nuevo como presencia en dos Availability Zones, sin cambiar las direcciones existentes. Asociar el CIDR 10.63.0.0/16, que no se superpone, aporta espacio; crear subredes separadas a partir de él permite distribuir las instancias por zona. No puedes ampliar el CIDR principal; usar 10.61.0.0/16 se superpondría con la VPC par activa, y una sola subred no puede abarcar varias zonas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "vpc-cidr-subnets-ip-addressing--ea91fc3d",
+      "conceptId": "vpc-cidr-subnets-ip-addressing",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company is creating a VPC for a new service that must run in two Availability Zones. Its on-premises network uses 10.40.0.0/16, and a VPC it plans to peer with uses 10.41.0.0/16. The team wants a VPC CIDR with room to create more subnets later. Which plan meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a VPC with 10.41.0.0/16 and use distinct /24 subnets in separate Availability Zones.",
+          "correct": false,
+          "why": "The VPC CIDR overlaps the VPC identified for future peering."
+        },
+        {
+          "id": "B",
+          "text": "Create a VPC with 10.42.0.0/24 and assign that entire /24 to a subnet in each Availability Zone.",
+          "correct": false,
+          "why": "The two subnets would use the same CIDR instead of distinct portions of the VPC address space."
+        },
+        {
+          "id": "C",
+          "text": "Create a VPC with 10.42.0.0/16 and use 10.42.0.0/24 and 10.42.1.0/24 for subnets in separate Availability Zones.",
+          "correct": true,
+          "why": "The VPC avoids the specified networks, and its distinct per-zone subnets leave address space for growth."
+        },
+        {
+          "id": "D",
+          "text": "Create a VPC with 10.40.0.0/16 and separate subnets in each Availability Zone.",
+          "correct": false,
+          "why": "The VPC CIDR conflicts with the specified on-premises address range."
+        }
+      ],
+      "explanation": "The deciding requirements are future connectivity to the named networks, deployment across two Availability Zones, and room for more subnets. The 10.42.0.0/16 plan avoids both specified ranges and assigns a distinct subnet to each zone. Choosing 10.41.0.0/16 would conflict with the planned peer, while assigning the same /24 to both subnets does not create distinct address ranges.",
+      "keywordCues": [
+        "two Availability Zones",
+        "on-premises network uses 10.40.0.0/16",
+        "plans to peer with uses 10.41.0.0/16",
+        "room to create more subnets later"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios está creando una VPC para un servicio nuevo que debe ejecutarse en dos Availability Zones. Su red local usa 10.40.0.0/16 y una VPC con la que planea establecer VPC peering usa 10.41.0.0/16. El equipo quiere un CIDR de VPC que deje espacio para crear más subredes después. ¿Qué plan cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea una VPC con 10.41.0.0/16 y usa subredes /24 distintas en Availability Zones diferentes.",
+            "why": "El CIDR de la VPC se superpone con el de la VPC prevista para VPC peering."
+          },
+          {
+            "id": "B",
+            "text": "Crea una VPC con 10.42.0.0/24 y asigna ese /24 completo a una subred en cada Availability Zone.",
+            "why": "Las dos subredes usarían el mismo CIDR en lugar de partes distintas del espacio de direcciones de la VPC."
+          },
+          {
+            "id": "C",
+            "text": "Crea una VPC con 10.42.0.0/16 y usa 10.42.0.0/24 y 10.42.1.0/24 para subredes en Availability Zones diferentes.",
+            "why": "La VPC evita las redes indicadas y sus subredes distintas por zona dejan espacio para crecer."
+          },
+          {
+            "id": "D",
+            "text": "Crea una VPC con 10.40.0.0/16 y subredes separadas en cada Availability Zone.",
+            "why": "El CIDR de la VPC entra en conflicto con el rango de direcciones de la red local indicado."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la conectividad futura con las redes indicadas, el despliegue en dos Availability Zones y el espacio para más subredes. El plan con 10.42.0.0/16 evita ambos rangos y asigna una subred distinta a cada zona. Elegir 10.41.0.0/16 causaría un conflicto con la VPC par prevista, mientras que asignar el mismo /24 a ambas subredes no crea rangos distintos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "vpc-cidr-subnets-ip-addressing--r0",
+      "conceptId": "vpc-cidr-subnets-ip-addressing",
+      "kind": "recall",
+      "prompt": "An existing VPC needs more IPv4 addresses and deployment in two Availability Zones. What CIDR and subnet changes should you make, and why?",
+      "promptEs": "Una VPC existente necesita más direcciones IPv4 y despliegue en dos Availability Zones. ¿Qué cambios harías en sus CIDR y subredes, y por qué?",
+      "idealAnswer": "Associate a permitted secondary IPv4 CIDR that does not overlap existing CIDRs or an active peer's CIDR; you cannot resize the existing block. Create distinct subnets from the added space in the two Availability Zones, because each subnet belongs to only one zone.",
+      "rubric": [
+        "Adds a permitted, non-overlapping secondary IPv4 CIDR.",
+        "States that an existing VPC CIDR cannot be resized.",
+        "Creates distinct subnets, one in each Availability Zone."
+      ]
+    }
+  ]
+}

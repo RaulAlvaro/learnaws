@@ -1,0 +1,335 @@
+{
+  "conceptId": "bastion-vs-session-manager",
+  "card": {
+    "en": {
+      "tldr": "Session Manager provides shell access to managed EC2 instances without inbound SSH ports, bastion hosts, or SSH keys. Choose it when a scenario requires IAM-controlled access to private instances with optional session-activity logging.",
+      "whenToUse": [
+        "Administrators need browser or CLI shell access to instances without public IP addresses.",
+        "Security policy requires closing inbound SSH ports and eliminating bastion and key management.",
+        "Access must be granted per user and managed node through IAM policies."
+      ],
+      "keyFacts": [
+        "Session Manager is a fully managed Systems Manager tool for connecting to managed nodes.",
+        "CloudTrail records Session Manager API calls; Amazon S3 or CloudWatch Logs can receive session log data.",
+        "Session content logging is unavailable for sessions that use port forwarding or SSH.",
+        "VPC endpoints for Systems Manager using AWS PrivateLink can keep traffic between managed nodes, Systems Manager, and Amazon EC2 on the Amazon network."
+      ],
+      "gotchas": [
+        "CloudTrail API records alone do not provide a record of commands run during a session.",
+        "Tunneling SSH through Session Manager does not make SSH session content available for Session Manager logging.",
+        "A bastion host still requires operating a jump box and does not eliminate inbound SSH access."
+      ],
+      "confusedWith": [
+        {
+          "concept": "SSH bastion host",
+          "difference": "A bastion is a host you maintain for jump access; Session Manager avoids bastions, inbound ports, and SSH keys."
+        },
+        {
+          "concept": "CloudTrail logging",
+          "difference": "CloudTrail records Session Manager API calls; configure S3 or CloudWatch Logs for session log data."
+        }
+      ],
+      "examCues": [
+        "private instances without public IP addresses",
+        "close inbound port 22",
+        "eliminate SSH keys and bastion hosts",
+        "record commands run during shell sessions"
+      ]
+    },
+    "es": {
+      "tldr": "Session Manager ofrece acceso a una shell en instancias EC2 administradas sin puertos SSH de entrada, bastion hosts ni claves SSH. Elígelo cuando el escenario exige acceso a instancias privadas controlado mediante IAM y la opción de registrar la actividad de las sesiones.",
+      "whenToUse": [
+        "Los administradores necesitan acceso a una shell desde el navegador o la CLI en instancias sin direcciones IP públicas.",
+        "La política de seguridad exige cerrar los puertos SSH de entrada y eliminar la administración de bastion hosts y claves.",
+        "Debes otorgar acceso por usuario y por nodo administrado mediante políticas de IAM."
+      ],
+      "keyFacts": [
+        "Session Manager es una herramienta totalmente administrada de Systems Manager para conectarte a nodos administrados.",
+        "CloudTrail registra las llamadas a la API de Session Manager; Amazon S3 o CloudWatch Logs pueden recibir los datos de registro de las sesiones.",
+        "El registro del contenido de la sesión no está disponible para sesiones que usan port forwarding o SSH.",
+        "Los VPC endpoints para Systems Manager mediante AWS PrivateLink pueden mantener el tráfico entre los nodos administrados, Systems Manager y Amazon EC2 dentro de la red de Amazon."
+      ],
+      "gotchas": [
+        "Los registros de llamadas a la API en CloudTrail no proporcionan por sí solos un registro de los comandos ejecutados durante una sesión.",
+        "Si utilizas SSH a través de Session Manager, el contenido de esa sesión SSH no queda disponible para el registro de Session Manager.",
+        "Un bastion host sigue siendo un servidor de salto que debes administrar y no elimina el acceso SSH de entrada."
+      ],
+      "confusedWith": [
+        {
+          "concept": "SSH bastion host",
+          "difference": "Un bastion es un servidor de salto que administras; Session Manager evita bastion hosts, puertos de entrada y claves SSH."
+        },
+        {
+          "concept": "CloudTrail logging",
+          "difference": "CloudTrail registra llamadas a la API de Session Manager; configura S3 o CloudWatch Logs para guardar los datos de las sesiones."
+        }
+      ],
+      "examCues": [
+        "private instances without public IP addresses",
+        "close inbound port 22",
+        "eliminate SSH keys and bastion hosts",
+        "record commands run during shell sessions"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "bastion-vs-session-manager--980b7de6",
+      "conceptId": "bastion-vs-session-manager",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs Linux EC2 instances in private subnets. Its administrators need occasional interactive shell access, but the security team will not allow inbound SSH ports or shared SSH keys. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Systems Manager Session Manager to open shell sessions on the managed instances.",
+          "correct": true,
+          "why": "Session Manager provides interactive access without inbound ports, SSH keys, or a maintained bastion."
+        },
+        {
+          "id": "B",
+          "text": "Allow SSH only from administrator IP addresses and rotate each administrator's SSH keys.",
+          "correct": false,
+          "why": "Restricting source addresses does not meet the requirements to close inbound SSH and avoid SSH keys."
+        },
+        {
+          "id": "C",
+          "text": "Require administrators to connect through a VPN and then SSH to the private instances.",
+          "correct": false,
+          "why": "A VPN changes the network path but still requires inbound SSH access to the instances."
+        },
+        {
+          "id": "D",
+          "text": "Deploy a bastion host and allow SSH from the bastion to the private instances.",
+          "correct": false,
+          "why": "The company would need to maintain a bastion and permit inbound SSH on the instances."
+        }
+      ],
+      "explanation": "The deciding constraints are interactive shell access without inbound SSH or shared keys, with minimal infrastructure to operate. Session Manager provides that access through a managed service. A bastion is a plausible way to reach private instances, but it adds a host to maintain and still relies on SSH access.",
+      "keywordCues": [
+        "interactive shell access",
+        "will not allow inbound SSH ports or shared SSH keys",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta instancias EC2 con Linux en subredes privadas. Sus administradores necesitan acceso ocasional a una shell interactiva, pero el equipo de seguridad no permite puertos SSH de entrada ni claves SSH compartidas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Systems Manager Session Manager para abrir sesiones de shell en las instancias administradas.",
+            "why": "Session Manager ofrece acceso interactivo sin puertos de entrada, claves SSH ni un bastion que debas administrar."
+          },
+          {
+            "id": "B",
+            "text": "Permitir SSH solo desde las direcciones IP de los administradores y rotar las claves SSH de cada uno.",
+            "why": "Limitar las direcciones de origen no cumple los requisitos de cerrar SSH de entrada y evitar las claves SSH."
+          },
+          {
+            "id": "C",
+            "text": "Exigir que los administradores se conecten mediante una VPN y luego usen SSH para acceder a las instancias privadas.",
+            "why": "Una VPN cambia la ruta de red, pero sigue requiriendo acceso SSH de entrada a las instancias."
+          },
+          {
+            "id": "D",
+            "text": "Implementar un bastion host y permitir SSH desde ese servidor hacia las instancias privadas.",
+            "why": "Tendrías que administrar un bastion y permitir SSH de entrada en las instancias."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el acceso a una shell interactiva sin SSH de entrada ni claves compartidas, y con una infraestructura mínima que administrar. Session Manager ofrece ese acceso como servicio administrado. Un bastion podría servir para llegar a las instancias privadas, pero agrega un servidor que debes mantener y sigue dependiendo del acceso SSH."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "bastion-vs-session-manager--a7cb1232",
+      "conceptId": "bastion-vs-session-manager",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A financial services team manages EC2 instances without public IP addresses. Engineers need shell access without opening inbound ports, and the team wants traffic between the managed instances and Systems Manager to stay on the Amazon network. Which design meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Session Manager with a NAT gateway instead of VPC endpoints for Systems Manager.",
+          "correct": false,
+          "why": "Session Manager avoids inbound ports, but this design does not use the documented PrivateLink option for keeping the specified traffic on the Amazon network."
+        },
+        {
+          "id": "B",
+          "text": "Use Session Manager with VPC endpoints for Systems Manager through AWS PrivateLink.",
+          "correct": true,
+          "why": "Session Manager avoids inbound access, and PrivateLink endpoints keep the specified traffic on the Amazon network."
+        },
+        {
+          "id": "C",
+          "text": "Use a VPN for engineer access and permit SSH to the private instances from the VPN network.",
+          "correct": false,
+          "why": "This design still opens inbound SSH access to the instances."
+        },
+        {
+          "id": "D",
+          "text": "Use a public bastion host to establish SSH connections to the private instances.",
+          "correct": false,
+          "why": "SSH from a bastion requires inbound SSH access to the managed instances."
+        }
+      ],
+      "explanation": "The instances have no public IP addresses, inbound ports must stay closed, and the Systems Manager connection should remain on the Amazon network. Session Manager supports access to managed nodes without inbound ports; VPC endpoints for Systems Manager using AWS PrivateLink address the network-path requirement. A bastion or VPN with SSH fails the inbound-port constraint, while the NAT gateway design omits the requested PrivateLink path.",
+      "keywordCues": [
+        "without public IP addresses",
+        "without opening inbound ports",
+        "stay on the Amazon network"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html"
+      ],
+      "es": {
+        "stem": "Un equipo de servicios financieros administra instancias EC2 sin direcciones IP públicas. Sus ingenieros necesitan acceso a una shell sin abrir puertos de entrada, y el equipo quiere que el tráfico entre las instancias administradas y Systems Manager permanezca en la red de Amazon. ¿Qué diseño cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Session Manager con un NAT gateway en lugar de VPC endpoints para Systems Manager.",
+            "why": "Session Manager evita los puertos de entrada, pero este diseño no usa la opción documentada de PrivateLink para mantener el tráfico indicado en la red de Amazon."
+          },
+          {
+            "id": "B",
+            "text": "Usar Session Manager con VPC endpoints para Systems Manager mediante AWS PrivateLink.",
+            "why": "Session Manager evita el acceso de entrada y los endpoints de PrivateLink mantienen el tráfico indicado en la red de Amazon."
+          },
+          {
+            "id": "C",
+            "text": "Usar una VPN para el acceso de los ingenieros y permitir SSH a las instancias privadas desde la red de la VPN.",
+            "why": "Este diseño sigue abriendo el acceso SSH de entrada a las instancias."
+          },
+          {
+            "id": "D",
+            "text": "Usar un bastion host público para establecer conexiones SSH hacia las instancias privadas.",
+            "why": "El acceso SSH desde un bastion requiere permitir SSH de entrada en las instancias administradas."
+          }
+        ],
+        "explanation": "Las instancias no tienen direcciones IP públicas, los puertos de entrada deben permanecer cerrados y la conexión con Systems Manager debe mantenerse en la red de Amazon. Session Manager permite acceder a nodos administrados sin puertos de entrada; los VPC endpoints para Systems Manager mediante AWS PrivateLink cumplen el requisito de la ruta de red. Un bastion o una VPN con SSH incumplen la restricción de puertos, mientras que el diseño con NAT gateway omite la ruta de PrivateLink solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "bastion-vs-session-manager--1dd0d882",
+      "conceptId": "bastion-vs-session-manager",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A logistics company is retiring its SSH bastion. On-call staff need keyless shell access to managed EC2 instances, with access limited to the instances each person supports. The company must also retain session log data for reviewing commands, without reopening inbound SSH. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use IAM policies to control which staff can start Session Manager sessions on each managed instance.",
+          "correct": true,
+          "why": "IAM policies can limit Session Manager access by user and managed node."
+        },
+        {
+          "id": "B",
+          "text": "Use Session Manager port forwarding and configure CloudWatch Logs to record the forwarded sessions.",
+          "correct": false,
+          "why": "Session Manager does not provide session content logging for port-forwarding sessions."
+        },
+        {
+          "id": "C",
+          "text": "Enable CloudTrail for Session Manager API calls as the only source of command records.",
+          "correct": false,
+          "why": "CloudTrail records API calls but does not provide the requested session log data."
+        },
+        {
+          "id": "D",
+          "text": "Use standard Session Manager shell sessions and send session log data to an Amazon S3 bucket.",
+          "correct": true,
+          "why": "Standard Session Manager shell sessions provide keyless access without inbound SSH and can send session log data to S3."
+        },
+        {
+          "id": "E",
+          "text": "Start SSH sessions through Session Manager and configure Session Manager session logging.",
+          "correct": false,
+          "why": "Session Manager cannot log session content for SSH sessions, and SSH does not meet the keyless-shell requirement."
+        }
+      ],
+      "explanation": "The company needs both per-instance access control and retained data from keyless shell sessions. IAM policies govern who can initiate Session Manager sessions and which managed nodes they can access; standard Session Manager sessions can send session log data to S3. CloudTrail alone records API calls rather than command activity, and neither SSH nor port-forwarding sessions provide Session Manager session content logging.",
+      "keywordCues": [
+        "keyless shell access",
+        "access limited to the instances each person supports",
+        "retain session log data for reviewing commands",
+        "without reopening inbound SSH"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística está retirando su bastion SSH. El personal de guardia necesita acceso a una shell sin claves en instancias EC2 administradas, limitado a las instancias que atiende cada persona. La empresa también debe conservar los datos de sesión para revisar los comandos, sin volver a abrir SSH de entrada. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar políticas de IAM para controlar qué personas pueden iniciar sesiones de Session Manager en cada instancia administrada.",
+            "why": "Las políticas de IAM pueden limitar el acceso de Session Manager por usuario y nodo administrado."
+          },
+          {
+            "id": "B",
+            "text": "Usar port forwarding de Session Manager y configurar CloudWatch Logs para registrar las sesiones redirigidas.",
+            "why": "Session Manager no proporciona registro del contenido de las sesiones de port forwarding."
+          },
+          {
+            "id": "C",
+            "text": "Habilitar CloudTrail para las llamadas a la API de Session Manager como única fuente de registros de comandos.",
+            "why": "CloudTrail registra llamadas a la API, pero no proporciona los datos de sesión solicitados."
+          },
+          {
+            "id": "D",
+            "text": "Usar sesiones de shell estándar de Session Manager y enviar los datos de sesión a un bucket de Amazon S3.",
+            "why": "Las sesiones de shell estándar de Session Manager ofrecen acceso sin claves ni SSH de entrada y pueden enviar datos de sesión a S3."
+          },
+          {
+            "id": "E",
+            "text": "Iniciar sesiones SSH a través de Session Manager y configurar el registro de sesiones de Session Manager.",
+            "why": "Session Manager no puede registrar el contenido de las sesiones SSH, y SSH no cumple el requisito de acceso a la shell sin claves."
+          }
+        ],
+        "explanation": "La empresa necesita tanto control de acceso por instancia como datos conservados de las sesiones de shell sin claves. Las políticas de IAM determinan quién puede iniciar sesiones de Session Manager y a qué nodos administrados puede acceder; las sesiones estándar de Session Manager pueden enviar datos de sesión a S3. CloudTrail por sí solo registra llamadas a la API en lugar de la actividad de comandos, y las sesiones SSH o de port forwarding no permiten registrar su contenido mediante Session Manager."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "bastion-vs-session-manager--r0",
+      "conceptId": "bastion-vs-session-manager",
+      "kind": "recall",
+      "prompt": "How would you give engineers shell access to private EC2 instances without inbound SSH, bastions, or SSH keys, and why?",
+      "promptEs": "¿Cómo darías a los ingenieros acceso a una shell en instancias EC2 privadas sin SSH de entrada, bastion hosts ni claves SSH, y por qué?",
+      "idealAnswer": "Use Systems Manager Session Manager for managed instances. It provides browser or CLI shell access without inbound ports, bastion hosts, or SSH keys, and IAM policies control who can connect to each node.",
+      "rubric": [
+        "Names Systems Manager Session Manager.",
+        "Explains that it avoids inbound SSH, bastions, and SSH keys.",
+        "Mentions IAM control over users and managed nodes."
+      ]
+    }
+  ]
+}

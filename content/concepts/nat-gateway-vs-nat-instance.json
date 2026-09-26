@@ -1,0 +1,430 @@
+{
+  "conceptId": "nat-gateway-vs-nat-instance",
+  "card": {
+    "en": {
+      "tldr": "A public NAT gateway lets instances in private subnets initiate internet connections without accepting unsolicited inbound connections. Choose it over a NAT instance when managed operation and availability matter; use a gateway in each Availability Zone when the design must remain zone-independent.",
+      "whenToUse": [
+        "Private instances must download updates or call external APIs without accepting unsolicited inbound internet connections.",
+        "The team wants AWS to manage the NAT component rather than patch and size an instance.",
+        "Private subnets in multiple Availability Zones need zone-independent outbound access."
+      ],
+      "keyFacts": [
+        "A public NAT gateway is created in a public subnet with an Elastic IP address and routes internet-bound traffic through the VPC internet gateway.",
+        "NAT gateways are managed by AWS and have redundancy within their Availability Zone; a gateway in each Availability Zone provides a zone-independent architecture.",
+        "A NAT instance requires you to handle maintenance and arrange failover between instances.",
+        "NAT gateway charges depend on gateway count, usage duration, and data sent through the gateways.",
+        "You cannot attach a security group to a NAT gateway, and NAT gateways do not support port forwarding."
+      ],
+      "gotchas": [
+        "A private NAT gateway cannot provide internet access through an internet gateway; the internet gateway drops that traffic.",
+        "One public NAT gateway shared across Availability Zones does not provide a zone-independent design.",
+        "Replacing a NAT instance's route with a NAT gateway route drops existing connections; they must be re-established."
+      ],
+      "confusedWith": [
+        {
+          "concept": "NAT instance",
+          "difference": "A NAT instance is self-managed and can be customized for port forwarding; a NAT gateway is managed and does not support port forwarding."
+        },
+        {
+          "concept": "VPC endpoint",
+          "difference": "An endpoint for an AWS service is not a substitute for outbound access to arbitrary internet destinations."
+        }
+      ],
+      "examCues": [
+        "private subnets call a third-party API",
+        "no unsolicited inbound internet connections",
+        "least operational overhead for outbound access",
+        "zone-independent internet egress"
+      ]
+    },
+    "es": {
+      "tldr": "Un public NAT gateway permite que las instancias en subredes privadas inicien conexiones a internet sin aceptar conexiones entrantes no solicitadas. Elígelo en lugar de un NAT instance cuando importen la administración a cargo de AWS y la disponibilidad; usa uno por Availability Zone si necesitas independencia entre zonas.",
+      "whenToUse": [
+        "Tus instancias privadas deben descargar actualizaciones o llamar a API externas sin aceptar conexiones entrantes no solicitadas desde internet.",
+        "Tu equipo quiere que AWS administre el componente NAT en vez de aplicar parches y elegir el tamaño de una instancia.",
+        "Las subredes privadas en varias Availability Zones necesitan salida independiente por zona."
+      ],
+      "keyFacts": [
+        "Un public NAT gateway se crea en una subred pública con una Elastic IP y dirige el tráfico hacia internet mediante el internet gateway de la VPC.",
+        "AWS administra los NAT gateways, que tienen redundancia dentro de su Availability Zone; uno en cada zona permite una arquitectura independiente por zona.",
+        "Con un NAT instance, tú te encargas del mantenimiento y de organizar la conmutación por error entre instancias.",
+        "Los cargos de NAT gateway dependen de la cantidad de gateways, el tiempo de uso y los datos enviados a través de ellos.",
+        "No puedes asociar un security group a un NAT gateway, y los NAT gateways no admiten port forwarding."
+      ],
+      "gotchas": [
+        "Un private NAT gateway no ofrece acceso a internet a través de un internet gateway: este descarta el tráfico.",
+        "Compartir un único public NAT gateway entre Availability Zones no da independencia entre zonas.",
+        "Al reemplazar en una tabla de rutas un NAT instance por un NAT gateway, se interrumpen las conexiones existentes y deben restablecerse."
+      ],
+      "confusedWith": [
+        {
+          "concept": "NAT instance",
+          "difference": "Un NAT instance requiere administración propia y se puede configurar para port forwarding; un NAT gateway es administrado y no admite port forwarding."
+        },
+        {
+          "concept": "VPC endpoint",
+          "difference": "Un endpoint para un servicio de AWS no sustituye la salida hacia destinos arbitrarios de internet."
+        }
+      ],
+      "examCues": [
+        "private subnets call a third-party API",
+        "no unsolicited inbound internet connections",
+        "least operational overhead for outbound access",
+        "zone-independent internet egress"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "nat-gateway-vs-nat-instance--1d73df09",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A testing firm uses private instances to initiate connections to an external service. It also requires custom port forwarding on the NAT component for a separate diagnostic workflow, and its network team is prepared to maintain that component. Which option meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a NAT instance and customize its configuration for port forwarding.",
+          "correct": true,
+          "why": "A NAT instance can be manually configured for port forwarding, and the team accepts its maintenance burden."
+        },
+        {
+          "id": "B",
+          "text": "Use a public NAT gateway and associate a security group that permits the diagnostic ports.",
+          "correct": false,
+          "why": "NAT gateways do not support port forwarding and cannot have security groups associated with them."
+        },
+        {
+          "id": "C",
+          "text": "Use a public NAT gateway and configure port forwarding in the private subnet's route table.",
+          "correct": false,
+          "why": "Changing the route table does not add port forwarding support to a NAT gateway."
+        },
+        {
+          "id": "D",
+          "text": "Use a private NAT gateway and add a route from it to an internet gateway.",
+          "correct": false,
+          "why": "The internet gateway drops traffic from a private NAT gateway, and the gateway does not support port forwarding."
+        }
+      ],
+      "explanation": "Custom port forwarding is the deciding requirement. The documented comparison allows manual port-forwarding configuration on a NAT instance but says NAT gateways do not support it. Although a public NAT gateway would reduce maintenance for ordinary outbound traffic, it cannot satisfy this additional workflow. The team has explicitly accepted instance maintenance.",
+      "keywordCues": [
+        "custom port forwarding",
+        "prepared to maintain that component"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html"
+      ],
+      "es": {
+        "stem": "Una empresa de pruebas usa instancias privadas para iniciar conexiones a un servicio externo. También necesita port forwarding personalizado en el componente NAT para un flujo de diagnóstico independiente, y su equipo de redes está dispuesto a mantener ese componente. ¿Qué opción cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un NAT instance y personalizar su configuración para port forwarding.",
+            "why": "Un NAT instance permite configurar port forwarding manualmente, y el equipo acepta su mantenimiento."
+          },
+          {
+            "id": "B",
+            "text": "Usar un public NAT gateway y asociarle un security group que permita los puertos de diagnóstico.",
+            "why": "Los NAT gateways no admiten port forwarding ni permiten asociarles security groups."
+          },
+          {
+            "id": "C",
+            "text": "Usar un public NAT gateway y configurar port forwarding en la tabla de rutas de la subred privada.",
+            "why": "Cambiar la tabla de rutas no agrega compatibilidad con port forwarding a un NAT gateway."
+          },
+          {
+            "id": "D",
+            "text": "Usar un private NAT gateway y agregar una ruta desde él hacia un internet gateway.",
+            "why": "El internet gateway descarta el tráfico de un private NAT gateway, que además no admite port forwarding."
+          }
+        ],
+        "explanation": "El requisito decisivo es port forwarding personalizado. La comparación documentada permite configurarlo manualmente en un NAT instance, pero indica que los NAT gateways no lo admiten. Aunque un public NAT gateway reduciría el mantenimiento del tráfico saliente habitual, no cumple este flujo adicional. El equipo ha aceptado explícitamente mantener la instancia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-gateway-vs-nat-instance--f8175a4e",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A healthcare analytics company runs private-subnet workers in multiple Availability Zones. Workers must reach a third-party internet API without accepting unsolicited inbound internet connections, and outbound access must remain zone-independent. The company wants AWS to manage the NAT components. Which two actions should the company take? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create private NAT gateways and send their outbound traffic through the VPC internet gateway.",
+          "correct": false,
+          "why": "The internet gateway drops traffic from private NAT gateways."
+        },
+        {
+          "id": "B",
+          "text": "Create a public NAT gateway with an Elastic IP in a public subnet in each Availability Zone.",
+          "correct": true,
+          "why": "Public NAT gateways support outbound internet access, and placing one in each zone supports zone independence."
+        },
+        {
+          "id": "C",
+          "text": "Route each private subnet's internet-bound traffic to the public NAT gateway in its own Availability Zone.",
+          "correct": true,
+          "why": "Local-zone NAT routes use the per-zone gateways for outbound access without a shared-zone dependency."
+        },
+        {
+          "id": "D",
+          "text": "Route all private subnets through one public NAT gateway to reduce the number of gateways.",
+          "correct": false,
+          "why": "A single gateway does not meet the stated zone-independence requirement."
+        },
+        {
+          "id": "E",
+          "text": "Attach security groups directly to the NAT gateways to block unsolicited inbound internet traffic.",
+          "correct": false,
+          "why": "Security groups cannot be associated directly with NAT gateways."
+        }
+      ],
+      "explanation": "The workers need public-internet egress, not unsolicited inbound access, so the NAT components must be public NAT gateways rather than private ones. Creating a gateway in each Availability Zone and routing each zone's private subnets through their local gateway provides a zone-independent architecture. A shared gateway would introduce the zone dependency the scenario forbids. Security groups cannot be attached to NAT gateways.",
+      "keywordCues": [
+        "third-party internet API",
+        "without accepting unsolicited inbound internet connections",
+        "zone-independent",
+        "AWS to manage the NAT components"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html"
+      ],
+      "es": {
+        "stem": "Una empresa de análisis de salud ejecuta procesos en subredes privadas de varias Availability Zones. Los procesos deben acceder a una API externa por internet sin aceptar conexiones entrantes no solicitadas, y la salida debe ser independiente por zona. La empresa quiere que AWS administre los componentes NAT. ¿Qué dos acciones debe tomar? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear private NAT gateways y enviar su tráfico saliente a través del internet gateway de la VPC.",
+            "why": "El internet gateway descarta el tráfico de los private NAT gateways."
+          },
+          {
+            "id": "B",
+            "text": "Crear un public NAT gateway con una Elastic IP en una subred pública de cada Availability Zone.",
+            "why": "Los public NAT gateways permiten la salida a internet, y uno en cada zona favorece la independencia entre zonas."
+          },
+          {
+            "id": "C",
+            "text": "Dirigir el tráfico hacia internet de cada subred privada al public NAT gateway de su propia Availability Zone.",
+            "why": "Las rutas hacia el gateway de la misma zona usan los gateways por zona para dar salida sin depender de una zona compartida."
+          },
+          {
+            "id": "D",
+            "text": "Dirigir todas las subredes privadas a un solo public NAT gateway para reducir la cantidad de gateways.",
+            "why": "Un solo gateway no cumple el requisito de independencia entre zonas."
+          },
+          {
+            "id": "E",
+            "text": "Asociar security groups directamente a los NAT gateways para bloquear el tráfico entrante no solicitado desde internet.",
+            "why": "No se pueden asociar security groups directamente a los NAT gateways."
+          }
+        ],
+        "explanation": "Los procesos necesitan salida a internet, no acceso entrante no solicitado, por lo que los componentes deben ser public NAT gateways y no private NAT gateways. Crear uno en cada Availability Zone y dirigir las subredes privadas al gateway de su zona permite una arquitectura independiente por zona. Un gateway compartido introduciría la dependencia que el escenario prohíbe. No se pueden asociar security groups a los NAT gateways."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-gateway-vs-nat-instance--41c86da2",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company runs processing workers in private subnets across two Availability Zones. The workers must call an external licensing API, must not accept unsolicited inbound internet connections, and must retain outbound access if either zone fails. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy one public NAT gateway in one Availability Zone and route both private subnets through it.",
+          "correct": false,
+          "why": "A single gateway does not meet the requirement to retain outbound access if its zone fails."
+        },
+        {
+          "id": "B",
+          "text": "Deploy a NAT instance in each Availability Zone and route each private subnet through its local instance.",
+          "correct": false,
+          "why": "NAT instances require instance maintenance and failover management, increasing operational overhead."
+        },
+        {
+          "id": "C",
+          "text": "Deploy one public NAT gateway in each Availability Zone and route each private subnet through the gateway in its own zone.",
+          "correct": true,
+          "why": "Managed public NAT gateways provide outbound internet access, and using one per zone provides zone independence."
+        },
+        {
+          "id": "D",
+          "text": "Deploy one private NAT gateway in each Availability Zone and route their traffic to the internet gateway.",
+          "correct": false,
+          "why": "An internet gateway drops traffic routed to it from a private NAT gateway."
+        }
+      ],
+      "explanation": "The external API requires outbound internet access, while the workers must remain protected from unsolicited inbound connections. Public NAT gateways provide that behavior without instance maintenance. A gateway in each Availability Zone meets the zone-independence requirement; sharing one gateway across zones does not.",
+      "keywordCues": [
+        "external licensing API",
+        "must not accept unsolicited inbound internet connections",
+        "if either zone fails",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ejecuta procesos en subredes privadas de dos Availability Zones. Los procesos deben llamar a una API externa de licencias, no deben aceptar conexiones entrantes no solicitadas desde internet y deben conservar la salida si falla cualquiera de las zonas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementar un public NAT gateway en una Availability Zone y dirigir ambas subredes privadas a él.",
+            "why": "Un solo gateway no mantiene la salida si falla la zona donde se encuentra."
+          },
+          {
+            "id": "B",
+            "text": "Implementar un NAT instance en cada Availability Zone y dirigir cada subred privada a su instancia local.",
+            "why": "Los NAT instances requieren mantenimiento y administración de la conmutación por error, lo que aumenta la carga operativa."
+          },
+          {
+            "id": "C",
+            "text": "Implementar un public NAT gateway en cada Availability Zone y dirigir cada subred privada al gateway de su propia zona.",
+            "why": "Los public NAT gateways administrados dan salida a internet, y uno por zona proporciona independencia entre zonas."
+          },
+          {
+            "id": "D",
+            "text": "Implementar un private NAT gateway en cada Availability Zone y dirigir su tráfico al internet gateway.",
+            "why": "El internet gateway descarta el tráfico que recibe desde un private NAT gateway."
+          }
+        ],
+        "explanation": "La API externa exige salida a internet, mientras que los procesos deben permanecer protegidos de conexiones entrantes no solicitadas. Los public NAT gateways ofrecen ese comportamiento sin mantenimiento de instancias. Un gateway en cada Availability Zone cumple el requisito de independencia entre zonas; compartir uno solo no lo cumple."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-gateway-vs-nat-instance--dbfdd06b",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher uses a NAT instance for outbound connections from a private subnet. Its partner allows requests only from the instance's current Elastic IP address, and the publisher wants to move to managed NAT during a scheduled maintenance window. Existing connections can be interrupted during that window. Which migration approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a private NAT gateway, attach the existing Elastic IP to it, and replace the private subnet's NAT route.",
+          "correct": false,
+          "why": "A private NAT gateway cannot have an Elastic IP and cannot provide the required internet egress."
+        },
+        {
+          "id": "B",
+          "text": "Disassociate the Elastic IP from the NAT instance, associate it with a new public NAT gateway at creation, and replace the private subnet's NAT route.",
+          "correct": true,
+          "why": "This reuses the allowed Elastic IP and moves the route to managed NAT, with connection interruption permitted during maintenance."
+        },
+        {
+          "id": "C",
+          "text": "Create a public NAT gateway with a new Elastic IP, change the private route, and keep the old NAT instance's Elastic IP attached.",
+          "correct": false,
+          "why": "The partner would see a different Elastic IP address, violating its allowlist requirement."
+        },
+        {
+          "id": "D",
+          "text": "Keep the NAT instance, update its operating system during maintenance, and leave the private subnet's route unchanged.",
+          "correct": false,
+          "why": "Keeping the instance does not meet the requirement to move to managed NAT."
+        }
+      ],
+      "explanation": "The partner's allowlist makes reuse of the existing Elastic IP decisive. AWS documents disassociating it from the NAT instance, associating it with the public NAT gateway when the gateway is created, and updating the route. Existing connections are dropped by the change, which the scheduled window permits. A new Elastic IP would fail the partner's allowlist.",
+      "keywordCues": [
+        "current Elastic IP address",
+        "move to managed NAT",
+        "Existing connections can be interrupted"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html"
+      ],
+      "es": {
+        "stem": "Una editorial usa un NAT instance para las conexiones salientes de una subred privada. Su socio solo acepta solicitudes desde la Elastic IP actual de la instancia, y la editorial quiere migrar a NAT administrado durante una ventana de mantenimiento programada. Las conexiones existentes pueden interrumpirse durante esa ventana. ¿Qué método de migración cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear un private NAT gateway, asociarle la Elastic IP existente y reemplazar la ruta NAT de la subred privada.",
+            "why": "Un private NAT gateway no admite Elastic IP ni proporciona la salida a internet necesaria."
+          },
+          {
+            "id": "B",
+            "text": "Desasociar la Elastic IP del NAT instance, asociarla a un nuevo public NAT gateway al crearlo y reemplazar la ruta NAT de la subred privada.",
+            "why": "Esto reutiliza la Elastic IP permitida y migra la ruta a NAT administrado; la interrupción de conexiones está permitida durante el mantenimiento."
+          },
+          {
+            "id": "C",
+            "text": "Crear un public NAT gateway con una nueva Elastic IP, cambiar la ruta privada y mantener la Elastic IP anterior asociada al NAT instance.",
+            "why": "El socio vería otra Elastic IP, lo que incumple su lista de direcciones permitidas."
+          },
+          {
+            "id": "D",
+            "text": "Conservar el NAT instance, actualizar su sistema operativo durante el mantenimiento y no cambiar la ruta de la subred privada.",
+            "why": "Conservar la instancia no cumple el requisito de migrar a NAT administrado."
+          }
+        ],
+        "explanation": "La lista de direcciones permitidas del socio hace imprescindible reutilizar la Elastic IP actual. AWS documenta desasociarla del NAT instance, asociarla al public NAT gateway al crearlo y actualizar la ruta. El cambio interrumpe las conexiones existentes, algo permitido durante la ventana programada. Una Elastic IP nueva no cumpliría el requisito del socio."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "nat-gateway-vs-nat-instance--r0",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "kind": "recall",
+      "prompt": "Private workers across two zones need managed, zone-independent outbound internet access. What NAT design would you choose, and why?",
+      "promptEs": "Tus procesos privados en dos zonas necesitan salida administrada a internet e independencia entre zonas. ¿Qué diseño NAT elegirías y por qué?",
+      "idealAnswer": "Use a public NAT gateway in a public subnet in each Availability Zone, and route each zone's private subnets through its local gateway. Public NAT gateways allow outbound internet connections without unsolicited inbound connections and avoid NAT instance maintenance.",
+      "rubric": [
+        "Chooses public NAT gateways for internet egress",
+        "Places one gateway in each Availability Zone and uses local-zone routes",
+        "Explains managed operation or absence of unsolicited inbound access"
+      ]
+    },
+    {
+      "id": "nat-gateway-vs-nat-instance--r1",
+      "conceptId": "nat-gateway-vs-nat-instance",
+      "kind": "why-not",
+      "prompt": "Why would a private NAT gateway routed to an internet gateway fail to let private instances call a public API?",
+      "promptEs": "¿Por qué un private NAT gateway con una ruta hacia un internet gateway no permitiría que tus instancias privadas llamen a una API pública?",
+      "idealAnswer": "A private NAT gateway is not the NAT gateway type for internet egress. The internet gateway drops traffic routed to it from a private NAT gateway; use a public NAT gateway for this requirement.",
+      "rubric": [
+        "States that the internet gateway drops traffic from a private NAT gateway",
+        "Identifies a public NAT gateway as the appropriate type for outbound internet access"
+      ]
+    }
+  ]
+}

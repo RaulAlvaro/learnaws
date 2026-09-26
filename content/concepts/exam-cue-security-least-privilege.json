@@ -1,0 +1,398 @@
+{
+  "conceptId": "exam-cue-security-least-privilege",
+  "card": {
+    "en": {
+      "tldr": "For a “most secure” IAM decision, prefer temporary credentials from roles over long-term access keys, then grant only the actions needed on the required resources under appropriate conditions. For workforce access, use federation; for workloads on AWS compute, use IAM roles.",
+      "whenToUse": [
+        "People need access to AWS accounts without maintaining IAM user access keys.",
+        "An application on AWS compute needs credentials to call AWS services.",
+        "A policy grants more actions or resources than a task requires.",
+        "Multiple accounts need organization-wide permissions guardrails."
+      ],
+      "keyFacts": [
+        "Federated human users can assume roles and receive temporary credentials; IAM Identity Center is recommended for centralized workforce access.",
+        "AWS compute services such as EC2 and Lambda deliver temporary IAM role credentials to workloads.",
+        "Least privilege limits actions, resources, and, where appropriate, the conditions under which access is allowed.",
+        "IAM Access Analyzer can generate fine-grained policies from access activity logged in CloudTrail; test generated policies before deployment.",
+        "SCPs set permissions guardrails across accounts but do not grant permissions."
+      ],
+      "gotchas": [
+        "Rotating long-term access keys does not make them preferable when temporary role credentials work.",
+        "An AWS managed policy may be broader than a particular workload needs.",
+        "An SCP cannot replace the identity-based or resource-based policy needed to grant access."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "most secure access for a workload on EC2",
+        "workforce access across multiple AWS accounts",
+        "only the required actions on one resource",
+        "organization-wide permissions guardrail"
+      ]
+    },
+    "es": {
+      "tldr": "Para una decisión de IAM que pida la opción “most secure”, prefiere credenciales temporales mediante roles en vez de access keys de larga duración y concede solo las acciones necesarias sobre los recursos requeridos, con condiciones cuando corresponda. Para el personal, usa federación; para cargas de trabajo en servicios de cómputo de AWS, usa IAM roles.",
+      "whenToUse": [
+        "El personal necesita acceso a cuentas de AWS sin mantener access keys de IAM users.",
+        "Una aplicación en cómputo de AWS necesita credenciales para llamar a servicios de AWS.",
+        "Una política concede más acciones o recursos de los que requiere una tarea.",
+        "Varias cuentas necesitan límites de permisos para toda la organización."
+      ],
+      "keyFacts": [
+        "Los usuarios federados pueden asumir roles y recibir credenciales temporales; se recomienda IAM Identity Center para centralizar el acceso del personal.",
+        "Los servicios de cómputo de AWS, como EC2 y Lambda, entregan credenciales temporales de IAM roles a las cargas de trabajo.",
+        "Least privilege limita acciones, recursos y, cuando corresponde, las condiciones de acceso.",
+        "IAM Access Analyzer puede generar políticas detalladas a partir de la actividad registrada en CloudTrail; prueba las políticas generadas antes de implementarlas.",
+        "Los SCP establecen límites de permisos entre cuentas, pero no conceden permisos."
+      ],
+      "gotchas": [
+        "Rotar access keys de larga duración no las convierte en la mejor opción si funcionan las credenciales temporales de un rol.",
+        "Una AWS managed policy puede conceder más permisos de los que necesita una carga de trabajo específica.",
+        "Un SCP no reemplaza la política basada en identidad o en recursos necesaria para conceder acceso."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "most secure access for a workload on EC2",
+        "workforce access across multiple AWS accounts",
+        "only the required actions on one resource",
+        "organization-wide permissions guardrail"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "exam-cue-security-least-privilege--8aec7158",
+      "conceptId": "exam-cue-security-least-privilege",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A healthcare organization operates workloads in several AWS accounts managed with AWS Organizations. It wants a permissions guardrail that applies across the accounts, while each workload receives only the access needed for its task. The team must not rely on a guardrail to grant access. Which TWO actions meet these requirements MOST securely? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Organizations SCPs to establish permissions guardrails across the accounts.",
+          "correct": true,
+          "why": "SCPs provide the requested organization-wide permissions guardrails."
+        },
+        {
+          "id": "B",
+          "text": "Give every workload the same broad AWS managed policy to simplify administration.",
+          "correct": false,
+          "why": "A broad common policy does not limit each workload to the access its task requires."
+        },
+        {
+          "id": "C",
+          "text": "Create IAM users with long-term access keys for every workload.",
+          "correct": false,
+          "why": "Workloads should use temporary role credentials where possible, rather than long-term keys."
+        },
+        {
+          "id": "D",
+          "text": "Grant each workload's required actions through narrowly scoped IAM role policies.",
+          "correct": true,
+          "why": "Role policies grant task-specific access while workloads use temporary role credentials."
+        },
+        {
+          "id": "E",
+          "text": "Use SCPs as the only policies for workloads that need access to AWS resources.",
+          "correct": false,
+          "why": "SCPs do not grant permissions and cannot be the only source of workload access."
+        }
+      ],
+      "explanation": "The scenario calls for both an organization-wide guardrail and actual least-privilege grants to workloads. SCPs establish guardrails across accounts, but they grant no permissions. Narrowly scoped IAM role policies provide the task-specific permissions, with temporary credentials for workloads. Using an SCP alone would leave the workloads without the grants they need.",
+      "keywordCues": [
+        "several AWS accounts managed with AWS Organizations",
+        "permissions guardrail that applies across the accounts",
+        "only the access needed for its task",
+        "must not rely on a guardrail to grant access"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Una organización de salud opera cargas de trabajo en varias cuentas de AWS administradas con AWS Organizations. Quiere un límite de permisos que se aplique entre las cuentas, mientras cada carga de trabajo recibe solo el acceso necesario para su tarea. El equipo no debe depender de ese límite para conceder acceso. ¿Qué DOS acciones cumplen estos requisitos de la forma MOST secure? (Elige dos).",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa AWS Organizations SCPs para establecer límites de permisos entre las cuentas.",
+            "why": "Los SCP proporcionan los límites de permisos solicitados para toda la organización."
+          },
+          {
+            "id": "B",
+            "text": "Otorga a todas las cargas de trabajo la misma AWS managed policy amplia para simplificar la administración.",
+            "why": "Una política común y amplia no limita cada carga de trabajo al acceso que requiere su tarea."
+          },
+          {
+            "id": "C",
+            "text": "Crea IAM users con access keys de larga duración para cada carga de trabajo.",
+            "why": "Cuando sea posible, las cargas de trabajo deben usar credenciales temporales de roles en vez de claves de larga duración."
+          },
+          {
+            "id": "D",
+            "text": "Concede las acciones requeridas por cada carga de trabajo mediante políticas de IAM roles de alcance reducido.",
+            "why": "Las políticas de los roles conceden acceso específico para cada tarea mientras las cargas de trabajo usan credenciales temporales."
+          },
+          {
+            "id": "E",
+            "text": "Usa SCPs como las únicas políticas para las cargas de trabajo que necesitan acceso a recursos de AWS.",
+            "why": "Los SCP no conceden permisos y no pueden ser la única fuente de acceso para las cargas de trabajo."
+          }
+        ],
+        "explanation": "El escenario requiere tanto un límite para toda la organización como permisos reales de least privilege para las cargas de trabajo. Los SCP establecen límites entre cuentas, pero no conceden permisos. Las políticas de IAM roles de alcance reducido proporcionan los permisos específicos para cada tarea y credenciales temporales a las cargas de trabajo. Usar solo un SCP dejaría a las cargas de trabajo sin los permisos que necesitan."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-security-least-privilege--2591df20",
+      "conceptId": "exam-cue-security-least-privilege",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company runs a processing application on Amazon EC2. The application must read objects from one S3 bucket and does not need access to other buckets. The team wants to avoid distributing long-term credentials. Which solution meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an IAM user with read access to all S3 buckets and place its access keys on the instance.",
+          "correct": false,
+          "why": "Long-term keys must be distributed, and access to all buckets exceeds the stated need."
+        },
+        {
+          "id": "B",
+          "text": "Assign an IAM role to the EC2 instance with permission to read objects from the required bucket.",
+          "correct": true,
+          "why": "The workload receives temporary role credentials with access limited to its required bucket."
+        },
+        {
+          "id": "C",
+          "text": "Create an IAM user with read access to the required bucket and rotate its access keys regularly.",
+          "correct": false,
+          "why": "The bucket scope is appropriate, but the solution still distributes long-term keys unnecessarily."
+        },
+        {
+          "id": "D",
+          "text": "Assign an IAM role to the EC2 instance with an AWS managed policy granting broad S3 access.",
+          "correct": false,
+          "why": "The role avoids long-term keys, but broad S3 access does not meet the least-privilege requirement."
+        }
+      ],
+      "explanation": "The deciding requirements are temporary credentials and read access limited to one bucket. An IAM role provides temporary credentials to an EC2 workload, while a narrowly scoped policy limits what it can do. Rotating IAM user keys does not remove the need to distribute long-term credentials. A role with broad S3 permissions solves the credential problem but not the least-privilege problem.",
+      "keywordCues": [
+        "runs a processing application on Amazon EC2",
+        "read objects from one S3 bucket",
+        "avoid distributing long-term credentials"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta una aplicación de procesamiento en Amazon EC2. La aplicación debe leer objetos de un solo bucket de S3 y no necesita acceso a otros buckets. El equipo quiere evitar distribuir credenciales de larga duración. ¿Qué solución cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un IAM user con acceso de lectura a todos los buckets de S3 y coloca sus access keys en la instancia.",
+            "why": "Se deben distribuir claves de larga duración y el acceso a todos los buckets supera lo necesario."
+          },
+          {
+            "id": "B",
+            "text": "Asigna un IAM role a la instancia EC2 con permiso para leer objetos del bucket requerido.",
+            "why": "La carga de trabajo recibe credenciales temporales del rol con acceso limitado al bucket requerido."
+          },
+          {
+            "id": "C",
+            "text": "Crea un IAM user con acceso de lectura al bucket requerido y rota sus access keys con regularidad.",
+            "why": "El alcance del bucket es adecuado, pero la solución sigue distribuyendo claves de larga duración sin necesidad."
+          },
+          {
+            "id": "D",
+            "text": "Asigna un IAM role a la instancia EC2 con una AWS managed policy que conceda acceso amplio a S3.",
+            "why": "El rol evita las claves de larga duración, pero el acceso amplio a S3 no cumple el requisito de least privilege."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son las credenciales temporales y el acceso de lectura limitado a un bucket. Un IAM role proporciona credenciales temporales a una carga de trabajo en EC2, mientras que una política de alcance reducido limita sus acciones. Rotar las claves de un IAM user no elimina la necesidad de distribuir credenciales de larga duración. Un rol con permisos amplios de S3 resuelve el problema de las credenciales, pero no el de least privilege."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-security-least-privilege--2b869e02",
+      "conceptId": "exam-cue-security-least-privilege",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company is reviewing a mature Lambda workload. Its role has a broad AWS managed policy, although the team wants to limit the role to actions the workload actually uses. The company has access activity logged in AWS CloudTrail and will test changes before deployment. Which approach meets the requirement MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the broad role policy and use IAM Access Analyzer only to check for public resource access.",
+          "correct": false,
+          "why": "Checking public access does not narrow the role's permissions to the actions it uses."
+        },
+        {
+          "id": "B",
+          "text": "Use IAM Access Analyzer to generate a policy from access activity, test it, and deploy a refined policy for the role.",
+          "correct": true,
+          "why": "This uses observed activity to develop and test a finer-grained policy for the workload."
+        },
+        {
+          "id": "C",
+          "text": "Replace the Lambda role with an IAM user and rotate its access keys after each deployment.",
+          "correct": false,
+          "why": "This substitutes long-term credentials for the temporary role credentials available to Lambda."
+        },
+        {
+          "id": "D",
+          "text": "Keep the AWS managed policy because it covers common use cases and already lets the workload run.",
+          "correct": false,
+          "why": "A policy designed for common use cases may grant more than this workload uses."
+        }
+      ],
+      "explanation": "The deciding requirement is to reduce an existing role's permissions to the actions the workload uses. IAM Access Analyzer can generate a fine-grained policy from CloudTrail access activity, which the team should test before deploying. An AWS managed policy can be a starting point but may not be least privilege for this Lambda workload. Replacing its role with IAM user keys moves away from the recommended temporary credentials.",
+      "keywordCues": [
+        "mature Lambda workload",
+        "broad AWS managed policy",
+        "actions the workload actually uses",
+        "access activity logged in AWS CloudTrail"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística revisa una carga de trabajo madura en Lambda. Su rol tiene una AWS managed policy amplia, aunque el equipo quiere limitarlo a las acciones que la carga de trabajo realmente utiliza. La empresa tiene actividad de acceso registrada en AWS CloudTrail y probará los cambios antes de implementarlos. ¿Qué enfoque cumple el requisito de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conserva la política amplia del rol y usa IAM Access Analyzer solo para comprobar el acceso público a los recursos.",
+            "why": "Comprobar el acceso público no reduce los permisos del rol a las acciones que utiliza."
+          },
+          {
+            "id": "B",
+            "text": "Usa IAM Access Analyzer para generar una política a partir de la actividad de acceso, pruébala e implementa una política refinada para el rol.",
+            "why": "Usa la actividad observada para desarrollar y probar una política más detallada para la carga de trabajo."
+          },
+          {
+            "id": "C",
+            "text": "Reemplaza el rol de Lambda por un IAM user y rota sus access keys después de cada implementación.",
+            "why": "Sustituye las credenciales temporales que Lambda puede recibir mediante un rol por credenciales de larga duración."
+          },
+          {
+            "id": "D",
+            "text": "Conserva la AWS managed policy porque cubre casos de uso comunes y ya permite que la carga de trabajo funcione.",
+            "why": "Una política diseñada para casos de uso comunes puede conceder más de lo que utiliza esta carga de trabajo."
+          }
+        ],
+        "explanation": "El requisito decisivo es reducir los permisos de un rol existente a las acciones que utiliza la carga de trabajo. IAM Access Analyzer puede generar una política detallada a partir de la actividad de acceso en CloudTrail, que el equipo debe probar antes de implementar. Una AWS managed policy puede servir como punto de partida, pero quizá no aplique least privilege a esta carga de trabajo en Lambda. Reemplazar su rol por claves de un IAM user se aleja de las credenciales temporales recomendadas."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-security-least-privilege--d95a43dc",
+      "conceptId": "exam-cue-security-least-privilege",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company lets developers create IAM roles for projects within one AWS account. Each project needs different permissions, but the security team must ensure that no developer-created role can exceed an approved maximum. Developers must still be able to grant the permissions their projects require within that maximum. Which solution meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach the same broad AWS managed policy to every role developers create.",
+          "correct": false,
+          "why": "A broad shared policy does not enforce project-specific least privilege."
+        },
+        {
+          "id": "B",
+          "text": "Attach only a permissions boundary to each role and omit its identity-based policies.",
+          "correct": false,
+          "why": "A permissions boundary sets a maximum but grants no permissions on its own."
+        },
+        {
+          "id": "C",
+          "text": "Set a permissions boundary for developer-created roles and use identity-based policies to grant each project's needed permissions.",
+          "correct": true,
+          "why": "The boundary caps delegated permissions while role policies grant the required project access."
+        },
+        {
+          "id": "D",
+          "text": "Use an AWS Organizations SCP as the only policy for developer-created roles.",
+          "correct": false,
+          "why": "An SCP can act as a guardrail but cannot grant the permissions projects require."
+        }
+      ],
+      "explanation": "The security team needs a maximum for permissions delegated within one account, while individual roles still need project-specific grants. A permissions boundary sets that maximum; identity-based policies supply the permissions a role can use. A boundary by itself grants nothing. An SCP can provide a broader account guardrail, but it also cannot serve as the sole grant for these roles.",
+      "keywordCues": [
+        "within one AWS account",
+        "no developer-created role can exceed an approved maximum",
+        "grant the permissions their projects require"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios permite que sus desarrolladores creen IAM roles para proyectos dentro de una cuenta de AWS. Cada proyecto necesita permisos distintos, pero el equipo de seguridad debe garantizar que ningún rol creado por desarrolladores supere un máximo aprobado. Los desarrolladores también deben poder conceder los permisos que sus proyectos necesiten dentro de ese máximo. ¿Qué solución cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Adjunta la misma AWS managed policy amplia a todos los roles que creen los desarrolladores.",
+            "why": "Una política amplia y compartida no aplica least privilege según cada proyecto."
+          },
+          {
+            "id": "B",
+            "text": "Adjunta solo una permissions boundary a cada rol y omite sus políticas basadas en identidad.",
+            "why": "Una permissions boundary establece un máximo, pero no concede permisos por sí sola."
+          },
+          {
+            "id": "C",
+            "text": "Establece una permissions boundary para los roles creados por desarrolladores y usa políticas basadas en identidad para conceder los permisos necesarios de cada proyecto.",
+            "why": "La permissions boundary limita los permisos delegados, mientras que las políticas del rol conceden el acceso requerido por el proyecto."
+          },
+          {
+            "id": "D",
+            "text": "Usa un AWS Organizations SCP como única política para los roles creados por desarrolladores.",
+            "why": "Un SCP puede establecer límites, pero no concede los permisos que necesitan los proyectos."
+          }
+        ],
+        "explanation": "El equipo de seguridad necesita un máximo para los permisos delegados dentro de una cuenta, mientras que cada rol requiere permisos específicos del proyecto. Una permissions boundary establece ese máximo; las políticas basadas en identidad proporcionan los permisos que puede usar un rol. Una permissions boundary por sí sola no concede acceso. Un SCP puede establecer un límite más amplio para la cuenta, pero tampoco puede ser la única fuente de permisos para estos roles."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "exam-cue-security-least-privilege--r0",
+      "conceptId": "exam-cue-security-least-privilege",
+      "kind": "recall",
+      "prompt": "An application on EC2 needs to read one S3 bucket. What credentials and permissions should it use, and why?",
+      "promptEs": "Una aplicación en EC2 debe leer un bucket de S3. ¿Qué credenciales y permisos debe usar, y por qué?",
+      "idealAnswer": "Assign the EC2 workload an IAM role so it receives temporary credentials instead of distributed long-term access keys. Grant only the read actions needed on the required bucket.",
+      "rubric": [
+        "Uses an IAM role with temporary credentials for the EC2 workload.",
+        "Avoids unnecessary long-term IAM user access keys.",
+        "Limits permitted actions and resources to the task."
+      ]
+    }
+  ]
+}

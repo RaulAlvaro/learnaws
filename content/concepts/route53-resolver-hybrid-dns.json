@@ -1,0 +1,228 @@
+{
+  "conceptId": "route53-resolver-hybrid-dns",
+  "card": {
+    "en": {
+      "tldr": "Route 53 VPC Resolver answers VPC DNS queries by default, including queries for associated private hosted zones. For hybrid DNS, choose the endpoint by query direction: outbound plus a forwarding rule for VPC-to-on-premises queries; inbound plus on-premises forwarding for on-premises-to-VPC queries.",
+      "whenToUse": [
+        "A workload in a VPC must resolve a domain hosted by an on-premises DNS server.",
+        "An on-premises client must resolve a name in an AWS private hosted zone.",
+        "Both environments need to resolve names hosted in the other environment over VPN or Direct Connect."
+      ],
+      "keyFacts": [
+        "VPC Resolver is available by default in VPCs and answers queries for records in private hosted zones.",
+        "A VPC-to-on-premises query uses a domain-specific Resolver forwarding rule and an outbound endpoint.",
+        "An on-premises-to-VPC query uses an inbound endpoint; the on-premises DNS resolver forwards the relevant domain to it.",
+        "Resolver rules are applied to VPCs and can be shared across multiple accounts."
+      ],
+      "gotchas": [
+        "An inbound endpoint does not send VPC queries to an on-premises DNS server.",
+        "An outbound endpoint alone does not select which domain's queries to forward.",
+        "The default VPC Resolver does not, by itself, provide on-premises clients a path to private hosted zone answers."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "EC2 must resolve a domain hosted on-premises",
+        "on-premises clients need private hosted zone records",
+        "DNS resolution in both directions over VPN"
+      ]
+    },
+    "es": {
+      "tldr": "Route 53 VPC Resolver responde de forma predeterminada a las consultas DNS de una VPC, incluidas las de zonas alojadas privadas asociadas. Para DNS híbrido, elige el endpoint según la dirección: outbound con una regla de reenvío para consultas de la VPC hacia on-premises; inbound con reenvío desde on-premises para consultas hacia la VPC.",
+      "whenToUse": [
+        "Una carga de trabajo en una VPC debe resolver un dominio alojado en un servidor DNS on-premises.",
+        "Un cliente on-premises debe resolver un nombre de una zona alojada privada en AWS.",
+        "Ambos entornos deben resolver nombres alojados en el otro mediante VPN o Direct Connect."
+      ],
+      "keyFacts": [
+        "VPC Resolver está disponible de forma predeterminada en las VPC y responde consultas de registros en zonas alojadas privadas.",
+        "Una consulta de la VPC hacia on-premises usa una regla de reenvío de Resolver para el dominio y un outbound endpoint.",
+        "Una consulta de on-premises hacia la VPC usa un inbound endpoint; el DNS on-premises le reenvía las consultas del dominio correspondiente.",
+        "Las reglas de Resolver se aplican a las VPC y se pueden compartir entre varias cuentas."
+      ],
+      "gotchas": [
+        "Un inbound endpoint no envía consultas de la VPC a un servidor DNS on-premises.",
+        "Un outbound endpoint por sí solo no selecciona qué consultas de dominio se deben reenviar.",
+        "VPC Resolver, por sí solo, no proporciona a los clientes on-premises una ruta para obtener respuestas de zonas alojadas privadas."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "EC2 must resolve a domain hosted on-premises",
+        "on-premises clients need private hosted zone records",
+        "DNS resolution in both directions over VPN"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route53-resolver-hybrid-dns--6aba3cf3",
+      "conceptId": "route53-resolver-hybrid-dns",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturer runs an application on EC2 in a VPC. Its inventory service uses names in plant.example.com, which are hosted on a DNS server in the company's data center. The VPC and data center are connected by AWS Site-to-Site VPN. Which solution lets the application resolve these names with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an outbound Resolver endpoint and associate a plant.example.com forwarding rule with the VPC.",
+          "correct": true,
+          "why": "The rule sends VPC queries for the specified domain through the outbound endpoint to the on-premises DNS server."
+        },
+        {
+          "id": "B",
+          "text": "Create an inbound Resolver endpoint and forward plant.example.com queries from the data-center DNS server to it.",
+          "correct": false,
+          "why": "Inbound endpoints accept queries toward the VPC, but the EC2 application needs to query names hosted in the data center."
+        },
+        {
+          "id": "C",
+          "text": "Create a Route 53 private hosted zone for plant.example.com and rely on the default VPC Resolver.",
+          "correct": false,
+          "why": "A private hosted zone does not forward queries to the existing authoritative DNS server in the data center."
+        },
+        {
+          "id": "D",
+          "text": "Create an outbound Resolver endpoint without a forwarding rule and continue querying the default VPC Resolver.",
+          "correct": false,
+          "why": "The endpoint alone does not tell VPC Resolver to forward plant.example.com queries to the on-premises server."
+        }
+      ],
+      "explanation": "The deciding requirement is that EC2 must resolve a domain whose DNS server remains on-premises. A domain-specific forwarding rule associated with the VPC directs those queries through an outbound Resolver endpoint over the private connection. An inbound endpoint handles queries traveling toward the VPC, while an outbound endpoint without a rule does not select the domain to forward.",
+      "keywordCues": [
+        "application on EC2 in a VPC",
+        "hosted on a DNS server in the company's data center",
+        "AWS Site-to-Site VPN"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html"
+      ],
+      "es": {
+        "stem": "Un fabricante ejecuta una aplicación en EC2 dentro de una VPC. Su servicio de inventario usa nombres de plant.example.com, alojados en un servidor DNS del centro de datos de la empresa. La VPC y el centro de datos están conectados mediante AWS Site-to-Site VPN. ¿Qué solución permite que la aplicación resuelva estos nombres con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un outbound Resolver endpoint y asocia a la VPC una regla de reenvío para plant.example.com.",
+            "why": "La regla envía las consultas de la VPC para ese dominio por el outbound endpoint hacia el DNS on-premises."
+          },
+          {
+            "id": "B",
+            "text": "Crea un inbound Resolver endpoint y reenvía a él las consultas de plant.example.com desde el DNS del centro de datos.",
+            "why": "Los inbound endpoints reciben consultas dirigidas a la VPC, pero la aplicación en EC2 necesita consultar nombres alojados en el centro de datos."
+          },
+          {
+            "id": "C",
+            "text": "Crea una zona alojada privada de Route 53 para plant.example.com y utiliza el VPC Resolver predeterminado.",
+            "why": "Una zona alojada privada no reenvía las consultas al servidor DNS autoritativo existente en el centro de datos."
+          },
+          {
+            "id": "D",
+            "text": "Crea un outbound Resolver endpoint sin una regla de reenvío y sigue consultando el VPC Resolver predeterminado.",
+            "why": "El endpoint por sí solo no indica a VPC Resolver que reenvíe las consultas de plant.example.com al servidor on-premises."
+          }
+        ],
+        "explanation": "El requisito decisivo es que EC2 debe resolver un dominio cuyo servidor DNS permanece on-premises. Una regla de reenvío para ese dominio, asociada a la VPC, dirige las consultas por un outbound Resolver endpoint mediante la conexión privada. Un inbound endpoint atiende consultas dirigidas hacia la VPC; un outbound endpoint sin regla no selecciona el dominio que se debe reenviar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-resolver-hybrid-dns--dd77242a",
+      "conceptId": "route53-resolver-hybrid-dns",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company is moving its editing tools into a VPC while keeping a licensing service in its data center. EC2 instances must resolve license.corp.example, hosted by data-center DNS, and data-center workstations must resolve edit.aws.example, stored in a private hosted zone associated with the VPC. The environments are connected by AWS Site-to-Site VPN. Which design provides DNS resolution in both directions?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an outbound endpoint with VPC forwarding rules for both corp.example and aws.example; keep data-center DNS unchanged.",
+          "correct": false,
+          "why": "Outbound forwarding does not provide the data-center workstations a path to the VPC's private hosted zone."
+        },
+        {
+          "id": "B",
+          "text": "Use both endpoint types, but forward corp.example from data-center DNS to the inbound endpoint and aws.example from the VPC to the outbound endpoint.",
+          "correct": false,
+          "why": "This reverses the forwarding directions needed for the two specified workloads."
+        },
+        {
+          "id": "C",
+          "text": "Use an inbound endpoint with data-center DNS forwarding rules for both corp.example and aws.example; keep VPC DNS unchanged.",
+          "correct": false,
+          "why": "Inbound forwarding does not send the EC2 instances' corp.example queries to data-center DNS."
+        },
+        {
+          "id": "D",
+          "text": "Use an outbound endpoint with a VPC forwarding rule for corp.example; use an inbound endpoint with data-center DNS forwarding for aws.example.",
+          "correct": true,
+          "why": "Each domain's queries are forwarded to the endpoint matching their direction of travel."
+        }
+      ],
+      "explanation": "The scenario has two separate DNS paths: EC2 to data-center DNS for corp.example, and data-center workstations to the VPC for aws.example. The first needs a VPC forwarding rule and outbound endpoint; the second needs data-center DNS forwarding to an inbound endpoint. Merely deploying both endpoint types is insufficient if the forwarding rules send each domain in the wrong direction.",
+      "keywordCues": [
+        "EC2 instances must resolve license.corp.example",
+        "hosted by data-center DNS",
+        "data-center workstations must resolve edit.aws.example",
+        "private hosted zone associated with the VPC"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios traslada sus herramientas de edición a una VPC, pero mantiene un servicio de licencias en su centro de datos. Las instancias EC2 deben resolver license.corp.example, alojado en el DNS del centro de datos, y las estaciones de trabajo del centro de datos deben resolver edit.aws.example, almacenado en una zona alojada privada asociada a la VPC. Los entornos están conectados mediante AWS Site-to-Site VPN. ¿Qué diseño proporciona resolución DNS en ambas direcciones?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un outbound endpoint con reglas de reenvío en la VPC para corp.example y aws.example; no cambies el DNS del centro de datos.",
+            "why": "El reenvío outbound no proporciona a las estaciones de trabajo del centro de datos una ruta hacia la zona alojada privada de la VPC."
+          },
+          {
+            "id": "B",
+            "text": "Usa ambos tipos de endpoint, pero reenvía corp.example desde el DNS del centro de datos al inbound endpoint y aws.example desde la VPC al outbound endpoint.",
+            "why": "Esta configuración invierte las direcciones de reenvío necesarias para las dos cargas de trabajo."
+          },
+          {
+            "id": "C",
+            "text": "Usa un inbound endpoint con reglas de reenvío en el DNS del centro de datos para corp.example y aws.example; no cambies el DNS de la VPC.",
+            "why": "El reenvío inbound no envía al DNS del centro de datos las consultas de corp.example originadas en EC2."
+          },
+          {
+            "id": "D",
+            "text": "Usa un outbound endpoint con una regla de reenvío en la VPC para corp.example; usa un inbound endpoint con reenvío desde el DNS del centro de datos para aws.example.",
+            "why": "Las consultas de cada dominio se reenvían al endpoint que corresponde a su dirección."
+          }
+        ],
+        "explanation": "El escenario tiene dos rutas DNS: de EC2 al DNS del centro de datos para corp.example y de las estaciones de trabajo a la VPC para aws.example. La primera necesita una regla de reenvío en la VPC y un outbound endpoint; la segunda requiere que el DNS del centro de datos reenvíe las consultas a un inbound endpoint. No basta con implementar ambos tipos de endpoint si las reglas envían cada dominio en la dirección equivocada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "route53-resolver-hybrid-dns--r0",
+      "conceptId": "route53-resolver-hybrid-dns",
+      "kind": "recall",
+      "prompt": "EC2 needs names hosted by on-premises DNS. Which Route 53 Resolver components provide resolution, and why?",
+      "promptEs": "EC2 necesita nombres alojados en un DNS on-premises. ¿Qué componentes de Route 53 Resolver permiten resolverlos y por qué?",
+      "idealAnswer": "Associate a forwarding rule for the on-premises domain with the VPC and use an outbound Resolver endpoint. The rule selects matching queries, and the outbound endpoint sends them to the on-premises DNS server over the private connection.",
+      "rubric": [
+        "Identifies an outbound Resolver endpoint.",
+        "Specifies a domain-specific forwarding rule associated with the VPC.",
+        "Explains that queries travel from the VPC to on-premises DNS."
+      ]
+    }
+  ]
+}

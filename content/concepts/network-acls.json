@@ -1,0 +1,425 @@
+{
+  "conceptId": "network-acls",
+  "card": {
+    "en": {
+      "tldr": "A network ACL (NACL) controls inbound and outbound traffic at the subnet boundary. Choose it when a scenario requires a subnet-wide rule or an explicit deny, and check both directions because NACLs are stateless.",
+      "whenToUse": [
+        "Block a specific source IP address or CIDR while allowing other traffic to a subnet.",
+        "Apply the same traffic policy to every resource in a subnet.",
+        "Troubleshoot replies dropped by a restrictive subnet-level policy."
+      ],
+      "keyFacts": [
+        "NACL rules can allow or deny traffic and are evaluated from the lowest rule number upward; evaluation stops at the first match.",
+        "Inbound and outbound rules are separate. Allowing a request does not automatically allow its response.",
+        "Return traffic to a client can require a rule for the client's ephemeral destination ports.",
+        "Each subnet has one NACL association at a time; a NACL can be associated with multiple subnets."
+      ],
+      "gotchas": [
+        "An allow rule with a lower number can make a later deny rule ineffective.",
+        "A security group cannot express an explicit deny rule.",
+        "Opening the request port alone may leave return traffic blocked by a custom NACL."
+      ],
+      "confusedWith": [
+        {
+          "concept": "security-groups",
+          "difference": "Security groups filter at the instance or network-interface level, use allow rules, and automatically permit responses to allowed traffic; NACLs filter at the subnet level and are stateless."
+        }
+      ],
+      "examCues": [
+        "block one source IP for an entire subnet",
+        "deny rule must override an existing allow",
+        "requests arrive but responses are dropped",
+        "policy must cover every resource in the subnet"
+      ]
+    },
+    "es": {
+      "tldr": "Una network ACL (NACL) controla el tráfico entrante y saliente en el límite de una subred. Elígela cuando necesites una regla para toda la subred o una denegación explícita, y revisa ambas direcciones porque las NACL son stateless.",
+      "whenToUse": [
+        "Bloquear una dirección IP o un CIDR de origen específico sin bloquear el resto del tráfico hacia la subred.",
+        "Aplicar la misma política de tráfico a todos los recursos de una subred.",
+        "Investigar respuestas que una política restrictiva de subred está descartando."
+      ],
+      "keyFacts": [
+        "Las reglas de una NACL pueden permitir o denegar tráfico; se evalúan desde el número más bajo y la evaluación termina en la primera coincidencia.",
+        "Las reglas entrantes y salientes son independientes. Permitir una solicitud no permite automáticamente su respuesta.",
+        "El tráfico de respuesta hacia un cliente puede necesitar una regla para los puertos efímeros de destino del cliente.",
+        "Cada subred tiene una sola asociación de NACL a la vez; una NACL puede asociarse con varias subredes."
+      ],
+      "gotchas": [
+        "Una regla de permiso con un número menor puede hacer que una regla de denegación posterior no tenga efecto.",
+        "Un security group no puede expresar una regla de denegación explícita.",
+        "Abrir únicamente el puerto de la solicitud puede dejar bloqueadas las respuestas en una NACL personalizada."
+      ],
+      "confusedWith": [
+        {
+          "concept": "security-groups",
+          "difference": "Los security groups filtran a nivel de instancia o interfaz de red, usan reglas de permiso y permiten automáticamente las respuestas al tráfico autorizado; las NACL filtran a nivel de subred y son stateless."
+        }
+      ],
+      "examCues": [
+        "block one source IP for an entire subnet",
+        "deny rule must override an existing allow",
+        "requests arrive but responses are dropped",
+        "policy must cover every resource in the subnet"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "network-acls--0bcae318",
+      "conceptId": "network-acls",
+      "secondaryConcepts": [
+        "security-groups"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An analytics company has instances in a private subnet that initiate HTTPS connections to a partner's address range through a NAT gateway. A custom network ACL permits outbound TCP port 443 to the partner, but the instances do not receive responses; their security groups permit the connections. Which change restores the responses while keeping the subnet policy restricted to the partner?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allow inbound traffic from the partner's address range to client ephemeral ports in the instances' security groups.",
+          "correct": false,
+          "why": "Stateful security groups already permit responses to allowed connections and cannot override a NACL block."
+        },
+        {
+          "id": "B",
+          "text": "Allow inbound traffic from the partner's address range to the client ephemeral ports in the subnet's network ACL.",
+          "correct": true,
+          "why": "The stateless NACL must separately permit responses entering the subnet on the clients' ephemeral ports."
+        },
+        {
+          "id": "C",
+          "text": "Allow inbound TCP port 443 from the partner's address range in the subnet's network ACL.",
+          "correct": false,
+          "why": "The response is destined for the initiating client's ephemeral port, not its HTTPS destination port."
+        },
+        {
+          "id": "D",
+          "text": "Allow outbound client ephemeral ports to the partner's address range in the subnet's network ACL.",
+          "correct": false,
+          "why": "This does not permit the missing inbound response traffic."
+        }
+      ],
+      "explanation": "The instances initiate the HTTPS connections, so the missing packets are responses entering their subnet. A stateless NACL needs an inbound rule that permits those packets to the clients' ephemeral ports. An inbound rule for port 443 addresses the wrong destination port, and changing security groups does not fix a NACL drop.",
+      "keywordCues": [
+        "initiate HTTPS connections",
+        "permits outbound TCP port 443",
+        "do not receive responses",
+        "security groups permit the connections"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+      ],
+      "es": {
+        "stem": "Una empresa de análisis tiene instancias en una subred privada que inician conexiones HTTPS hacia el rango de direcciones de un socio mediante un NAT gateway. Una network ACL personalizada permite TCP saliente por el puerto 443 hacia el socio, pero las instancias no reciben respuestas; sus security groups permiten las conexiones. ¿Qué cambio restablece las respuestas y mantiene la política de la subred limitada al socio?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Permite tráfico entrante desde el rango de direcciones del socio hacia los puertos efímeros de los clientes en los security groups de las instancias.",
+            "why": "Los security groups stateful ya permiten las respuestas de las conexiones autorizadas y no pueden anular un bloqueo de la NACL."
+          },
+          {
+            "id": "B",
+            "text": "Permite en la network ACL de la subred el tráfico entrante desde el rango de direcciones del socio hacia los puertos efímeros de los clientes.",
+            "why": "La NACL stateless debe permitir por separado las respuestas que entran a la subred por los puertos efímeros de los clientes."
+          },
+          {
+            "id": "C",
+            "text": "Permite TCP entrante por el puerto 443 desde el rango de direcciones del socio en la network ACL de la subred.",
+            "why": "La respuesta se dirige al puerto efímero del cliente que inició la conexión, no al puerto de destino HTTPS."
+          },
+          {
+            "id": "D",
+            "text": "Permite puertos efímeros salientes hacia el rango de direcciones del socio en la network ACL de la subred.",
+            "why": "Esto no permite el tráfico de respuesta entrante que falta."
+          }
+        ],
+        "explanation": "Las instancias inician las conexiones HTTPS, por lo que los paquetes faltantes son respuestas que entran a su subred. Una NACL stateless necesita una regla entrante que permita esos paquetes hacia los puertos efímeros de los clientes. Una regla entrante para el puerto 443 apunta al puerto de destino equivocado, y cambiar los security groups no corrige un bloqueo de la NACL."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "network-acls--24bda1bb",
+      "conceptId": "network-acls",
+      "secondaryConcepts": [
+        "security-groups"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer allows administrative traffic from a peered VPC into a maintenance subnet. Its subnet network ACL has inbound rule 100 allowing the peered VPC's CIDR, but a smaller range within that CIDR is no longer trusted. The manufacturer must deny that smaller range without interrupting access from the rest of the peered VPC. Which change meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace NACL rule 100 with a deny rule for the entire peered VPC CIDR.",
+          "correct": false,
+          "why": "Denying the entire CIDR would interrupt access from the trusted remainder."
+        },
+        {
+          "id": "B",
+          "text": "Add a security group deny rule for the smaller range on each maintenance instance.",
+          "correct": false,
+          "why": "Security groups have no deny rules."
+        },
+        {
+          "id": "C",
+          "text": "Add a NACL deny rule for the smaller range with a rule number greater than 100.",
+          "correct": false,
+          "why": "Rule 100 would allow matching traffic before the new deny rule is evaluated."
+        },
+        {
+          "id": "D",
+          "text": "Add a NACL deny rule for the smaller range with a rule number lower than 100.",
+          "correct": true,
+          "why": "The specific deny will match first, while rule 100 can still allow the remaining addresses."
+        }
+      ],
+      "explanation": "The smaller untrusted range is contained within a CIDR already allowed by rule 100. NACL rules are evaluated in ascending number order and evaluation stops at the first match, so its deny must have a number below 100. A later deny is ineffective, while denying the whole peered CIDR would break required access.",
+      "keywordCues": [
+        "inbound rule 100 allowing the peered VPC's CIDR",
+        "a smaller range within that CIDR",
+        "without interrupting access from the rest"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+      ],
+      "es": {
+        "stem": "Un fabricante permite tráfico administrativo desde una VPC conectada mediante peering hacia una subred de mantenimiento. La network ACL de la subred tiene la regla entrante 100, que permite el CIDR de esa VPC, pero un rango menor dentro de ese CIDR ya no es confiable. El fabricante debe denegar ese rango menor sin interrumpir el acceso desde el resto de la VPC. ¿Qué cambio cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplaza la regla 100 de la NACL por una regla que deniegue todo el CIDR de la VPC conectada mediante peering.",
+            "why": "Denegar todo el CIDR interrumpiría el acceso desde las demás direcciones confiables."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una regla de denegación en el security group de cada instancia de mantenimiento para el rango menor.",
+            "why": "Los security groups no tienen reglas de denegación."
+          },
+          {
+            "id": "C",
+            "text": "Agrega una regla de denegación en la NACL para el rango menor con un número de regla superior a 100.",
+            "why": "La regla 100 permitiría el tráfico coincidente antes de que se evalúe la nueva regla de denegación."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una regla de denegación en la NACL para el rango menor con un número de regla inferior a 100.",
+            "why": "La denegación específica coincidirá primero y la regla 100 todavía podrá permitir las demás direcciones."
+          }
+        ],
+        "explanation": "El rango menor no confiable está dentro de un CIDR que la regla 100 ya permite. Las reglas de una NACL se evalúan en orden numérico ascendente y la evaluación termina en la primera coincidencia, por lo que la denegación debe tener un número inferior a 100. Una denegación posterior no tendría efecto, mientras que denegar todo el CIDR interrumpiría el acceso requerido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "network-acls--80592ce7",
+      "conceptId": "network-acls",
+      "secondaryConcepts": [
+        "security-groups"
+      ],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A community library hosts an HTTPS service on instances in a dedicated subnet. Clients in a known address range initiate connections to TCP port 443, and their responses must reach those clients; the subnet's custom network ACL currently has no applicable allow rules. The instances' security groups already permit the client connections. Which two network ACL rules are needed to permit the request and response traffic? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allow inbound traffic to client ephemeral ports from the client address range.",
+          "correct": false,
+          "why": "The incoming client requests are destined for the service's port 443."
+        },
+        {
+          "id": "B",
+          "text": "Allow outbound TCP port 443 to the client address range.",
+          "correct": false,
+          "why": "Replies to client-initiated connections are destined for client ephemeral ports, not port 443."
+        },
+        {
+          "id": "C",
+          "text": "Allow outbound traffic to client ephemeral ports in the client address range.",
+          "correct": true,
+          "why": "The stateless NACL needs a separate outbound rule for responses returning to clients."
+        },
+        {
+          "id": "D",
+          "text": "Allow TCP port 443 from the client address range in the instances' security groups.",
+          "correct": false,
+          "why": "That access is already permitted by the security groups and does not create a missing NACL rule."
+        },
+        {
+          "id": "E",
+          "text": "Allow inbound TCP port 443 from the client address range.",
+          "correct": true,
+          "why": "This permits client requests to enter the service subnet."
+        }
+      ],
+      "explanation": "Clients send requests into the subnet on TCP port 443, so the NACL needs an inbound allow for that port. Responses leave the subnet for the clients' ephemeral ports, requiring a separate outbound allow because NACLs are stateless. An outbound port 443 rule targets the wrong destination port, and the existing security group permissions do not replace either NACL rule.",
+      "keywordCues": [
+        "Clients in a known address range initiate connections to TCP port 443",
+        "responses must reach those clients",
+        "no applicable allow rules",
+        "security groups already permit"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+      ],
+      "es": {
+        "stem": "Una biblioteca comunitaria ofrece un servicio HTTPS en instancias de una subred dedicada. Los clientes de un rango de direcciones conocido inician conexiones al puerto TCP 443 y deben recibir las respuestas; la network ACL personalizada de la subred no tiene actualmente reglas de permiso aplicables. Los security groups de las instancias ya permiten las conexiones de los clientes. ¿Qué dos reglas de network ACL se necesitan para permitir las solicitudes y las respuestas? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Permite tráfico entrante hacia los puertos efímeros de los clientes desde el rango de direcciones de los clientes.",
+            "why": "Las solicitudes entrantes de los clientes se dirigen al puerto 443 del servicio."
+          },
+          {
+            "id": "B",
+            "text": "Permite TCP saliente por el puerto 443 hacia el rango de direcciones de los clientes.",
+            "why": "Las respuestas a conexiones iniciadas por los clientes se dirigen a sus puertos efímeros, no al puerto 443."
+          },
+          {
+            "id": "C",
+            "text": "Permite tráfico saliente hacia los puertos efímeros del rango de direcciones de los clientes.",
+            "why": "La NACL stateless necesita una regla saliente independiente para las respuestas dirigidas a los clientes."
+          },
+          {
+            "id": "D",
+            "text": "Permite el puerto TCP 443 desde el rango de direcciones de los clientes en los security groups de las instancias.",
+            "why": "Los security groups ya permiten ese acceso y esto no crea la regla de NACL que falta."
+          },
+          {
+            "id": "E",
+            "text": "Permite TCP entrante por el puerto 443 desde el rango de direcciones de los clientes.",
+            "why": "Esto permite que las solicitudes de los clientes entren a la subred del servicio."
+          }
+        ],
+        "explanation": "Los clientes envían solicitudes a la subred por el puerto TCP 443, por lo que la NACL necesita una regla entrante que lo permita. Las respuestas salen de la subred hacia los puertos efímeros de los clientes y necesitan una regla saliente independiente porque las NACL son stateless. Una regla saliente para el puerto 443 apunta al puerto de destino equivocado, y los permisos existentes de los security groups no sustituyen ninguna de las dos reglas de la NACL."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "network-acls--a84283d0",
+      "conceptId": "network-acls",
+      "secondaryConcepts": [
+        "security-groups"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional clinic runs several TCP services on instances in one public subnet. Its security team must block all connections from one identified source IP address to that subnet while preserving access for other clients. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Associate a custom network ACL with the subnet and place a deny rule for the source IP address before applicable allow rules.",
+          "correct": true,
+          "why": "One subnet-level NACL rule can explicitly deny that source before broader allows match."
+        },
+        {
+          "id": "B",
+          "text": "Add a deny rule for the source IP address to each instance's security group.",
+          "correct": false,
+          "why": "Security groups do not support deny rules."
+        },
+        {
+          "id": "C",
+          "text": "Add the source IP address to an AWS WAF IP set and apply it to the clinic's web application.",
+          "correct": false,
+          "why": "Filtering the web application would not block the source from all TCP services in the subnet."
+        },
+        {
+          "id": "D",
+          "text": "Add a deny rule for the source IP address after the subnet's existing broad allow rule in its network ACL.",
+          "correct": false,
+          "why": "Traffic matching the earlier allow rule would never reach the later deny rule."
+        }
+      ],
+      "explanation": "The decisive requirement is an explicit source-IP block across several services in one subnet. A custom NACL provides subnet-level deny rules, and its first matching rule determines the result. Security groups cannot deny traffic, while a deny placed after a matching allow in a NACL would not take effect.",
+      "keywordCues": [
+        "several TCP services",
+        "one identified source IP address",
+        "that subnet"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+      ],
+      "es": {
+        "stem": "Una clínica regional ejecuta varios servicios TCP en instancias de una subred pública. Su equipo de seguridad debe bloquear todas las conexiones desde una dirección IP de origen identificada hacia esa subred y conservar el acceso de los demás clientes. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asocia una network ACL personalizada con la subred y coloca una regla de denegación para la dirección IP de origen antes de las reglas de permiso aplicables.",
+            "why": "Una sola regla de NACL a nivel de subred puede denegar explícitamente ese origen antes de que coincida una regla de permiso más amplia."
+          },
+          {
+            "id": "B",
+            "text": "Agrega una regla de denegación para la dirección IP de origen al security group de cada instancia.",
+            "why": "Los security groups no admiten reglas de denegación."
+          },
+          {
+            "id": "C",
+            "text": "Agrega la dirección IP de origen a un IP set de AWS WAF y aplícalo a la aplicación web de la clínica.",
+            "why": "Filtrar la aplicación web no bloquearía el origen para todos los servicios TCP de la subred."
+          },
+          {
+            "id": "D",
+            "text": "Agrega una regla de denegación para la dirección IP de origen después de la regla amplia de permiso que ya tiene la network ACL de la subred.",
+            "why": "El tráfico que coincida con la regla de permiso anterior nunca llegará a la regla de denegación posterior."
+          }
+        ],
+        "explanation": "El requisito decisivo es bloquear explícitamente una IP de origen en varios servicios de una misma subred. Una NACL personalizada ofrece reglas de denegación a nivel de subred y se aplica la primera regla que coincida. Los security groups no pueden denegar tráfico, y una denegación colocada después de una regla de permiso que coincide no tendría efecto."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "network-acls--r0",
+      "conceptId": "network-acls",
+      "kind": "recall",
+      "prompt": "A subnet must reject one source IP while accepting other clients. Which VPC control fits, and where must its deny rule go?",
+      "promptEs": "Una subred debe rechazar una IP de origen y aceptar a los demás clientes. ¿Qué control de VPC usarías y dónde colocarías su regla de denegación?",
+      "idealAnswer": "Use a network ACL associated with the subnet. Put a deny rule for that source before any broader allow rule that would match it, because NACL evaluation stops at the first match.",
+      "rubric": [
+        "Identifies a subnet-associated network ACL.",
+        "Specifies an explicit deny for the source IP.",
+        "Places the deny before a matching allow because rules are evaluated in number order."
+      ]
+    },
+    {
+      "id": "network-acls--r1",
+      "conceptId": "network-acls",
+      "kind": "why-not",
+      "prompt": "Why can't a security group replace a restrictive network ACL when client requests arrive but their responses are blocked?",
+      "promptEs": "¿Por qué un security group no puede reemplazar una network ACL restrictiva si llegan las solicitudes de los clientes, pero se bloquean sus respuestas?",
+      "idealAnswer": "Security groups are stateful and automatically permit responses to allowed requests, but they cannot override a subnet NACL that drops those packets. The stateless NACL needs an appropriate rule in the response direction, potentially for the clients' ephemeral ports.",
+      "rubric": [
+        "Contrasts stateful security groups with stateless NACLs.",
+        "Explains that a security group cannot override a NACL block.",
+        "Identifies a separate response-direction NACL rule and relevant client ephemeral ports."
+      ]
+    }
+  ]
+}

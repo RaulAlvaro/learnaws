@@ -1,0 +1,406 @@
+{
+  "conceptId": "stateless-vs-stateful-design",
+  "card": {
+    "en": {
+      "tldr": "A stateless application does not depend on session data stored on the instance that handled a previous request. Offload session state to a shared service such as Amazon ElastiCache or Amazon DynamoDB so any instance can serve the next request and an instance can be replaced without losing the session.",
+      "whenToUse": [
+        "Users must keep their sessions when an application instance fails or is replaced.",
+        "A web tier must scale horizontally without tying users to particular instances.",
+        "Application components need to scale independently."
+      ],
+      "keyFacts": [
+        "Session data persists across requests; a stateless application does not store that data locally.",
+        "Amazon ElastiCache and Amazon DynamoDB are examples of services that can hold offloaded session data.",
+        "With a stateless design, any available compute resource can serve a request.",
+        "Amazon S3 can hold large, unstructured data such as images and documents, while DynamoDB can hold information such as user profiles."
+      ],
+      "gotchas": [
+        "Sticky sessions can route a user back to the same instance, but they do not remove the dependency on that instance's local session data.",
+        "Adding instances does not fix a session design that requires each user to reach one particular instance.",
+        "Moving images or user profiles to shared storage does not help if session data remains local."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Sticky sessions",
+          "difference": "Request affinity is a workaround for local state; offloading session state removes the need to reach a particular instance."
+        }
+      ],
+      "examCues": [
+        "users lose sessions when an instance is replaced",
+        "any instance must handle the next request",
+        "scale the web tier horizontally",
+        "session data stored in instance memory"
+      ]
+    },
+    "es": {
+      "tldr": "Una aplicación sin estado no depende de los datos de sesión guardados en la instancia que atendió una solicitud anterior. Guarda el estado de sesión fuera de las instancias, por ejemplo, en Amazon ElastiCache o Amazon DynamoDB, para que cualquier instancia atienda la siguiente solicitud sin perder la sesión si se reemplaza una instancia.",
+      "whenToUse": [
+        "Debes conservar las sesiones de los usuarios si falla o se reemplaza una instancia.",
+        "Debes escalar horizontalmente la capa web sin vincular a cada usuario con una instancia.",
+        "Necesitas escalar los componentes de la aplicación de forma independiente."
+      ],
+      "keyFacts": [
+        "Los datos de sesión persisten entre solicitudes; una aplicación sin estado no los guarda localmente.",
+        "Amazon ElastiCache y Amazon DynamoDB son ejemplos de servicios donde puedes guardar los datos de sesión fuera de las instancias.",
+        "Con un diseño sin estado, cualquier recurso de cómputo disponible puede atender una solicitud.",
+        "Amazon S3 puede almacenar datos no estructurados grandes, como imágenes y documentos, mientras que DynamoDB puede almacenar información como perfiles de usuario."
+      ],
+      "gotchas": [
+        "Sticky sessions pueden dirigir al usuario a la misma instancia, pero no eliminan la dependencia de los datos de sesión locales.",
+        "Agregar instancias no corrige un diseño que exige que cada usuario llegue a una instancia específica.",
+        "Mover imágenes o perfiles de usuario a almacenamiento compartido no resuelve el problema si los datos de sesión siguen siendo locales."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Sticky sessions",
+          "difference": "La afinidad de solicitudes es una solución provisional para el estado local; guardar el estado de sesión fuera de las instancias elimina la necesidad de llegar a una instancia específica."
+        }
+      ],
+      "examCues": [
+        "users lose sessions when an instance is replaced",
+        "any instance must handle the next request",
+        "scale the web tier horizontally",
+        "session data stored in instance memory"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_stateless.html",
+      "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "stateless-vs-stateful-design--e9bbfd73",
+      "conceptId": "stateless-vs-stateful-design",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A design studio serves client documents through a web application on multiple EC2 instances. Each instance holds uploaded documents and editing sessions locally; replacing an instance interrupts an active editor and makes that instance's documents unavailable. The studio wants instances to be replaceable and to scale the web tier independently of stored content. Which solution best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store documents in Amazon S3 but continue storing editing sessions in instance memory.",
+          "correct": false,
+          "why": "Documents are externalized, but replacing an instance still interrupts its local editing sessions."
+        },
+        {
+          "id": "B",
+          "text": "Store documents in Amazon S3 and editing sessions in Amazon ElastiCache.",
+          "correct": true,
+          "why": "Both the large unstructured documents and session data are separated from replaceable web instances."
+        },
+        {
+          "id": "C",
+          "text": "Use sticky sessions and add EC2 instances while keeping documents and sessions locally.",
+          "correct": false,
+          "why": "Affinity and extra instances do not remove either dependency on local data."
+        },
+        {
+          "id": "D",
+          "text": "Store editing sessions in Amazon DynamoDB but keep uploaded documents on instance disks.",
+          "correct": false,
+          "why": "Sessions are externalized, but documents still depend on the instance that stores them."
+        }
+      ],
+      "explanation": "Two kinds of locally stored data prevent the studio from replacing instances freely. Amazon S3 can hold large, unstructured documents, and Amazon ElastiCache can hold offloaded session data. Moving only one kind of data leaves the other dependent on an instance; sticky sessions remove neither dependency.",
+      "keywordCues": [
+        "holds uploaded documents and editing sessions locally",
+        "instances to be replaceable",
+        "scale the web tier independently of stored content"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_stateless.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño ofrece documentos a sus clientes mediante una aplicación web en varias instancias EC2. Cada instancia guarda localmente documentos cargados y sesiones de edición; reemplazarla interrumpe al editor activo y deja sus documentos inaccesibles. El estudio quiere poder reemplazar instancias y escalar la capa web independientemente del contenido almacenado. ¿Qué solución cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guarda los documentos en Amazon S3, pero continúa guardando las sesiones de edición en la memoria de cada instancia.",
+            "why": "Los documentos quedan fuera de las instancias, pero reemplazar una instancia todavía interrumpe sus sesiones locales."
+          },
+          {
+            "id": "B",
+            "text": "Guarda los documentos en Amazon S3 y las sesiones de edición en Amazon ElastiCache.",
+            "why": "Tanto los documentos no estructurados como los datos de sesión quedan separados de las instancias web reemplazables."
+          },
+          {
+            "id": "C",
+            "text": "Usa sticky sessions y agrega instancias EC2, pero conserva localmente documentos y sesiones.",
+            "why": "La afinidad y las instancias adicionales no eliminan ninguna de las dependencias de los datos locales."
+          },
+          {
+            "id": "D",
+            "text": "Guarda las sesiones de edición en Amazon DynamoDB, pero conserva los documentos cargados en los discos de las instancias.",
+            "why": "Las sesiones quedan fuera de las instancias, pero los documentos siguen dependiendo de la instancia que los almacena."
+          }
+        ],
+        "explanation": "Dos tipos de datos almacenados localmente impiden que el estudio reemplace instancias libremente. Amazon S3 puede almacenar documentos grandes no estructurados y Amazon ElastiCache puede guardar los datos de sesión fuera de las instancias. Mover solo uno de esos tipos de datos deja el otro vinculado a una instancia; sticky sessions no elimina ninguna dependencia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "stateless-vs-stateful-design--41cc146d",
+      "conceptId": "stateless-vs-stateful-design",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A travel agency has a web tier behind a load balancer. Each server keeps itinerary-building sessions in memory, so replacing a server forces its customers to restart; the agency wants to scale servers in and out without this disruption. Which two changes together make the web tier independent of locally stored session data? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable sticky sessions while retaining session data in server memory.",
+          "correct": false,
+          "why": "Affinity still ties a customer's session to a replaceable server."
+        },
+        {
+          "id": "B",
+          "text": "Move customer profiles to Amazon DynamoDB but retain itinerary sessions in server memory.",
+          "correct": false,
+          "why": "Externalizing profiles does not externalize the sessions that must survive replacement."
+        },
+        {
+          "id": "C",
+          "text": "Move itinerary session data to Amazon DynamoDB.",
+          "correct": true,
+          "why": "DynamoDB can hold session state outside the web servers."
+        },
+        {
+          "id": "D",
+          "text": "Add web servers while keeping sessions in each server's memory.",
+          "correct": false,
+          "why": "More servers do not remove the local-state dependency."
+        },
+        {
+          "id": "E",
+          "text": "Update the application so any server can retrieve and use a customer's stored session.",
+          "correct": true,
+          "why": "Any available server can then continue a session after another server is replaced."
+        }
+      ],
+      "explanation": "The agency must both move sessions off individual servers and make the application use the shared session data. DynamoDB provides an external place for that data, and letting any server retrieve it removes the dependency on the previous server. Sticky sessions, added servers, and externalized profiles alone all leave itinerary sessions in server memory.",
+      "keywordCues": [
+        "replacing a server forces its customers to restart",
+        "scale servers in and out",
+        "independent of locally stored session data"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_stateless.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+      ],
+      "es": {
+        "stem": "Una agencia de viajes tiene una capa web detrás de un balanceador de carga. Cada servidor conserva en memoria las sesiones para crear itinerarios, por lo que reemplazar un servidor obliga a sus clientes a comenzar de nuevo; la agencia quiere agregar y quitar servidores sin esa interrupción. ¿Qué dos cambios, en conjunto, hacen que la capa web deje de depender de datos de sesión almacenados localmente? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activa sticky sessions y conserva los datos de sesión en la memoria de cada servidor.",
+            "why": "La afinidad todavía vincula la sesión del cliente a un servidor reemplazable."
+          },
+          {
+            "id": "B",
+            "text": "Mueve los perfiles de clientes a Amazon DynamoDB, pero conserva las sesiones de itinerarios en la memoria de los servidores.",
+            "why": "Mover los perfiles no mueve las sesiones que deben continuar tras un reemplazo."
+          },
+          {
+            "id": "C",
+            "text": "Mueve los datos de sesión de itinerarios a Amazon DynamoDB.",
+            "why": "DynamoDB puede conservar el estado de sesión fuera de los servidores web."
+          },
+          {
+            "id": "D",
+            "text": "Agrega servidores web y conserva las sesiones en la memoria de cada servidor.",
+            "why": "Más servidores no eliminan la dependencia del estado local."
+          },
+          {
+            "id": "E",
+            "text": "Actualiza la aplicación para que cualquier servidor pueda consultar y usar la sesión almacenada de un cliente.",
+            "why": "Así, cualquier servidor disponible puede continuar una sesión después de que se reemplace otro."
+          }
+        ],
+        "explanation": "La agencia debe sacar las sesiones de los servidores individuales y hacer que la aplicación utilice los datos de sesión compartidos. DynamoDB ofrece un lugar externo para esos datos, y permitir que cualquier servidor los consulte elimina la dependencia del servidor anterior. Sticky sessions, más servidores o mover solo los perfiles dejan las sesiones de itinerarios en la memoria de los servidores."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "stateless-vs-stateful-design--6884bc69",
+      "conceptId": "stateless-vs-stateful-design",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs its web application on multiple EC2 instances behind a load balancer. Each instance keeps shopping sessions in memory, and customers lose their carts when an instance is replaced. The company wants to add or remove instances as demand changes. Which solution meets these requirements while allowing any instance to handle a customer's next request?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store customer profiles in Amazon DynamoDB but keep active carts in instance memory.",
+          "correct": false,
+          "why": "Moving profiles does not preserve the session data that contains the carts."
+        },
+        {
+          "id": "B",
+          "text": "Store session data in Amazon DynamoDB and have each instance retrieve it for incoming requests.",
+          "correct": true,
+          "why": "Shared session data removes the dependency on the instance that handled the previous request."
+        },
+        {
+          "id": "C",
+          "text": "Use sticky sessions on the load balancer and continue storing carts in instance memory.",
+          "correct": false,
+          "why": "Affinity still leaves a cart dependent on the original instance when that instance is replaced."
+        },
+        {
+          "id": "D",
+          "text": "Add more EC2 instances and continue storing each customer's cart in instance memory.",
+          "correct": false,
+          "why": "Additional capacity does not make a locally stored cart available to other instances."
+        }
+      ],
+      "explanation": "The deciding requirement is that any instance must handle the next request without losing a cart. Offloading session data to DynamoDB removes the dependency on instance memory and supports horizontal scaling. Sticky sessions may keep requests on one instance while it is available, but do not solve session loss when that instance is replaced.",
+      "keywordCues": [
+        "customers lose their carts when an instance is replaced",
+        "any instance to handle a customer's next request"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_stateless.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta su aplicación web en varias instancias EC2 detrás de un balanceador de carga. Cada instancia conserva las sesiones de compra en memoria y los clientes pierden sus carritos cuando se reemplaza una instancia. La empresa quiere agregar o quitar instancias según cambie la demanda. ¿Qué solución cumple estos requisitos y permite que cualquier instancia atienda la siguiente solicitud de un cliente?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Guarda los perfiles de clientes en Amazon DynamoDB, pero conserva los carritos activos en la memoria de las instancias.",
+            "why": "Mover los perfiles no conserva los datos de sesión que contienen los carritos."
+          },
+          {
+            "id": "B",
+            "text": "Guarda los datos de sesión en Amazon DynamoDB y haz que cada instancia los consulte para las solicitudes entrantes.",
+            "why": "Los datos de sesión compartidos eliminan la dependencia de la instancia que atendió la solicitud anterior."
+          },
+          {
+            "id": "C",
+            "text": "Usa sticky sessions en el balanceador de carga y continúa guardando los carritos en la memoria de cada instancia.",
+            "why": "La afinidad mantiene la dependencia de la instancia original cuando esta se reemplaza."
+          },
+          {
+            "id": "D",
+            "text": "Agrega más instancias EC2 y continúa guardando el carrito de cada cliente en la memoria de una instancia.",
+            "why": "La capacidad adicional no pone un carrito almacenado localmente a disposición de otras instancias."
+          }
+        ],
+        "explanation": "El requisito decisivo es que cualquier instancia pueda atender la siguiente solicitud sin perder el carrito. Guardar los datos de sesión en DynamoDB elimina la dependencia de la memoria de una instancia y permite escalar horizontalmente. Sticky sessions pueden mantener las solicitudes en una instancia mientras esté disponible, pero no evitan la pérdida de la sesión cuando se reemplaza."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "stateless-vs-stateful-design--85e25ca7",
+      "conceptId": "stateless-vs-stateful-design",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A publisher's web tier runs on EC2 instances and experiences sharp traffic changes during live events. Its load balancer uses sticky sessions because readers' session data is kept on the instance that handled their first request. The publisher wants requests to continue without losing session data when individual instances fail. Which change best meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move reader profiles to Amazon DynamoDB and continue keeping active sessions on EC2 instances.",
+          "correct": false,
+          "why": "Externalizing profiles alone leaves active sessions dependent on the failed instance."
+        },
+        {
+          "id": "B",
+          "text": "Keep sticky sessions and add EC2 instances whenever event traffic increases.",
+          "correct": false,
+          "why": "Adding instances does not preserve sessions held on an instance that fails."
+        },
+        {
+          "id": "C",
+          "text": "Move the web tier to AWS Lambda but keep session data in the memory of each execution environment.",
+          "correct": false,
+          "why": "Changing compute services does not help if sessions still depend on local memory."
+        },
+        {
+          "id": "D",
+          "text": "Store sessions in Amazon ElastiCache and let web instances read session data for incoming requests.",
+          "correct": true,
+          "why": "Offloading sessions lets another instance serve a request after an instance fails."
+        }
+      ],
+      "explanation": "The publisher needs session data to remain available to a different web instance after a failure. Amazon ElastiCache is an example of a service to which the application can offload session data. Sticky sessions and extra capacity leave the active session tied to the original instance; moving profiles alone does not move sessions.",
+      "keywordCues": [
+        "sticky sessions",
+        "session data is kept on the instance",
+        "individual instances fail"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_stateless.html",
+        "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/microservices-on-aws.html"
+      ],
+      "es": {
+        "stem": "La capa web de una editorial se ejecuta en instancias EC2 y recibe cambios bruscos de tráfico durante eventos en vivo. Su balanceador de carga usa sticky sessions porque los datos de sesión de cada lector se guardan en la instancia que atendió su primera solicitud. La editorial quiere que las solicitudes continúen sin perder los datos de sesión cuando falle una instancia. ¿Qué cambio cumple mejor este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mueve los perfiles de lectores a Amazon DynamoDB y continúa guardando las sesiones activas en las instancias EC2.",
+            "why": "Mover solo los perfiles deja las sesiones activas vinculadas a la instancia que falla."
+          },
+          {
+            "id": "B",
+            "text": "Mantén sticky sessions y agrega instancias EC2 cada vez que aumente el tráfico del evento.",
+            "why": "Agregar instancias no conserva las sesiones alojadas en una instancia que falla."
+          },
+          {
+            "id": "C",
+            "text": "Migra la capa web a AWS Lambda, pero conserva los datos de sesión en la memoria de cada entorno de ejecución.",
+            "why": "Cambiar el servicio de cómputo no ayuda si las sesiones siguen dependiendo de la memoria local."
+          },
+          {
+            "id": "D",
+            "text": "Guarda las sesiones en Amazon ElastiCache y haz que las instancias web consulten los datos de sesión para las solicitudes entrantes.",
+            "why": "Guardar las sesiones fuera de las instancias permite que otra instancia atienda una solicitud tras una falla."
+          }
+        ],
+        "explanation": "La editorial necesita que otra instancia web pueda acceder a los datos de sesión después de una falla. Amazon ElastiCache es un servicio donde la aplicación puede guardar esos datos fuera de las instancias. Sticky sessions y la capacidad adicional mantienen la sesión vinculada a la instancia original; mover solo los perfiles tampoco mueve las sesiones."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "stateless-vs-stateful-design--r0",
+      "conceptId": "stateless-vs-stateful-design",
+      "kind": "recall",
+      "prompt": "Users lose sessions when a web instance is replaced. Where could you store session data, and why?",
+      "promptEs": "Los usuarios pierden sus sesiones cuando se reemplaza una instancia web. ¿Dónde podrías guardar los datos de sesión y por qué?",
+      "idealAnswer": "Store session data outside the instances, for example in Amazon ElastiCache or Amazon DynamoDB. Then any instance can retrieve the session for a later request, so replacing one instance does not require the user to restart.",
+      "rubric": [
+        "Names Amazon ElastiCache or Amazon DynamoDB as a place to offload session data.",
+        "Explains that session data must not depend on a particular instance.",
+        "Connects shared state to continued sessions after instance replacement."
+      ]
+    }
+  ]
+}

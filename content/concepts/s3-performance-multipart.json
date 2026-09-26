@@ -1,0 +1,331 @@
+{
+  "conceptId": "s3-performance-multipart",
+  "card": {
+    "en": {
+      "tldr": "Amazon S3 has different ways to improve performance depending on the bottleneck: distribute requests across prefixes, use multipart upload for large objects, and batch small objects when the workload permits. Identify whether the scenario needs more request throughput, faster and more resilient large uploads, or fewer individual uploads.",
+      "whenToUse": [
+        "Reads or writes need higher request throughput: parallelize requests across multiple S3 prefixes.",
+        "Objects are 100 MB or larger, or large uploads encounter network interruptions: use multipart upload.",
+        "Many small items are consumed together and do not need separate S3 objects: batch them before upload."
+      ],
+      "keyFacts": [
+        "S3 supports at least 3,500 PUT/COPY/POST/DELETE or 5,500 GET/HEAD requests per second per partitioned prefix; a bucket can have any number of prefixes.",
+        "Scaling to a higher request rate is gradual, and 503 Slow Down errors can occur while S3 scales.",
+        "Multipart upload sends parts independently; parts can be uploaded in parallel, and a failed part can be retried without restarting the entire object.",
+        "AWS recommends multipart upload for objects that are 100 MB or larger.",
+        "Uploaded parts continue to incur storage charges until the multipart upload is completed or stopped."
+      ],
+      "gotchas": [
+        "Multipart upload improves the transfer of an individual large object; it does not replace distributing high request volumes across prefixes.",
+        "Additional prefixes do not make S3 scaling instantaneous or eliminate every possible 503 Slow Down response.",
+        "Do not leave failed multipart uploads unfinished: a lifecycle rule can remove incomplete uploads."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon S3 Transfer Acceleration",
+          "difference": "Choose it for faster transport over long geographical distances, not to address request distribution across prefixes."
+        },
+        {
+          "concept": "Amazon CloudFront",
+          "difference": "Caching can help an appropriate read workload, but it does not replace multipart upload for transferring a large object into S3."
+        }
+      ],
+      "examCues": [
+        "high request rate across many S3 objects",
+        "large uploads over an unreliable network",
+        "many small items consumed as a batch",
+        "503 Slow Down during a sudden traffic increase"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon S3 ofrece distintas formas de mejorar el rendimiento según el cuello de botella: distribuir solicitudes entre prefijos, usar multipart upload para objetos grandes y agrupar objetos pequeños cuando la carga lo permita. Identifica si el escenario necesita más capacidad de solicitudes, cargas grandes más rápidas y resistentes, o menos cargas individuales.",
+      "whenToUse": [
+        "Las lecturas o escrituras necesitan mayor capacidad de solicitudes: paraleliza las solicitudes entre varios prefijos de S3.",
+        "Los objetos tienen 100 MB o más, o las cargas grandes sufren interrupciones de red: usa multipart upload.",
+        "Muchos elementos pequeños se consumen juntos y no necesitan ser objetos de S3 separados: agrúpalos antes de cargarlos."
+      ],
+      "keyFacts": [
+        "S3 admite al menos 3500 solicitudes PUT/COPY/POST/DELETE o 5500 GET/HEAD por segundo por prefijo particionado; un bucket puede tener cualquier cantidad de prefijos.",
+        "El escalado a una tasa de solicitudes más alta es gradual, y pueden aparecer errores 503 Slow Down mientras S3 escala.",
+        "Multipart upload envía las partes de forma independiente; puedes cargarlas en paralelo y reintentar una parte fallida sin reiniciar todo el objeto.",
+        "AWS recomienda multipart upload para objetos de 100 MB o más.",
+        "Las partes cargadas siguen generando cargos de almacenamiento hasta que completes o detengas el multipart upload."
+      ],
+      "gotchas": [
+        "Multipart upload mejora la transferencia de un objeto grande individual; no sustituye la distribución de grandes volúmenes de solicitudes entre prefijos.",
+        "Agregar prefijos no hace que el escalado de S3 sea instantáneo ni elimina todas las posibles respuestas 503 Slow Down.",
+        "No dejes multipart uploads fallidos sin terminar: una regla de lifecycle puede eliminar las cargas incompletas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon S3 Transfer Acceleration",
+          "difference": "Elígelo para acelerar el transporte a través de grandes distancias geográficas, no para distribuir solicitudes entre prefijos."
+        },
+        {
+          "concept": "Amazon CloudFront",
+          "difference": "El almacenamiento en caché puede ayudar a una carga de lectura adecuada, pero no sustituye multipart upload para transferir un objeto grande a S3."
+        }
+      ],
+      "examCues": [
+        "high request rate across many S3 objects",
+        "large uploads over an unreliable network",
+        "many small items consumed as a batch",
+        "503 Slow Down during a sudden traffic increase"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-performance-multipart--8cc63c4b",
+      "conceptId": "s3-performance-multipart",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company stores event records as objects in Amazon S3. Its application reads many different records concurrently, and a new event is expected to sharply increase the GET request rate. The company can change how object keys are organized but wants to keep S3 as its storage service. Which solution meets the higher request-rate requirement MOST effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Organize records under multiple S3 prefixes and parallelize reads across them.",
+          "correct": true,
+          "why": "Parallel requests across prefixes can increase S3 read request performance."
+        },
+        {
+          "id": "B",
+          "text": "Use multipart upload for each record and continue reading from the existing key layout.",
+          "correct": false,
+          "why": "Multipart upload concerns how objects are uploaded, not how the application's GET requests are distributed."
+        },
+        {
+          "id": "C",
+          "text": "Configure a lifecycle rule to abort incomplete multipart uploads for the bucket.",
+          "correct": false,
+          "why": "The lifecycle rule addresses storage used by unfinished uploads, not the GET request rate."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Transfer Acceleration for the bucket and continue using the existing key layout.",
+          "correct": false,
+          "why": "Transfer Acceleration targets transport over long geographical distances, not the stated need to distribute GET requests."
+        }
+      ],
+      "explanation": "The deciding requirement is a higher rate of GET requests for many different objects. S3 supports request performance per partitioned prefix, so parallel reads across multiple prefixes are the appropriate design. Transfer Acceleration addresses long-distance transport instead. Multipart upload and cleanup of incomplete uploads address upload behavior, not this read-request bottleneck.",
+      "keywordCues": [
+        "reads many different records concurrently",
+        "sharply increase the GET request rate",
+        "change how object keys are organized"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de entradas guarda registros de eventos como objetos en Amazon S3. Su aplicación lee muchos registros distintos en paralelo, y se espera que un nuevo evento aumente bruscamente la tasa de solicitudes GET. La empresa puede cambiar cómo organiza las claves de los objetos, pero quiere conservar S3 como servicio de almacenamiento. ¿Qué solución cumple el requisito de una tasa de solicitudes más alta MOST effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Organizar los registros en varios prefijos de S3 y paralelizar las lecturas entre ellos.",
+            "why": "Las solicitudes paralelas entre prefijos pueden aumentar el rendimiento de las solicitudes de lectura de S3."
+          },
+          {
+            "id": "B",
+            "text": "Usar multipart upload para cada registro y seguir leyendo con la organización actual de claves.",
+            "why": "Multipart upload se refiere a cómo se cargan los objetos, no a cómo se distribuyen las solicitudes GET de la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Configurar una regla de lifecycle para detener los multipart uploads incompletos del bucket.",
+            "why": "La regla de lifecycle aborda el almacenamiento usado por cargas sin terminar, no la tasa de solicitudes GET."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Transfer Acceleration para el bucket y mantener la organización actual de claves.",
+            "why": "Transfer Acceleration se enfoca en el transporte a través de grandes distancias geográficas, no en la necesidad indicada de distribuir solicitudes GET."
+          }
+        ],
+        "explanation": "El requisito decisivo es una tasa más alta de solicitudes GET para muchos objetos distintos. S3 admite rendimiento de solicitudes por prefijo particionado, por lo que conviene paralelizar las lecturas entre varios prefijos. Transfer Acceleration aborda el transporte a larga distancia. Multipart upload y la limpieza de cargas incompletas tratan el comportamiento de carga, no este cuello de botella de lectura."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-performance-multipart--8c658393",
+      "conceptId": "s3-performance-multipart",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A field research team sends 800 MB video files to Amazon S3 from sites with intermittent connectivity. When a transfer fails, the team does not want to resend the entire file. The files must remain individual S3 objects after upload. Which approach meets these requirements MOST effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Upload each video with S3 multipart upload and retry only interrupted parts.",
+          "correct": true,
+          "why": "Multipart upload lets the team retry failed parts without restarting an entire video upload."
+        },
+        {
+          "id": "B",
+          "text": "Send each video with a single PUT request and retry the request if it fails.",
+          "correct": false,
+          "why": "Retrying the single request requires resending the video rather than only an interrupted part."
+        },
+        {
+          "id": "C",
+          "text": "Cache completed videos with Amazon CloudFront and keep each upload as a single request.",
+          "correct": false,
+          "why": "Caching completed objects does not prevent a failed single-request upload from restarting."
+        },
+        {
+          "id": "D",
+          "text": "Distribute video keys across multiple S3 prefixes and keep each upload as a single request.",
+          "correct": false,
+          "why": "Multiple prefixes can help request throughput but do not provide part-level recovery for an individual upload."
+        }
+      ],
+      "explanation": "The key constraint is avoiding a full restart when a large file transfer is interrupted. Multipart upload divides one object into independently uploaded parts, so the team can retry only the affected parts and still complete one S3 object. Multiple prefixes address request throughput rather than recovery of an individual transfer. A single PUT request does not provide the required part-level retry.",
+      "keywordCues": [
+        "800 MB video files",
+        "intermittent connectivity",
+        "does not want to resend the entire file",
+        "individual S3 objects"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html"
+      ],
+      "es": {
+        "stem": "Un equipo de investigación de campo envía archivos de video de 800 MB a Amazon S3 desde sitios con conectividad intermitente. Si una transferencia falla, el equipo no quiere volver a enviar el archivo completo. Los archivos deben seguir siendo objetos individuales de S3 después de la carga. ¿Qué enfoque cumple estos requisitos MOST effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Cargar cada video con S3 multipart upload y reintentar solo las partes interrumpidas.",
+            "why": "Multipart upload permite reintentar las partes fallidas sin reiniciar la carga del video completo."
+          },
+          {
+            "id": "B",
+            "text": "Enviar cada video con una sola solicitud PUT y reintentar la solicitud si falla.",
+            "why": "Reintentar la solicitud única exige volver a enviar el video, no solo una parte interrumpida."
+          },
+          {
+            "id": "C",
+            "text": "Guardar los videos terminados en caché con Amazon CloudFront y mantener cada carga como una sola solicitud.",
+            "why": "Almacenar objetos terminados en caché no evita que una carga fallida de una sola solicitud tenga que reiniciarse."
+          },
+          {
+            "id": "D",
+            "text": "Distribuir las claves de los videos entre varios prefijos de S3 y mantener cada carga como una sola solicitud.",
+            "why": "Varios prefijos pueden mejorar la capacidad de solicitudes, pero no ofrecen recuperación por partes para una carga individual."
+          }
+        ],
+        "explanation": "La restricción clave es evitar reiniciar toda la transferencia cuando se interrumpe el envío de un archivo grande. Multipart upload divide un objeto en partes que se cargan de forma independiente, así que el equipo puede reintentar solo las partes afectadas y completar un único objeto de S3. Los prefijos múltiples abordan la capacidad de solicitudes, no la recuperación de una transferencia individual. Una sola solicitud PUT no ofrece el reintento por partes requerido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-performance-multipart--590a9844",
+      "conceptId": "s3-performance-multipart",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer generates many tiny machine readings throughout each shift. Analysts download and process readings by completed shift; they do not need to retrieve individual readings as separate S3 objects. The manufacturer wants to reduce the number of upload requests while retaining S3 as the destination. Which approach meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Upload each reading separately and add a lifecycle rule for incomplete multipart uploads.",
+          "correct": false,
+          "why": "The lifecycle rule concerns unfinished multipart uploads and leaves the individual-reading upload count unchanged."
+        },
+        {
+          "id": "B",
+          "text": "Use multipart upload separately for each reading and complete each as an S3 object.",
+          "correct": false,
+          "why": "Multipart upload does not consolidate the readings and introduces part-upload requests for each tiny item."
+        },
+        {
+          "id": "C",
+          "text": "Batch readings into shift-level files and upload each file as an S3 object.",
+          "correct": true,
+          "why": "Batching matches shift-level consumption and reduces the number of individual uploads."
+        },
+        {
+          "id": "D",
+          "text": "Upload each reading as its own object, distributing the keys across multiple S3 prefixes.",
+          "correct": false,
+          "why": "Prefixes can distribute request load but do not reduce the number of uploads for individual readings."
+        }
+      ],
+      "explanation": "The deciding requirements are fewer upload requests and consumption by completed shift rather than by individual reading. Combining readings into shift-level objects avoids an individual upload for each tiny item. Spreading individual objects across prefixes may help throughput, but it does not reduce the request count. Multipart upload addresses transferring an object in parts, not consolidating separate readings.",
+      "keywordCues": [
+        "many tiny machine readings",
+        "process readings by completed shift",
+        "do not need to retrieve individual readings",
+        "reduce the number of upload requests"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html"
+      ],
+      "es": {
+        "stem": "Un fabricante genera muchas lecturas pequeñas de máquinas durante cada turno. Los analistas descargan y procesan las lecturas por turno completado; no necesitan recuperar cada lectura como un objeto de S3 separado. El fabricante quiere reducir la cantidad de solicitudes de carga y conservar S3 como destino. ¿Qué enfoque cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Cargar cada lectura por separado y agregar una regla de lifecycle para multipart uploads incompletos.",
+            "why": "La regla de lifecycle se refiere a cargas multipart sin terminar y no cambia la cantidad de cargas individuales."
+          },
+          {
+            "id": "B",
+            "text": "Usar multipart upload por separado para cada lectura y completar cada una como un objeto de S3.",
+            "why": "Multipart upload no consolida las lecturas e introduce solicitudes de carga de partes para cada elemento pequeño."
+          },
+          {
+            "id": "C",
+            "text": "Agrupar las lecturas en archivos por turno y cargar cada archivo como un objeto de S3.",
+            "why": "La agrupación coincide con el consumo por turno y reduce la cantidad de cargas individuales."
+          },
+          {
+            "id": "D",
+            "text": "Cargar cada lectura como un objeto propio y distribuir las claves entre varios prefijos de S3.",
+            "why": "Los prefijos pueden distribuir la carga de solicitudes, pero no reducen la cantidad de cargas de lecturas individuales."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son hacer menos solicitudes de carga y consumir los datos por turno completado, no por lectura individual. Combinar las lecturas en objetos por turno evita una carga independiente para cada elemento pequeño. Distribuir objetos individuales entre prefijos puede mejorar la capacidad de solicitudes, pero no reduce su cantidad. Multipart upload sirve para transferir un objeto en partes, no para consolidar lecturas separadas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-performance-multipart--r0",
+      "conceptId": "s3-performance-multipart",
+      "kind": "recall",
+      "prompt": "How would you improve S3 uploads of large files over an unreliable connection, and why?",
+      "promptEs": "¿Cómo mejorarías las cargas de archivos grandes a S3 mediante una conexión poco confiable y por qué?",
+      "idealAnswer": "Use S3 multipart upload. It transfers parts independently, so an interrupted part can be retried without restarting the entire object; parts can also be uploaded in parallel.",
+      "rubric": [
+        "Names S3 multipart upload.",
+        "Explains retrying interrupted parts instead of restarting the entire file.",
+        "Mentions that parts can be uploaded in parallel."
+      ]
+    }
+  ]
+}

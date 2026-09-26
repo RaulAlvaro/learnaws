@@ -1,0 +1,432 @@
+{
+  "conceptId": "purpose-built-databases",
+  "card": {
+    "en": {
+      "tldr": "Choose a database by its data model and dominant query pattern, not by the application's industry. Highly connected relationships point to Amazon Neptune; MongoDB-compatible documents to Amazon DocumentDB; Cassandra workloads to Amazon Keyspaces; time-interval queries to Amazon Timestream; key-value lookups to Amazon DynamoDB; and large-scale analytics to Amazon Redshift.",
+      "whenToUse": [
+        "Queries must navigate relationships among connected entities: choose Amazon Neptune.",
+        "An existing application needs MongoDB compatibility or Apache Cassandra compatibility: evaluate Amazon DocumentDB or Amazon Keyspaces, respectively.",
+        "Measurements arrive over time and queries use time intervals: choose Amazon Timestream.",
+        "Separate low-latency key-value application access from large-scale analytical reporting: evaluate Amazon DynamoDB and Amazon Redshift for their respective workloads."
+      ],
+      "keyFacts": [
+        "Amazon DynamoDB is a fully managed key-value and document database that delivers single-digit millisecond performance at any scale.",
+        "Amazon DocumentDB is a fully managed document database with MongoDB compatibility for JSON workloads.",
+        "Amazon Neptune is a fully managed graph database for highly connected datasets and supports Property Graph and RDF models.",
+        "Amazon Keyspaces is a managed, serverless Apache Cassandra–compatible database service that supports existing Cassandra application code and developer tools.",
+        "Amazon Timestream is a serverless time series database that processes data by time intervals; Amazon Redshift is a fully managed data warehouse for large-scale analytics."
+      ],
+      "gotchas": [
+        "JSON data alone does not make MongoDB compatibility a requirement: DynamoDB also supports a document data model.",
+        "A relationship-heavy fraud investigation calls for graph traversal, not merely fast lookup by an entity's key.",
+        "Repeated measurements do not imply a wide-column database when time-interval analysis is the deciding requirement.",
+        "Amazon Redshift serves large-scale analytical workloads, not the low-latency key-value access pattern of an application database."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon DynamoDB vs. Amazon DocumentDB",
+          "difference": "Both can hold document data; choose Amazon DocumentDB when MongoDB compatibility is required, and Amazon DynamoDB for key-value access with single-digit millisecond performance."
+        },
+        {
+          "concept": "Amazon Keyspaces vs. Amazon Timestream",
+          "difference": "Choose Amazon Keyspaces for Cassandra-compatible workloads; choose Amazon Timestream when queries analyze measurements over time intervals."
+        },
+        {
+          "concept": "Amazon Neptune vs. Amazon Redshift",
+          "difference": "Amazon Neptune navigates highly connected graphs; Amazon Redshift supports large-scale data-warehouse analytics."
+        }
+      ],
+      "examCues": [
+        "traverse relationships between accounts and devices",
+        "retain MongoDB-compatible application code",
+        "reuse Cassandra application code and tools",
+        "analyze sensor readings over time intervals",
+        "key-value lookups versus large-scale analytical reporting"
+      ]
+    },
+    "es": {
+      "tldr": "Elige la base de datos según el modelo de datos y el patrón principal de consulta, no según el sector de la aplicación. Las relaciones muy conectadas apuntan a Amazon Neptune; los documentos compatibles con MongoDB, a Amazon DocumentDB; las cargas Cassandra, a Amazon Keyspaces; las consultas por intervalos de tiempo, a Amazon Timestream; las búsquedas por clave, a Amazon DynamoDB; y el análisis a gran escala, a Amazon Redshift.",
+      "whenToUse": [
+        "Necesitas recorrer relaciones entre entidades conectadas: elige Amazon Neptune.",
+        "Tu aplicación actual requiere compatibilidad con MongoDB o Apache Cassandra: evalúa Amazon DocumentDB o Amazon Keyspaces, respectivamente.",
+        "Recibes mediciones a lo largo del tiempo y consultas intervalos temporales: elige Amazon Timestream.",
+        "Debes separar el acceso de la aplicación por clave y de baja latencia de los reportes analíticos a gran escala: evalúa Amazon DynamoDB y Amazon Redshift para cada carga."
+      ],
+      "keyFacts": [
+        "Amazon DynamoDB es una base de datos administrada de clave-valor y documentos que ofrece rendimiento de milisegundos de un solo dígito a cualquier escala.",
+        "Amazon DocumentDB es una base de datos de documentos administrada, compatible con MongoDB, para cargas JSON.",
+        "Amazon Neptune es una base de datos de grafos administrada para conjuntos de datos muy conectados y admite los modelos Property Graph y RDF.",
+        "Amazon Keyspaces es un servicio administrado y serverless compatible con Apache Cassandra que admite el código y las herramientas existentes de Cassandra.",
+        "Amazon Timestream es una base de datos de series temporales serverless que procesa datos por intervalos de tiempo; Amazon Redshift es un almacén de datos administrado para análisis a gran escala."
+      ],
+      "gotchas": [
+        "Tener datos JSON no implica que necesites compatibilidad con MongoDB: Amazon DynamoDB también admite un modelo de documentos.",
+        "Para investigar fraude mediante relaciones, necesitas recorrer un grafo, no solo buscar entidades por clave.",
+        "Las mediciones repetidas no justifican una base wide-column si el requisito decisivo es analizarlas por intervalos de tiempo.",
+        "Amazon Redshift sirve para análisis a gran escala, no para el patrón de acceso de baja latencia por clave de una aplicación."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon DynamoDB vs. Amazon DocumentDB",
+          "difference": "Ambos pueden almacenar documentos; elige Amazon DocumentDB si necesitas compatibilidad con MongoDB y Amazon DynamoDB para acceso por clave con rendimiento de milisegundos de un solo dígito."
+        },
+        {
+          "concept": "Amazon Keyspaces vs. Amazon Timestream",
+          "difference": "Elige Amazon Keyspaces para cargas compatibles con Cassandra; elige Amazon Timestream si analizas mediciones por intervalos de tiempo."
+        },
+        {
+          "concept": "Amazon Neptune vs. Amazon Redshift",
+          "difference": "Amazon Neptune recorre grafos muy conectados; Amazon Redshift admite análisis de almacén de datos a gran escala."
+        }
+      ],
+      "examCues": [
+        "traverse relationships between accounts and devices",
+        "retain MongoDB-compatible application code",
+        "reuse Cassandra application code and tools",
+        "analyze sensor readings over time intervals",
+        "key-value lookups versus large-scale analytical reporting"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html",
+      "https://docs.aws.amazon.com/decision-guides/latest/databases-on-aws-how-to-choose/databases-on-aws-how-to-choose.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "purpose-built-databases--38b00e48",
+      "conceptId": "purpose-built-databases",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A payment company links customer accounts, devices, and merchants to investigate suspicious activity. Investigators need to follow chains of relationships between entities rather than retrieve records only by account ID. Which managed database best supports this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB for key-value records indexed by account ID",
+          "correct": false,
+          "why": "Key-value access by account ID does not address the required navigation of relationship chains."
+        },
+        {
+          "id": "B",
+          "text": "Amazon Redshift for analytical tables of each entity",
+          "correct": false,
+          "why": "Redshift is a data warehouse for large-scale analytics rather than a purpose-built graph database."
+        },
+        {
+          "id": "C",
+          "text": "Amazon Neptune for the connected entity data",
+          "correct": true,
+          "why": "Neptune is a managed graph database designed to query highly connected datasets."
+        },
+        {
+          "id": "D",
+          "text": "Amazon DocumentDB for JSON records of each entity",
+          "correct": false,
+          "why": "A document model does not specifically meet the stated need to traverse connected relationships."
+        }
+      ],
+      "explanation": "The deciding requirement is following chains of relationships among accounts, devices, and merchants. Amazon Neptune is purpose-built for querying highly connected datasets and is fully managed. DynamoDB can provide fast access to records by key, but that is not the investigators' primary query pattern. Redshift addresses large-scale analytics, not the requested graph application.",
+      "keywordCues": [
+        "follow chains of relationships",
+        "rather than retrieve records only by account ID",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html",
+        "https://docs.aws.amazon.com/decision-guides/latest/databases-on-aws-how-to-choose/databases-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Una empresa de pagos relaciona cuentas de clientes, dispositivos y comercios para investigar actividades sospechosas. Los investigadores necesitan seguir cadenas de relaciones entre entidades, en lugar de recuperar registros solo por ID de cuenta. ¿Qué base de datos administrada cumple mejor este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Amazon DynamoDB para registros de clave-valor indexados por ID de cuenta",
+            "why": "El acceso por clave mediante el ID de cuenta no resuelve la necesidad de recorrer cadenas de relaciones."
+          },
+          {
+            "id": "B",
+            "text": "Amazon Redshift para tablas analíticas de cada entidad",
+            "why": "Redshift es un almacén de datos para análisis a gran escala, no una base de datos de grafos especializada."
+          },
+          {
+            "id": "C",
+            "text": "Amazon Neptune para los datos de entidades conectadas",
+            "why": "Neptune es una base de datos de grafos administrada, diseñada para consultar conjuntos de datos muy conectados."
+          },
+          {
+            "id": "D",
+            "text": "Amazon DocumentDB para registros JSON de cada entidad",
+            "why": "El modelo de documentos no responde específicamente a la necesidad de recorrer relaciones conectadas."
+          }
+        ],
+        "explanation": "El requisito decisivo es seguir cadenas de relaciones entre cuentas, dispositivos y comercios. Amazon Neptune está diseñado para consultar conjuntos de datos muy conectados y es totalmente administrado. DynamoDB puede acceder rápidamente a registros por clave, pero ese no es el patrón principal de consulta. Redshift está orientado al análisis a gran escala, no a esta aplicación de grafos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "purpose-built-databases--c4e7726b",
+      "conceptId": "purpose-built-databases",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing platform stores article metadata and contributor profiles as JSON documents. Its existing application uses MongoDB-compatible code, which the team wants to retain while moving database operations to a managed AWS service. Which database meets these requirements with the LEAST application rework?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon DynamoDB for the JSON document workload",
+          "correct": false,
+          "why": "DynamoDB supports document data, but the stated compatibility requirement points to a MongoDB-compatible service."
+        },
+        {
+          "id": "B",
+          "text": "Amazon DocumentDB for the JSON document workload",
+          "correct": true,
+          "why": "DocumentDB is a fully managed document database with MongoDB compatibility."
+        },
+        {
+          "id": "C",
+          "text": "Amazon Neptune for the contributor and article data",
+          "correct": false,
+          "why": "Neptune targets graph queries and does not satisfy the stated MongoDB compatibility requirement."
+        },
+        {
+          "id": "D",
+          "text": "Amazon Keyspaces for the document workload",
+          "correct": false,
+          "why": "Keyspaces is compatible with Apache Cassandra, not the stated MongoDB-compatible application."
+        }
+      ],
+      "explanation": "The application must retain MongoDB-compatible code while using a managed document database. Amazon DocumentDB is the purpose-built choice for that combination. DynamoDB also supports document data, but JSON alone is not the deciding clue: MongoDB compatibility is. Keyspaces offers Cassandra compatibility instead.",
+      "keywordCues": [
+        "JSON documents",
+        "MongoDB-compatible code",
+        "LEAST application rework"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html",
+        "https://docs.aws.amazon.com/decision-guides/latest/databases-on-aws-how-to-choose/databases-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Una plataforma editorial guarda metadatos de artículos y perfiles de colaboradores como documentos JSON. Su aplicación actual usa código compatible con MongoDB, que el equipo quiere conservar al trasladar las operaciones de la base de datos a un servicio administrado de AWS. ¿Qué base de datos cumple estos requisitos con el LEAST application rework?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Amazon DynamoDB para la carga de documentos JSON",
+            "why": "DynamoDB admite documentos, pero el requisito de compatibilidad apunta a un servicio compatible con MongoDB."
+          },
+          {
+            "id": "B",
+            "text": "Amazon DocumentDB para la carga de documentos JSON",
+            "why": "DocumentDB es una base de datos de documentos totalmente administrada y compatible con MongoDB."
+          },
+          {
+            "id": "C",
+            "text": "Amazon Neptune para los datos de colaboradores y artículos",
+            "why": "Neptune se orienta a consultas de grafos y no satisface el requisito de compatibilidad con MongoDB."
+          },
+          {
+            "id": "D",
+            "text": "Amazon Keyspaces para la carga de documentos",
+            "why": "Keyspaces es compatible con Apache Cassandra, no con la aplicación compatible con MongoDB descrita."
+          }
+        ],
+        "explanation": "La aplicación debe conservar su código compatible con MongoDB y usar una base de datos de documentos administrada. Amazon DocumentDB responde a esa combinación. DynamoDB también admite documentos, pero JSON no es la pista decisiva: lo es la compatibilidad con MongoDB. Keyspaces ofrece compatibilidad con Cassandra."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "purpose-built-databases--c09c3700",
+      "conceptId": "purpose-built-databases",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics provider runs a fleet-management application backed by Apache Cassandra. Developers want to continue using their Cassandra application code and tools, while the operations team wants to stop provisioning and patching database servers as traffic changes. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the workload to Amazon Keyspaces",
+          "correct": true,
+          "why": "Keyspaces is managed, serverless, and compatible with existing Cassandra application code and tools."
+        },
+        {
+          "id": "B",
+          "text": "Move the workload to Amazon Timestream",
+          "correct": false,
+          "why": "Timestream is designed for time series data, not for retaining Cassandra code and tools."
+        },
+        {
+          "id": "C",
+          "text": "Run Apache Cassandra on Amazon EC2 instances",
+          "correct": false,
+          "why": "Self-hosting Cassandra retains server provisioning and patching responsibilities."
+        },
+        {
+          "id": "D",
+          "text": "Move the workload to Amazon DynamoDB",
+          "correct": false,
+          "why": "DynamoDB is managed but does not provide the stated Cassandra compatibility."
+        }
+      ],
+      "explanation": "The existing Cassandra code and tools are the strongest selection criteria. Amazon Keyspaces supports Cassandra workloads without requiring the team to provision or patch servers, and its tables can scale with traffic. Running Cassandra on EC2 preserves the code but fails the operational-overhead requirement. DynamoDB is managed but does not meet the specified compatibility need.",
+      "keywordCues": [
+        "Apache Cassandra",
+        "continue using their Cassandra application code and tools",
+        "stop provisioning and patching database servers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html",
+        "https://docs.aws.amazon.com/decision-guides/latest/databases-on-aws-how-to-choose/databases-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Un proveedor de logística ejecuta una aplicación de gestión de flotas respaldada por Apache Cassandra. Los desarrolladores quieren seguir usando su código y herramientas de Cassandra, mientras que el equipo de operaciones quiere dejar de aprovisionar y aplicar parches a servidores de bases de datos cuando cambie el tráfico. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Trasladar la carga a Amazon Keyspaces",
+            "why": "Keyspaces es administrado, serverless y compatible con el código y las herramientas existentes de Cassandra."
+          },
+          {
+            "id": "B",
+            "text": "Trasladar la carga a Amazon Timestream",
+            "why": "Timestream está diseñado para series temporales, no para conservar código y herramientas de Cassandra."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar Apache Cassandra en instancias de Amazon EC2",
+            "why": "Alojar Cassandra por cuenta propia mantiene la responsabilidad de aprovisionar servidores y aplicarles parches."
+          },
+          {
+            "id": "D",
+            "text": "Trasladar la carga a Amazon DynamoDB",
+            "why": "DynamoDB es administrado, pero no ofrece la compatibilidad con Cassandra requerida."
+          }
+        ],
+        "explanation": "El código y las herramientas existentes de Cassandra son los criterios de selección más importantes. Amazon Keyspaces admite esas cargas sin que el equipo tenga que aprovisionar servidores ni aplicarles parches, y sus tablas pueden escalar con el tráfico. Ejecutar Cassandra en EC2 conserva el código, pero no cumple el requisito de bajo esfuerzo operativo. DynamoDB es administrado, pero no satisface la compatibilidad indicada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "purpose-built-databases--24c00abe",
+      "conceptId": "purpose-built-databases",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A gaming company is separating two workloads. Its player service must retrieve profile records by player ID with single-digit millisecond performance at scale; a reporting team must analyze large volumes of historical activity in a managed data warehouse. Which TWO databases best match the respective workloads? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Amazon Timestream for historical activity reporting",
+          "correct": false,
+          "why": "Timestream targets time series and time-interval queries, while this team explicitly needs a data warehouse."
+        },
+        {
+          "id": "B",
+          "text": "Amazon DynamoDB for player profile lookups",
+          "correct": true,
+          "why": "DynamoDB supports key-value access with single-digit millisecond performance at scale."
+        },
+        {
+          "id": "C",
+          "text": "Amazon Neptune for player profile lookups",
+          "correct": false,
+          "why": "Neptune targets highly connected graph queries rather than the stated lookups by player ID."
+        },
+        {
+          "id": "D",
+          "text": "Amazon Redshift for historical activity reporting",
+          "correct": true,
+          "why": "Redshift is a managed data warehouse designed for large-scale analytics."
+        },
+        {
+          "id": "E",
+          "text": "Amazon DocumentDB for historical activity reporting",
+          "correct": false,
+          "why": "DocumentDB is a MongoDB-compatible document database rather than a large-scale analytical data warehouse."
+        }
+      ],
+      "explanation": "These are two different access patterns, so they need not share a database. DynamoDB matches key-based player lookups requiring single-digit millisecond performance at scale. Redshift matches the reporting team's requirement for a managed data warehouse and large-scale analytics. Timestream would be a stronger candidate if time-interval analysis, rather than warehousing, were the deciding requirement.",
+      "keywordCues": [
+        "by player ID",
+        "single-digit millisecond performance at scale",
+        "managed data warehouse",
+        "Choose two."
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database.html",
+        "https://docs.aws.amazon.com/decision-guides/latest/databases-on-aws-how-to-choose/databases-on-aws-how-to-choose.html"
+      ],
+      "es": {
+        "stem": "Una empresa de videojuegos está separando dos cargas. Su servicio de jugadores debe recuperar perfiles por ID de jugador con rendimiento de milisegundos de un solo dígito a escala; un equipo de reportes debe analizar grandes volúmenes de actividad histórica en un almacén de datos administrado. ¿Qué DOS bases de datos se ajustan mejor a las cargas respectivas? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Amazon Timestream para los reportes de actividad histórica",
+            "why": "Timestream se orienta a series temporales y consultas por intervalos, mientras que este equipo requiere expresamente un almacén de datos."
+          },
+          {
+            "id": "B",
+            "text": "Amazon DynamoDB para buscar perfiles de jugadores",
+            "why": "DynamoDB admite acceso por clave con rendimiento de milisegundos de un solo dígito a escala."
+          },
+          {
+            "id": "C",
+            "text": "Amazon Neptune para buscar perfiles de jugadores",
+            "why": "Neptune está orientado a consultas de grafos muy conectados, no a las búsquedas por ID de jugador descritas."
+          },
+          {
+            "id": "D",
+            "text": "Amazon Redshift para los reportes de actividad histórica",
+            "why": "Redshift es un almacén de datos administrado diseñado para análisis a gran escala."
+          },
+          {
+            "id": "E",
+            "text": "Amazon DocumentDB para los reportes de actividad histórica",
+            "why": "DocumentDB es una base de documentos compatible con MongoDB, no un almacén de datos para análisis a gran escala."
+          }
+        ],
+        "explanation": "Son dos patrones de acceso distintos, así que no tienen que compartir una base de datos. DynamoDB se ajusta a las búsquedas por clave de perfiles de jugadores que requieren rendimiento de milisegundos de un solo dígito a escala. Redshift cumple el requisito de un almacén de datos administrado para análisis a gran escala. Timestream sería un candidato más fuerte si el requisito decisivo fuera analizar intervalos de tiempo y no usar un almacén de datos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "purpose-built-databases--r0",
+      "conceptId": "purpose-built-databases",
+      "kind": "recall",
+      "prompt": "A fleet app must retain Cassandra code and tools but stop managing database servers. Which service fits, and why?",
+      "promptEs": "Una app de flotas debe conservar su código y herramientas de Cassandra, pero dejar de administrar servidores de bases de datos. ¿Qué servicio eliges y por qué?",
+      "idealAnswer": "Choose Amazon Keyspaces. It is a managed, serverless Apache Cassandra–compatible database service that supports existing Cassandra application code and tools without requiring you to provision or patch servers.",
+      "rubric": [
+        "Names Amazon Keyspaces.",
+        "Identifies Apache Cassandra compatibility for existing code and tools.",
+        "Explains that the team does not need to provision or patch database servers."
+      ]
+    }
+  ]
+}

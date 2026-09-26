@@ -1,0 +1,343 @@
+{
+  "conceptId": "nat-gateway-per-az-design",
+  "card": {
+    "en": {
+      "tldr": "A public NAT gateway lets instances in private subnets initiate internet connections without allowing the internet to initiate connections to them. For a multi-AZ workload, choose a NAT gateway in each AZ when outbound access must remain resilient; consider a shared gateway when reducing the number of gateways matters more than that resilience.",
+      "whenToUse": [
+        "Production private subnets in multiple AZs need resilient outbound internet access: place a public NAT gateway in each AZ and route each private subnet to its local gateway.",
+        "A non-production workload accepts dependence on another AZ's NAT gateway and prioritizes fewer hourly gateway charges: share one gateway.",
+        "Substantial traffic would otherwise cross AZs to reach a shared gateway: evaluate a NAT gateway in each AZ."
+      ],
+      "keyFacts": [
+        "A private subnet can route 0.0.0.0/0 to a public NAT gateway in a public subnet; the public subnet routes internet-bound traffic to an internet gateway.",
+        "A private subnet in one AZ can route through a NAT gateway in another AZ, but placing a gateway in each AZ improves resiliency.",
+        "NAT gateways incur charges for each hour available and each gigabyte processed.",
+        "Keeping resources in the same AZ as their NAT gateway can reduce cross-AZ data transfer charges.",
+        "A private NAT gateway serves private-network connectivity use cases, not this outbound-internet design."
+      ],
+      "gotchas": [
+        "A single shared gateway can serve private subnets in multiple AZs, but it leaves their outbound access dependent on the gateway's AZ.",
+        "A gateway in each AZ does not provide local outbound access unless each private subnet's route points to the gateway in its AZ.",
+        "More gateways increase hourly gateway charges; local routing can reduce cross-AZ transfer charges, so compare the requirements rather than assuming one layout is always cheapest."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Private NAT gateway",
+          "difference": "Use a public NAT gateway for private-subnet outbound internet access; the excerpt uses private NAT gateways for private-network connectivity."
+        },
+        {
+          "concept": "VPC endpoint",
+          "difference": "An endpoint can be worth evaluating for traffic to supported AWS services, but it does not replace the required general internet route."
+        }
+      ],
+      "examCues": [
+        "private subnets in two AZs need resilient internet egress",
+        "non-production accepts an AZ dependency",
+        "large cross-AZ volume to a shared NAT gateway",
+        "minimize hourly gateway charges"
+      ]
+    },
+    "es": {
+      "tldr": "Un public NAT gateway permite que las instancias en subredes privadas inicien conexiones a internet sin permitir que internet inicie conexiones hacia ellas. Para una carga en varias AZ, elige un NAT gateway por AZ si la salida debe ser resiliente; considera uno compartido si importa más reducir la cantidad de gateways.",
+      "whenToUse": [
+        "Las subredes privadas de producción en varias AZ necesitan acceso resiliente a internet: coloca un public NAT gateway en cada AZ y dirige cada subred privada a su gateway local.",
+        "Una carga no productiva acepta depender del NAT gateway de otra AZ y prioriza menos cargos por hora de gateways: comparte uno.",
+        "Un volumen considerable de tráfico cruzaría AZ para llegar a un gateway compartido: evalúa un NAT gateway por AZ."
+      ],
+      "keyFacts": [
+        "Una subred privada puede dirigir 0.0.0.0/0 a un public NAT gateway en una subred pública; la subred pública dirige el tráfico hacia internet a un internet gateway.",
+        "Una subred privada de una AZ puede usar un NAT gateway de otra AZ, pero colocar uno en cada AZ mejora la resiliencia.",
+        "Los NAT gateways generan cargos por cada hora disponible y por cada gigabyte procesado.",
+        "Mantener los recursos en la misma AZ que su NAT gateway puede reducir los cargos por transferencia entre AZ.",
+        "Un private NAT gateway sirve para casos de conectividad con redes privadas, no para este diseño de salida a internet."
+      ],
+      "gotchas": [
+        "Un solo gateway compartido puede atender subredes privadas de varias AZ, pero su salida dependerá de la AZ del gateway.",
+        "Tener un gateway por AZ no proporciona salida local si la ruta de cada subred privada no apunta al gateway de su AZ.",
+        "Más gateways aumentan los cargos por hora; el enrutamiento local puede reducir cargos de transferencia entre AZ. Compara los requisitos en vez de asumir que un diseño siempre cuesta menos."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Private NAT gateway",
+          "difference": "Usa un public NAT gateway para la salida a internet desde subredes privadas; el extracto usa private NAT gateways para conectividad entre redes privadas."
+        },
+        {
+          "concept": "VPC endpoint",
+          "difference": "Puede valer la pena evaluar un endpoint para el tráfico a servicios de AWS compatibles, pero no sustituye la ruta general a internet requerida."
+        }
+      ],
+      "examCues": [
+        "private subnets in two AZs need resilient internet egress",
+        "non-production accepts an AZ dependency",
+        "large cross-AZ volume to a shared NAT gateway",
+        "minimize hourly gateway charges"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-scenarios.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "nat-gateway-per-az-design--1be8edfe",
+      "conceptId": "nat-gateway-per-az-design",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing company runs application instances in private subnets across two AZs. The instances must download updates from internet repositories, and an AZ failure must not make outbound access in the surviving AZ depend on the failed AZ. Which solution meets these requirements while keeping the instances private?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place a private NAT gateway in each AZ and route each private subnet's default traffic to its local gateway for internet access.",
+          "correct": false,
+          "why": "The documented internet-egress pattern uses public, not private, NAT gateways."
+        },
+        {
+          "id": "B",
+          "text": "Place a public NAT gateway in each AZ, but route both private subnets' default traffic to the gateway in the first AZ.",
+          "correct": false,
+          "why": "The gateway in the second AZ would not be used by its private subnet."
+        },
+        {
+          "id": "C",
+          "text": "Place a public NAT gateway in each AZ and route each private subnet's default traffic to the gateway in its own AZ.",
+          "correct": true,
+          "why": "Each private subnet uses local outbound access without depending on the other AZ's gateway."
+        },
+        {
+          "id": "D",
+          "text": "Place one public NAT gateway in the first AZ and route both private subnets' default traffic to it.",
+          "correct": false,
+          "why": "The second AZ's outbound access would depend on a gateway in the first AZ."
+        }
+      ],
+      "explanation": "The deciding requirement is outbound internet access that remains independent of the other AZ. AWS documents a public NAT gateway for private-subnet internet egress and recommends a gateway in each AZ to improve resiliency. Each private subnet must route to its local gateway; merely provisioning a second gateway does not achieve that routing. A shared gateway leaves one AZ dependent on the other.",
+      "keywordCues": [
+        "private subnets across two AZs",
+        "download updates from internet repositories",
+        "must not make outbound access in the surviving AZ depend on the failed AZ"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-scenarios.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta instancias de aplicación en subredes privadas de dos AZ. Las instancias deben descargar actualizaciones de repositorios en internet, y una falla de AZ no debe hacer que la salida de la AZ restante dependa de la AZ afectada. ¿Qué solución cumple estos requisitos y mantiene privadas las instancias?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Coloca un private NAT gateway en cada AZ y dirige el tráfico predeterminado de cada subred privada a su gateway local para acceder a internet.",
+            "why": "El diseño documentado para la salida a internet usa public NAT gateways, no private NAT gateways."
+          },
+          {
+            "id": "B",
+            "text": "Coloca un public NAT gateway en cada AZ, pero dirige el tráfico predeterminado de ambas subredes privadas al gateway de la primera AZ.",
+            "why": "La subred privada de la segunda AZ no usaría su propio gateway."
+          },
+          {
+            "id": "C",
+            "text": "Coloca un public NAT gateway en cada AZ y dirige el tráfico predeterminado de cada subred privada al gateway de su AZ.",
+            "why": "Cada subred privada usa una salida local sin depender del gateway de la otra AZ."
+          },
+          {
+            "id": "D",
+            "text": "Coloca un public NAT gateway en la primera AZ y dirige el tráfico predeterminado de ambas subredes privadas hacia él.",
+            "why": "La salida de la segunda AZ dependería de un gateway en la primera AZ."
+          }
+        ],
+        "explanation": "El requisito decisivo es que la salida a internet no dependa de la otra AZ. AWS documenta el uso de un public NAT gateway para la salida desde subredes privadas y recomienda uno por AZ para mejorar la resiliencia. Cada subred privada debe dirigirse a su gateway local; crear un segundo gateway sin cambiar las rutas no basta. Un gateway compartido mantiene la dependencia entre AZ."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-gateway-per-az-design--0706c26e",
+      "conceptId": "nat-gateway-per-az-design",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A retailer operates separate production and development VPCs, each with private subnets in two AZs that need occasional outbound access to public internet hosts. Production must retain outbound access in a surviving AZ after an AZ disruption; development accepts that dependency and seeks to minimize gateway hourly charges. Which TWO configurations meet the respective environments' requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "In production, deploy a private NAT gateway in each AZ and route each private subnet to its local gateway for internet access.",
+          "correct": false,
+          "why": "The internet-egress requirement calls for public NAT gateways rather than private NAT gateways."
+        },
+        {
+          "id": "B",
+          "text": "In development, deploy one public NAT gateway and route both AZs' private subnets to it.",
+          "correct": true,
+          "why": "A single gateway reduces hourly gateway charges while accepting the stated AZ dependency."
+        },
+        {
+          "id": "C",
+          "text": "In production, deploy one public NAT gateway and route both AZs' private subnets to it.",
+          "correct": false,
+          "why": "Production outbound access in one AZ would depend on a gateway in the other AZ."
+        },
+        {
+          "id": "D",
+          "text": "In production, deploy a public NAT gateway in each AZ and route each private subnet to its local gateway.",
+          "correct": true,
+          "why": "Production private subnets get outbound access without relying on a gateway in the other AZ."
+        },
+        {
+          "id": "E",
+          "text": "In development, deploy a public NAT gateway in each AZ and route each private subnet locally.",
+          "correct": false,
+          "why": "The second gateway adds an hourly charge despite development's acceptance of the AZ dependency."
+        }
+      ],
+      "explanation": "Production requires AZ-local outbound internet access, so it needs a public NAT gateway in each AZ with each private subnet routed locally. Development explicitly accepts an AZ dependency and prioritizes fewer hourly gateway charges, making one shared public NAT gateway appropriate. Giving production only one gateway misses its resilience requirement. Giving development two gateways adds a charge for resilience it does not require.",
+      "keywordCues": [
+        "separate production and development VPCs",
+        "public internet hosts",
+        "Production must retain outbound access in a surviving AZ",
+        "development accepts that dependency",
+        "minimize gateway hourly charges"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-scenarios.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+      ],
+      "es": {
+        "stem": "Un minorista opera VPC separadas para producción y desarrollo, cada una con subredes privadas en dos AZ que necesitan salida ocasional a hosts en internet público. Producción debe conservar la salida en la AZ restante tras una interrupción de AZ; desarrollo acepta esa dependencia y busca minimizar los cargos por hora de gateways. ¿Qué DOS configuraciones cumplen los requisitos de cada entorno? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "En producción, implementa un private NAT gateway en cada AZ y dirige cada subred privada a su gateway local para acceder a internet.",
+            "why": "El requisito de salida a internet exige public NAT gateways, no private NAT gateways."
+          },
+          {
+            "id": "B",
+            "text": "En desarrollo, implementa un public NAT gateway y dirige hacia él las subredes privadas de ambas AZ.",
+            "why": "Un solo gateway reduce los cargos por hora de gateways y acepta la dependencia entre AZ indicada."
+          },
+          {
+            "id": "C",
+            "text": "En producción, implementa un public NAT gateway y dirige hacia él las subredes privadas de ambas AZ.",
+            "why": "La salida de producción en una AZ dependería de un gateway en la otra AZ."
+          },
+          {
+            "id": "D",
+            "text": "En producción, implementa un public NAT gateway en cada AZ y dirige cada subred privada a su gateway local.",
+            "why": "Las subredes privadas de producción obtienen salida sin depender de un gateway en la otra AZ."
+          },
+          {
+            "id": "E",
+            "text": "En desarrollo, implementa un public NAT gateway en cada AZ y dirige cada subred privada a su gateway local.",
+            "why": "El segundo gateway agrega un cargo por hora aunque desarrollo acepta la dependencia entre AZ."
+          }
+        ],
+        "explanation": "Producción requiere salida a internet local por AZ, así que necesita un public NAT gateway en cada AZ y rutas locales para cada subred privada. Desarrollo acepta explícitamente la dependencia entre AZ y prioriza menos cargos por hora de gateways; por eso corresponde un public NAT gateway compartido. Un único gateway en producción no cumple la resiliencia requerida. Dos gateways en desarrollo agregan un cargo por una resiliencia que no se exige."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nat-gateway-per-az-design--79d2390a",
+      "conceptId": "nat-gateway-per-az-design",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio keeps short-lived test workers in private subnets in two AZs. The workers occasionally fetch files from internet hosts, and the team explicitly accepts losing outbound access during an AZ disruption. Gateway hourly charges dominate this environment's budget. Which design meets the requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Give both private subnets a default route directly to the internet gateway instead of deploying a NAT gateway.",
+          "correct": false,
+          "why": "The documented private-subnet internet-egress route targets a public NAT gateway, not the internet gateway directly."
+        },
+        {
+          "id": "B",
+          "text": "Deploy one public NAT gateway in a public subnet and route both private subnets' internet-bound traffic to it.",
+          "correct": true,
+          "why": "One gateway serves both AZs while avoiding the hourly charge for a second gateway."
+        },
+        {
+          "id": "C",
+          "text": "Deploy one private NAT gateway and route both private subnets' internet-bound traffic to it.",
+          "correct": false,
+          "why": "A private NAT gateway is not the documented solution for outbound internet access."
+        },
+        {
+          "id": "D",
+          "text": "Deploy a public NAT gateway in each AZ and route each private subnet to its local gateway.",
+          "correct": false,
+          "why": "This adds a second gateway's hourly charge for resilience the team does not require."
+        }
+      ],
+      "explanation": "The team accepts the AZ dependency and wants to minimize gateway hourly charges. AWS shows that a private subnet in one AZ can route to a NAT gateway in another AZ, so one public NAT gateway can serve both. A gateway per AZ would improve resiliency but incur another gateway's hourly charge. Private NAT gateways address different connectivity scenarios.",
+      "keywordCues": [
+        "private subnets in two AZs",
+        "occasionally fetch files from internet hosts",
+        "explicitly accepts losing outbound access during an AZ disruption",
+        "Gateway hourly charges dominate"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-scenarios.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño mantiene workers de prueba temporales en subredes privadas de dos AZ. Los workers descargan archivos ocasionalmente de hosts en internet, y el equipo acepta explícitamente perder la salida durante una interrupción de AZ. Los cargos por hora de gateways dominan el presupuesto de este entorno. ¿Qué diseño cumple los requisitos de la forma MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asigna a ambas subredes privadas una ruta predeterminada directa al internet gateway en lugar de implementar un NAT gateway.",
+            "why": "La ruta documentada para la salida a internet desde una subred privada apunta a un public NAT gateway, no directamente al internet gateway."
+          },
+          {
+            "id": "B",
+            "text": "Implementa un public NAT gateway en una subred pública y dirige hacia él el tráfico a internet de ambas subredes privadas.",
+            "why": "Un gateway atiende ambas AZ y evita el cargo por hora de un segundo gateway."
+          },
+          {
+            "id": "C",
+            "text": "Implementa un private NAT gateway y dirige hacia él el tráfico a internet de ambas subredes privadas.",
+            "why": "Un private NAT gateway no es la solución documentada para la salida a internet."
+          },
+          {
+            "id": "D",
+            "text": "Implementa un public NAT gateway en cada AZ y dirige cada subred privada a su gateway local.",
+            "why": "Agrega el cargo por hora de un segundo gateway para una resiliencia que el equipo no exige."
+          }
+        ],
+        "explanation": "El equipo acepta la dependencia entre AZ y quiere minimizar los cargos por hora de gateways. AWS muestra que una subred privada de una AZ puede dirigirse a un NAT gateway de otra AZ, por lo que uno solo puede atender ambas. Un gateway por AZ mejoraría la resiliencia, pero agregaría un cargo por hora. Los private NAT gateways atienden otros casos de conectividad."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "nat-gateway-per-az-design--r0",
+      "conceptId": "nat-gateway-per-az-design",
+      "kind": "recall",
+      "prompt": "Private subnets in two AZs need resilient outbound internet access. How would you place and route public NAT gateways, and why?",
+      "promptEs": "Las subredes privadas de dos AZ necesitan salida resiliente a internet. ¿Cómo ubicarías y configurarías las rutas de los public NAT gateways, y por qué?",
+      "idealAnswer": "Place a public NAT gateway in each AZ and route each private subnet's internet-bound traffic to the gateway in its own AZ. This improves resiliency by avoiding dependence on a gateway in the other AZ and can reduce cross-AZ data transfer charges.",
+      "rubric": [
+        "States that the design uses public NAT gateways for outbound internet access.",
+        "Places one gateway in each AZ and routes each private subnet to its local gateway.",
+        "Explains the resilience benefit and the potential reduction in cross-AZ transfer charges."
+      ]
+    }
+  ]
+}

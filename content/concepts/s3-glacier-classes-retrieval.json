@@ -1,0 +1,438 @@
+{
+  "conceptId": "s3-glacier-classes-retrieval",
+  "card": {
+    "en": {
+      "tldr": "Choose the S3 Glacier storage class by how quickly a rarely accessed archive must be available: Instant Retrieval for immediate GET access, Flexible Retrieval for restores in minutes to hours, and Deep Archive when longer restores are acceptable. For objects already archived, choose the least costly retrieval option that fits the time window.",
+      "whenToUse": [
+        "Choose S3 Glacier Instant Retrieval when a rarely accessed archive still needs millisecond access.",
+        "Choose S3 Glacier Flexible Retrieval when the application can restore objects before using them, including occasional urgent restores.",
+        "Choose S3 Glacier Deep Archive when archived data rarely needs access and a restore taking up to 12 or 48 hours fits the requirement."
+      ],
+      "keyFacts": [
+        "S3 Glacier Instant Retrieval objects are immediately available with GET; Flexible Retrieval and Deep Archive objects require a restore first.",
+        "For S3 Glacier Flexible Retrieval, Expedited typically takes 1–5 minutes for objects under 250 MB; Standard typically takes 3–5 hours; Bulk typically takes 5–12 hours.",
+        "For S3 Glacier Deep Archive, Standard typically finishes within 12 hours and Bulk typically finishes within 48 hours. Expedited is unavailable.",
+        "Bulk is the lowest-cost retrieval option for S3 Glacier storage classes. Bulk retrievals from S3 Glacier Flexible Retrieval are free.",
+        "Without provisioned capacity, Expedited retrieval requests might not be accepted during periods of high demand."
+      ],
+      "gotchas": [
+        "Do not choose Flexible Retrieval with Expedited when the application needs immediate GET access: Expedited is still a restore.",
+        "Do not choose Deep Archive with Expedited; that retrieval option is unavailable.",
+        "Do not assume Bulk fits every archive deadline merely because it has the lowest retrieval cost."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Standard-IA and S3 One Zone-IA",
+          "difference": "These provide millisecond access for infrequently accessed data; the Glacier classes target rarely accessed, long-term archives, with only Instant Retrieval providing immediate access."
+        },
+        {
+          "concept": "S3 Intelligent-Tiering",
+          "difference": "Choose it for unknown or changing access patterns; its optional asynchronous archive tiers may still require a restore."
+        }
+      ],
+      "examCues": [
+        "rarely accessed archive, immediate GET",
+        "occasional urgent restore within minutes",
+        "existing Flexible Retrieval archive, several hours allowed",
+        "Deep Archive restore can wait up to 48 hours"
+      ]
+    },
+    "es": {
+      "tldr": "Elige la clase S3 Glacier según la rapidez con que debe estar disponible un archivo de acceso poco frecuente: Instant Retrieval para acceso inmediato mediante GET, Flexible Retrieval para restauraciones en minutos u horas y Deep Archive cuando se aceptan esperas más largas. Si los objetos ya están archivados, elige la opción de recuperación de menor costo que cumpla el plazo.",
+      "whenToUse": [
+        "Elige S3 Glacier Instant Retrieval si un archivo de acceso poco frecuente aún necesita acceso en milisegundos.",
+        "Elige S3 Glacier Flexible Retrieval si la aplicación puede restaurar los objetos antes de usarlos, incluso para solicitudes urgentes ocasionales.",
+        "Elige S3 Glacier Deep Archive si casi nunca se accede a los datos y una restauración de hasta 12 o 48 horas cumple el requisito."
+      ],
+      "keyFacts": [
+        "Los objetos de S3 Glacier Instant Retrieval están disponibles de inmediato mediante GET; los de Flexible Retrieval y Deep Archive requieren primero una restauración.",
+        "En S3 Glacier Flexible Retrieval, Expedited suele tardar de 1 a 5 minutos para objetos menores de 250 MB; Standard, de 3 a 5 horas; y Bulk, de 5 a 12 horas.",
+        "En S3 Glacier Deep Archive, Standard suele terminar en un máximo de 12 horas y Bulk en un máximo de 48 horas. Expedited no está disponible.",
+        "Bulk es la opción de recuperación de menor costo para las clases S3 Glacier. Las recuperaciones Bulk desde S3 Glacier Flexible Retrieval son gratuitas.",
+        "Sin Provisioned Capacity, es posible que las solicitudes Expedited no se acepten durante períodos de alta demanda."
+      ],
+      "gotchas": [
+        "No elijas Flexible Retrieval con Expedited si la aplicación necesita acceso inmediato mediante GET: Expedited también requiere una restauración.",
+        "No elijas Deep Archive con Expedited: esa opción no está disponible.",
+        "No supongas que Bulk cumple cualquier plazo solo porque tiene el menor costo de recuperación."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Standard-IA y S3 One Zone-IA",
+          "difference": "Ofrecen acceso en milisegundos para datos de acceso infrecuente; las clases Glacier se orientan a archivos de largo plazo a los que casi nunca se accede, y solo Instant Retrieval ofrece acceso inmediato."
+        },
+        {
+          "concept": "S3 Intelligent-Tiering",
+          "difference": "Elígela si el patrón de acceso es desconocido o cambia; sus niveles opcionales de archivo asíncrono pueden requerir una restauración."
+        }
+      ],
+      "examCues": [
+        "rarely accessed archive, immediate GET",
+        "occasional urgent restore within minutes",
+        "existing Flexible Retrieval archive, several hours allowed",
+        "Deep Archive restore can wait up to 48 hours"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-glacier",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-glacier-classes-retrieval--7e266aa0",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "secondaryConcepts": [
+        "s3-infrequent-access-classes",
+        "s3-intelligent-tiering"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum keeps digitized exhibit files for long-term preservation. Curators open a small selection only a few times a year, but the viewing application must serve any selected file immediately with millisecond access and cannot wait for a restore. Which storage class is designed for this archive while meeting the access requirement MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "S3 Intelligent-Tiering with Archive Access activated",
+          "correct": false,
+          "why": "Objects in its Archive Access tier require a restore, which conflicts with immediate viewing."
+        },
+        {
+          "id": "B",
+          "text": "S3 Glacier Instant Retrieval",
+          "correct": true,
+          "why": "It is designed for rarely accessed, long-term data that must remain available immediately."
+        },
+        {
+          "id": "C",
+          "text": "S3 Standard-IA",
+          "correct": false,
+          "why": "It provides millisecond access, but Glacier Instant Retrieval is designed for long-term data that is rarely accessed and needs that speed."
+        },
+        {
+          "id": "D",
+          "text": "S3 Glacier Flexible Retrieval",
+          "correct": false,
+          "why": "Its archived objects require a restore before the application can access them."
+        }
+      ],
+      "explanation": "The deciding constraint is immediate millisecond access to a known, rarely accessed long-term archive. S3 Glacier Instant Retrieval is designed for that combination and supports immediate GET access. S3 Standard-IA also provides millisecond access, but is positioned for infrequently accessed data rather than rarely accessed archives. Flexible Retrieval and the Intelligent-Tiering Archive Access tier require restoration.",
+      "keywordCues": [
+        "only a few times a year",
+        "immediately with millisecond access",
+        "cannot wait for a restore"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-glacier",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
+      ],
+      "es": {
+        "stem": "Un museo conserva archivos digitales de exhibiciones a largo plazo. Los curadores abren una pequeña selección solo algunas veces al año, pero la aplicación debe mostrar cualquier archivo seleccionado de inmediato, con acceso en milisegundos y sin esperar una restauración. ¿Qué clase de almacenamiento está diseñada para este archivo y cumple el requisito de acceso MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "S3 Intelligent-Tiering con Archive Access activado",
+            "why": "Los objetos en Archive Access requieren una restauración, lo que impide mostrarlos de inmediato."
+          },
+          {
+            "id": "B",
+            "text": "S3 Glacier Instant Retrieval",
+            "why": "Está diseñada para datos de largo plazo a los que casi nunca se accede y que deben estar disponibles de inmediato."
+          },
+          {
+            "id": "C",
+            "text": "S3 Standard-IA",
+            "why": "Ofrece acceso en milisegundos, pero Glacier Instant Retrieval está diseñada para datos de largo plazo a los que casi nunca se accede y que necesitan esa rapidez."
+          },
+          {
+            "id": "D",
+            "text": "S3 Glacier Flexible Retrieval",
+            "why": "Sus objetos archivados requieren una restauración antes de que la aplicación pueda acceder a ellos."
+          }
+        ],
+        "explanation": "La condición decisiva es el acceso inmediato en milisegundos a un archivo de largo plazo con acceso poco frecuente y predecible. S3 Glacier Instant Retrieval está diseñada para esa combinación y permite acceso inmediato mediante GET. S3 Standard-IA también ofrece acceso en milisegundos, pero está orientada a datos de acceso infrecuente, no a archivos a los que casi nunca se accede. Flexible Retrieval y Archive Access de Intelligent-Tiering requieren restauración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-glacier-classes-retrieval--7bc63e33",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company already archives completed production footage in S3 Glacier Flexible Retrieval. A monthly review can wait for restorations that typically finish within 12 hours, and the team wants the lowest-cost retrieval option for these existing objects. Which approach meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the objects to S3 Glacier Instant Retrieval before each review.",
+          "correct": false,
+          "why": "Immediate access is unnecessary, and changing storage classes is not needed to retrieve the existing archive."
+        },
+        {
+          "id": "B",
+          "text": "Use Bulk retrieval for the Flexible Retrieval objects.",
+          "correct": true,
+          "why": "Bulk is the lowest-cost retrieval option and typically finishes within 5–12 hours for these objects."
+        },
+        {
+          "id": "C",
+          "text": "Use Expedited retrieval for the Flexible Retrieval objects.",
+          "correct": false,
+          "why": "It is faster than required and is charged at a premium rate."
+        },
+        {
+          "id": "D",
+          "text": "Use Standard retrieval for the Flexible Retrieval objects.",
+          "correct": false,
+          "why": "It meets the time window, but Bulk is the lower-cost retrieval option."
+        }
+      ],
+      "explanation": "The review allows the typical 5–12-hour Bulk retrieval time for objects already in Flexible Retrieval. Bulk is the lowest-cost S3 Glacier retrieval option, and Bulk retrievals from Flexible Retrieval are free. Standard also meets the deadline but does not satisfy the lowest-cost retrieval requirement as well. Expedited pays for speed the team does not need.",
+      "keywordCues": [
+        "already archives",
+        "typically finish within 12 hours",
+        "lowest-cost retrieval option",
+        "existing objects"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-glacier",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ya archiva grabaciones de producciones terminadas en S3 Glacier Flexible Retrieval. Una revisión mensual puede esperar restauraciones que normalmente terminen en un máximo de 12 horas, y el equipo quiere la opción de recuperación de menor costo para estos objetos existentes. ¿Qué enfoque cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mover los objetos a S3 Glacier Instant Retrieval antes de cada revisión.",
+            "why": "No se necesita acceso inmediato ni cambiar de clase para recuperar el archivo existente."
+          },
+          {
+            "id": "B",
+            "text": "Usar Bulk retrieval para los objetos de Flexible Retrieval.",
+            "why": "Bulk es la opción de recuperación de menor costo y suele terminar en 5 a 12 horas para estos objetos."
+          },
+          {
+            "id": "C",
+            "text": "Usar Expedited retrieval para los objetos de Flexible Retrieval.",
+            "why": "Es más rápida de lo necesario y tiene una tarifa premium."
+          },
+          {
+            "id": "D",
+            "text": "Usar Standard retrieval para los objetos de Flexible Retrieval.",
+            "why": "Cumple el plazo, pero Bulk es la opción de recuperación de menor costo."
+          }
+        ],
+        "explanation": "La revisión permite el tiempo típico de 5 a 12 horas de Bulk retrieval para objetos que ya están en Flexible Retrieval. Bulk es la opción de recuperación de menor costo en S3 Glacier, y las recuperaciones Bulk desde Flexible Retrieval son gratuitas. Standard también cumple el plazo, pero no satisface tan bien el requisito de menor costo de recuperación. Expedited cobra por una rapidez que el equipo no necesita."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-glacier-classes-retrieval--20d73611",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research institute already keeps historical experiment records in S3 Glacier Deep Archive. For a scheduled audit, staff can wait for restorations that typically finish within 12 hours, but not for a 48-hour retrieval. They want the lowest-cost available retrieval option that fits that window without changing the objects' storage class. Which option should they select?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the records to S3 Glacier Flexible Retrieval and use Bulk retrieval.",
+          "correct": false,
+          "why": "It changes the objects' storage class, contrary to the stated requirement."
+        },
+        {
+          "id": "B",
+          "text": "Use Expedited retrieval from S3 Glacier Deep Archive.",
+          "correct": false,
+          "why": "Expedited retrieval is not available for Deep Archive."
+        },
+        {
+          "id": "C",
+          "text": "Use Bulk retrieval from S3 Glacier Deep Archive.",
+          "correct": false,
+          "why": "Bulk retrieval from Deep Archive typically finishes within 48 hours, which does not fit the stated window."
+        },
+        {
+          "id": "D",
+          "text": "Use Standard retrieval from S3 Glacier Deep Archive.",
+          "correct": true,
+          "why": "Standard retrieval is available for Deep Archive and typically finishes within 12 hours."
+        }
+      ],
+      "explanation": "The records must remain in Deep Archive, and the accepted typical restore window is 12 hours rather than 48. Standard retrieval from Deep Archive typically finishes within 12 hours. Bulk is the lowest-cost retrieval option in general, but its typical Deep Archive completion time is within 48 hours, so it misses this window. Deep Archive does not offer Expedited retrieval.",
+      "keywordCues": [
+        "already keeps",
+        "within 12 hours",
+        "not for a 48-hour retrieval",
+        "without changing the objects' storage class"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-glacier",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación ya conserva registros históricos de experimentos en S3 Glacier Deep Archive. Para una auditoría programada, el personal puede esperar restauraciones que normalmente terminen en un máximo de 12 horas, pero no una recuperación de 48 horas. Quieren la opción de recuperación disponible de menor costo que cumpla ese plazo sin cambiar la clase de almacenamiento de los objetos. ¿Qué opción deben elegir?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mover los registros a S3 Glacier Flexible Retrieval y usar Bulk retrieval.",
+            "why": "Cambia la clase de almacenamiento de los objetos, en contra del requisito indicado."
+          },
+          {
+            "id": "B",
+            "text": "Usar Expedited retrieval desde S3 Glacier Deep Archive.",
+            "why": "Expedited retrieval no está disponible para Deep Archive."
+          },
+          {
+            "id": "C",
+            "text": "Usar Bulk retrieval desde S3 Glacier Deep Archive.",
+            "why": "Bulk retrieval desde Deep Archive suele terminar en un máximo de 48 horas, por lo que no cumple el plazo indicado."
+          },
+          {
+            "id": "D",
+            "text": "Usar Standard retrieval desde S3 Glacier Deep Archive.",
+            "why": "Standard retrieval está disponible para Deep Archive y suele terminar en un máximo de 12 horas."
+          }
+        ],
+        "explanation": "Los registros deben permanecer en Deep Archive y el plazo típico aceptable es de 12 horas, no de 48. Standard retrieval desde Deep Archive suele terminar en un máximo de 12 horas. Bulk es, en general, la opción de recuperación de menor costo, pero en Deep Archive suele terminar en un máximo de 48 horas, por lo que no cumple este plazo. Deep Archive no ofrece Expedited retrieval."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-glacier-classes-retrieval--e3e38496",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "secondaryConcepts": [
+        "s3-intelligent-tiering"
+      ],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturer is designing storage for two independent collections. Rarely opened calibration images must be available immediately through GET, while historical compliance records can be restored when needed and their reviews can wait for retrievals that typically finish within 48 hours. Which two choices match the collections' access requirements and use an archive class or retrieval option suited to each? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the images in S3 Glacier Flexible Retrieval and use Expedited retrieval.",
+          "correct": false,
+          "why": "Expedited is a restore operation and does not provide immediate GET access."
+        },
+        {
+          "id": "B",
+          "text": "Store the compliance records in S3 Glacier Deep Archive and use Expedited retrieval.",
+          "correct": false,
+          "why": "Expedited retrieval is not available for Deep Archive."
+        },
+        {
+          "id": "C",
+          "text": "Store the compliance records in S3 Glacier Deep Archive and use Bulk retrieval.",
+          "correct": true,
+          "why": "Deep Archive suits rarely accessed records, and its Bulk retrieval typically finishes within 48 hours."
+        },
+        {
+          "id": "D",
+          "text": "Store the images in S3 Intelligent-Tiering with Archive Access activated.",
+          "correct": false,
+          "why": "Images moved to Archive Access would require restoration rather than immediate GET access."
+        },
+        {
+          "id": "E",
+          "text": "Store the images in S3 Glacier Instant Retrieval.",
+          "correct": true,
+          "why": "This archive class provides immediate access to rarely accessed objects."
+        }
+      ],
+      "explanation": "The two collections have different access constraints, so they should not be assigned the same retrieval approach. S3 Glacier Instant Retrieval keeps the rarely opened images immediately accessible by GET. S3 Glacier Deep Archive with Bulk retrieval fits records that can wait for its typical 48-hour completion time; Bulk is the lowest-cost Glacier retrieval option. Flexible Retrieval with Expedited and Intelligent-Tiering Archive Access both fail the images' immediate-access requirement.",
+      "keywordCues": [
+        "two independent collections",
+        "available immediately through GET",
+        "can be restored when needed",
+        "typically finish within 48 hours"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html#sc-glacier",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
+      ],
+      "es": {
+        "stem": "Un fabricante está diseñando almacenamiento para dos colecciones independientes. Las imágenes de calibración, que casi nunca se abren, deben estar disponibles de inmediato mediante GET; los registros históricos de cumplimiento pueden restaurarse cuando se necesiten y sus revisiones pueden esperar recuperaciones que normalmente terminen en un máximo de 48 horas. ¿Qué dos opciones cumplen los requisitos de acceso de las colecciones y usan una clase de archivo u opción de recuperación adecuada para cada una? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Almacenar las imágenes en S3 Glacier Flexible Retrieval y usar Expedited retrieval.",
+            "why": "Expedited es una operación de restauración y no ofrece acceso inmediato mediante GET."
+          },
+          {
+            "id": "B",
+            "text": "Almacenar los registros de cumplimiento en S3 Glacier Deep Archive y usar Expedited retrieval.",
+            "why": "Expedited retrieval no está disponible para Deep Archive."
+          },
+          {
+            "id": "C",
+            "text": "Almacenar los registros de cumplimiento en S3 Glacier Deep Archive y usar Bulk retrieval.",
+            "why": "Deep Archive es adecuada para registros a los que casi nunca se accede, y Bulk retrieval suele terminar en un máximo de 48 horas."
+          },
+          {
+            "id": "D",
+            "text": "Almacenar las imágenes en S3 Intelligent-Tiering con Archive Access activado.",
+            "why": "Las imágenes trasladadas a Archive Access requerirían una restauración en lugar de acceso inmediato mediante GET."
+          },
+          {
+            "id": "E",
+            "text": "Almacenar las imágenes en S3 Glacier Instant Retrieval.",
+            "why": "Esta clase de archivo ofrece acceso inmediato a objetos a los que casi nunca se accede."
+          }
+        ],
+        "explanation": "Las dos colecciones tienen requisitos de acceso distintos, por lo que no conviene asignarles el mismo enfoque de recuperación. S3 Glacier Instant Retrieval mantiene las imágenes disponibles de inmediato mediante GET. S3 Glacier Deep Archive con Bulk retrieval cumple el plazo de hasta 48 horas típico para los registros; Bulk es la opción de recuperación de menor costo en Glacier. Flexible Retrieval con Expedited y Archive Access de Intelligent-Tiering no cumplen el requisito de acceso inmediato a las imágenes."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-glacier-classes-retrieval--r0",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "kind": "recall",
+      "prompt": "A Deep Archive audit can wait about 12 hours, but not 48. Which retrieval option fits, and why?",
+      "promptEs": "Una auditoría de Deep Archive puede esperar unas 12 horas, pero no 48. ¿Qué opción de recuperación usarías y por qué?",
+      "idealAnswer": "Use Standard retrieval. For S3 Glacier Deep Archive it typically finishes within 12 hours; Bulk typically takes up to 48 hours, and Expedited is unavailable.",
+      "rubric": [
+        "Selects Standard retrieval for S3 Glacier Deep Archive.",
+        "States that Standard typically finishes within 12 hours.",
+        "Distinguishes Bulk's typical 48-hour window or notes that Expedited is unavailable."
+      ]
+    },
+    {
+      "id": "s3-glacier-classes-retrieval--r1",
+      "conceptId": "s3-glacier-classes-retrieval",
+      "kind": "why-not",
+      "prompt": "Why isn't S3 Intelligent-Tiering with Archive Access a reliable substitute for Glacier Instant Retrieval when every archive image needs immediate GET access?",
+      "promptEs": "¿Por qué S3 Intelligent-Tiering con Archive Access no sustituye a Glacier Instant Retrieval si cada imagen archivada necesita acceso inmediato mediante GET?",
+      "idealAnswer": "An object in the Intelligent-Tiering Archive Access tier must be restored before access, so it cannot satisfy immediate GET access for every image. S3 Glacier Instant Retrieval provides immediate access to rarely accessed archive objects.",
+      "rubric": [
+        "Explains that Intelligent-Tiering Archive Access requires restoration.",
+        "Connects restoration to failure of the immediate GET requirement.",
+        "Identifies Glacier Instant Retrieval as the immediate-access archive choice."
+      ]
+    }
+  ]
+}

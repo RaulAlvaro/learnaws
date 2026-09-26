@@ -1,0 +1,345 @@
+{
+  "conceptId": "iam-policy-conditions",
+  "card": {
+    "en": {
+      "tldr": "IAM policy conditions compare request context with values in a policy to determine when a permission applies. Choose the key that matches the requirement—organization membership, network origin, MFA authentication, tags, or requested Region—rather than redesigning access around a different identity or network.",
+      "whenToUse": [
+        "Access should follow accounts as they join or leave an AWS organization.",
+        "A permission should apply only when a request comes through a specified VPC endpoint or from an approved IP range.",
+        "An action requires MFA, a matching principal tag, or a specified requested Region."
+      ],
+      "keyFacts": [
+        "aws:PrincipalOrgID matches the requesting principal’s AWS Organizations ID; it avoids maintaining an account ID list as membership changes.",
+        "aws:SourceIp and aws:SourceVpce are network-related condition keys; choose the one that matches the network property the requirement specifies.",
+        "aws:MultiFactorAuthPresent can test whether MFA is present in the request context.",
+        "aws:PrincipalTag/tag-key tests a tag on an IAM user, role, or role session; aws:ResourceTag/tag-key tests a resource tag where supported.",
+        "A condition key missing from a request normally does not match. An IfExists condition can instead return true when its key is missing."
+      ],
+      "gotchas": [
+        "aws:PrincipalOrgID identifies the requester’s organization, not an individual AWS account.",
+        "An organization-only condition can also exclude AWS service principals that need access to a resource.",
+        "Do not use an IfExists operator when a missing MFA context must fail the condition.",
+        "Do not use wildcards with sensitive keys such as aws:PrincipalOrgID or aws:SourceVpce."
+      ],
+      "confusedWith": [
+        {
+          "concept": "aws:PrincipalAccount",
+          "difference": "Matches an account ID, whereas aws:PrincipalOrgID follows organization membership as accounts change."
+        },
+        {
+          "concept": "aws:ResourceTag/tag-key",
+          "difference": "Tests a resource’s tag, whereas aws:PrincipalTag/tag-key tests the requester’s tag."
+        }
+      ],
+      "examCues": [
+        "accounts added to or removed from the organization",
+        "requests through one specified VPC endpoint",
+        "reject requests without MFA context",
+        "access based on a role session tag",
+        "requests for a specified Region"
+      ]
+    },
+    "es": {
+      "tldr": "Las condiciones de una política IAM comparan el contexto de la solicitud con los valores de la política para determinar cuándo se aplica un permiso. Elige la clave que corresponda al requisito —organización, origen de red, MFA, etiquetas o Region solicitada— sin rediseñar la arquitectura de acceso.",
+      "whenToUse": [
+        "El acceso debe seguir a las cuentas cuando entran o salen de una organización de AWS.",
+        "Un permiso debe aplicarse solo a solicitudes realizadas mediante un VPC endpoint específico o desde un rango de IP aprobado.",
+        "Una acción requiere MFA, una etiqueta del principal o una Region solicitada específica."
+      ],
+      "keyFacts": [
+        "aws:PrincipalOrgID compara el ID de la organización del principal solicitante; evita mantener una lista de IDs de cuentas cuando cambia la membresía.",
+        "aws:SourceIp y aws:SourceVpce son claves relacionadas con la red; elige la que corresponda a la propiedad de red requerida.",
+        "aws:MultiFactorAuthPresent permite comprobar si MFA está presente en el contexto de la solicitud.",
+        "aws:PrincipalTag/tag-key comprueba una etiqueta de un usuario, rol o sesión de rol; aws:ResourceTag/tag-key comprueba una etiqueta del recurso cuando el servicio la admite.",
+        "Por lo general, una clave ausente del contexto de la solicitud no coincide. En cambio, una condición IfExists puede devolver true si falta la clave."
+      ],
+      "gotchas": [
+        "aws:PrincipalOrgID identifica la organización del solicitante, no una cuenta de AWS individual.",
+        "Una condición basada solo en la organización también puede excluir a principales de servicios de AWS que necesitan acceso al recurso.",
+        "No uses un operador IfExists si la ausencia del contexto de MFA debe impedir que se cumpla la condición.",
+        "No uses comodines con claves sensibles como aws:PrincipalOrgID o aws:SourceVpce."
+      ],
+      "confusedWith": [
+        {
+          "concept": "aws:PrincipalAccount",
+          "difference": "Compara el ID de una cuenta; aws:PrincipalOrgID sigue la membresía de la organización cuando cambian las cuentas."
+        },
+        {
+          "concept": "aws:ResourceTag/tag-key",
+          "difference": "Comprueba una etiqueta del recurso; aws:PrincipalTag/tag-key comprueba una etiqueta del solicitante."
+        }
+      ],
+      "examCues": [
+        "accounts added to or removed from the organization",
+        "requests through one specified VPC endpoint",
+        "reject requests without MFA context",
+        "access based on a role session tag",
+        "requests for a specified Region"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "iam-policy-conditions--746d0c97",
+      "conceptId": "iam-policy-conditions",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company allows employees in its AWS organization to upload files to a shared S3 bucket. New AWS accounts join the organization regularly, and the bucket policy must not need an account ID update each time. The uploads are made by employee principals, not AWS service principals. Which condition should the company use to meet these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Match aws:PrincipalAccount against a maintained list of member account IDs.",
+          "correct": false,
+          "why": "The account list must be updated when organization membership changes."
+        },
+        {
+          "id": "B",
+          "text": "Match aws:PrincipalOrgID against the company’s AWS Organizations ID.",
+          "correct": true,
+          "why": "The condition follows the requesting principal’s organization membership without maintaining an account ID list."
+        },
+        {
+          "id": "C",
+          "text": "Match aws:PrincipalOrgPaths against the path of one organizational unit.",
+          "correct": false,
+          "why": "A condition restricted to one organizational unit would not cover the stated organization-wide access requirement."
+        },
+        {
+          "id": "D",
+          "text": "Match aws:PrincipalTag/department against a company department value.",
+          "correct": false,
+          "why": "A department tag does not establish that the requester belongs to the company’s organization."
+        }
+      ],
+      "explanation": "The deciding requirement is that authorization must track organization membership as accounts are added without policy edits. aws:PrincipalOrgID compares the requester’s organization ID and avoids maintaining an account ID list. aws:PrincipalAccount could identify member accounts, but its list would need maintenance. The scenario excludes AWS service principals because an organization-only condition can prevent their access.",
+      "keywordCues": [
+        "New AWS accounts join the organization regularly",
+        "must not need an account ID update each time",
+        "employee principals, not AWS service principals"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html"
+      ],
+      "es": {
+        "stem": "Una editorial permite que empleados de su organización de AWS carguen archivos a un bucket de S3 compartido. Nuevas cuentas de AWS se unen con frecuencia, y la política del bucket no debe requerir una actualización de IDs de cuentas cada vez. Las cargas las realizan principales de empleados, no principales de servicios de AWS. ¿Qué condición cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Comparar aws:PrincipalAccount con una lista mantenida de IDs de cuentas miembro.",
+            "why": "La lista debe actualizarse cuando cambia la membresía de la organización."
+          },
+          {
+            "id": "B",
+            "text": "Comparar aws:PrincipalOrgID con el ID de AWS Organizations de la empresa.",
+            "why": "La condición sigue la membresía de la organización del principal solicitante sin mantener una lista de cuentas."
+          },
+          {
+            "id": "C",
+            "text": "Comparar aws:PrincipalOrgPaths con la ruta de una sola unidad organizativa.",
+            "why": "Restringirse a una unidad organizativa no cubre el acceso requerido para toda la organización."
+          },
+          {
+            "id": "D",
+            "text": "Comparar aws:PrincipalTag/department con un valor de departamento de la empresa.",
+            "why": "Una etiqueta de departamento no establece que el solicitante pertenezca a la organización de la empresa."
+          }
+        ],
+        "explanation": "El requisito decisivo es que la autorización siga la membresía de la organización cuando se agreguen cuentas, sin modificar la política. aws:PrincipalOrgID compara el ID de la organización del solicitante y evita mantener una lista de cuentas. aws:PrincipalAccount podría identificar cuentas miembro, pero su lista requeriría mantenimiento. El escenario excluye principales de servicios de AWS porque una condición basada solo en la organización puede impedirles el acceso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-policy-conditions--ee8c42e0",
+      "conceptId": "iam-policy-conditions",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A logistics company has two VPC endpoints that its teams use to reach an AWS resource. A sensitive action must be permitted only when the request uses the designated endpoint, even if the other endpoint is in the same VPC. The team wants to express this restriction in an IAM policy condition. Which condition key meets the requirement MOST precisely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "aws:PrincipalOrgID, matched against the company’s organization ID.",
+          "correct": false,
+          "why": "Organization membership describes the requester, not which endpoint carries the request."
+        },
+        {
+          "id": "B",
+          "text": "aws:SourceVpc, matched against the VPC that contains both endpoints.",
+          "correct": false,
+          "why": "Both endpoints are in that VPC, so this does not identify the designated endpoint."
+        },
+        {
+          "id": "C",
+          "text": "aws:SourceIp, matched against the team’s approved IP range.",
+          "correct": false,
+          "why": "An IP-range check does not express the requirement to use one specific endpoint."
+        },
+        {
+          "id": "D",
+          "text": "aws:SourceVpce, matched against the designated VPC endpoint ID.",
+          "correct": true,
+          "why": "This condition key matches the specified VPC endpoint rather than the broader VPC or requester."
+        }
+      ],
+      "explanation": "The company needs to distinguish one endpoint from another in the same VPC. aws:SourceVpce is the network condition key that expresses the specified endpoint requirement. aws:SourceVpc is too broad because both endpoints share its value. An IP or organization condition tests a different property of the request.",
+      "keywordCues": [
+        "two VPC endpoints",
+        "only when the request uses the designated endpoint",
+        "other endpoint is in the same VPC"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene dos VPC endpoints que sus equipos usan para acceder a un recurso de AWS. Una acción sensible debe permitirse solo cuando la solicitud usa el endpoint designado, aunque el otro esté en la misma VPC. El equipo quiere expresar la restricción mediante una condición de política IAM. ¿Qué clave de condición cumple el requisito de la forma MOST precisa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "aws:PrincipalOrgID, comparada con el ID de la organización de la empresa.",
+            "why": "La membresía de la organización describe al solicitante, no el endpoint utilizado."
+          },
+          {
+            "id": "B",
+            "text": "aws:SourceVpc, comparada con la VPC que contiene ambos endpoints.",
+            "why": "Ambos endpoints están en esa VPC, por lo que no identifica el endpoint designado."
+          },
+          {
+            "id": "C",
+            "text": "aws:SourceIp, comparada con el rango de IP aprobado del equipo.",
+            "why": "Comprobar el rango de IP no expresa el requisito de usar un endpoint específico."
+          },
+          {
+            "id": "D",
+            "text": "aws:SourceVpce, comparada con el ID del VPC endpoint designado.",
+            "why": "Esta clave compara el VPC endpoint especificado, en lugar de la VPC más amplia o el solicitante."
+          }
+        ],
+        "explanation": "La empresa necesita distinguir un endpoint del otro dentro de la misma VPC. aws:SourceVpce es la clave de condición de red que expresa el requisito de un endpoint específico. aws:SourceVpc es demasiado amplia porque ambos endpoints comparten su valor. Una condición de IP u organización comprueba otra propiedad de la solicitud."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-policy-conditions--b1cc82e8",
+      "conceptId": "iam-policy-conditions",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A research institute assigns department tags to IAM role sessions. It wants a policy permission to apply only when the requesting session has department=imaging and the request targets the institute’s approved AWS Region. The policy must test both properties of the request. Which two condition keys meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "aws:SourceIp",
+          "correct": false,
+          "why": "The source IP does not identify either the session’s department tag or the requested Region."
+        },
+        {
+          "id": "B",
+          "text": "aws:RequestedRegion",
+          "correct": true,
+          "why": "This tests the Region requested by the caller against the policy’s approved value."
+        },
+        {
+          "id": "C",
+          "text": "aws:PrincipalOrgID",
+          "correct": false,
+          "why": "Organization membership does not test the session tag or the requested Region."
+        },
+        {
+          "id": "D",
+          "text": "aws:ResourceTag/department",
+          "correct": false,
+          "why": "This tests a resource tag rather than the requesting role session’s department tag."
+        },
+        {
+          "id": "E",
+          "text": "aws:PrincipalTag/department",
+          "correct": true,
+          "why": "This tests the department tag associated with the requesting principal’s role session."
+        }
+      ],
+      "explanation": "The permission depends on two separate request properties: the principal’s session tag and the requested Region. aws:PrincipalTag/department addresses the first, and aws:RequestedRegion addresses the second. aws:ResourceTag/department is tempting but tests the resource rather than the requester. The other keys test network origin or organization membership, neither of which is a stated requirement.",
+      "keywordCues": [
+        "department tags to IAM role sessions",
+        "requesting session has department=imaging",
+        "request targets the institute’s approved AWS Region",
+        "test both properties"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación asigna etiquetas de departamento a sesiones de roles IAM. Quiere que un permiso de política se aplique solo cuando la sesión solicitante tenga department=imaging y la solicitud apunte a la AWS Region aprobada por el instituto. La política debe comprobar ambas propiedades de la solicitud. ¿Qué dos claves de condición cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "aws:SourceIp",
+            "why": "La IP de origen no identifica la etiqueta de departamento de la sesión ni la Region solicitada."
+          },
+          {
+            "id": "B",
+            "text": "aws:RequestedRegion",
+            "why": "Comprueba la Region solicitada por el usuario frente al valor aprobado en la política."
+          },
+          {
+            "id": "C",
+            "text": "aws:PrincipalOrgID",
+            "why": "La membresía de la organización no comprueba la etiqueta de la sesión ni la Region solicitada."
+          },
+          {
+            "id": "D",
+            "text": "aws:ResourceTag/department",
+            "why": "Comprueba una etiqueta del recurso, no la etiqueta de departamento de la sesión de rol solicitante."
+          },
+          {
+            "id": "E",
+            "text": "aws:PrincipalTag/department",
+            "why": "Comprueba la etiqueta de departamento asociada con la sesión de rol del principal solicitante."
+          }
+        ],
+        "explanation": "El permiso depende de dos propiedades distintas de la solicitud: la etiqueta de la sesión del principal y la Region solicitada. aws:PrincipalTag/department cubre la primera y aws:RequestedRegion cubre la segunda. aws:ResourceTag/department puede parecer adecuado, pero comprueba el recurso y no al solicitante. Las otras claves comprueban el origen de red o la membresía de la organización, que no son requisitos del escenario."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "iam-policy-conditions--r0",
+      "conceptId": "iam-policy-conditions",
+      "kind": "recall",
+      "prompt": "Accounts frequently join an AWS organization. Which IAM condition key keeps a resource policy aligned with membership, and why?",
+      "promptEs": "Las cuentas se unen con frecuencia a una organización de AWS. ¿Qué clave de condición IAM mantiene la política del recurso alineada con la membresía y por qué?",
+      "idealAnswer": "Use aws:PrincipalOrgID to compare the requester’s organization ID with the ID in the policy. It avoids maintaining an account ID list as accounts join or leave the organization.",
+      "rubric": [
+        "Names aws:PrincipalOrgID.",
+        "Explains that it checks the requesting principal’s organization membership.",
+        "Explains why it avoids account ID list updates."
+      ]
+    }
+  ]
+}

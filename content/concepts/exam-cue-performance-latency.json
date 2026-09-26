@@ -1,0 +1,318 @@
+{
+  "conceptId": "exam-cue-performance-latency",
+  "card": {
+    "en": {
+      "tldr": "Performance wording tells you where to investigate the bottleneck, not which service guarantees a latency target. Match repeated reads to caching, distant users to edge delivery, and sustained data-access demand to data-store selection and capacity planning.",
+      "whenToUse": [
+        "Repeated requests for the same data dominate a read-latency problem.",
+        "Users in distant locations experience slow delivery of shared content.",
+        "A workload needs a primary data store that can accommodate growing request volume."
+      ],
+      "keyFacts": [
+        "AWS Well-Architected treats performance efficiency as an architectural concern, not just a compute-sizing concern.",
+        "Its performance focus areas include architecture selection, data management, and networking and content delivery.",
+        "The exam task statements identify caching, database access patterns, database capacity planning, and edge networking as separate performance decisions.",
+        "A workload's stated latency or throughput target is a requirement to evaluate; it is not a performance guarantee from a named service."
+      ],
+      "gotchas": [
+        "Do not select edge delivery for a bottleneck caused by repeated database reads within the application.",
+        "Do not treat a cache as an unquestioned replacement for a required primary data store.",
+        "Do not assume that scaling compute addresses a data-access or content-delivery bottleneck."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "repeated reads of the same records",
+        "global users requesting shared content",
+        "sub-millisecond read target",
+        "millions of requests per second at peak"
+      ]
+    },
+    "es": {
+      "tldr": "El lenguaje de performance te indica dónde investigar el cuello de botella, no qué servicio garantiza una meta de latencia. Relaciona las lecturas repetidas con caching, los usuarios distantes con edge delivery y la demanda sostenida de acceso a datos con la selección y planificación de capacidad del almacén de datos.",
+      "whenToUse": [
+        "Las solicitudes repetidas de los mismos datos dominan un problema de latencia de lectura.",
+        "Los usuarios en ubicaciones distantes reciben lentamente contenido compartido.",
+        "Una carga de trabajo necesita un almacén de datos principal que admita un volumen creciente de solicitudes."
+      ],
+      "keyFacts": [
+        "AWS Well-Architected considera Performance Efficiency una cuestión de arquitectura, no solo de dimensionamiento de cómputo.",
+        "Sus áreas de enfoque de performance incluyen selección de arquitectura, gestión de datos y redes y entrega de contenido.",
+        "Los enunciados de tareas del examen distinguen caching, patrones de acceso a bases de datos, planificación de capacidad de bases de datos y redes de edge como decisiones de performance.",
+        "La meta de latencia o throughput de una carga de trabajo es un requisito que debes evaluar; no es una garantía de performance de un servicio."
+      ],
+      "gotchas": [
+        "No elijas edge delivery si el cuello de botella son las lecturas repetidas de la base de datos dentro de la aplicación.",
+        "No trates una caché como reemplazo automático de un almacén de datos principal requerido.",
+        "No supongas que escalar el cómputo resuelve un cuello de botella de acceso a datos o entrega de contenido."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "repeated reads of the same records",
+        "global users requesting shared content",
+        "sub-millisecond read target",
+        "millions of requests per second at peak"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar/welcome.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "exam-cue-performance-latency--82b62117",
+      "conceptId": "exam-cue-performance-latency",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A ticketing application repeatedly reads the same event details during popular sales. Measurements show that these database reads, rather than request processing or content delivery, dominate response time. The team has a sub-millisecond read target for frequently requested details and must retain its current primary database. Which approach should the team evaluate FIRST to meet the latency requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add Amazon ElastiCache for frequently requested event details.",
+          "correct": true,
+          "why": "A cache targets the repeated reads while the current database remains the primary store."
+        },
+        {
+          "id": "B",
+          "text": "Increase the application tier's Amazon EC2 Auto Scaling capacity.",
+          "correct": false,
+          "why": "More application compute does not directly address the measured database-read bottleneck."
+        },
+        {
+          "id": "C",
+          "text": "Replace the primary database with an Amazon Aurora read replica.",
+          "correct": false,
+          "why": "The requirement retains the primary database, and a read replica is not a replacement for it."
+        },
+        {
+          "id": "D",
+          "text": "Add Amazon CloudFront for the application's public images.",
+          "correct": false,
+          "why": "Delivering public images does not address the measured database-read bottleneck."
+        }
+      ],
+      "explanation": "The decisive measurement is that repeated database reads dominate response time. Evaluate caching those frequently requested details and test whether the resulting design meets the stated target; the target alone is not a service guarantee. CloudFront addresses a different part of this workload, while increasing application compute misses the measured bottleneck.",
+      "keywordCues": [
+        "repeatedly reads the same event details",
+        "database reads, rather than request processing or content delivery",
+        "retain its current primary database"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de venta de entradas lee repetidamente los mismos detalles de eventos durante ventas populares. Las mediciones muestran que estas lecturas de la base de datos, y no el procesamiento de solicitudes ni la entrega de contenido, dominan el tiempo de respuesta. El equipo tiene una meta de lectura sub-millisecond para los detalles más solicitados y debe conservar su base de datos principal actual. ¿Qué enfoque debe evaluar PRIMERO para cumplir el requisito de latencia?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar Amazon ElastiCache para los detalles de eventos más solicitados.",
+            "why": "Una caché se enfoca en las lecturas repetidas mientras la base de datos actual sigue siendo el almacén principal."
+          },
+          {
+            "id": "B",
+            "text": "Aumentar la capacidad de Amazon EC2 Auto Scaling del nivel de aplicación.",
+            "why": "Más cómputo para la aplicación no resuelve directamente el cuello de botella medido en las lecturas de la base de datos."
+          },
+          {
+            "id": "C",
+            "text": "Reemplazar la base de datos principal con una read replica de Amazon Aurora.",
+            "why": "El requisito es conservar la base de datos principal, y una read replica no la reemplaza."
+          },
+          {
+            "id": "D",
+            "text": "Agregar Amazon CloudFront para las imágenes públicas de la aplicación.",
+            "why": "Entregar imágenes públicas no resuelve el cuello de botella medido en las lecturas de la base de datos."
+          }
+        ],
+        "explanation": "La medición decisiva es que las lecturas repetidas de la base de datos dominan el tiempo de respuesta. Evalúa almacenar en caché esos detalles solicitados con frecuencia y comprueba si el diseño cumple la meta; la meta por sí sola no es una garantía del servicio. Amazon CloudFront aborda otra parte de esta carga de trabajo, mientras que aumentar el cómputo no resuelve el cuello de botella medido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-performance-latency--5474ffdf",
+      "conceptId": "exam-cue-performance-latency",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum publishes the same exhibit images to visitors in several continents. Its application and database respond quickly, but visitors far from the content's current location report slow image delivery. The museum wants to improve delivery of these shared images without redesigning its database. Which solution best addresses the stated performance problem?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Evaluate Amazon CloudFront for delivering the shared images.",
+          "correct": true,
+          "why": "Edge content delivery is the relevant architectural choice for shared content requested by distant users."
+        },
+        {
+          "id": "B",
+          "text": "Add Amazon ElastiCache for exhibit-record lookups.",
+          "correct": false,
+          "why": "Caching database lookups targets a component that is not the measured bottleneck."
+        },
+        {
+          "id": "C",
+          "text": "Add an Amazon Aurora read replica for exhibit records.",
+          "correct": false,
+          "why": "The database is responding quickly, so a read replica does not address image delivery."
+        },
+        {
+          "id": "D",
+          "text": "Increase Amazon EC2 Auto Scaling capacity for the application.",
+          "correct": false,
+          "why": "The application responds quickly, so additional application capacity misses the stated issue."
+        }
+      ],
+      "explanation": "The slow step is delivering shared images to geographically dispersed visitors, not querying records or processing application requests. Amazon CloudFront is the edge-delivery choice to evaluate for that requirement. Adding a database cache or read replica would optimize components the scenario says are already responding quickly.",
+      "keywordCues": [
+        "visitors in several continents",
+        "application and database respond quickly",
+        "slow image delivery",
+        "without redesigning its database"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Un museo publica las mismas imágenes de exhibiciones para visitantes en varios continentes. Su aplicación y su base de datos responden rápido, pero los visitantes alejados de la ubicación actual del contenido informan que las imágenes tardan en llegar. El museo quiere mejorar la entrega de estas imágenes compartidas sin rediseñar la base de datos. ¿Qué solución aborda mejor el problema de performance indicado?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Evaluar Amazon CloudFront para entregar las imágenes compartidas.",
+            "why": "Edge content delivery es la decisión arquitectónica pertinente para contenido compartido solicitado por usuarios distantes."
+          },
+          {
+            "id": "B",
+            "text": "Agregar Amazon ElastiCache para las consultas de registros de exhibiciones.",
+            "why": "Almacenar en caché las consultas a la base de datos se enfoca en un componente que no es el cuello de botella medido."
+          },
+          {
+            "id": "C",
+            "text": "Agregar una read replica de Amazon Aurora para los registros de exhibiciones.",
+            "why": "La base de datos responde rápido, así que una read replica no resuelve la entrega de imágenes."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar la capacidad de Amazon EC2 Auto Scaling de la aplicación.",
+            "why": "La aplicación responde rápido, así que la capacidad adicional no resuelve el problema indicado."
+          }
+        ],
+        "explanation": "El paso lento es entregar imágenes compartidas a visitantes geográficamente dispersos, no consultar registros ni procesar solicitudes de la aplicación. Amazon CloudFront es la opción de edge delivery que debes evaluar para este requisito. Agregar una caché de base de datos o una read replica optimizaría componentes que, según el escenario, ya responden rápido."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-performance-latency--4c6d1030",
+      "conceptId": "exam-cue-performance-latency",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A travel site has two measured performance issues: customers worldwide wait for shared destination images, and itinerary pages repeatedly read the same reference records from a database. The application tier has spare capacity, and the database must remain the primary store for those records. The team wants to address each bottleneck without replacing its existing application or database. Which two approaches should it evaluate? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an Application Load Balancer for the spare-capacity application tier.",
+          "correct": false,
+          "why": "Distributing application requests does not directly address the identified image-delivery and repeated-read issues."
+        },
+        {
+          "id": "B",
+          "text": "Evaluate Amazon CloudFront for the shared destination images.",
+          "correct": true,
+          "why": "Edge delivery addresses the shared-content issue affecting worldwide customers."
+        },
+        {
+          "id": "C",
+          "text": "Evaluate Amazon ElastiCache for the repeated reference-record reads.",
+          "correct": true,
+          "why": "Caching targets the repeated database reads without requiring replacement of the primary store."
+        },
+        {
+          "id": "D",
+          "text": "Increase Amazon EC2 Auto Scaling capacity for the application tier.",
+          "correct": false,
+          "why": "The application tier has spare capacity, so scaling it does not target either measured bottleneck."
+        },
+        {
+          "id": "E",
+          "text": "Replace the existing database with an Amazon Aurora read replica.",
+          "correct": false,
+          "why": "The database must remain the primary store, which a read replica cannot replace."
+        }
+      ],
+      "explanation": "This scenario identifies two distinct bottlenecks, so the design should address both rather than scaling an unrelated tier. Evaluate Amazon CloudFront for delivery of shared images to worldwide users and Amazon ElastiCache for repeated reads of reference records. An Application Load Balancer or more application capacity misses the measured issues, and a read replica cannot replace the required primary database.",
+      "keywordCues": [
+        "customers worldwide wait for shared destination images",
+        "repeatedly read the same reference records",
+        "application tier has spare capacity",
+        "database must remain the primary store"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Un sitio de viajes tiene dos problemas de performance medidos: los clientes de todo el mundo esperan las imágenes compartidas de los destinos, y las páginas de itinerarios leen repetidamente los mismos registros de referencia de una base de datos. El nivel de aplicación tiene capacidad disponible y la base de datos debe seguir siendo el almacén principal de esos registros. El equipo quiere resolver cada cuello de botella sin reemplazar la aplicación ni la base de datos actuales. ¿Qué dos enfoques debe evaluar? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar un Application Load Balancer para el nivel de aplicación que tiene capacidad disponible.",
+            "why": "Distribuir las solicitudes de la aplicación no resuelve directamente los problemas identificados de entrega de imágenes y lecturas repetidas."
+          },
+          {
+            "id": "B",
+            "text": "Evaluar Amazon CloudFront para las imágenes compartidas de los destinos.",
+            "why": "Edge delivery aborda el problema del contenido compartido que afecta a clientes de todo el mundo."
+          },
+          {
+            "id": "C",
+            "text": "Evaluar Amazon ElastiCache para las lecturas repetidas de registros de referencia.",
+            "why": "Caching se enfoca en las lecturas repetidas sin exigir el reemplazo del almacén principal."
+          },
+          {
+            "id": "D",
+            "text": "Aumentar la capacidad de Amazon EC2 Auto Scaling del nivel de aplicación.",
+            "why": "El nivel de aplicación tiene capacidad disponible, así que escalarlo no aborda ninguno de los cuellos de botella medidos."
+          },
+          {
+            "id": "E",
+            "text": "Reemplazar la base de datos actual con una read replica de Amazon Aurora.",
+            "why": "La base de datos debe seguir siendo el almacén principal, función que una read replica no puede reemplazar."
+          }
+        ],
+        "explanation": "El escenario identifica dos cuellos de botella distintos, así que el diseño debe abordar ambos en lugar de escalar un nivel que no es el problema. Evalúa Amazon CloudFront para entregar imágenes compartidas a usuarios de todo el mundo y Amazon ElastiCache para las lecturas repetidas de registros de referencia. Un Application Load Balancer o más capacidad de aplicación no resuelven los problemas medidos, y una read replica no puede reemplazar la base de datos principal requerida."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "exam-cue-performance-latency--r0",
+      "conceptId": "exam-cue-performance-latency",
+      "kind": "recall",
+      "prompt": "Global users wait for shared images, while repeated database reads slow page assembly. Which AWS features would you evaluate, and why?",
+      "promptEs": "Usuarios de todo el mundo esperan imágenes compartidas y las lecturas repetidas de la base de datos retrasan las páginas. ¿Qué features de AWS evaluarías y por qué?",
+      "idealAnswer": "I would evaluate Amazon CloudFront for delivery of the shared images and Amazon ElastiCache for repeated database reads. They target different measured bottlenecks; I would test the resulting design against the workload's latency requirements.",
+      "rubric": [
+        "Identifies Amazon CloudFront for the shared-content delivery issue.",
+        "Identifies Amazon ElastiCache for repeated database reads.",
+        "Explains that the two choices address different bottlenecks rather than guaranteeing a latency target."
+      ]
+    }
+  ]
+}

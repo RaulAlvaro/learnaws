@@ -1,0 +1,394 @@
+{
+  "conceptId": "exam-cue-least-operational-overhead",
+  "card": {
+    "en": {
+      "tldr": "“Least operational overhead” asks who must run and maintain the solution after deployment. When the required function is available as a purpose-built AWS managed service, prefer it over custom scripts or software your team must operate on EC2.",
+      "whenToUse": [
+        "The scenario explicitly prioritizes “least operational overhead” or “least management effort.”",
+        "One option meets the requirement with a managed service, while another requires operating equivalent software.",
+        "A proposed design adds custom scripts or infrastructure that the requirement does not call for."
+      ],
+      "keyFacts": [
+        "Operational excellence covers the design, delivery, and maintenance of workloads—not just their initial deployment.",
+        "An operationally effective architecture provides insight into its status and supports efficient event response.",
+        "Operational practices should continue to improve in support of business goals.",
+        "The provided Well-Architected excerpt gives operational guidance, not a rule that a named service is always the best choice."
+      ],
+      "gotchas": [
+        "Do not choose a managed service if it does not perform the function the scenario requires.",
+        "Do not treat automated scripts as maintenance-free; the team still owns the scripts and what runs them.",
+        "Least operational overhead does not mean ignoring workload status or event response."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "least operational overhead",
+        "small operations team",
+        "avoid maintaining servers",
+        "replace custom scripts"
+      ]
+    },
+    "es": {
+      "tldr": "“Least operational overhead” te pide evaluar quién deberá operar y mantener la solución después del despliegue. Si un servicio administrado de AWS diseñado para esa función cumple el requisito, prefiérelo frente a scripts propios o software que tu equipo deba operar en EC2.",
+      "whenToUse": [
+        "El escenario prioriza explícitamente “least operational overhead” o “least management effort”.",
+        "Una opción cumple el requisito con un servicio administrado y otra exige operar software equivalente.",
+        "Un diseño agrega scripts propios o infraestructura que el requisito no necesita."
+      ],
+      "keyFacts": [
+        "La excelencia operativa abarca el diseño, la entrega y el mantenimiento de las cargas de trabajo, no solo su despliegue inicial.",
+        "Una arquitectura eficaz para la operación permite conocer su estado y responder eficientemente a eventos.",
+        "Las prácticas operativas deben seguir mejorando para apoyar los objetivos del negocio.",
+        "El extracto de Well-Architected ofrece orientación operativa, no una regla de que un servicio específico siempre sea la mejor opción."
+      ],
+      "gotchas": [
+        "No elijas un servicio administrado si no cumple la función solicitada.",
+        "No supongas que los scripts automatizados no requieren mantenimiento; tu equipo sigue siendo responsable de ellos y de dónde se ejecutan.",
+        "“Least operational overhead” no significa dejar de observar el estado de la carga de trabajo ni de responder a eventos."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "least operational overhead",
+        "small operations team",
+        "avoid maintaining servers",
+        "replace custom scripts"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "exam-cue-least-operational-overhead--0ab80fff",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A regional museum is replacing the entry point for a public REST API. The application team can update the API integration, but its small operations team does not want to maintain the software that receives and routes client requests. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Package an API proxy in containers and run it on team-managed EC2 instances.",
+          "correct": false,
+          "why": "Container packaging does not remove the stated responsibility for operating the proxy and its hosts."
+        },
+        {
+          "id": "B",
+          "text": "Use scripts on EC2 instances to receive requests and forward them to the application.",
+          "correct": false,
+          "why": "The team would own both the request-routing scripts and the instances running them."
+        },
+        {
+          "id": "C",
+          "text": "Run a reverse proxy on EC2 instances and have the team maintain its configuration.",
+          "correct": false,
+          "why": "It provides an API entry point but leaves proxy software and configuration with the operations team."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon API Gateway as the managed entry point for the REST API.",
+          "correct": true,
+          "why": "It addresses API creation and management without requiring the team to operate its own entry-point software."
+        }
+      ],
+      "explanation": "The deciding requirement is to provide a REST API entry point without maintaining the software that receives and routes requests. Amazon API Gateway is the managed option aligned with API creation and management. An EC2-hosted proxy could also receive requests, but the team would have to operate it, contrary to the stated priority.",
+      "keywordCues": [
+        "public REST API",
+        "does not want to maintain the software that receives and routes client requests",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Un museo regional está reemplazando el punto de entrada de una REST API pública. El equipo de aplicaciones puede actualizar la integración de la API, pero su pequeño equipo de operaciones no quiere mantener el software que recibe y dirige las solicitudes de los clientes. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Empaquetar un proxy de API en contenedores y ejecutarlo en instancias EC2 administradas por el equipo.",
+            "why": "Empaquetarlo en contenedores no elimina la responsabilidad de operar el proxy y sus instancias."
+          },
+          {
+            "id": "B",
+            "text": "Usar scripts en instancias EC2 para recibir solicitudes y enviarlas a la aplicación.",
+            "why": "El equipo tendría que mantener tanto los scripts de enrutamiento como las instancias donde se ejecutan."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar un proxy inverso en instancias EC2 y hacer que el equipo mantenga su configuración.",
+            "why": "Ofrece un punto de entrada para la API, pero deja el software del proxy y su configuración a cargo del equipo de operaciones."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon API Gateway como punto de entrada administrado para la REST API.",
+            "why": "Cubre la creación y administración de la API sin exigir que el equipo opere su propio software de entrada."
+          }
+        ],
+        "explanation": "El requisito decisivo es ofrecer un punto de entrada para la REST API sin mantener el software que recibe y dirige solicitudes. Amazon API Gateway es la opción administrada alineada con la creación y administración de API. Un proxy alojado en EC2 también podría recibir solicitudes, pero tu equipo tendría que operarlo, en contra de la prioridad indicada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-least-operational-overhead--cd27a94e",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An online publisher accepts article-processing requests and wants the receiving component to hand work off to separate processors. Its engineers are willing to change the application but do not want to operate queue software or maintain polling scripts. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Write requests to an application table and maintain scripts that poll for new work.",
+          "correct": false,
+          "why": "It creates a handoff but requires the polling scripts the team wants to avoid."
+        },
+        {
+          "id": "B",
+          "text": "Send each request directly to a processor and have the client retry when processing is unavailable.",
+          "correct": false,
+          "why": "It does not provide the requested handoff between the receiving component and separate processors."
+        },
+        {
+          "id": "C",
+          "text": "Run queue software on EC2 instances and have the team maintain it.",
+          "correct": false,
+          "why": "It provides a queue but directly conflicts with the requirement not to operate queue software."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon SQS as the managed queue between the receiving component and the processors.",
+          "correct": true,
+          "why": "It supplies the requested queue without making the team operate queue software or polling scripts for a custom handoff."
+        }
+      ],
+      "explanation": "The publisher needs a queue-based handoff and explicitly wants to avoid operating the mechanism itself. Amazon SQS is the purpose-built managed queue option. An EC2-hosted queue meets the handoff requirement but fails the operations requirement; sending requests directly to processors misses the handoff altogether.",
+      "keywordCues": [
+        "hand work off to separate processors",
+        "do not want to operate queue software or maintain polling scripts",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una editorial digital acepta solicitudes de procesamiento de artículos y quiere que el componente receptor entregue el trabajo a procesadores separados. Sus ingenieros pueden modificar la aplicación, pero no quieren operar software de colas ni mantener scripts de sondeo. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Escribir las solicitudes en una tabla de la aplicación y mantener scripts que consulten si hay trabajo nuevo.",
+            "why": "Crea una forma de entregar el trabajo, pero exige los scripts de sondeo que el equipo quiere evitar."
+          },
+          {
+            "id": "B",
+            "text": "Enviar cada solicitud directamente a un procesador y pedir al cliente que reintente cuando el procesamiento no esté disponible.",
+            "why": "No proporciona la entrega de trabajo solicitada entre el componente receptor y los procesadores separados."
+          },
+          {
+            "id": "C",
+            "text": "Ejecutar software de colas en instancias EC2 y hacer que el equipo lo mantenga.",
+            "why": "Proporciona una cola, pero contradice directamente el requisito de no operar software de colas."
+          },
+          {
+            "id": "D",
+            "text": "Usar Amazon SQS como cola administrada entre el componente receptor y los procesadores.",
+            "why": "Proporciona la cola solicitada sin que el equipo opere software de colas ni scripts de sondeo para una solución propia."
+          }
+        ],
+        "explanation": "La editorial necesita entregar trabajo mediante una cola y quiere evitar operar ese mecanismo. Amazon SQS es la opción de cola administrada diseñada para esa función. Una cola alojada en EC2 cumple la entrega de trabajo, pero falla el requisito operativo; enviar solicitudes directamente a los procesadores ni siquiera proporciona la entrega intermedia."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-least-operational-overhead--1622cfc4",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A medical scheduling company is reviewing how its applications obtain database credentials. The team currently maintains its own credential storage and update scripts and wants to retire that custom management work. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Build a credential-distribution application and schedule its update jobs on EC2.",
+          "correct": false,
+          "why": "It replaces one custom management process with another that the team must operate."
+        },
+        {
+          "id": "B",
+          "text": "Run a credential store on EC2 instances and have the team manage its updates.",
+          "correct": false,
+          "why": "It moves the custom store to EC2 but keeps its operation and updates with the team."
+        },
+        {
+          "id": "C",
+          "text": "Use AWS Secrets Manager for the application credentials.",
+          "correct": true,
+          "why": "It replaces a custom credential-management mechanism with a purpose-built managed service."
+        },
+        {
+          "id": "D",
+          "text": "Store credentials in application configuration files and maintain scripts to update them.",
+          "correct": false,
+          "why": "It retains the custom credential-update scripts the team wants to retire."
+        }
+      ],
+      "explanation": "The requirement is to stop maintaining a custom system for application credentials. AWS Secrets Manager is the purpose-built managed option for that function. An EC2-hosted credential store might be workable, but it preserves the team's responsibility for operating and updating the store.",
+      "keywordCues": [
+        "database credentials",
+        "retire that custom management work",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa de programación de citas médicas está revisando cómo sus aplicaciones obtienen credenciales de base de datos. El equipo mantiene actualmente su propio almacenamiento de credenciales y scripts de actualización, y quiere retirar ese trabajo de administración propio. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear una aplicación para distribuir credenciales y programar sus tareas de actualización en EC2.",
+            "why": "Sustituye un proceso propio por otro que el equipo también debe operar."
+          },
+          {
+            "id": "B",
+            "text": "Ejecutar un almacén de credenciales en instancias EC2 y hacer que el equipo administre sus actualizaciones.",
+            "why": "Traslada el almacén propio a EC2, pero mantiene su operación y actualización a cargo del equipo."
+          },
+          {
+            "id": "C",
+            "text": "Usar AWS Secrets Manager para las credenciales de las aplicaciones.",
+            "why": "Sustituye un mecanismo propio de administración de credenciales por un servicio administrado diseñado para esa función."
+          },
+          {
+            "id": "D",
+            "text": "Guardar las credenciales en archivos de configuración de la aplicación y mantener scripts para actualizarlas.",
+            "why": "Conserva los scripts propios de actualización de credenciales que el equipo quiere retirar."
+          }
+        ],
+        "explanation": "El requisito es dejar de mantener un sistema propio para las credenciales de las aplicaciones. AWS Secrets Manager es la opción administrada diseñada para esa función. Un almacén de credenciales alojado en EC2 podría funcionar, pero mantendría la responsabilidad de operarlo y actualizarlo en tu equipo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "exam-cue-least-operational-overhead--388e56ad",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A ticketing startup is designing two separate components: a public REST API entry point and a queue to hand accepted requests to processors. The team can integrate with managed AWS services but cannot take on routine maintenance of API proxy or queue software. Which TWO components meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Queue software installed and maintained on EC2 instances",
+          "correct": false,
+          "why": "It addresses the queue function but leaves routine queue-software maintenance with the team."
+        },
+        {
+          "id": "B",
+          "text": "A database table with team-maintained polling scripts for pending requests",
+          "correct": false,
+          "why": "It creates a custom handoff that requires the script maintenance the team wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Amazon SQS for the request handoff to processors",
+          "correct": true,
+          "why": "It provides the managed queue component without requiring the team to operate queue software."
+        },
+        {
+          "id": "D",
+          "text": "Amazon API Gateway for the REST API entry point",
+          "correct": true,
+          "why": "It supplies the requested managed API entry point without a team-operated proxy."
+        },
+        {
+          "id": "E",
+          "text": "An API proxy installed and maintained on EC2 instances",
+          "correct": false,
+          "why": "It could serve as an entry point, but the team would maintain the proxy software."
+        }
+      ],
+      "explanation": "This design needs two functions, not one: a REST API entry point and a queue for handing off work. Amazon API Gateway and Amazon SQS are the corresponding managed components. An EC2 proxy or EC2-hosted queue could perform one of those functions, but each conflicts with the explicit restriction on routine software maintenance.",
+      "keywordCues": [
+        "two separate components",
+        "public REST API entry point",
+        "a queue to hand accepted requests to processors",
+        "cannot take on routine maintenance",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html"
+      ],
+      "es": {
+        "stem": "Una empresa emergente de venta de boletos está diseñando dos componentes separados: un punto de entrada para una REST API pública y una cola para entregar las solicitudes aceptadas a los procesadores. El equipo puede integrar servicios administrados de AWS, pero no puede asumir el mantenimiento rutinario del software de proxy de API ni de colas. ¿Qué DOS componentes cumplen estos requisitos con el LEAST operational overhead? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Software de colas instalado y mantenido en instancias EC2",
+            "why": "Cubre la función de cola, pero deja su mantenimiento rutinario a cargo del equipo."
+          },
+          {
+            "id": "B",
+            "text": "Una tabla de base de datos con scripts de sondeo mantenidos por el equipo para las solicitudes pendientes",
+            "why": "Crea un mecanismo propio de entrega que exige el mantenimiento de scripts que el equipo quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Amazon SQS para entregar las solicitudes a los procesadores",
+            "why": "Proporciona el componente de cola administrado sin exigir que el equipo opere software de colas."
+          },
+          {
+            "id": "D",
+            "text": "Amazon API Gateway como punto de entrada de la REST API",
+            "why": "Proporciona el punto de entrada administrado solicitado sin un proxy operado por el equipo."
+          },
+          {
+            "id": "E",
+            "text": "Un proxy de API instalado y mantenido en instancias EC2",
+            "why": "Podría servir como punto de entrada, pero el equipo tendría que mantener el software del proxy."
+          }
+        ],
+        "explanation": "Este diseño necesita dos funciones, no una: un punto de entrada para la REST API y una cola para entregar trabajo. Amazon API Gateway y Amazon SQS son los componentes administrados correspondientes. Un proxy o una cola alojados en EC2 podrían cumplir una de esas funciones, pero ambos contradicen la restricción explícita sobre el mantenimiento rutinario del software."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "exam-cue-least-operational-overhead--r0",
+      "conceptId": "exam-cue-least-operational-overhead",
+      "kind": "recall",
+      "prompt": "A team needs an API entry point but cannot maintain proxy software. Which AWS service fits, and why?",
+      "promptEs": "Un equipo necesita un punto de entrada para una API, pero no puede mantener software de proxy. ¿Qué servicio de AWS elegirías y por qué?",
+      "idealAnswer": "Choose Amazon API Gateway for the API entry point. It meets the requested function without making the team operate its own proxy software.",
+      "rubric": [
+        "Names Amazon API Gateway.",
+        "Connects it to the API entry-point requirement.",
+        "Explains why avoiding a self-operated proxy reduces the stated management work."
+      ]
+    }
+  ]
+}

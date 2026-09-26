@@ -1,0 +1,420 @@
+{
+  "conceptId": "iam-users-groups-roles",
+  "card": {
+    "en": {
+      "tldr": "IAM users represent individual people or applications, groups collect IAM users, and roles provide permissions to principals that assume them. Prefer roles when temporary credentials are possible; use an IAM user with long-term credentials only when the use case cannot use the preferred approach.",
+      "whenToUse": [
+        "Use a role for a workload, federated identity, or cross-account principal that needs temporary access.",
+        "Use a group to assign the same permissions to a collection of IAM users.",
+        "Consider an IAM user when a client cannot use federation or roles."
+      ],
+      "keyFacts": [
+        "A role has no standard long-term password or access keys; assuming it provides temporary security credentials.",
+        "An IAM group is a collection of IAM users, not a principal that assumes a role.",
+        "Federated identities from an external identity provider assume IAM roles to access AWS resources.",
+        "For cross-account role delegation, the role's trust policy identifies who can assume it, while its permissions policy defines what it can do.",
+        "IAM users with long-term access keys are an exception for workloads or third-party clients that cannot use roles or supported federation."
+      ],
+      "gotchas": [
+        "Giving every workload its own IAM user and access key does not meet a requirement to avoid long-term credentials.",
+        "A group simplifies permissions for IAM users but does not replace a role for federated or service access.",
+        "A role's permissions policy alone does not establish which cross-account principal may assume it."
+      ],
+      "confusedWith": [
+        {
+          "concept": "IAM user group",
+          "difference": "A group collects IAM users for permissions; a role is assumed and supplies temporary credentials."
+        },
+        {
+          "concept": "IAM user",
+          "difference": "A user is associated with a specific person or application; a role can be assumed by trusted principals."
+        }
+      ],
+      "examCues": [
+        "avoid storing access keys in an application",
+        "employees already authenticate with a corporate directory",
+        "same permissions for several IAM users",
+        "trusted principal in another AWS account",
+        "client cannot use roles or federation"
+      ]
+    },
+    "es": {
+      "tldr": "Los IAM users representan a personas o aplicaciones individuales, los IAM groups reúnen IAM users y los IAM roles otorgan permisos a quienes los asumen. Prefiere roles cuando puedas usar credenciales temporales; usa un IAM user con credenciales de largo plazo solo cuando el caso no admita el enfoque preferido.",
+      "whenToUse": [
+        "Usa un IAM role para una carga de trabajo, una identidad federada o un principal de otra cuenta que necesite acceso temporal.",
+        "Usa un IAM group para asignar los mismos permisos a un conjunto de IAM users.",
+        "Considera un IAM user cuando un cliente no pueda usar federación ni roles."
+      ],
+      "keyFacts": [
+        "Un IAM role no tiene contraseña ni access keys estándar de largo plazo; al asumirlo obtienes credenciales de seguridad temporales.",
+        "Un IAM group reúne IAM users; no es un principal que asume un rol.",
+        "Las identidades federadas de un proveedor de identidad externo asumen IAM roles para acceder a recursos de AWS.",
+        "Para delegar acceso entre cuentas mediante un rol, su trust policy identifica quién puede asumirlo y su permissions policy define qué puede hacer.",
+        "Los IAM users con access keys de largo plazo son una excepción para cargas de trabajo o clientes de terceros que no pueden usar roles ni federación compatible."
+      ],
+      "gotchas": [
+        "Crear un IAM user y una access key para cada carga de trabajo no cumple un requisito de evitar credenciales de largo plazo.",
+        "Un grupo facilita compartir permisos entre IAM users, pero no sustituye a un rol para acceso federado o de servicios.",
+        "La permissions policy de un rol, por sí sola, no establece qué principal de otra cuenta puede asumirlo."
+      ],
+      "confusedWith": [
+        {
+          "concept": "IAM user group",
+          "difference": "Un grupo reúne IAM users para asignar permisos; un rol se asume y proporciona credenciales temporales."
+        },
+        {
+          "concept": "IAM user",
+          "difference": "Un usuario está asociado con una persona o aplicación específica; los principales de confianza pueden asumir un rol."
+        }
+      ],
+      "examCues": [
+        "avoid storing access keys in an application",
+        "employees already authenticate with a corporate directory",
+        "same permissions for several IAM users",
+        "trusted principal in another AWS account",
+        "client cannot use roles or federation"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "iam-users-groups-roles--045c3b09",
+      "conceptId": "iam-users-groups-roles",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company runs an application on Amazon EC2 that needs to write reports to an S3 bucket. Security requires that the application not store long-term AWS access keys. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Assign an IAM role with the required S3 permissions to the EC2 workload.",
+          "correct": true,
+          "why": "The workload can use the role's temporary credentials without storing long-term access keys."
+        },
+        {
+          "id": "B",
+          "text": "Create one IAM user for the fleet and distribute its access keys to each instance.",
+          "correct": false,
+          "why": "Distributing a user's long-term keys conflicts with the requirement not to store them."
+        },
+        {
+          "id": "C",
+          "text": "Create an IAM user for the application and store its access keys on the instance.",
+          "correct": false,
+          "why": "Storing the user's long-term keys violates the stated security requirement."
+        },
+        {
+          "id": "D",
+          "text": "Add an IAM user for each instance to a group with the required S3 permissions.",
+          "correct": false,
+          "why": "The group can share permissions, but the application would still need IAM user credentials."
+        }
+      ],
+      "explanation": "The deciding requirement is that the EC2 application must not store long-term access keys. A role can be assumed by an AWS service and supplies temporary credentials with the permissions the workload needs. An IAM user, whether used alone or placed in a group, would require the proposed long-term keys.",
+      "keywordCues": [
+        "runs an application on Amazon EC2",
+        "not store long-term AWS access keys",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta una aplicación en Amazon EC2 que necesita escribir informes en un bucket de S3. El equipo de seguridad exige que la aplicación no almacene access keys de AWS de largo plazo. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asigna a la carga de trabajo en EC2 un IAM role con los permisos necesarios para S3.",
+            "why": "La carga de trabajo puede usar las credenciales temporales del rol sin almacenar access keys de largo plazo."
+          },
+          {
+            "id": "B",
+            "text": "Crea un IAM user para toda la flota y distribuye sus access keys a cada instancia.",
+            "why": "Distribuir las claves de largo plazo de un usuario contradice el requisito de no almacenarlas."
+          },
+          {
+            "id": "C",
+            "text": "Crea un IAM user para la aplicación y almacena sus access keys en la instancia.",
+            "why": "Almacenar las claves de largo plazo del usuario incumple el requisito de seguridad."
+          },
+          {
+            "id": "D",
+            "text": "Agrega un IAM user por instancia a un grupo con los permisos necesarios para S3.",
+            "why": "El grupo permite compartir permisos, pero la aplicación aún necesitaría credenciales de IAM users."
+          }
+        ],
+        "explanation": "El requisito decisivo es que la aplicación en EC2 no almacene access keys de largo plazo. Un servicio de AWS puede asumir un rol que proporcione credenciales temporales con los permisos necesarios. Un IAM user, con o sin grupo, requeriría las claves de largo plazo propuestas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-users-groups-roles--0e965767",
+      "conceptId": "iam-users-groups-roles",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research institute's employees already sign in through a corporate SAML 2.0 identity provider. They need access to AWS resources without creating a separate IAM user for each employee or distributing long-term AWS credentials. Which design meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Federate the corporate identities with AWS and have employees assume IAM roles for access.",
+          "correct": true,
+          "why": "Federated users can assume roles and receive temporary credentials without separate IAM users."
+        },
+        {
+          "id": "B",
+          "text": "Create a group for each research team and add the external SAML identities directly to the groups.",
+          "correct": false,
+          "why": "IAM groups are collections of IAM users, whereas federated identities access AWS through roles."
+        },
+        {
+          "id": "C",
+          "text": "Create an IAM user for each employee and manage their shared permissions through an IAM group.",
+          "correct": false,
+          "why": "A group manages user permissions but does not eliminate the separate IAM users."
+        },
+        {
+          "id": "D",
+          "text": "Create one IAM user per research team and distribute each user's access keys within that team.",
+          "correct": false,
+          "why": "This design distributes long-term AWS credentials and does not use the existing identities."
+        }
+      ],
+      "explanation": "The employees already have external SAML identities, and the institute wants to avoid both separate IAM users and long-term AWS credentials. Federation lets those identities assume IAM roles and receive temporary credentials. IAM groups collect IAM users; they do not serve as the access mechanism for the external identities.",
+      "keywordCues": [
+        "corporate SAML 2.0 identity provider",
+        "without creating a separate IAM user",
+        "without distributing long-term AWS credentials"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html"
+      ],
+      "es": {
+        "stem": "Los empleados de un instituto de investigación ya inician sesión mediante un proveedor de identidad corporativo SAML 2.0. Necesitan acceder a recursos de AWS sin crear un IAM user por empleado ni distribuir credenciales de AWS de largo plazo. ¿Qué diseño cumple estos requisitos de la forma MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Federa las identidades corporativas con AWS y permite que los empleados asuman IAM roles para acceder.",
+            "why": "Los usuarios federados pueden asumir roles y obtener credenciales temporales sin IAM users independientes."
+          },
+          {
+            "id": "B",
+            "text": "Crea un grupo por equipo de investigación y agrega directamente las identidades SAML externas a los grupos.",
+            "why": "Los IAM groups reúnen IAM users, mientras que las identidades federadas acceden a AWS mediante roles."
+          },
+          {
+            "id": "C",
+            "text": "Crea un IAM user por empleado y administra sus permisos compartidos mediante un IAM group.",
+            "why": "Un grupo administra permisos de usuarios, pero no elimina los IAM users individuales."
+          },
+          {
+            "id": "D",
+            "text": "Crea un IAM user por equipo de investigación y distribuye las access keys de cada usuario dentro de su equipo.",
+            "why": "Este diseño distribuye credenciales de AWS de largo plazo y no utiliza las identidades existentes."
+          }
+        ],
+        "explanation": "Los empleados ya tienen identidades SAML externas y el instituto quiere evitar tanto IAM users adicionales como credenciales de AWS de largo plazo. La federación permite que esas identidades asuman IAM roles y reciban credenciales temporales. Los IAM groups reúnen IAM users; no son el mecanismo de acceso para las identidades externas."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-users-groups-roles--33fd7248",
+      "conceptId": "iam-users-groups-roles",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company keeps its audit resources in one AWS account and its internal auditors' IAM users in another. Auditors need temporary access to perform specific audit actions in the resources account, without receiving IAM users or long-term keys in that account. Which TWO configurations are needed for IAM role-based cross-account delegation? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach only a permissions policy to the role and allow any auditor to assume it without defining trust.",
+          "correct": false,
+          "why": "A role needs a trust policy identifying principals allowed to assume it."
+        },
+        {
+          "id": "B",
+          "text": "Configure the role's trust policy to allow the intended principals from the auditors' account to assume it.",
+          "correct": true,
+          "why": "The trust policy identifies the cross-account principals allowed to assume the role."
+        },
+        {
+          "id": "C",
+          "text": "Create IAM users in the resources account and give their access keys to the auditors.",
+          "correct": false,
+          "why": "This provides long-term credentials and additional users in the resources account, both of which are prohibited."
+        },
+        {
+          "id": "D",
+          "text": "Create a role in the resources account with a permissions policy for the specific audit actions.",
+          "correct": true,
+          "why": "The role's permissions policy defines the actions available during the assumed role session."
+        },
+        {
+          "id": "E",
+          "text": "Create an IAM group in the resources account and add the auditors' IAM users from the other account.",
+          "correct": false,
+          "why": "A group is a collection of IAM users and is not the cross-account role the auditors need to assume."
+        }
+      ],
+      "explanation": "The auditors need role-based access across accounts, with temporary credentials and only specific audit permissions. Create the role in the resources account: its permissions policy defines the allowed audit actions, and its trust policy identifies the principals allowed to assume it. A permissions policy without trust is insufficient, while creating users and keys in the resources account violates the stated constraints.",
+      "keywordCues": [
+        "IAM users in another",
+        "temporary access",
+        "specific audit actions",
+        "role-based cross-account delegation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística mantiene sus recursos de auditoría en una cuenta de AWS y los IAM users de sus auditores internos en otra. Los auditores necesitan acceso temporal para realizar acciones de auditoría específicas en la cuenta de recursos, sin recibir IAM users ni claves de largo plazo en esa cuenta. ¿Qué DOS configuraciones se necesitan para delegar acceso entre cuentas mediante IAM roles? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Adjunta solo una permissions policy al rol y permite que cualquier auditor lo asuma sin definir confianza.",
+            "why": "Un rol necesita una trust policy que identifique los principales autorizados a asumirlo."
+          },
+          {
+            "id": "B",
+            "text": "Configura la trust policy del rol para permitir que los principales previstos de la cuenta de los auditores lo asuman.",
+            "why": "La trust policy identifica a los principales de la otra cuenta autorizados a asumir el rol."
+          },
+          {
+            "id": "C",
+            "text": "Crea IAM users en la cuenta de recursos y entrega sus access keys a los auditores.",
+            "why": "Esto crea credenciales de largo plazo y usuarios adicionales en la cuenta de recursos, dos cosas prohibidas."
+          },
+          {
+            "id": "D",
+            "text": "Crea un rol en la cuenta de recursos con una permissions policy para las acciones de auditoría específicas.",
+            "why": "La permissions policy del rol define las acciones disponibles durante la sesión del rol asumido."
+          },
+          {
+            "id": "E",
+            "text": "Crea un IAM group en la cuenta de recursos y agrega los IAM users de los auditores de la otra cuenta.",
+            "why": "Un grupo reúne IAM users y no es el rol entre cuentas que deben asumir los auditores."
+          }
+        ],
+        "explanation": "Los auditores necesitan acceso entre cuentas basado en un rol, con credenciales temporales y solo los permisos de auditoría específicos. Crea el rol en la cuenta de recursos: su permissions policy define las acciones permitidas y su trust policy identifica a los principales que pueden asumirlo. Una permissions policy sin confianza no basta; crear usuarios y claves en la cuenta de recursos incumple las restricciones."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-users-groups-roles--5108eabc",
+      "conceptId": "iam-users-groups-roles",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum has created IAM users for its cataloging staff. Every cataloger needs the same permissions on the museum's AWS resources, and administrators want to change those permissions for the entire team in one place. Which approach meets the requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place the catalogers' IAM users in an IAM group and attach the permissions policy to the group.",
+          "correct": true,
+          "why": "The group collects the IAM users and provides one place to manage their shared permissions."
+        },
+        {
+          "id": "B",
+          "text": "Attach a separate copy of the permissions policy to each cataloger's IAM user.",
+          "correct": false,
+          "why": "Administrators would have to update the users individually rather than manage the team's permissions in one place."
+        },
+        {
+          "id": "C",
+          "text": "Create one IAM user with the cataloging permissions and share its credentials with the staff.",
+          "correct": false,
+          "why": "One shared user does not preserve the existing individual IAM user identities."
+        },
+        {
+          "id": "D",
+          "text": "Create a separate IAM role with the cataloging permissions for each staff member.",
+          "correct": false,
+          "why": "Separate roles do not provide the requested single place to change permissions for the existing IAM users."
+        }
+      ],
+      "explanation": "The staff already have individual IAM users and all need the same permissions. An IAM group is the identity designed to collect users, so attaching the shared policy to the group gives administrators one place to update it. Individual user policies or separate roles would require managing multiple copies.",
+      "keywordCues": [
+        "created IAM users",
+        "same permissions",
+        "change those permissions for the entire team in one place"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html"
+      ],
+      "es": {
+        "stem": "Un museo creó IAM users para el personal que cataloga sus colecciones. Cada integrante necesita los mismos permisos sobre los recursos de AWS del museo, y los administradores quieren cambiar esos permisos para todo el equipo en un solo lugar. ¿Qué enfoque cumple el requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Incluye los IAM users del equipo en un IAM group y adjunta la permissions policy al grupo.",
+            "why": "El grupo reúne a los IAM users y permite administrar sus permisos compartidos en un solo lugar."
+          },
+          {
+            "id": "B",
+            "text": "Adjunta una copia independiente de la permissions policy a cada IAM user del equipo.",
+            "why": "Los administradores tendrían que actualizar cada usuario en lugar de administrar los permisos del equipo en un solo lugar."
+          },
+          {
+            "id": "C",
+            "text": "Crea un solo IAM user con los permisos de catalogación y comparte sus credenciales con el personal.",
+            "why": "Un usuario compartido no conserva las identidades individuales de IAM user que ya existen."
+          },
+          {
+            "id": "D",
+            "text": "Crea un IAM role independiente con los permisos de catalogación para cada integrante.",
+            "why": "Los roles independientes no ofrecen el lugar único solicitado para cambiar los permisos de los IAM users existentes."
+          }
+        ],
+        "explanation": "El personal ya tiene IAM users individuales y todos necesitan los mismos permisos. Un IAM group reúne usuarios, por lo que adjuntar la policy compartida al grupo permite actualizarla en un solo lugar. Las policies individuales o los roles separados exigirían administrar varias copias."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "iam-users-groups-roles--r0",
+      "conceptId": "iam-users-groups-roles",
+      "kind": "recall",
+      "prompt": "Employees use a corporate SAML identity provider and need AWS access without long-term keys. Which IAM identity should they use, and why?",
+      "promptEs": "Los empleados usan un proveedor de identidad corporativo SAML y necesitan acceso a AWS sin claves de largo plazo. ¿Qué identidad de IAM deben usar y por qué?",
+      "idealAnswer": "Federate their existing identities with AWS and have them assume IAM roles. The roles grant the required permissions through temporary credentials without creating separate IAM users for those employees.",
+      "rubric": [
+        "Identifies IAM roles assumed through federation.",
+        "Mentions temporary credentials instead of long-term keys.",
+        "Explains that separate IAM users are unnecessary for these existing identities."
+      ]
+    }
+  ]
+}

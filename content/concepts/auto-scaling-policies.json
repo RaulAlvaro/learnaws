@@ -1,0 +1,429 @@
+{
+  "conceptId": "auto-scaling-policies",
+  "card": {
+    "en": {
+      "tldr": "Choose an Amazon EC2 Auto Scaling policy based on what tells you capacity must change. Use target tracking to maintain a metric target, scheduled scaling for a known time, predictive scaling for recurring demand patterns, and step scaling when different metric ranges require different responses.",
+      "whenToUse": [
+        "Choose target tracking when a valid utilization or per-instance throughput metric should stay near a target as load changes.",
+        "Choose scheduled scaling when a capacity change is needed at a known time, including a one-time event.",
+        "Choose predictive scaling when demand follows a recurring pattern; choose step scaling when the size of the response must depend on the severity of a metric breach."
+      ],
+      "keyFacts": [
+        "Target tracking automatically creates and manages the CloudWatch alarms used for its scaling actions.",
+        "Target tracking supports predefined metrics including average Auto Scaling group CPU utilization and ALBRequestCountPerTarget, as well as suitable custom metrics.",
+        "A target tracking metric must describe instance utilization and change proportionally with group capacity.",
+        "With multiple target tracking policies, the group scales out if any policy is ready, but scales in only if all applicable policies are ready.",
+        "A target tracking policy scales out when its metric exceeds the target—not when it falls below it."
+      ],
+      "gotchas": [
+        "The raw Amazon SQS ApproximateNumberOfMessagesVisible metric is not suitable for target tracking; queue messages per instance can be.",
+        "Load balancer RequestCount and Latency are not suitable target tracking metrics; ALBRequestCountPerTarget is a supported predefined metric.",
+        "Do not manually edit the CloudWatch alarms that Amazon EC2 Auto Scaling manages for target tracking."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Scheduled scaling",
+          "difference": "Acts at a known time rather than maintaining a metric target."
+        },
+        {
+          "concept": "Predictive scaling",
+          "difference": "Fits recurring demand patterns rather than a specified one-time capacity change."
+        },
+        {
+          "concept": "Step scaling",
+          "difference": "Uses tiered responses to metric breaches rather than automatically maintaining one target value."
+        }
+      ],
+      "examCues": [
+        "keep average CPU near a target",
+        "capacity needed before a one-time event",
+        "recurring demand pattern",
+        "different actions for moderate and severe breaches"
+      ]
+    },
+    "es": {
+      "tldr": "Elige una política de Amazon EC2 Auto Scaling según la señal que indica cuándo debe cambiar la capacidad. Usa target tracking para mantener un valor objetivo, scheduled scaling para un momento conocido, predictive scaling para patrones recurrentes y step scaling para respuestas por niveles.",
+      "whenToUse": [
+        "Elige target tracking si una métrica válida de utilización o rendimiento por instancia debe mantenerse cerca de un objetivo mientras cambia la carga.",
+        "Elige scheduled scaling si necesitas cambiar la capacidad en un momento conocido, incluso para un evento único.",
+        "Elige predictive scaling si la demanda sigue un patrón recurrente; elige step scaling si la magnitud de la respuesta debe depender de qué tanto se supera un umbral."
+      ],
+      "keyFacts": [
+        "Target tracking crea y administra automáticamente las alarmas de CloudWatch que usa para escalar.",
+        "Target tracking admite métricas predefinidas como la utilización promedio de CPU del Auto Scaling group y ALBRequestCountPerTarget, además de métricas personalizadas adecuadas.",
+        "Una métrica para target tracking debe representar la utilización de las instancias y cambiar proporcionalmente con la capacidad del grupo.",
+        "Con varias políticas de target tracking, el grupo escala hacia afuera si cualquiera está lista, pero escala hacia adentro solo si todas las políticas aplicables están listas.",
+        "Una política de target tracking escala hacia afuera cuando su métrica supera el objetivo, no cuando cae por debajo."
+      ],
+      "gotchas": [
+        "La métrica sin ajustar de Amazon SQS ApproximateNumberOfMessagesVisible no es adecuada para target tracking; los mensajes en cola por instancia sí pueden serlo.",
+        "RequestCount y Latency del load balancer no son métricas adecuadas para target tracking; ALBRequestCountPerTarget sí es una métrica predefinida admitida.",
+        "No edites manualmente las alarmas de CloudWatch que Amazon EC2 Auto Scaling administra para target tracking."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Scheduled scaling",
+          "difference": "Actúa en un momento conocido en vez de mantener una métrica en un valor objetivo."
+        },
+        {
+          "concept": "Predictive scaling",
+          "difference": "Se ajusta a patrones de demanda recurrentes, no a un cambio de capacidad específico para un evento único."
+        },
+        {
+          "concept": "Step scaling",
+          "difference": "Aplica respuestas por niveles cuando se superan umbrales, en vez de mantener automáticamente un único valor objetivo."
+        }
+      ],
+      "examCues": [
+        "keep average CPU near a target",
+        "capacity needed before a one-time event",
+        "recurring demand pattern",
+        "different actions for moderate and severe breaches"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/scale-your-group.html",
+      "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "auto-scaling-policies--d17423e3",
+      "conceptId": "auto-scaling-policies",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company will host a one-time live premiere on its EC2-backed website. It knows the start and end times and needs additional instances ready before viewers connect; there is no comparable traffic history. The company also wants to remove the extra capacity after the premiere. Which scaling approach meets these requirements MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use predictive scaling to prepare for the premiere from recurring demand.",
+          "correct": false,
+          "why": "The event is one-time and has no comparable traffic history from which to identify a recurring pattern."
+        },
+        {
+          "id": "B",
+          "text": "Use target tracking on average CPU utilization to add and remove instances.",
+          "correct": false,
+          "why": "CPU-based target tracking responds to measured utilization rather than arranging capacity before the known start time."
+        },
+        {
+          "id": "C",
+          "text": "Use step scaling with progressively larger additions as CPU rises.",
+          "correct": false,
+          "why": "Step scaling reacts to metric breaches rather than using the known event times to prepare capacity."
+        },
+        {
+          "id": "D",
+          "text": "Use scheduled scaling actions before the premiere and after it ends.",
+          "correct": true,
+          "why": "Scheduled actions match the known times for adding and later removing the event capacity."
+        }
+      ],
+      "explanation": "The premiere has known boundaries, and capacity must be ready before traffic arrives. Scheduled scaling aligns the capacity changes with those times. Target tracking and step scaling react to observed metrics, so they do not directly satisfy the advance-capacity requirement. Predictive scaling is a poor fit for an event with no recurring demand pattern.",
+      "keywordCues": [
+        "one-time live premiere",
+        "knows the start and end times",
+        "additional instances ready before viewers connect",
+        "no comparable traffic history"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/scale-your-group.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios realizará un estreno en vivo, por única vez, en su sitio web respaldado por EC2. Conoce la hora de inicio y de fin, y necesita instancias adicionales listas antes de que se conecten los espectadores; no hay un historial de tráfico comparable. También quiere retirar la capacidad adicional después del estreno. ¿Qué enfoque de escalamiento cumple estos requisitos de la forma MOST directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar predictive scaling para prepararse para el estreno a partir de demanda recurrente.",
+            "why": "El evento es único y no tiene un historial comparable del cual identificar un patrón recurrente."
+          },
+          {
+            "id": "B",
+            "text": "Usar target tracking sobre la utilización promedio de CPU para agregar y retirar instancias.",
+            "why": "Target tracking basado en CPU responde a la utilización medida, en vez de preparar capacidad antes de la hora de inicio conocida."
+          },
+          {
+            "id": "C",
+            "text": "Usar step scaling con incrementos progresivamente mayores a medida que suba la CPU.",
+            "why": "Step scaling responde a umbrales de métricas, en vez de usar los horarios conocidos para preparar la capacidad."
+          },
+          {
+            "id": "D",
+            "text": "Usar acciones de scheduled scaling antes del estreno y después de que termine.",
+            "why": "Las acciones programadas corresponden a los momentos conocidos para agregar y luego retirar la capacidad del evento."
+          }
+        ],
+        "explanation": "El estreno tiene horarios conocidos y la capacidad debe estar lista antes de que llegue el tráfico. Scheduled scaling permite alinear los cambios de capacidad con esos momentos. Target tracking y step scaling reaccionan a métricas observadas, por lo que no atienden directamente la necesidad de preparar capacidad con anticipación. Predictive scaling no es adecuado para un evento sin un patrón de demanda recurrente."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "auto-scaling-policies--38af3f75",
+      "conceptId": "auto-scaling-policies",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A grocery delivery service runs its dispatch application in an Amazon EC2 Auto Scaling group. Order surges recur throughout the week, but their start times and sizes vary in a recognizable pattern. The service wants capacity to follow that recurring demand rather than setting a fixed capacity for each hour. Which approach best meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use scheduled scaling with the same desired capacity every afternoon.",
+          "correct": false,
+          "why": "A fixed daily capacity does not account for the stated variations in surge timing and size."
+        },
+        {
+          "id": "B",
+          "text": "Use predictive scaling for the Auto Scaling group.",
+          "correct": true,
+          "why": "Predictive scaling is the policy choice for demand that follows a recurring pattern."
+        },
+        {
+          "id": "C",
+          "text": "Use step scaling with CPU alarms for moderate and severe load.",
+          "correct": false,
+          "why": "Step scaling provides tiered reactions to metric breaches, not scaling based on the recurring pattern described."
+        },
+        {
+          "id": "D",
+          "text": "Use target tracking with a CPU utilization target.",
+          "correct": false,
+          "why": "Target tracking maintains a utilization target as measured load changes, but it does not select capacity from the recurring demand pattern requested."
+        }
+      ],
+      "explanation": "The key requirement is to use a recognizable, recurring pattern while avoiding fixed hourly capacity settings. Predictive scaling is the appropriate choice for recurring demand. Scheduled scaling fits known times but the proposed fixed daily action misses the varying timing and size. Target tracking and step scaling respond to metrics instead of choosing capacity based on the recurring pattern.",
+      "keywordCues": [
+        "surges recur throughout the week",
+        "start times and sizes vary in a recognizable pattern",
+        "capacity to follow that recurring demand",
+        "rather than setting a fixed capacity for each hour"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/scale-your-group.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html"
+      ],
+      "es": {
+        "stem": "Un servicio de entrega de comestibles ejecuta su aplicación de despacho en un Amazon EC2 Auto Scaling group. Los aumentos de pedidos se repiten durante la semana, pero sus horas de inicio y magnitudes varían según un patrón reconocible. El servicio quiere que la capacidad siga esa demanda recurrente en lugar de establecer una capacidad fija para cada hora. ¿Qué enfoque cumple mejor este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar scheduled scaling con la misma capacidad deseada todas las tardes.",
+            "why": "Una capacidad diaria fija no considera las variaciones indicadas en el horario y la magnitud de los aumentos."
+          },
+          {
+            "id": "B",
+            "text": "Usar predictive scaling para el Auto Scaling group.",
+            "why": "Predictive scaling es la opción de política para una demanda que sigue un patrón recurrente."
+          },
+          {
+            "id": "C",
+            "text": "Usar step scaling con alarmas de CPU para cargas moderadas e intensas.",
+            "why": "Step scaling ofrece respuestas por niveles cuando se superan umbrales, no un escalamiento basado en el patrón recurrente descrito."
+          },
+          {
+            "id": "D",
+            "text": "Usar target tracking con un objetivo de utilización de CPU.",
+            "why": "Target tracking mantiene un objetivo de utilización cuando cambia la carga medida, pero no elige la capacidad a partir del patrón recurrente solicitado."
+          }
+        ],
+        "explanation": "El requisito clave es aprovechar un patrón reconocible y recurrente sin establecer capacidades horarias fijas. Predictive scaling es la opción adecuada para la demanda recurrente. Scheduled scaling se ajusta a horarios conocidos, pero la acción diaria fija propuesta no contempla las variaciones de horario y magnitud. Target tracking y step scaling responden a métricas en vez de elegir capacidad según el patrón recurrente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "auto-scaling-policies--a197696c",
+      "conceptId": "auto-scaling-policies",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "An insurer operates two EC2 Auto Scaling groups: one processes messages from an Amazon SQS queue, and the other serves requests through an Application Load Balancer. For each group, the team wants target tracking that maintains a meaningful per-instance or per-target workload level without managing CloudWatch alarms. Which TWO metric and policy choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use target tracking for the web group with ALBRequestCountPerTarget.",
+          "correct": true,
+          "why": "ALBRequestCountPerTarget is a supported predefined target tracking metric for requests per target."
+        },
+        {
+          "id": "B",
+          "text": "Use target tracking for the web group with load balancer RequestCount.",
+          "correct": false,
+          "why": "Total load balancer RequestCount does not change proportionally with the Auto Scaling group's capacity."
+        },
+        {
+          "id": "C",
+          "text": "Use target tracking for the web group with load balancer Latency.",
+          "correct": false,
+          "why": "Load balancer Latency does not necessarily change proportionally with group capacity."
+        },
+        {
+          "id": "D",
+          "text": "Use target tracking for the workers with a custom metric of queued messages per instance.",
+          "correct": true,
+          "why": "Queue messages per instance can be a suitable target tracking metric because it relates backlog to group capacity."
+        },
+        {
+          "id": "E",
+          "text": "Use target tracking for the workers with Amazon SQS ApproximateNumberOfMessagesVisible.",
+          "correct": false,
+          "why": "Raw visible queue depth might not change proportionally to the number of worker instances."
+        }
+      ],
+      "explanation": "Target tracking needs a metric that meaningfully reflects workload relative to the group's capacity. Messages per instance can work for the queue workers, and ALBRequestCountPerTarget is a supported predefined metric for the web group; target tracking also manages its own CloudWatch alarms. Raw queue depth and total load balancer RequestCount do not vary proportionally with group size. Load balancer Latency is likewise unsuitable because it does not necessarily change proportionally.",
+      "keywordCues": [
+        "processes messages from an Amazon SQS queue",
+        "serves requests through an Application Load Balancer",
+        "meaningful per-instance or per-target workload level",
+        "without managing CloudWatch alarms"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/scale-your-group.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html"
+      ],
+      "es": {
+        "stem": "Una aseguradora opera dos EC2 Auto Scaling groups: uno procesa mensajes de una cola de Amazon SQS y el otro atiende solicitudes mediante un Application Load Balancer. Para cada grupo, el equipo quiere target tracking que mantenga un nivel de carga significativo por instancia o por target, sin administrar alarmas de CloudWatch. ¿Qué DOS combinaciones de métrica y política cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar target tracking para el grupo web con ALBRequestCountPerTarget.",
+            "why": "ALBRequestCountPerTarget es una métrica predefinida admitida para target tracking de solicitudes por target."
+          },
+          {
+            "id": "B",
+            "text": "Usar target tracking para el grupo web con RequestCount del load balancer.",
+            "why": "El RequestCount total del load balancer no cambia proporcionalmente con la capacidad del Auto Scaling group."
+          },
+          {
+            "id": "C",
+            "text": "Usar target tracking para el grupo web con Latency del load balancer.",
+            "why": "Latency del load balancer no necesariamente cambia proporcionalmente con la capacidad del grupo."
+          },
+          {
+            "id": "D",
+            "text": "Usar target tracking para los workers con una métrica personalizada de mensajes en cola por instancia.",
+            "why": "Los mensajes en cola por instancia pueden ser una métrica adecuada para target tracking porque relacionan los mensajes pendientes con la capacidad del grupo."
+          },
+          {
+            "id": "E",
+            "text": "Usar target tracking para los workers con Amazon SQS ApproximateNumberOfMessagesVisible.",
+            "why": "La cantidad total de mensajes visibles en la cola podría no cambiar proporcionalmente con el número de instancias worker."
+          }
+        ],
+        "explanation": "Target tracking necesita una métrica que refleje la carga en relación con la capacidad del grupo. Los mensajes por instancia pueden funcionar para los workers de la cola, y ALBRequestCountPerTarget es una métrica predefinida admitida para el grupo web; además, target tracking administra sus propias alarmas de CloudWatch. La cantidad total de mensajes en cola y el RequestCount total del load balancer no varían proporcionalmente con el tamaño del grupo. Latency del load balancer tampoco es adecuada porque no necesariamente cambia de forma proporcional."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "auto-scaling-policies--4d8cea0a",
+      "conceptId": "auto-scaling-policies",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A veterinary booking application runs in an Amazon EC2 Auto Scaling group. Appointment traffic changes unpredictably throughout the day, and average group CPU utilization reliably reflects how busy the instances are. The team wants utilization to remain near a chosen target without maintaining scaling alarms. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use target tracking with average Auto Scaling group CPU utilization as the metric.",
+          "correct": true,
+          "why": "Target tracking maintains the chosen utilization target and manages its associated CloudWatch alarms."
+        },
+        {
+          "id": "B",
+          "text": "Use predictive scaling based on a recurring daily traffic pattern.",
+          "correct": false,
+          "why": "The scenario specifies unpredictable changes rather than a recurring pattern to plan around."
+        },
+        {
+          "id": "C",
+          "text": "Use scheduled scaling to increase and decrease capacity at fixed times each day.",
+          "correct": false,
+          "why": "Fixed times do not address the stated unpredictable changes in traffic."
+        },
+        {
+          "id": "D",
+          "text": "Use step scaling with CloudWatch alarms for several CPU utilization ranges.",
+          "correct": false,
+          "why": "Step scaling can react to CPU ranges, but the team would need to maintain the alarms and responses instead of setting one target."
+        }
+      ],
+      "explanation": "The deciding requirements are a reliable utilization metric, unpredictable load, and no alarm maintenance. Target tracking adjusts group capacity around a selected target and creates and manages the CloudWatch alarms it uses. Step scaling is useful when the team wants distinct responses for different metric ranges, but that is not required here. Fixed schedules and recurring-pattern planning do not match the described traffic.",
+      "keywordCues": [
+        "changes unpredictably throughout the day",
+        "average group CPU utilization reliably reflects how busy the instances are",
+        "remain near a chosen target",
+        "without maintaining scaling alarms"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/scale-your-group.html",
+        "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html"
+      ],
+      "es": {
+        "stem": "Una aplicación de reservas veterinarias se ejecuta en un Amazon EC2 Auto Scaling group. El tráfico cambia de forma impredecible durante el día, y la utilización promedio de CPU del grupo refleja de manera confiable qué tan ocupadas están las instancias. El equipo quiere mantener la utilización cerca de un objetivo sin administrar alarmas de escalamiento. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar target tracking con la utilización promedio de CPU del Auto Scaling group como métrica.",
+            "why": "Target tracking mantiene el objetivo de utilización elegido y administra las alarmas de CloudWatch asociadas."
+          },
+          {
+            "id": "B",
+            "text": "Usar predictive scaling según un patrón diario recurrente de tráfico.",
+            "why": "El escenario describe cambios impredecibles, no un patrón recurrente con el cual planificar."
+          },
+          {
+            "id": "C",
+            "text": "Usar scheduled scaling para aumentar y reducir la capacidad en horarios fijos cada día.",
+            "why": "Los horarios fijos no resuelven los cambios impredecibles de tráfico indicados en el escenario."
+          },
+          {
+            "id": "D",
+            "text": "Usar step scaling con alarmas de CloudWatch para varios rangos de utilización de CPU.",
+            "why": "Step scaling puede responder a distintos rangos de CPU, pero el equipo tendría que administrar las alarmas y las respuestas en lugar de establecer un solo objetivo."
+          }
+        ],
+        "explanation": "Lo decisivo es que existe una métrica confiable de utilización, la carga es impredecible y el equipo no quiere administrar alarmas. Target tracking ajusta la capacidad alrededor de un objetivo y crea y administra las alarmas de CloudWatch que utiliza. Step scaling sirve cuando necesitas respuestas distintas para rangos diferentes de una métrica, lo que aquí no se solicita. Los horarios fijos y la planificación de patrones recurrentes tampoco corresponden al tráfico descrito."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "auto-scaling-policies--r0",
+      "conceptId": "auto-scaling-policies",
+      "kind": "recall",
+      "prompt": "Traffic changes unpredictably, but average group CPU reflects instance load. Which scaling policy maintains a chosen CPU target, and why?",
+      "promptEs": "El tráfico cambia de forma impredecible, pero la CPU promedio del grupo refleja la carga. ¿Qué política mantiene un objetivo de CPU y por qué?",
+      "idealAnswer": "Use target tracking on average Auto Scaling group CPU utilization. It adjusts capacity around the selected target and manages the CloudWatch alarms used for scaling.",
+      "rubric": [
+        "Identifies target tracking.",
+        "Uses average Auto Scaling group CPU utilization as the metric.",
+        "Explains that it maintains the chosen target and manages its scaling alarms."
+      ]
+    }
+  ]
+}

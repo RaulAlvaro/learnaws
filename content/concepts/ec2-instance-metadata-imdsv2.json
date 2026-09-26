@@ -1,0 +1,230 @@
+{
+  "conceptId": "ec2-instance-metadata-imdsv2",
+  "card": {
+    "en": {
+      "tldr": "IMDSv2 is the session-oriented way for an EC2 instance to access instance metadata, including the IAM-related metadata used by workloads with instance roles. When a scenario calls for reducing SSRF-related metadata exposure, require IMDSv2 on the instance rather than merely allowing applications to use it.",
+      "whenToUse": [
+        "An EC2 workload needs instance metadata while the organization wants defense in depth against SSRF.",
+        "Unauthenticated IMDSv1 requests must fail without disabling metadata access.",
+        "A containerized workload needs IMDSv2 but cannot receive the token request's response at the default hop limit."
+      ],
+      "keyFacts": [
+        "By default, an instance can use IMDSv1, IMDSv2, or both; configuring IMDSv2 as required makes IMDSv1 calls fail.",
+        "IMDSv2 starts with a PUT request for a session token; subsequent metadata GET requests include that token.",
+        "A missing, invalid, or expired token receives HTTP 401 when tokens are required.",
+        "A token is specific to the instance that generated it and can last from one second to six hours.",
+        "The default IP response hop limit for token PUT requests is 1; it can be increased when a workload, such as a container service on the instance, needs it."
+      ],
+      "gotchas": [
+        "Using an IMDSv2-capable application does not by itself prevent IMDSv1 calls if the instance still permits them.",
+        "Requiring IMDSv2 can break a workload that uses an SDK version without IMDSv2 support.",
+        "Increasing the response hop limit is not a substitute for requiring IMDSv2."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "SSRF exposure on EC2",
+        "reject tokenless metadata requests",
+        "legacy SDK on an instance",
+        "container cannot receive IMDSv2 token response"
+      ]
+    },
+    "es": {
+      "tldr": "IMDSv2 es la forma basada en sesiones con la que una instancia EC2 accede a instance metadata, incluidos los metadatos relacionados con IAM que usan las cargas de trabajo con roles de instancia. Si un escenario pide reducir la exposición de metadatos ante SSRF, exige IMDSv2 en la instancia en vez de solo permitir que la aplicación lo use.",
+      "whenToUse": [
+        "Una carga de trabajo en EC2 necesita instance metadata y la organización busca defensa en profundidad frente a SSRF.",
+        "Las solicitudes IMDSv1 sin token deben fallar sin deshabilitar el acceso a los metadatos.",
+        "Una carga de trabajo en contenedores necesita IMDSv2, pero no recibe la respuesta de la solicitud del token con el hop limit predeterminado."
+      ],
+      "keyFacts": [
+        "De forma predeterminada, una instancia puede usar IMDSv1, IMDSv2 o ambos; exigir IMDSv2 hace que fallen las llamadas IMDSv1.",
+        "IMDSv2 comienza con una solicitud PUT para obtener un token de sesión; las solicitudes GET posteriores incluyen ese token.",
+        "Cuando se exigen tokens, un token ausente, inválido o vencido produce HTTP 401.",
+        "El token solo es válido en la instancia que lo generó y puede durar desde un segundo hasta seis horas.",
+        "El hop limit IP predeterminado de la respuesta al PUT del token es 1; puedes aumentarlo si una carga de trabajo, como un servicio de contenedores en la instancia, lo necesita."
+      ],
+      "gotchas": [
+        "Que la aplicación pueda usar IMDSv2 no impide las llamadas IMDSv1 si la instancia todavía las acepta.",
+        "Exigir IMDSv2 puede afectar a una carga de trabajo que usa una versión del SDK sin soporte para IMDSv2.",
+        "Aumentar el hop limit de la respuesta no sustituye el requisito de usar IMDSv2."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "SSRF exposure on EC2",
+        "reject tokenless metadata requests",
+        "legacy SDK on an instance",
+        "container cannot receive IMDSv2 token response"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ec2-instance-metadata-imdsv2--a0056560",
+      "conceptId": "ec2-instance-metadata-imdsv2",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publishing company runs an application on EC2 that needs access to instance metadata. A security review identifies an SSRF risk, and the company wants metadata requests without an IMDSv2 session token to fail. Which change meets this requirement MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Have the application request a new IMDSv2 token for every metadata lookup without changing the instance settings.",
+          "correct": false,
+          "why": "Generating tokens more often does not prevent other requests from using IMDSv1 when it remains allowed."
+        },
+        {
+          "id": "B",
+          "text": "Increase the instance metadata response hop limit and leave both IMDS versions available.",
+          "correct": false,
+          "why": "A higher hop limit does not make tokenless IMDSv1 requests fail."
+        },
+        {
+          "id": "C",
+          "text": "Configure the EC2 instance to require IMDSv2 and have the application obtain and include a session token.",
+          "correct": true,
+          "why": "Requiring IMDSv2 rejects tokenless metadata requests while preserving token-based access."
+        },
+        {
+          "id": "D",
+          "text": "Update the application to use IMDSv2, but leave the instance configured to accept either IMDS version.",
+          "correct": false,
+          "why": "The application would use tokens, but the instance would still accept IMDSv1 requests without them."
+        }
+      ],
+      "explanation": "The deciding requirement is that metadata requests without an IMDSv2 token must fail. Configure the instance to require IMDSv2, then use a token obtained by PUT in subsequent metadata requests. Merely changing the application to use tokens leaves IMDSv1 available if the instance still accepts both versions. Increasing the hop limit addresses token-response delivery, not whether tokens are required.",
+      "keywordCues": [
+        "SSRF risk",
+        "metadata requests without an IMDSv2 session token to fail"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta en EC2 una aplicación que necesita acceder a instance metadata. Una revisión de seguridad detecta un riesgo de SSRF y la empresa quiere que fallen las solicitudes de metadatos sin un token de sesión IMDSv2. ¿Qué cambio cumple este requisito de la manera MOST secure?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Haz que la aplicación solicite un nuevo token IMDSv2 para cada consulta de metadatos sin cambiar la configuración de la instancia.",
+            "why": "Generar tokens con más frecuencia no impide que otras solicitudes usen IMDSv1 si sigue permitido."
+          },
+          {
+            "id": "B",
+            "text": "Aumenta el hop limit de la respuesta de instance metadata y deja disponibles ambas versiones de IMDS.",
+            "why": "Un hop limit mayor no hace que fallen las solicitudes IMDSv1 sin token."
+          },
+          {
+            "id": "C",
+            "text": "Configura la instancia EC2 para exigir IMDSv2 y haz que la aplicación obtenga e incluya un token de sesión.",
+            "why": "Exigir IMDSv2 rechaza las solicitudes de metadatos sin token y conserva el acceso basado en tokens."
+          },
+          {
+            "id": "D",
+            "text": "Actualiza la aplicación para que use IMDSv2, pero deja la instancia configurada para aceptar cualquiera de las dos versiones de IMDS.",
+            "why": "La aplicación usaría tokens, pero la instancia todavía aceptaría solicitudes IMDSv1 sin ellos."
+          }
+        ],
+        "explanation": "El requisito decisivo es que fallen las solicitudes de metadatos sin un token IMDSv2. Configura la instancia para exigir IMDSv2 y luego incluye en las solicitudes posteriores el token obtenido mediante PUT. Cambiar solo la aplicación para que use tokens deja disponible IMDSv1 si la instancia aún acepta ambas versiones. Aumentar el hop limit ayuda a entregar la respuesta del token, pero no exige el uso de tokens."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ec2-instance-metadata-imdsv2--d52bee28",
+      "conceptId": "ec2-instance-metadata-imdsv2",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab is migrating an EC2-based analysis service to an IMDSv2-only configuration. Its current AWS SDK version does not support IMDSv2, but the service must continue retrieving instance metadata after the change. Which migration plan meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Upgrade to an SDK version that supports IMDSv2, verify metadata access, and then require IMDSv2.",
+          "correct": true,
+          "why": "A supported SDK can use IMDSv2 while the instance setting rejects IMDSv1 calls."
+        },
+        {
+          "id": "B",
+          "text": "Require IMDSv2 immediately and keep the current SDK version.",
+          "correct": false,
+          "why": "The current SDK does not support the metadata access method the instance would require."
+        },
+        {
+          "id": "C",
+          "text": "Disable instance metadata access and keep the current SDK version.",
+          "correct": false,
+          "why": "Disabling metadata access prevents the service from continuing to retrieve it."
+        },
+        {
+          "id": "D",
+          "text": "Leave IMDSv1 enabled and retry metadata requests when the current SDK receives an error.",
+          "correct": false,
+          "why": "Leaving IMDSv1 available does not achieve an IMDSv2-only configuration."
+        }
+      ],
+      "explanation": "The service must keep accessing metadata, and the finished configuration must accept only IMDSv2. AWS states that an EC2 workload using an SDK needs an IMDSv2-supporting version to use IMDSv2. Upgrade and verify the SDK before requiring IMDSv2 on the instance. Requiring IMDSv2 while retaining the incompatible SDK would fail the continuity requirement.",
+      "keywordCues": [
+        "IMDSv2-only configuration",
+        "current AWS SDK version does not support IMDSv2",
+        "continue retrieving instance metadata"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación está migrando un servicio de análisis en EC2 a una configuración que solo acepta IMDSv2. Su versión actual del AWS SDK no admite IMDSv2, pero el servicio debe seguir obteniendo instance metadata después del cambio. ¿Qué plan de migración cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Actualiza a una versión del SDK compatible con IMDSv2, comprueba el acceso a los metadatos y después exige IMDSv2.",
+            "why": "Un SDK compatible puede usar IMDSv2 mientras la configuración de la instancia rechaza las llamadas IMDSv1."
+          },
+          {
+            "id": "B",
+            "text": "Exige IMDSv2 de inmediato y conserva la versión actual del SDK.",
+            "why": "El SDK actual no admite el método de acceso a metadatos que exigiría la instancia."
+          },
+          {
+            "id": "C",
+            "text": "Deshabilita el acceso a instance metadata y conserva la versión actual del SDK.",
+            "why": "Deshabilitar el acceso impide que el servicio siga obteniendo metadatos."
+          },
+          {
+            "id": "D",
+            "text": "Deja habilitado IMDSv1 y reintenta las solicitudes de metadatos cuando el SDK actual reciba un error.",
+            "why": "Dejar disponible IMDSv1 no logra una configuración que solo acepta IMDSv2."
+          }
+        ],
+        "explanation": "El servicio debe seguir accediendo a los metadatos y la configuración final debe aceptar solo IMDSv2. AWS indica que una carga de trabajo en EC2 que usa un SDK necesita una versión compatible con IMDSv2 para utilizarlo. Actualiza y verifica el SDK antes de exigir IMDSv2 en la instancia. Exigir IMDSv2 sin reemplazar el SDK incompatible incumpliría el requisito de continuidad."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ec2-instance-metadata-imdsv2--r0",
+      "conceptId": "ec2-instance-metadata-imdsv2",
+      "kind": "recall",
+      "prompt": "An EC2 application needs metadata, but tokenless requests must fail because of SSRF risk. What should you configure, and how does the application access metadata?",
+      "promptEs": "Una aplicación en EC2 necesita metadatos, pero las solicitudes sin token deben fallar por riesgo de SSRF. ¿Qué configuras y cómo accede la aplicación?",
+      "idealAnswer": "Require IMDSv2 on the EC2 instance so IMDSv1 calls fail. The application obtains a session token with a PUT request and includes the token in subsequent metadata GET requests.",
+      "rubric": [
+        "Require IMDSv2 in the instance metadata options.",
+        "State that IMDSv1 or tokenless requests fail.",
+        "Describe obtaining a token by PUT and including it in metadata GET requests."
+      ]
+    }
+  ]
+}

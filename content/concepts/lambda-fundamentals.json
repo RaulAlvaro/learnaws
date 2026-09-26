@@ -1,0 +1,457 @@
+{
+  "conceptId": "lambda-fundamentals",
+  "card": {
+    "en": {
+      "tldr": "AWS Lambda Functions run independent handlers in response to events or API calls without server management. Choose them for short, variable-demand work; check execution time and memory before choosing a function instead of a container.",
+      "whenToUse": [
+        "An S3, SQS, EventBridge, or API Gateway trigger should run code on demand.",
+        "Work is independent across invocations and does not require persistent in-memory state.",
+        "Demand varies and the team does not want to provision or patch servers."
+      ],
+      "keyFacts": [
+        "A standard Lambda Function invocation can run for up to 900 seconds (15 minutes). Certain AWS Lambda Managed Instances invocations have a documented 90-minute exception.",
+        "Function memory ranges from 128 MB to 10,240 MB in 1-MB increments; allocated CPU power increases with configured memory.",
+        "Lambda scales functions by creating execution environments in response to traffic; each invocation runs independently.",
+        "Execution environments can be reused, but state might not persist across invocations.",
+        "The default regional concurrent-executions quota is 1,000 and can be increased."
+      ],
+      "gotchas": [
+        "Packaging a function as a container image does not, by itself, remove the standard function timeout.",
+        "Increasing /tmp storage does not increase allocated CPU power; increasing function memory does.",
+        "A warm execution environment is not a reliable store for state needed by later invocations."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Fargate",
+          "difference": "Consider a container task when one uninterrupted job exceeds the standard Lambda Function invocation limit."
+        },
+        {
+          "concept": "Amazon ECS on EC2",
+          "difference": "A short event handler does not need container hosts simply to respond to an AWS service trigger."
+        },
+        {
+          "concept": "AWS Batch",
+          "difference": "A directly triggered, short handler is different from a workload that needs a managed batch-job queue and scheduler."
+        }
+      ],
+      "examCues": [
+        "run code when an S3 object arrives",
+        "unpredictable bursts of independent events",
+        "CPU-bound function within 15 minutes",
+        "one uninterrupted job exceeds the standard function timeout",
+        "API traffic may exceed the default Lambda concurrency quota"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Lambda Functions ejecuta handlers independientes en respuesta a eventos o llamadas de API sin que administres servidores. Elígelo para trabajo breve con demanda variable; revisa el tiempo de ejecución y la memoria antes de optar por una función en lugar de un contenedor.",
+      "whenToUse": [
+        "Un trigger de S3, SQS, EventBridge o API Gateway debe ejecutar código bajo demanda.",
+        "El trabajo es independiente entre invocaciones y no requiere estado persistente en memoria.",
+        "La demanda varía y tu equipo no quiere aprovisionar ni aplicar parches a servidores."
+      ],
+      "keyFacts": [
+        "Una invocación estándar de Lambda Function puede durar hasta 900 segundos (15 minutos). Ciertas invocaciones de AWS Lambda Managed Instances tienen una excepción documentada de 90 minutos.",
+        "La memoria de una función va de 128 MB a 10,240 MB en incrementos de 1 MB; la CPU asignada aumenta con la memoria configurada.",
+        "Lambda escala las funciones creando entornos de ejecución según el tráfico; cada invocación se ejecuta de forma independiente.",
+        "Los entornos de ejecución pueden reutilizarse, pero el estado podría no persistir entre invocaciones.",
+        "La cuota regional predeterminada de ejecuciones concurrentes es 1,000 y puede aumentarse."
+      ],
+      "gotchas": [
+        "Empaquetar una función como container image no elimina por sí solo el timeout estándar de la función.",
+        "Aumentar el almacenamiento /tmp no incrementa la CPU asignada; aumentar la memoria de la función sí lo hace.",
+        "Un entorno de ejecución reutilizado no es un lugar confiable para guardar estado que necesiten invocaciones posteriores."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Fargate",
+          "difference": "Considera una tarea en contenedor cuando un trabajo ininterrumpido supera el límite de una invocación estándar de Lambda Function."
+        },
+        {
+          "concept": "Amazon ECS on EC2",
+          "difference": "Un handler breve basado en eventos no necesita hosts de contenedores solo para responder a un trigger de un servicio de AWS."
+        },
+        {
+          "concept": "AWS Batch",
+          "difference": "Un handler breve activado directamente es distinto de una carga que necesita una cola y un programador administrados para trabajos batch."
+        }
+      ],
+      "examCues": [
+        "run code when an S3 object arrives",
+        "unpredictable bursts of independent events",
+        "CPU-bound function within 15 minutes",
+        "one uninterrupted job exceeds the standard function timeout",
+        "API traffic may exceed the default Lambda concurrency quota"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
+      "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "lambda-fundamentals--2b6b66c7",
+      "conceptId": "lambda-fundamentals",
+      "secondaryConcepts": [
+        "fargate-serverless-containers",
+        "amazon-ecs-launch-types",
+        "amazon-eks"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A museum receives image uploads in Amazon S3, with long quiet periods followed by unpredictable bursts. Each image needs an independent conversion that completes in about four minutes. The team does not want to manage servers or a container deployment. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Package the converter for AWS Fargate and run a container task for each upload.",
+          "correct": false,
+          "why": "The scenario does not require a container deployment, whereas a Lambda Function directly fits the event and duration requirements."
+        },
+        {
+          "id": "B",
+          "text": "Configure an AWS Lambda Function to process each S3 upload event.",
+          "correct": true,
+          "why": "Lambda supports S3 event triggers, independent invocations, and managed infrastructure for this short task."
+        },
+        {
+          "id": "C",
+          "text": "Deploy the converter as a container workload on Amazon EKS.",
+          "correct": false,
+          "why": "The scenario calls for a short event handler without a container deployment, not a Kubernetes workload."
+        },
+        {
+          "id": "D",
+          "text": "Run the converter in containers on Amazon ECS with EC2 instances.",
+          "correct": false,
+          "why": "Managing container hosts conflicts with the requirement to avoid server management."
+        }
+      ],
+      "explanation": "The deciding requirements are independent, short conversions triggered by S3 uploads and no server or container management. Lambda Functions can use S3 as a trigger and scale execution environments in response to demand. A container-based choice could process images, but it adds a deployment model the team explicitly wants to avoid.",
+      "keywordCues": [
+        "Amazon S3",
+        "unpredictable bursts",
+        "independent conversion",
+        "about four minutes",
+        "does not want to manage servers or a container deployment"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"
+      ],
+      "es": {
+        "stem": "Un museo recibe imágenes en Amazon S3, con largos periodos de poca actividad seguidos de picos impredecibles. Cada imagen requiere una conversión independiente que termina en unos cuatro minutos. Tu equipo no quiere administrar servidores ni un despliegue de contenedores. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Empaqueta el conversor para AWS Fargate y ejecuta una tarea en contenedor por cada carga.",
+            "why": "El escenario no requiere un despliegue de contenedores, mientras que una Lambda Function cumple directamente con los requisitos de evento y duración."
+          },
+          {
+            "id": "B",
+            "text": "Configura una AWS Lambda Function para procesar cada evento de carga en S3.",
+            "why": "Lambda admite triggers de S3, invocaciones independientes e infraestructura administrada para esta tarea breve."
+          },
+          {
+            "id": "C",
+            "text": "Despliega el conversor como carga de contenedores en Amazon EKS.",
+            "why": "El escenario pide un handler breve basado en eventos sin despliegue de contenedores, no una carga de Kubernetes."
+          },
+          {
+            "id": "D",
+            "text": "Ejecuta el conversor en contenedores de Amazon ECS con instancias EC2.",
+            "why": "Administrar hosts de contenedores contradice el requisito de no administrar servidores."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son conversiones breves e independientes activadas por cargas en S3, sin administrar servidores ni contenedores. Lambda Functions puede usar S3 como trigger y escalar entornos de ejecución según la demanda. Una opción basada en contenedores podría procesar imágenes, pero agrega un modelo de despliegue que tu equipo quiere evitar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-fundamentals--71232f16",
+      "conceptId": "lambda-fundamentals",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A mapping company runs a standard AWS Lambda Function to calculate a route after each API request. Calculations finish within the configured timeout, but profiling shows they are CPU-bound; the current memory setting is 512 MB. The company wants more CPU for each invocation while keeping the same event-driven design. Which change meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Increase the function's /tmp storage allocation.",
+          "correct": false,
+          "why": "The /tmp setting changes temporary storage, not the CPU power allocated to the function."
+        },
+        {
+          "id": "B",
+          "text": "Package the same function code as a Lambda container image.",
+          "correct": false,
+          "why": "Changing the code package format does not address the function's configured memory and CPU allocation."
+        },
+        {
+          "id": "C",
+          "text": "Increase the function's configured memory.",
+          "correct": true,
+          "why": "Lambda allocates CPU power in proportion to configured function memory."
+        },
+        {
+          "id": "D",
+          "text": "Increase the function's timeout while leaving memory unchanged.",
+          "correct": false,
+          "why": "A longer timeout does not address the CPU allocation identified by profiling."
+        }
+      ],
+      "explanation": "The requirement is more CPU per invocation, not more temporary storage or execution time. Lambda allocates CPU power in proportion to the function's configured memory. Raising memory therefore addresses the measured bottleneck while preserving the event-driven function design. A container image changes packaging, not this resource-setting decision.",
+      "keywordCues": [
+        "standard AWS Lambda Function",
+        "finish within the configured timeout",
+        "CPU-bound",
+        "current memory setting is 512 MB",
+        "more CPU for each invocation"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"
+      ],
+      "es": {
+        "stem": "Una empresa de mapas ejecuta una AWS Lambda Function estándar para calcular una ruta después de cada solicitud de API. Los cálculos terminan dentro del timeout configurado, pero el análisis muestra que están limitados por CPU; la memoria actual es de 512 MB. La empresa quiere más CPU por invocación sin cambiar el diseño basado en eventos. ¿Qué cambio cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Aumenta el almacenamiento /tmp de la función.",
+            "why": "La configuración de /tmp cambia el almacenamiento temporal, no la CPU asignada a la función."
+          },
+          {
+            "id": "B",
+            "text": "Empaqueta el mismo código de la función como Lambda container image.",
+            "why": "Cambiar el formato del paquete no resuelve la configuración de memoria y CPU de la función."
+          },
+          {
+            "id": "C",
+            "text": "Aumenta la memoria configurada de la función.",
+            "why": "Lambda asigna CPU en proporción a la memoria configurada de la función."
+          },
+          {
+            "id": "D",
+            "text": "Aumenta el timeout de la función sin cambiar la memoria.",
+            "why": "Un timeout mayor no soluciona la asignación de CPU identificada en el análisis."
+          }
+        ],
+        "explanation": "El requisito es más CPU por invocación, no más almacenamiento temporal ni más tiempo de ejecución. Lambda asigna CPU en proporción a la memoria configurada de la función. Por eso, aumentar la memoria atiende el cuello de botella medido y conserva el diseño basado en eventos. Un container image cambia el empaquetado, no esta decisión de recursos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-fundamentals--cd2485b8",
+      "conceptId": "lambda-fundamentals",
+      "secondaryConcepts": [
+        "fargate-serverless-containers",
+        "amazon-ecs-launch-types"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab processes individual instrument files with a program that must run uninterrupted for roughly 40 minutes. The lab initially plans to invoke a standard Lambda Function for each file, but does not want to split a file's processing into steps. It also wants to avoid managing compute hosts. Which approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy the program as a standard Lambda Function and set its timeout to 40 minutes.",
+          "correct": false,
+          "why": "A standard Lambda Function cannot be configured with a 40-minute invocation timeout."
+        },
+        {
+          "id": "B",
+          "text": "Deploy a standard Lambda Function from a container image and set its timeout to 40 minutes.",
+          "correct": false,
+          "why": "Using a container image does not make a standard Lambda Function's 40-minute timeout valid."
+        },
+        {
+          "id": "C",
+          "text": "Run each file as an AWS Fargate container task instead of a standard Lambda Function.",
+          "correct": true,
+          "why": "A container task avoids the standard Lambda Function's 15-minute invocation limit without requiring the lab to manage hosts."
+        },
+        {
+          "id": "D",
+          "text": "Run each file in an Amazon ECS container on lab-managed EC2 instances.",
+          "correct": false,
+          "why": "Although this avoids the standard function timeout, managing EC2 hosts conflicts with the stated requirement."
+        }
+      ],
+      "explanation": "Each file needs one uninterrupted run longer than the standard Lambda Function maximum of 15 minutes. A container task is a better fit than simply increasing a standard function's timeout, and Fargate avoids managing compute hosts. Packaging the Lambda code as a container image does not change that standard invocation limit. ECS on EC2 misses the lab's host-management constraint.",
+      "keywordCues": [
+        "run uninterrupted for roughly 40 minutes",
+        "standard Lambda Function",
+        "does not want to split",
+        "avoid managing compute hosts"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio procesa archivos individuales de instrumentos con un programa que debe ejecutarse sin interrupciones durante unos 40 minutos. Al principio, el laboratorio planea invocar una Lambda Function estándar por archivo, pero no quiere dividir el procesamiento en pasos. Tampoco quiere administrar hosts de cómputo. ¿Qué enfoque cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Despliega el programa como una Lambda Function estándar y configura un timeout de 40 minutos.",
+            "why": "No puedes configurar una Lambda Function estándar con un timeout de invocación de 40 minutos."
+          },
+          {
+            "id": "B",
+            "text": "Despliega una Lambda Function estándar desde un container image y configura un timeout de 40 minutos.",
+            "why": "Usar un container image no hace válido un timeout de 40 minutos para una Lambda Function estándar."
+          },
+          {
+            "id": "C",
+            "text": "Ejecuta cada archivo como una tarea en contenedor de AWS Fargate en lugar de una Lambda Function estándar.",
+            "why": "Una tarea en contenedor evita el límite de 15 minutos de la Lambda Function estándar sin que el laboratorio administre hosts."
+          },
+          {
+            "id": "D",
+            "text": "Ejecuta cada archivo en un contenedor de Amazon ECS sobre instancias EC2 administradas por el laboratorio.",
+            "why": "Aunque evita el timeout de la función estándar, administrar hosts EC2 contradice el requisito indicado."
+          }
+        ],
+        "explanation": "Cada archivo necesita una ejecución ininterrumpida mayor que el máximo de 15 minutos de una Lambda Function estándar. Una tarea en contenedor encaja mejor que simplemente aumentar el timeout de la función, y Fargate evita administrar hosts de cómputo. Empaquetar el código de Lambda como container image no cambia ese límite de invocación estándar. ECS on EC2 incumple la restricción de administrar hosts."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-fundamentals--212020e2",
+      "conceptId": "lambda-fundamentals",
+      "secondaryConcepts": [
+        "amazon-ecs-launch-types"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A weather service receives bursts of independent sensor files in Amazon S3. It wants each file analyzed on arrival without managing servers; tests show that each analysis completes within six minutes but needs more CPU than its current Lambda Function configuration provides. The team is reviewing changes that preserve this design. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the analyzer to ECS on EC2 to avoid managing compute hosts.",
+          "correct": false,
+          "why": "An EC2-backed container design conflicts with the requirement not to manage hosts."
+        },
+        {
+          "id": "B",
+          "text": "Keep intermediate state only in the Lambda execution environment for the next file.",
+          "correct": false,
+          "why": "Invocations are independent, and execution-environment state might not persist for the next file."
+        },
+        {
+          "id": "C",
+          "text": "Increase the function's /tmp allocation to provide more CPU per invocation.",
+          "correct": false,
+          "why": "The /tmp setting controls temporary storage rather than the function's CPU allocation."
+        },
+        {
+          "id": "D",
+          "text": "Increase the Lambda Function's memory setting to allocate more CPU.",
+          "correct": true,
+          "why": "Lambda allocates CPU power in proportion to configured function memory."
+        },
+        {
+          "id": "E",
+          "text": "Configure the Lambda Function to run in response to S3 upload events.",
+          "correct": true,
+          "why": "S3 can trigger a Lambda Function for each newly arrived file without server management."
+        }
+      ],
+      "explanation": "S3 upload events provide the requested on-arrival trigger, and Lambda handles the independent six-minute analyses without server management. Increasing function memory is the documented way to allocate more CPU to each invocation. Increasing /tmp addresses storage instead, while relying on execution-environment state would be unsafe across invocations. Moving to EC2-backed containers would also miss the no-host-management requirement.",
+      "keywordCues": [
+        "bursts of independent sensor files",
+        "Amazon S3",
+        "analyzed on arrival",
+        "without managing servers",
+        "within six minutes",
+        "needs more CPU"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"
+      ],
+      "es": {
+        "stem": "Un servicio meteorológico recibe picos de archivos independientes de sensores en Amazon S3. Quiere analizar cada archivo al llegar sin administrar servidores; las pruebas muestran que cada análisis termina en seis minutos, pero necesita más CPU de la que ofrece la configuración actual de su Lambda Function. Tu equipo evalúa cambios que conserven este diseño. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Migra el analizador a ECS on EC2 para evitar administrar hosts de cómputo.",
+            "why": "Un diseño de contenedores sobre EC2 contradice el requisito de no administrar hosts."
+          },
+          {
+            "id": "B",
+            "text": "Conserva el estado intermedio solo en el entorno de ejecución de Lambda para el siguiente archivo.",
+            "why": "Las invocaciones son independientes y el estado del entorno de ejecución podría no persistir para el siguiente archivo."
+          },
+          {
+            "id": "C",
+            "text": "Aumenta la asignación de /tmp de la función para obtener más CPU por invocación.",
+            "why": "La configuración de /tmp controla el almacenamiento temporal, no la CPU asignada a la función."
+          },
+          {
+            "id": "D",
+            "text": "Aumenta la memoria de la Lambda Function para asignarle más CPU.",
+            "why": "Lambda asigna CPU en proporción a la memoria configurada de la función."
+          },
+          {
+            "id": "E",
+            "text": "Configura la Lambda Function para que se ejecute en respuesta a eventos de carga en S3.",
+            "why": "S3 puede activar una Lambda Function por cada archivo nuevo sin que administres servidores."
+          }
+        ],
+        "explanation": "Los eventos de carga en S3 proporcionan el trigger solicitado al llegar cada archivo, y Lambda procesa los análisis independientes de seis minutos sin administrar servidores. Aumentar la memoria de la función es la forma documentada de asignar más CPU a cada invocación. Aumentar /tmp resuelve una necesidad de almacenamiento, mientras que depender del estado del entorno de ejecución no sería confiable entre invocaciones. Pasar a contenedores sobre EC2 también incumpliría el requisito de no administrar hosts."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "lambda-fundamentals--r0",
+      "conceptId": "lambda-fundamentals",
+      "kind": "recall",
+      "prompt": "Uploads arrive unpredictably and each needs a stateless, five-minute conversion. Which compute option fits, and why?",
+      "promptEs": "Las cargas llegan de forma impredecible y cada una necesita una conversión sin estado de cinco minutos. ¿Qué opción de cómputo elegirías y por qué?",
+      "idealAnswer": "Use an AWS Lambda Function triggered by the upload event. Lambda runs independent, short-lived handlers and manages infrastructure and scaling as demand changes.",
+      "rubric": [
+        "Names AWS Lambda Functions.",
+        "Connects the upload event to the function.",
+        "Explains the fit using short, independent work and managed scaling or infrastructure."
+      ]
+    },
+    {
+      "id": "lambda-fundamentals--r1",
+      "conceptId": "lambda-fundamentals",
+      "kind": "why-not",
+      "prompt": "Why not use a standard Lambda Function for one uninterrupted 40-minute job, even if its code is packaged as a container image?",
+      "promptEs": "¿Por qué no usarías una Lambda Function estándar para un trabajo ininterrumpido de 40 minutos, aunque empaquetes su código como container image?",
+      "idealAnswer": "A standard Lambda Function invocation has a maximum timeout of 15 minutes, so it cannot complete that uninterrupted job. A container image is a packaging option, not an extension of the standard function timeout; consider a container task instead.",
+      "rubric": [
+        "States the 15-minute standard Lambda Function invocation limit.",
+        "Explains that container-image packaging does not remove that limit.",
+        "Identifies a container task as an alternative for the uninterrupted job."
+      ]
+    }
+  ]
+}

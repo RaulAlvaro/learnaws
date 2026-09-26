@@ -1,0 +1,271 @@
+{
+  "conceptId": "network-firewall",
+  "card": {
+    "en": {
+      "tldr": "AWS Network Firewall is a managed, stateful firewall and intrusion prevention service for VPC traffic. Choose it when traffic must pass through inspection for threats, domains, or protocols—not merely be permitted by port and address.",
+      "whenToUse": [
+        "Inspect VPC traffic entering or leaving through an internet gateway, NAT gateway, VPN, or Direct Connect.",
+        "Filter access to domains or apply Suricata-compatible intrusion prevention rules.",
+        "Steer traffic from protected subnets through firewall endpoints using VPC route tables."
+      ],
+      "keyFacts": [
+        "Stateful rules can inspect traffic in the context of its flow; Network Firewall also supports stateless rules.",
+        "Stateful inspection supports domain filtering, 5-tuple rules, and Suricata-compatible IPS rules.",
+        "Stateful protocol detection can identify HTTPS independently of its port.",
+        "In the default source-preservation mode, inspection preserves the original source and destination IP addresses.",
+        "A firewall endpoint cannot filter traffic entering or leaving its own subnet; reserve firewall subnets for Network Firewall."
+      ],
+      "gotchas": [
+        "Creating a firewall is not enough: VPC route tables must direct the relevant traffic through its endpoints.",
+        "Do not place protected workloads in a firewall subnet.",
+        "Routing traffic through an endpoint in another Availability Zone can incur cross-zone traffic charges."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Firewall Manager",
+          "difference": "Firewall Manager centrally configures and manages firewalls across accounts; Network Firewall performs the VPC traffic filtering."
+        },
+        {
+          "concept": "AWS WAF",
+          "difference": "WAF protects supported web application entry points; Network Firewall inspects traffic routed through its VPC endpoints."
+        }
+      ],
+      "examCues": [
+        "stateful inspection of VPC egress",
+        "block known bad destination domains",
+        "IPS rules for traffic over VPN",
+        "inspect HTTPS regardless of port"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Network Firewall es un firewall administrado con inspección stateful y prevención de intrusiones para tráfico de VPC. Elígelo cuando debas inspeccionar amenazas, dominios o protocolos en el tráfico, no solo permitir conexiones según puertos y direcciones.",
+      "whenToUse": [
+        "Debes inspeccionar tráfico de VPC que pasa por un internet gateway, NAT gateway, VPN o Direct Connect.",
+        "Necesitas filtrar dominios o aplicar reglas de prevención de intrusiones compatibles con Suricata.",
+        "Debes dirigir tráfico de subredes protegidas a endpoints del firewall mediante tablas de rutas de VPC."
+      ],
+      "keyFacts": [
+        "Las reglas stateful inspeccionan paquetes en el contexto de su flujo; Network Firewall también admite reglas stateless.",
+        "La inspección stateful admite filtrado de dominios, reglas de 5 tuplas y reglas IPS compatibles con Suricata.",
+        "La detección stateful puede identificar HTTPS independientemente del puerto.",
+        "En el modo predeterminado source-preservation, la inspección conserva las direcciones IP originales de origen y destino.",
+        "Un endpoint del firewall no puede filtrar tráfico que entra o sale de su propia subred; reserva las subredes del firewall para Network Firewall."
+      ],
+      "gotchas": [
+        "Crear el firewall no basta: debes dirigir el tráfico pertinente a sus endpoints mediante tablas de rutas de VPC.",
+        "No coloques las cargas protegidas en una subred del firewall.",
+        "Enviar tráfico a un endpoint de otra Availability Zone puede generar cargos de tráfico entre zonas."
+      ],
+      "confusedWith": [
+        {
+          "concept": "AWS Firewall Manager",
+          "difference": "Firewall Manager configura y administra firewalls de forma centralizada entre cuentas; Network Firewall filtra el tráfico de VPC."
+        },
+        {
+          "concept": "AWS WAF",
+          "difference": "WAF protege puntos de entrada compatibles de aplicaciones web; Network Firewall inspecciona tráfico dirigido a través de sus endpoints de VPC."
+        }
+      ],
+      "examCues": [
+        "stateful inspection of VPC egress",
+        "block known bad destination domains",
+        "IPS rules for traffic over VPN",
+        "inspect HTTPS regardless of port"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "network-firewall--4ebb92f8",
+      "conceptId": "network-firewall",
+      "secondaryConcepts": [
+        "firewall-manager",
+        "waf",
+        "guardduty"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher's private-subnet workers download content through a NAT gateway. The security team has a changing list of malicious domains and wants to inspect outbound flows with intrusion prevention rules before they leave the VPC. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Firewall Manager to distribute security group policies that permit only the workers' required outbound ports.",
+          "correct": false,
+          "why": "Port-based security group policies do not provide the requested domain filtering and intrusion prevention inspection."
+        },
+        {
+          "id": "B",
+          "text": "Use Amazon GuardDuty to identify suspicious worker activity and send findings to the security team.",
+          "correct": false,
+          "why": "Threat findings do not filter the specified outbound flows before they leave the VPC."
+        },
+        {
+          "id": "C",
+          "text": "Deploy AWS Network Firewall with stateful domain and IPS rules, and route the workers' outbound traffic through its endpoints.",
+          "correct": true,
+          "why": "Network Firewall provides managed domain filtering and IPS inspection when VPC routes send the flows through its endpoints."
+        },
+        {
+          "id": "D",
+          "text": "Attach an AWS WAF web ACL to the publisher's public application and add rules for suspicious requests.",
+          "correct": false,
+          "why": "Protecting the public web application does not inspect the workers' outbound traffic through the NAT gateway."
+        }
+      ],
+      "explanation": "The deciding requirement is to filter destination domains and apply IPS rules to outbound VPC traffic before it exits through the NAT gateway. Network Firewall supports both rule types, and VPC routes steer traffic to its endpoints. Firewall Manager can centrally manage firewall deployments, but security group policies based on ports do not replace the requested inspection.",
+      "keywordCues": [
+        "private-subnet workers",
+        "through a NAT gateway",
+        "list of malicious domains",
+        "intrusion prevention rules"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html"
+      ],
+      "es": {
+        "stem": "Los procesos de una editorial en subredes privadas descargan contenido a través de un NAT gateway. El equipo de seguridad tiene una lista cambiante de dominios maliciosos y quiere inspeccionar los flujos salientes con reglas de prevención de intrusiones antes de que salgan de la VPC. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Firewall Manager para distribuir políticas de security groups que permitan solo los puertos salientes necesarios para los procesos.",
+            "why": "Las políticas de security groups basadas en puertos no ofrecen el filtrado de dominios ni la inspección para prevención de intrusiones solicitados."
+          },
+          {
+            "id": "B",
+            "text": "Usar Amazon GuardDuty para identificar actividad sospechosa de los procesos y enviar hallazgos al equipo de seguridad.",
+            "why": "Los hallazgos de amenazas no filtran los flujos salientes indicados antes de que salgan de la VPC."
+          },
+          {
+            "id": "C",
+            "text": "Implementar AWS Network Firewall con reglas stateful de dominios e IPS, y dirigir el tráfico saliente de los procesos a través de sus endpoints.",
+            "why": "Network Firewall ofrece filtrado administrado de dominios e inspección IPS cuando las rutas de VPC dirigen los flujos a sus endpoints."
+          },
+          {
+            "id": "D",
+            "text": "Asociar una web ACL de AWS WAF a la aplicación pública de la editorial y agregar reglas para solicitudes sospechosas.",
+            "why": "Proteger la aplicación web pública no inspecciona el tráfico saliente de los procesos a través del NAT gateway."
+          }
+        ],
+        "explanation": "El requisito decisivo es filtrar dominios de destino y aplicar reglas IPS al tráfico saliente de VPC antes de que salga por el NAT gateway. Network Firewall admite ambos tipos de reglas, y las rutas de VPC dirigen el tráfico a sus endpoints. Firewall Manager puede administrar implementaciones de firewalls de forma centralizada, pero las políticas de security groups basadas en puertos no sustituyen la inspección solicitada."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "network-firewall--50eddf7f",
+      "conceptId": "network-firewall",
+      "secondaryConcepts": [
+        "guardduty",
+        "firewall-manager"
+      ],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A manufacturer connects an on-premises network to a VPC over VPN. Its security policy requires stateful inspection of traffic arriving over the VPN and detection of HTTPS even when applications use an unexpected port. The inspected traffic must retain its original source and destination IP addresses. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS Firewall Manager to centrally apply security group rules for the VPN traffic.",
+          "correct": false,
+          "why": "Centralized security group rules do not perform stateful HTTPS protocol detection independent of port."
+        },
+        {
+          "id": "B",
+          "text": "Configure network ACL rules for the expected HTTPS port on the protected subnets.",
+          "correct": false,
+          "why": "Port-based network ACL rules cannot meet the requirement to detect HTTPS on an unexpected port."
+        },
+        {
+          "id": "C",
+          "text": "Enable Amazon GuardDuty and review findings for suspicious traffic associated with the VPC.",
+          "correct": false,
+          "why": "Reviewing threat findings does not provide the required in-path protocol inspection."
+        },
+        {
+          "id": "D",
+          "text": "Route the VPN traffic through AWS Network Firewall endpoints using its default source-preservation mode and stateful protocol rules.",
+          "correct": true,
+          "why": "Network Firewall can inspect VPN traffic, detect HTTPS independently of port, and preserve both original IP addresses in its default mode."
+        }
+      ],
+      "explanation": "The key constraint is protocol-aware, stateful inspection of VPN traffic without changing its original IP addresses. Network Firewall supports filtering traffic over VPN and detecting HTTPS independently of port; its default source-preservation mode retains the original addresses. Network ACLs and security group rules based on expected ports miss the unexpected-port requirement.",
+      "keywordCues": [
+        "over VPN",
+        "stateful inspection",
+        "HTTPS even when applications use an unexpected port",
+        "retain its original source and destination IP addresses"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html"
+      ],
+      "es": {
+        "stem": "Un fabricante conecta su red local a una VPC mediante VPN. Su política de seguridad exige inspección stateful del tráfico que llega por la VPN y detección de HTTPS incluso cuando las aplicaciones usan un puerto inesperado. El tráfico inspeccionado debe conservar sus direcciones IP originales de origen y destino. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS Firewall Manager para aplicar centralmente reglas de security groups al tráfico de la VPN.",
+            "why": "Las reglas centralizadas de security groups no realizan detección stateful de HTTPS independientemente del puerto."
+          },
+          {
+            "id": "B",
+            "text": "Configurar reglas de network ACL para el puerto HTTPS esperado en las subredes protegidas.",
+            "why": "Las reglas de network ACL basadas en puertos no cumplen el requisito de detectar HTTPS en un puerto inesperado."
+          },
+          {
+            "id": "C",
+            "text": "Activar Amazon GuardDuty y revisar hallazgos de tráfico sospechoso asociado con la VPC.",
+            "why": "Revisar hallazgos de amenazas no proporciona la inspección de protocolos en la ruta del tráfico."
+          },
+          {
+            "id": "D",
+            "text": "Dirigir el tráfico de la VPN a través de endpoints de AWS Network Firewall con su modo predeterminado source-preservation y reglas stateful de protocolos.",
+            "why": "Network Firewall puede inspeccionar tráfico de VPN, detectar HTTPS independientemente del puerto y conservar ambas direcciones IP originales en su modo predeterminado."
+          }
+        ],
+        "explanation": "La restricción clave es inspeccionar de forma stateful el tráfico de VPN según su protocolo sin cambiar sus direcciones IP originales. Network Firewall admite el filtrado de tráfico sobre VPN y la detección de HTTPS independientemente del puerto; su modo predeterminado source-preservation conserva las direcciones originales. Las network ACL y las reglas de security groups basadas en puertos esperados no cumplen el requisito del puerto inesperado."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "network-firewall--r0",
+      "conceptId": "network-firewall",
+      "kind": "recall",
+      "prompt": "Which service would you use to block bad domains and apply IPS rules to VPC egress, and what routing step is necessary?",
+      "promptEs": "¿Qué servicio usarías para bloquear dominios maliciosos y aplicar reglas IPS al tráfico saliente de VPC, y qué cambio de rutas necesitas?",
+      "idealAnswer": "Use AWS Network Firewall with stateful domain-filtering and IPS rules. Change the relevant VPC route tables so the outbound traffic passes through its firewall endpoints.",
+      "rubric": [
+        "Names AWS Network Firewall.",
+        "Mentions stateful domain filtering and IPS rules.",
+        "States that VPC routes must steer traffic through firewall endpoints."
+      ]
+    },
+    {
+      "id": "network-firewall--r1",
+      "conceptId": "network-firewall",
+      "kind": "why-not",
+      "prompt": "Why doesn't AWS Firewall Manager alone satisfy a requirement to inspect VPC egress with stateful IPS and domain rules?",
+      "promptEs": "¿Por qué AWS Firewall Manager por sí solo no cumple un requisito de inspeccionar el tráfico saliente de VPC con reglas stateful de IPS y dominios?",
+      "idealAnswer": "Firewall Manager centrally configures and manages firewalls across accounts; it is not the firewall performing traffic inspection. AWS Network Firewall supplies the stateful IPS and domain-filtering rules, and routes must send traffic through its endpoints.",
+      "rubric": [
+        "Distinguishes centralized management from in-path filtering.",
+        "Identifies AWS Network Firewall as the inspection service.",
+        "Mentions routing traffic through firewall endpoints."
+      ]
+    }
+  ]
+}

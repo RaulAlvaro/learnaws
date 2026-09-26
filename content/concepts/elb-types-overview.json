@@ -1,0 +1,421 @@
+{
+  "conceptId": "elb-types-overview",
+  "card": {
+    "en": {
+      "tldr": "Choose an Application Load Balancer (ALB) for HTTP/HTTPS routing based on request content, a Network Load Balancer (NLB) for TCP/UDP traffic or a static IP address per Availability Zone, and a Gateway Load Balancer (GWLB) for virtual appliances. Check cross-zone behavior separately from the load balancer type.",
+      "whenToUse": [
+        "Use ALB when HTTP hostnames, paths, headers, or other request attributes determine the target group.",
+        "Use NLB for transport-layer traffic, low-latency requirements, or static IP addresses per Availability Zone.",
+        "Use GWLB to distribute traffic to third-party virtual appliances."
+      ],
+      "keyFacts": [
+        "ALB operates at the application layer; NLB is recommended for Layer 4 TCP/UDP traffic.",
+        "GWLB routes each flow consistently to a target appliance and exchanges traffic with appliances using GENEVE on port 6081.",
+        "With cross-zone load balancing enabled, a node can route to targets in all enabled Availability Zones; without it, the node routes only to targets in its own zone.",
+        "ALB has cross-zone load balancing enabled at the load balancer level, although it can be disabled at the target group level. NLB and GWLB have it disabled by default.",
+        "A Network Load Balancer can forward to an Application Load Balancer-type target group when an application needs both an NLB static IP address per Availability Zone and ALB features."
+      ],
+      "gotchas": [
+        "An ALB does not become a Layer 4 load balancer merely because its listeners use TCP ports.",
+        "A static IP requirement does not mean giving up ALB request routing: an NLB can forward to an ALB.",
+        "NLB routing of an individual TCP connection to one target for its lifetime is not a reason to choose NLB for HTTP content-based routing."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Network Load Balancer",
+          "difference": "Choose NLB for TCP/UDP or static IP addresses per Availability Zone; choose ALB when HTTP request content controls routing."
+        },
+        {
+          "concept": "Gateway Load Balancer",
+          "difference": "Choose GWLB for a fleet of virtual appliances, not for ordinary HTTP path routing or a TCP application tier."
+        }
+      ],
+      "examCues": [
+        "route by URL path",
+        "TCP or UDP traffic",
+        "static IP address per Availability Zone",
+        "third-party inspection appliances",
+        "uneven targets across Availability Zones"
+      ]
+    },
+    "es": {
+      "tldr": "Elige Application Load Balancer (ALB) para enrutar HTTP/HTTPS según el contenido de la solicitud, Network Load Balancer (NLB) para tráfico TCP/UDP o una dirección IP estática por Availability Zone y Gateway Load Balancer (GWLB) para dispositivos virtuales. Evalúa cross-zone load balancing por separado del tipo de balanceador.",
+      "whenToUse": [
+        "Usa ALB cuando el nombre de host, la ruta, los encabezados u otros atributos HTTP determinen el grupo de destinos.",
+        "Usa NLB para tráfico de capa de transporte, requisitos de baja latencia o direcciones IP estáticas por Availability Zone.",
+        "Usa GWLB para distribuir tráfico entre dispositivos virtuales de terceros."
+      ],
+      "keyFacts": [
+        "ALB opera en la capa de aplicación; NLB se recomienda para tráfico TCP/UDP de Layer 4.",
+        "GWLB dirige cada flujo de forma consistente al mismo dispositivo de destino e intercambia tráfico con los dispositivos mediante GENEVE en el puerto 6081.",
+        "Con cross-zone load balancing habilitado, un nodo puede enviar tráfico a destinos de todas las Availability Zones habilitadas; sin él, solo envía tráfico a destinos de su propia zona.",
+        "ALB tiene cross-zone load balancing habilitado a nivel del balanceador, aunque puede deshabilitarse a nivel del grupo de destinos. NLB y GWLB lo tienen deshabilitado de forma predeterminada.",
+        "Un Network Load Balancer puede enviar tráfico a un grupo de destinos de tipo Application Load Balancer cuando se necesitan tanto una IP estática por Availability Zone como funciones de ALB."
+      ],
+      "gotchas": [
+        "Un ALB no se convierte en un balanceador de Layer 4 solo porque sus listeners usen puertos TCP.",
+        "Necesitar una IP estática no obliga a renunciar al enrutamiento HTTP de ALB: un NLB puede enviarle tráfico.",
+        "Que NLB mantenga una conexión TCP individual en un mismo destino durante su vida no lo convierte en la opción para enrutar según el contenido HTTP."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Network Load Balancer",
+          "difference": "Elige NLB para TCP/UDP o IP estáticas por Availability Zone; elige ALB cuando el contenido de una solicitud HTTP determina el enrutamiento."
+        },
+        {
+          "concept": "Gateway Load Balancer",
+          "difference": "Elige GWLB para una flota de dispositivos virtuales, no para enrutar por rutas HTTP ni para una capa de aplicación TCP convencional."
+        }
+      ],
+      "examCues": [
+        "route by URL path",
+        "TCP or UDP traffic",
+        "static IP address per Availability Zone",
+        "third-party inspection appliances",
+        "uneven targets across Availability Zones"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+      "https://aws.amazon.com/elasticloadbalancing/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "elb-types-overview--ef6851e0",
+      "conceptId": "elb-types-overview",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A security team is deploying a fleet of third-party traffic inspection appliances. Packets belonging to the same flow must keep reaching the same appliance while the fleet scales across Availability Zones. Which load balancer meets this requirement MOST directly?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Network Load Balancer with an HTTPS listener for the inspection appliances.",
+          "correct": false,
+          "why": "NLB connection routing is not the GWLB appliance-routing behavior required for packets in the same flow."
+        },
+        {
+          "id": "B",
+          "text": "Use a Gateway Load Balancer with the inspection appliances as targets.",
+          "correct": true,
+          "why": "GWLB selects a target appliance by flow and consistently routes packets in that flow to it."
+        },
+        {
+          "id": "C",
+          "text": "Use an Application Load Balancer with host-header rules for the inspection appliances.",
+          "correct": false,
+          "why": "ALB host-header rules process HTTP requests rather than keeping arbitrary packet flows on an appliance."
+        },
+        {
+          "id": "D",
+          "text": "Use an Application Load Balancer with a target group for each inspection appliance.",
+          "correct": false,
+          "why": "ALB target groups do not supply the stated packet-flow routing to third-party appliances."
+        }
+      ],
+      "explanation": "The targets are inspection appliances, and packets in a flow must continue to reach the same appliance. GWLB uses a 5-tuple flow hash to select an appliance and consistently routes subsequent packets in that flow to it. An NLB keeps an individual TCP connection on one target, but that is not the specified appliance-flow solution. ALB rules operate on HTTP request attributes.",
+      "keywordCues": [
+        "third-party traffic inspection appliances",
+        "Packets belonging to the same flow",
+        "same appliance"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+        "https://aws.amazon.com/elasticloadbalancing/faqs/"
+      ],
+      "es": {
+        "stem": "Un equipo de seguridad está implementando una flota de dispositivos de inspección de tráfico de terceros. Los paquetes de un mismo flujo deben seguir llegando al mismo dispositivo mientras la flota escala entre Availability Zones. ¿Qué balanceador cumple este requisito de la forma MOST directa?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un Network Load Balancer con un listener HTTPS para los dispositivos.",
+            "why": "El enrutamiento de conexiones de NLB no es el comportamiento de enrutamiento por flujo a dispositivos que se requiere."
+          },
+          {
+            "id": "B",
+            "text": "Usa un Gateway Load Balancer con los dispositivos de inspección como destinos.",
+            "why": "GWLB selecciona un dispositivo según el flujo y dirige de forma consistente los paquetes de ese flujo hacia él."
+          },
+          {
+            "id": "C",
+            "text": "Usa un Application Load Balancer con reglas basadas en el encabezado de host para los dispositivos.",
+            "why": "Las reglas de host de ALB procesan solicitudes HTTP, no mantienen flujos de paquetes arbitrarios en un dispositivo."
+          },
+          {
+            "id": "D",
+            "text": "Usa un Application Load Balancer con un grupo de destinos por dispositivo de inspección.",
+            "why": "Los grupos de destinos de ALB no proporcionan el enrutamiento de flujos de paquetes hacia dispositivos de terceros solicitado."
+          }
+        ],
+        "explanation": "Los destinos son dispositivos de inspección, y los paquetes de un flujo deben seguir llegando al mismo dispositivo. GWLB usa un hash de flujo de cinco elementos para seleccionar un dispositivo y le envía de forma consistente los siguientes paquetes del flujo. NLB mantiene una conexión TCP individual en un destino, pero esa no es la solución especificada para flujos hacia dispositivos. Las reglas de ALB operan sobre atributos de solicitudes HTTP."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elb-types-overview--e173d3b3",
+      "conceptId": "elb-types-overview",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A game studio uses a Network Load Balancer for a TCP service in two enabled Availability Zones. One zone currently has far fewer registered targets, and operators want each load balancer node to be able to use healthy targets in either enabled zone. Which change meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable cross-zone load balancing on the existing Network Load Balancer.",
+          "correct": true,
+          "why": "Cross-zone balancing lets each node route to registered targets across all enabled zones."
+        },
+        {
+          "id": "B",
+          "text": "Leave the NLB at its default cross-zone setting and add a TCP listener in each zone.",
+          "correct": false,
+          "why": "With cross-zone balancing disabled, each NLB node routes only to targets in its own zone."
+        },
+        {
+          "id": "C",
+          "text": "Disable the zone with fewer targets while keeping its targets registered.",
+          "correct": false,
+          "why": "Targets in a disabled zone receive no traffic even if they remain registered."
+        },
+        {
+          "id": "D",
+          "text": "Replace the NLB with a Gateway Load Balancer and retain the TCP application targets.",
+          "correct": false,
+          "why": "GWLB is intended for virtual appliances and also has cross-zone balancing disabled by default."
+        }
+      ],
+      "explanation": "The requirement is for every load balancer node to reach targets in both enabled zones. Cross-zone load balancing provides that routing scope, and it is disabled by default on an NLB. Adding listeners does not change which zones a node can route to. Disabling a zone prevents its registered targets from receiving traffic.",
+      "keywordCues": [
+        "Network Load Balancer",
+        "far fewer registered targets",
+        "each load balancer node",
+        "either enabled zone"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+        "https://aws.amazon.com/elasticloadbalancing/faqs/"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos usa un Network Load Balancer para un servicio TCP en dos Availability Zones habilitadas. Una zona tiene actualmente muchos menos destinos registrados, y los operadores quieren que cada nodo del balanceador pueda usar destinos en buen estado de cualquiera de las dos zonas. ¿Qué cambio cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Habilita cross-zone load balancing en el Network Load Balancer existente.",
+            "why": "Cross-zone load balancing permite que cada nodo envíe tráfico a destinos registrados de todas las zonas habilitadas."
+          },
+          {
+            "id": "B",
+            "text": "Mantén la configuración predeterminada de cross-zone del NLB y agrega un listener TCP en cada zona.",
+            "why": "Con cross-zone load balancing deshabilitado, cada nodo de NLB solo envía tráfico a destinos de su propia zona."
+          },
+          {
+            "id": "C",
+            "text": "Deshabilita la zona con menos destinos, pero mantén sus destinos registrados.",
+            "why": "Los destinos de una zona deshabilitada no reciben tráfico aunque sigan registrados."
+          },
+          {
+            "id": "D",
+            "text": "Reemplaza el NLB por un Gateway Load Balancer y conserva los destinos de la aplicación TCP.",
+            "why": "GWLB está pensado para dispositivos virtuales y también tiene cross-zone load balancing deshabilitado de forma predeterminada."
+          }
+        ],
+        "explanation": "Se requiere que cada nodo del balanceador pueda llegar a destinos de ambas zonas habilitadas. Cross-zone load balancing proporciona ese alcance de enrutamiento y está deshabilitado de forma predeterminada en NLB. Agregar listeners no cambia las zonas a las que puede enviar tráfico un nodo. Deshabilitar una zona impide que sus destinos registrados reciban tráfico."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elb-types-overview--c979e26f",
+      "conceptId": "elb-types-overview",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A healthcare portal serves HTTPS requests through multiple backend services. A partner must allowlist a static IP address per Availability Zone, while the portal must route requests to target groups based on the HTTP Host header. The team wants to retain managed load balancing for both requirements. Which TWO components should the architecture use? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "An Application Load Balancer registered in an ALB-type NLB target group, with Host-header rules on the ALB.",
+          "correct": true,
+          "why": "NLB can forward to an ALB, whose listener rules can select target groups by Host header."
+        },
+        {
+          "id": "B",
+          "text": "A Network Load Balancer with a static IP address per enabled Availability Zone.",
+          "correct": true,
+          "why": "NLB provides the per-zone static IP capability needed for partner allowlisting."
+        },
+        {
+          "id": "C",
+          "text": "An Application Load Balancer alone, using its listener rules to supply static IP addresses.",
+          "correct": false,
+          "why": "ALB listener rules handle HTTP routing but do not provide the stated per-zone static IP capability."
+        },
+        {
+          "id": "D",
+          "text": "Network Load Balancer target groups that select backend services by HTTP Host header.",
+          "correct": false,
+          "why": "NLB does not evaluate HTTP Host headers to select backend target groups."
+        },
+        {
+          "id": "E",
+          "text": "A Gateway Load Balancer to provide the partner-facing entry point for the portal.",
+          "correct": false,
+          "why": "GWLB is designed for virtual appliances, not the required static-IP entry point to HTTP routing."
+        }
+      ],
+      "explanation": "This design needs two distinct capabilities: static IP addresses per Availability Zone and HTTP Host-header routing. Put an NLB at the entry point and forward its traffic to an ALB registered in an ALB-type target group. The ALB then uses Host-header rules for the backend services. An ALB alone misses the static-IP requirement, while an NLB alone cannot apply the HTTP routing rule.",
+      "keywordCues": [
+        "static IP address per Availability Zone",
+        "based on the HTTP Host header",
+        "both requirements",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+        "https://aws.amazon.com/elasticloadbalancing/faqs/"
+      ],
+      "es": {
+        "stem": "Un portal de salud atiende solicitudes HTTPS mediante varios servicios backend. Un socio debe incluir en una lista de permitidos una IP estática por Availability Zone, mientras que el portal debe enviar solicitudes a grupos de destinos según el encabezado HTTP Host. El equipo quiere conservar el balanceo administrado para ambos requisitos. ¿Qué DOS componentes debe usar la arquitectura? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Un Application Load Balancer registrado en un grupo de destinos de tipo ALB del NLB, con reglas de Host en el ALB.",
+            "why": "NLB puede enviar tráfico a un ALB, cuyas reglas pueden seleccionar grupos de destinos según el encabezado Host."
+          },
+          {
+            "id": "B",
+            "text": "Un Network Load Balancer con una IP estática por cada Availability Zone habilitada.",
+            "why": "NLB proporciona la capacidad de IP estática por zona que necesita el socio."
+          },
+          {
+            "id": "C",
+            "text": "Solo un Application Load Balancer, que use sus reglas del listener para proporcionar IP estáticas.",
+            "why": "Las reglas de ALB permiten enrutamiento HTTP, pero no proporcionan la capacidad de IP estática por zona requerida."
+          },
+          {
+            "id": "D",
+            "text": "Grupos de destinos de Network Load Balancer que seleccionen servicios backend según el encabezado HTTP Host.",
+            "why": "NLB no evalúa encabezados HTTP Host para seleccionar grupos de destinos backend."
+          },
+          {
+            "id": "E",
+            "text": "Un Gateway Load Balancer como punto de entrada del portal para el socio.",
+            "why": "GWLB está diseñado para dispositivos virtuales, no como punto de entrada con IP estática hacia el enrutamiento HTTP solicitado."
+          }
+        ],
+        "explanation": "El diseño necesita dos capacidades distintas: IP estáticas por Availability Zone y enrutamiento según el encabezado HTTP Host. Coloca un NLB como punto de entrada y envía su tráfico a un ALB registrado en un grupo de destinos de tipo ALB. Después, ALB usa reglas de Host para los servicios backend. ALB por sí solo no cumple el requisito de IP estática, mientras que NLB por sí solo no puede aplicar la regla de enrutamiento HTTP."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elb-types-overview--bbdb57a2",
+      "conceptId": "elb-types-overview",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher is splitting its HTTPS website into an article service and a subscription service. Both services will run on EC2 instances, and requests for /subscribe must reach a different target group than requests for /articles. Which load balancer meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Gateway Load Balancer with each service registered as a target appliance.",
+          "correct": false,
+          "why": "GWLB is intended for virtual appliances and does not provide the required HTTP path rules."
+        },
+        {
+          "id": "B",
+          "text": "Use an Application Load Balancer with HTTPS listener rules that forward each path to its target group.",
+          "correct": true,
+          "why": "ALB listener rules can route HTTPS requests by path to separate target groups."
+        },
+        {
+          "id": "C",
+          "text": "Use a Network Load Balancer with separate TCP target groups for each service.",
+          "correct": false,
+          "why": "An NLB selects targets for connections rather than routing requests by URL path."
+        },
+        {
+          "id": "D",
+          "text": "Use one Network Load Balancer for each service and select between them in application code.",
+          "correct": false,
+          "why": "Application-side selection adds work and does not provide the requested path-based listener routing."
+        }
+      ],
+      "explanation": "The deciding requirement is routing HTTPS requests to different target groups by URL path. An ALB evaluates listener rules and supports path conditions, so one load balancer can make that decision. An NLB is appropriate for transport-layer connections but cannot use an HTTP path to select a target group. GWLB addresses virtual-appliance traffic rather than this website-routing need.",
+      "keywordCues": [
+        "HTTPS website",
+        "requests for /subscribe must reach a different target group than requests for /articles",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+        "https://aws.amazon.com/elasticloadbalancing/faqs/"
+      ],
+      "es": {
+        "stem": "Una editorial está dividiendo su sitio HTTPS en un servicio de artículos y otro de suscripciones. Ambos se ejecutarán en instancias EC2, y las solicitudes a /subscribe deben llegar a un grupo de destinos distinto del de /articles. ¿Qué balanceador cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usa un Gateway Load Balancer y registra cada servicio como dispositivo de destino.",
+            "why": "GWLB está pensado para dispositivos virtuales y no proporciona las reglas de ruta HTTP necesarias."
+          },
+          {
+            "id": "B",
+            "text": "Usa un Application Load Balancer con reglas de un listener HTTPS que envíen cada ruta a su grupo de destinos.",
+            "why": "Las reglas de ALB pueden enrutar solicitudes HTTPS según la ruta hacia grupos de destinos distintos."
+          },
+          {
+            "id": "C",
+            "text": "Usa un Network Load Balancer con grupos de destinos TCP separados para cada servicio.",
+            "why": "NLB selecciona destinos para conexiones, pero no enruta solicitudes según la ruta URL."
+          },
+          {
+            "id": "D",
+            "text": "Usa un Network Load Balancer por servicio y selecciona entre ellos en el código de la aplicación.",
+            "why": "Seleccionar el servicio desde la aplicación agrega trabajo y no proporciona el enrutamiento solicitado mediante reglas de ruta."
+          }
+        ],
+        "explanation": "El requisito decisivo es enviar solicitudes HTTPS a distintos grupos de destinos según la ruta URL. ALB evalúa reglas del listener y admite condiciones de ruta, por lo que un solo balanceador puede tomar esa decisión. NLB sirve para conexiones de la capa de transporte, pero no puede usar una ruta HTTP para seleccionar un grupo de destinos. GWLB está orientado al tráfico de dispositivos virtuales, no al enrutamiento de este sitio."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "elb-types-overview--r0",
+      "conceptId": "elb-types-overview",
+      "kind": "recall",
+      "prompt": "Which load balancer would you choose for third-party inspection appliances that must receive every packet in a flow consistently, and why?",
+      "promptEs": "¿Qué balanceador elegirías para dispositivos de inspección de terceros que deben recibir de forma consistente todos los paquetes de un flujo y por qué?",
+      "idealAnswer": "Choose a Gateway Load Balancer. It selects a target appliance using a 5-tuple flow hash and consistently routes packets from the same flow to that appliance.",
+      "rubric": [
+        "Names Gateway Load Balancer.",
+        "Identifies virtual or third-party inspection appliances as the use case.",
+        "Explains consistent routing of packets from the same flow to one appliance."
+      ]
+    }
+  ]
+}

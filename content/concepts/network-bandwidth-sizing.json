@@ -1,0 +1,254 @@
+{
+  "conceptId": "network-bandwidth-sizing",
+  "card": {
+    "en": {
+      "tldr": "Size hybrid connectivity against the bandwidth requirement, not just the number of connections. For higher aggregate Site-to-Site VPN bandwidth, use multiple tunnels with ECMP on a transit gateway and dynamic routing; for a dedicated Direct Connect connection, select a sufficient port speed when creating it.",
+      "whenToUse": [
+        "Traffic must exceed the bandwidth available from one standard VPN tunnel, and multiple tunnels can be used.",
+        "A workload requires a dedicated Direct Connect port sized for a stated bandwidth target.",
+        "An existing dedicated Direct Connect port is too small for a new requirement."
+      ],
+      "keyFacts": [
+        "A standard Site-to-Site VPN tunnel supports up to 1.25 Gbps; realized bandwidth depends on traffic and network conditions.",
+        "A large bandwidth VPN tunnel supports up to 5 Gbps.",
+        "Transit gateway VPN connections can use ECMP to aggregate multiple tunnels, but ECMP requires dynamic routing and does not support static routing.",
+        "Dedicated Direct Connect port speeds are 1, 10, 100, and 400 Gbps.",
+        "A dedicated Direct Connect port speed cannot be changed after the connection request; a different speed requires a new connection."
+      ],
+      "gotchas": [
+        "Enabling ECMP without switching a statically routed VPN connection to dynamic routing does not meet the ECMP requirement.",
+        "Two VPN tunnels do not establish a guaranteed aggregate throughput; the documented tunnel maximums are upper bounds.",
+        "A dedicated Direct Connect port cannot be resized in place."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Static-routing VPN connections",
+          "difference": "Transit gateway VPN ECMP requires dynamic routing; static-routing VPN connections cannot use it."
+        },
+        {
+          "concept": "Hosted Direct Connect connections",
+          "difference": "A hosted connection is requested through a Direct Connect Partner, whereas a dedicated port has a fixed speed after its connection request."
+        }
+      ],
+      "examCues": [
+        "aggregate bandwidth across existing VPN tunnels",
+        "transit gateway VPN with static routes",
+        "smallest dedicated port for a bandwidth target",
+        "increase the speed of an existing dedicated connection"
+      ]
+    },
+    "es": {
+      "tldr": "Dimensiona la conectividad híbrida según el ancho de banda requerido, no solo según la cantidad de conexiones. Para aumentar el ancho de banda agregado de Site-to-Site VPN, usa varios túneles con ECMP en un transit gateway y enrutamiento dinámico; para Direct Connect dedicated, elige una velocidad de puerto suficiente al crear la conexión.",
+      "whenToUse": [
+        "El tráfico debe superar el ancho de banda disponible en un solo túnel VPN estándar y se pueden usar varios túneles.",
+        "Una carga de trabajo requiere un puerto Direct Connect dedicated dimensionado para un objetivo de ancho de banda.",
+        "Un puerto Direct Connect dedicated existente es demasiado pequeño para un nuevo requisito."
+      ],
+      "keyFacts": [
+        "Un túnel Site-to-Site VPN estándar admite hasta 1,25 Gbps; el ancho de banda real depende del tráfico y de las condiciones de la red.",
+        "Un túnel VPN de gran ancho de banda admite hasta 5 Gbps.",
+        "Las conexiones VPN en un transit gateway pueden usar ECMP para agregar varios túneles, pero ECMP requiere enrutamiento dinámico y no admite enrutamiento estático.",
+        "Las velocidades de puerto de Direct Connect dedicated son 1, 10, 100 y 400 Gbps.",
+        "No puedes cambiar la velocidad de un puerto Direct Connect dedicated después de solicitar la conexión; necesitas una conexión nueva."
+      ],
+      "gotchas": [
+        "Activar ECMP sin cambiar una conexión VPN con enrutamiento estático a enrutamiento dinámico no cumple el requisito de ECMP.",
+        "Tener dos túneles VPN no garantiza un rendimiento agregado; los máximos documentados por túnel son límites superiores.",
+        "No puedes aumentar la velocidad de un puerto Direct Connect dedicated sin reemplazar la conexión."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Conexiones VPN con enrutamiento estático",
+          "difference": "ECMP para VPN en un transit gateway requiere enrutamiento dinámico; las conexiones con enrutamiento estático no pueden usarlo."
+        },
+        {
+          "concept": "Conexiones Direct Connect hosted",
+          "difference": "Solicitas una conexión hosted mediante un Direct Connect Partner; la velocidad de un puerto dedicated queda fija después de solicitarlo."
+        }
+      ],
+      "examCues": [
+        "aggregate bandwidth across existing VPN tunnels",
+        "transit gateway VPN with static routes",
+        "smallest dedicated port for a bandwidth target",
+        "increase the speed of an existing dedicated connection"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/vpn/latest/s2svpn/vpn-limits.html",
+      "https://docs.aws.amazon.com/directconnect/latest/UserGuide/dedicated_connection.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "network-bandwidth-sizing--ac76f04d",
+      "conceptId": "network-bandwidth-sizing",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A video production company has two standard Site-to-Site VPN connections attached to a transit gateway. The connections currently use static routing, and the company wants to increase potential aggregate bandwidth beyond the limit of one standard tunnel by using its existing tunnels. Which solution meets these requirements without ordering a new circuit?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the VPN connections with a 1 Gbps dedicated Direct Connect connection.",
+          "correct": false,
+          "why": "This requires a new circuit and its selected port speed does not exceed the standard VPN tunnel maximum."
+        },
+        {
+          "id": "B",
+          "text": "Configure the VPN connections for dynamic routing and use ECMP on the transit gateway.",
+          "correct": true,
+          "why": "Dynamic routing permits transit gateway ECMP to aggregate bandwidth across multiple VPN tunnels."
+        },
+        {
+          "id": "C",
+          "text": "Use dynamic routing on one VPN connection and route all production traffic through that connection.",
+          "correct": false,
+          "why": "Using only one connection does not aggregate bandwidth across the existing tunnels."
+        },
+        {
+          "id": "D",
+          "text": "Enable ECMP on the transit gateway and retain static routing for both VPN connections.",
+          "correct": false,
+          "why": "Transit gateway VPN ECMP does not support connections that use static routing."
+        }
+      ],
+      "explanation": "The deciding requirement is to increase potential aggregate bandwidth using the existing VPN tunnels. Site-to-Site VPN connections on a transit gateway can use ECMP for this purpose when configured for dynamic routing. Keeping static routing prevents ECMP, while using just one connection does not aggregate the tunnels. Actual VPN throughput can still vary with traffic and network conditions.",
+      "keywordCues": [
+        "two standard Site-to-Site VPN connections attached to a transit gateway",
+        "currently use static routing",
+        "using its existing tunnels",
+        "without ordering a new circuit"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpn/latest/s2svpn/vpn-limits.html",
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/dedicated_connection.html"
+      ],
+      "es": {
+        "stem": "Una productora de video tiene dos conexiones Site-to-Site VPN estándar conectadas a un transit gateway. Actualmente usan enrutamiento estático, y la empresa quiere aumentar el ancho de banda agregado potencial más allá del límite de un túnel estándar mediante los túneles existentes. ¿Qué solución cumple estos requisitos sin solicitar un circuito nuevo?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplazar las conexiones VPN por una conexión Direct Connect dedicated de 1 Gbps.",
+            "why": "Esto requiere un circuito nuevo y la velocidad elegida no supera el máximo de un túnel VPN estándar."
+          },
+          {
+            "id": "B",
+            "text": "Configurar las conexiones VPN con enrutamiento dinámico y usar ECMP en el transit gateway.",
+            "why": "El enrutamiento dinámico permite que ECMP en el transit gateway agregue ancho de banda de varios túneles VPN."
+          },
+          {
+            "id": "C",
+            "text": "Usar enrutamiento dinámico en una conexión VPN y dirigir todo el tráfico de producción por esa conexión.",
+            "why": "Usar solo una conexión no agrega el ancho de banda de los túneles existentes."
+          },
+          {
+            "id": "D",
+            "text": "Activar ECMP en el transit gateway y mantener el enrutamiento estático en ambas conexiones VPN.",
+            "why": "ECMP para VPN en un transit gateway no admite conexiones que usan enrutamiento estático."
+          }
+        ],
+        "explanation": "El requisito decisivo es aumentar el ancho de banda agregado potencial mediante los túneles VPN existentes. Las conexiones Site-to-Site VPN en un transit gateway pueden usar ECMP para ello si se configuran con enrutamiento dinámico. Mantener el enrutamiento estático impide usar ECMP, mientras que utilizar una sola conexión no agrega los túneles. El rendimiento real de VPN también puede variar según el tráfico y las condiciones de la red."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "network-bandwidth-sizing--fe98fecc",
+      "conceptId": "network-bandwidth-sizing",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research institute is planning a dedicated Direct Connect connection for data transfers from its facility. Its network team requires a port speed that accommodates a 6 Gbps target and will request the dedicated connection directly rather than obtain a hosted connection through a partner. Which solution meets these requirements with the LEAST excess provisioned port capacity?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Request a 100 Gbps dedicated Direct Connect connection.",
+          "correct": false,
+          "why": "It exceeds the target by more than the available 10 Gbps dedicated port."
+        },
+        {
+          "id": "B",
+          "text": "Request a 10 Gbps dedicated Direct Connect connection.",
+          "correct": true,
+          "why": "It is the smallest listed dedicated port speed above the 6 Gbps target."
+        },
+        {
+          "id": "C",
+          "text": "Request a 10 Gbps hosted Direct Connect connection through a partner.",
+          "correct": false,
+          "why": "A hosted connection does not satisfy the requirement to request a dedicated connection directly."
+        },
+        {
+          "id": "D",
+          "text": "Request a 1 Gbps dedicated Direct Connect connection.",
+          "correct": false,
+          "why": "A 1 Gbps port is below the stated 6 Gbps target."
+        }
+      ],
+      "explanation": "The institute needs a dedicated port with a speed of at least 6 Gbps and wants the smallest qualifying option. Dedicated Direct Connect port speeds include 1, 10, 100, and 400 Gbps, making 10 Gbps the appropriate selection. A 1 Gbps port is too small; a 100 Gbps port provides more excess capacity. A hosted connection misses the stated dedicated-connection requirement.",
+      "keywordCues": [
+        "dedicated Direct Connect connection",
+        "6 Gbps target",
+        "rather than obtain a hosted connection through a partner",
+        "LEAST excess provisioned port capacity"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/vpn/latest/s2svpn/vpn-limits.html",
+        "https://docs.aws.amazon.com/directconnect/latest/UserGuide/dedicated_connection.html"
+      ],
+      "es": {
+        "stem": "Un instituto de investigación planea una conexión Direct Connect dedicated para transferir datos desde sus instalaciones. Su equipo de redes necesita una velocidad de puerto que cubra un objetivo de 6 Gbps y solicitará la conexión dedicated directamente, en lugar de obtener una conexión hosted mediante un partner. ¿Qué solución cumple estos requisitos con la LEAST excess provisioned port capacity?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Solicitar una conexión Direct Connect dedicated de 100 Gbps.",
+            "why": "Supera el objetivo por más capacidad que el puerto dedicated disponible de 10 Gbps."
+          },
+          {
+            "id": "B",
+            "text": "Solicitar una conexión Direct Connect dedicated de 10 Gbps.",
+            "why": "Es la menor velocidad de puerto dedicated indicada que supera el objetivo de 6 Gbps."
+          },
+          {
+            "id": "C",
+            "text": "Solicitar una conexión Direct Connect hosted de 10 Gbps mediante un partner.",
+            "why": "Una conexión hosted no cumple el requisito de solicitar directamente una conexión dedicated."
+          },
+          {
+            "id": "D",
+            "text": "Solicitar una conexión Direct Connect dedicated de 1 Gbps.",
+            "why": "Un puerto de 1 Gbps está por debajo del objetivo de 6 Gbps."
+          }
+        ],
+        "explanation": "El instituto necesita un puerto dedicated con una velocidad de al menos 6 Gbps y busca la menor opción que cumpla el requisito. Las velocidades de puerto de Direct Connect dedicated incluyen 1, 10, 100 y 400 Gbps, por lo que corresponde elegir 10 Gbps. Un puerto de 1 Gbps es insuficiente; uno de 100 Gbps deja más capacidad excedente. Una conexión hosted no cumple el requisito de una conexión dedicated."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "network-bandwidth-sizing--r0",
+      "conceptId": "network-bandwidth-sizing",
+      "kind": "recall",
+      "prompt": "Existing standard VPN tunnels need more aggregate bandwidth through a transit gateway. What routing and bandwidth feature should you choose, and why?",
+      "promptEs": "Los túneles VPN estándar existentes necesitan más ancho de banda agregado mediante un transit gateway. ¿Qué tipo de enrutamiento y qué función elegirías, y por qué?",
+      "idealAnswer": "Configure the VPN connections for dynamic routing and use ECMP on the transit gateway. ECMP can aggregate bandwidth across multiple VPN tunnels, but it does not support statically routed VPN connections.",
+      "rubric": [
+        "Identifies ECMP on a transit gateway.",
+        "Specifies dynamic routing for the VPN connections.",
+        "Explains that multiple tunnels can provide higher aggregate bandwidth than one tunnel."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,439 @@
+{
+  "conceptId": "nlb-static-ip-tcp-udp",
+  "card": {
+    "en": {
+      "tldr": "A Network Load Balancer (NLB) distributes traffic at Layer 4 and is the fit for TCP or UDP workloads that need static IP addresses or very high throughput. In an exam scenario, choose it over an ALB when transport protocols and fixed addresses matter more than HTTP routing.",
+      "whenToUse": [
+        "Clients send TCP or UDP traffic to multiple application targets.",
+        "Partners must allowlist fixed public IP addresses for an internet-facing load balancer.",
+        "A high-volume service needs load balancing across multiple Availability Zones."
+      ],
+      "keyFacts": [
+        "An NLB operates at OSI Layer 4 and can handle millions of requests per second.",
+        "Each enabled Availability Zone has a load balancer node with a static IP address.",
+        "An internet-facing NLB can optionally use one Elastic IP address per enabled subnet.",
+        "By default, a node sends traffic only to targets in its own Availability Zone; cross-zone load balancing changes this behavior.",
+        "For fault tolerance, enable multiple Availability Zones and place at least one target for each target group in every enabled Zone."
+      ],
+      "gotchas": [
+        "Static NLB addresses do not make a single-Availability-Zone deployment highly available.",
+        "An NLB does not provide the HTTP path- or host-based routing that points to an ALB.",
+        "A Gateway Load Balancer is for inline network appliances, not a substitute for an application's TCP or UDP load balancer."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Application Load Balancer",
+          "difference": "Choose ALB for HTTP/HTTPS Layer 7 routing by path or host; choose NLB for TCP/UDP and static addresses."
+        },
+        {
+          "concept": "Gateway Load Balancer",
+          "difference": "Choose GWLB to insert and scale inline virtual appliances such as firewalls; choose NLB to distribute application connections."
+        }
+      ],
+      "examCues": [
+        "UDP application traffic",
+        "partner allowlists fixed IP addresses",
+        "Elastic IP per enabled subnet",
+        "millions of requests per second",
+        "TCP service across multiple Availability Zones"
+      ]
+    },
+    "es": {
+      "tldr": "Un Network Load Balancer (NLB) distribuye tráfico en la capa 4 y es adecuado para cargas TCP o UDP que necesitan direcciones IP estáticas o un volumen de tráfico muy alto. En un escenario de examen, elígelo en lugar de un ALB cuando importen más los protocolos de transporte y las direcciones fijas que el enrutamiento HTTP.",
+      "whenToUse": [
+        "Los clientes envían tráfico TCP o UDP a varios destinos de la aplicación.",
+        "Los socios deben incluir direcciones IP públicas fijas en una lista de permitidas para un balanceador orientado a internet.",
+        "Un servicio de gran volumen necesita balanceo en varias Availability Zones."
+      ],
+      "keyFacts": [
+        "Un NLB opera en la capa 4 del modelo OSI y puede manejar millones de solicitudes por segundo.",
+        "Cada Availability Zone habilitada tiene un nodo del balanceador con una dirección IP estática.",
+        "Un NLB orientado a internet puede usar opcionalmente una Elastic IP por cada subred habilitada.",
+        "De forma predeterminada, cada nodo envía tráfico solo a los destinos de su Availability Zone; cross-zone load balancing cambia este comportamiento.",
+        "Para mejorar la tolerancia a fallas, habilita varias Availability Zones y coloca al menos un destino de cada target group en cada una."
+      ],
+      "gotchas": [
+        "Las direcciones estáticas del NLB no hacen que un despliegue en una sola Availability Zone sea altamente disponible.",
+        "Un NLB no ofrece el enrutamiento HTTP por ruta o nombre de host que indica el uso de un ALB.",
+        "Un Gateway Load Balancer sirve para appliances de red en línea, no para reemplazar el balanceador TCP o UDP de una aplicación."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Application Load Balancer",
+          "difference": "Elige ALB para enrutamiento HTTP/HTTPS de capa 7 por ruta o nombre de host; elige NLB para TCP/UDP y direcciones estáticas."
+        },
+        {
+          "concept": "Gateway Load Balancer",
+          "difference": "Elige GWLB para insertar y escalar appliances virtuales en línea, como firewalls; elige NLB para distribuir conexiones de aplicaciones."
+        }
+      ],
+      "examCues": [
+        "UDP application traffic",
+        "partner allowlists fixed IP addresses",
+        "Elastic IP per enabled subnet",
+        "millions of requests per second",
+        "TCP service across multiple Availability Zones"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "nlb-static-ip-tcp-udp--e25556d2",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "secondaryConcepts": [
+        "alb-routing",
+        "gateway-load-balancer"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research lab operates a TCP ingestion service behind a Network Load Balancer in two Availability Zones. Its only target group has healthy instances in one Zone but no registered targets in the other. The team wants the deployment to follow the NLB guidance for fault tolerance if a Zone becomes unavailable. Which change BEST meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Register at least one target from the target group in each enabled Availability Zone.",
+          "correct": true,
+          "why": "The documented fault-tolerance guidance calls for a target in each enabled Zone for every target group."
+        },
+        {
+          "id": "B",
+          "text": "Replace the NLB with a Gateway Load Balancer and keep the existing targets in one Zone.",
+          "correct": false,
+          "why": "GWLB targets inline appliances and leaves the application without targets in the other Zone."
+        },
+        {
+          "id": "C",
+          "text": "Keep the target placement and add host-based routing rules to the existing load balancer.",
+          "correct": false,
+          "why": "Host-based routing is an ALB feature and does not place a target in the empty Zone."
+        },
+        {
+          "id": "D",
+          "text": "Keep the target placement and associate Elastic IP addresses with both NLB subnets.",
+          "correct": false,
+          "why": "Elastic IPs provide fixed addresses but do not add a target to the empty Zone."
+        }
+      ],
+      "explanation": "Enabling two Zones alone is not the complete fault-tolerance configuration described for an NLB. AWS recommends at least one target from each target group in every enabled Availability Zone. Adding Elastic IPs changes addressing, not target placement; switching to GWLB would solve an appliance-inspection problem instead.",
+      "keywordCues": [
+        "no registered targets in the other",
+        "NLB guidance for fault tolerance",
+        "Zone becomes unavailable"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación opera un servicio de ingestión TCP detrás de un Network Load Balancer en dos Availability Zones. Su único target group tiene instancias saludables en una zona, pero ningún destino registrado en la otra. El equipo quiere que el despliegue siga la recomendación de tolerancia a fallas del NLB si una zona deja de estar disponible. ¿Qué cambio cumple MEJOR este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Registrar al menos un destino del target group en cada Availability Zone habilitada.",
+            "why": "La recomendación documentada de tolerancia a fallas indica que cada target group debe tener un destino en cada zona habilitada."
+          },
+          {
+            "id": "B",
+            "text": "Reemplazar el NLB por un Gateway Load Balancer y mantener los destinos actuales en una sola zona.",
+            "why": "GWLB está orientado a appliances en línea y deja la aplicación sin destinos en la otra zona."
+          },
+          {
+            "id": "C",
+            "text": "Mantener los destinos donde están y agregar reglas de enrutamiento por nombre de host al balanceador actual.",
+            "why": "El enrutamiento por nombre de host es una función de ALB y no coloca un destino en la zona vacía."
+          },
+          {
+            "id": "D",
+            "text": "Mantener los destinos donde están y asociar Elastic IP a ambas subredes del NLB.",
+            "why": "Las Elastic IP proporcionan direcciones fijas, pero no agregan un destino a la zona vacía."
+          }
+        ],
+        "explanation": "Habilitar dos zonas por sí solo no completa la configuración de tolerancia a fallas descrita para un NLB. AWS recomienda al menos un destino de cada target group en cada Availability Zone habilitada. Agregar Elastic IP cambia las direcciones, no la ubicación de los destinos; cambiar a GWLB resolvería un problema diferente de inspección mediante appliances."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nlb-static-ip-tcp-udp--abc1e544",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "secondaryConcepts": [
+        "alb-routing",
+        "gateway-load-balancer"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "An agricultural monitoring platform receives UDP readings from remote stations. Network administrators at the stations must allowlist fixed public IP addresses, and the application needs a fault-tolerant deployment across two Availability Zones. Which TWO design choices meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy a Gateway Load Balancer and register the monitoring application as inline inspection appliances.",
+          "correct": false,
+          "why": "GWLB serves inline inspection appliances rather than directly balancing this UDP application."
+        },
+        {
+          "id": "B",
+          "text": "Deploy an Application Load Balancer and use host-based rules to distribute the UDP readings.",
+          "correct": false,
+          "why": "HTTP host-based rules do not meet the UDP traffic requirement."
+        },
+        {
+          "id": "C",
+          "text": "Deploy an internet-facing Network Load Balancer and associate an Elastic IP address with each enabled subnet.",
+          "correct": true,
+          "why": "An NLB supports UDP and can provide a fixed public Elastic IP for each enabled subnet."
+        },
+        {
+          "id": "D",
+          "text": "Enable both Availability Zones on the NLB and register at least one target from each target group in each enabled Zone.",
+          "correct": true,
+          "why": "This follows the documented NLB guidance for fault tolerance across enabled Zones."
+        },
+        {
+          "id": "E",
+          "text": "Enable only one Availability Zone on the NLB so that the stations need to allowlist fewer addresses.",
+          "correct": false,
+          "why": "Using only one Zone contradicts the required two-Zone fault-tolerant deployment."
+        }
+      ],
+      "explanation": "The UDP protocol and fixed public addresses point to an internet-facing NLB with an Elastic IP for each enabled subnet. For the specified fault-tolerant deployment, enable both Zones and place at least one target from each target group in each Zone. Choosing one Zone reduces the number of addresses but fails the availability requirement; ALB host routing addresses HTTP rather than UDP.",
+      "keywordCues": [
+        "UDP readings",
+        "allowlist fixed public IP addresses",
+        "fault-tolerant deployment across two Availability Zones"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de monitoreo agrícola recibe lecturas UDP de estaciones remotas. Los administradores de red de las estaciones deben incluir direcciones IP públicas fijas en sus listas de permitidas, y la aplicación necesita un despliegue tolerante a fallas en dos Availability Zones. ¿Qué DOS decisiones de diseño cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Desplegar un Gateway Load Balancer y registrar la aplicación de monitoreo como appliances de inspección en línea.",
+            "why": "GWLB sirve para appliances de inspección en línea, no para balancear directamente esta aplicación UDP."
+          },
+          {
+            "id": "B",
+            "text": "Desplegar un Application Load Balancer y usar reglas por nombre de host para distribuir las lecturas UDP.",
+            "why": "Las reglas HTTP por nombre de host no cumplen el requisito de tráfico UDP."
+          },
+          {
+            "id": "C",
+            "text": "Desplegar un Network Load Balancer orientado a internet y asociar una Elastic IP a cada subred habilitada.",
+            "why": "Un NLB admite UDP y puede proporcionar una Elastic IP pública fija por cada subred habilitada."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar ambas Availability Zones en el NLB y registrar al menos un destino de cada target group en cada zona habilitada.",
+            "why": "Esto sigue la recomendación documentada de tolerancia a fallas del NLB en las zonas habilitadas."
+          },
+          {
+            "id": "E",
+            "text": "Habilitar solo una Availability Zone en el NLB para que las estaciones tengan que incluir menos direcciones en sus listas.",
+            "why": "Usar una sola zona contradice el requisito de un despliegue tolerante a fallas en dos zonas."
+          }
+        ],
+        "explanation": "El protocolo UDP y las direcciones públicas fijas apuntan a un NLB orientado a internet con una Elastic IP por subred habilitada. Para el despliegue tolerante a fallas solicitado, habilita ambas zonas y coloca al menos un destino de cada target group en cada una. Elegir una sola zona reduce la cantidad de direcciones, pero incumple el requisito de disponibilidad; las reglas por nombre de host de ALB resuelven necesidades HTTP, no UDP."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nlb-static-ip-tcp-udp--39444f22",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "secondaryConcepts": [
+        "alb-routing",
+        "gateway-load-balancer"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A game studio receives UDP telemetry from players and distributes it to application targets in two Availability Zones. Its partners require fixed public IP addresses that they can allowlist for each enabled subnet. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an Application Load Balancer across both Availability Zones and route requests by host name.",
+          "correct": false,
+          "why": "Host-based HTTP routing does not meet the UDP and fixed-IP requirements."
+        },
+        {
+          "id": "B",
+          "text": "Use an internet-facing Network Load Balancer in one Availability Zone with an Elastic IP address.",
+          "correct": false,
+          "why": "It supports UDP and a fixed address but does not meet the two-Availability-Zone requirement."
+        },
+        {
+          "id": "C",
+          "text": "Use a Gateway Load Balancer across both Availability Zones to distribute the telemetry to inline firewalls.",
+          "correct": false,
+          "why": "A GWLB is intended for inline network appliances, not direct distribution to the telemetry application."
+        },
+        {
+          "id": "D",
+          "text": "Use an internet-facing Network Load Balancer across both Availability Zones and associate an Elastic IP address with each enabled subnet.",
+          "correct": true,
+          "why": "An NLB supports UDP and can use one Elastic IP per enabled subnet."
+        }
+      ],
+      "explanation": "The deciding requirements are UDP traffic, fixed public IPs per enabled subnet, and deployment across two Availability Zones. An internet-facing NLB supports UDP and can associate one Elastic IP with each enabled subnet. An ALB's host routing does not address UDP, while a single-Zone NLB misses the stated Zone requirement.",
+      "keywordCues": [
+        "UDP telemetry",
+        "two Availability Zones",
+        "fixed public IP addresses"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos recibe telemetría UDP de jugadores y la distribuye a destinos de la aplicación en dos Availability Zones. Sus socios exigen direcciones IP públicas fijas que puedan incluir en una lista de permitidas para cada subred habilitada. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un Application Load Balancer en ambas Availability Zones y enrutar solicitudes según el nombre de host.",
+            "why": "El enrutamiento HTTP por nombre de host no cumple los requisitos de UDP y direcciones IP fijas."
+          },
+          {
+            "id": "B",
+            "text": "Usar un Network Load Balancer orientado a internet en una Availability Zone con una Elastic IP.",
+            "why": "Admite UDP y una dirección fija, pero no cumple el requisito de dos Availability Zones."
+          },
+          {
+            "id": "C",
+            "text": "Usar un Gateway Load Balancer en ambas Availability Zones para distribuir la telemetría a firewalls en línea.",
+            "why": "Un GWLB está destinado a appliances de red en línea, no a distribuir tráfico directamente a la aplicación de telemetría."
+          },
+          {
+            "id": "D",
+            "text": "Usar un Network Load Balancer orientado a internet en ambas Availability Zones y asociar una Elastic IP a cada subred habilitada.",
+            "why": "Un NLB admite UDP y puede usar una Elastic IP por cada subred habilitada."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son el tráfico UDP, las direcciones IP públicas fijas por subred habilitada y el despliegue en dos Availability Zones. Un NLB orientado a internet admite UDP y permite asociar una Elastic IP a cada subred habilitada. El enrutamiento por nombre de host de un ALB no resuelve el requisito de UDP, mientras que un NLB en una sola zona incumple el requisito de dos zonas."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "nlb-static-ip-tcp-udp--4cfd181d",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "secondaryConcepts": [
+        "alb-routing",
+        "gateway-load-balancer"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A logistics company is replacing a self-managed TCP connection distributor for a partner-facing service. The partner can allowlist only fixed public IP addresses, and the service must remain deployed in two Availability Zones. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy a Gateway Load Balancer in two Availability Zones and register the service targets as inspection appliances.",
+          "correct": false,
+          "why": "GWLB is for inline inspection appliances rather than distributing partner connections to the application."
+        },
+        {
+          "id": "B",
+          "text": "Deploy an internet-facing Network Load Balancer in two Availability Zones with an Elastic IP address for each enabled subnet.",
+          "correct": true,
+          "why": "The NLB distributes TCP connections and provides allowlistable Elastic IPs for both enabled subnets."
+        },
+        {
+          "id": "C",
+          "text": "Deploy an internet-facing Network Load Balancer in one Availability Zone with an Elastic IP address.",
+          "correct": false,
+          "why": "This retains a fixed address but fails the required two-Availability-Zone deployment."
+        },
+        {
+          "id": "D",
+          "text": "Deploy an Application Load Balancer in two Availability Zones and configure host-based rules for the partner.",
+          "correct": false,
+          "why": "Host-based HTTP rules do not provide the required TCP load-balancing and fixed public addresses."
+        }
+      ],
+      "explanation": "The partner needs fixed public addresses for a TCP service, with the service deployed in two Availability Zones. An internet-facing NLB supports TCP and permits an Elastic IP for each enabled subnet. The one-Zone NLB misses the deployment requirement, and ALB host rules address a different, HTTP-level requirement.",
+      "keywordCues": [
+        "TCP connection distributor",
+        "allowlist only fixed public IP addresses",
+        "two Availability Zones"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística reemplazará un distribuidor de conexiones TCP que administra por su cuenta para un servicio dirigido a socios. El socio solo puede incluir direcciones IP públicas fijas en su lista de permitidas, y el servicio debe permanecer desplegado en dos Availability Zones. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Desplegar un Gateway Load Balancer en dos Availability Zones y registrar los destinos del servicio como appliances de inspección.",
+            "why": "GWLB sirve para appliances de inspección en línea, no para distribuir conexiones del socio a la aplicación."
+          },
+          {
+            "id": "B",
+            "text": "Desplegar un Network Load Balancer orientado a internet en dos Availability Zones con una Elastic IP para cada subred habilitada.",
+            "why": "El NLB distribuye conexiones TCP y proporciona Elastic IP que el socio puede incluir en su lista para ambas subredes habilitadas."
+          },
+          {
+            "id": "C",
+            "text": "Desplegar un Network Load Balancer orientado a internet en una Availability Zone con una Elastic IP.",
+            "why": "Conserva una dirección fija, pero incumple el requisito de desplegar en dos Availability Zones."
+          },
+          {
+            "id": "D",
+            "text": "Desplegar un Application Load Balancer en dos Availability Zones y configurar reglas por nombre de host para el socio.",
+            "why": "Las reglas HTTP por nombre de host no proporcionan el balanceo TCP ni las direcciones públicas fijas requeridas."
+          }
+        ],
+        "explanation": "El socio necesita direcciones públicas fijas para un servicio TCP desplegado en dos Availability Zones. Un NLB orientado a internet admite TCP y permite una Elastic IP por cada subred habilitada. El NLB en una sola zona incumple el requisito de despliegue, mientras que las reglas por nombre de host de un ALB resuelven un requisito distinto de nivel HTTP."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "nlb-static-ip-tcp-udp--r0",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "kind": "recall",
+      "prompt": "A UDP service needs fixed public IPs in two Availability Zones. What load balancer and address configuration would you choose, and why?",
+      "promptEs": "Un servicio UDP necesita direcciones IP públicas fijas en dos Availability Zones. ¿Qué balanceador y configuración de direcciones elegirías, y por qué?",
+      "idealAnswer": "Choose an internet-facing Network Load Balancer with both Availability Zones enabled and an Elastic IP address for each enabled subnet. NLB supports UDP and provides the fixed public addresses the clients need.",
+      "rubric": [
+        "Names an internet-facing Network Load Balancer.",
+        "Specifies an Elastic IP for each enabled subnet across the two Zones.",
+        "Connects the choice to UDP and fixed public addresses."
+      ]
+    },
+    {
+      "id": "nlb-static-ip-tcp-udp--r1",
+      "conceptId": "nlb-static-ip-tcp-udp",
+      "kind": "why-not",
+      "prompt": "Why is an Application Load Balancer not the right substitute for an NLB when partners send UDP traffic to allowlisted fixed public IPs?",
+      "promptEs": "¿Por qué un Application Load Balancer no reemplaza a un NLB cuando los socios envían tráfico UDP a direcciones IP públicas fijas incluidas en una lista de permitidas?",
+      "idealAnswer": "An ALB is for HTTP/HTTPS Layer 7 features such as path or host routing, not the UDP requirement in this scenario. An internet-facing NLB supports UDP and can associate an Elastic IP with each enabled subnet.",
+      "rubric": [
+        "Distinguishes ALB's HTTP/HTTPS Layer 7 role from UDP traffic.",
+        "Identifies NLB as the UDP choice.",
+        "Mentions Elastic IP addresses per enabled subnet for fixed public addresses."
+      ]
+    }
+  ]
+}

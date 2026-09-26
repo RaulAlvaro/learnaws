@@ -1,0 +1,346 @@
+{
+  "conceptId": "lambda-concurrency",
+  "card": {
+    "en": {
+      "tldr": "Reserved concurrency gives a Lambda function exclusive access to a specified amount of concurrency and caps it at that amount; it does not pre-initialize environments. Provisioned concurrency pre-initializes environments to reduce cold starts, so choose it when invocation latency matters enough to justify additional charges.",
+      "whenToUse": [
+        "Reserve concurrency when a critical function must retain capacity while other functions compete for the account pool.",
+        "Reserve concurrency to cap a function that could overwhelm a downstream database.",
+        "Provision concurrency for latency-sensitive interactive requests that need environments ready before invocation."
+      ],
+      "keyFacts": [
+        "Concurrency is the number of in-flight requests; estimate it as average requests per second multiplied by average duration in seconds.",
+        "Reserved concurrency is both an exclusive allocation and an upper bound. It has no additional configuration charge.",
+        "Provisioned concurrency pre-initializes environments and incurs additional charges; traffic beyond its allocation can use on-demand environments.",
+        "Provisioned concurrency applies to a function version or alias, not $LATEST. Requests must reach that version or alias to use its prepared environments.",
+        "If both controls are used on one function, provisioned concurrency cannot exceed reserved concurrency."
+      ],
+      "gotchas": [
+        "Reserved capacity is not warm capacity: a reserved function can still experience cold starts.",
+        "Unused reserved concurrency cannot be borrowed by other functions.",
+        "Provisioned concurrency does not make traffic beyond its allocation free of cold starts.",
+        "Configuring provisioned concurrency on an alias does not help requests sent elsewhere."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Reserved concurrency",
+          "difference": "Guarantees and caps a function's concurrency, but does not pre-initialize environments."
+        },
+        {
+          "concept": "Provisioned concurrency",
+          "difference": "Pre-initializes environments for low-latency invocations, but has an additional charge."
+        }
+      ],
+      "examCues": [
+        "protect the database from too many concurrent invocations",
+        "critical function must retain capacity during another function's spike",
+        "interactive requests are slow when new environments start",
+        "provisioned concurrency is configured but cold starts persist"
+      ]
+    },
+    "es": {
+      "tldr": "Reserved concurrency asigna capacidad exclusiva a una función Lambda y limita su concurrencia a esa cantidad; no prepara entornos de ejecución con anticipación. Provisioned concurrency prepara entornos para reducir los cold starts, así que elígela cuando la latencia de invocación justifique el costo adicional.",
+      "whenToUse": [
+        "Usa reserved concurrency cuando una función crítica deba conservar capacidad mientras otras compiten por la capacidad de la cuenta.",
+        "Usa reserved concurrency para limitar una función que podría saturar una base de datos.",
+        "Usa provisioned concurrency cuando las solicitudes interactivas necesiten entornos listos antes de la invocación."
+      ],
+      "keyFacts": [
+        "La concurrencia es la cantidad de solicitudes en curso; puedes estimarla multiplicando las solicitudes promedio por segundo por la duración promedio en segundos.",
+        "Reserved concurrency ofrece una asignación exclusiva y establece un límite superior. Configurarla no tiene un cargo adicional.",
+        "Provisioned concurrency prepara entornos y genera cargos adicionales; el tráfico que supera la cantidad configurada puede usar entornos on-demand.",
+        "Provisioned concurrency se aplica a una versión o alias, no a $LATEST. Las solicitudes deben dirigirse a esa versión o alias para usar los entornos preparados.",
+        "Si usas ambos controles en una función, provisioned concurrency no puede superar reserved concurrency."
+      ],
+      "gotchas": [
+        "La capacidad reservada no equivale a entornos preparados: una función con reserved concurrency aún puede tener cold starts.",
+        "Otras funciones no pueden tomar prestada la reserved concurrency que una función no esté usando.",
+        "Provisioned concurrency no evita los cold starts del tráfico que supera su cantidad configurada.",
+        "Configurar provisioned concurrency en un alias no ayuda a las solicitudes dirigidas a otro destino."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Reserved concurrency",
+          "difference": "Garantiza y limita la concurrencia de una función, pero no prepara entornos de ejecución."
+        },
+        {
+          "concept": "Provisioned concurrency",
+          "difference": "Prepara entornos para invocaciones de baja latencia, pero genera un cargo adicional."
+        }
+      ],
+      "examCues": [
+        "protect the database from too many concurrent invocations",
+        "critical function must retain capacity during another function's spike",
+        "interactive requests are slow when new environments start",
+        "provisioned concurrency is configured but cold starts persist"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+      "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "lambda-concurrency--352737ca",
+      "conceptId": "lambda-concurrency",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher runs several Lambda functions in one AWS Region. A new batch-processing function occasionally spikes, but an order-processing function must retain capacity and must not open more concurrent database connections than the database can handle. Cold-start latency is acceptable. Which solution meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Leave both functions on the shared account concurrency pool and increase the account concurrency quota.",
+          "correct": false,
+          "why": "A larger shared pool neither protects the order-processing function from competing traffic nor caps its database connections."
+        },
+        {
+          "id": "B",
+          "text": "Configure reserved concurrency for the batch-processing function at the database's connection limit.",
+          "correct": false,
+          "why": "Reserving capacity for the batch function does not guarantee capacity or set the database-safe cap for the order-processing function."
+        },
+        {
+          "id": "C",
+          "text": "Configure provisioned concurrency for the order-processing function at the database's connection limit.",
+          "correct": false,
+          "why": "Provisioned concurrency prepares environments but does not provide the stated upper bound, and it adds charges despite cold starts being acceptable."
+        },
+        {
+          "id": "D",
+          "text": "Configure reserved concurrency for the order-processing function at the database's connection limit.",
+          "correct": true,
+          "why": "Reserved concurrency protects exclusive capacity while capping the function's concurrency without an additional configuration charge."
+        }
+      ],
+      "explanation": "The order-processing function needs both protected capacity and a firm concurrency ceiling. Reserved concurrency supplies both controls for that function and has no additional configuration charge. Provisioned concurrency addresses cold-start latency instead and adds charges, which the scenario does not justify. Increasing the shared pool would not enforce the database-safe ceiling.",
+      "keywordCues": [
+        "must retain capacity",
+        "must not open more concurrent database connections",
+        "Cold-start latency is acceptable",
+        "MOST cost-effectively"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+      ],
+      "es": {
+        "stem": "Una editorial ejecuta varias funciones Lambda en una Región de AWS. Una nueva función de procesamiento por lotes presenta picos ocasionales, pero una función que procesa pedidos debe conservar capacidad y no debe abrir más conexiones concurrentes de las que soporta la base de datos. La latencia de cold starts es aceptable. ¿Qué solución cumple estos requisitos MOST cost-effectively?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Deja ambas funciones en la capacidad compartida de la cuenta y aumenta la cuota de concurrencia de la cuenta.",
+            "why": "Una capacidad compartida mayor no protege la función de pedidos frente a otros picos ni limita sus conexiones a la base de datos."
+          },
+          {
+            "id": "B",
+            "text": "Configura reserved concurrency para la función por lotes según el límite de conexiones de la base de datos.",
+            "why": "Reservar capacidad para la función por lotes no garantiza capacidad ni establece un límite seguro para la función de pedidos."
+          },
+          {
+            "id": "C",
+            "text": "Configura provisioned concurrency para la función de pedidos según el límite de conexiones de la base de datos.",
+            "why": "Provisioned concurrency prepara entornos, pero no establece el límite superior requerido y genera cargos aunque los cold starts sean aceptables."
+          },
+          {
+            "id": "D",
+            "text": "Configura reserved concurrency para la función de pedidos según el límite de conexiones de la base de datos.",
+            "why": "Reserved concurrency protege capacidad exclusiva y limita la concurrencia de la función sin un cargo adicional por configurarla."
+          }
+        ],
+        "explanation": "La función de pedidos necesita capacidad protegida y un límite firme de concurrencia. Reserved concurrency ofrece ambos controles para esa función y configurarla no genera cargos adicionales. Provisioned concurrency atiende la latencia de cold starts y agrega costos que el escenario no justifica. Aumentar la capacidad compartida no impondría el límite seguro para la base de datos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-concurrency--1e73b065",
+      "conceptId": "lambda-concurrency",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company configured provisioned concurrency on the STABLE alias of a Lambda function that processes upload events. X-Ray monitoring still shows cold starts, and the event source mapping points to the unqualified function rather than STABLE. The team wants event invocations to use the environments already allocated to STABLE. Which change meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the provisioned concurrency configuration to $LATEST and keep the event source mapping unchanged.",
+          "correct": false,
+          "why": "Lambda does not support provisioned concurrency on $LATEST."
+        },
+        {
+          "id": "B",
+          "text": "Increase provisioned concurrency on STABLE and keep the event source mapping unchanged.",
+          "correct": false,
+          "why": "Additional prepared environments on STABLE cannot help invocations that do not target STABLE."
+        },
+        {
+          "id": "C",
+          "text": "Add reserved concurrency to the function and keep the event source mapping unchanged.",
+          "correct": false,
+          "why": "Reserved concurrency does not pre-initialize environments or route events to STABLE."
+        },
+        {
+          "id": "D",
+          "text": "Update the event source mapping to invoke the STABLE alias.",
+          "correct": true,
+          "why": "Invoking the alias with provisioned concurrency lets these events use its prepared environments."
+        }
+      ],
+      "explanation": "Provisioned concurrency is attached to a specific version or alias, and the event source must invoke that target to use its prepared environments. Updating the mapping to STABLE addresses the identified routing mismatch directly. Increasing STABLE's allocation without changing the mapping leaves the mismatch in place. Reserved concurrency does not remove cold starts.",
+      "keywordCues": [
+        "provisioned concurrency on the STABLE alias",
+        "event source mapping points to the unqualified function",
+        "use the environments already allocated to STABLE",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios configuró provisioned concurrency en el alias STABLE de una función Lambda que procesa eventos de carga. El monitoreo con X-Ray todavía muestra cold starts, y el event source mapping apunta a la función sin especificar STABLE. El equipo quiere que las invocaciones de eventos usen los entornos ya asignados a STABLE. ¿Qué cambio cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mueve la configuración de provisioned concurrency a $LATEST y no cambies el event source mapping.",
+            "why": "Lambda no permite configurar provisioned concurrency en $LATEST."
+          },
+          {
+            "id": "B",
+            "text": "Aumenta provisioned concurrency en STABLE y no cambies el event source mapping.",
+            "why": "Más entornos preparados en STABLE no ayudan a las invocaciones que no se dirigen a STABLE."
+          },
+          {
+            "id": "C",
+            "text": "Agrega reserved concurrency a la función y no cambies el event source mapping.",
+            "why": "Reserved concurrency no prepara entornos ni dirige los eventos a STABLE."
+          },
+          {
+            "id": "D",
+            "text": "Actualiza el event source mapping para que invoque el alias STABLE.",
+            "why": "Invocar el alias con provisioned concurrency permite que esos eventos usen sus entornos preparados."
+          }
+        ],
+        "explanation": "Provisioned concurrency se asocia a una versión o un alias específico, y el origen de eventos debe invocar ese destino para usar sus entornos preparados. Actualizar el mapping para que apunte a STABLE corrige directamente el problema de enrutamiento. Aumentar la asignación de STABLE sin cambiar el mapping deja el problema intacto. Reserved concurrency no elimina los cold starts."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "lambda-concurrency--492dbca4",
+      "conceptId": "lambda-concurrency",
+      "secondaryConcepts": [],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A clinic invokes a Lambda function through its RELEASE alias to return interactive appointment results. The function accesses a database that can safely support at most 30 simultaneous executions, and peak traffic requires 20 environments ready to avoid cold-start delays. Other functions in the account also experience traffic spikes. Which two configurations together meet the latency and database-protection requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure 20 units of provisioned concurrency on RELEASE.",
+          "correct": true,
+          "why": "This prepares the requested 20 environments on the alias that the clinic invokes."
+        },
+        {
+          "id": "B",
+          "text": "Configure 20 units of provisioned concurrency on $LATEST.",
+          "correct": false,
+          "why": "Provisioned concurrency cannot be configured on $LATEST, and the clinic invokes RELEASE."
+        },
+        {
+          "id": "C",
+          "text": "Configure 40 units of provisioned concurrency on RELEASE.",
+          "correct": false,
+          "why": "This allocation exceeds the database-safe concurrency target and cannot fit within a reserved concurrency setting of 30."
+        },
+        {
+          "id": "D",
+          "text": "Configure 20 units of reserved concurrency for the function without provisioned concurrency.",
+          "correct": false,
+          "why": "Reserved concurrency alone does not prepare the 20 environments needed to avoid cold-start delays."
+        },
+        {
+          "id": "E",
+          "text": "Configure 30 units of reserved concurrency for the function.",
+          "correct": true,
+          "why": "This reserves function capacity against competing functions and caps simultaneous executions at the database-safe limit."
+        }
+      ],
+      "explanation": "The clinic needs two distinct controls: a database-safe concurrency ceiling and prepared environments for interactive traffic. Reserving 30 units caps the function while protecting its capacity from spikes in other functions. Provisioning 20 units on the invoked RELEASE alias prepares the required environments and stays within that reserved limit. Reserved concurrency alone cannot prevent cold starts, and provisioned concurrency cannot be placed on $LATEST.",
+      "keywordCues": [
+        "through its RELEASE alias",
+        "at most 30 simultaneous executions",
+        "20 environments ready",
+        "Other functions in the account also experience traffic spikes",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+      ],
+      "es": {
+        "stem": "Una clínica invoca una función Lambda mediante su alias RELEASE para devolver resultados interactivos de citas. La función accede a una base de datos que admite de forma segura un máximo de 30 ejecuciones simultáneas, y el tráfico pico requiere 20 entornos preparados para evitar retrasos por cold starts. Otras funciones de la cuenta también tienen picos de tráfico. ¿Qué dos configuraciones, en conjunto, cumplen los requisitos de latencia y protección de la base de datos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura 20 unidades de provisioned concurrency en RELEASE.",
+            "why": "Esto prepara los 20 entornos requeridos en el alias que invoca la clínica."
+          },
+          {
+            "id": "B",
+            "text": "Configura 20 unidades de provisioned concurrency en $LATEST.",
+            "why": "No puedes configurar provisioned concurrency en $LATEST, y la clínica invoca RELEASE."
+          },
+          {
+            "id": "C",
+            "text": "Configura 40 unidades de provisioned concurrency en RELEASE.",
+            "why": "Esta asignación supera el objetivo seguro de concurrencia y no cabe dentro de una reserved concurrency de 30."
+          },
+          {
+            "id": "D",
+            "text": "Configura 20 unidades de reserved concurrency para la función sin provisioned concurrency.",
+            "why": "Reserved concurrency por sí sola no prepara los 20 entornos necesarios para evitar retrasos por cold starts."
+          },
+          {
+            "id": "E",
+            "text": "Configura 30 unidades de reserved concurrency para la función.",
+            "why": "Esto protege la capacidad frente a otras funciones y limita las ejecuciones simultáneas al máximo seguro para la base de datos."
+          }
+        ],
+        "explanation": "La clínica necesita dos controles diferentes: un límite seguro para la base de datos y entornos preparados para el tráfico interactivo. Reservar 30 unidades limita la función y protege su capacidad frente a picos de otras funciones. Configurar 20 unidades de provisioned concurrency en el alias RELEASE que se invoca prepara los entornos necesarios sin superar el límite reservado. Reserved concurrency por sí sola no evita los cold starts, y no puedes configurar provisioned concurrency en $LATEST."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "lambda-concurrency--r0",
+      "conceptId": "lambda-concurrency",
+      "kind": "recall",
+      "prompt": "An interactive Lambda function needs warm environments and a firm limit on database connections. Which concurrency controls would you use, and why?",
+      "promptEs": "Una función Lambda interactiva necesita entornos preparados y un límite firme de conexiones a la base de datos. ¿Qué controles de concurrencia usarías y por qué?",
+      "idealAnswer": "Use provisioned concurrency on the invoked version or alias to pre-initialize environments and reduce cold starts. Use reserved concurrency to cap simultaneous executions at the database-safe level and protect that capacity from other functions; provisioned concurrency cannot exceed the function's reserved concurrency.",
+      "rubric": [
+        "Selects provisioned concurrency for prepared environments and reduced cold starts.",
+        "Selects reserved concurrency for the exclusive allocation and database-safe upper bound.",
+        "Places provisioned concurrency on the invoked version or alias and keeps it no higher than reserved concurrency."
+      ]
+    }
+  ]
+}

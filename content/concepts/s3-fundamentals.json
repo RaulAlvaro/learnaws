@@ -1,0 +1,454 @@
+{
+  "conceptId": "s3-fundamentals",
+  "card": {
+    "en": {
+      "tldr": "Amazon S3 is scalable object storage for data such as static content, backups, and data lakes. Choose it when an application needs durable object storage and must read or list objects immediately after a successful write, without managing file servers or a separate consistency layer.",
+      "whenToUse": [
+        "The application stores objects rather than requiring a mounted file system or block device.",
+        "The number of objects or total stored data may grow substantially.",
+        "Readers must see a newly written or overwritten object immediately."
+      ],
+      "keyFacts": [
+        "S3 provides strong read-after-write consistency for new objects and overwrites; list operations also reflect completed writes.",
+        "The total volume of data and number of S3 objects are unlimited.",
+        "An individual object can be up to 50 TB, but a single PUT can upload no more than 5 GB; consider multipart upload for objects larger than 100 MB.",
+        "Objects in S3 Standard are stored across multiple devices spanning at least three Availability Zones."
+      ],
+      "gotchas": [
+        "Strong consistency does not mean that every S3 storage class stores data across multiple Availability Zones; S3 One Zone-IA uses one AZ.",
+        "Do not confuse the maximum object size with the maximum size of a single PUT.",
+        "S3 object access is not a substitute for a required mounted NFS or SMB file share."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EBS",
+          "difference": "Choose EBS for block storage attached to EC2; choose S3 for scalable object storage."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "Choose EFS when multiple Linux clients need a shared NFS file system, not merely access to objects."
+        },
+        {
+          "concept": "Amazon FSx for Windows File Server",
+          "difference": "Choose FSx for Windows when applications require SMB shares, NTFS permissions, or Active Directory integration."
+        }
+      ],
+      "examCues": [
+        "growing collection of immutable objects",
+        "read immediately after upload",
+        "list objects immediately after a write",
+        "single object larger than a single PUT",
+        "objects stored across multiple Availability Zones"
+      ]
+    },
+    "es": {
+      "tldr": "Amazon S3 es almacenamiento de objetos escalable para contenido estático, respaldos y data lakes. Elígelo cuando necesites almacenar objetos de forma duradera y leerlos o listarlos inmediatamente después de una escritura correcta, sin administrar servidores de archivos ni una capa de consistencia adicional.",
+      "whenToUse": [
+        "Tu aplicación almacena objetos y no requiere un sistema de archivos montado ni un dispositivo de bloques.",
+        "La cantidad de objetos o el volumen total de datos puede crecer considerablemente.",
+        "Los lectores deben ver de inmediato un objeto nuevo o sobrescrito."
+      ],
+      "keyFacts": [
+        "S3 ofrece strong read-after-write consistency para objetos nuevos y sobrescrituras; las operaciones de listado también reflejan las escrituras completadas.",
+        "El volumen total de datos y la cantidad de objetos en S3 son ilimitados.",
+        "Un objeto puede medir hasta 50 TB, pero un solo PUT admite como máximo 5 GB; considera multipart upload para objetos mayores de 100 MB.",
+        "Los objetos en S3 Standard se almacenan en varios dispositivos distribuidos en al menos tres Availability Zones."
+      ],
+      "gotchas": [
+        "Strong consistency no implica que todas las storage classes de S3 almacenen datos en varias Availability Zones; S3 One Zone-IA usa una sola AZ.",
+        "No confundas el tamaño máximo de un objeto con el tamaño máximo de un solo PUT.",
+        "El acceso a objetos de S3 no reemplaza un recurso compartido NFS o SMB montado cuando la aplicación lo exige."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon EBS",
+          "difference": "Elige EBS para almacenamiento de bloques conectado a EC2; elige S3 para almacenamiento de objetos escalable."
+        },
+        {
+          "concept": "Amazon EFS",
+          "difference": "Elige EFS cuando varios clientes Linux necesiten un sistema de archivos NFS compartido, no solo acceso a objetos."
+        },
+        {
+          "concept": "Amazon FSx for Windows File Server",
+          "difference": "Elige FSx for Windows cuando la aplicación necesite recursos compartidos SMB, permisos NTFS o integración con Active Directory."
+        }
+      ],
+      "examCues": [
+        "growing collection of immutable objects",
+        "read immediately after upload",
+        "list objects immediately after a write",
+        "single object larger than a single PUT",
+        "objects stored across multiple Availability Zones"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+      "https://aws.amazon.com/s3/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-fundamentals--b3b96f01",
+      "conceptId": "s3-fundamentals",
+      "secondaryConcepts": [
+        "instance-store",
+        "ebs-volume-types"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A wildlife research group receives an unpredictable number of camera images each day. Researchers retrieve images as objects through a web application, and the group wants the stored images to span multiple Availability Zones without managing storage servers. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the images on an Amazon EBS volume attached to an EC2 instance.",
+          "correct": false,
+          "why": "An EBS volume is block storage attached to EC2, rather than scalable, serverless object storage."
+        },
+        {
+          "id": "B",
+          "text": "Store the images on EC2 instance store volumes.",
+          "correct": false,
+          "why": "Instance store is ephemeral and does not provide the required durable object storage."
+        },
+        {
+          "id": "C",
+          "text": "Store the images in S3 One Zone-IA.",
+          "correct": false,
+          "why": "S3 One Zone-IA stores objects in a single Availability Zone, contrary to the stated requirement."
+        },
+        {
+          "id": "D",
+          "text": "Store the images in an S3 Standard general purpose bucket.",
+          "correct": true,
+          "why": "S3 Standard stores objects across at least three Availability Zones and scales without managing storage servers."
+        }
+      ],
+      "explanation": "The images are accessed as objects, their count is unpredictable, and storage must span multiple Availability Zones. An S3 Standard general purpose bucket meets those requirements without managing storage servers. S3 One Zone-IA is still object storage, but its single-AZ placement fails the explicit resilience requirement.",
+      "keywordCues": [
+        "unpredictable number of camera images",
+        "retrieve images as objects",
+        "span multiple Availability Zones",
+        "without managing storage servers"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+        "https://aws.amazon.com/s3/faqs/"
+      ],
+      "es": {
+        "stem": "Un grupo de investigación de fauna recibe cada día una cantidad impredecible de imágenes de cámaras. Los investigadores recuperan las imágenes como objetos mediante una aplicación web, y el grupo quiere que se almacenen en varias Availability Zones sin administrar servidores de almacenamiento. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Almacenar las imágenes en un volumen Amazon EBS conectado a una instancia EC2.",
+            "why": "Un volumen EBS es almacenamiento de bloques conectado a EC2, no almacenamiento de objetos escalable sin servidores que administrar."
+          },
+          {
+            "id": "B",
+            "text": "Almacenar las imágenes en volúmenes EC2 instance store.",
+            "why": "Instance store es efímero y no proporciona el almacenamiento duradero de objetos requerido."
+          },
+          {
+            "id": "C",
+            "text": "Almacenar las imágenes en S3 One Zone-IA.",
+            "why": "S3 One Zone-IA almacena los objetos en una sola Availability Zone, en contra del requisito indicado."
+          },
+          {
+            "id": "D",
+            "text": "Almacenar las imágenes en un general purpose bucket de S3 Standard.",
+            "why": "S3 Standard almacena objetos en al menos tres Availability Zones y escala sin administrar servidores de almacenamiento."
+          }
+        ],
+        "explanation": "Las imágenes se consultan como objetos, su cantidad es impredecible y el almacenamiento debe abarcar varias Availability Zones. Un general purpose bucket de S3 Standard cumple esos requisitos sin que tengas que administrar servidores de almacenamiento. S3 One Zone-IA también almacena objetos, pero su ubicación en una sola AZ incumple el requisito explícito de resiliencia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-fundamentals--697bcd43",
+      "conceptId": "s3-fundamentals",
+      "secondaryConcepts": [
+        "ebs-volume-types"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A film preservation studio produces finished media packages of 12 TB each. It wants to retain each package as one object in its growing Amazon S3 collection so authorized clients can retrieve it by object key. Which upload approach meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Upload each package to S3 with one PUT request.",
+          "correct": false,
+          "why": "A single PUT is limited to 5 GB, below the size of a package."
+        },
+        {
+          "id": "B",
+          "text": "Use S3 multipart upload to create one object for each package.",
+          "correct": true,
+          "why": "Multipart upload supports creating a single S3 object larger than the single-PUT limit."
+        },
+        {
+          "id": "C",
+          "text": "Split each package into separate S3 objects and require clients to reassemble them.",
+          "correct": false,
+          "why": "Clients would no longer retrieve each complete package as one object."
+        },
+        {
+          "id": "D",
+          "text": "Keep each package on an Amazon EBS volume and expose it through an EC2 server.",
+          "correct": false,
+          "why": "This replaces the required S3 object collection with server-managed block storage."
+        }
+      ],
+      "explanation": "Each package must remain one S3 object, and 12 TB is below the documented 50 TB maximum object size. A single PUT cannot upload it because that operation is limited to 5 GB. Multipart upload addresses the upload constraint without changing the client's one-object retrieval model.",
+      "keywordCues": [
+        "12 TB each",
+        "one object",
+        "Amazon S3 collection",
+        "retrieve it by object key"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+        "https://aws.amazon.com/s3/faqs/"
+      ],
+      "es": {
+        "stem": "Un estudio de preservación cinematográfica produce paquetes de medios terminados de 12 TB cada uno. Quiere conservar cada paquete como un solo objeto en su creciente colección de Amazon S3 para que los clientes autorizados lo recuperen mediante su clave de objeto. ¿Qué método de carga cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Cargar cada paquete en S3 con una sola solicitud PUT.",
+            "why": "Un solo PUT está limitado a 5 GB, menos que el tamaño de un paquete."
+          },
+          {
+            "id": "B",
+            "text": "Usar S3 multipart upload para crear un objeto por paquete.",
+            "why": "Multipart upload permite crear un solo objeto S3 que supera el límite de un único PUT."
+          },
+          {
+            "id": "C",
+            "text": "Dividir cada paquete en objetos S3 separados y exigir que los clientes los reconstruyan.",
+            "why": "Los clientes ya no recuperarían cada paquete completo como un solo objeto."
+          },
+          {
+            "id": "D",
+            "text": "Mantener cada paquete en un volumen Amazon EBS y ofrecer acceso mediante un servidor EC2.",
+            "why": "Esto reemplaza la colección requerida de objetos S3 por almacenamiento de bloques administrado mediante un servidor."
+          }
+        ],
+        "explanation": "Cada paquete debe permanecer como un solo objeto S3, y 12 TB está por debajo del tamaño máximo documentado de 50 TB por objeto. No puedes cargarlo con un solo PUT porque esa operación tiene un límite de 5 GB. Multipart upload resuelve la restricción de carga sin cambiar el modelo de recuperación de un objeto por paquete."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-fundamentals--75a0f857",
+      "conceptId": "s3-fundamentals",
+      "secondaryConcepts": [
+        "efs-fundamentals"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturer uploads inspection images under object keys, sometimes replacing an image after a reviewer corrects it. A reporting job reads a corrected image and lists the bucket immediately after the replacement succeeds. The manufacturer wants the objects stored across multiple Availability Zones and does not want an additional system to track when writes become visible. Which TWO design choices meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the images on Amazon EFS and mount the file system on the reporting host.",
+          "correct": false,
+          "why": "This substitutes mounted file storage for the stated object-key and bucket-listing workflow."
+        },
+        {
+          "id": "B",
+          "text": "Store the images in an S3 Standard general purpose bucket.",
+          "correct": true,
+          "why": "S3 Standard stores objects across multiple Availability Zones and supports the required object-access pattern."
+        },
+        {
+          "id": "C",
+          "text": "Store the images in S3 One Zone-IA.",
+          "correct": false,
+          "why": "Its single-AZ storage fails the multiple-AZ requirement."
+        },
+        {
+          "id": "D",
+          "text": "Use S3's native strong consistency for reads and listings after completed overwrites.",
+          "correct": true,
+          "why": "S3 makes a completed overwrite visible to subsequent reads and reflects completed writes in listings."
+        },
+        {
+          "id": "E",
+          "text": "Maintain a separate database of successful S3 writes and consult it before each read.",
+          "correct": false,
+          "why": "A separate write-tracking system adds overhead that native S3 consistency makes unnecessary."
+        }
+      ],
+      "explanation": "The storage decision must satisfy both multiple-AZ placement and immediate visibility after a successful overwrite. S3 Standard stores objects across at least three AZs, and S3's native strong consistency supports subsequent reads and listings. S3 One Zone-IA misses the placement requirement, while a separate tracking database adds operational overhead without solving an unmet consistency need.",
+      "keywordCues": [
+        "under object keys",
+        "lists the bucket immediately",
+        "replacement succeeds",
+        "across multiple Availability Zones",
+        "does not want an additional system"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+        "https://aws.amazon.com/s3/faqs/"
+      ],
+      "es": {
+        "stem": "Un fabricante carga imágenes de inspección con claves de objeto y a veces reemplaza una imagen después de que un revisor la corrige. Un proceso de informes lee la imagen corregida y lista el bucket inmediatamente después de que el reemplazo se completa correctamente. El fabricante quiere almacenar los objetos en varias Availability Zones y no quiere un sistema adicional para rastrear cuándo se vuelven visibles las escrituras. ¿Qué DOS decisiones de diseño cumplen estos requisitos con el LEAST operational overhead? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Almacenar las imágenes en Amazon EFS y montar el sistema de archivos en el host de informes.",
+            "why": "Esto sustituye el flujo indicado de claves de objeto y listados del bucket por almacenamiento de archivos montado."
+          },
+          {
+            "id": "B",
+            "text": "Almacenar las imágenes en un general purpose bucket de S3 Standard.",
+            "why": "S3 Standard almacena objetos en varias Availability Zones y admite el patrón requerido de acceso a objetos."
+          },
+          {
+            "id": "C",
+            "text": "Almacenar las imágenes en S3 One Zone-IA.",
+            "why": "Su almacenamiento en una sola AZ incumple el requisito de varias AZ."
+          },
+          {
+            "id": "D",
+            "text": "Usar la strong consistency nativa de S3 para las lecturas y los listados posteriores a sobrescrituras completadas.",
+            "why": "S3 hace visible una sobrescritura completada para las lecturas posteriores y refleja las escrituras completadas en los listados."
+          },
+          {
+            "id": "E",
+            "text": "Mantener una base de datos separada de escrituras exitosas en S3 y consultarla antes de cada lectura.",
+            "why": "Un sistema separado de seguimiento de escrituras agrega esfuerzo operativo que la consistencia nativa de S3 vuelve innecesario."
+          }
+        ],
+        "explanation": "La decisión de almacenamiento debe cumplir tanto la distribución en varias AZ como la visibilidad inmediata después de una sobrescritura correcta. S3 Standard almacena objetos en al menos tres AZ, y la strong consistency nativa de S3 permite las lecturas y los listados posteriores. S3 One Zone-IA incumple el requisito de ubicación, mientras que una base de datos de seguimiento agrega esfuerzo operativo sin resolver una necesidad de consistencia pendiente."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-fundamentals--7708d861",
+      "conceptId": "s3-fundamentals",
+      "secondaryConcepts": [
+        "efs-fundamentals",
+        "instance-store"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An online publisher replaces a product image whenever its artwork changes. Immediately after an upload succeeds, its application reads the image using the same object key and lists the bucket to update a catalog. The team wants to avoid operating a separate index solely to make completed writes visible. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Store the images in Amazon S3 and use its native consistency for reads and listings.",
+          "correct": true,
+          "why": "S3 reads return a completed overwrite and listings reflect completed writes without a separate consistency index."
+        },
+        {
+          "id": "B",
+          "text": "Store the images on an EC2 instance store volume and serve them from that instance.",
+          "correct": false,
+          "why": "Ephemeral instance storage does not meet the publisher's need to retain its product images."
+        },
+        {
+          "id": "C",
+          "text": "Store the images in Amazon S3 and maintain a separate index of completed uploads.",
+          "correct": false,
+          "why": "The separate index adds the operational overhead the team explicitly wants to avoid."
+        },
+        {
+          "id": "D",
+          "text": "Store the images in Amazon EFS and have the application access a mounted NFS share.",
+          "correct": false,
+          "why": "A mounted file system changes the stated object-access design when S3 already supplies the needed consistency."
+        }
+      ],
+      "explanation": "The deciding requirement is visibility immediately after a successful overwrite, including through a bucket listing. Amazon S3 provides strong read-after-write consistency for overwrites and strong consistency for list operations. A separate upload index is unnecessary for that purpose and increases operational overhead.",
+      "keywordCues": [
+        "replaces a product image",
+        "Immediately after an upload succeeds",
+        "same object key",
+        "lists the bucket",
+        "avoid operating a separate index"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+        "https://aws.amazon.com/s3/faqs/"
+      ],
+      "es": {
+        "stem": "Una editorial en línea reemplaza la imagen de un producto cada vez que cambia su diseño. Inmediatamente después de que una carga se completa correctamente, la aplicación lee la imagen con la misma clave de objeto y lista el bucket para actualizar un catálogo. El equipo quiere evitar administrar un índice separado solo para hacer visibles las escrituras completadas. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Almacenar las imágenes en Amazon S3 y usar su consistencia nativa para las lecturas y los listados.",
+            "why": "Las lecturas de S3 devuelven la sobrescritura completada y los listados reflejan las escrituras completadas sin un índice de consistencia separado."
+          },
+          {
+            "id": "B",
+            "text": "Almacenar las imágenes en un volumen EC2 instance store y entregarlas desde esa instancia.",
+            "why": "El almacenamiento efímero de la instancia no satisface la necesidad de conservar las imágenes de productos."
+          },
+          {
+            "id": "C",
+            "text": "Almacenar las imágenes en Amazon S3 y mantener un índice separado de las cargas completadas.",
+            "why": "El índice separado agrega el esfuerzo operativo que el equipo quiere evitar explícitamente."
+          },
+          {
+            "id": "D",
+            "text": "Almacenar las imágenes en Amazon EFS y hacer que la aplicación acceda a un recurso NFS montado.",
+            "why": "Un sistema de archivos montado cambia el diseño de acceso a objetos cuando S3 ya proporciona la consistencia necesaria."
+          }
+        ],
+        "explanation": "El requisito decisivo es la visibilidad inmediatamente después de una sobrescritura correcta, incluso en un listado del bucket. Amazon S3 ofrece strong read-after-write consistency para sobrescrituras y consistencia fuerte para las operaciones de listado. No necesitas un índice de cargas separado para ese fin; agregarlo incrementaría el esfuerzo operativo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-fundamentals--r0",
+      "conceptId": "s3-fundamentals",
+      "kind": "recall",
+      "prompt": "Which storage service fits a growing object archive requiring immediate reads after overwrites, and why?",
+      "promptEs": "¿Qué servicio de almacenamiento usarías para un archivo creciente de objetos que exige lecturas inmediatas después de sobrescrituras, y por qué?",
+      "idealAnswer": "Use Amazon S3. It scales for object storage and provides strong read-after-write consistency for completed overwrites; listings also reflect completed writes.",
+      "rubric": [
+        "Names Amazon S3.",
+        "Identifies scalable object storage as the fit.",
+        "Explains immediate visibility after successful overwrites."
+      ]
+    },
+    {
+      "id": "s3-fundamentals--r1",
+      "conceptId": "s3-fundamentals",
+      "kind": "why-not",
+      "prompt": "Why not choose Amazon EFS for a web application that retrieves archive items by object key and needs no mounted file system?",
+      "promptEs": "¿Por qué no elegirías Amazon EFS para una aplicación web que recupera elementos de un archivo por clave de objeto y no necesita un sistema de archivos montado?",
+      "idealAnswer": "EFS is shared NFS file storage, so it addresses a mounted-file-system requirement the application does not have. S3 matches retrieval by object key and supports a growing object collection.",
+      "rubric": [
+        "Identifies EFS as shared NFS file storage.",
+        "Notes that the application does not need a mounted file system.",
+        "Explains why S3 fits object-key retrieval."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+{
+  "conceptId": "aws-ram-resource-sharing",
+  "card": {
+    "en": {
+      "tldr": "AWS Resource Access Manager (AWS RAM) shares supported resources across accounts without creating a copy in each account. For VPC sharing, choose AWS RAM when accounts in the same AWS Organizations organization need to deploy their own application resources into centrally managed subnets.",
+      "whenToUse": [
+        "Several accounts need to use one supported resource while the owning account retains ownership.",
+        "Accounts in an organization or OU need access without maintaining a list of account IDs.",
+        "Application teams in the same organization need separate accounts but shared VPC subnets."
+      ],
+      "keyFacts": [
+        "A VPC owner can share subnets with participants in the same AWS Organizations organization; participants manage their own application resources, not those of the owner or other participants.",
+        "After sharing within an organization is enabled, shares with its accounts do not require invitations. Shares with accounts outside the organization require recipient acceptance.",
+        "For cross-account shares, AWS RAM permissions set the maximum access; the consuming account must also grant its roles or users access through IAM identity-based policies.",
+        "A resource share containing Regional resources must be in the same Region as those resources. AWS RAM has no additional charge, though resource usage charges vary."
+      ],
+      "gotchas": [
+        "Sharing a subnet does not transfer ownership of the VPC or let participants manage another account's application resources.",
+        "An AWS RAM share alone does not grant every role in a consuming account permission to use the resource.",
+        "A general AWS RAM share can target specific external accounts, but VPC subnet sharing requires participants to be in the owner's organization."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Resource-based policies",
+          "difference": "Some resources support cross-account resource policies, but AWS RAM can target an organization or OU without enumerating account IDs."
+        },
+        {
+          "concept": "VPC peering",
+          "difference": "VPC peering connects separate VPCs; subnet sharing lets participating accounts deploy resources into subnets of the owner's VPC."
+        }
+      ],
+      "examCues": [
+        "share one resource with an OU",
+        "centrally managed VPC, separate application accounts",
+        "avoid duplicate resources across accounts",
+        "external account must accept a share"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Resource Access Manager (AWS RAM) comparte recursos compatibles entre cuentas sin crear una copia en cada una. Para VPC sharing, elige AWS RAM cuando las cuentas de la misma organización de AWS Organizations deban implementar sus propios recursos de aplicación en subredes administradas centralmente.",
+      "whenToUse": [
+        "Varias cuentas necesitan usar un recurso compatible, mientras la cuenta propietaria conserva su titularidad.",
+        "Las cuentas de una organización o OU necesitan acceso sin mantener una lista de ID de cuentas.",
+        "Los equipos de aplicaciones de la misma organización necesitan cuentas separadas, pero subredes compartidas."
+      ],
+      "keyFacts": [
+        "El propietario de una VPC puede compartir subredes con participantes de la misma organización de AWS Organizations; cada participante administra sus propios recursos de aplicación, no los del propietario ni los de otros participantes.",
+        "Una vez habilitada la opción de compartir dentro de la organización, las cuentas de esa organización no necesitan invitaciones. Las cuentas externas deben aceptar una invitación.",
+        "En una compartición entre cuentas, los permisos de AWS RAM fijan el acceso máximo; la cuenta consumidora también debe conceder acceso a sus roles o usuarios mediante políticas IAM basadas en identidad.",
+        "Un resource share que contiene recursos Regional debe estar en la misma Region que esos recursos. AWS RAM no tiene cargos adicionales, aunque los cargos por uso del recurso varían."
+      ],
+      "gotchas": [
+        "Compartir una subred no transfiere la propiedad de la VPC ni permite que los participantes administren los recursos de aplicación de otras cuentas.",
+        "Un recurso compartido mediante AWS RAM no concede por sí solo permiso a todos los roles de la cuenta consumidora.",
+        "Un resource share general de AWS RAM puede incluir cuentas externas específicas, pero VPC subnet sharing exige que los participantes estén en la organización del propietario."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Políticas basadas en recursos",
+          "difference": "Algunos recursos admiten políticas basadas en recursos para acceso entre cuentas, pero AWS RAM permite seleccionar una organización u OU sin enumerar ID de cuentas."
+        },
+        {
+          "concept": "VPC peering",
+          "difference": "VPC peering conecta VPC separadas; compartir subredes permite que las cuentas participantes implementen recursos en subredes de la VPC propietaria."
+        }
+      ],
+      "examCues": [
+        "share one resource with an OU",
+        "centrally managed VPC, separate application accounts",
+        "avoid duplicate resources across accounts",
+        "external account must accept a share"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/ram/latest/userguide/what-is.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-sharing.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "aws-ram-resource-sharing--b61f1728",
+      "conceptId": "aws-ram-resource-sharing",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company keeps a supported network resource in a central AWS account. Several application accounts in one AWS Organizations OU need to use it, and the OU's membership changes regularly. The network team wants to avoid creating a copy in each account or updating access whenever an account joins the OU. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Attach a cross-account resource-based policy that lists the current application account principals.",
+          "correct": false,
+          "why": "Listing current principals does not meet the requirement to avoid updates when OU membership changes."
+        },
+        {
+          "id": "B",
+          "text": "Create an AWS RAM resource share for the central resource and specify the OU as a principal.",
+          "correct": true,
+          "why": "AWS RAM can share a supported resource with accounts in an OU without enumerating their account IDs."
+        },
+        {
+          "id": "C",
+          "text": "Create an AWS RAM resource share and add each current application account by account ID.",
+          "correct": false,
+          "why": "Sharing by individual account ID would require updates as OU membership changes."
+        },
+        {
+          "id": "D",
+          "text": "Create a copy of the resource in each application account and apply the same configuration to every copy.",
+          "correct": false,
+          "why": "Separate copies increase the provisioning and maintenance work the team wants to avoid."
+        }
+      ],
+      "explanation": "The deciding requirement is access for a changing OU without duplicating the resource or maintaining account IDs. AWS RAM supports sharing a resource with an OU as a principal, so the team can maintain one owned resource. Sharing by account ID or listing principals in a resource policy would require updates as accounts change; separate copies add maintenance.",
+      "keywordCues": [
+        "one AWS Organizations OU",
+        "OU's membership changes regularly",
+        "avoid creating a copy in each account",
+        "without updating access whenever an account joins the OU"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ram/latest/userguide/what-is.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-sharing.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios mantiene un recurso de red compatible en una cuenta central de AWS. Varias cuentas de aplicaciones de una OU de AWS Organizations necesitan usarlo, y los integrantes de la OU cambian con frecuencia. El equipo de redes quiere evitar crear una copia en cada cuenta o actualizar el acceso cada vez que una cuenta se incorpora a la OU. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Asociar una política basada en recursos para acceso entre cuentas que enumere los principales de las cuentas de aplicaciones actuales.",
+            "why": "Enumerar los principales actuales no cumple el requisito de evitar actualizaciones cuando cambien los integrantes de la OU."
+          },
+          {
+            "id": "B",
+            "text": "Crear un resource share de AWS RAM para el recurso central y especificar la OU como principal.",
+            "why": "AWS RAM puede compartir un recurso compatible con las cuentas de una OU sin enumerar sus ID."
+          },
+          {
+            "id": "C",
+            "text": "Crear un resource share de AWS RAM y agregar cada cuenta de aplicaciones actual por su ID.",
+            "why": "Compartir por ID de cuenta individual exigiría actualizaciones cuando cambien los integrantes de la OU."
+          },
+          {
+            "id": "D",
+            "text": "Crear una copia del recurso en cada cuenta de aplicaciones y aplicar la misma configuración a todas.",
+            "why": "Las copias separadas aumentan el trabajo de aprovisionamiento y mantenimiento que el equipo quiere evitar."
+          }
+        ],
+        "explanation": "El requisito decisivo es dar acceso a una OU cambiante sin duplicar el recurso ni mantener ID de cuentas. AWS RAM permite compartir un recurso con una OU como principal, por lo que el equipo puede mantener un solo recurso. Compartir por ID de cuenta o enumerar principales en una política basada en recursos exigiría actualizaciones; crear copias separadas añade mantenimiento."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "aws-ram-resource-sharing--3ff4bd18",
+      "conceptId": "aws-ram-resource-sharing",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization uses separate AWS accounts for its analysis teams, all in the same AWS Organizations organization. The network team owns a centrally managed VPC, and each analysis team must launch its own EC2 instances into that VPC while remaining unable to manage another team's instances. The organization also wants to avoid maintaining a VPC for every team. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use AWS RAM to share subnets of the central VPC with the teams' accounts.",
+          "correct": true,
+          "why": "Organization accounts can launch and manage their own application resources in shared subnets without managing other participants' resources."
+        },
+        {
+          "id": "B",
+          "text": "Give every team a VPC in its own account and connect each one to the central VPC with VPC peering.",
+          "correct": false,
+          "why": "Peering provides connectivity between VPCs rather than letting teams launch instances into the centrally managed VPC."
+        },
+        {
+          "id": "C",
+          "text": "Give every team a VPC in its own account and connect the VPCs with AWS Transit Gateway.",
+          "correct": false,
+          "why": "This connects separate VPCs but still requires a VPC for every team."
+        },
+        {
+          "id": "D",
+          "text": "Create all team instances in the network account's VPC and let teams administer the shared instances.",
+          "correct": false,
+          "why": "The teams must create and manage their own instances from their separate accounts."
+        }
+      ],
+      "explanation": "The teams need to deploy their own instances into one centrally managed VPC, not merely connect separate VPCs. VPC subnet sharing through AWS RAM allows accounts in the same organization to create application resources in shared subnets. Participants cannot manage resources belonging to the owner or other participants. Transit Gateway and peering can connect separate VPCs, but those options retain a VPC per team.",
+      "keywordCues": [
+        "all in the same AWS Organizations organization",
+        "launch its own EC2 instances into that VPC",
+        "unable to manage another team's instances",
+        "avoid maintaining a VPC for every team"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/ram/latest/userguide/what-is.html",
+        "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-sharing.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación usa cuentas de AWS separadas para sus equipos de análisis, todas dentro de la misma organización de AWS Organizations. El equipo de redes posee una VPC administrada centralmente, y cada equipo de análisis debe iniciar sus propias instancias EC2 en esa VPC sin poder administrar las instancias de otros equipos. La organización también quiere evitar mantener una VPC por equipo. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar AWS RAM para compartir subredes de la VPC central con las cuentas de los equipos.",
+            "why": "Las cuentas de la organización pueden iniciar y administrar sus propios recursos de aplicación en subredes compartidas sin administrar los recursos de otros participantes."
+          },
+          {
+            "id": "B",
+            "text": "Dar a cada equipo una VPC en su propia cuenta y conectar cada una con la VPC central mediante VPC peering.",
+            "why": "VPC peering proporciona conectividad entre VPC, pero no permite que los equipos inicien instancias en la VPC administrada centralmente."
+          },
+          {
+            "id": "C",
+            "text": "Dar a cada equipo una VPC en su propia cuenta y conectar las VPC mediante AWS Transit Gateway.",
+            "why": "Esto conecta VPC separadas, pero sigue requiriendo una VPC por equipo."
+          },
+          {
+            "id": "D",
+            "text": "Crear todas las instancias de los equipos en la VPC de la cuenta de redes y permitir que los equipos administren las instancias compartidas.",
+            "why": "Los equipos deben crear y administrar sus propias instancias desde sus cuentas separadas."
+          }
+        ],
+        "explanation": "Los equipos necesitan implementar sus propias instancias en una sola VPC administrada centralmente, no solo conectar VPC separadas. VPC subnet sharing mediante AWS RAM permite que las cuentas de la misma organización creen recursos de aplicación en subredes compartidas. Los participantes no pueden administrar recursos del propietario ni de otros participantes. AWS Transit Gateway y VPC peering pueden conectar VPC separadas, pero esas opciones mantienen una VPC por equipo."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "aws-ram-resource-sharing--r0",
+      "conceptId": "aws-ram-resource-sharing",
+      "kind": "recall",
+      "prompt": "Several accounts in one organization need to launch their own resources into centrally managed VPC subnets. What should the network owner use, and why?",
+      "promptEs": "Varias cuentas de una organización necesitan iniciar sus propios recursos en subredes de una VPC administrada centralmente. ¿Qué debe usar el propietario de la red y por qué?",
+      "idealAnswer": "The VPC owner should use AWS RAM to share the subnets with accounts in the same AWS Organizations organization. Each participant can manage its own application resources in those subnets without managing the owner's or other participants' resources.",
+      "rubric": [
+        "Name AWS RAM and VPC subnet sharing.",
+        "State that participating accounts must be in the same organization as the VPC owner.",
+        "Explain that participants manage their own application resources, not other accounts' resources."
+      ]
+    }
+  ]
+}

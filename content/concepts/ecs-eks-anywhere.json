@@ -1,0 +1,281 @@
+{
+  "conceptId": "ecs-eks-anywhere",
+  "card": {
+    "en": {
+      "tldr": "Use Amazon ECS Anywhere to run ECS tasks on customer-owned servers or VMs registered as external instances to an ECS cluster. Use Amazon EKS Anywhere for Kubernetes clusters on customer-owned infrastructure, including air-gapped environments; unlike regional Amazon EKS, its control plane and lifecycle are customer-managed.",
+      "whenToUse": [
+        "Existing ECS workflows must schedule data-processing or outbound-traffic containers on on-premises servers.",
+        "A Kubernetes cluster must run on customer-owned infrastructure without a reliable connection to an AWS Region.",
+        "The team wants automated setup and lifecycle operations for an on-premises Kubernetes cluster and accepts responsibility for its maintenance."
+      ],
+      "keyFacts": [
+        "ECS Anywhere uses the EXTERNAL launch type for services and tasks on registered external instances.",
+        "ECS external instances require an IAM role and connectivity to the relevant AWS service endpoints.",
+        "ECS external instances do not support service load balancing, service discovery, or awsvpc task networking.",
+        "EKS Anywhere can run in air-gapped environments; customers manage its control plane and cluster lifecycle.",
+        "EKS Hybrid Nodes instead use customer-managed machines with an AWS-managed control plane in an AWS Region and require a reliable connection to that Region."
+      ],
+      "gotchas": [
+        "ECS Anywhere is a poor fit when the requirement depends on placing an on-premises web service behind an ECS service load balancer.",
+        "EKS Anywhere does not mean AWS manages the on-premises Kubernetes control plane.",
+        "Amazon EKS Distro supplies Kubernetes components, but it is not EKS Anywhere's cluster lifecycle automation."
+      ],
+      "confusedWith": [
+        {
+          "concept": "outposts",
+          "difference": "Outposts uses AWS-managed infrastructure at your site; ECS Anywhere and EKS Anywhere can use customer-owned machines."
+        },
+        {
+          "concept": "local-zones-wavelength",
+          "difference": "Local Zones and Wavelength place compute near metro users or 5G devices, not on customer-owned on-premises servers."
+        },
+        {
+          "concept": "vmware-cloud-on-aws",
+          "difference": "VMware Cloud on AWS preserves vSphere-based workloads and tooling; Anywhere options address running containers on customer-owned infrastructure."
+        }
+      ],
+      "examCues": [
+        "existing ECS tasks on company-owned servers",
+        "outbound data processing at a factory",
+        "air-gapped on-premises Kubernetes",
+        "customer-managed Kubernetes control plane",
+        "AWS-managed control plane with on-premises nodes"
+      ]
+    },
+    "es": {
+      "tldr": "Usa Amazon ECS Anywhere para ejecutar tareas de ECS en servidores o VM propios, registrados como instancias externas en un clúster de ECS. Usa Amazon EKS Anywhere para clústeres de Kubernetes en infraestructura propia, incluso en entornos air-gapped; a diferencia de Amazon EKS regional, tú administras el plano de control y el ciclo de vida.",
+      "whenToUse": [
+        "Necesitas ejecutar contenedores de procesamiento de datos o tráfico saliente en servidores locales mediante tus flujos de trabajo actuales de ECS.",
+        "Necesitas un clúster de Kubernetes en infraestructura propia sin una conexión confiable a una región de AWS.",
+        "Quieres automatizar la instalación y las operaciones del ciclo de vida de un clúster local de Kubernetes, y aceptas encargarte de su mantenimiento."
+      ],
+      "keyFacts": [
+        "ECS Anywhere usa el tipo de lanzamiento EXTERNAL para servicios y tareas en instancias externas registradas.",
+        "Las instancias externas de ECS necesitan un rol de IAM y conectividad con los endpoints correspondientes de AWS.",
+        "Las instancias externas de ECS no admiten balanceo de carga de servicios, descubrimiento de servicios ni el modo de red awsvpc para tareas.",
+        "EKS Anywhere puede funcionar en entornos air-gapped; tú administras su plano de control y el ciclo de vida del clúster.",
+        "En cambio, EKS Hybrid Nodes usa máquinas administradas por ti con un plano de control administrado por AWS en una región, y requiere una conexión confiable con esa región."
+      ],
+      "gotchas": [
+        "ECS Anywhere no es una buena opción si necesitas colocar un servicio web local detrás de un balanceador de carga de servicios de ECS.",
+        "EKS Anywhere no significa que AWS administre el plano de control de Kubernetes en tu sitio.",
+        "Amazon EKS Distro proporciona componentes de Kubernetes, pero no la automatización del ciclo de vida de clústeres que ofrece EKS Anywhere."
+      ],
+      "confusedWith": [
+        {
+          "concept": "outposts",
+          "difference": "Outposts usa infraestructura administrada por AWS en tu sitio; ECS Anywhere y EKS Anywhere pueden usar máquinas propias."
+        },
+        {
+          "concept": "local-zones-wavelength",
+          "difference": "Local Zones y Wavelength ubican recursos de cómputo cerca de usuarios metropolitanos o dispositivos 5G, no en tus servidores locales."
+        },
+        {
+          "concept": "vmware-cloud-on-aws",
+          "difference": "VMware Cloud on AWS conserva las cargas de trabajo y herramientas basadas en vSphere; las opciones Anywhere permiten ejecutar contenedores en infraestructura propia."
+        }
+      ],
+      "examCues": [
+        "existing ECS tasks on company-owned servers",
+        "outbound data processing at a factory",
+        "air-gapped on-premises Kubernetes",
+        "customer-managed Kubernetes control plane",
+        "AWS-managed control plane with on-premises nodes"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html",
+      "https://docs.aws.amazon.com/eks/latest/userguide/eks-deployment-options.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "ecs-eks-anywhere--7f07dfc7",
+      "conceptId": "ecs-eks-anywhere",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research laboratory runs Kubernetes workloads in a facility whose network must remain air-gapped. It owns the servers and accepts responsibility for maintaining its on-site clusters, but wants tooling that automates initial infrastructure setup and Kubernetes cluster lifecycle operations. Which solution meets these requirements with the LEAST cluster setup and lifecycle effort?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon EKS Hybrid Nodes on the laboratory servers with an AWS-managed regional control plane.",
+          "correct": false,
+          "why": "EKS Hybrid Nodes requires a reliable connection to an AWS Region, which the air-gapped facility cannot provide."
+        },
+        {
+          "id": "B",
+          "text": "Connect the laboratory's Kubernetes clusters with Amazon EKS Connector and manage their lifecycle in the EKS console.",
+          "correct": false,
+          "why": "EKS Connector provides console visibility but does not enable cluster management operations through the console."
+        },
+        {
+          "id": "C",
+          "text": "Deploy Amazon EKS Anywhere on the laboratory servers and manage the on-site cluster with its lifecycle tooling.",
+          "correct": true,
+          "why": "EKS Anywhere supports air-gapped deployments and automates cluster setup and lifecycle operations while remaining customer-managed."
+        },
+        {
+          "id": "D",
+          "text": "Build self-managed Kubernetes clusters from Amazon EKS Distro components using tooling chosen by the laboratory.",
+          "correct": false,
+          "why": "EKS Distro provides components but leaves cluster management to the team's chosen tooling rather than supplying EKS Anywhere's lifecycle automation."
+        }
+      ],
+      "explanation": "The air-gapped network rules out EKS Hybrid Nodes, which needs a reliable connection to an AWS Region. EKS Anywhere can run in an air-gapped environment and simplifies infrastructure setup and Kubernetes cluster lifecycle operations. The laboratory still owns cluster maintenance; EKS Anywhere does not make the control plane AWS-managed. EKS Distro supplies Kubernetes components but leaves the choice and operation of management tooling to the customer.",
+      "keywordCues": [
+        "network must remain air-gapped",
+        "owns the servers",
+        "accepts responsibility for maintaining its on-site clusters",
+        "automates initial infrastructure setup and Kubernetes cluster lifecycle operations"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html",
+        "https://docs.aws.amazon.com/eks/latest/userguide/eks-deployment-options.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación ejecuta cargas de trabajo de Kubernetes en una instalación cuya red debe permanecer air-gapped. Tiene servidores propios y acepta encargarse del mantenimiento de sus clústeres locales, pero quiere herramientas que automaticen la configuración inicial de la infraestructura y las operaciones del ciclo de vida de Kubernetes. ¿Qué solución cumple estos requisitos con el LEAST cluster setup and lifecycle effort?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar Amazon EKS Hybrid Nodes en los servidores del laboratorio con un plano de control regional administrado por AWS.",
+            "why": "EKS Hybrid Nodes requiere una conexión confiable con una región de AWS, que la instalación air-gapped no puede proporcionar."
+          },
+          {
+            "id": "B",
+            "text": "Conectar los clústeres del laboratorio mediante Amazon EKS Connector y administrar su ciclo de vida en la consola de EKS.",
+            "why": "EKS Connector ofrece visibilidad en la consola, pero no permite realizar desde allí operaciones de administración del clúster."
+          },
+          {
+            "id": "C",
+            "text": "Implementar Amazon EKS Anywhere en los servidores del laboratorio y administrar el clúster local con sus herramientas de ciclo de vida.",
+            "why": "EKS Anywhere admite implementaciones air-gapped y automatiza la configuración y las operaciones del ciclo de vida, aunque el cliente sigue administrando el clúster."
+          },
+          {
+            "id": "D",
+            "text": "Crear clústeres de Kubernetes autoadministrados con componentes de Amazon EKS Distro y herramientas elegidas por el laboratorio.",
+            "why": "EKS Distro proporciona componentes, pero deja la administración del clúster a las herramientas elegidas por el equipo, en lugar de aportar la automatización del ciclo de vida de EKS Anywhere."
+          }
+        ],
+        "explanation": "El requisito de una red air-gapped descarta EKS Hybrid Nodes, que necesita una conexión confiable con una región de AWS. EKS Anywhere puede funcionar en ese entorno y simplifica la configuración de la infraestructura y las operaciones del ciclo de vida del clúster. El laboratorio sigue siendo responsable del mantenimiento: EKS Anywhere no convierte su plano de control en uno administrado por AWS. EKS Distro aporta componentes de Kubernetes, pero deja al cliente la selección y operación de las herramientas de administración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "ecs-eks-anywhere--01632e80",
+      "conceptId": "ecs-eks-anywhere",
+      "secondaryConcepts": [
+        "outposts",
+        "vmware-cloud-on-aws"
+      ],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A food manufacturer already uses Amazon ECS task definitions and wants to run containerized sensor-data processing on servers it owns at several plants. The tasks process local data and send results to AWS; they do not receive inbound application traffic. The company wants to retain its ECS workflows and avoid replacing the servers. Which solution meets these requirements with the LEAST infrastructure change?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Install AWS Outposts at each plant and move the container workloads onto its AWS-managed infrastructure.",
+          "correct": false,
+          "why": "Outposts introduces AWS-managed infrastructure rather than using the company's existing servers."
+        },
+        {
+          "id": "B",
+          "text": "Move the workloads to VMware Cloud on AWS and operate them with vSphere tooling.",
+          "correct": false,
+          "why": "This changes the workload location and tooling instead of running ECS tasks on the existing plant servers."
+        },
+        {
+          "id": "C",
+          "text": "Deploy Amazon EKS Anywhere clusters on the plant servers and move the tasks into Kubernetes workloads.",
+          "correct": false,
+          "why": "EKS Anywhere can use those servers but requires a move from the existing ECS workflows to Kubernetes."
+        },
+        {
+          "id": "D",
+          "text": "Register the plant servers as Amazon ECS Anywhere external instances and run the tasks with the EXTERNAL launch type.",
+          "correct": true,
+          "why": "ECS Anywhere runs ECS tasks on registered, customer-owned servers, and the outbound processing workload suits external instances."
+        }
+      ],
+      "explanation": "The deciding constraints are customer-owned servers, existing ECS workflows, and tasks that do not need inbound traffic. ECS Anywhere registers those servers as external instances and runs tasks on them with the EXTERNAL launch type. Outposts would introduce AWS-managed infrastructure rather than reuse the servers. EKS Anywhere supports Kubernetes on customer-owned infrastructure, but it does not preserve the team's ECS workflow.",
+      "keywordCues": [
+        "Amazon ECS task definitions",
+        "servers it owns",
+        "send results to AWS",
+        "do not receive inbound application traffic",
+        "retain its ECS workflows"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html",
+        "https://docs.aws.amazon.com/eks/latest/userguide/eks-deployment-options.html"
+      ],
+      "es": {
+        "stem": "Un fabricante de alimentos ya usa definiciones de tareas de Amazon ECS y quiere procesar datos de sensores en contenedores sobre servidores propios en varias plantas. Las tareas procesan datos locales y envían resultados a AWS; no reciben tráfico entrante de aplicaciones. La empresa quiere conservar sus flujos de trabajo de ECS y evitar reemplazar los servidores. ¿Qué solución cumple estos requisitos con el LEAST infrastructure change?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Instalar AWS Outposts en cada planta y trasladar los contenedores a su infraestructura administrada por AWS.",
+            "why": "Outposts introduce infraestructura administrada por AWS en vez de usar los servidores actuales de la empresa."
+          },
+          {
+            "id": "B",
+            "text": "Trasladar las cargas de trabajo a VMware Cloud on AWS y operarlas con herramientas de vSphere.",
+            "why": "Esta opción cambia la ubicación y las herramientas en lugar de ejecutar tareas de ECS en los servidores actuales."
+          },
+          {
+            "id": "C",
+            "text": "Implementar clústeres de Amazon EKS Anywhere en los servidores de las plantas y convertir las tareas en cargas de trabajo de Kubernetes.",
+            "why": "EKS Anywhere puede usar esos servidores, pero exige cambiar los flujos de trabajo actuales de ECS por Kubernetes."
+          },
+          {
+            "id": "D",
+            "text": "Registrar los servidores de las plantas como instancias externas de Amazon ECS Anywhere y ejecutar las tareas con el tipo de lanzamiento EXTERNAL.",
+            "why": "ECS Anywhere ejecuta tareas de ECS en servidores propios registrados, y el procesamiento con tráfico saliente es apropiado para instancias externas."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son usar servidores propios, conservar los flujos de trabajo de ECS y ejecutar tareas que no necesitan tráfico entrante. ECS Anywhere registra esos servidores como instancias externas y ejecuta tareas mediante el tipo de lanzamiento EXTERNAL. Outposts introduciría infraestructura administrada por AWS en vez de reutilizar los servidores. EKS Anywhere admite Kubernetes en infraestructura propia, pero no conserva el flujo de trabajo de ECS."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "ecs-eks-anywhere--r0",
+      "conceptId": "ecs-eks-anywhere",
+      "kind": "recall",
+      "prompt": "A factory has existing ECS tasks that process data on its own servers and send results to AWS. What feature fits, and why?",
+      "promptEs": "Una fábrica tiene tareas de ECS que procesan datos en servidores propios y envían resultados a AWS. ¿Qué opción elegirías y por qué?",
+      "idealAnswer": "Use Amazon ECS Anywhere to register the servers as external instances and run the tasks with the EXTERNAL launch type. Its external instances suit data-processing or outbound-traffic workloads.",
+      "rubric": [
+        "Names Amazon ECS Anywhere.",
+        "Explains registration of customer-owned servers as ECS external instances.",
+        "Mentions the EXTERNAL launch type or the suitability of outbound data processing."
+      ]
+    },
+    {
+      "id": "ecs-eks-anywhere--r1",
+      "conceptId": "ecs-eks-anywhere",
+      "kind": "why-not",
+      "prompt": "Why is EKS Anywhere not the best fit when on-premises nodes need an AWS-managed regional Kubernetes control plane?",
+      "promptEs": "¿Por qué EKS Anywhere no es la mejor opción si los nodos locales necesitan un plano de control regional de Kubernetes administrado por AWS?",
+      "idealAnswer": "EKS Anywhere's control plane runs on customer infrastructure and is customer-managed. With reliable connectivity to an AWS Region, Amazon EKS Hybrid Nodes can use the on-premises machines while AWS manages the regional control plane.",
+      "rubric": [
+        "Identifies EKS Anywhere's control plane as customer-managed and on premises.",
+        "Names Amazon EKS Hybrid Nodes as the better fit.",
+        "Notes its AWS-managed regional control plane and need for reliable regional connectivity."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,436 @@
+{
+  "conceptId": "s3-replication",
+  "card": {
+    "en": {
+      "tldr": "S3 Replication asynchronously copies objects to another bucket. Choose Cross-Region Replication (CRR) for copies in another Region, Same-Region Replication (SRR) for copies within a Region, and S3 Batch Replication for objects that existed before live replication was configured.",
+      "whenToUse": [
+        "A disaster recovery, compliance, or nearby-access requirement calls for object copies in another Region.",
+        "Logs or other objects must be copied between buckets or accounts within one Region.",
+        "Existing objects need a one-time replication job, or new objects need a predictable replication time."
+      ],
+      "keyFacts": [
+        "Live CRR and SRR automatically and asynchronously replicate new and updated objects; they do not replicate objects that existed before the rule was configured.",
+        "S3 Batch Replication copies existing objects on demand and can retry objects whose replication previously failed.",
+        "S3 Replication Time Control (S3 RTC) has an SLA to replicate 99.99% of new objects within 15 minutes; it does not apply to Batch Replication.",
+        "Replication can use buckets in different AWS accounts and can target one or multiple destination buckets.",
+        "For writes made after a Regional failover to replicate back to the original bucket, configure two-way replication rules."
+      ],
+      "gotchas": [
+        "Versioning helps recover overwritten or deleted objects, but does not by itself copy them to another bucket or Region.",
+        "S3 Object Lock addresses retention; it does not replace a replication rule.",
+        "Turning on live replication does not backfill older objects.",
+        "S3 RTC is a replication-time SLA for new objects, not a 15-minute guarantee for a Batch Replication job."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Versioning and MFA Delete",
+          "difference": "Keeps versions for recovery from accidental changes; replication makes copies in another bucket."
+        },
+        {
+          "concept": "S3 Object Lock and Glacier Vault Lock",
+          "difference": "Provides WORM retention; replication addresses where object copies are stored."
+        }
+      ],
+      "examCues": [
+        "copies in another AWS Region",
+        "aggregate logs into one in-Region bucket",
+        "objects uploaded before replication was enabled",
+        "15-minute replication SLA for new objects",
+        "writes during Regional failover must replicate back"
+      ]
+    },
+    "es": {
+      "tldr": "S3 Replication copia objetos de forma asíncrona a otro bucket. Elige Cross-Region Replication (CRR) para copias en otra Región, Same-Region Replication (SRR) para copias dentro de una Región y S3 Batch Replication para objetos que ya existían antes de configurar la replicación en vivo.",
+      "whenToUse": [
+        "Necesitas copias en otra Región para recuperación ante desastres, cumplimiento o acceso más cercano a los usuarios.",
+        "Debes copiar logs u otros objetos entre buckets o cuentas dentro de una misma Región.",
+        "Necesitas copiar objetos existentes mediante un trabajo bajo demanda o cumplir un plazo predecible para objetos nuevos."
+      ],
+      "keyFacts": [
+        "CRR y SRR en vivo replican de forma automática y asíncrona objetos nuevos y actualizados; no copian los que existían antes de configurar la regla.",
+        "S3 Batch Replication copia objetos existentes bajo demanda y puede reintentar objetos cuya replicación falló.",
+        "S3 Replication Time Control (S3 RTC) ofrece un SLA para replicar el 99.99 % de los objetos nuevos en un máximo de 15 minutos; no se aplica a Batch Replication.",
+        "La replicación puede realizarse entre buckets de distintas cuentas de AWS y hacia uno o varios buckets de destino.",
+        "Si necesitas que las escrituras posteriores a un failover regional vuelvan al bucket original, configura reglas de replicación bidireccional."
+      ],
+      "gotchas": [
+        "Versioning ayuda a recuperar objetos sobrescritos o eliminados, pero por sí solo no los copia a otro bucket o Región.",
+        "S3 Object Lock resuelve requisitos de retención; no sustituye una regla de replicación.",
+        "Activar la replicación en vivo no copia automáticamente los objetos antiguos.",
+        "S3 RTC ofrece un SLA de tiempo de replicación para objetos nuevos, no una garantía de 15 minutos para un trabajo de Batch Replication."
+      ],
+      "confusedWith": [
+        {
+          "concept": "S3 Versioning and MFA Delete",
+          "difference": "Conserva versiones para recuperarte de cambios accidentales; la replicación crea copias en otro bucket."
+        },
+        {
+          "concept": "S3 Object Lock and Glacier Vault Lock",
+          "difference": "Proporciona retención WORM; la replicación determina dónde se almacenan las copias."
+        }
+      ],
+      "examCues": [
+        "copies in another AWS Region",
+        "aggregate logs into one in-Region bucket",
+        "objects uploaded before replication was enabled",
+        "15-minute replication SLA for new objects",
+        "writes during Regional failover must replicate back"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-replication--911a936b",
+      "conceptId": "s3-replication",
+      "secondaryConcepts": [],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media publisher uploads new images to an S3 bucket and needs copies in a second AWS Region. Its distribution agreement requires an SLA-backed replication target of 15 minutes for new objects. Which configuration meets both requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure S3 Cross-Region Replication without S3 Replication Time Control.",
+          "correct": false,
+          "why": "CRR meets the location requirement but does not itself provide the requested 15-minute SLA."
+        },
+        {
+          "id": "B",
+          "text": "Run S3 Batch Replication jobs to the second Region every 15 minutes.",
+          "correct": false,
+          "why": "S3 RTC's SLA does not apply to Batch Replication jobs."
+        },
+        {
+          "id": "C",
+          "text": "Configure S3 Cross-Region Replication with S3 Replication Time Control.",
+          "correct": true,
+          "why": "CRR copies to another Region, and S3 RTC supplies the SLA-backed target for new objects."
+        },
+        {
+          "id": "D",
+          "text": "Configure S3 Same-Region Replication with S3 Replication Time Control.",
+          "correct": false,
+          "why": "S3 RTC addresses timing, but SRR cannot copy to a second Region."
+        }
+      ],
+      "explanation": "This scenario requires both a different-Region destination and an SLA-backed replication time for new objects. CRR meets the geographic requirement; adding S3 RTC provides an SLA to replicate 99.99% of new objects within 15 minutes. CRR alone lacks that SLA, and the S3 RTC SLA does not apply to Batch Replication.",
+      "keywordCues": [
+        "new images",
+        "second AWS Region",
+        "SLA-backed replication target of 15 minutes"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+      ],
+      "es": {
+        "stem": "Una editorial de medios carga imágenes nuevas en un bucket de S3 y necesita copias en una segunda Región de AWS. Su acuerdo de distribución exige un objetivo de replicación de 15 minutos respaldado por un SLA para los objetos nuevos. ¿Qué configuración cumple ambos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura S3 Cross-Region Replication sin S3 Replication Time Control.",
+            "why": "CRR cumple el requisito de ubicación, pero por sí solo no ofrece el SLA de 15 minutos solicitado."
+          },
+          {
+            "id": "B",
+            "text": "Ejecuta trabajos de S3 Batch Replication hacia la segunda Región cada 15 minutos.",
+            "why": "El SLA de S3 RTC no se aplica a los trabajos de Batch Replication."
+          },
+          {
+            "id": "C",
+            "text": "Configura S3 Cross-Region Replication con S3 Replication Time Control.",
+            "why": "CRR copia a otra Región y S3 RTC aporta el objetivo respaldado por un SLA para objetos nuevos."
+          },
+          {
+            "id": "D",
+            "text": "Configura S3 Same-Region Replication con S3 Replication Time Control.",
+            "why": "S3 RTC aborda el plazo, pero SRR no puede copiar a una segunda Región."
+          }
+        ],
+        "explanation": "El caso exige un destino en otra Región y un plazo de replicación respaldado por un SLA para objetos nuevos. CRR cumple el requisito geográfico y S3 RTC añade un SLA para replicar el 99.99 % de los objetos nuevos en un máximo de 15 minutos. CRR por sí solo no ofrece ese SLA, y el SLA de S3 RTC no se aplica a Batch Replication."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-replication--0c3a5d0f",
+      "conceptId": "s3-replication",
+      "secondaryConcepts": [
+        "s3-versioning-mfa-delete"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A gaming studio uses S3 buckets in two AWS Regions and plans to direct traffic to the second Region during a disruption. Players may upload new content to the second bucket during failover, and the studio needs those uploads replicated back to the original bucket. Which replication design meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure a one-way CRR rule from the original bucket to the second bucket.",
+          "correct": false,
+          "why": "One-way CRR does not replicate uploads made to the second bucket back to the original."
+        },
+        {
+          "id": "B",
+          "text": "Configure two-way S3 Cross-Region Replication rules between the buckets.",
+          "correct": true,
+          "why": "Two-way CRR can replicate writes made to the failover bucket back to the original bucket."
+        },
+        {
+          "id": "C",
+          "text": "Configure a one-way SRR rule from the second bucket to the original bucket.",
+          "correct": false,
+          "why": "SRR cannot replicate between buckets in different Regions."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Versioning on both buckets without configuring replication rules.",
+          "correct": false,
+          "why": "Versioning alone does not copy failover writes between buckets."
+        }
+      ],
+      "explanation": "The key constraint is that writes made to the second bucket during failover must return to the original bucket. Two-way replication rules provide replication in both directions between the Regions. A one-way rule from the original bucket would not replicate those failover writes back, and Versioning alone would not copy them between buckets.",
+      "keywordCues": [
+        "two AWS Regions",
+        "upload new content to the second bucket during failover",
+        "replicated back to the original bucket"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+      ],
+      "es": {
+        "stem": "Un estudio de videojuegos usa buckets de S3 en dos Regiones de AWS y planea dirigir el tráfico a la segunda Región durante una interrupción. Los jugadores podrían cargar contenido nuevo en el segundo bucket durante el failover, y el estudio necesita que esas cargas se repliquen de vuelta al bucket original. ¿Qué diseño de replicación cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura una regla de CRR unidireccional desde el bucket original hacia el segundo bucket.",
+            "why": "La CRR unidireccional no replica de vuelta al bucket original las cargas hechas en el segundo bucket."
+          },
+          {
+            "id": "B",
+            "text": "Configura reglas de S3 Cross-Region Replication bidireccionales entre los buckets.",
+            "why": "La CRR bidireccional puede replicar al bucket original las escrituras realizadas en el bucket de failover."
+          },
+          {
+            "id": "C",
+            "text": "Configura una regla de SRR unidireccional desde el segundo bucket hacia el original.",
+            "why": "SRR no puede replicar entre buckets ubicados en distintas Regiones."
+          },
+          {
+            "id": "D",
+            "text": "Activa S3 Versioning en ambos buckets sin configurar reglas de replicación.",
+            "why": "Versioning por sí solo no copia las escrituras realizadas durante el failover entre buckets."
+          }
+        ],
+        "explanation": "La condición decisiva es que las escrituras realizadas en el segundo bucket durante el failover deben volver al bucket original. Las reglas de replicación bidireccional permiten copiar en ambos sentidos entre Regiones. Una regla unidireccional desde el bucket original no devolvería esas escrituras, y Versioning por sí solo no las copiaría entre buckets."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-replication--de93ef2b",
+      "conceptId": "s3-replication",
+      "secondaryConcepts": [
+        "s3-object-lock-vault-lock"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A manufacturer is adding a recovery bucket in another AWS Region for an S3 archive. The archive contains objects uploaded over the past year and continues to receive new objects; both the existing objects and future uploads must be copied to the recovery bucket. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable S3 Object Lock on the archive bucket for the older objects.",
+          "correct": false,
+          "why": "Object Lock addresses retention rather than copying existing objects to the recovery bucket."
+        },
+        {
+          "id": "B",
+          "text": "Enable S3 Replication Time Control without creating a live replication rule.",
+          "correct": false,
+          "why": "S3 RTC addresses replication timing, not the need to configure cross-Region copying or backfill existing objects."
+        },
+        {
+          "id": "C",
+          "text": "Configure live S3 Cross-Region Replication to the recovery bucket.",
+          "correct": true,
+          "why": "Live CRR automatically copies new and updated objects to the other Region."
+        },
+        {
+          "id": "D",
+          "text": "Configure live S3 Same-Region Replication to the recovery bucket.",
+          "correct": false,
+          "why": "SRR does not copy objects to a bucket in another Region."
+        },
+        {
+          "id": "E",
+          "text": "Run S3 Batch Replication for the objects already in the archive.",
+          "correct": true,
+          "why": "Batch Replication copies objects that existed before live replication was configured."
+        }
+      ],
+      "explanation": "The archive has two distinct populations: objects already present and objects uploaded later. Live CRR automatically copies future uploads to the other Region, while S3 Batch Replication backfills the existing objects. Live replication alone does not copy objects that predate its configuration. SRR misses the other-Region requirement, and Object Lock does not perform the backfill.",
+      "keywordCues": [
+        "another AWS Region",
+        "objects uploaded over the past year",
+        "continues to receive new objects",
+        "both the existing objects and future uploads"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+      ],
+      "es": {
+        "stem": "Un fabricante está agregando un bucket de recuperación en otra Región de AWS para un archivo de S3. El archivo contiene objetos cargados durante el último año y sigue recibiendo objetos nuevos; tanto los objetos existentes como las cargas futuras deben copiarse al bucket de recuperación. ¿Qué DOS acciones cumplen estos requisitos? (Elige dos.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Activa S3 Object Lock en el bucket del archivo para los objetos antiguos.",
+            "why": "Object Lock aborda la retención, no la copia de objetos existentes al bucket de recuperación."
+          },
+          {
+            "id": "B",
+            "text": "Activa S3 Replication Time Control sin crear una regla de replicación en vivo.",
+            "why": "S3 RTC aborda el tiempo de replicación, no la configuración de copias entre Regiones ni la copia de objetos existentes."
+          },
+          {
+            "id": "C",
+            "text": "Configura S3 Cross-Region Replication en vivo hacia el bucket de recuperación.",
+            "why": "CRR en vivo copia automáticamente los objetos nuevos y actualizados a la otra Región."
+          },
+          {
+            "id": "D",
+            "text": "Configura S3 Same-Region Replication en vivo hacia el bucket de recuperación.",
+            "why": "SRR no copia objetos a un bucket de otra Región."
+          },
+          {
+            "id": "E",
+            "text": "Ejecuta S3 Batch Replication para los objetos que ya están en el archivo.",
+            "why": "Batch Replication copia objetos que existían antes de configurar la replicación en vivo."
+          }
+        ],
+        "explanation": "El archivo tiene dos grupos: objetos que ya existen y objetos que se cargarán después. CRR en vivo copia automáticamente las cargas futuras a la otra Región, mientras que S3 Batch Replication copia los objetos existentes. La replicación en vivo por sí sola no copia los objetos anteriores a su configuración. SRR no cumple el requisito de otra Región y Object Lock no realiza la copia de los objetos existentes."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-replication--5c10d89a",
+      "conceptId": "s3-replication",
+      "secondaryConcepts": [
+        "s3-versioning-mfa-delete"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A travel company stores newly uploaded itinerary files in an S3 bucket. Its recovery plan requires automatic copies in a bucket in another AWS Region so the files remain available if the source Region is disrupted. Which solution meets this requirement with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run S3 Batch Replication jobs to copy each day's new uploads to the recovery Region.",
+          "correct": false,
+          "why": "Batch Replication is on demand rather than automatic live replication and requires recurring jobs."
+        },
+        {
+          "id": "B",
+          "text": "Enable S3 Versioning on the source bucket and retain previous versions there.",
+          "correct": false,
+          "why": "Versioning retains versions but does not create the required copy in another Region."
+        },
+        {
+          "id": "C",
+          "text": "Configure S3 Cross-Region Replication from the source bucket to a bucket in the recovery Region.",
+          "correct": true,
+          "why": "CRR automatically copies new objects to a bucket in another Region."
+        },
+        {
+          "id": "D",
+          "text": "Configure S3 Same-Region Replication to a bucket in a separate account.",
+          "correct": false,
+          "why": "SRR can copy across accounts, but its destination remains in the same Region."
+        }
+      ],
+      "explanation": "The deciding requirement is an automatic copy of new objects in another Region. CRR is the live replication option for buckets in different Regions. Versioning does not create a second bucket copy, while SRR cannot place its destination in another Region. Batch Replication is an on-demand option rather than the least-overhead way to replicate each new upload.",
+      "keywordCues": [
+        "newly uploaded itinerary files",
+        "automatic copies in a bucket in another AWS Region",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+      ],
+      "es": {
+        "stem": "Una empresa de viajes guarda archivos de itinerarios recién cargados en un bucket de S3. Su plan de recuperación exige copias automáticas en un bucket de otra Región de AWS para que los archivos sigan disponibles si se interrumpe la Región de origen. ¿Qué solución cumple este requisito con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecuta trabajos de S3 Batch Replication para copiar las cargas nuevas de cada día a la Región de recuperación.",
+            "why": "Batch Replication se ejecuta bajo demanda, no como replicación en vivo automática, y exigiría trabajos recurrentes."
+          },
+          {
+            "id": "B",
+            "text": "Activa S3 Versioning en el bucket de origen y conserva allí las versiones anteriores.",
+            "why": "Versioning conserva versiones, pero no crea la copia requerida en otra Región."
+          },
+          {
+            "id": "C",
+            "text": "Configura S3 Cross-Region Replication desde el bucket de origen hacia un bucket en la Región de recuperación.",
+            "why": "CRR copia automáticamente los objetos nuevos a un bucket en otra Región."
+          },
+          {
+            "id": "D",
+            "text": "Configura S3 Same-Region Replication hacia un bucket de otra cuenta.",
+            "why": "SRR puede copiar entre cuentas, pero el destino permanece en la misma Región."
+          }
+        ],
+        "explanation": "El requisito decisivo es copiar automáticamente los objetos nuevos a otra Región. CRR es la opción de replicación en vivo para buckets en Regiones distintas. Versioning no crea una copia en otro bucket y SRR no puede ubicar su destino en otra Región. Batch Replication funciona bajo demanda, por lo que no es la opción de menor carga operativa para cada carga nueva."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-replication--r0",
+      "conceptId": "s3-replication",
+      "kind": "recall",
+      "prompt": "An S3 bucket needs copies of old and future objects in another Region. Which replication approaches handle each group, and why?",
+      "promptEs": "Un bucket de S3 necesita copias de objetos antiguos y futuros en otra Región. ¿Qué opciones de replicación usarías para cada grupo y por qué?",
+      "idealAnswer": "Use S3 Batch Replication on demand for objects already in the bucket. Configure live Cross-Region Replication for new and updated objects, because live replication does not backfill objects that existed before the rule.",
+      "rubric": [
+        "Identifies S3 Batch Replication for existing objects.",
+        "Identifies live CRR for future objects in another Region.",
+        "Explains that live replication does not backfill preexisting objects."
+      ]
+    },
+    {
+      "id": "s3-replication--r1",
+      "conceptId": "s3-replication",
+      "kind": "why-not",
+      "prompt": "Why doesn't S3 Object Lock alone meet a requirement to keep automatic object copies in a second AWS Region?",
+      "promptEs": "¿Por qué S3 Object Lock por sí solo no cumple un requisito de mantener copias automáticas de objetos en una segunda Región de AWS?",
+      "idealAnswer": "S3 Object Lock is for object retention, not copying objects to another bucket. Use Cross-Region Replication for automatic copies of new objects in a second Region.",
+      "rubric": [
+        "Identifies Object Lock as a retention feature.",
+        "States that it does not create automatic cross-Region copies.",
+        "Selects CRR for new objects in a second Region."
+      ]
+    }
+  ]
+}

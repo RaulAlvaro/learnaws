@@ -1,0 +1,450 @@
+{
+  "conceptId": "global-accelerator",
+  "card": {
+    "en": {
+      "tldr": "AWS Global Accelerator provides fixed anycast entry points and carries traffic over the AWS global network to healthy regional endpoints. Choose it for global TCP/UDP applications that need static client-facing IPs, improved network performance, or fast regional failover without relying on DNS updates.",
+      "whenToUse": [
+        "Clients or corporate firewalls must allow-list fixed IP addresses even when application endpoints move between Regions.",
+        "A non-HTTP application, such as a UDP game or IoT service, serves users globally.",
+        "A multi-Region application needs health-based routing to another Region without waiting for clients to refresh cached DNS answers."
+      ],
+      "keyFacts": [
+        "An IPv4 accelerator receives two static IPv4 addresses, anycast from the AWS edge network.",
+        "A standard accelerator can use Network Load Balancers, Application Load Balancers, EC2 instances, or Elastic IP addresses as regional endpoints.",
+        "Global Accelerator routes to endpoints based on health, client location, and configured policies; it can detect and remove an unhealthy endpoint in less than one minute.",
+        "Its static IP addresses remain assigned while the accelerator exists, including when it is disabled, but are lost if the accelerator is deleted.",
+        "Traffic dials control the percentage of traffic accepted by a regional endpoint group; endpoint weights control proportions within a group."
+      ],
+      "gotchas": [
+        "A DNS-based failover design may be affected by clients and resolvers that cache IP addresses for long periods.",
+        "Global Accelerator is not an edge cache; choose CloudFront when caching content is the deciding requirement.",
+        "A standard accelerator routes to healthy regional endpoints; a custom routing accelerator is for mapping users to specific destinations and uses VPC subnet endpoints.",
+        "Do not register an on-premises resource directly as a Global Accelerator endpoint."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cloudfront-fundamentals",
+          "difference": "CloudFront serves web content through edge locations and can cache it; Global Accelerator provides static IP entry points and proxies TCP/UDP traffic to regional applications."
+        },
+        {
+          "concept": "s3-transfer-acceleration",
+          "difference": "S3 Transfer Acceleration addresses long-distance uploads to an S3 bucket, not routing application connections among regional endpoints."
+        }
+      ],
+      "examCues": [
+        "UDP clients across continents",
+        "corporate firewalls allow-list fixed IPs",
+        "fail over without waiting for DNS caches",
+        "move endpoints between Regions without changing client settings"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Global Accelerator ofrece puntos de entrada anycast con direcciones IP fijas y transporta el tráfico por la red global de AWS hacia endpoints regionales saludables. Elígelo para aplicaciones TCP/UDP globales que necesitan IP públicas estáticas, mejor rendimiento de red o failover regional rápido sin depender de actualizaciones de DNS.",
+      "whenToUse": [
+        "Los clientes o firewalls corporativos deben incluir IP fijas en su lista de permitidos aunque los endpoints se muevan entre Regions.",
+        "Una aplicación que no usa HTTP, como un juego UDP o un servicio de IoT, atiende a usuarios de todo el mundo.",
+        "Una aplicación en varias Regions necesita enviar tráfico a otra Region según el estado de los endpoints, sin esperar a que los clientes actualicen respuestas de DNS almacenadas en caché."
+      ],
+      "keyFacts": [
+        "Un acelerador IPv4 recibe dos direcciones IPv4 estáticas, anunciadas mediante anycast desde la red de borde de AWS.",
+        "Un standard accelerator puede usar Network Load Balancers, Application Load Balancers, instancias EC2 o direcciones Elastic IP como endpoints regionales.",
+        "Global Accelerator dirige el tráfico según el estado de los endpoints, la ubicación del cliente y las políticas configuradas; puede detectar y retirar un endpoint no saludable en menos de un minuto.",
+        "Las IP estáticas siguen asignadas mientras exista el acelerador, incluso si está deshabilitado, pero se pierden al eliminarlo.",
+        "Los traffic dials controlan el porcentaje de tráfico que acepta un endpoint group regional; los pesos controlan la proporción de tráfico entre endpoints del grupo."
+      ],
+      "gotchas": [
+        "El failover basado en DNS puede verse afectado por clientes y resolutores que guardan direcciones IP en caché durante mucho tiempo.",
+        "Global Accelerator no es una caché de borde; elige CloudFront cuando almacenar contenido en caché es el requisito decisivo.",
+        "Un standard accelerator dirige tráfico a endpoints regionales saludables; un custom routing accelerator asigna usuarios a destinos específicos y usa endpoints de subred de VPC.",
+        "No registres directamente un recurso on-premises como endpoint de Global Accelerator."
+      ],
+      "confusedWith": [
+        {
+          "concept": "cloudfront-fundamentals",
+          "difference": "CloudFront entrega contenido web desde ubicaciones de borde y puede almacenarlo en caché; Global Accelerator ofrece IP de entrada estáticas y envía tráfico TCP/UDP a aplicaciones regionales."
+        },
+        {
+          "concept": "s3-transfer-acceleration",
+          "difference": "S3 Transfer Acceleration acelera cargas de larga distancia hacia un bucket de S3; no dirige conexiones de una aplicación entre endpoints regionales."
+        }
+      ],
+      "examCues": [
+        "UDP clients across continents",
+        "corporate firewalls allow-list fixed IPs",
+        "fail over without waiting for DNS caches",
+        "move endpoints between Regions without changing client settings"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html",
+      "https://aws.amazon.com/global-accelerator/faqs/"
+    ]
+  },
+  "questions": [
+    {
+      "id": "global-accelerator--9d4355e9",
+      "conceptId": "global-accelerator",
+      "secondaryConcepts": [
+        "cloudfront-fundamentals",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A multiplayer game runs on Network Load Balancers in two AWS Regions and accepts UDP connections from players worldwide. The studio wants traffic to use the AWS global network and to move to healthy regional endpoints if one deployment fails. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place Amazon CloudFront in front of both regional deployments.",
+          "correct": false,
+          "why": "CloudFront is not the appropriate entry point for this UDP application."
+        },
+        {
+          "id": "B",
+          "text": "Create a standard AWS Global Accelerator and register the regional Network Load Balancers.",
+          "correct": true,
+          "why": "A standard accelerator supports regional Network Load Balancers and routes global traffic to healthy endpoints."
+        },
+        {
+          "id": "C",
+          "text": "Publish the addresses of both Network Load Balancers to players and have the game client test each address.",
+          "correct": false,
+          "why": "Client-side endpoint testing adds application work rather than providing managed global routing."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Transfer Acceleration for a bucket in each Region.",
+          "correct": false,
+          "why": "S3 Transfer Acceleration addresses transfers into S3 buckets, not UDP connections to the game."
+        }
+      ],
+      "explanation": "The deciding requirements are UDP support, access to the AWS global network, and routing to healthy regional deployments. A standard Global Accelerator can direct TCP or UDP traffic to Network Load Balancers in multiple Regions and respond to endpoint health changes. CloudFront is a plausible global edge service, but it is not the fit for this UDP game. S3 Transfer Acceleration serves a different transfer workflow.",
+      "keywordCues": [
+        "accepts UDP connections",
+        "use the AWS global network",
+        "move to healthy regional endpoints",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html",
+        "https://aws.amazon.com/global-accelerator/faqs/"
+      ],
+      "es": {
+        "stem": "Un juego multijugador se ejecuta detrás de Network Load Balancers en dos AWS Regions y acepta conexiones UDP de jugadores de todo el mundo. El estudio quiere que el tráfico use la red global de AWS y se dirija a endpoints regionales saludables si falla una implementación. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Colocar Amazon CloudFront delante de ambas implementaciones regionales.",
+            "why": "CloudFront no es el punto de entrada adecuado para esta aplicación UDP."
+          },
+          {
+            "id": "B",
+            "text": "Crear un standard AWS Global Accelerator y registrar los Network Load Balancers regionales.",
+            "why": "Un standard accelerator admite Network Load Balancers regionales y dirige el tráfico global a endpoints saludables."
+          },
+          {
+            "id": "C",
+            "text": "Publicar las direcciones de ambos Network Load Balancers para que el cliente del juego pruebe cada una.",
+            "why": "Hacer que el cliente pruebe endpoints agrega trabajo a la aplicación en lugar de ofrecer enrutamiento global administrado."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Transfer Acceleration para un bucket en cada Region.",
+            "why": "S3 Transfer Acceleration se ocupa de transferencias hacia buckets de S3, no de conexiones UDP al juego."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son admitir UDP, usar la red global de AWS y dirigir el tráfico a implementaciones regionales saludables. Un standard Global Accelerator puede enviar tráfico TCP o UDP a Network Load Balancers en varias Regions y responder a cambios en el estado de los endpoints. CloudFront es un servicio de borde global plausible, pero no es la opción adecuada para este juego UDP. S3 Transfer Acceleration resuelve otro tipo de transferencia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "global-accelerator--8d8bb616",
+      "conceptId": "global-accelerator",
+      "secondaryConcepts": [
+        "cloudfront-fundamentals",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "An education platform assigns participants in each live voice session to a particular media server. Its application chooses the destination EC2 IP address and port, and all participants assigned to a session must reach that chosen destination through a global entry point. Which solution meets this routing requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use CloudFront distributions with the media servers as origins.",
+          "correct": false,
+          "why": "CloudFront does not provide this mapping of voice-session users to an EC2 IP address and port."
+        },
+        {
+          "id": "B",
+          "text": "Use a Global Accelerator standard accelerator with regional load balancer endpoints.",
+          "correct": false,
+          "why": "A standard accelerator selects regional endpoints rather than implementing the required application-chosen destination mapping."
+        },
+        {
+          "id": "C",
+          "text": "Use S3 Transfer Acceleration with a bucket for each media server.",
+          "correct": false,
+          "why": "Accelerating uploads to S3 does not route live voice connections to selected media servers."
+        },
+        {
+          "id": "D",
+          "text": "Use a Global Accelerator custom routing accelerator with VPC subnet endpoints.",
+          "correct": true,
+          "why": "Custom routing supports mapping users to a specific destination IP and port in a VPC subnet."
+        }
+      ],
+      "explanation": "The requirement is not merely to select a healthy Region: the application must map session participants to a particular IP address and port. A Global Accelerator custom routing accelerator supports that deterministic mapping and uses VPC subnet endpoints. A standard accelerator is the tempting alternative, but its health-based regional endpoint selection does not implement the specified destination choice. CloudFront and S3 Transfer Acceleration address different traffic patterns.",
+      "keywordCues": [
+        "particular media server",
+        "chooses the destination EC2 IP address and port",
+        "all participants assigned to a session",
+        "that chosen destination"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html",
+        "https://aws.amazon.com/global-accelerator/faqs/"
+      ],
+      "es": {
+        "stem": "Una plataforma educativa asigna a los participantes de cada sesión de voz en vivo a un servidor multimedia específico. Su aplicación elige la dirección IP y el puerto de la instancia EC2 de destino, y todos los participantes de una sesión deben llegar a ese destino mediante un punto de entrada global. ¿Qué solución cumple este requisito de enrutamiento?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar distribuciones de CloudFront con los servidores multimedia como origins.",
+            "why": "CloudFront no proporciona esta asignación de usuarios de una sesión de voz a una IP y un puerto de EC2."
+          },
+          {
+            "id": "B",
+            "text": "Usar un Global Accelerator standard accelerator con load balancers regionales como endpoints.",
+            "why": "Un standard accelerator selecciona endpoints regionales, pero no implementa la asignación al destino elegido por la aplicación."
+          },
+          {
+            "id": "C",
+            "text": "Usar S3 Transfer Acceleration con un bucket para cada servidor multimedia.",
+            "why": "Acelerar cargas hacia S3 no dirige conexiones de voz en vivo a servidores multimedia seleccionados."
+          },
+          {
+            "id": "D",
+            "text": "Usar un Global Accelerator custom routing accelerator con endpoints de subred de VPC.",
+            "why": "Custom routing permite asignar usuarios a una IP y un puerto de destino específicos en una subred de VPC."
+          }
+        ],
+        "explanation": "No basta con seleccionar una Region saludable: la aplicación debe asignar a los participantes de una sesión a una IP y un puerto particulares. Un Global Accelerator custom routing accelerator admite esa asignación determinista y usa endpoints de subred de VPC. Un standard accelerator es una alternativa tentadora, pero su selección de endpoints regionales según el estado no implementa la elección de destino indicada. CloudFront y S3 Transfer Acceleration atienden otros patrones de tráfico."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "global-accelerator--60978e66",
+      "conceptId": "global-accelerator",
+      "secondaryConcepts": [
+        "cloudfront-fundamentals",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company has a standard AWS Global Accelerator in front of a regional TCP service. Partners have allow-listed the accelerator's IPv4 addresses. The company is adding a second Region and replacing its original regional deployment, but partners must keep using their existing approved addresses while traffic can move to healthy endpoints. Which TWO actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Replace the accelerator with S3 Transfer Acceleration for the second Region.",
+          "correct": false,
+          "why": "S3 Transfer Acceleration does not route TCP service traffic or preserve the approved accelerator IPs."
+        },
+        {
+          "id": "B",
+          "text": "Delete the accelerator and create a replacement that includes endpoints in both Regions.",
+          "correct": false,
+          "why": "Deleting the accelerator forfeits its assigned static IP addresses, which partners have allow-listed."
+        },
+        {
+          "id": "C",
+          "text": "Replace the accelerator with CloudFront distributions for each regional TCP endpoint.",
+          "correct": false,
+          "why": "This does not retain the accelerator IPs and does not fit the stated TCP entry-point requirement."
+        },
+        {
+          "id": "D",
+          "text": "Add a regional endpoint group and register the second Region's Network Load Balancer with the existing accelerator.",
+          "correct": true,
+          "why": "Adding a regional endpoint to the existing accelerator enables routing to that Region without replacing its entry-point IPs."
+        },
+        {
+          "id": "E",
+          "text": "Keep the existing accelerator and update its regional endpoints as the original deployment is replaced.",
+          "correct": true,
+          "why": "Its static IPs stay assigned while it exists, and endpoints can change behind those IPs."
+        }
+      ],
+      "explanation": "Partners must keep the addresses already assigned to the accelerator while the company changes regional deployments. Adding the second Region's endpoint group to that accelerator enables multi-Region routing, and retaining the accelerator preserves its static IPs as endpoints change. Deleting it is the critical trap: assigned static addresses are lost on deletion. CloudFront and S3 Transfer Acceleration neither preserve those addresses nor meet this TCP routing requirement.",
+      "keywordCues": [
+        "Partners have allow-listed the accelerator's IPv4 addresses",
+        "adding a second Region",
+        "replacing its original regional deployment",
+        "existing approved addresses",
+        "healthy endpoints"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html",
+        "https://aws.amazon.com/global-accelerator/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de logística tiene un standard AWS Global Accelerator delante de un servicio TCP regional. Sus socios incluyeron las direcciones IPv4 del acelerador en sus listas de permitidos. La empresa agregará una segunda Region y reemplazará la implementación regional original, pero los socios deben seguir usando sus direcciones aprobadas mientras el tráfico puede dirigirse a endpoints saludables. ¿Qué DOS acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Reemplazar el acelerador con S3 Transfer Acceleration para la segunda Region.",
+            "why": "S3 Transfer Acceleration no dirige el tráfico del servicio TCP ni conserva las IP aprobadas del acelerador."
+          },
+          {
+            "id": "B",
+            "text": "Eliminar el acelerador y crear uno nuevo que incluya endpoints de ambas Regions.",
+            "why": "Al eliminar el acelerador se pierden las IP estáticas asignadas que los socios incluyeron en sus listas de permitidos."
+          },
+          {
+            "id": "C",
+            "text": "Reemplazar el acelerador con distribuciones de CloudFront para cada endpoint TCP regional.",
+            "why": "Esto no conserva las IP del acelerador ni cumple el requisito de entrada del servicio TCP."
+          },
+          {
+            "id": "D",
+            "text": "Agregar un endpoint group regional y registrar el Network Load Balancer de la segunda Region en el acelerador existente.",
+            "why": "Agregar un endpoint regional al acelerador existente permite dirigir tráfico a esa Region sin sustituir las IP de entrada."
+          },
+          {
+            "id": "E",
+            "text": "Conservar el acelerador existente y actualizar sus endpoints regionales al reemplazar la implementación original.",
+            "why": "Sus IP estáticas permanecen asignadas mientras exista el acelerador, aunque cambien los endpoints detrás de ellas."
+          }
+        ],
+        "explanation": "Los socios deben conservar las direcciones ya asignadas al acelerador mientras la empresa modifica sus implementaciones regionales. Agregar el endpoint group de la segunda Region al mismo acelerador permite el enrutamiento entre Regions, y conservarlo mantiene sus IP estáticas aunque cambien los endpoints. Eliminarlo es la trampa principal: al hacerlo se pierden las direcciones estáticas asignadas. CloudFront y S3 Transfer Acceleration no conservan esas direcciones ni cumplen este requisito de enrutamiento TCP."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "global-accelerator--b77ec0fd",
+      "conceptId": "global-accelerator",
+      "secondaryConcepts": [
+        "cloudfront-fundamentals",
+        "s3-transfer-acceleration"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An IoT company hosts a TCP ingestion service on EC2 instances behind a Network Load Balancer in one AWS Region. Its devices are distributed worldwide, and the company wants fixed client-facing IP addresses and access to the AWS global network; a second Region may be added later. Which solution best meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use the regional Network Load Balancer as the sole public entry point.",
+          "correct": false,
+          "why": "A regional load balancer alone does not provide Global Accelerator's anycast entry onto the AWS global network."
+        },
+        {
+          "id": "B",
+          "text": "Put CloudFront in front of the ingestion service as its global entry point.",
+          "correct": false,
+          "why": "CloudFront does not meet this non-HTTP TCP service's static-IP entry requirement."
+        },
+        {
+          "id": "C",
+          "text": "Add the Network Load Balancer as an endpoint of a standard AWS Global Accelerator.",
+          "correct": true,
+          "why": "A single-Region accelerator can provide static IPs and carry global users' traffic over the AWS global network."
+        },
+        {
+          "id": "D",
+          "text": "Enable S3 Transfer Acceleration and send ingestion requests to an S3 bucket.",
+          "correct": false,
+          "why": "The service accepts TCP application connections rather than long-distance uploads to a bucket."
+        }
+      ],
+      "explanation": "Global Accelerator can benefit an application even when it currently runs in one Region. Its static anycast IPs let devices enter the AWS global network near them, and the company can later add regional endpoints without changing that public interface. A Network Load Balancer remains useful within the Region, but by itself does not supply the requested global entry. CloudFront and S3 Transfer Acceleration do not match this TCP ingestion workflow.",
+      "keywordCues": [
+        "TCP ingestion service",
+        "one AWS Region",
+        "fixed client-facing IP addresses",
+        "access to the AWS global network",
+        "second Region may be added later"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html",
+        "https://aws.amazon.com/global-accelerator/faqs/"
+      ],
+      "es": {
+        "stem": "Una empresa de IoT aloja un servicio de ingesta TCP en instancias EC2 detrás de un Network Load Balancer en una AWS Region. Sus dispositivos están distribuidos por el mundo y la empresa quiere IP fijas visibles para los clientes y acceso a la red global de AWS; quizá agregue otra Region más adelante. ¿Qué solución cumple mejor estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar el Network Load Balancer regional como único punto de entrada público.",
+            "why": "Un load balancer regional por sí solo no proporciona la entrada anycast a la red global de AWS que ofrece Global Accelerator."
+          },
+          {
+            "id": "B",
+            "text": "Colocar CloudFront delante del servicio de ingesta como punto de entrada global.",
+            "why": "CloudFront no cumple el requisito de IP de entrada estáticas para este servicio TCP que no usa HTTP."
+          },
+          {
+            "id": "C",
+            "text": "Agregar el Network Load Balancer como endpoint de un standard AWS Global Accelerator.",
+            "why": "Un acelerador de una sola Region puede proporcionar IP estáticas y transportar el tráfico de usuarios globales por la red global de AWS."
+          },
+          {
+            "id": "D",
+            "text": "Habilitar S3 Transfer Acceleration y enviar las solicitudes de ingesta a un bucket de S3.",
+            "why": "El servicio acepta conexiones TCP de la aplicación, no cargas de larga distancia hacia un bucket."
+          }
+        ],
+        "explanation": "Global Accelerator puede beneficiar a una aplicación aunque hoy funcione en una sola Region. Sus IP anycast estáticas permiten que los dispositivos entren a la red global de AWS cerca de ellos, y después la empresa puede agregar endpoints regionales sin cambiar esa interfaz pública. Un Network Load Balancer sigue siendo útil dentro de la Region, pero por sí solo no ofrece la entrada global solicitada. CloudFront y S3 Transfer Acceleration no corresponden a este flujo de ingesta TCP."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "global-accelerator--r0",
+      "conceptId": "global-accelerator",
+      "kind": "recall",
+      "prompt": "A global UDP service needs fixed IPs and regional failover despite cached DNS answers. What would you deploy, and why?",
+      "promptEs": "Un servicio UDP global necesita IP fijas y failover regional pese a respuestas DNS en caché. ¿Qué implementarías y por qué?",
+      "idealAnswer": "Deploy a standard AWS Global Accelerator with endpoints in the application Regions. It provides static anycast IPs and directs traffic over the AWS global network to healthy regional endpoints without depending on clients refreshing DNS answers.",
+      "rubric": [
+        "Names a standard AWS Global Accelerator.",
+        "Mentions static anycast IP entry points.",
+        "Explains health-based regional routing without reliance on DNS refresh."
+      ]
+    },
+    {
+      "id": "global-accelerator--r1",
+      "conceptId": "global-accelerator",
+      "kind": "why-not",
+      "prompt": "Why is CloudFront not the best choice for a global UDP game that needs fixed IPs and regional failover?",
+      "promptEs": "¿Por qué CloudFront no es la mejor opción para un juego UDP global que necesita IP fijas y failover regional?",
+      "idealAnswer": "CloudFront is suited to delivering web content, including content that can be cached; it does not meet this UDP game's fixed-IP entry requirement. AWS Global Accelerator supports UDP, provides static anycast IPs, and routes to healthy regional endpoints.",
+      "rubric": [
+        "Distinguishes CloudFront's content-delivery role from the UDP requirement.",
+        "Identifies Global Accelerator as the fit for static IPs.",
+        "Mentions routing to healthy regional endpoints."
+      ]
+    }
+  ]
+}

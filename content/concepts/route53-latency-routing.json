@@ -1,0 +1,356 @@
+{
+  "conceptId": "route53-latency-routing",
+  "card": {
+    "en": {
+      "tldr": "Route 53 latency-based routing answers a DNS query with a record for the AWS Region that offers the user the lowest latency among the Regions you configured. Choose it for a multi-Region active-active application when network latency—not a fixed geographic rule or traffic percentage—should determine the destination.",
+      "whenToUse": [
+        "The application serves users from resources in multiple AWS Regions.",
+        "The requirement is to direct users toward the Region with the lowest network latency.",
+        "Both regional deployments can serve traffic, rather than keeping one only for failover."
+      ],
+      "keyFacts": [
+        "Create latency records for resources in each participating AWS Region.",
+        "Route 53 evaluates the Regions with latency records and responds with a value from a record for the lowest-latency Region.",
+        "Routing can change as network conditions and Route 53 latency data change.",
+        "Latency routing is supported for records in a private hosted zone.",
+        "AWS latency data reflects traffic between users and AWS data centers; it might not represent actual latency to resources outside an AWS Region."
+      ],
+      "gotchas": [
+        "Do not substitute the user's country for measured regional latency: the lowest-latency Region need not match a geographic assumption.",
+        "Do not choose weighted routing when the requirement is lowest latency rather than a percentage split.",
+        "Latency routing selects among configured Regions; it does not mean every query always receives the same regional answer."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Route 53 failover routing",
+          "difference": "Failover is for a primary and secondary destination; latency routing selects a low-latency Region for an active-active application."
+        },
+        {
+          "concept": "Route 53 geolocation routing",
+          "difference": "Geolocation applies location-based rules, such as country or continent; latency routing uses regional latency data."
+        },
+        {
+          "concept": "Route 53 weighted routing",
+          "difference": "Weighted routing controls a traffic split; latency routing favors the lowest-latency configured Region."
+        }
+      ],
+      "examCues": [
+        "active-active in multiple AWS Regions",
+        "lowest network latency for each user",
+        "regional destinations may change as network conditions change",
+        "private hosted zone with regional resources"
+      ]
+    },
+    "es": {
+      "tldr": "Route 53 latency-based routing responde una consulta DNS con un registro de la AWS Region que ofrece la menor latencia al usuario entre las Regions configuradas. Elígelo para una aplicación active-active en varias Regions cuando la latencia de red, y no una regla geográfica fija o un porcentaje de tráfico, deba determinar el destino.",
+      "whenToUse": [
+        "La aplicación atiende a usuarios desde recursos en varias AWS Regions.",
+        "Necesitas dirigir a los usuarios hacia la Region con la menor latencia de red.",
+        "Ambos despliegues regionales pueden atender tráfico, en lugar de reservar uno solo para failover."
+      ],
+      "keyFacts": [
+        "Creas registros de latencia para los recursos de cada AWS Region participante.",
+        "Route 53 evalúa las Regions con registros de latencia y responde con el valor de un registro de la Region con menor latencia.",
+        "El enrutamiento puede cambiar cuando cambian las condiciones de red y los datos de latencia de Route 53.",
+        "Latency routing admite registros en una private hosted zone.",
+        "Los datos de latencia de AWS reflejan el tráfico entre usuarios y centros de datos de AWS; quizá no representen la latencia real hacia recursos fuera de una AWS Region."
+      ],
+      "gotchas": [
+        "No uses el país del usuario como sustituto de la latencia regional: la Region con menor latencia no tiene que coincidir con una suposición geográfica.",
+        "No elijas weighted routing si necesitas la menor latencia y no una división porcentual.",
+        "Latency routing selecciona entre las Regions configuradas; no significa que cada consulta siempre reciba la misma respuesta regional."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Route 53 failover routing",
+          "difference": "Failover usa un destino primario y otro secundario; latency routing selecciona una Region de baja latencia para una aplicación active-active."
+        },
+        {
+          "concept": "Route 53 geolocation routing",
+          "difference": "Geolocation aplica reglas basadas en la ubicación, como país o continente; latency routing usa datos de latencia regional."
+        },
+        {
+          "concept": "Route 53 weighted routing",
+          "difference": "Weighted routing controla la proporción del tráfico; latency routing favorece la Region configurada con menor latencia."
+        }
+      ],
+      "examCues": [
+        "active-active in multiple AWS Regions",
+        "lowest network latency for each user",
+        "regional destinations may change as network conditions change",
+        "private hosted zone with regional resources"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "route53-latency-routing--aec7274b",
+      "conceptId": "route53-latency-routing",
+      "secondaryConcepts": [
+        "route53-weighted-routing",
+        "route53-geolocation-geoproximity",
+        "route53-failover-routing"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A parcel-tracking company runs the same customer application behind load balancers in two AWS Regions. Both deployments accept requests at all times, and customers may reach either deployment. The company wants DNS to direct customers to the Region with the lowest network latency, even when that choice changes over time. Which Route 53 configuration meets this requirement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create geolocation records that direct each customer country to a designated load balancer.",
+          "correct": false,
+          "why": "A fixed country-to-Region rule does not select the Region with the lowest network latency."
+        },
+        {
+          "id": "B",
+          "text": "Create weighted records for the two load balancers with an equal traffic split.",
+          "correct": false,
+          "why": "An equal weighted split controls traffic proportions, not the lowest-latency destination for a user."
+        },
+        {
+          "id": "C",
+          "text": "Create failover records with one load balancer primary and the other secondary.",
+          "correct": false,
+          "why": "A primary-secondary arrangement does not use both deployments to select the lowest-latency Region during normal operation."
+        },
+        {
+          "id": "D",
+          "text": "Create latency records for the load balancers in their respective AWS Regions.",
+          "correct": true,
+          "why": "Latency records let Route 53 choose a record from the configured Region with the lowest latency for the user."
+        }
+      ],
+      "explanation": "The deciding requirement is to select the lowest-latency Region while both regional deployments serve requests. Route 53 latency records are created for resources in multiple AWS Regions, and Route 53 selects a record for the Region with the lowest latency. Weighted records instead specify a traffic split; they do not make the selection based on latency.",
+      "keywordCues": [
+        "Both deployments accept requests at all times",
+        "Region with the lowest network latency",
+        "choice changes over time"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html"
+      ],
+      "es": {
+        "stem": "Una empresa de seguimiento de paquetes ejecuta la misma aplicación para clientes detrás de balanceadores de carga en dos AWS Regions. Ambos despliegues aceptan solicitudes en todo momento y los clientes pueden usar cualquiera de ellos. La empresa quiere que DNS dirija a cada cliente a la Region con la menor latencia de red, incluso si esa elección cambia con el tiempo. ¿Qué configuración de Route 53 cumple este requisito?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crear registros geolocation que dirijan cada país de los clientes a un balanceador de carga designado.",
+            "why": "Una regla fija que asigna países a Regions no selecciona la Region con menor latencia de red."
+          },
+          {
+            "id": "B",
+            "text": "Crear registros weighted para los dos balanceadores de carga con una división equitativa del tráfico.",
+            "why": "Una división weighted equitativa controla las proporciones de tráfico, no el destino con menor latencia para cada usuario."
+          },
+          {
+            "id": "C",
+            "text": "Crear registros failover con un balanceador de carga primario y otro secundario.",
+            "why": "Una configuración primaria-secundaria no usa ambos despliegues para seleccionar la Region con menor latencia durante la operación normal."
+          },
+          {
+            "id": "D",
+            "text": "Crear registros de latencia para los balanceadores de carga en sus respectivas AWS Regions.",
+            "why": "Los registros de latencia permiten que Route 53 elija un registro de la Region configurada con menor latencia para el usuario."
+          }
+        ],
+        "explanation": "El requisito decisivo es seleccionar la Region con menor latencia mientras ambos despliegues regionales atienden solicitudes. Se crean registros de latencia de Route 53 para recursos en varias AWS Regions, y Route 53 selecciona un registro de la Region con menor latencia. Los registros weighted, en cambio, especifican una división del tráfico; no seleccionan el destino según la latencia."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-latency-routing--079b2a53",
+      "conceptId": "route53-latency-routing",
+      "secondaryConcepts": [
+        "route53-geolocation-geoproximity",
+        "route53-weighted-routing"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research organization hosts an internal analysis service on resources in three AWS Regions. Its applications resolve the service name through a Route 53 private hosted zone, and every regional deployment is active. Researchers want resolution to favor the Region with the lowest network latency rather than the Region nearest their office on a map. Which solution meets these requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use geolocation records in the private hosted zone, mapping each office's country to a Region.",
+          "correct": false,
+          "why": "A country-based mapping follows location rules rather than regional latency data."
+        },
+        {
+          "id": "B",
+          "text": "Use latency records in the private hosted zone for resources in all three Regions.",
+          "correct": true,
+          "why": "Latency records can be used in a private hosted zone and select among configured Regions based on latency."
+        },
+        {
+          "id": "C",
+          "text": "Use geoproximity records in the private hosted zone, with bias toward the largest deployment.",
+          "correct": false,
+          "why": "Distance and bias do not directly meet the requirement to select the Region with the lowest network latency."
+        },
+        {
+          "id": "D",
+          "text": "Use weighted records in the private hosted zone, with weights based on regional capacity.",
+          "correct": false,
+          "why": "Capacity-based traffic proportions do not select the lowest-latency Region for each user."
+        }
+      ],
+      "explanation": "The private hosted zone does not rule out latency routing: Route 53 supports latency records there. With records for resources in all three Regions, Route 53 can select the Region offering the lowest latency. Geoproximity is tempting because it concerns location, but distance with bias is not the requested latency-based decision.",
+      "keywordCues": [
+        "private hosted zone",
+        "every regional deployment is active",
+        "lowest network latency rather than the Region nearest their office"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html"
+      ],
+      "es": {
+        "stem": "Una organización de investigación aloja un servicio interno de análisis en recursos de tres AWS Regions. Sus aplicaciones resuelven el nombre del servicio mediante una private hosted zone de Route 53, y todos los despliegues regionales están activos. Los investigadores quieren que la resolución favorezca la Region con menor latencia de red, no la Region que parece más cercana a su oficina en un mapa. ¿Qué solución cumple estos requisitos?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar registros geolocation en la private hosted zone que asignen el país de cada oficina a una Region.",
+            "why": "Una asignación por país sigue reglas de ubicación, no datos de latencia regional."
+          },
+          {
+            "id": "B",
+            "text": "Usar registros de latencia en la private hosted zone para los recursos de las tres Regions.",
+            "why": "Los registros de latencia se pueden usar en una private hosted zone y permiten seleccionar entre Regions configuradas según la latencia."
+          },
+          {
+            "id": "C",
+            "text": "Usar registros geoproximity en la private hosted zone, con bias hacia el despliegue más grande.",
+            "why": "La distancia y el bias no cumplen directamente el requisito de seleccionar la Region con menor latencia de red."
+          },
+          {
+            "id": "D",
+            "text": "Usar registros weighted en la private hosted zone, con pesos basados en la capacidad regional.",
+            "why": "Las proporciones de tráfico basadas en capacidad no seleccionan la Region con menor latencia para cada usuario."
+          }
+        ],
+        "explanation": "La private hosted zone no impide usar latency routing: Route 53 admite registros de latencia allí. Con registros para los recursos de las tres Regions, Route 53 puede seleccionar la Region que ofrece la menor latencia. Geoproximity puede parecer adecuado porque considera la ubicación, pero la distancia con bias no equivale a la decisión solicitada basada en latencia."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "route53-latency-routing--98d834f1",
+      "conceptId": "route53-latency-routing",
+      "secondaryConcepts": [
+        "route53-geolocation-geoproximity",
+        "route53-weighted-routing"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media company serves an interactive editing application from two AWS Regions, with both sites accepting user sessions. Its team has noticed that the Region geographically closer to a customer is not always the faster network destination. It does not need a fixed allocation of sessions between Regions. Which Route 53 policy should the company choose to improve user performance?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Geolocation routing, with each customer's country mapped to the geographically closer Region.",
+          "correct": false,
+          "why": "The scenario explicitly says geographic closeness does not reliably identify the faster destination."
+        },
+        {
+          "id": "B",
+          "text": "Latency-based routing, with a latency record for the application in each AWS Region.",
+          "correct": true,
+          "why": "Route 53 can compare latency to the configured Regions and return a record from the lowest-latency Region."
+        },
+        {
+          "id": "C",
+          "text": "Geoproximity routing, with bias adjusted to favor the Region with more editing capacity.",
+          "correct": false,
+          "why": "A distance-based policy with bias does not select by the user's lowest regional network latency."
+        },
+        {
+          "id": "D",
+          "text": "Weighted routing, with the session split adjusted when regional demand changes.",
+          "correct": false,
+          "why": "Adjusting a traffic split does not select the lowest-latency Region for an individual user."
+        }
+      ],
+      "explanation": "Both sites are active, and the company wants the faster network destination rather than the geographically nearer one. Latency-based routing uses Route 53 latency data to select among the AWS Regions for which latency records exist. Geolocation and geoproximity make location-based decisions, while weighted routing addresses a traffic split that the company does not require.",
+      "keywordCues": [
+        "both sites accepting user sessions",
+        "geographically closer to a customer is not always the faster network destination",
+        "does not need a fixed allocation of sessions"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios ofrece una aplicación interactiva de edición desde dos AWS Regions, y ambos sitios aceptan sesiones de usuarios. Su equipo ha observado que la Region geográficamente más cercana a un cliente no siempre es el destino más rápido en la red. No necesita una asignación fija de sesiones entre Regions. ¿Qué política de Route 53 debe elegir la empresa para mejorar el rendimiento de los usuarios?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Geolocation routing, con el país de cada cliente asignado a la Region geográficamente más cercana.",
+            "why": "El escenario indica expresamente que la cercanía geográfica no identifica de forma confiable el destino más rápido."
+          },
+          {
+            "id": "B",
+            "text": "Latency-based routing, con un registro de latencia para la aplicación en cada AWS Region.",
+            "why": "Route 53 puede comparar la latencia hacia las Regions configuradas y devolver un registro de la Region con menor latencia."
+          },
+          {
+            "id": "C",
+            "text": "Geoproximity routing, con bias ajustado para favorecer la Region con más capacidad de edición.",
+            "why": "Una política basada en distancia y bias no selecciona según la menor latencia de red regional para el usuario."
+          },
+          {
+            "id": "D",
+            "text": "Weighted routing, con la división de sesiones ajustada cuando cambie la demanda regional.",
+            "why": "Ajustar una división del tráfico no selecciona la Region con menor latencia para cada usuario."
+          }
+        ],
+        "explanation": "Ambos sitios están activos y la empresa quiere el destino más rápido en la red, no el más cercano geográficamente. Latency-based routing usa datos de latencia de Route 53 para seleccionar entre las AWS Regions que tienen registros de latencia. Geolocation y geoproximity toman decisiones basadas en ubicación, mientras que weighted routing resuelve una división del tráfico que la empresa no necesita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "route53-latency-routing--r0",
+      "conceptId": "route53-latency-routing",
+      "kind": "recall",
+      "prompt": "Both regional app deployments are active. How would you configure Route 53 to direct users toward the lowest-latency Region, and why?",
+      "promptEs": "Ambos despliegues regionales de una aplicación están activos. ¿Cómo configurarías Route 53 para dirigir a los usuarios hacia la Region con menor latencia y por qué?",
+      "idealAnswer": "Create Route 53 latency records for the application resources in each AWS Region. Route 53 uses latency data to choose a record from the configured Region offering the user the lowest latency.",
+      "rubric": [
+        "Names Route 53 latency-based routing.",
+        "Specifies latency records for resources in each participating AWS Region.",
+        "Explains selection by lowest regional latency."
+      ]
+    },
+    {
+      "id": "route53-latency-routing--r1",
+      "conceptId": "route53-latency-routing",
+      "kind": "why-not",
+      "prompt": "Why isn't Route 53 geolocation routing the best fit when an active-active app must send users to the lowest-latency AWS Region?",
+      "promptEs": "¿Por qué Route 53 geolocation routing no es la mejor opción si una aplicación active-active debe enviar usuarios a la AWS Region con menor latencia?",
+      "idealAnswer": "Geolocation routing follows location-based rules, such as a user's country or continent, rather than selecting by regional network latency. Use latency-based routing with records in the participating AWS Regions when lowest latency is the deciding requirement.",
+      "rubric": [
+        "Identifies geolocation as a location-rule decision.",
+        "Explains that location does not necessarily identify the lowest-latency Region.",
+        "Names latency-based routing as the appropriate alternative."
+      ]
+    }
+  ]
+}

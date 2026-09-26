@@ -1,0 +1,451 @@
+{
+  "conceptId": "step-functions",
+  "card": {
+    "en": {
+      "tldr": "AWS Step Functions orchestrates multi-step processes as state machine workflows, with branching, retries, parallel work, and tracked execution state. Choose Standard for long-running or human-approval workflows; choose Express for high-event-rate workflows that finish within five minutes and can tolerate at-least-once execution.",
+      "whenToUse": [
+        "A process must run tasks in sequence, choose a path based on data, or retry and handle failures.",
+        "Independent tasks must run in parallel before the process continues.",
+        "A workflow must pause for a human response and resume after a callback."
+      ],
+      "keyFacts": [
+        "Choice states branch on input; Retry and Catch handle task failures; Parallel states run independent branches.",
+        "A Map state applies workflow steps to each item in a dataset.",
+        "Standard workflows can run for up to one year and provide execution history and visual debugging.",
+        "Express workflows can run for up to five minutes and are suited to high-event-rate workloads.",
+        "Standard supports the wait-for-callback task-token pattern for supported integrations; Express supports only Request Response integrations.",
+        "Standard has exactly-once workflow execution; Express has at-least-once workflow execution."
+      ],
+      "gotchas": [
+        "Routing an event to a target is not the same as tracking a process through multiple dependent steps.",
+        "An Express workflow is not suitable when a task must wait for a callback.",
+        "Express steps can run more than once; do not assume exactly-once workflow execution."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS buffers work for consumers; Step Functions tracks and coordinates steps in a process."
+        },
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS fans a message out to subscribers; Step Functions controls what happens before and after each task."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "EventBridge routes events by rules; Step Functions maintains workflow state across tasks."
+        }
+      ],
+      "examCues": [
+        "retry a task, then take an alternate path",
+        "wait for a manager's approval",
+        "run checks in parallel before proceeding",
+        "high-volume workflows that finish within five minutes"
+      ]
+    },
+    "es": {
+      "tldr": "AWS Step Functions orquesta procesos de varios pasos mediante workflows de máquinas de estados, con ramificaciones, reintentos, trabajo paralelo y seguimiento del estado. Elige Standard para procesos largos o con aprobación humana; elige Express para muchos eventos si cada ejecución termina en cinco minutos y admite ejecución at-least-once.",
+      "whenToUse": [
+        "Un proceso debe ejecutar tareas en orden, elegir una ruta según los datos o reintentar y manejar fallas.",
+        "Varias tareas independientes deben ejecutarse en paralelo antes de continuar.",
+        "Un workflow debe esperar una respuesta humana y reanudarse tras un callback."
+      ],
+      "keyFacts": [
+        "Choice ramifica según la entrada; Retry y Catch manejan fallas; Parallel ejecuta ramas independientes.",
+        "Map aplica pasos del workflow a cada elemento de un conjunto de datos.",
+        "Standard puede durar hasta un año y ofrece historial de ejecución y depuración visual.",
+        "Express puede durar hasta cinco minutos y se adapta a cargas con una alta tasa de eventos.",
+        "Standard admite wait-for-callback con task token para integraciones compatibles; Express solo admite Request Response.",
+        "Standard tiene ejecución de workflow exactly-once; Express tiene ejecución de workflow at-least-once."
+      ],
+      "gotchas": [
+        "Enrutar un evento a un destino no equivale a seguir un proceso con varios pasos dependientes.",
+        "Express no sirve si una tarea debe esperar un callback.",
+        "Los pasos de Express pueden ejecutarse más de una vez; no presupongas ejecución de workflow exactly-once."
+      ],
+      "confusedWith": [
+        {
+          "concept": "Amazon SQS",
+          "difference": "SQS almacena trabajo para consumidores; Step Functions sigue y coordina los pasos de un proceso."
+        },
+        {
+          "concept": "Amazon SNS",
+          "difference": "SNS distribuye un mensaje a varios suscriptores; Step Functions controla qué ocurre antes y después de cada tarea."
+        },
+        {
+          "concept": "Amazon EventBridge",
+          "difference": "EventBridge enruta eventos mediante reglas; Step Functions mantiene el estado entre tareas."
+        }
+      ],
+      "examCues": [
+        "retry a task, then take an alternate path",
+        "wait for a manager's approval",
+        "run checks in parallel before proceeding",
+        "high-volume workflows that finish within five minutes"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "step-functions--1a423cc9",
+      "conceptId": "step-functions",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "sqs-standard-vs-fifo"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A property insurer validates a claim automatically, then sends claims above a threshold to an adjuster. The adjuster may take several days to respond, and processing must resume only after that response arrives. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Place claims in an Amazon SQS queue and have workers poll for claims ready for payment.",
+          "correct": false,
+          "why": "A queue buffers claims but does not itself manage the conditional, multi-day approval workflow."
+        },
+        {
+          "id": "B",
+          "text": "Publish each claim to Amazon SNS and use separate subscribers for validation and payment.",
+          "correct": false,
+          "why": "Fan-out does not track the claim through a conditional approval step or wait for the adjuster's response."
+        },
+        {
+          "id": "C",
+          "text": "Use a Standard Step Functions workflow with a Choice state and a task-token callback.",
+          "correct": true,
+          "why": "Standard can branch on the claim amount and wait for the adjuster's callback before continuing."
+        },
+        {
+          "id": "D",
+          "text": "Use an Express Step Functions workflow with a Choice state and a task-token callback.",
+          "correct": false,
+          "why": "Express workflows do not support the wait-for-callback integration pattern."
+        }
+      ],
+      "explanation": "The deciding requirements are conditional routing and waiting several days for a human response. A Standard Step Functions workflow can use Choice for the threshold and a task-token callback to pause until approval arrives. Express cannot use the callback pattern, while SNS and SQS address message distribution or buffering rather than tracking this process.",
+      "keywordCues": [
+        "claims above a threshold",
+        "several days to respond",
+        "resume only after that response arrives"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+      ],
+      "es": {
+        "stem": "Una aseguradora de propiedades valida automáticamente cada reclamación y envía las que superan un umbral a un ajustador. El ajustador puede tardar varios días en responder, y el proceso solo debe reanudarse cuando llegue su respuesta. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Poner las reclamaciones en una cola de Amazon SQS para que los trabajadores consulten cuáles están listas para el pago.",
+            "why": "Una cola almacena reclamaciones, pero no gestiona por sí sola el proceso de aprobación condicional de varios días."
+          },
+          {
+            "id": "B",
+            "text": "Publicar cada reclamación en Amazon SNS y usar suscriptores separados para la validación y el pago.",
+            "why": "Fan-out no sigue la reclamación durante la aprobación condicional ni espera la respuesta del ajustador."
+          },
+          {
+            "id": "C",
+            "text": "Usar un workflow Standard de Step Functions con Choice y un callback con task token.",
+            "why": "Standard puede ramificar según el monto y esperar el callback del ajustador antes de continuar."
+          },
+          {
+            "id": "D",
+            "text": "Usar un workflow Express de Step Functions con Choice y un callback con task token.",
+            "why": "Los workflows Express no admiten el patrón wait-for-callback."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la ruta condicional y la espera de varios días por una respuesta humana. Un workflow Standard de Step Functions puede usar Choice para el umbral y un callback con task token para pausar hasta recibir la aprobación. Express no admite ese patrón; SNS y SQS distribuyen o almacenan mensajes, pero no siguen este proceso."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "step-functions--77148729",
+      "conceptId": "step-functions",
+      "secondaryConcepts": [
+        "eventbridge",
+        "sns-pub-sub-fanout"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A manufacturer processes a high rate of sensor readings. For each reading, it must validate the data, choose one of two enrichment steps, and send a result; every workflow finishes within a minute. The tasks tolerate at-least-once execution, and no human response or job-completion wait is needed. Which solution is the BEST fit?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a Standard Step Functions workflow with a Choice state.",
+          "correct": false,
+          "why": "Standard can orchestrate the steps, but Express is the better fit for the stated high-event-rate, short-duration workload."
+        },
+        {
+          "id": "B",
+          "text": "Publish each reading to Amazon SNS with separate enrichment subscribers.",
+          "correct": false,
+          "why": "Fan-out does not choose an enrichment step after validation and track the subsequent result."
+        },
+        {
+          "id": "C",
+          "text": "Use an Express Step Functions workflow with a Choice state.",
+          "correct": true,
+          "why": "Express suits high-event-rate, short workflows and can branch using Choice."
+        },
+        {
+          "id": "D",
+          "text": "Use Amazon EventBridge rules to route each reading directly to an enrichment target.",
+          "correct": false,
+          "why": "Routing a reading to a target does not coordinate validation, conditional enrichment, and the final result as one workflow."
+        }
+      ],
+      "explanation": "Each reading requires an ordered process with a branch, so it needs workflow orchestration rather than event routing or fan-out alone. Express is suited to high-event-rate workloads, and the stated duration and at-least-once tolerance fit its behavior. Standard could perform the steps, but its long-running, auditable strengths are not the deciding requirements here.",
+      "keywordCues": [
+        "high rate of sensor readings",
+        "choose one of two enrichment steps",
+        "every workflow finishes within a minute",
+        "tolerate at-least-once execution"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+      ],
+      "es": {
+        "stem": "Un fabricante procesa una alta tasa de lecturas de sensores. Para cada lectura, debe validar los datos, elegir uno de dos pasos de enriquecimiento y enviar un resultado; cada workflow termina en menos de un minuto. Las tareas admiten ejecución at-least-once y no requieren respuesta humana ni espera por la finalización de un trabajo. ¿Qué solución es la BEST fit?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un workflow Standard de Step Functions con Choice.",
+            "why": "Standard puede orquestar los pasos, pero Express se ajusta mejor a la carga breve y con alta tasa de eventos."
+          },
+          {
+            "id": "B",
+            "text": "Publicar cada lectura en Amazon SNS con suscriptores separados para el enriquecimiento.",
+            "why": "Fan-out no elige un paso de enriquecimiento después de validar ni sigue el resultado posterior."
+          },
+          {
+            "id": "C",
+            "text": "Usar un workflow Express de Step Functions con Choice.",
+            "why": "Express se adapta a workflows breves con una alta tasa de eventos y puede ramificar con Choice."
+          },
+          {
+            "id": "D",
+            "text": "Usar reglas de Amazon EventBridge para enviar cada lectura directamente a un destino de enriquecimiento.",
+            "why": "Enviar una lectura a un destino no coordina la validación, el enriquecimiento condicional y el resultado final como un solo workflow."
+          }
+        ],
+        "explanation": "Cada lectura requiere un proceso ordenado con una ramificación, no solo enrutamiento de eventos o fan-out. Express está pensado para cargas con una alta tasa de eventos; la duración y la tolerancia a at-least-once indicadas se ajustan a su comportamiento. Standard también podría ejecutar los pasos, pero sus ventajas para procesos largos y auditables no son decisivas aquí."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "step-functions--4bb826e9",
+      "conceptId": "step-functions",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "eventbridge"
+      ],
+      "domain": "d2",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A research lab processes access requests for sensitive datasets. Two independent checks must run before a request is sent to a reviewer; a failed check should be retried, and the reviewer can take several days to respond. The request must not advance until that response arrives. Which TWO design choices meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use an Express Step Functions workflow so the approval task can wait for a task-token callback.",
+          "correct": false,
+          "why": "Express does not support wait-for-callback and cannot accommodate a response that takes several days."
+        },
+        {
+          "id": "B",
+          "text": "Use a Standard Step Functions workflow with a task-token callback for reviewer approval.",
+          "correct": true,
+          "why": "Standard can wait for the reviewer callback and supports a workflow that lasts several days."
+        },
+        {
+          "id": "C",
+          "text": "Use Amazon EventBridge rules to invoke both checks and route their events to the reviewer.",
+          "correct": false,
+          "why": "Event routing alone does not track both check results, retry a failed check, and wait for the response."
+        },
+        {
+          "id": "D",
+          "text": "Use Parallel branches for the checks and Retry on the check tasks before the approval step.",
+          "correct": true,
+          "why": "Parallel coordinates the independent checks, and Retry handles transient check failures."
+        },
+        {
+          "id": "E",
+          "text": "Publish the request to Amazon SNS so reviewer and check subscribers each advance the process when finished.",
+          "correct": false,
+          "why": "Fan-out does not enforce checks-before-review or hold the process until reviewer approval."
+        }
+      ],
+      "explanation": "The workflow needs both parallel checks with retries and a pause for a human response that may take days. Parallel and Retry address the checks; a Standard workflow can then wait using a task-token callback. Express lacks that callback pattern and has a five-minute maximum duration. The SNS and EventBridge designs distribute messages or events without coordinating all of these steps.",
+      "keywordCues": [
+        "Two independent checks",
+        "failed check should be retried",
+        "several days to respond",
+        "must not advance until that response arrives"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación procesa solicitudes de acceso a conjuntos de datos sensibles. Deben ejecutarse dos verificaciones independientes antes de enviar la solicitud a un revisor; una verificación fallida debe reintentarse y el revisor puede tardar varios días en responder. La solicitud no debe avanzar hasta recibir esa respuesta. ¿Qué DOS decisiones de diseño cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar un workflow Express de Step Functions para que la aprobación espere un callback con task token.",
+            "why": "Express no admite wait-for-callback ni una respuesta que tarde varios días."
+          },
+          {
+            "id": "B",
+            "text": "Usar un workflow Standard de Step Functions con un callback con task token para la aprobación del revisor.",
+            "why": "Standard puede esperar el callback del revisor y admitir un workflow que dure varios días."
+          },
+          {
+            "id": "C",
+            "text": "Usar reglas de Amazon EventBridge para invocar ambas verificaciones y enviar sus eventos al revisor.",
+            "why": "El enrutamiento por sí solo no sigue ambos resultados, reintenta una verificación fallida ni espera la respuesta."
+          },
+          {
+            "id": "D",
+            "text": "Usar ramas Parallel para las verificaciones y Retry en esas tareas antes del paso de aprobación.",
+            "why": "Parallel coordina las verificaciones independientes y Retry maneja sus fallas transitorias."
+          },
+          {
+            "id": "E",
+            "text": "Publicar la solicitud en Amazon SNS para que los suscriptores del revisor y de las verificaciones avancen el proceso al terminar.",
+            "why": "Fan-out no impone que las verificaciones precedan a la revisión ni detiene el proceso hasta la aprobación."
+          }
+        ],
+        "explanation": "El proceso necesita verificaciones paralelas con reintentos y una pausa por una respuesta humana que puede tardar días. Parallel y Retry cubren las verificaciones; luego, un workflow Standard puede esperar mediante un callback con task token. Express no admite ese patrón y tiene una duración máxima de cinco minutos. Los diseños con SNS y EventBridge distribuyen mensajes o eventos sin coordinar todos los pasos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "step-functions--e346806c",
+      "conceptId": "step-functions",
+      "secondaryConcepts": [
+        "sns-pub-sub-fanout",
+        "sqs-standard-vs-fifo",
+        "eventbridge"
+      ],
+      "domain": "d2",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A media studio starts three independent checks when an editor submits a video. If any check fails transiently, that check should be retried; publication must begin only after all three checks succeed. Editors also need to inspect the state of each check during processing. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use Amazon EventBridge rules to send the submission event to three check targets.",
+          "correct": false,
+          "why": "Rules route the event but do not provide the required per-check retries and tracked join before publication."
+        },
+        {
+          "id": "B",
+          "text": "Use a Standard Step Functions workflow with Parallel branches, Retry, and a publication step after the branches.",
+          "correct": true,
+          "why": "Parallel runs the checks, Retry handles transient failures, and the workflow tracks their states before proceeding."
+        },
+        {
+          "id": "C",
+          "text": "Put three messages in Amazon SQS queues and let each check publish directly when it succeeds.",
+          "correct": false,
+          "why": "Queueing the checks does not track when all three have succeeded or control a single publication step."
+        },
+        {
+          "id": "D",
+          "text": "Publish a video-submitted message to Amazon SNS and let three subscribers start publication when they finish.",
+          "correct": false,
+          "why": "SNS can distribute the message but does not coordinate completion of all checks before publication."
+        }
+      ],
+      "explanation": "The critical requirement is to run independent checks concurrently but publish only after all succeed. A Step Functions Parallel state coordinates the checks, Retry handles transient failures, and Standard provides execution history and visual debugging. SNS, SQS, and EventBridge can distribute work or events, but none of the proposed designs coordinates the join and tracked publication step.",
+      "keywordCues": [
+        "three independent checks",
+        "that check should be retried",
+        "only after all three checks succeed",
+        "inspect the state of each check"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+      ],
+      "es": {
+        "stem": "Un estudio de medios inicia tres verificaciones independientes cuando un editor envía un video. Si una verificación falla de forma transitoria, debe reintentarse; la publicación solo puede comenzar cuando las tres tengan éxito. Los editores también necesitan revisar el estado de cada verificación durante el proceso. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar reglas de Amazon EventBridge para enviar el evento de envío a tres destinos de verificación.",
+            "why": "Las reglas enrutan el evento, pero no proporcionan los reintentos por verificación ni la coordinación necesaria antes de publicar."
+          },
+          {
+            "id": "B",
+            "text": "Usar un workflow Standard de Step Functions con ramas Parallel, Retry y un paso de publicación después de las ramas.",
+            "why": "Parallel ejecuta las verificaciones, Retry maneja fallas transitorias y el workflow sigue sus estados antes de avanzar."
+          },
+          {
+            "id": "C",
+            "text": "Poner tres mensajes en colas de Amazon SQS y hacer que cada verificación publique directamente al tener éxito.",
+            "why": "Poner las verificaciones en colas no sigue cuándo las tres tuvieron éxito ni controla un único paso de publicación."
+          },
+          {
+            "id": "D",
+            "text": "Publicar un mensaje de envío en Amazon SNS y dejar que tres suscriptores inicien la publicación al terminar.",
+            "why": "SNS puede distribuir el mensaje, pero no coordina que todas las verificaciones terminen antes de publicar."
+          }
+        ],
+        "explanation": "Lo decisivo es ejecutar las verificaciones al mismo tiempo, pero publicar solo cuando todas tengan éxito. Parallel de Step Functions las coordina, Retry maneja fallas transitorias y Standard ofrece historial de ejecución y depuración visual. SNS, SQS y EventBridge pueden distribuir trabajo o eventos, pero los diseños propuestos no coordinan la finalización ni el paso de publicación."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "step-functions--r0",
+      "conceptId": "step-functions",
+      "kind": "recall",
+      "prompt": "A process branches after validation, retries failed tasks, and waits days for approval. Which workflow type fits, and why?",
+      "promptEs": "Un proceso ramifica tras validar, reintenta tareas fallidas y espera días por una aprobación. ¿Qué tipo de workflow eliges y por qué?",
+      "idealAnswer": "Use a Standard Step Functions workflow. Choice and Retry handle the decision and failures, while a task-token callback lets the workflow wait for approval; Standard supports long-running executions.",
+      "rubric": [
+        "Identifies Standard Step Functions",
+        "Connects Choice and Retry to the process",
+        "Explains the human-approval wait with a task-token callback"
+      ]
+    },
+    {
+      "id": "step-functions--r1",
+      "conceptId": "step-functions",
+      "kind": "why-not",
+      "prompt": "Why is Amazon SNS fan-out alone insufficient when three checks must finish before a single publication step?",
+      "promptEs": "¿Por qué Amazon SNS fan-out por sí solo no basta si tres verificaciones deben terminar antes de un único paso de publicación?",
+      "idealAnswer": "SNS distributes a message to subscribers, but fan-out alone does not track the three checks as one workflow or coordinate publication after all succeed. A Step Functions Parallel state can run the checks and then continue to publication.",
+      "rubric": [
+        "Describes SNS as fan-out rather than workflow orchestration",
+        "Identifies the need to coordinate completion of all checks",
+        "Names Step Functions Parallel as the suitable workflow feature"
+      ]
+    }
+  ]
+}

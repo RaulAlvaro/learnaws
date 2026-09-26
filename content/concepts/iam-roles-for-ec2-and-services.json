@@ -1,0 +1,406 @@
+{
+  "conceptId": "iam-roles-for-ec2-and-services",
+  "card": {
+    "en": {
+      "tldr": "Give applications AWS permissions through workload roles rather than access keys stored in code or configuration. For EC2, pass a role to the instance through an instance profile; for ECS workloads that need different permissions, use distinct task roles instead of relying on one shared EC2 instance role.",
+      "whenToUse": [
+        "An application on EC2 must call AWS APIs without distributing long-term access keys.",
+        "Several ECS tasks on the same EC2 instance need different AWS permissions.",
+        "An application on EC2 must access resources in another AWS account."
+      ],
+      "keyFacts": [
+        "An EC2 instance profile contains a role and makes its temporary credentials available to applications on the instance.",
+        "Only one role can be assigned to an EC2 instance at a time; applications on that instance share its permissions.",
+        "ECS task roles can be distinct from the role of the EC2 instance hosting the tasks.",
+        "With the AWS CLI or API, create the EC2 role and instance profile separately, then specify the instance profile when launching the instance.",
+        "A role can be attached to an already running EC2 instance through an instance profile.",
+        "Launching an EC2 instance with a role requires permission to launch the instance and permission to pass that role."
+      ],
+      "gotchas": [
+        "Creating an EC2 role through the CLI or API does not, by itself, create the instance profile needed to pass it to an instance.",
+        "An EC2 instance role does not give different applications on the same instance separate sets of permissions.",
+        "Broad iam:PassRole permission can let a user launch an instance with a role that grants more access than intended."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "application on EC2 must call AWS APIs without stored keys",
+        "ECS tasks on one host need different permissions",
+        "launch an instance with only an approved role",
+        "EC2 application needs cross-account access"
+      ]
+    },
+    "es": {
+      "tldr": "Otorga permisos de AWS a las aplicaciones mediante roles de la carga de trabajo, en lugar de guardar access keys en el código o la configuración. Para EC2, pasa el rol mediante un instance profile; si las tareas de ECS necesitan permisos distintos, usa roles de tarea separados en vez de depender de un único rol compartido de la instancia.",
+      "whenToUse": [
+        "Una aplicación en EC2 debe llamar a las API de AWS sin distribuir access keys de larga duración.",
+        "Varias tareas de ECS en la misma instancia EC2 necesitan permisos distintos de AWS.",
+        "Una aplicación en EC2 debe acceder a recursos de otra cuenta de AWS."
+      ],
+      "keyFacts": [
+        "Un instance profile de EC2 contiene un rol y pone sus credenciales temporales a disposición de las aplicaciones de la instancia.",
+        "Solo se puede asignar un rol a una instancia EC2 a la vez; las aplicaciones de esa instancia comparten sus permisos.",
+        "Los roles de tarea de ECS pueden ser distintos del rol de la instancia EC2 que aloja las tareas.",
+        "Con AWS CLI o AWS API, creas por separado el rol y el instance profile de EC2; al iniciar la instancia, especificas el instance profile.",
+        "Puedes asociar un rol a una instancia EC2 que ya está en ejecución mediante un instance profile.",
+        "Para iniciar una instancia EC2 con un rol, necesitas permiso para iniciar la instancia y para pasar ese rol."
+      ],
+      "gotchas": [
+        "Crear un rol de EC2 mediante CLI o API no crea por sí solo el instance profile necesario para pasarlo a una instancia.",
+        "Un rol de instancia EC2 no proporciona conjuntos de permisos separados a distintas aplicaciones de la misma instancia.",
+        "Un permiso iam:PassRole demasiado amplio puede permitir que un usuario inicie una instancia con un rol que otorgue más acceso del previsto."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "application on EC2 must call AWS APIs without stored keys",
+        "ECS tasks on one host need different permissions",
+        "launch an instance with only an approved role",
+        "EC2 application needs cross-account access"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "iam-roles-for-ec2-and-services--91c0bc53",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A ticketing company runs two ECS tasks on the same EC2 host. One task reads a reports bucket; the other writes to a fulfillment bucket, and neither should receive the other's permissions. The team also wants to avoid application access keys. Which design meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Give each task an IAM user's access keys limited to its bucket actions.",
+          "correct": false,
+          "why": "Separate IAM users could distinguish permissions, but they would place long-term keys in the applications."
+        },
+        {
+          "id": "B",
+          "text": "Assign each ECS task its own role granting only that task's required bucket actions.",
+          "correct": true,
+          "why": "Distinct ECS task roles provide granular permissions even when tasks share an EC2 host."
+        },
+        {
+          "id": "C",
+          "text": "Put two IAM roles into the host's instance profile and have each task select its own role.",
+          "correct": false,
+          "why": "An instance profile can contain only one IAM role."
+        },
+        {
+          "id": "D",
+          "text": "Attach one EC2 instance role granting both sets of bucket actions and have both tasks use it.",
+          "correct": false,
+          "why": "Applications using the same EC2 instance role share its permissions, so the tasks would not be separated."
+        }
+      ],
+      "explanation": "The tasks need separate permissions while running on the same EC2 host. ECS task roles can be distinguished from the host's EC2 role, allowing each task to receive only its required access without application keys. A single host role would share permissions across applications, and an instance profile cannot contain two roles.",
+      "keywordCues": [
+        "two ECS tasks on the same EC2 host",
+        "neither should receive the other's permissions",
+        "avoid application access keys",
+        "MOST securely"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html"
+      ],
+      "es": {
+        "stem": "Una empresa de venta de boletos ejecuta dos tareas de ECS en el mismo host EC2. Una tarea lee un bucket de informes y la otra escribe en un bucket de entregas; ninguna debe recibir los permisos de la otra. El equipo también quiere evitar access keys en las aplicaciones. ¿Qué diseño cumple estos requisitos de la forma MOST securely?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Entrega a cada tarea las access keys de un usuario de IAM limitadas a las acciones necesarias para su bucket.",
+            "why": "Los usuarios de IAM separarían los permisos, pero colocarían claves de larga duración en las aplicaciones."
+          },
+          {
+            "id": "B",
+            "text": "Asigna a cada tarea de ECS su propio rol con solo las acciones necesarias para su bucket.",
+            "why": "Los roles de tarea distintos permiten permisos específicos aunque las tareas compartan un host EC2."
+          },
+          {
+            "id": "C",
+            "text": "Coloca dos roles de IAM en el instance profile del host y haz que cada tarea seleccione el suyo.",
+            "why": "Un instance profile solo puede contener un rol de IAM."
+          },
+          {
+            "id": "D",
+            "text": "Asocia al host un único rol de instancia EC2 con ambos conjuntos de acciones sobre los buckets y haz que las dos tareas lo usen.",
+            "why": "Las aplicaciones que usan el mismo rol de instancia EC2 comparten sus permisos, por lo que las tareas no quedarían separadas."
+          }
+        ],
+        "explanation": "Las tareas necesitan permisos separados aunque se ejecuten en el mismo host EC2. Los roles de tarea de ECS pueden ser distintos del rol de EC2 del host, lo que permite otorgar a cada tarea solo el acceso necesario sin claves en las aplicaciones. Un único rol del host compartiría los permisos y un instance profile no puede contener dos roles."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-roles-for-ec2-and-services--4bfecf30",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A laboratory lets a deployment operator launch EC2 instances for a data-ingestion application. The application needs a designated role with read access to its input bucket, but the operator must not be able to launch an instance with an existing, more privileged role. Which authorization design meets these requirements MOST securely?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allow the operator to pass the designated role but do not grant permission to launch EC2 instances.",
+          "correct": false,
+          "why": "Passing a role alone does not give the operator permission to launch an instance."
+        },
+        {
+          "id": "B",
+          "text": "Allow the operator to launch EC2 instances and grant iam:PassRole for every role in the account.",
+          "correct": false,
+          "why": "Passing every role would allow the operator to select the more privileged role."
+        },
+        {
+          "id": "C",
+          "text": "Allow the operator to launch EC2 instances and grant iam:PassRole only for the designated role.",
+          "correct": true,
+          "why": "Launching with a role requires both launch permission and permission to pass that specific role."
+        },
+        {
+          "id": "D",
+          "text": "Allow the operator to launch EC2 instances and place the designated role's permissions policy directly on the operator.",
+          "correct": false,
+          "why": "Permissions on the operator do not grant the application the role or restrict which role the operator can pass."
+        }
+      ],
+      "explanation": "The operator must launch instances with one approved role, not choose a more privileged one. Granting instance-launch permission and scoping iam:PassRole to the designated role meets both requirements. Broad PassRole permission fails the privilege constraint, while PassRole without launch permission is insufficient.",
+      "keywordCues": [
+        "lets a deployment operator launch EC2 instances",
+        "a designated role",
+        "must not be able to launch an instance with an existing, more privileged role",
+        "MOST securely"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio permite que un operador de implementación inicie instancias EC2 para una aplicación de ingesta de datos. La aplicación necesita un rol designado con acceso de lectura a su bucket de entrada, pero el operador no debe poder iniciar una instancia con otro rol existente que tenga más privilegios. ¿Qué diseño de autorización cumple estos requisitos de la forma MOST securely?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Permite que el operador pase el rol designado, pero no le concedas permiso para iniciar instancias EC2.",
+            "why": "El permiso para pasar un rol, por sí solo, no permite iniciar una instancia."
+          },
+          {
+            "id": "B",
+            "text": "Permite que el operador inicie instancias EC2 y concédele iam:PassRole para todos los roles de la cuenta.",
+            "why": "Permitir pasar cualquier rol dejaría que el operador eligiera el rol con más privilegios."
+          },
+          {
+            "id": "C",
+            "text": "Permite que el operador inicie instancias EC2 y concédele iam:PassRole solo para el rol designado.",
+            "why": "Iniciar una instancia con un rol requiere permiso de inicio y permiso para pasar ese rol específico."
+          },
+          {
+            "id": "D",
+            "text": "Permite que el operador inicie instancias EC2 y asigna directamente al operador la política de permisos del rol designado.",
+            "why": "Los permisos del operador no otorgan el rol a la aplicación ni restringen qué rol puede pasar el operador."
+          }
+        ],
+        "explanation": "El operador debe iniciar instancias con un solo rol aprobado, sin poder elegir otro con más privilegios. Conceder permiso para iniciar instancias y limitar iam:PassRole al rol designado cumple ambos requisitos. Un permiso PassRole amplio incumple la restricción de privilegios, mientras que PassRole sin permiso de inicio es insuficiente."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-roles-for-ec2-and-services--42bb6c28",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 2,
+      "stem": "A conservation nonprofit has a fleet of running EC2 instances whose applications read field reports from S3 using access keys in configuration files. The team wants to remove those keys without rebuilding the instances and minimize ongoing credential maintenance. Which two actions meet these requirements? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure the applications to use an AWS SDK credential provider for the instance profile rather than reading keys from configuration files.",
+          "correct": true,
+          "why": "An SDK instance-profile credential provider can manage the role's temporary credentials without application-managed key updates."
+        },
+        {
+          "id": "B",
+          "text": "Replace the stored keys with a new IAM user's keys and schedule regular key updates.",
+          "correct": false,
+          "why": "Rotating IAM user keys still leaves long-term credentials on the instances and requires maintenance."
+        },
+        {
+          "id": "C",
+          "text": "Keep the current access keys in the configuration files and restrict the keys to read-only S3 actions.",
+          "correct": false,
+          "why": "Narrower permissions do not remove the stored access keys or their maintenance burden."
+        },
+        {
+          "id": "D",
+          "text": "Create an EC2-trusted role with the required S3 access in an instance profile and associate the profile with the running instances.",
+          "correct": true,
+          "why": "An instance profile can be associated with running EC2 instances and provides the applications with role-based temporary credentials."
+        },
+        {
+          "id": "E",
+          "text": "Place one application role in an instance profile and a second application role directly on each EC2 instance.",
+          "correct": false,
+          "why": "An EC2 instance can have only one assigned role, so this does not provide a second independent instance role."
+        }
+      ],
+      "explanation": "The fleet must keep running, stop using stored keys, and avoid routine credential replacement. An instance profile can be associated with a running EC2 instance, and an SDK credential provider can manage the role's automatically updated temporary credentials. Replacing or narrowing IAM user keys leaves keys on the instances, while adding a second role to each instance is not supported.",
+      "keywordCues": [
+        "fleet of running EC2 instances",
+        "access keys in configuration files",
+        "without rebuilding the instances",
+        "minimize ongoing credential maintenance",
+        "(Choose two.)"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html"
+      ],
+      "es": {
+        "stem": "Una organización de conservación tiene una flota de instancias EC2 en ejecución cuyas aplicaciones leen informes de campo de S3 mediante access keys guardadas en archivos de configuración. El equipo quiere quitar esas claves sin volver a crear las instancias y minimizar el mantenimiento continuo de credenciales. ¿Qué dos acciones cumplen estos requisitos? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configura las aplicaciones para usar un proveedor de credenciales de AWS SDK para el instance profile en lugar de leer claves de archivos de configuración.",
+            "why": "Un proveedor de credenciales de SDK para el instance profile puede administrar las credenciales temporales del rol sin que la aplicación actualice claves."
+          },
+          {
+            "id": "B",
+            "text": "Reemplaza las claves guardadas por las de un nuevo usuario de IAM y programa actualizaciones periódicas.",
+            "why": "Rotar las claves de un usuario de IAM mantiene credenciales de larga duración en las instancias y requiere mantenimiento."
+          },
+          {
+            "id": "C",
+            "text": "Conserva las access keys actuales en los archivos de configuración y limita sus permisos a acciones de solo lectura en S3.",
+            "why": "Reducir los permisos no elimina las claves guardadas ni el trabajo de mantenerlas."
+          },
+          {
+            "id": "D",
+            "text": "Crea un rol que confíe en EC2 y tenga el acceso necesario a S3 dentro de un instance profile; asocia el perfil a las instancias en ejecución.",
+            "why": "Puedes asociar un instance profile a instancias EC2 en ejecución para proporcionar credenciales temporales basadas en el rol."
+          },
+          {
+            "id": "E",
+            "text": "Coloca un rol de aplicación en un instance profile y asocia un segundo rol de aplicación directamente a cada instancia EC2.",
+            "why": "Una instancia EC2 solo puede tener un rol asignado, por lo que este diseño no proporciona un segundo rol independiente."
+          }
+        ],
+        "explanation": "La flota debe seguir en ejecución, dejar de usar claves guardadas y evitar reemplazos rutinarios de credenciales. Puedes asociar un instance profile a una instancia EC2 en ejecución, y un proveedor de credenciales de SDK puede administrar las credenciales temporales del rol, que se actualizan automáticamente. Reemplazar o limitar las claves de usuarios de IAM las deja en las instancias; agregar un segundo rol a cada instancia no es compatible."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-roles-for-ec2-and-services--9b1c860c",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A publisher deploys an image-processing application to new EC2 instances using the AWS CLI. The application must read one S3 bucket, and the deployment must not place access keys on the instances. Which approach meets these requirements with the LEAST credential-management overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create an EC2-trusted IAM role with read access to the bucket, add it to an instance profile, and specify that profile when launching instances.",
+          "correct": true,
+          "why": "The instance profile passes the role to EC2 so the application can use automatically updated temporary credentials."
+        },
+        {
+          "id": "B",
+          "text": "Create an IAM user with read access to the bucket and periodically replace its access keys in each instance's configuration.",
+          "correct": false,
+          "why": "Periodic key replacement still requires distributing and managing long-term credentials on the instances."
+        },
+        {
+          "id": "C",
+          "text": "Create an IAM user with read access to the bucket and copy its access keys to each instance during deployment.",
+          "correct": false,
+          "why": "The application would use long-term keys that must be distributed and managed on every instance."
+        },
+        {
+          "id": "D",
+          "text": "Create an EC2-trusted IAM role with read access to the bucket and specify the role name directly when launching instances with the CLI.",
+          "correct": false,
+          "why": "CLI-based EC2 launches specify an instance profile, which must be created separately from the role."
+        }
+      ],
+      "explanation": "The deciding requirements are CLI-based deployment and no access keys on the instances. An EC2 role supplies temporary credentials, but with the CLI the role must be added to an instance profile that is specified at launch. Creating only the role misses that separate CLI configuration step; IAM user keys add credential-management work.",
+      "keywordCues": [
+        "using the AWS CLI",
+        "must read one S3 bucket",
+        "must not place access keys on the instances",
+        "LEAST credential-management overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html",
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html"
+      ],
+      "es": {
+        "stem": "Una editorial implementa una aplicación de procesamiento de imágenes en nuevas instancias EC2 mediante AWS CLI. La aplicación debe leer un bucket de S3 y la implementación no debe colocar access keys en las instancias. ¿Qué enfoque cumple estos requisitos con el LEAST credential-management overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Crea un rol de IAM que confíe en EC2 y tenga acceso de lectura al bucket, agrégalo a un instance profile y especifica ese perfil al iniciar las instancias.",
+            "why": "El instance profile pasa el rol a EC2 para que la aplicación use credenciales temporales que se actualizan automáticamente."
+          },
+          {
+            "id": "B",
+            "text": "Crea un usuario de IAM con acceso de lectura al bucket y reemplaza periódicamente sus access keys en la configuración de cada instancia.",
+            "why": "Reemplazar las claves periódicamente todavía exige distribuir y administrar credenciales de larga duración en las instancias."
+          },
+          {
+            "id": "C",
+            "text": "Crea un usuario de IAM con acceso de lectura al bucket y copia sus access keys a cada instancia durante la implementación.",
+            "why": "La aplicación usaría claves de larga duración que tendrías que distribuir y administrar en cada instancia."
+          },
+          {
+            "id": "D",
+            "text": "Crea un rol de IAM que confíe en EC2 y tenga acceso de lectura al bucket; especifica directamente el nombre del rol al iniciar las instancias con CLI.",
+            "why": "Al iniciar instancias EC2 mediante CLI, especificas un instance profile, que debes crear por separado del rol."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son la implementación mediante CLI y no colocar access keys en las instancias. Un rol de EC2 proporciona credenciales temporales, pero con CLI debes agregarlo a un instance profile y especificar ese perfil al iniciar la instancia. Crear solo el rol omite ese paso de configuración; las claves de un usuario de IAM agregan trabajo de administración."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "iam-roles-for-ec2-and-services--r0",
+      "conceptId": "iam-roles-for-ec2-and-services",
+      "kind": "recall",
+      "prompt": "An application on a running EC2 instance needs S3 access without stored keys. What should you attach, and how can the application obtain credentials?",
+      "promptEs": "Una aplicación en una instancia EC2 en ejecución necesita acceso a S3 sin claves guardadas. ¿Qué debes asociar y cómo puede obtener credenciales?",
+      "idealAnswer": "Associate an instance profile containing an EC2-trusted role with the running instance, and grant the role only the required S3 permissions. The application can use an AWS SDK instance-profile credential provider to obtain the role's temporary credentials.",
+      "rubric": [
+        "Identifies an instance profile containing an EC2-trusted IAM role.",
+        "Scopes the role's permissions to the required S3 access.",
+        "Explains that the application uses temporary role credentials, preferably through an SDK credential provider."
+      ]
+    }
+  ]
+}

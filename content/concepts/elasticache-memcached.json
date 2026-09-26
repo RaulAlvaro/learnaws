@@ -1,0 +1,363 @@
+{
+  "conceptId": "elasticache-memcached",
+  "card": {
+    "en": {
+      "tldr": "Choose ElastiCache for Memcached for a simple, disposable object cache that benefits from multithreaded nodes and partitioning across nodes. If the cache needs replication, automatic failover, or Redis-style data structures, choose Valkey or Redis OSS instead.",
+      "whenToUse": [
+        "Cached objects can be regenerated; cache replication and restore are not required.",
+        "The workload benefits from large nodes with multiple cores or threads.",
+        "Capacity must scale out and in by adding or removing cache nodes."
+      ],
+      "keyFacts": [
+        "Memcached is an in-memory key-value engine with a simple data model.",
+        "Memcached supports data partitioning and multithreading.",
+        "Memcached does not provide high availability through replication or automatic failover.",
+        "Memcached does not support Pub/Sub or sorted sets.",
+        "Backup and restore are available for serverless Memcached caches, but not for node-based Memcached clusters."
+      ],
+      "gotchas": [
+        "Do not choose Memcached when losing a cache node must trigger automatic failover to a replica.",
+        "Do not confuse partitioning across nodes with replication of cached data.",
+        "Do not claim Memcached never supports backups: serverless caches have backup and restore.",
+        "Memcached supports partitioning, but not online resharding."
+      ],
+      "confusedWith": [
+        {
+          "concept": "ElastiCache for Redis OSS/Valkey",
+          "difference": "Choose Redis OSS or Valkey when replication, automatic failover, Pub/Sub, or sorted sets matter; choose Memcached for the simpler multithreaded cache."
+        },
+        {
+          "concept": "DynamoDB Accelerator (DAX)",
+          "difference": "DAX targets DynamoDB read caching; Memcached is the choice here for a simple, horizontally partitioned object cache."
+        }
+      ],
+      "examCues": [
+        "disposable cached objects",
+        "large nodes with multiple threads",
+        "add and remove cache nodes",
+        "no replication or failover requirement"
+      ]
+    },
+    "es": {
+      "tldr": "Elige ElastiCache for Memcached para una caché sencilla de objetos que puedes regenerar y que se beneficia de nodos multihilo y partición entre nodos. Si necesitas replicación, failover automático o estructuras de datos de Redis, elige Valkey o Redis OSS.",
+      "whenToUse": [
+        "Puedes regenerar los objetos almacenados; no necesitas replicación ni restauración de la caché.",
+        "La carga aprovecha nodos grandes con varios núcleos o hilos.",
+        "Necesitas aumentar o reducir la capacidad agregando o quitando nodos."
+      ],
+      "keyFacts": [
+        "Memcached es un motor en memoria de clave-valor con un modelo de datos sencillo.",
+        "Memcached admite partición de datos y ejecución multihilo.",
+        "Memcached no ofrece alta disponibilidad mediante replicación ni failover automático.",
+        "Memcached no admite Pub/Sub ni sorted sets.",
+        "Backup and restore está disponible para cachés Memcached serverless, pero no para clústeres Memcached basados en nodos."
+      ],
+      "gotchas": [
+        "No elijas Memcached si la pérdida de un nodo debe activar failover automático hacia una réplica.",
+        "No confundas la partición entre nodos con la replicación de los datos en caché.",
+        "No afirmes que Memcached nunca admite backups: las cachés serverless admiten backup and restore.",
+        "Memcached admite partición, pero no online resharding."
+      ],
+      "confusedWith": [
+        {
+          "concept": "ElastiCache for Redis OSS/Valkey",
+          "difference": "Elige Redis OSS o Valkey si necesitas replicación, failover automático, Pub/Sub o sorted sets; elige Memcached para la caché multihilo más sencilla."
+        },
+        {
+          "concept": "DynamoDB Accelerator (DAX)",
+          "difference": "DAX está orientado a la caché de lecturas de DynamoDB; aquí Memcached resuelve la necesidad de una caché sencilla de objetos particionada horizontalmente."
+        }
+      ],
+      "examCues": [
+        "disposable cached objects",
+        "large nodes with multiple threads",
+        "add and remove cache nodes",
+        "no replication or failover requirement"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/SelectEngine.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "elasticache-memcached--bc91c457",
+      "conceptId": "elasticache-memcached",
+      "secondaryConcepts": [
+        "elasticache-redis-valkey",
+        "dynamodb-dax"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A travel marketplace caches destination-page objects that its application can rebuild from its database. Traffic varies by season, so the team wants to add and remove cache nodes and make use of multiple threads on large nodes. The cached objects do not need replication or recovery. Which cache engine meets these requirements with the LEAST unnecessary functionality?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ElastiCache for Valkey with cluster mode enabled",
+          "correct": false,
+          "why": "It can partition data, but Memcached better matches the stated need for a simple cache that uses multiple threads on large nodes."
+        },
+        {
+          "id": "B",
+          "text": "ElastiCache for Redis OSS with cluster mode disabled",
+          "correct": false,
+          "why": "This configuration does not provide the requested data partitioning across cache nodes."
+        },
+        {
+          "id": "C",
+          "text": "ElastiCache for Memcached",
+          "correct": true,
+          "why": "It provides a simple object cache with multithreading and the ability to add or remove nodes."
+        },
+        {
+          "id": "D",
+          "text": "DynamoDB Accelerator (DAX)",
+          "correct": false,
+          "why": "DAX is aimed at caching DynamoDB reads, not at selecting a multithreaded ElastiCache object-cache engine."
+        }
+      ],
+      "explanation": "The deciding requirements are a simple object cache, multithreaded large nodes, and capacity changes by adding or removing nodes. ElastiCache for Memcached matches all three, while the objects' disposability removes any need for replication. Valkey with cluster mode enabled can partition data, but it does not match the specified multithreaded-node advantage. Redis OSS with cluster mode disabled does not provide the requested partitioning.",
+      "keywordCues": [
+        "objects that its application can rebuild",
+        "add and remove cache nodes",
+        "multiple threads on large nodes",
+        "do not need replication or recovery"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/SelectEngine.html"
+      ],
+      "es": {
+        "stem": "Una plataforma de viajes guarda en caché objetos de páginas de destinos que su aplicación puede reconstruir a partir de la base de datos. El tráfico cambia según la temporada, así que el equipo quiere agregar y quitar nodos de caché y aprovechar varios hilos en nodos grandes. Los objetos en caché no necesitan replicación ni recuperación. ¿Qué motor de caché cumple estos requisitos con la LEAST unnecessary functionality?",
+        "options": [
+          {
+            "id": "A",
+            "text": "ElastiCache for Valkey con cluster mode enabled",
+            "why": "Puede particionar datos, pero Memcached se ajusta mejor a la necesidad de una caché sencilla que use varios hilos en nodos grandes."
+          },
+          {
+            "id": "B",
+            "text": "ElastiCache for Redis OSS con cluster mode disabled",
+            "why": "Esta configuración no ofrece la partición de datos entre nodos de caché que se solicita."
+          },
+          {
+            "id": "C",
+            "text": "ElastiCache for Memcached",
+            "why": "Ofrece una caché sencilla de objetos, ejecución multihilo y la posibilidad de agregar o quitar nodos."
+          },
+          {
+            "id": "D",
+            "text": "DynamoDB Accelerator (DAX)",
+            "why": "DAX está orientado a almacenar en caché lecturas de DynamoDB, no a elegir un motor de ElastiCache multihilo para objetos."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son una caché sencilla de objetos, nodos grandes multihilo y cambios de capacidad mediante la incorporación o eliminación de nodos. ElastiCache for Memcached cumple los tres; como puedes regenerar los objetos, no necesitas replicación. Valkey con cluster mode enabled puede particionar datos, pero no ofrece la ventaja multihilo solicitada. Redis OSS con cluster mode disabled no proporciona la partición requerida."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elasticache-memcached--1ef1cf7a",
+      "conceptId": "elasticache-memcached",
+      "secondaryConcepts": [
+        "elasticache-redis-valkey",
+        "dynamodb-dax"
+      ],
+      "domain": "d3",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research portal uses a cache for computed chart objects that are recreated whenever they are missing. During enrollment periods, its engineers add cache nodes; afterward, they remove nodes. The team wants the simplest engine that supports this pattern and can use multiple threads on large nodes, and it does not need Pub/Sub, sorted sets, or cache replication. Which engine should the team select?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ElastiCache for Memcached",
+          "correct": true,
+          "why": "Its simple model, multithreading, and ability to add and remove nodes match the portal's disposable-object cache."
+        },
+        {
+          "id": "B",
+          "text": "ElastiCache for Valkey with cluster mode enabled",
+          "correct": false,
+          "why": "It can scale a partitioned cache, but does not match the specified need for multithreading on large nodes."
+        },
+        {
+          "id": "C",
+          "text": "DynamoDB Accelerator (DAX)",
+          "correct": false,
+          "why": "It targets DynamoDB read caching rather than the requested choice of a simple, multithreaded ElastiCache engine."
+        },
+        {
+          "id": "D",
+          "text": "ElastiCache for Redis OSS with cluster mode enabled",
+          "correct": false,
+          "why": "It supports partitioning, but does not provide the multithreaded-engine characteristic the team requests."
+        }
+      ],
+      "explanation": "The engineers explicitly prioritize a simple model, multithreaded large nodes, and the ability to add and remove cache nodes. AWS identifies these as reasons to choose Memcached. Redis OSS and Valkey with cluster mode enabled can partition data, but they do not meet the multithreaded-engine requirement. The portal also has no need for their Pub/Sub, sorted-set, or replication features.",
+      "keywordCues": [
+        "computed chart objects that are recreated",
+        "add cache nodes",
+        "remove nodes",
+        "multiple threads on large nodes",
+        "does not need Pub/Sub, sorted sets, or cache replication"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/SelectEngine.html"
+      ],
+      "es": {
+        "stem": "Un portal de investigación usa una caché para objetos de gráficos calculados que vuelve a crear cuando faltan. Durante los períodos de inscripción, sus ingenieros agregan nodos de caché; después, los quitan. El equipo quiere el motor más sencillo que admita este patrón y aproveche varios hilos en nodos grandes; no necesita Pub/Sub, sorted sets ni replicación de la caché. ¿Qué motor debe seleccionar?",
+        "options": [
+          {
+            "id": "A",
+            "text": "ElastiCache for Memcached",
+            "why": "Su modelo sencillo, ejecución multihilo y capacidad de agregar o quitar nodos se ajustan a esta caché de objetos regenerables."
+          },
+          {
+            "id": "B",
+            "text": "ElastiCache for Valkey con cluster mode enabled",
+            "why": "Puede escalar una caché particionada, pero no cumple el requisito de ejecución multihilo en nodos grandes."
+          },
+          {
+            "id": "C",
+            "text": "DynamoDB Accelerator (DAX)",
+            "why": "Está orientado a la caché de lecturas de DynamoDB, no a la elección de un motor ElastiCache sencillo y multihilo."
+          },
+          {
+            "id": "D",
+            "text": "ElastiCache for Redis OSS con cluster mode enabled",
+            "why": "Admite partición, pero no ofrece la característica de motor multihilo que solicita el equipo."
+          }
+        ],
+        "explanation": "Los ingenieros priorizan explícitamente un modelo sencillo, nodos grandes multihilo y la posibilidad de agregar y quitar nodos. AWS identifica estas características como motivos para elegir Memcached. Redis OSS y Valkey con cluster mode enabled pueden particionar datos, pero no cumplen el requisito de motor multihilo. El portal tampoco necesita sus funciones de Pub/Sub, sorted sets o replicación."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "elasticache-memcached--91781f93",
+      "conceptId": "elasticache-memcached",
+      "secondaryConcepts": [
+        "elasticache-redis-valkey"
+      ],
+      "domain": "d3",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "An architecture team is assigning cache engines to five new workloads. It wants to use ElastiCache for Memcached where a simple, multithreaded object cache can scale by adding nodes and where losing cached entries is acceptable. Which TWO workloads best fit that decision? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "A live event dashboard needs Pub/Sub to distribute updates to connected viewers.",
+          "correct": false,
+          "why": "Memcached does not support the Pub/Sub capability required by this workload."
+        },
+        {
+          "id": "B",
+          "text": "An account portal requires cache replicas and automatic failover for its active cache.",
+          "correct": false,
+          "why": "Memcached provides neither high availability through replication nor automatic failover."
+        },
+        {
+          "id": "C",
+          "text": "A sports site needs sorted sets to maintain live rankings in its cache.",
+          "correct": false,
+          "why": "Memcached does not support sorted sets, so Valkey or Redis OSS is a better match."
+        },
+        {
+          "id": "D",
+          "text": "A product catalog caches regenerable item objects and adds cache nodes during promotions.",
+          "correct": true,
+          "why": "Disposable cached objects and scaling by adding nodes fit Memcached's simple, partitioned model."
+        },
+        {
+          "id": "E",
+          "text": "A mapping service caches reproducible tile objects on large nodes and wants multiple threads.",
+          "correct": true,
+          "why": "A regenerable object cache that benefits from multithreaded large nodes matches Memcached."
+        }
+      ],
+      "explanation": "The team is looking for disposable object caches that benefit from Memcached's simple model, node scaling, and multithreading. The product catalog and mapping service satisfy those conditions without asking the cache to preserve data. The event dashboard and sports site require Pub/Sub and sorted sets, respectively, which Memcached lacks. The account portal requires replication and automatic failover, which Memcached also lacks.",
+      "keywordCues": [
+        "simple, multithreaded object cache",
+        "losing cached entries is acceptable",
+        "regenerable item objects and adds cache nodes",
+        "reproducible tile objects on large nodes and wants multiple threads"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/SelectEngine.html"
+      ],
+      "es": {
+        "stem": "Un equipo de arquitectura asigna motores de caché a cinco cargas nuevas. Quiere usar ElastiCache for Memcached cuando una caché sencilla y multihilo de objetos pueda escalar agregando nodos y sea aceptable perder las entradas almacenadas. ¿Qué DOS cargas se ajustan mejor a esa decisión? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Un panel de eventos en vivo necesita Pub/Sub para distribuir actualizaciones a los espectadores conectados.",
+            "why": "Memcached no admite la capacidad de Pub/Sub que esta carga requiere."
+          },
+          {
+            "id": "B",
+            "text": "Un portal de cuentas requiere réplicas de caché y automatic failover para su caché activa.",
+            "why": "Memcached no ofrece alta disponibilidad mediante replicación ni automatic failover."
+          },
+          {
+            "id": "C",
+            "text": "Un sitio deportivo necesita sorted sets para mantener clasificaciones en vivo en su caché.",
+            "why": "Memcached no admite sorted sets; Valkey o Redis OSS se ajusta mejor."
+          },
+          {
+            "id": "D",
+            "text": "Un catálogo de productos almacena objetos regenerables y agrega nodos de caché durante las promociones.",
+            "why": "Los objetos regenerables y el crecimiento mediante nodos adicionales se ajustan al modelo sencillo y particionado de Memcached."
+          },
+          {
+            "id": "E",
+            "text": "Un servicio de mapas almacena mosaicos reproducibles en nodos grandes y quiere aprovechar varios hilos.",
+            "why": "Una caché de objetos regenerables que se beneficia de nodos grandes multihilo se ajusta a Memcached."
+          }
+        ],
+        "explanation": "El equipo busca cachés de objetos regenerables que aprovechen el modelo sencillo, el escalado mediante nodos y la ejecución multihilo de Memcached. El catálogo de productos y el servicio de mapas cumplen esas condiciones sin exigir que la caché conserve los datos. El panel de eventos y el sitio deportivo requieren Pub/Sub y sorted sets, respectivamente, funciones que Memcached no ofrece. El portal de cuentas requiere replicación y automatic failover, que Memcached tampoco ofrece."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "elasticache-memcached--r0",
+      "conceptId": "elasticache-memcached",
+      "kind": "recall",
+      "prompt": "Which ElastiCache engine fits a regenerable object cache that needs multithreaded large nodes and node-based scale-out, and why?",
+      "promptEs": "¿Qué motor de ElastiCache elegirías para objetos regenerables que requieren nodos grandes multihilo y escalado al agregar nodos, y por qué?",
+      "idealAnswer": "Choose ElastiCache for Memcached. It provides a simple object-cache model, uses multiple threads, and can scale out by adding nodes; the objects do not require replication.",
+      "rubric": [
+        "Names ElastiCache for Memcached.",
+        "Mentions multithreading and adding nodes for scale.",
+        "Connects the choice to regenerable data and no replication need."
+      ]
+    },
+    {
+      "id": "elasticache-memcached--r1",
+      "conceptId": "elasticache-memcached",
+      "kind": "why-not",
+      "prompt": "Why not use Memcached for a cache whose owners require replicas, automatic failover, and sorted-set rankings?",
+      "promptEs": "¿Por qué no usarías Memcached para una caché cuyos responsables exigen réplicas, automatic failover y clasificaciones con sorted sets?",
+      "idealAnswer": "Memcached does not provide high availability through replication, automatic failover, or sorted sets. Choose ElastiCache for Valkey or Redis OSS for those requirements instead.",
+      "rubric": [
+        "Identifies the lack of replication and automatic failover.",
+        "Identifies the lack of sorted sets.",
+        "Names Valkey or Redis OSS as the better fit."
+      ]
+    }
+  ]
+}

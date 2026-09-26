@@ -1,0 +1,405 @@
+{
+  "conceptId": "s3-lifecycle-policies",
+  "card": {
+    "en": {
+      "tldr": "S3 Lifecycle rules automate storage-class transitions and object expiration for a bucket. Choose them when the decision depends on an object's age and the goal is to reduce storage costs or delete objects after a retention period without running a cleanup process.",
+      "whenToUse": [
+        "Objects follow a predictable pattern: active first, archived later, then deleted.",
+        "Existing and future objects should follow the same age-based expiration rule.",
+        "Only objects matching a prefix, tag, or size filter should receive an action."
+      ],
+      "keyFacts": [
+        "Lifecycle configurations contain transition and expiration actions; rules apply to both existing and new objects.",
+        "By default, objects smaller than 128 KB do not transition to any storage class; a custom object-size filter can allow them.",
+        "S3 Glacier Flexible Retrieval and S3 Glacier Deep Archive are not available for real-time access.",
+        "A single rule cannot schedule a transition out of a storage class before its minimum storage duration has passed.",
+        "In a versioning-enabled or versioning-suspended bucket, objects with Pending or Failed replication status cannot transition."
+      ],
+      "gotchas": [
+        "A bucket policy that denies deletion does not stop an S3 Lifecycle rule from deleting objects in a general purpose bucket.",
+        "Transitions incur request costs, which can outweigh storage savings for small objects.",
+        "A lifecycle action can occur after its eligibility date; a delay does not necessarily mean the rule failed."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "archive objects after a predictable number of days",
+        "delete both existing and future objects after retention",
+        "transition only objects matching a prefix",
+        "small objects are not transitioning"
+      ]
+    },
+    "es": {
+      "tldr": "Las reglas de S3 Lifecycle automatizan las transiciones entre clases de almacenamiento y la expiración de objetos de un bucket. Elígelas cuando la decisión dependa de la antigüedad del objeto y se busque reducir costos o eliminar objetos al terminar su período de retención sin operar un proceso de limpieza.",
+      "whenToUse": [
+        "Los objetos siguen un patrón predecible: primero se usan, después se archivan y finalmente se eliminan.",
+        "Los objetos existentes y futuros deben seguir la misma regla de expiración basada en su antigüedad.",
+        "La acción debe aplicarse solo a objetos que coincidan con un filtro de prefijo, etiqueta o tamaño."
+      ],
+      "keyFacts": [
+        "Las configuraciones de S3 Lifecycle incluyen acciones de transición y expiración; sus reglas se aplican a objetos existentes y nuevos.",
+        "De forma predeterminada, los objetos menores de 128 KB no se transfieren a ninguna otra clase de almacenamiento; un filtro de tamaño personalizado puede permitirlo.",
+        "Los objetos en S3 Glacier Flexible Retrieval y S3 Glacier Deep Archive no están disponibles para acceso en tiempo real.",
+        "Una sola regla no puede programar la salida de una clase antes de que termine su duración mínima de almacenamiento.",
+        "En un bucket con versioning habilitado o suspendido, los objetos cuyo estado de replicación sea Pending o Failed no pueden transferirse."
+      ],
+      "gotchas": [
+        "Una bucket policy que deniega eliminaciones no impide que una regla de S3 Lifecycle elimine objetos de un general purpose bucket.",
+        "Las transiciones generan costos por solicitud que pueden superar el ahorro de almacenamiento en objetos pequeños.",
+        "Una acción puede ejecutarse después de la fecha en que el objeto cumple las condiciones; la demora no implica necesariamente que la regla haya fallado."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "archive objects after a predictable number of days",
+        "delete both existing and future objects after retention",
+        "transition only objects matching a prefix",
+        "small objects are not transitioning"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "s3-lifecycle-policies--dfa2556c",
+      "conceptId": "s3-lifecycle-policies",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A delivery company stores diagnostic files in an S3 bucket. Some files are already older than the required 30-day retention period, and new files arrive daily. The company must delete files once they exceed 30 days of age without maintaining a cleanup application. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Run a scheduled application that lists the bucket and deletes files older than 30 days.",
+          "correct": false,
+          "why": "The application could delete the files but requires ongoing operation that a Lifecycle rule avoids."
+        },
+        {
+          "id": "B",
+          "text": "Add an S3 Lifecycle expiration action for files 30 days after creation.",
+          "correct": true,
+          "why": "Lifecycle expiration deletes eligible existing and future objects without a cleanup application."
+        },
+        {
+          "id": "C",
+          "text": "Add an S3 Lifecycle transition that moves files to S3 Standard-IA after 30 days.",
+          "correct": false,
+          "why": "A transition changes the storage class but does not delete files after the retention period."
+        },
+        {
+          "id": "D",
+          "text": "Deny access to files older than 30 days through a bucket policy.",
+          "correct": false,
+          "why": "Preventing access does not remove the files after their retention period."
+        }
+      ],
+      "explanation": "The deciding requirements are deletion by object age and coverage of both existing and future files. An S3 Lifecycle expiration rule applies to both groups, including existing objects already past the specified age. Moving files to S3 Standard-IA preserves them rather than deleting them. A scheduled application adds operational work that the managed Lifecycle action avoids.",
+      "keywordCues": [
+        "already older than the required 30-day retention period",
+        "new files arrive daily",
+        "delete files once they exceed 30 days of age",
+        "without maintaining a cleanup application"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html"
+      ],
+      "es": {
+        "stem": "Una empresa de entregas guarda archivos de diagnóstico en un bucket de S3. Algunos archivos ya superan el período de retención requerido de 30 días y siguen llegando archivos nuevos cada día. La empresa debe eliminar los archivos cuando superen los 30 días de antigüedad, sin mantener una aplicación de limpieza. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ejecutar una aplicación programada que enumere el bucket y elimine los archivos con más de 30 días.",
+            "why": "La aplicación podría eliminarlos, pero requiere operación continua que una regla de S3 Lifecycle evita."
+          },
+          {
+            "id": "B",
+            "text": "Agregar una acción de expiración de S3 Lifecycle para los archivos 30 días después de su creación.",
+            "why": "La expiración elimina los objetos existentes y futuros que cumplan la condición sin una aplicación de limpieza."
+          },
+          {
+            "id": "C",
+            "text": "Agregar una transición de S3 Lifecycle que mueva los archivos a S3 Standard-IA después de 30 días.",
+            "why": "La transición cambia la clase de almacenamiento, pero no elimina los archivos al terminar el período de retención."
+          },
+          {
+            "id": "D",
+            "text": "Denegar mediante una bucket policy el acceso a los archivos con más de 30 días.",
+            "why": "Impedir el acceso no elimina los archivos al terminar su período de retención."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son eliminar por antigüedad y cubrir archivos existentes y futuros. Una regla de expiración de S3 Lifecycle se aplica a ambos grupos, incluso a objetos existentes que ya superan la antigüedad indicada. Mover archivos a S3 Standard-IA los conserva en lugar de eliminarlos. Una aplicación programada agrega trabajo operativo que la acción administrada evita."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-lifecycle-policies--c1f4e5ea",
+      "conceptId": "s3-lifecycle-policies",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research studio plans to move large S3 objects to S3 Glacier Instant Retrieval four days after creation. It then wants to move them to S3 Glacier Deep Archive as soon as a single Lifecycle rule permits, without transitioning out before the first archival class's minimum storage duration has passed. Which schedule meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use one Lifecycle rule to transition to S3 Glacier Instant Retrieval on day 4 and S3 Glacier Deep Archive on day 20.",
+          "correct": false,
+          "why": "A single rule cannot transition out before S3 Glacier Instant Retrieval's 90-day minimum duration passes."
+        },
+        {
+          "id": "B",
+          "text": "Use two Lifecycle rules to transition to S3 Glacier Instant Retrieval on day 4 and S3 Glacier Deep Archive on day 20.",
+          "correct": false,
+          "why": "Two rules can schedule the early transition, but it would incur minimum-duration storage charges."
+        },
+        {
+          "id": "C",
+          "text": "Use one Lifecycle rule to transition to S3 Glacier Instant Retrieval on day 4 and S3 Glacier Deep Archive on day 90.",
+          "correct": false,
+          "why": "Day 90 is only 86 days after the day-4 transition, short of the first class's minimum duration."
+        },
+        {
+          "id": "D",
+          "text": "Use one Lifecycle rule to transition to S3 Glacier Instant Retrieval on day 4 and S3 Glacier Deep Archive on day 94.",
+          "correct": true,
+          "why": "Day 94 is 90 days after the first transition, so a single rule can schedule both actions."
+        }
+      ],
+      "explanation": "S3 Glacier Instant Retrieval has a 90-day minimum storage duration. Because the objects enter that class on day 4, a subsequent transition in one rule must be scheduled no earlier than day 94. Day 90 counts from object creation, not from entry into the storage class. Using two rules for an earlier move does not satisfy the requirement to avoid minimum-duration charges.",
+      "keywordCues": [
+        "four days after creation",
+        "a single Lifecycle rule",
+        "minimum storage duration has passed",
+        "LEAST operational overhead"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html"
+      ],
+      "es": {
+        "stem": "Un estudio de investigación planea mover objetos grandes de S3 a S3 Glacier Instant Retrieval cuatro días después de crearlos. Luego quiere moverlos a S3 Glacier Deep Archive tan pronto como lo permita una sola regla de S3 Lifecycle, sin salir de la primera clase de archivo antes de que termine su duración mínima de almacenamiento. ¿Qué programación cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Usar una regla de S3 Lifecycle para pasar a S3 Glacier Instant Retrieval el día 4 y a S3 Glacier Deep Archive el día 20.",
+            "why": "Una sola regla no puede programar la salida antes de que transcurra la duración mínima de 90 días de S3 Glacier Instant Retrieval."
+          },
+          {
+            "id": "B",
+            "text": "Usar dos reglas de S3 Lifecycle para pasar a S3 Glacier Instant Retrieval el día 4 y a S3 Glacier Deep Archive el día 20.",
+            "why": "Dos reglas pueden programar la transición anticipada, pero se generarían cargos por la duración mínima de almacenamiento."
+          },
+          {
+            "id": "C",
+            "text": "Usar una regla de S3 Lifecycle para pasar a S3 Glacier Instant Retrieval el día 4 y a S3 Glacier Deep Archive el día 90.",
+            "why": "El día 90 llega solo 86 días después de la transición del día 4, antes de completar la duración mínima de la primera clase."
+          },
+          {
+            "id": "D",
+            "text": "Usar una regla de S3 Lifecycle para pasar a S3 Glacier Instant Retrieval el día 4 y a S3 Glacier Deep Archive el día 94.",
+            "why": "El día 94 llega 90 días después de la primera transición, por lo que una sola regla puede programar ambas acciones."
+          }
+        ],
+        "explanation": "S3 Glacier Instant Retrieval tiene una duración mínima de almacenamiento de 90 días. Como los objetos entran en esa clase el día 4, la siguiente transición dentro de una sola regla debe programarse a partir del día 94. El día 90 se cuenta desde la creación del objeto, no desde su entrada en esa clase. Usar dos reglas para moverlos antes no cumple el requisito de evitar cargos por duración mínima."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-lifecycle-policies--467ec479",
+      "conceptId": "s3-lifecycle-policies",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "An accounting firm uses one general purpose S3 bucket for temporary files under `scratch/` and records under `records/`. A bucket-wide Lifecycle rule expires objects after 90 days, but the records must remain longer; a bucket policy already denies object deletions. Which change protects the records while continuing to expire temporary files with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the bucket-wide Lifecycle rule because the bucket policy will prevent expiration of the records.",
+          "correct": false,
+          "why": "A bucket policy cannot prevent deletions performed by an S3 Lifecycle rule."
+        },
+        {
+          "id": "B",
+          "text": "Change the bucket-wide Lifecycle expiration action to a transition to S3 Standard-IA.",
+          "correct": false,
+          "why": "That change preserves the records but also stops the required expiration of temporary files."
+        },
+        {
+          "id": "C",
+          "text": "Remove delete permissions from the IAM identities that upload objects under `records/`.",
+          "correct": false,
+          "why": "Changing uploader permissions does not stop the bucket-wide Lifecycle expiration action."
+        },
+        {
+          "id": "D",
+          "text": "Scope the Lifecycle expiration rule to the `scratch/` prefix instead of the entire bucket.",
+          "correct": true,
+          "why": "The rule continues to expire temporary files but no longer selects objects under `records/`."
+        }
+      ],
+      "explanation": "The requirement calls for different expiration behavior for two prefixes. Scoping the Lifecycle rule to `scratch/` retains automatic deletion of temporary files without selecting the longer-lived records. The existing bucket policy does not protect objects from Lifecycle deletion in a general purpose bucket. Replacing expiration with a transition would leave temporary files undeleted.",
+      "keywordCues": [
+        "general purpose S3 bucket",
+        "`scratch/`",
+        "`records/`",
+        "bucket-wide Lifecycle rule",
+        "records must remain longer"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html"
+      ],
+      "es": {
+        "stem": "Una firma contable usa un mismo general purpose bucket de S3 para archivos temporales bajo `scratch/` y registros bajo `records/`. Una regla de S3 Lifecycle para todo el bucket hace que los objetos expiren después de 90 días, pero los registros deben conservarse más tiempo; una bucket policy ya deniega la eliminación de objetos. ¿Qué cambio protege los registros y mantiene la expiración de los archivos temporales con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Conservar la regla de S3 Lifecycle para todo el bucket porque la bucket policy impedirá que expiren los registros.",
+            "why": "Una bucket policy no puede impedir las eliminaciones que realiza una regla de S3 Lifecycle."
+          },
+          {
+            "id": "B",
+            "text": "Cambiar la acción de expiración para todo el bucket por una transición a S3 Standard-IA.",
+            "why": "El cambio conserva los registros, pero también impide la expiración requerida de los archivos temporales."
+          },
+          {
+            "id": "C",
+            "text": "Quitar los permisos de eliminación a las identidades de IAM que cargan objetos bajo `records/`.",
+            "why": "Cambiar los permisos de quienes cargan objetos no detiene la acción de expiración de S3 Lifecycle para todo el bucket."
+          },
+          {
+            "id": "D",
+            "text": "Limitar la regla de expiración de S3 Lifecycle al prefijo `scratch/` en lugar de aplicarla a todo el bucket.",
+            "why": "La regla sigue eliminando los archivos temporales, pero deja de seleccionar los objetos bajo `records/`."
+          }
+        ],
+        "explanation": "Los requisitos exigen un comportamiento de expiración diferente para dos prefijos. Limitar la regla de S3 Lifecycle a `scratch/` mantiene la eliminación automática de archivos temporales sin seleccionar los registros que deben conservarse. La bucket policy existente no protege los objetos de la eliminación por S3 Lifecycle en un general purpose bucket. Reemplazar la expiración por una transición dejaría los archivos temporales sin eliminar."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "s3-lifecycle-policies--b3b56896",
+      "conceptId": "s3-lifecycle-policies",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A video company keeps encrypted, large S3 objects in a versioning-enabled bucket. Some objects have Pending or Failed replication status. The company wants eligible objects to move from S3 Standard to S3 Glacier Flexible Retrieval after one year, while retaining encryption and identifying why some objects do not move. Which TWO actions meet these requirements with the LEAST operational overhead? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure an S3 Lifecycle transition from S3 Standard to S3 Glacier Flexible Retrieval after one year.",
+          "correct": true,
+          "why": "The transition automates the requested age-based archival for eligible objects, and encrypted objects remain encrypted."
+        },
+        {
+          "id": "B",
+          "text": "Check replication status when investigating objects that remain in S3 Standard.",
+          "correct": true,
+          "why": "Pending and Failed replication statuses explain why affected objects cannot undergo the transition."
+        },
+        {
+          "id": "C",
+          "text": "Add a second Lifecycle transition from S3 Glacier Flexible Retrieval back to S3 Standard for objects that fail to archive.",
+          "correct": false,
+          "why": "Lifecycle cannot transition objects from S3 Glacier Flexible Retrieval back to S3 Standard."
+        },
+        {
+          "id": "D",
+          "text": "Use a bucket policy to force transitions of objects with Pending or Failed replication status.",
+          "correct": false,
+          "why": "Objects with either status cannot transition in this versioning-enabled bucket, and a bucket policy cannot override that constraint."
+        },
+        {
+          "id": "E",
+          "text": "Decrypt the objects before the Lifecycle transition and encrypt them again after archival.",
+          "correct": false,
+          "why": "Encrypted objects remain encrypted during a Lifecycle transition, so these extra operations are unnecessary."
+        }
+      ],
+      "explanation": "An S3 Lifecycle rule supplies the requested automatic, age-based move to S3 Glacier Flexible Retrieval, and objects stay encrypted throughout the transition. In a versioning-enabled bucket, objects with Pending or Failed replication status cannot transition, so checking that status is relevant when investigating objects left behind. Decrypting objects adds unnecessary work. A bucket policy cannot make an ineligible object transition.",
+      "keywordCues": [
+        "encrypted, large S3 objects",
+        "versioning-enabled bucket",
+        "Pending or Failed replication status",
+        "move from S3 Standard to S3 Glacier Flexible Retrieval after one year",
+        "identifying why some objects do not move"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html"
+      ],
+      "es": {
+        "stem": "Una empresa de video guarda objetos grandes y cifrados de S3 en un bucket con versioning habilitado. Algunos objetos tienen estado de replicación Pending o Failed. La empresa quiere mover los objetos elegibles de S3 Standard a S3 Glacier Flexible Retrieval después de un año, conservar el cifrado e identificar por qué algunos objetos no se mueven. ¿Qué DOS acciones cumplen estos requisitos con el LEAST operational overhead? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Configurar una transición de S3 Lifecycle de S3 Standard a S3 Glacier Flexible Retrieval después de un año.",
+            "why": "La transición automatiza el archivo por antigüedad de los objetos elegibles, y los objetos cifrados permanecen cifrados."
+          },
+          {
+            "id": "B",
+            "text": "Revisar el estado de replicación al investigar los objetos que siguen en S3 Standard.",
+            "why": "Los estados Pending y Failed explican por qué los objetos afectados no pueden realizar la transición."
+          },
+          {
+            "id": "C",
+            "text": "Agregar una segunda transición de S3 Lifecycle de S3 Glacier Flexible Retrieval a S3 Standard para los objetos que no se logren archivar.",
+            "why": "S3 Lifecycle no puede transferir objetos de S3 Glacier Flexible Retrieval de regreso a S3 Standard."
+          },
+          {
+            "id": "D",
+            "text": "Usar una bucket policy para forzar la transición de objetos con estado de replicación Pending o Failed.",
+            "why": "Los objetos con cualquiera de esos estados no pueden transferirse en este bucket con versioning habilitado, y una bucket policy no elimina esa restricción."
+          },
+          {
+            "id": "E",
+            "text": "Descifrar los objetos antes de la transición de S3 Lifecycle y volver a cifrarlos después de archivarlos.",
+            "why": "Los objetos cifrados permanecen cifrados durante la transición, por lo que estas operaciones adicionales no son necesarias."
+          }
+        ],
+        "explanation": "Una regla de S3 Lifecycle proporciona el movimiento automático por antigüedad a S3 Glacier Flexible Retrieval, y los objetos conservan el cifrado durante la transición. En un bucket con versioning habilitado, los objetos con estado de replicación Pending o Failed no pueden transferirse; por eso conviene revisar ese estado al investigar los objetos que permanecen en S3 Standard. Descifrar los objetos agrega trabajo innecesario. Una bucket policy no puede forzar la transición de un objeto que no cumple las condiciones."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "s3-lifecycle-policies--r0",
+      "conceptId": "s3-lifecycle-policies",
+      "kind": "recall",
+      "prompt": "Existing and new S3 logs must be deleted 30 days after creation without a cleanup job. What would you configure, and why?",
+      "promptEs": "Los logs existentes y nuevos de S3 deben eliminarse 30 días después de crearse, sin un proceso de limpieza. ¿Qué configurarías y por qué?",
+      "idealAnswer": "Configure an S3 Lifecycle expiration rule for objects 30 days after creation. Lifecycle applies to both existing and future objects and deletes eligible objects on your behalf.",
+      "rubric": [
+        "Names an S3 Lifecycle expiration rule.",
+        "Sets expiration based on age after creation.",
+        "Explains that the rule applies to existing and future objects without a cleanup job."
+      ]
+    }
+  ]
+}

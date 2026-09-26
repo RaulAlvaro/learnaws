@@ -1,0 +1,318 @@
+{
+  "conceptId": "iam-policy-evaluation-logic",
+  "card": {
+    "en": {
+      "tldr": "IAM evaluates the policies that apply to a request, and an explicit deny overrides any allow. For exam scenarios, identify the policy types in scope before deciding whether permissions combine as a union or an intersection.",
+      "whenToUse": [
+        "A request has an allow in one policy but a deny in another.",
+        "A same-account request involves identity-based and resource-based policies.",
+        "A user's permissions boundary or an AWS Organizations SCP limits an otherwise allowed action."
+      ],
+      "keyFacts": [
+        "For an IAM user or role accessing a resource in the same account, identity-based and resource-based permissions form a union; an allow in either can permit the action.",
+        "An explicit deny in either an identity-based or resource-based policy overrides an allow.",
+        "For a user, identity-based permissions and a permissions boundary form an intersection; adding a boundary can reduce permissions.",
+        "For a user in an organization accessing a resource without a resource-based policy, the user's policies, SCPs, and RCP form an intersection. An explicit deny in any of them overrides an allow."
+      ],
+      "gotchas": [
+        "An allow in an identity-based policy does not overcome an explicit deny elsewhere.",
+        "A permissions boundary does not grant an action that the user's identity-based policy does not allow.",
+        "Do not apply the same-account identity/resource-policy union rule to every combination of policy types."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "explicit deny in the resource policy",
+        "user has a permissions boundary",
+        "SCP denies the action",
+        "same-account resource policy allows access"
+      ]
+    },
+    "es": {
+      "tldr": "IAM evalúa las políticas aplicables a una solicitud, y un explicit deny prevalece sobre cualquier allow. En un escenario de examen, identifica los tipos de políticas involucrados antes de decidir si los permisos se combinan por unión o intersección.",
+      "whenToUse": [
+        "Una solicitud tiene un allow en una política, pero un deny en otra.",
+        "Una solicitud dentro de la misma cuenta involucra políticas basadas en identidad y en recursos.",
+        "Un permissions boundary o un SCP de AWS Organizations limita una acción que, de otro modo, estaría permitida."
+      ],
+      "keyFacts": [
+        "Para un usuario o rol de IAM que accede a un recurso de la misma cuenta, los permisos basados en identidad y en recursos forman una unión; un allow en cualquiera de ellos puede permitir la acción.",
+        "Un explicit deny en una política basada en identidad o en recursos prevalece sobre un allow.",
+        "Para un usuario, los permisos basados en identidad y un permissions boundary forman una intersección; agregar el boundary puede reducir los permisos.",
+        "Para un usuario de una organización que accede a un recurso sin una política basada en recursos, las políticas del usuario, los SCP y los RCP forman una intersección. Un explicit deny en cualquiera de ellos prevalece sobre un allow."
+      ],
+      "gotchas": [
+        "Un allow en una política basada en identidad no supera un explicit deny en otra política.",
+        "Un permissions boundary no concede una acción que la política basada en identidad del usuario no permite.",
+        "No apliques la regla de unión de políticas basadas en identidad y en recursos de la misma cuenta a todas las combinaciones de políticas."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "explicit deny in the resource policy",
+        "user has a permissions boundary",
+        "SCP denies the action",
+        "same-account resource policy allows access"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "iam-policy-evaluation-logic--eb06c6d9",
+      "conceptId": "iam-policy-evaluation-logic",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A media company has an IAM role that reads objects from an S3 bucket in the same AWS account. The role's identity-based policy allows the requested read action, but the bucket's resource-based policy explicitly denies that action for the role. The security team needs to predict the result without changing either policy. Which assessment is correct?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The request is denied because the resource-based policy explicitly denies the action.",
+          "correct": true,
+          "why": "An explicit deny in the resource-based policy overrides the identity-based allow."
+        },
+        {
+          "id": "B",
+          "text": "The request is allowed because the identity-based policy grants the action.",
+          "correct": false,
+          "why": "The resource-based policy's explicit deny overrides that allow."
+        },
+        {
+          "id": "C",
+          "text": "The request is allowed because identity-based and resource-based permissions form a union.",
+          "correct": false,
+          "why": "The union of allows does not override an explicit deny."
+        },
+        {
+          "id": "D",
+          "text": "The request is denied only if a permissions boundary also denies the action.",
+          "correct": false,
+          "why": "The stated resource-based explicit deny is sufficient to deny the request."
+        }
+      ],
+      "explanation": "The deciding fact is the explicit deny in the bucket's resource-based policy. Although same-account identity-based and resource-based permissions normally form a union, an explicit deny in either policy overrides an allow. The role's identity-based allow therefore cannot permit this request.",
+      "keywordCues": [
+        "in the same AWS account",
+        "identity-based policy allows",
+        "resource-based policy explicitly denies"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html"
+      ],
+      "es": {
+        "stem": "Una empresa de medios tiene un rol de IAM que lee objetos de un bucket de S3 en la misma cuenta de AWS. La política basada en identidad del rol permite la acción de lectura solicitada, pero la política basada en recursos del bucket deniega explícitamente esa acción para el rol. El equipo de seguridad necesita predecir el resultado sin cambiar ninguna política. ¿Qué evaluación es correcta?",
+        "options": [
+          {
+            "id": "A",
+            "text": "La solicitud se deniega porque la política basada en recursos deniega explícitamente la acción.",
+            "why": "Un explicit deny en la política basada en recursos prevalece sobre el allow basado en identidad."
+          },
+          {
+            "id": "B",
+            "text": "La solicitud se permite porque la política basada en identidad concede la acción.",
+            "why": "El explicit deny de la política basada en recursos prevalece sobre ese allow."
+          },
+          {
+            "id": "C",
+            "text": "La solicitud se permite porque los permisos basados en identidad y en recursos forman una unión.",
+            "why": "La unión de permisos allow no supera un explicit deny."
+          },
+          {
+            "id": "D",
+            "text": "La solicitud se deniega solo si un permissions boundary también deniega la acción.",
+            "why": "El explicit deny de la política basada en recursos ya es suficiente para denegar la solicitud."
+          }
+        ],
+        "explanation": "El dato decisivo es el explicit deny en la política basada en recursos del bucket. Aunque los permisos basados en identidad y en recursos dentro de la misma cuenta normalmente forman una unión, un explicit deny en cualquiera de esas políticas prevalece sobre un allow. Por lo tanto, el allow del rol no puede permitir esta solicitud."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-policy-evaluation-logic--73137539",
+      "conceptId": "iam-policy-evaluation-logic",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A logistics company is reviewing same-account access to two resources. For each request, an IAM role's identity-based policy allows the action; no permissions boundary or AWS Organizations policy applies. The security team must identify policy changes that would make a request fail despite its identity-based allow. Which changes would do so? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add an explicit deny for the action to the resource-based policy.",
+          "correct": true,
+          "why": "A resource-based explicit deny overrides the role's identity-based allow."
+        },
+        {
+          "id": "B",
+          "text": "Add a second identity-based policy that allows the same action.",
+          "correct": false,
+          "why": "An additional allow does not negate the existing allow."
+        },
+        {
+          "id": "C",
+          "text": "Add a resource-based policy that allows the action for the role.",
+          "correct": false,
+          "why": "Another allow does not make an already allowed request fail."
+        },
+        {
+          "id": "D",
+          "text": "Add an explicit deny for the action to the role's identity-based policy.",
+          "correct": true,
+          "why": "An identity-based explicit deny overrides the existing identity-based allow."
+        },
+        {
+          "id": "E",
+          "text": "Remove a resource-based allow while retaining the role's identity-based allow.",
+          "correct": false,
+          "why": "For same-account access, the remaining identity-based allow can still permit the request."
+        }
+      ],
+      "explanation": "The question asks which changes defeat an existing identity-based allow. An explicit deny in either the identity-based or resource-based policy does so. Removing a resource-based allow does not have the same effect here: for same-account access, the role's identity-based allow can still permit the request.",
+      "keywordCues": [
+        "same-account access",
+        "identity-based policy allows the action",
+        "no permissions boundary or AWS Organizations policy applies",
+        "make a request fail despite its identity-based allow"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html"
+      ],
+      "es": {
+        "stem": "Una empresa de logística revisa el acceso dentro de la misma cuenta a dos recursos. Para cada solicitud, la política basada en identidad de un rol de IAM permite la acción; no se aplica ningún permissions boundary ni ninguna política de AWS Organizations. El equipo de seguridad debe identificar los cambios de políticas que harían fallar una solicitud a pesar de su allow basado en identidad. ¿Qué cambios lo harían? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Agregar un explicit deny para la acción a la política basada en recursos.",
+            "why": "Un explicit deny basado en recursos prevalece sobre el allow basado en identidad del rol."
+          },
+          {
+            "id": "B",
+            "text": "Agregar una segunda política basada en identidad que permita la misma acción.",
+            "why": "Un allow adicional no anula el allow existente."
+          },
+          {
+            "id": "C",
+            "text": "Agregar una política basada en recursos que permita la acción para el rol.",
+            "why": "Otro allow no hace fallar una solicitud que ya está permitida."
+          },
+          {
+            "id": "D",
+            "text": "Agregar un explicit deny para la acción a la política basada en identidad del rol.",
+            "why": "Un explicit deny basado en identidad prevalece sobre el allow existente en esa política."
+          },
+          {
+            "id": "E",
+            "text": "Quitar un allow basado en recursos y conservar el allow basado en identidad del rol.",
+            "why": "Para el acceso dentro de la misma cuenta, el allow basado en identidad que permanece todavía puede permitir la solicitud."
+          }
+        ],
+        "explanation": "La pregunta pide identificar los cambios que anulan un allow basado en identidad existente. Un explicit deny en la política basada en identidad o en la política basada en recursos produce ese resultado. Quitar un allow basado en recursos no tiene el mismo efecto aquí: para el acceso dentro de la misma cuenta, el allow basado en identidad del rol todavía puede permitir la solicitud."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "iam-policy-evaluation-logic--2d277698",
+      "conceptId": "iam-policy-evaluation-logic",
+      "secondaryConcepts": [],
+      "domain": "d1",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A research lab gives an IAM user an identity-based policy that allows two AWS API actions. A permissions boundary attached to the user allows only the first action, and neither policy contains an explicit deny. No resource-based policy applies to the requests. Which result should the lab expect?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Both actions are permitted, because the identity-based policy allows both.",
+          "correct": false,
+          "why": "The boundary limits the user's effective identity-based permissions."
+        },
+        {
+          "id": "B",
+          "text": "Only the first action is permitted, because the user's identity-based policy and boundary intersect.",
+          "correct": true,
+          "why": "Only the first action is allowed by both policy types."
+        },
+        {
+          "id": "C",
+          "text": "Both actions are permitted, because the boundary has no explicit deny.",
+          "correct": false,
+          "why": "The second action is outside the boundary's allowed permissions."
+        },
+        {
+          "id": "D",
+          "text": "Neither action is permitted, because a boundary replaces the identity-based policy.",
+          "correct": false,
+          "why": "The boundary intersects with, rather than replaces, the identity-based permissions."
+        }
+      ],
+      "explanation": "The requirement is to evaluate a user's identity-based permissions together with a permissions boundary. Their resulting permissions are the intersection, so the first action remains permitted and the second does not. An identity-based allow alone is not enough for the second action, even though the boundary contains no explicit deny.",
+      "keywordCues": [
+        "identity-based policy that allows two AWS API actions",
+        "permissions boundary",
+        "allows only the first action",
+        "No resource-based policy applies"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html"
+      ],
+      "es": {
+        "stem": "Un laboratorio de investigación asigna a un usuario de IAM una política basada en identidad que permite dos acciones de la API de AWS. Un permissions boundary adjunto al usuario permite solo la primera acción, y ninguna de las dos políticas contiene un explicit deny. No se aplica ninguna política basada en recursos a las solicitudes. ¿Qué resultado debe esperar el laboratorio?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Se permiten ambas acciones porque la política basada en identidad permite las dos.",
+            "why": "El boundary limita los permisos efectivos basados en identidad del usuario."
+          },
+          {
+            "id": "B",
+            "text": "Solo se permite la primera acción porque los permisos de la política basada en identidad del usuario y del boundary forman una intersección.",
+            "why": "Solo la primera acción está permitida por ambos tipos de políticas."
+          },
+          {
+            "id": "C",
+            "text": "Se permiten ambas acciones porque el boundary no tiene un explicit deny.",
+            "why": "La segunda acción no está entre los permisos que permite el boundary."
+          },
+          {
+            "id": "D",
+            "text": "No se permite ninguna acción porque el boundary reemplaza la política basada en identidad.",
+            "why": "El boundary forma una intersección con los permisos basados en identidad; no los reemplaza."
+          }
+        ],
+        "explanation": "La clave es evaluar los permisos basados en identidad del usuario junto con su permissions boundary. Los permisos resultantes forman una intersección: la primera acción sigue permitida y la segunda no. El allow de la política basada en identidad no basta para la segunda acción, aunque el boundary no contenga un explicit deny."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "iam-policy-evaluation-logic--r0",
+      "conceptId": "iam-policy-evaluation-logic",
+      "kind": "recall",
+      "prompt": "A user's identity policy allows an action, but an applicable SCP explicitly denies it. Is the request allowed, and why?",
+      "promptEs": "La política basada en identidad de un usuario permite una acción, pero un SCP aplicable la deniega explícitamente. ¿Se permite la solicitud y por qué?",
+      "idealAnswer": "No. The SCP's explicit deny overrides the allow in the user's identity-based policy.",
+      "rubric": [
+        "States that the request is denied.",
+        "Identifies the applicable SCP's explicit deny as the deciding factor.",
+        "Explains that an identity-based allow cannot override that deny."
+      ]
+    }
+  ]
+}

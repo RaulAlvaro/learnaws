@@ -1,0 +1,326 @@
+{
+  "conceptId": "non-production-scheduling",
+  "card": {
+    "en": {
+      "tldr": "Match availability and operating hours to the workload: keep production resources available, but consider smaller, single-AZ dev/test resources that run only when needed. Instance Scheduler on AWS can start and stop tagged EC2 and RDS instances on a schedule, including across configured accounts and Regions.",
+      "whenToUse": [
+        "Dev/test EC2 or RDS instances are needed during business hours but not overnight.",
+        "Production must remain available while non-production can tolerate scheduled downtime.",
+        "Tagged instances in multiple accounts or Regions need a common schedule."
+      ],
+      "keyFacts": [
+        "Instance Scheduler on AWS uses resource tags and AWS Lambda to start and stop EC2 and RDS instances on customer-defined schedules.",
+        "A stopped RDS DB instance incurs no DB instance-hour charges, but storage and backup charges continue.",
+        "An RDS DB instance can remain stopped for at most seven consecutive days before RDS automatically starts it.",
+        "Starting a stopped RDS DB instance can take minutes to hours.",
+        "An RDS DB instance cannot be stopped if it has a read replica or is itself a read replica."
+      ],
+      "gotchas": [
+        "Do not schedule a production database to stop if it must remain available; restarting RDS is not instantaneous.",
+        "Stopping RDS does not eliminate storage or backup costs.",
+        "Do not assume an RDS instance will stay stopped indefinitely or that an instance with a read replica can be stopped."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "dev/test only during business hours",
+        "production must remain available",
+        "tagged instances across accounts and Regions",
+        "stop RDS overnight"
+      ]
+    },
+    "es": {
+      "tldr": "Ajusta la disponibilidad y el horario de operación a cada carga: mantén disponibles los recursos de producción, pero considera recursos dev/test más pequeños y de una sola AZ que funcionen solo cuando se necesiten. Instance Scheduler on AWS puede iniciar y detener instancias EC2 y RDS etiquetadas según un horario, incluso entre cuentas y Regions configuradas.",
+      "whenToUse": [
+        "Las instancias EC2 o RDS de dev/test se necesitan durante el horario laboral, pero no por la noche.",
+        "Producción debe seguir disponible, mientras que los entornos no productivos toleran interrupciones programadas.",
+        "Las instancias etiquetadas en varias cuentas o Regions necesitan un horario común."
+      ],
+      "keyFacts": [
+        "Instance Scheduler on AWS usa resource tags y AWS Lambda para iniciar y detener instancias EC2 y RDS según horarios definidos por el cliente.",
+        "Una instancia de RDS detenida no genera cargos por horas de instancia de base de datos, pero siguen los cargos de almacenamiento y respaldos.",
+        "Una instancia de RDS puede permanecer detenida un máximo de siete días consecutivos; después, RDS la inicia automáticamente.",
+        "Iniciar una instancia de RDS detenida puede tardar de minutos a horas.",
+        "No puedes detener una instancia de RDS que tenga una read replica ni una que sea una read replica."
+      ],
+      "gotchas": [
+        "No programes la detención de una base de datos de producción que deba seguir disponible; reiniciar RDS no es instantáneo.",
+        "Detener RDS no elimina los costos de almacenamiento ni de respaldos.",
+        "No supongas que RDS permanecerá detenido indefinidamente ni que puedes detener una instancia con una read replica."
+      ],
+      "confusedWith": [],
+      "examCues": [
+        "dev/test only during business hours",
+        "production must remain available",
+        "tagged instances across accounts and Regions",
+        "stop RDS overnight"
+      ]
+    },
+    "docs": [
+      "https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/solution-overview.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html"
+    ]
+  },
+  "questions": [
+    {
+      "id": "non-production-scheduling--e2e0602a",
+      "conceptId": "non-production-scheduling",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "multi",
+      "difficulty": 3,
+      "stem": "A retailer operates development EC2 instances and RDS databases in multiple AWS accounts and Regions. Development runs during business hours, while production databases must remain available; some development RDS instances have read replicas. The retailer wants automated off-hours savings without assuming that stopped databases have no costs or will stay stopped forever. Which two actions should the retailer take? (Choose two.)",
+      "options": [
+        {
+          "id": "A",
+          "text": "Exclude RDS instances with read replicas from the stop plan, and account for ongoing storage and backup costs plus the seven-day automatic restart.",
+          "correct": true,
+          "why": "This respects the RDS stop limitation and the billing and restart behavior of stopped instances."
+        },
+        {
+          "id": "B",
+          "text": "Include development RDS instances with read replicas in the stop schedule to capture the same savings as other development databases.",
+          "correct": false,
+          "why": "An RDS DB instance with a read replica cannot be stopped."
+        },
+        {
+          "id": "C",
+          "text": "Apply an overnight stop tag to every RDS database, including production databases, so one schedule covers the fleet.",
+          "correct": false,
+          "why": "An overnight stop schedule would violate production's availability requirement."
+        },
+        {
+          "id": "D",
+          "text": "Configure Instance Scheduler on AWS for the relevant accounts and Regions, using schedule tags to select eligible development instances.",
+          "correct": true,
+          "why": "The solution supports scheduled, tag-based actions across configured accounts and Regions."
+        },
+        {
+          "id": "E",
+          "text": "Plan savings as though all RDS charges cease while an instance is stopped and it remains stopped until manually started.",
+          "correct": false,
+          "why": "Storage and backup charges continue, and RDS automatically starts the instance after seven consecutive days."
+        }
+      ],
+      "explanation": "The retailer needs automated scheduling across accounts and Regions, but only for resources eligible to stop. Instance Scheduler on AWS can target tagged development instances in the configured scope, while production databases remain available. RDS instances with read replicas cannot be stopped, so they must be excluded from this plan. For eligible RDS instances, storage and backup charges continue during a stop, and RDS automatically restarts an instance after seven consecutive days.",
+      "keywordCues": [
+        "multiple AWS accounts and Regions",
+        "production databases must remain available",
+        "some development RDS instances have read replicas",
+        "without assuming that stopped databases have no costs or will stay stopped forever"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/solution-overview.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html"
+      ],
+      "es": {
+        "stem": "Una empresa minorista opera instancias EC2 y bases de datos RDS de desarrollo en varias cuentas y Regions de AWS. Desarrollo funciona durante el horario laboral, mientras que las bases de datos de producción deben seguir disponibles; algunas instancias RDS de desarrollo tienen read replicas. La empresa quiere ahorros automatizados fuera de horario sin suponer que las bases de datos detenidas no generan costos o permanecerán detenidas para siempre. ¿Qué dos acciones debe tomar? (Choose two.)",
+        "options": [
+          {
+            "id": "A",
+            "text": "Excluye del plan de detención las instancias RDS con read replicas y considera los costos continuos de almacenamiento y respaldos, además del reinicio automático a los siete días.",
+            "why": "Esto respeta la limitación de detención de RDS y el comportamiento de facturación y reinicio de las instancias detenidas."
+          },
+          {
+            "id": "B",
+            "text": "Incluye en el horario de detención las instancias RDS de desarrollo con read replicas para obtener los mismos ahorros que con las demás bases de datos de desarrollo.",
+            "why": "No puedes detener una instancia de base de datos RDS que tenga una read replica."
+          },
+          {
+            "id": "C",
+            "text": "Aplica un tag de detención nocturna a todas las bases de datos RDS, incluidas las de producción, para cubrirlas con un solo horario.",
+            "why": "Un horario de detención nocturna incumpliría el requisito de disponibilidad de producción."
+          },
+          {
+            "id": "D",
+            "text": "Configura Instance Scheduler on AWS para las cuentas y Regions pertinentes y usa tags de horario para seleccionar las instancias de desarrollo aptas.",
+            "why": "La solución admite acciones programadas basadas en tags entre las cuentas y Regions configuradas."
+          },
+          {
+            "id": "E",
+            "text": "Calcula los ahorros suponiendo que todos los cargos de RDS cesan mientras una instancia está detenida y que esta sigue detenida hasta que alguien la inicie manualmente.",
+            "why": "Los cargos de almacenamiento y respaldos continúan, y RDS inicia automáticamente la instancia después de siete días consecutivos."
+          }
+        ],
+        "explanation": "La empresa necesita programación automatizada entre cuentas y Regions, pero solo para recursos que se puedan detener. Instance Scheduler on AWS puede seleccionar instancias de desarrollo etiquetadas dentro del alcance configurado, mientras las bases de datos de producción siguen disponibles. Las instancias RDS con read replicas no se pueden detener, por lo que deben quedar fuera de este plan. Para las instancias RDS aptas, continúan los cargos de almacenamiento y respaldos durante la detención, y RDS las inicia automáticamente después de siete días consecutivos."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "non-production-scheduling--4708811f",
+      "conceptId": "non-production-scheduling",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 2,
+      "stem": "A design studio runs development EC2 instances and RDS databases in several AWS accounts and Regions. Teams use them only during local business hours, but the production instances must remain available overnight. The studio wants one tag-based approach rather than separate scripts maintained by each team. Which solution meets these requirements with the LEAST operational overhead?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy Instance Scheduler on AWS for the configured accounts and Regions, and apply its schedule tag only to eligible development instances.",
+          "correct": true,
+          "why": "Instance Scheduler automates tag-based start and stop actions across configured accounts and Regions without targeting production."
+        },
+        {
+          "id": "B",
+          "text": "Have each team stop its development instances manually at the end of each workday and start them the next morning.",
+          "correct": false,
+          "why": "Manual actions require each team to perform the recurring work that the studio wants to avoid."
+        },
+        {
+          "id": "C",
+          "text": "Deploy Instance Scheduler on AWS and apply the same overnight stop schedule to both development and production instances.",
+          "correct": false,
+          "why": "Stopping production instances conflicts with the requirement that they remain available overnight."
+        },
+        {
+          "id": "D",
+          "text": "Have each team snapshot and delete its development RDS databases after work, then restore them before the next workday.",
+          "correct": false,
+          "why": "Snapshot, deletion, and restoration add recurring work when temporary RDS stopping is the more efficient fit."
+        }
+      ],
+      "explanation": "The deciding requirements are a common tag-based schedule across accounts and Regions and uninterrupted production availability. Instance Scheduler on AWS can act on tagged EC2 and RDS instances across configured accounts and Regions, so the studio can target eligible development resources. Applying the schedule to production would violate its availability requirement. Manual actions and repeated RDS deletion and restoration also add avoidable operational work.",
+      "keywordCues": [
+        "several AWS accounts and Regions",
+        "only during local business hours",
+        "production instances must remain available overnight",
+        "one tag-based approach"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/solution-overview.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html"
+      ],
+      "es": {
+        "stem": "Un estudio de diseño ejecuta instancias EC2 y bases de datos RDS de desarrollo en varias cuentas y Regions de AWS. Los equipos las usan solo durante el horario laboral local, pero las instancias de producción deben seguir disponibles por la noche. El estudio quiere un enfoque basado en tags en lugar de scripts separados que mantenga cada equipo. ¿Qué solución cumple estos requisitos con el LEAST operational overhead?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implementa Instance Scheduler on AWS para las cuentas y Regions configuradas, y aplica su tag de horario solo a las instancias de desarrollo aptas.",
+            "why": "Instance Scheduler automatiza el inicio y la detención mediante tags entre las cuentas y Regions configuradas sin afectar a producción."
+          },
+          {
+            "id": "B",
+            "text": "Pide a cada equipo que detenga manualmente sus instancias de desarrollo al terminar la jornada y las inicie a la mañana siguiente.",
+            "why": "Las acciones manuales exigen a cada equipo repetir el trabajo que el estudio quiere evitar."
+          },
+          {
+            "id": "C",
+            "text": "Implementa Instance Scheduler on AWS y aplica el mismo horario de detención nocturna a las instancias de desarrollo y producción.",
+            "why": "Detener las instancias de producción contradice el requisito de mantenerlas disponibles por la noche."
+          },
+          {
+            "id": "D",
+            "text": "Pide a cada equipo que cree snapshots y elimine sus bases de datos RDS de desarrollo al terminar la jornada, y que las restaure antes del siguiente día laboral.",
+            "why": "Crear snapshots, eliminar y restaurar agrega trabajo recurrente cuando la detención temporal de RDS es más eficiente."
+          }
+        ],
+        "explanation": "Los requisitos decisivos son un horario común basado en tags entre cuentas y Regions y la disponibilidad continua de producción. Instance Scheduler on AWS puede actuar sobre instancias EC2 y RDS etiquetadas en las cuentas y Regions configuradas, por lo que el estudio puede seleccionar los recursos de desarrollo aptos. Aplicar el horario a producción incumpliría su requisito de disponibilidad. Las acciones manuales y la eliminación y restauración repetidas de RDS también agregan trabajo evitable."
+      },
+      "heldOut": false,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    },
+    {
+      "id": "non-production-scheduling--c8a03a10",
+      "conceptId": "non-production-scheduling",
+      "secondaryConcepts": [],
+      "domain": "d4",
+      "type": "single",
+      "difficulty": 3,
+      "stem": "A research group uses an RDS DB instance for short training sessions on weekdays. No one needs the database overnight, and the instance has no read replicas; instructors can wait for it to finish starting before each session. The group wants to reduce instance-hour charges without repeatedly deleting and restoring the database. Which plan meets these requirements MOST cost-effectively?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the DB instance running between sessions and take a manual snapshot after each session.",
+          "correct": false,
+          "why": "Snapshots do not remove instance-hour charges while the DB instance remains running."
+        },
+        {
+          "id": "B",
+          "text": "Stop the DB instance after the last session and leave it stopped indefinitely until the next course.",
+          "correct": false,
+          "why": "RDS automatically starts a stopped DB instance after seven consecutive days."
+        },
+        {
+          "id": "C",
+          "text": "Delete the DB instance after each session and restore it from a snapshot before the next session.",
+          "correct": false,
+          "why": "Repeated deletion and restoration are less efficient than temporarily stopping and starting this eligible instance."
+        },
+        {
+          "id": "D",
+          "text": "Schedule the DB instance to stop after training and start before the next session, allowing for startup time and continuing storage charges.",
+          "correct": true,
+          "why": "Temporary stops avoid DB instance-hour charges while respecting startup time and ongoing storage costs."
+        }
+      ],
+      "explanation": "This non-production database has predictable idle periods, no read replicas, and no requirement for immediate startup. Scheduling temporary stops avoids DB instance-hour charges during those periods, although storage and backup charges continue. Instructors should allow time for the database to start, which can take minutes to hours. Leaving it stopped indefinitely is not a valid assumption because RDS automatically starts it after seven consecutive days.",
+      "keywordCues": [
+        "short training sessions on weekdays",
+        "No one needs the database overnight",
+        "no read replicas",
+        "can wait for it to finish starting",
+        "without repeatedly deleting and restoring"
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/solution-overview.html",
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html"
+      ],
+      "es": {
+        "stem": "Un grupo de investigación usa una instancia de base de datos RDS para sesiones breves de capacitación entre semana. Nadie necesita la base de datos por la noche y la instancia no tiene read replicas; los instructores pueden esperar a que termine de iniciarse antes de cada sesión. El grupo quiere reducir los cargos por horas de instancia sin eliminar y restaurar repetidamente la base de datos. ¿Qué plan cumple estos requisitos de la forma MOST cost-effective?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Mantén la instancia de base de datos en ejecución entre sesiones y toma un snapshot manual después de cada una.",
+            "why": "Los snapshots no eliminan los cargos por horas de instancia mientras la base de datos sigue en ejecución."
+          },
+          {
+            "id": "B",
+            "text": "Detén la instancia de base de datos después de la última sesión y déjala detenida indefinidamente hasta el siguiente curso.",
+            "why": "RDS inicia automáticamente una instancia detenida después de siete días consecutivos."
+          },
+          {
+            "id": "C",
+            "text": "Elimina la instancia de base de datos después de cada sesión y restáurala desde un snapshot antes de la siguiente.",
+            "why": "Eliminar y restaurar repetidamente es menos eficiente que detener e iniciar temporalmente esta instancia apta."
+          },
+          {
+            "id": "D",
+            "text": "Programa la detención de la instancia después de la capacitación y su inicio antes de la siguiente sesión, considerando el tiempo de inicio y los cargos de almacenamiento que continúan.",
+            "why": "Las detenciones temporales evitan los cargos por horas de instancia de base de datos y contemplan el tiempo de inicio y los costos de almacenamiento."
+          }
+        ],
+        "explanation": "Esta base de datos no productiva tiene períodos de inactividad previsibles, no tiene read replicas y no requiere un inicio inmediato. Programar detenciones temporales evita los cargos por horas de instancia de base de datos durante esos períodos, aunque continúan los cargos de almacenamiento y respaldos. Los instructores deben prever el tiempo de inicio, que puede ser de minutos a horas. Dejarla detenida indefinidamente no es una suposición válida porque RDS la inicia automáticamente después de siete días consecutivos."
+      },
+      "heldOut": true,
+      "source": "generated",
+      "verification": {
+        "status": "pass",
+        "notes": ""
+      }
+    }
+  ],
+  "recall": [
+    {
+      "id": "non-production-scheduling--r0",
+      "conceptId": "non-production-scheduling",
+      "kind": "recall",
+      "prompt": "How would you reduce off-hours costs for tagged dev EC2 and eligible RDS instances across accounts while keeping production available?",
+      "promptEs": "¿Cómo reducirías los costos fuera de horario de instancias EC2 y RDS aptas de dev, etiquetadas en varias cuentas, sin afectar la disponibilidad de producción?",
+      "idealAnswer": "Use Instance Scheduler on AWS with schedules and tags scoped to eligible development instances in the configured accounts and Regions. Leave production running; allow for RDS startup time, continued storage and backup charges, and the seven-day automatic restart.",
+      "rubric": [
+        "Names Instance Scheduler on AWS and tag-based scheduling across configured accounts.",
+        "Scopes stopping to eligible non-production resources and keeps production available.",
+        "Mentions at least one RDS constraint: startup time, ongoing storage or backup charges, or automatic restart after seven days."
+      ]
+    }
+  ]
+}
