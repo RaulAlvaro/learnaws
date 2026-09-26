@@ -317,7 +317,7 @@ export function QuestionView({
         />
       )}
 
-      {error && <p className="text-sm text-bad">{error}</p>}
+      {error && <p className="break-words text-sm text-bad">{error}</p>}
     </div>
   );
 }

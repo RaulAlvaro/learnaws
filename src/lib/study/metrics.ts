@@ -148,7 +148,14 @@ export async function errorLog(limit = 100) {
   const rows = await db
     .select()
     .from(schema.attempts)
-    .where(and(eq(schema.attempts.correct, false), eq(schema.attempts.aided, false)))
+    // Unanswered mock items count as wrong in the score but are not "errors" to study.
+    .where(
+      and(
+        eq(schema.attempts.correct, false),
+        eq(schema.attempts.aided, false),
+        sql`(jsonb_array_length(${schema.attempts.selected}) > 0 or ${schema.attempts.mode} = 'voice')`,
+      ),
+    )
     .orderBy(desc(schema.attempts.createdAt))
     .limit(limit);
   const counts = await db

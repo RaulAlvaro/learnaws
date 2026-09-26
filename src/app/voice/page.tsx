@@ -238,7 +238,7 @@ export default function VoicePage() {
             </details>
           </div>
         )}
-        {error && <p className="text-sm text-bad">{error}</p>}
+        {error && <p className="break-words text-sm text-bad">{error}</p>}
 
         <div className="flex flex-wrap justify-center gap-2">
           {!running.current || status === "idle" || status === "empty" ? (

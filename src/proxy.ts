@@ -6,6 +6,8 @@ const isPublic = createRouteMatcher(["/sign-in(.*)", "/api/health", "/sw.js", "/
 /** Personal app: every route requires the one allowed Clerk user. */
 export default clerkMiddleware(async (auth, req) => {
   if (isPublic(req)) return;
+  // Local UI testing only (never honoured in production builds).
+  if (process.env.NODE_ENV !== "production" && process.env.AUTH_BYPASS === "1") return;
   const { userId, redirectToSignIn } = await auth();
   if (!userId) return redirectToSignIn();
   const allowed = process.env.ALLOWED_USER_ID;
