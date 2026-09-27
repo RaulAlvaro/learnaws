@@ -9,6 +9,7 @@ import { GameQuestion, type GameQuestionData } from "@/components/game/game-ques
 import { GameIcon, type GameIconName } from "@/components/game/icons";
 import type { Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { play, setSound, soundOn } from "@/lib/game/sfx";
+import { musicOn, preloadJingles, setMusic, setScene } from "@/lib/game/music";
 
 const ROUND_SIZE = 8;
 
@@ -70,6 +71,15 @@ export function PlayClient() {
   const [autoRead, setAutoRead] = usePref("autoRead", true);
   const [fs, setFs] = usePref("fs", 1);
   const [sfx, setSfx] = useState(() => soundOn());
+  const [music, setMusicState] = useState(() => musicOn());
+
+  useEffect(() => {
+    setScene(view);
+  }, [view]);
+  useEffect(() => {
+    preloadJingles();
+    return () => setScene(null);
+  }, []);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--fs", String(fs));
@@ -90,7 +100,7 @@ export function PlayClient() {
   }, []);
 
   async function startRound() {
-    play("tap");
+    play("start");
     setResults([]);
     setStartLevel(state?.level ?? 1);
     setView("round");
@@ -286,7 +296,7 @@ export function PlayClient() {
 
       <DailyGoal done={state.roundsToday} goal={state.goal} />
 
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-4 gap-2">
         <ToggleChip icon={autoRead ? "speaker" : "sound-off"} label="Voz" on={autoRead} onClick={() => setAutoRead(!autoRead)} />
         <ToggleChip
           icon="settings-knobs"
@@ -295,6 +305,15 @@ export function PlayClient() {
           onClick={() => {
             setSound(!sfx);
             setSfx(!sfx);
+          }}
+        />
+        <ToggleChip
+          icon="musical-notes"
+          label="Música"
+          on={music}
+          onClick={() => {
+            setMusic(!music);
+            setMusicState(!music);
           }}
         />
         <button

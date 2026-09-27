@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { highlight } from "@/lib/game/cues";
 import { play } from "@/lib/game/sfx";
+import { duckWhilePlaying } from "@/lib/game/music";
 import type { Chip } from "@/lib/game/cues";
 import type { PublicQuestion, Reveal } from "../question-view";
 import { ExpertPanel } from "./expert-panel";
@@ -90,6 +91,7 @@ export function GameQuestion({
       stopAudio();
       const a = new Audio(`/api/tts?ref=question:${encodeURIComponent(question.id)}&lang=${lang}`);
       audio.current = a;
+      duckWhilePlaying(a);
       a.play().catch(() => {});
     },
     [question.id],

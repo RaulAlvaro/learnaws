@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DiagramNode, Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { play } from "@/lib/game/sfx";
+import { duckWhilePlaying } from "@/lib/game/music";
 import { edgePath, hasGlyph, labelLines, layoutDiagram, LINE_H } from "@/lib/game/diagram-layout";
 import { GameIcon, type GameIconName } from "./icons";
 
@@ -45,6 +46,7 @@ export function Discover({
     audio.current?.pause();
     const a = new Audio(`/api/tts?ref=${encodeURIComponent(ref)}&lang=es`);
     audio.current = a;
+    duckWhilePlaying(a);
     a.play().catch(() => {});
   };
 

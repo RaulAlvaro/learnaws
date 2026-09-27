@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { duck } from "@/lib/game/music";
 import { GameIcon } from "./icons";
 
 interface Msg {
@@ -59,7 +60,7 @@ export function ExpertPanel({ attemptId, onClose }: { attemptId: number; onClose
   const [error, setError] = useState<string | null>(null);
   const [voice, setVoice] = useState<VoiceState>("off");
   const listRef = useRef<HTMLDivElement>(null);
-  const rtc = useRef<{ pc: RTCPeerConnection; dc: RTCDataChannel; mic: MediaStream; audio: HTMLAudioElement; started: number; model: string; conceptId: string } | null>(null);
+  const rtc = useRef<{ pc: RTCPeerConnection; dc: RTCDataChannel; mic: MediaStream; audio: HTMLAudioElement; unduck: () => void; started: number; model: string; conceptId: string } | null>(null);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: reduce ? "auto" : "smooth" });
@@ -144,7 +145,7 @@ export function ExpertPanel({ attemptId, onClose }: { attemptId: number; onClose
       });
       if (!sdp.ok) throw new Error("No se pudo conectar con la voz del experto");
       await pc.setRemoteDescription({ type: "answer", sdp: await sdp.text() });
-      rtc.current = { pc, dc, mic, audio, started: Date.now(), model: session.model, conceptId: session.conceptId };
+      rtc.current = { pc, dc, mic, audio, unduck: duck(0), started: Date.now(), model: session.model, conceptId: session.conceptId };
       setVoice("thinking");
     } catch (e) {
       const msg = (e as Error).message;
@@ -162,6 +163,7 @@ export function ExpertPanel({ attemptId, onClose }: { attemptId: number; onClose
     r.dc.close();
     r.pc.close();
     r.audio.srcObject = null;
+    r.unduck();
     const seconds = (Date.now() - r.started) / 1000;
     await fetch("/api/expert/usage", {
       method: "POST",

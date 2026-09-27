@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { duckWhilePlaying } from "@/lib/game/music";
 
 /** Plays server-side TTS for a content ref. The audio is generated once and cached. */
 export function AudioButton({ src: contentRef, lang, label }: { src: string; lang: "en" | "es"; label?: string }) {
@@ -22,6 +23,7 @@ export function AudioButton({ src: contentRef, lang, label }: { src: string; lan
       a.onended = () => setState("idle");
       a.onerror = () => setState("error");
       a.oncanplay = () => setState((s) => (s === "loading" ? "playing" : s));
+      duckWhilePlaying(a);
       audio.current = a;
     }
     try {

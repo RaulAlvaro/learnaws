@@ -90,7 +90,7 @@ Acierto: botón rebota (scale 1→1.08→1, 180 ms), destello verde, "ding", vib
 ## Audio
 
 - **Narración**: OpenAI TTS pre-generada y cacheada para contenido compartido (explicaciones y preguntas); auto-lectura activable.
-- **Música**: apagada por defecto; opción lo-fi suave.
+- **Música**: chiptune en loop (Juhani Junkala, CC0): Title Screen en el hub, Level 1/2/3 rotando por ronda, Ending en el resultado. Encendida por defecto con interruptor "Música"; volumen 0.28 hub / 0.13 en ronda (leer necesita silencio relativo), baja a 20% mientras suena la narración y se silencia en la llamada con el experto. Jingles 8-bit (Kenney, CC0) al empezar ronda, terminarla y subir de nivel.
 - **SFX**: ver tabla de assets. Vibración en móvil.
 
 ## Multiusuario
@@ -134,3 +134,4 @@ Multijugador, rankings, grupos de estudio cooperativos (candidato v2), música a
 - 2026-09-26: M2 Descubrir servicios (75 unidades en 9 islas, explicación narrada con diagrama por segmentos, 781 preguntas relámpago/esto-o-aquello; generadas por Claude, auditadas por OpenAI; formato corto al aprender y escenario al consolidar; los formatos cortos no cuentan para la probabilidad de aprobar).
 - 2026-09-26: Rediseño visual "Arcade" (opción B elegida por el usuario): sin emojis, iconos de juego, botones con volumen, tipografías de juego.
 - 2026-09-26: Login Arcade (Clerk neobrutalism + paleta + español) y "Pregúntale al experto": chat RAG con fuentes citadas y conversación voz a voz (OpenAI Realtime por WebRTC con la key del usuario, búsqueda en el índice como herramienta). Usar el experto cuenta como ayuda.
+- 2026-09-26: Música de juego (5 Chiptunes CC0 de Juhani Junkala + Kenney music-jingles CC0), interruptor Música en el hub, ducking con TTS y voz del experto.

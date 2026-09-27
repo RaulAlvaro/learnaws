@@ -1,13 +1,18 @@
 "use client";
 
+import { playJingle, type Jingle } from "./music";
+
 /**
  * Tiny synthesized SFX (Web Audio) — no asset files, no licences.
  * Short and soft by design: feedback, not noise. Errors are low and gentle, never punishing.
  */
-type Sound = "correct" | "wrong" | "tap" | "streak" | "levelup" | "round";
+type Sound = "correct" | "wrong" | "tap" | "streak" | "levelup" | "round" | "start";
+
+// These moments use a recorded 8-bit jingle (Kenney, CC0) when it is loaded; synth otherwise.
+const JINGLE_FOR: Partial<Record<Sound, Jingle>> = { round: "complete", levelup: "levelup", start: "start" };
 
 let ctx: AudioContext | null = null;
-function audio(): AudioContext | null {
+export function audio(): AudioContext | null {
   if (typeof window === "undefined") return null;
   ctx ??= new AudioContext();
   if (ctx.state === "suspended") void ctx.resume();
@@ -57,6 +62,7 @@ const PATTERNS: Record<Sound, () => void> = {
   streak: () => [660, 880, 1100].forEach((f, i) => tone(f, i * 0.07, 0.12, "triangle", 0.09)),
   levelup: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.1, 0.22, "triangle", 0.1)),
   round: () => [784, 988, 1175].forEach((f, i) => tone(f, i * 0.09, 0.2, "sine", 0.1)),
+  start: () => [523, 784].forEach((f, i) => tone(f, i * 0.08, 0.14, "triangle", 0.08)),
 };
 
 const VIBRATION: Partial<Record<Sound, number | number[]>> = {
@@ -68,7 +74,9 @@ const VIBRATION: Partial<Record<Sound, number | number[]>> = {
 export function play(sound: Sound) {
   if (!soundOn()) return;
   try {
-    PATTERNS[sound]();
+    const j = JINGLE_FOR[sound];
+    if (j) void playJingle(j).then((ok) => ok || PATTERNS[sound]());
+    else PATTERNS[sound]();
     const v = VIBRATION[sound];
     if (v && "vibrate" in navigator) navigator.vibrate(v);
   } catch {
