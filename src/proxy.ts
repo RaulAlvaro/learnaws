@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublic = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/api/health", "/sw.js", "/manifest.webmanifest", "/icons/(.*)"]);
+const isPublic = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/api/health", "/sw.js", "/manifest.webmanifest", "/icons/(.*)", "/opengraph-image(.*)", "/twitter-image(.*)"]);
 
 /** Open registration: every route requires a signed-in Clerk user (per-user data is scoped server-side). */
 export default clerkMiddleware(async (auth, req) => {

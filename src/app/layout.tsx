@@ -10,9 +10,14 @@ import "./globals.css";
 const lilita = Lilita_One({ variable: "--font-lilita", weight: "400", subsets: ["latin"] });
 const nunito = Nunito({ variable: "--font-nunito", weight: ["600", "700", "800", "900"], subsets: ["latin"] });
 
+const DESCRIPTION = "Aprueba AWS Solutions Architect Associate (SAA-C03) jugando rondas de 4 minutos, con métodos de estudio basados en evidencia.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://learnaws.crafter.run"),
   title: "Learn AWS · SAA-C03",
-  description: "Estudio personal para AWS Solutions Architect Associate con métodos basados en evidencia.",
+  description: DESCRIPTION,
+  openGraph: { title: "Learn AWS · SAA-C03", description: DESCRIPTION, siteName: "Learn AWS", locale: "es_419", type: "website" },
+  twitter: { card: "summary_large_image", title: "Learn AWS · SAA-C03", description: DESCRIPTION },
   appleWebApp: { capable: true, title: "Learn AWS", statusBarStyle: "black-translucent" },
   icons: { apple: "/icons/180" },
 };
