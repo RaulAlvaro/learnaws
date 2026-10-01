@@ -26,10 +26,11 @@ await page.goto(`file://${path.resolve(built)}`, { waitUntil: "networkidle" });
 await page.evaluate(() => document.fonts.ready);
 const overflow = await page.evaluate(() => {
   const p = document.querySelector(".page");
-  return p.scrollHeight > p.clientHeight + 1 || p.scrollWidth > p.clientWidth + 1;
+  const over = p.scrollHeight > p.clientHeight + 1 || p.scrollWidth > p.clientWidth + 1;
+  return over && `${p.scrollWidth}x${p.scrollHeight} > ${p.clientWidth}x${p.clientHeight}`;
 });
 await page.pdf({ path: path.join(dir, "learnaws-poster-a4.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
 await page.screenshot({ path: path.join(dir, "learnaws-poster-a4.png"), fullPage: false });
 await browser.close();
 fs.rmSync(built);
-console.log(overflow ? "WARNING: content overflows the A4 page" : "poster OK (A4 PDF + PNG at 3x)");
+console.log(overflow ? `WARNING: content overflows the A4 page (${overflow})` : "poster OK (A4 PDF + PNG at 3x)");
