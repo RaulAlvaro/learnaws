@@ -1,0 +1,35 @@
+// Renders marketing/poster/poster.html to an A4 PDF (print) and PNG (sharing).
+// Inlines game-icons (assets/sprites/icons, CC BY 3.0) for {{icon:name}} and a star for {{star}}.
+//   node scripts/build-poster.mjs
+import { chromium } from "playwright";
+import fs from "node:fs";
+import path from "node:path";
+
+const dir = "marketing/poster";
+const iconSvg = (name) => {
+  const svg = fs.readFileSync(path.join("assets/sprites/icons", `${name}.svg`), "utf8");
+  const d = [...svg.matchAll(/<path[^>]*\sd="([^"]+)"/g)].map((m) => m[1]).filter((p) => p !== "M0 0h512v512H0z");
+  return `<svg class="icon" viewBox="0 0 512 512" aria-hidden="true"><path d="${d.join(" ")}"/></svg>`;
+};
+const STAR = `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon fill="currentColor" points="50,4 61,37 97,37 68,58 79,93 50,72 21,93 32,58 3,37 39,37"/></svg>`;
+
+const html = fs
+  .readFileSync(path.join(dir, "poster.html"), "utf8")
+  .replace(/\{\{icon:([a-z0-9-]+)\}\}/g, (_, n) => iconSvg(n))
+  .replaceAll("{{star}}", STAR);
+const built = path.join(dir, ".poster.built.html");
+fs.writeFileSync(built, html);
+
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 794, height: 1123 }, deviceScaleFactor: 3 });
+await page.goto(`file://${path.resolve(built)}`, { waitUntil: "networkidle" });
+await page.evaluate(() => document.fonts.ready);
+const overflow = await page.evaluate(() => {
+  const p = document.querySelector(".page");
+  return p.scrollHeight > p.clientHeight + 1 || p.scrollWidth > p.clientWidth + 1;
+});
+await page.pdf({ path: path.join(dir, "learnaws-poster-a4.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
+await page.screenshot({ path: path.join(dir, "learnaws-poster-a4.png"), fullPage: false });
+await browser.close();
+fs.rmSync(built);
+console.log(overflow ? "WARNING: content overflows the A4 page" : "poster OK (A4 PDF + PNG at 3x)");
