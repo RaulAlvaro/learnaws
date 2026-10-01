@@ -30,7 +30,17 @@ const overflow = await page.evaluate(() => {
   return over && `${p.scrollWidth}x${p.scrollHeight} > ${p.clientWidth}x${p.clientHeight}`;
 });
 await page.pdf({ path: path.join(dir, "learnaws-poster-a4.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
-await page.screenshot({ path: path.join(dir, "learnaws-poster-a4.png"), fullPage: false });
+const png = await page.screenshot({ fullPage: false });
+// An image viewer holding the PNG open makes Windows refuse the write for a moment; retry.
+for (let i = 0; ; i++) {
+  try {
+    fs.writeFileSync(path.join(dir, "learnaws-poster-a4.png"), png);
+    break;
+  } catch (e) {
+    if (i >= 10) throw e;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+}
 await browser.close();
 fs.rmSync(built);
 console.log(overflow ? `WARNING: content overflows the A4 page (${overflow})` : "poster OK (A4 PDF + PNG at 3x)");
