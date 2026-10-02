@@ -40,12 +40,12 @@ for (let i = 0; i < 5; i++) {
 await page.getByText(/Puesto \d+ de \d+/).waitFor({ timeout: 15_000 });
 await shot("result", true);
 
-await page.getByRole("button", { name: /selfie con Nubi/ }).click();
-await page.getByRole("button", { name: /Festejo/ }).click();
+await page.getByRole("button", { name: /selfie con la mascota/ }).click();
+await page.getByRole("button", { name: /A la izquierda/ }).click();
 await page.waitForFunction(() => (document.querySelector("video")?.videoWidth ?? 0) > 0, null, { timeout: 15_000 });
 await shot("selfie-preview");
 await page.getByRole("button", { name: /Tomar foto/ }).click();
-await page.getByAltText("Tu selfie con Nubi").waitFor({ timeout: 15_000 });
+await page.getByAltText("Tu selfie con la mascota").waitFor({ timeout: 15_000 });
 await shot("selfie-card");
 await page.getByRole("checkbox").check();
 await page.getByRole("button", { name: /Usar en el ranking/ }).click();

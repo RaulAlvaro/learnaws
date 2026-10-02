@@ -9,5 +9,5 @@ export const GET = handle(async () => {
   const e = liveEvent();
   if (!e) return ok({ event: null });
   const entry = await getEntry(e.slug, userId);
-  return ok({ event: { slug: e.slug, name: e.name, venue: e.venue }, played: !!entry?.finishedAt });
+  return ok({ event: { slug: e.slug, name: e.name, venue: e.venue, mascot: e.mascot }, played: !!entry?.finishedAt });
 });

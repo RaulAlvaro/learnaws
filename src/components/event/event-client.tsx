@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { GameIcon } from "@/components/game/icons";
 import type { GameEvent, EventStatus } from "@/lib/events";
-import { mascotDataUrl } from "@/lib/game/mascot";
 import { setScene } from "@/lib/game/music";
 import { play } from "@/lib/game/sfx";
 import { EventQuestion, type EventQuestionData } from "./event-question";
@@ -151,6 +150,7 @@ export function EventClient({ slug }: { slug: string }) {
     return (
       <Selfie
         slug={slug}
+        mascot={event.mascot}
         label={{ event: event.name, name: me.displayName, score: `${me.correct}/${me.total} · ${me.score} pts` }}
         onSaved={async () => {
           await load();
@@ -194,9 +194,9 @@ export function EventClient({ slug }: { slug: string }) {
         ) : (
           <button onClick={() => setView("selfie")} className="press chunk flex w-full items-center gap-4 !bg-yellow p-4 text-left">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={mascotDataUrl("party")} alt="" className="h-20 w-auto" />
+            <img src={event.mascot} alt="" className="h-24 w-auto -rotate-6" />
             <span>
-              <span className="display block text-2xl leading-tight">Tómate una selfie con Nubi</span>
+              <span className="display block text-2xl leading-tight">Tómate una selfie con la mascota</span>
               <span className="block text-sm font-extrabold">Será tu foto en el ranking del evento.</span>
             </span>
           </button>
@@ -229,7 +229,7 @@ export function EventClient({ slug }: { slug: string }) {
               ["focused-lightning", `${event.questionCount} preguntas relámpago al azar sobre AWS`],
               ["stopwatch", `${event.secondsPerQuestion} segundos cada una: más rápido, más puntos (hasta 1000)`],
               ["checked-shield", "Un solo intento por persona"],
-              ["podium-winner", "Al final, selfie con Nubi para tu perfil del ranking"],
+              ["podium-winner", "Al final, selfie con la mascota para tu foto del ranking"],
             ].map(([icon, text]) => (
               <li key={text} className="flex items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 border-ink bg-yellow">
@@ -278,25 +278,29 @@ export function EventClient({ slug }: { slug: string }) {
 
 export function EventHero({ event, status, players }: { event: GameEvent; status: EventStatus; players?: number }) {
   return (
-    <div className="chunk relative overflow-hidden p-5">
-      <div className="relative z-10 max-w-[64%] space-y-2">
-        {status === "live" ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-red px-2.5 py-0.5 text-xs font-black text-white">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-white" /> EN VIVO
-          </span>
-        ) : (
-          <span className="inline-block rounded-full border-2 border-ink bg-card-2 px-2.5 py-0.5 text-xs font-black">
-            {status === "upcoming" ? "PRÓXIMO" : "TERMINADO"}
-          </span>
-        )}
+    <div className="chunk overflow-hidden !p-0">
+      <div className="relative aspect-[16/9] border-b-[3px] border-ink">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={event.art} alt={`Arte de ${event.name}`} className="h-full w-full object-cover" />
+        <span className="absolute left-3 top-3">
+          {status === "live" ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-red px-2.5 py-0.5 text-xs font-black text-white">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-white" /> EN VIVO
+            </span>
+          ) : (
+            <span className="inline-block rounded-full border-2 border-ink bg-white px-2.5 py-0.5 text-xs font-black">
+              {status === "upcoming" ? "PRÓXIMO" : "TERMINADO"}
+            </span>
+          )}
+        </span>
+      </div>
+      <div className="space-y-1 p-4">
         <h1 className="display text-3xl leading-tight">{event.name}</h1>
         <p className="text-sm font-extrabold text-muted">
           {event.dateLabel} · {event.venue}, {event.city}
         </p>
         {players !== undefined && players > 0 && <p className="text-sm font-black">{players} en el ranking</p>}
       </div>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={mascotDataUrl("wave")} alt="" className="absolute -right-4 bottom-0 w-[46%] max-w-[220px]" />
     </div>
   );
 }

@@ -3,13 +3,15 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { GameIcon } from "@/components/game/icons";
-import { MASCOT_POSES, mascotDataUrl, type MascotPose } from "@/lib/game/mascot";
 import { play } from "@/lib/game/sfx";
 
 const W = 720;
 const H = 960;
-// Where Nubi sits on the card (also used for the live preview, as percentages).
-const MASCOT = { w: 400, h: 343, x: W - 400 + 18, y: H - 343 - 6 };
+type Side = "right" | "left";
+// Where the mascot sits on the card (also used for the live preview, as percentages). Art is 740x990.
+const MW = 330;
+const MH = Math.round((MW * 990) / 740);
+const mascotBox = (side: Side) => ({ w: MW, h: MH, x: side === "right" ? W - MW + 12 : -12, y: H - MH + 24 });
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -25,8 +27,15 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.roundRect(x, y, w, h, r);
 }
 
-/** Draws the selfie card: mirrored photo, Nubi, event pill, name and score. */
-async function compose(source: CanvasImageSource, sw: number, sh: number, pose: MascotPose, label: { event: string; name: string; score: string }) {
+/** Draws the selfie card: mirrored photo, the mascot, event pill, name and score (on the free side). */
+async function compose(
+  source: CanvasImageSource,
+  sw: number,
+  sh: number,
+  mascot: string,
+  side: Side,
+  label: { event: string; name: string; score: string },
+) {
   const c = document.createElement("canvas");
   c.width = W;
   c.height = H;
@@ -50,7 +59,9 @@ async function compose(source: CanvasImageSource, sw: number, sh: number, pose: 
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  ctx.drawImage(await loadImage(mascotDataUrl(pose)), MASCOT.x, MASCOT.y, MASCOT.w, MASCOT.h);
+  const m = mascotBox(side);
+  // never mirrored: the art has text on it ("aws", "PERÚ")
+  ctx.drawImage(await loadImage(mascot), m.x, m.y, m.w, m.h);
 
   // event pill
   ctx.font = `36px ${display}`;
@@ -74,6 +85,8 @@ async function compose(source: CanvasImageSource, sw: number, sh: number, pose: 
   // name + score
   ctx.textBaseline = "alphabetic";
   ctx.lineJoin = "round";
+  ctx.textAlign = side === "right" ? "left" : "right";
+  const tx = side === "right" ? 36 : W - 36;
   for (const [text, size, y] of [
     [label.name, 64, H - 92],
     [label.score, 36, H - 40],
@@ -81,9 +94,9 @@ async function compose(source: CanvasImageSource, sw: number, sh: number, pose: 
     ctx.font = `${size}px ${display}`;
     ctx.lineWidth = size / 5;
     ctx.strokeStyle = "#1c1840";
-    ctx.strokeText(text, 36, y);
+    ctx.strokeText(text, tx, y);
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(text, 36, y);
+    ctx.fillText(text, tx, y);
   }
 
   // frame
@@ -96,18 +109,20 @@ async function compose(source: CanvasImageSource, sw: number, sh: number, pose: 
 
 export function Selfie({
   slug,
+  mascot,
   label,
   onSaved,
   onCancel,
 }: {
   slug: string;
+  mascot: string;
   label: { event: string; name: string; score: string };
   onSaved: () => void;
   onCancel: () => void;
 }) {
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
-  const [pose, setPose] = useState<MascotPose>("wave");
+  const [side, setSide] = useState<Side>("right");
   const [camError, setCamError] = useState<string | null>(() =>
     typeof navigator !== "undefined" && !navigator.mediaDevices ? "Tu navegador no permite usar la cámara aquí. Puedes subir una foto." : null,
   );
@@ -143,12 +158,12 @@ export function Selfie({
     }
     setCount(null);
     play("start");
-    setShot(await compose(v, v.videoWidth, v.videoHeight, pose, label));
+    setShot(await compose(v, v.videoWidth, v.videoHeight, mascot, side, label));
   }
 
   async function fromFile(file: File) {
     const img = await loadImage(URL.createObjectURL(file));
-    setShot(await compose(img, img.naturalWidth, img.naturalHeight, pose, label));
+    setShot(await compose(img, img.naturalWidth, img.naturalHeight, mascot, side, label));
   }
 
   async function save() {
@@ -176,22 +191,22 @@ export function Selfie({
   return (
     <div className="space-y-4">
       <div className="text-center text-white">
-        <h2 className="display text-3xl [text-shadow:0_3px_0_var(--ink)]">Selfie con Nubi</h2>
-        <p className="font-extrabold text-white/90">Elige la pose de Nubi, imítala y sonríe.</p>
+        <h2 className="display text-3xl [text-shadow:0_3px_0_var(--ink)]">Selfie con la mascota</h2>
+        <p className="font-extrabold text-white/90">Elige de qué lado aparece, haz tu mejor pose y sonríe.</p>
       </div>
 
       {!shot && (
-        <div className="grid grid-cols-3 gap-2.5">
-          {MASCOT_POSES.map((p) => (
+        <div className="grid grid-cols-2 gap-2.5">
+          {(["left", "right"] as const).map((sd) => (
             <button
-              key={p.pose}
-              onClick={() => setPose(p.pose)}
-              aria-pressed={pose === p.pose}
-              className={`press chunk-sm flex flex-col items-center p-1.5 font-extrabold ${pose === p.pose ? "!bg-yellow" : ""}`}
+              key={sd}
+              onClick={() => setSide(sd)}
+              aria-pressed={side === sd}
+              className={`press chunk-sm flex items-center justify-center gap-2 p-1.5 font-extrabold ${side === sd ? "!bg-yellow" : ""}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={mascotDataUrl(p.pose)} alt="" className="h-16 w-auto" />
-              <span className="text-xs">{p.label}</span>
+              <img src={mascot} alt="" className="h-14 w-auto" />
+              <span className="text-sm">{sd === "left" ? "A la izquierda" : "A la derecha"}</span>
             </button>
           ))}
         </div>
@@ -200,7 +215,7 @@ export function Selfie({
       <div className="chunk relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden !p-0">
         {shot ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={shot} alt="Tu selfie con Nubi" className="h-full w-full object-cover" />
+          <img src={shot} alt="Tu selfie con la mascota" className="h-full w-full object-cover" />
         ) : camError ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 bg-card-2 p-6 text-center">
             <GameIcon name="sound-off" size={36} />
@@ -217,10 +232,10 @@ export function Selfie({
               autoPlay playsInline muted className="h-full w-full -scale-x-100 object-cover" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={mascotDataUrl(pose)}
+              src={mascot}
               alt=""
               className="pointer-events-none absolute"
-              style={{ left: `${(MASCOT.x / W) * 100}%`, top: `${(MASCOT.y / H) * 100}%`, width: `${(MASCOT.w / W) * 100}%` }}
+              style={{ left: `${(mascotBox(side).x / W) * 100}%`, top: `${(mascotBox(side).y / H) * 100}%`, width: `${(MW / W) * 100}%` }}
             />
             <span className="display absolute left-3 top-3 rounded-full border-[3px] border-ink bg-yellow px-3 py-0.5 text-sm">
               {label.event}

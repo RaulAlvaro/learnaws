@@ -14,12 +14,16 @@ export interface GameEvent {
   endsAt: string;
   questionCount: number;
   secondsPerQuestion: number;
+  /** Event artwork (provided by the organizers): full poster and the mascot cut out on transparency. */
+  art: string;
+  mascot: string;
+  mascotName: string;
 }
 
 export const EVENTS: GameEvent[] = [
   {
-    slug: "aws-community-day-lima-2026",
-    name: "AWS Community Day Lima 2026",
+    slug: "aws-community-day-peru-2026",
+    name: "AWS Community Day Perú 2026",
     shortName: "AWS Community Day",
     venue: "UTEC",
     city: "Lima, Perú",
@@ -28,6 +32,9 @@ export const EVENTS: GameEvent[] = [
     endsAt: "2026-10-04T06:00:00-05:00",
     questionCount: 5,
     secondsPerQuestion: 20,
+    art: "/events/aws-community-day-peru-2026/art.webp",
+    mascot: "/events/aws-community-day-peru-2026/mascot.webp",
+    mascotName: "el mono del Community Day",
   },
 ];
 

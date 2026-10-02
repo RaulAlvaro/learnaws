@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "./ui";
 import { GameIcon } from "./game/icons";
 import type { GameEvent } from "@/lib/events";
-import { mascotDataUrl } from "@/lib/game/mascot";
 
 export function PrivacyNotice({ event }: { event?: GameEvent }) {
   const router = useRouter();
@@ -29,9 +28,9 @@ export function PrivacyNotice({ event }: { event?: GameEvent }) {
           <div className="relative -mx-1 overflow-hidden rounded-2xl border-[3px] border-ink bg-red p-4 pr-28 text-white">
             <span className="text-xs font-black uppercase tracking-wide">Hoy en {event.venue}</span>
             <p className="display text-2xl leading-tight [text-shadow:0_3px_0_var(--ink)]">{event.name}</p>
-            <p className="text-sm font-extrabold">5 preguntas, ranking en vivo y selfie con Nubi.</p>
+            <p className="text-sm font-extrabold">5 preguntas, ranking en vivo y selfie con la mascota.</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={mascotDataUrl("party")} alt="" className="absolute -right-2 bottom-0 w-28" />
+            <img src={event.mascot} alt="" className="absolute -bottom-3 -right-1 w-24 rotate-6" />
           </div>
         )}
         <h2 className="display text-2xl">Bienvenido a Learn AWS</h2>

@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { GameEvent } from "@/lib/events";
-import { mascotDataUrl } from "@/lib/game/mascot";
 import { Avatar, type BoardRow } from "./leaderboard";
 
 /** Full-screen projector view; refreshes the ranking every 5 s. */
@@ -28,7 +27,7 @@ export function ScreenClient({ event, qrSvg, url }: { event: GameEvent; qrSvg: s
         </span>
         <h1 className="display text-[clamp(2.5rem,5vw,5rem)] leading-[0.95] [text-shadow:0_6px_0_var(--ink)]">{event.name}</h1>
         <p className="text-[clamp(1rem,1.6vw,1.6rem)] font-black">
-          {event.questionCount} preguntas de AWS · selfie con Nubi · ranking en vivo
+          {event.questionCount} preguntas de AWS · selfie con la mascota · ranking en vivo
         </p>
         <div className="flex items-center gap-6">
           <div className="chunk w-[min(22vw,320px)] p-4" dangerouslySetInnerHTML={{ __html: qrSvg }} />
@@ -38,7 +37,7 @@ export function ScreenClient({ event, qrSvg, url }: { event: GameEvent; qrSvg: s
           </div>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={mascotDataUrl("point")} alt="" className="absolute bottom-6 left-[24%] w-[11vw] max-w-[200px]" />
+        <img src={event.mascot} alt="" className="absolute bottom-4 left-[27%] w-[10vw] max-w-[190px] -rotate-6" />
       </div>
 
       <div className="flex min-h-0 flex-col">
