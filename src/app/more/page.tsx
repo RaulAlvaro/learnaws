@@ -4,6 +4,7 @@ import { isAdmin, requireUser } from "@/lib/auth";
 import { GameIcon, type GameIconName } from "@/components/game/icons";
 
 const LINKS: { href: string; title: string; desc: string; icon: GameIconName; tint: string }[] = [
+  { href: "/events", title: "Eventos", desc: "Retos en vivo con ranking, como el AWS Community Day.", icon: "podium-winner", tint: "bg-red text-white" },
   { href: "/study", title: "Modo clásico", desc: "La sesión en formato texto, con fichas y preguntas largas.", icon: "open-book", tint: "bg-blue text-white" },
   { href: "/errors", title: "Registro de errores", desc: "Tus fallos por tipo, con la explicación.", icon: "cross-mark", tint: "bg-red text-white" },
   { href: "/concepts", title: "Conceptos", desc: "Los 259 conceptos del examen y su fase.", icon: "files", tint: "bg-green text-white" },

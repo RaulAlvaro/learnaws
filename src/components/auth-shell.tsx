@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { connection } from "next/server";
+import { liveEvent } from "@/lib/events";
 import { GameIcon, type GameIconName } from "./game/icons";
 
 const PERKS: { icon: GameIconName; text: string }[] = [
@@ -8,13 +10,23 @@ const PERKS: { icon: GameIconName; text: string }[] = [
 ];
 
 /** Game-style title screen around Clerk's sign-in / sign-up card. */
-export function AuthShell({ children }: { children: ReactNode }) {
+export async function AuthShell({ children }: { children: ReactNode }) {
+  await connection();
+  const event = liveEvent();
   return (
     <div className="mx-auto grid max-w-4xl items-center gap-8 py-4 md:grid-cols-[1fr_auto]">
       <div className="space-y-5 text-center md:text-left">
         <span className="chunk-sm mx-auto flex h-16 w-16 items-center justify-center !rounded-2xl !bg-yellow md:mx-0">
           <GameIcon name="trophy-cup" size={38} />
         </span>
+        {event && (
+          <p className="chunk-sm mx-auto flex max-w-sm items-center gap-2 !bg-red p-3 text-left text-sm font-extrabold text-white md:mx-0">
+            <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-white" />
+            <span>
+              <b className="display text-base">{event.name}</b> · hoy en {event.venue}. Crea tu cuenta y juega 5 preguntas por el ranking.
+            </span>
+          </p>
+        )}
         <h1 className="display text-5xl leading-[1.05] text-white [text-shadow:0_4px_0_var(--ink)]">
           Aprueba AWS
           <br />

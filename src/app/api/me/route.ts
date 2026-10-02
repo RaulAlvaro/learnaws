@@ -52,6 +52,7 @@ export const DELETE = handle(async () => {
     schema.settings,
     schema.feedback,
     schema.disabledQuestions,
+    schema.eventEntries,
   ]) {
     await db.delete(table).where(eq(table.userId, userId));
   }

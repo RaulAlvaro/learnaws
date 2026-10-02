@@ -13,7 +13,7 @@ const TABS: { href: string; label: string; icon: GameIconName }[] = [
   { href: "/more", label: "Más", icon: "hamburger-menu" },
 ];
 
-const MORE = ["/more", "/errors", "/labs", "/guide", "/settings", "/concepts", "/study", "/admin"];
+const MORE = ["/more", "/events", "/errors", "/labs", "/guide", "/settings", "/concepts", "/study", "/admin"];
 
 export function Nav() {
   const path = usePathname();

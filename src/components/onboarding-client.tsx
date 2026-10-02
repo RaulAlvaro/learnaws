@@ -4,14 +4,36 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui";
 import { GameIcon } from "./game/icons";
+import type { GameEvent } from "@/lib/events";
+import { mascotDataUrl } from "@/lib/game/mascot";
 
-export function PrivacyNotice() {
+export function PrivacyNotice({ event }: { event?: GameEvent }) {
   const router = useRouter();
+  const path = usePathname();
   const [hidden, setHidden] = useState(false);
   if (hidden) return null;
+  const ack = () => {
+    setHidden(true);
+    return fetch("/api/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ privacyAck: true }),
+    });
+  };
+  // New players on event day (often arriving from the venue QR) get the event first.
+  const eventHref = event ? `/events/${event.slug}` : null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
       <div className="chunk w-full max-w-md space-y-3 p-5">
+        {event && eventHref && (
+          <div className="relative -mx-1 overflow-hidden rounded-2xl border-[3px] border-ink bg-red p-4 pr-28 text-white">
+            <span className="text-xs font-black uppercase tracking-wide">Hoy en {event.venue}</span>
+            <p className="display text-2xl leading-tight [text-shadow:0_3px_0_var(--ink)]">{event.name}</p>
+            <p className="text-sm font-extrabold">5 preguntas, ranking en vivo y selfie con Nubi.</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={mascotDataUrl("party")} alt="" className="absolute -right-2 bottom-0 w-28" />
+          </div>
+        )}
         <h2 className="display text-2xl">Bienvenido a Learn AWS</h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
           <li>Tu progreso (respuestas, repasos, simulacros) se guarda en tu cuenta.</li>
@@ -21,20 +43,39 @@ export function PrivacyNotice() {
           <li>La IA (tutor, voz) usa tu propia API key de OpenAI, que agregas en Ajustes. Sin key, todo lo demás funciona.</li>
           <li>Puedes borrar tu cuenta y todos tus datos desde Ajustes cuando quieras.</li>
         </ul>
-        <Button
-          className="w-full"
-          onClick={async () => {
-            setHidden(true);
-            await fetch("/api/me", {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ privacyAck: true }),
-            });
-            router.refresh();
-          }}
-        >
-          Entendido
-        </Button>
+        {eventHref && path !== eventHref ? (
+          <div className="grid gap-2">
+            <Button
+              className="w-full"
+              onClick={async () => {
+                await ack();
+                router.push(eventHref);
+              }}
+            >
+              Entendido, ¡quiero participar!
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={async () => {
+                await ack();
+                router.refresh();
+              }}
+            >
+              Solo quiero estudiar
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="w-full"
+            onClick={async () => {
+              await ack();
+              router.refresh();
+            }}
+          >
+            Entendido
+          </Button>
+        )}
       </div>
     </div>
   );

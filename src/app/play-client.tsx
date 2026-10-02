@@ -10,6 +10,7 @@ import { GameIcon, type GameIconName } from "@/components/game/icons";
 import type { Island, ServiceUnit, UnitOverview } from "@/lib/content/types";
 import { play, setSound, soundOn } from "@/lib/game/sfx";
 import { musicOn, preloadJingles, setMusic, setScene } from "@/lib/game/music";
+import { EventBanner } from "@/components/event/event-banner";
 
 const ROUND_SIZE = 8;
 
@@ -283,6 +284,8 @@ export function PlayClient() {
         </HudStat>
         <HudStat icon="cycle" color="text-blue" value={state.dueNow} label="Repasos" />
       </div>
+
+      <EventBanner />
 
       <motion.button
         whileTap={{ scale: 0.97 }}

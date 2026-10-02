@@ -256,3 +256,41 @@ export const feedback = pgTable("feedback", {
   page: text("page"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * One row per (event, player). Questions are picked at start and served one at a time;
+ * served/answered times are server-side so the speed bonus can't be faked.
+ */
+export type EventQuestionState = {
+  id: string;
+  order: string[]; // option ids in the order shown
+  servedAt?: string;
+  answeredAt?: string;
+  chosen?: string | null;
+  correct?: boolean;
+  points?: number;
+};
+
+export const eventEntries = pgTable(
+  "event_entries",
+  {
+    eventId: text("event_id").notNull(),
+    userId: text("user_id").notNull(),
+    displayName: text("display_name").notNull(),
+    questions: jsonb("questions").$type<EventQuestionState[]>().notNull(),
+    current: integer("current").notNull().default(0),
+    score: integer("score").notNull().default(0),
+    correct: integer("correct").notNull().default(0),
+    totalMs: integer("total_ms").notNull().default(0),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    /** Selfie card shown on the public leaderboard (JPEG), only with explicit consent. */
+    photo: bytea("photo"),
+    photoAt: timestamp("photo_at", { withTimezone: true }),
+    hidden: boolean("hidden").notNull().default(false),
+  },
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.userId] }),
+    index("event_entries_rank_idx").on(t.eventId, t.score, t.totalMs),
+  ],
+);

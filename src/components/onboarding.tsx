@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
+import { liveEvent } from "@/lib/events";
 import { FeedbackButton, PrivacyNotice } from "./onboarding-client";
 
 /** Privacy notice on first visit + the feedback button, for signed-in users. */
@@ -15,7 +16,7 @@ export async function Onboarding() {
     .where(eq(schema.users.id, userId));
   return (
     <>
-      {!u?.ack && <PrivacyNotice />}
+      {!u?.ack && <PrivacyNotice event={liveEvent() ?? undefined} />}
       <FeedbackButton />
     </>
   );
